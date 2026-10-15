@@ -24,13 +24,13 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92.json",
-        "manifest_sha256": "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92"
+        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
+        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92": {
+      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -72,7 +72,8 @@
             "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 208,
@@ -96,7 +97,8 @@
             "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 275,
@@ -120,7 +122,8 @@
             "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1002,
@@ -152,7 +155,8 @@
             "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 356,
@@ -184,7 +188,8 @@
             "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1017,
@@ -216,7 +221,8 @@
             "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 5149,
@@ -280,7 +286,8 @@
             "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1218,
@@ -295,7 +302,8 @@
             "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f",
             "purpose": "config",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/global/global/band/12",
@@ -324,7 +332,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 533,
@@ -361,7 +370,8 @@
             "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c",
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -394,7 +404,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/1",
@@ -427,7 +438,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 39,
@@ -442,7 +454,8 @@
             "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
             "purpose": "programs",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 210,
@@ -466,7 +479,8 @@
             "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1061,
@@ -498,7 +512,8 @@
             "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 340,
@@ -530,7 +545,8 @@
             "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 206,
@@ -554,7 +570,8 @@
             "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -583,7 +600,8 @@
             },
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1079,
@@ -607,7 +625,8 @@
             "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 3284,
@@ -652,7 +671,8 @@
             "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 2587,
@@ -681,7 +701,8 @@
             "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1356,
@@ -705,7 +726,8 @@
             "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           }
         ],
         "format_version": "4.0.0",
@@ -788,12 +810,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92.json",
-        "manifest_sha256": "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92"
+        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
+        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
       }
     },
     "manifests": {
-      "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92": {
+      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -835,7 +857,8 @@
             "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 208,
@@ -859,7 +882,8 @@
             "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 275,
@@ -883,7 +907,8 @@
             "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1002,
@@ -915,7 +940,8 @@
             "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 356,
@@ -947,7 +973,8 @@
             "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1017,
@@ -979,7 +1006,8 @@
             "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 5149,
@@ -1043,7 +1071,8 @@
             "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1218,
@@ -1058,7 +1087,8 @@
             "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f",
             "purpose": "config",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/global/global/band/12",
@@ -1087,7 +1117,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 533,
@@ -1124,7 +1155,8 @@
             "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c",
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -1157,7 +1189,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/1",
@@ -1190,7 +1223,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 39,
@@ -1205,7 +1239,8 @@
             "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
             "purpose": "programs",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 210,
@@ -1229,7 +1264,8 @@
             "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1061,
@@ -1261,7 +1297,8 @@
             "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 340,
@@ -1293,7 +1330,8 @@
             "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 206,
@@ -1317,7 +1355,8 @@
             "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -1346,7 +1385,8 @@
             },
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1079,
@@ -1370,7 +1410,8 @@
             "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 3284,
@@ -1415,7 +1456,8 @@
             "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 2587,
@@ -1444,7 +1486,8 @@
             "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1356,
@@ -1468,7 +1511,8 @@
             "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           }
         ],
         "format_version": "4.0.0",
@@ -1583,12 +1627,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92.json",
-        "manifest_sha256": "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92"
+        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
+        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
       }
     },
     "manifests": {
-      "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92": {
+      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -1630,7 +1674,8 @@
             "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 208,
@@ -1654,7 +1699,8 @@
             "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 275,
@@ -1678,7 +1724,8 @@
             "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1002,
@@ -1710,7 +1757,8 @@
             "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 356,
@@ -1742,7 +1790,8 @@
             "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1017,
@@ -1774,7 +1823,8 @@
             "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 5149,
@@ -1838,7 +1888,8 @@
             "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1218,
@@ -1853,7 +1904,8 @@
             "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f",
             "purpose": "config",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/global/global/band/12",
@@ -1882,7 +1934,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 533,
@@ -1919,7 +1972,8 @@
             "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c",
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -1952,7 +2006,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/1",
@@ -1985,7 +2040,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 39,
@@ -2000,7 +2056,8 @@
             "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
             "purpose": "programs",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 210,
@@ -2024,7 +2081,8 @@
             "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1061,
@@ -2056,7 +2114,8 @@
             "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 340,
@@ -2088,7 +2147,8 @@
             "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 206,
@@ -2112,7 +2172,8 @@
             "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -2141,7 +2202,8 @@
             },
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1079,
@@ -2165,7 +2227,8 @@
             "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 3284,
@@ -2210,7 +2273,8 @@
             "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 2587,
@@ -2239,7 +2303,8 @@
             "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1356,
@@ -2263,7 +2328,8 @@
             "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           }
         ],
         "format_version": "4.0.0",
@@ -2378,12 +2444,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92.json",
-        "manifest_sha256": "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92"
+        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
+        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
       }
     },
     "manifests": {
-      "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92": {
+      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -2425,7 +2491,8 @@
             "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 208,
@@ -2449,7 +2516,8 @@
             "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 275,
@@ -2473,7 +2541,8 @@
             "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1002,
@@ -2505,7 +2574,8 @@
             "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 356,
@@ -2537,7 +2607,8 @@
             "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1017,
@@ -2569,7 +2640,8 @@
             "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 5149,
@@ -2633,7 +2705,8 @@
             "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1218,
@@ -2648,7 +2721,8 @@
             "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f",
             "purpose": "config",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/global/global/band/12",
@@ -2677,7 +2751,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 533,
@@ -2714,7 +2789,8 @@
             "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c",
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -2747,7 +2823,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/1",
@@ -2780,7 +2857,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 39,
@@ -2795,7 +2873,8 @@
             "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
             "purpose": "programs",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 210,
@@ -2819,7 +2898,8 @@
             "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1061,
@@ -2851,7 +2931,8 @@
             "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 340,
@@ -2883,7 +2964,8 @@
             "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 206,
@@ -2907,7 +2989,8 @@
             "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -2936,7 +3019,8 @@
             },
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1079,
@@ -2960,7 +3044,8 @@
             "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 3284,
@@ -3005,7 +3090,8 @@
             "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 2587,
@@ -3034,7 +3120,8 @@
             "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1356,
@@ -3058,7 +3145,8 @@
             "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           }
         ],
         "format_version": "4.0.0",
@@ -3152,12 +3240,12 @@
           "validation_policy_id": null
         },
         "manifest_path": "snapshots/manifests/0000000000000000000000000000000000000000000000000000000000000000.json",
-        "manifest_sha256": "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92"
+        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:3d3e7d97216378ca0944fafae45b555e708e804ba0b823f96bcb855bc3d04d92": {
+      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -3199,7 +3287,8 @@
             "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 208,
@@ -3223,7 +3312,8 @@
             "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 275,
@@ -3247,7 +3337,8 @@
             "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1002,
@@ -3279,7 +3370,8 @@
             "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 356,
@@ -3311,7 +3403,8 @@
             "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1017,
@@ -3343,7 +3436,8 @@
             "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 5149,
@@ -3407,7 +3501,8 @@
             "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877",
             "purpose": "catalog",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1218,
@@ -3422,7 +3517,8 @@
             "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f",
             "purpose": "config",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/global/global/band/12",
@@ -3451,7 +3547,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 533,
@@ -3488,7 +3585,8 @@
             "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c",
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -3521,7 +3619,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/1",
@@ -3554,7 +3653,8 @@
             },
             "purpose": "images",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 39,
@@ -3569,7 +3669,8 @@
             "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
             "purpose": "programs",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 210,
@@ -3593,7 +3694,8 @@
             "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1061,
@@ -3625,7 +3727,8 @@
             "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 340,
@@ -3657,7 +3760,8 @@
             "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 206,
@@ -3681,7 +3785,8 @@
             "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -3710,7 +3815,8 @@
             },
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1079,
@@ -3734,7 +3840,8 @@
             "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 3284,
@@ -3779,7 +3886,8 @@
             "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 2587,
@@ -3808,7 +3916,8 @@
             "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           },
           {
             "bytes": 1356,
@@ -3832,7 +3941,8 @@
             "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac",
             "purpose": "detail",
             "region": null,
-            "segment": "shared"
+            "segment": "shared",
+            "source_refs": []
           }
         ],
         "format_version": "4.0.0",

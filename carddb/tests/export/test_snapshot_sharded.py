@@ -525,7 +525,7 @@ def test_exact_fixed_band_width_matrix() -> None:
                 ("images", ""),
                 ("images", "BP01"),
                 ("images", "BP02"),
-                ("dictionary", ""),
+                ("translation", ""),
                 ("print", ""),
                 ("print", "BP01"),
                 ("print", "CP04"),
@@ -534,7 +534,7 @@ def test_exact_fixed_band_width_matrix() -> None:
                 ("history", "BP02"),
             ],
         )
-    ) == [1, 32, 32, 2, 8, 32, 32, 64, 8, 64]
+    ) == [1, 32, 32, 8, 8, 32, 32, 64, 8, 64]
 
 
 def test_shared_full_sha_bucket_goldens() -> None:

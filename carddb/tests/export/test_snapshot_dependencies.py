@@ -14,6 +14,7 @@ def manifest(graph: dict[str, list[str]]) -> dict[str, JsonValue]:
             {
                 "key": key,
                 "sha256": "sha256:" + "0" * 64,
+                "source_refs": [],
                 "dependencies": [
                     {"key": dep, "sha256": "sha256:" + "0" * 64} for dep in dependencies
                 ],

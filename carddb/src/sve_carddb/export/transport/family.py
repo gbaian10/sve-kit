@@ -8,7 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.snapshot import definition, row_type
 from sve_carddb.core.json import array, canonical, object_value, string
-from sve_carddb.export.project.closure import references as public_references
+from sve_carddb.export.references import references as public_references
 from sve_carddb.export.text_owners import TextOwners, row_owners
 from sve_carddb.export.transport.layout import (
     IMAGE_TABLES,
@@ -117,6 +117,7 @@ class FamilyLayout:
         self.dictionary = {
             t: {string(r["id"]): r for r in layout.view[t]} for t in DICTIONARIES
         }
+        self.shared_dependencies: dict[Scope, set[Scope]] = {}
         self.visible: dict[str, set[str]] = {}
         for printing in layout.view["printing"]:
             self.visible.setdefault(string(printing["card_id"]), set()).add(
@@ -199,36 +200,81 @@ class FamilyLayout:
         common = Scope("catalog", "", "")
         for row in self.layout.view["annotation_concept"]:
             self._add(common, "annotation_concept", row, "bootstrap")
-        self._catalog_dictionaries()
-        for table in sorted(DICTIONARIES - {"annotation_concept"}):
-            for row in self.layout.view[table]:
-                self._add(
-                    self.scope(table, row, "detail", "dictionary", ""),
-                    table,
-                    row,
-                    "detail",
-                )
+        self._dictionaries()
 
-    def _catalog_dictionaries(self) -> None:
+    def _translation_scope(self, selection: Row) -> Scope | None:
+        pointer = object_value(selection["source"])
+        info = self.owners.get(object_value(pointer["owner"]))
+        if (
+            selection["field"] == "name"
+            or selection["target_lang"] != "zh-Hant"
+            or info.region != "jp"
+            or selection["basis"] not in {"own_source", "jp_source"}
+        ):
+            return None
+        if info.owner["kind"] == "printing_face":
+            table = "printing"
+            row = self.layout.printings[string(info.owner["id"])]
+        else:
+            table, row = "face_revision", info.row
+        return self.scope(table, row, "detail", "translation", "")
+
+    def _dictionaries(self) -> None:
+        shared: dict[Scope, dict[str, Row]] = {}
         for scope, pieces in list(self.pieces.items()):
-            if scope.purpose != "catalog":
-                continue
             roots = [
                 self.layout.record(p.table, r, p.partition, i)
                 for p in pieces.values()
                 for i, r in enumerate(self._ordered(p))
             ]
-            roots.extend(
-                {"source_unit_id": w[1], "name_concept_id": w[2]}
-                for w in self._witnesses(scope)
-            )
-            for table, dictionary_rows in self._closure(roots).items():
-                if table == "annotation_concept":
-                    continue
-                for row in dictionary_rows.values():
+            if scope.purpose == "catalog":
+                roots.extend(
+                    {"source_unit_id": w[1], "name_concept_id": w[2]}
+                    for w in self._witnesses(scope)
+                )
+            external: set[str] = set()
+            for root in roots:
+                for selection in translation_selections(root):
+                    target = self._translation_scope(selection)
+                    if target is None:
+                        continue
+                    identifier = string(selection["translation_id"])
+                    external.add(identifier)
+                    shared.setdefault(target, {})[identifier] = self.dictionary[
+                        "translation"
+                    ][identifier]
+                    self.shared_dependencies.setdefault(scope, set()).add(target)
+            part = "bootstrap" if scope.purpose == "catalog" else "detail"
+            self._local_dictionaries(scope, roots, external, part)
+        for scope, translations in shared.items():
+            for table, rows in self._closure(list(translations.values())).items():
+                for row in rows.values():
                     self._add(
-                        scope, table, row, "bootstrap", coordinates=("", scope.segment)
+                        scope, table, row, "detail", coordinates=("", scope.segment)
                     )
+            for row in translations.values():
+                self._add(
+                    scope, "translation", row, "detail", coordinates=("", scope.segment)
+                )
+
+    def _local_dictionaries(
+        self,
+        scope: Scope,
+        roots: list[Row],
+        external: set[str],
+        part: str,
+    ) -> None:
+        # Only this file's selections may remove its local copies; new users of the shared file must not move them.
+        supplied = self._closure(
+            [
+                self.dictionary["translation"][identifier]
+                for identifier in sorted(external)
+            ]
+        )
+        for table, rows in self._closure(roots, external).items():
+            for identifier, row in rows.items():
+                if identifier not in supplied[table]:
+                    self._add(scope, table, row, part, coordinates=("", scope.segment))
 
     def _row_scope(self, table: str, row: Row, part: str) -> tuple[str, str]:
         purpose = (
@@ -328,7 +374,9 @@ class FamilyLayout:
         if found != {canonical(r) for r in self.layout.view["field_annotation"]}:
             raise ValueError("Missing original annotation placement")
 
-    def _closure(self, roots: list[Row]) -> dict[str, dict[str, Row]]:
+    def _closure(
+        self, roots: list[Row], external: set[str] | None = None
+    ) -> dict[str, dict[str, Row]]:
         selected: dict[str, dict[str, Row]] = {t: {} for t in DICTIONARIES}
         queue = roots.copy()
         while queue:
@@ -339,6 +387,8 @@ class FamilyLayout:
             if "occurrences" in row:
                 refs.extend(("annotation_concept", i) for i in concept_references(row))
             for table, identifier in refs:
+                if table == "translation" and identifier in (external or set()):
+                    continue
                 if table in DICTIONARIES and identifier not in selected[table]:
                     if table == "annotation_concept":
                         continue
@@ -391,15 +441,19 @@ class FamilyLayout:
         except ValueError:
             raise ValueError("public-annotation/owner") from None
 
-    def seal(self, files: _Files, config: Row) -> dict[str, frozenset[str]]:
-        """Seal bases first and retain direct source locations only for Python measurement."""
+    def seal(self, files: _Files, config: Row) -> None:
+        """Seal strong dependencies before publishing exact one-hop source references."""
         self._prepare()
         sealed: dict[Scope, Row] = {}
         locations: dict[str, dict[tuple[str, str], Row]] = {"printing": {}, "face": {}}
         ordered = sorted(
             self.pieces,
             key=lambda s: (
-                0
+                -2
+                if s == Scope("catalog", "", "")
+                else -1
+                if s.purpose == "translation"
+                else 0
                 if s.purpose == "catalog"
                 else 1
                 if s.purpose in {"print", "region-state"}
@@ -413,9 +467,11 @@ class FamilyLayout:
             pieces = self.pieces[scope]
             metadata: dict[str, list[JsonValue]] = {}
             dependencies: dict[str, Row] = {}
+            for target in self.shared_dependencies.get(scope, set()):
+                dependencies[target.key] = file_reference(sealed[target])
             if scope.purpose == "images":
                 dependencies[string(config["key"])] = file_reference(config)
-            elif scope.purpose == "catalog" and scope != Scope("catalog", "", ""):
+            elif scope != Scope("catalog", "", ""):
                 # Manifest dependencies do not rewrite family payloads when the common dictionary changes.
                 common = sealed[Scope("catalog", "", "")]
                 dependencies[string(common["key"])] = file_reference(common)
@@ -450,7 +506,10 @@ class FamilyLayout:
                             file_reference(file)
                         )
 
-        return self._source_files()
+        for key, targets in self._source_files().items():
+            files.files[key]["source_refs"] = [
+                file_reference(files.files[t]) for t in sorted(targets)
+            ]
 
     def _extras(self, scope: Scope, value: Row) -> None:
         if scope in self.locators:
@@ -543,13 +602,16 @@ class FamilyLayout:
         info = self.owners.get(owner)
         if info.card_id is None or info.region is None:
             return set()
-        family = string(self.layout.cards[info.card_id]["home_set_id"])
         purpose = (
             "catalog"
             if info.region in self.visible.get(info.card_id, set())
             else "region-state"
         )
-        context = Scope(purpose, info.region, family)
+        if info.face_id is None:
+            return set()
+        context = self.scope(
+            "face", self.layout.faces[info.face_id], "bootstrap", purpose, info.region
+        )
         return {context.key} if context in self.pieces else set()
 
 
@@ -582,3 +644,14 @@ def available_fields(table: str, partition: str) -> tuple[str, ...]:
     if table == "keyword":
         return ("label", "effect")
     return ("label",) if table in {"product", "product_family", "vocabulary"} else ()
+
+
+def translation_selections(value: JsonValue) -> list[Row]:
+    """Route JP-origin translations before any English printing exists."""
+    if isinstance(value, list):
+        return [s for item in value for s in translation_selections(item)]
+    if not isinstance(value, dict):
+        return []
+    return ([value] if "translation_id" in value and "source" in value else []) + [
+        s for item in value.values() for s in translation_selections(item)
+    ]

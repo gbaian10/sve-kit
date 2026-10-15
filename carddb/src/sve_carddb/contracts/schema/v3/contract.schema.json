@@ -16310,10 +16310,10 @@
             "history",
             "engine",
             "region-state",
-            "dictionary",
             "images",
             "config",
-            "programs"
+            "programs",
+            "translation"
           ]
         },
         "region": {
@@ -16325,6 +16325,12 @@
         },
         "segment": {
           "$ref": "#/$defs/ID"
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FileRef"
+          }
         }
       },
       "required": [
@@ -16338,7 +16344,8 @@
         "role",
         "purpose",
         "region",
-        "segment"
+        "segment",
+        "source_refs"
       ],
       "additionalProperties": false
     },

@@ -31,6 +31,10 @@ from sve_carddb.core.json import (
     string,
 )
 from sve_carddb.export.reader_media import validate_digital, validate_media
+from sve_carddb.export.reader_sources import (
+    validate_local_dictionaries,
+    validate_source_references,
+)
 from sve_carddb.export.semantics import (
     validate_config,
     validate_fragments,
@@ -93,12 +97,21 @@ def _files(manifest: Row) -> dict[str, Row]:
     if len(result) != len(array(manifest["files"])) or list(result) != sorted(result):
         raise ValueError("File keys must be sorted and unique")
     for file in result.values():
-        dependencies = array(file["dependencies"])
-        _ordered([object_value(item)["key"] for item in dependencies])
-        for item in dependencies:
-            dep = object_value(item)
-            if dep != _reference(result[string(dep["key"])]):
-                raise ValueError("Dependency hash mismatch")
+        for field in ("dependencies", "source_refs"):
+            references = array(file[field])
+            _ordered([object_value(item)["key"] for item in references])
+            for item in references:
+                dep = object_value(item)
+                if dep != _reference(result[string(dep["key"])]):
+                    raise ValueError(
+                        "Dependency hash mismatch"
+                        if field == "dependencies"
+                        else "Source reference hash mismatch"
+                    )
+                if field == "source_refs" and result[string(dep["key"])][
+                    "role"
+                ] not in {"text", "bootstrap"}:
+                    raise ValueError("Source reference escapes text presentation")
     graph = {
         key: [string(object_value(dep)["key"]) for dep in array(file["dependencies"])]
         for key, file in result.items()
@@ -517,7 +530,7 @@ def _metadata(manifest: Row, files: dict[str, Row]) -> None:
             else "text"
         )
         if file["role"] != expected_role or (
-            purpose in {"config", "programs", "images", "dictionary"}
+            purpose in {"config", "programs", "images", "translation"}
             and file["region"] is not None
         ):
             raise ValueError("Invalid File scope")
@@ -588,7 +601,9 @@ def join_payloads(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     _closure(view, manifest)
     _current(view, fragments)
     _catalog_metadata(view, fragments, files)
+    validate_local_dictionaries(fragments, files)
     validate_view(view, manifest, fragments)
+    validate_source_references(view, fragments, files)
     validate_placement(view, manifest, fragments)
     validate_media(view, fragments, files, object_value(manifest["config_ref"]))
     config = object_value(

@@ -25,7 +25,7 @@ wire capability only, not adoption of any real name-policy links.
 or a manifest file key. Integer path segments index arrays; strings index objects.
 For each case, copy the golden; apply setup then the primary replacement.
 Reseal payloads in config/programs/bootstrap, text, images order. Rebind embedded
-file/base references and manifest dependencies to the new hashes, update payload
+file/base references and manifest dependencies/source_refs to the new hashes, update payload
 path, byte length and row counts, then rebind config_ref.
 Preserve dependency membership: resealing must not repair a missing/extra
 reference. The expected rejection must follow byte and shape
@@ -99,3 +99,8 @@ The Python build, reader and projection cases live in
 `test_snapshot_offline_english.py`.
 
 `whole-name-native.json` uses synthetic whole names from stored source and target occurrences. Its compact wire has no name sets or field uses; the readers restore their unchanged annotation-v1 IDs and exact scalar ranges. Root row columns come from the fixed format schema; containers carry only the nested tuple descriptors they use.
+
+`source-native.json` is a synthetic producer snapshot for on-demand Japanese source
+presentation and official counterparts. Its explicit assertions cover source body,
+sections, independent annotation sets, one-hop file requests and corrupt pointers or
+dictionaries. Its strings are authored test data; it contains no official card text.

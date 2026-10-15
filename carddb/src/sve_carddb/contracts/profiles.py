@@ -17,8 +17,6 @@ class Profile:
         """Keep physical membership stable across data versions, including exceptions."""
         if purpose == "images":
             return 32 if family else 1
-        if purpose == "dictionary":
-            return 2
         return 32 if family in {"BP01", "CP04"} else 64 if family else 8
 
 

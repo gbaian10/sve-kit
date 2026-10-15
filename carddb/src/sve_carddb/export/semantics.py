@@ -669,16 +669,27 @@ def _expected_placement(
     purpose = string(file["purpose"])
     owner = object_value(fragment.value["owner"])
     family = string(owner["id"]) if owner["id"] is not None else ""
-    if purpose == "catalog" and fragment.table in {
+    if fragment.table in {
         "text_unit",
         "translation",
         "annotation_set",
         "annotation_concept",
     }:
-        family = (
-            string(file["segment"])[7:]
-            if string(file["segment"]).startswith("family-")
-            else ""
+        segment = string(file["segment"])
+        physical, _, suffix = (
+            segment.rpartition(":band-") if purpose != "catalog" else (segment, "", "0")
+        )
+        family = physical[7:] if physical.startswith("family-") else ""
+        band = int(suffix)
+        if (
+            owner != {"kind": "global", "id": None}
+            or fragment.value["base"] is not None
+        ):
+            raise ValueError("Invalid local dictionary coordinates")
+        return (
+            _physical_key(purpose, file["region"], family, band),
+            _physical_segment(purpose, family, band),
+            segment,
         )
     base = fragment.value["base"]
     source_purpose = (
@@ -782,7 +793,7 @@ def _placement_purpose(
     if table == "field_annotation":
         return
     if table in {"text_unit", "translation", "annotation_set"}:
-        if (purpose, part) not in {("catalog", "bootstrap"), ("dictionary", "detail")}:
+        if (part == "bootstrap") != (purpose == "catalog") or purpose == "images":
             raise ValueError("Dictionary partition differs from File scope")
         return
     if table == "annotation_concept":
