@@ -45,17 +45,20 @@ def test_sources_include_counterpart_and_each_owners_own_annotations() -> None:
 
 
 @pytest.mark.parametrize(
-    "mutation",
+    ("mutation", "message"),
     [
-        "missing_local_dictionary",
-        "conflicting_copy",
-        "bad_pointer",
-        "missing_source",
-        "bad_hash",
-        "bad_scope",
+        ("missing_local_dictionary", "Missing file-local dictionary reference"),
+        ("conflicting_copy", "Conflicting dictionary copy"),
+        ("bad_pointer", "public-annotation/owner"),
+        ("missing_source", "Source presentation closure mismatch"),
+        ("ordinary_reference", "Source presentation closure mismatch"),
+        ("bad_hash", "Source reference hash mismatch"),
+        ("bad_scope", "Base region scope mismatch"),
     ],
 )
-def test_source_and_dictionary_corruption_is_rejected(mutation: str) -> None:
+def test_source_and_dictionary_corruption_is_rejected(
+    mutation: str, message: str
+) -> None:
     manifest, payloads = source_input()
     file = next(
         object_value(f)
@@ -83,6 +86,16 @@ def test_source_and_dictionary_corruption_is_rejected(mutation: str) -> None:
         array(fragment[4])[0] = encode("face_revision_detail", row)
     elif mutation == "missing_source":
         file["source_refs"] = []
+    elif mutation == "ordinary_reference":
+        # Another printing's detail is an ordinary foreign key, not source presentation.
+        printing = next(
+            object_value(f)
+            for f in array(manifest["files"])
+            if object_value(f)["key"] == "print-detail/jp/family-BP02/0"
+        )
+        array(file["source_refs"]).append(
+            {"key": printing["key"], "sha256": printing["sha256"]}
+        )
     elif mutation == "bad_hash":
         object_value(array(file["source_refs"])[0])["sha256"] = "sha256:" + "0" * 64
     else:
@@ -92,10 +105,7 @@ def test_source_and_dictionary_corruption_is_rejected(mutation: str) -> None:
             if object_value(f)["key"] == "detail/jp/family-BP02/0"
         )
         target["region"] = "en"
-    with pytest.raises(
-        ValueError,
-        match=r"dictionary|Dictionary|owner|Source presentation|reference hash|Base region",
-    ):
+    with pytest.raises(ValueError, match=message):
         read_snapshot(manifest, _reseal(manifest, payloads))
 
 

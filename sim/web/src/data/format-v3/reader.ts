@@ -119,10 +119,7 @@ export function readManifest(value: JsonValue): { manifest: JsonObject; files: F
     for (const field of ["dependencies", "source_refs"]) {
       const refs = arrayValue(file[field])
       const keys = refs.map((raw) => stringValue(objectValue(raw)["key"]))
-      if (
-        keys.length !== new Set(keys).size ||
-        keys.some((key, i) => key !== [...keys].sort(compareCodePoints)[i])
-      )
+      if (keys.some((key, i) => i > 0 && compareCodePoints(keys[i - 1] ?? "", key) >= 0))
         fail("shape", "file references must be sorted and unique")
       for (const raw of refs) {
         const ref = objectValue(raw)

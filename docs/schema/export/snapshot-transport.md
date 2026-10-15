@@ -60,7 +60,6 @@ manifest 是一般 JSON object，不使用 tuple。完整欄位如下；引用�
 - `row_counts` 是 `[[table,owner_kind,owner_id,partition,segment,count]]`，逐一對應容器 fragment（含零列），count 是該 fragment 的 rows 長度，不是 join 後實體數。config 為 []；programs 也為 []，entries 長度由附件驗證。
 - `purpose` 為 `catalog/print/detail/print-detail/product/history/engine/region-state/translation/images/config/programs`；`region` 為 `jp/en/null`，null 代表共用且整檔計費；`segment` 是家族與固定 band 的裝檔座標，與永久 owner 分開。用途與地區不從 key、role 或卡面語言推測。
 - `dependencies` 是按 key 排序的唯一 `[FileRef]`；只表達解析／join 所需的先行檔案，須為 DAG，不包含所有邏輯 FK。所有邏輯 FK 的整體閉包仍由 producer 驗證，不能藉省 dependencies 規避。image 檔依賴 config，具有 base 的 fragment 所在 File 至少依賴其精確 base 檔；不能只由 role 推導依賴方向或把所有邏輯來源引用變成強制下載。
-
 - `source_refs` 是按 key 排序、唯一的直接來源呈現 `[FileRef]`，允許互相指向。只包含 exact source／counterpart owner 的原文、sections、各自 annotation、字典與必要 card／face／printing／revision 所在檔；printed 或歷史來源包含其 print-detail／history。不把普通商品或其他印刷的 FK 放入。消費端只展開當次來源一跳及強 dependencies，不沿新加入檔自己的 source_refs 遞移。
 
 JSON blob 使用 `snapshots/blobs/<64hex>.json`；Brotli 表示在同 path 加 `.br`，固定品質 11；壓縮器及版本由 producer recipe 釘住，兩次 clean export 壓縮 bytes 須相同。null 表示沒有該表示，不能當作零 bytes。下載後先核實壓縮長度，解壓後核 canonical bytes 長度與 sha256；不是拿壓縮內容算 File.sha256。HTTP 自動解壓的 client 要在能觀測傳輸長度的層驗證，不能把已解壓長度拿來比 compressed_bytes。
@@ -292,6 +291,7 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
     ]
   ],
   "dependencies": [],
+  "source_refs": [],
   "role": "bootstrap",
   "purpose": "catalog",
   "region": null,
@@ -317,9 +317,10 @@ row_index 只對該 exact base 有效；基礎列按完整 PK 排序，索引範
 只載基本目錄不宣稱完整 view 或文字離線備妥；完整 Python reader／read_api／publish 仍驗全閉包。
 
 JP 來源的繁中正文譯文（JP own_source／EN jp_source）固定放在來源 JP owner 永久家族的
-`purpose=translation,region=null` 檔，沿相同固定背景 band。檔內含 translation、繁中文字、
+共用譯文檔（`purpose=translation,region=null`），沿相同固定背景 band。檔內含 translation、繁中文字、
 譯文 annotation_set 及必要 source_unit_id 文字閉包；JP 與 EN 透過 manifest dependencies
-依賴它，本地不重出自身所選共用譯文閉包已供應的同 ID；共用檔其他列不影響本地副本位置。JP 首次出貨就使用此位置，不因 EN 加包或引用數改變而搬動。
+依賴它，本地不重出自身所選譯文閉包已供應的同 ID；共用譯文檔的其他列不影響本地副本位置。
+JP 首次出貨就使用此位置，不因 EN 加包或引用數改變而搬動。
 catalog 名稱譯文仍按 catalog 局部出貨。完整來源 owner、sections 與原文標註留在原家族的呈現檔，
 由 source_refs 按需載入；名稱 witness 不替代正文。缺局部字典即拒收，不能從無依賴關係的其他檔補洞。
 

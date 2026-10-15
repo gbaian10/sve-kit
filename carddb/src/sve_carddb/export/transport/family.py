@@ -8,6 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.snapshot import definition, row_type
 from sve_carddb.core.json import array, canonical, object_value, string
+from sve_carddb.export.references import DICTIONARIES, source_pointers
 from sve_carddb.export.references import references as public_references
 from sve_carddb.export.text_owners import TextOwners, row_owners
 from sve_carddb.export.transport.layout import (
@@ -28,9 +29,6 @@ def file_reference(file: dict[str, JsonValue]) -> dict[str, JsonValue]:
 
 
 type Row = dict[str, JsonValue]
-DICTIONARIES = frozenset(
-    {"text_unit", "translation", "annotation_set", "annotation_concept"}
-)
 CATALOG = frozenset(
     {
         "card",
@@ -613,20 +611,6 @@ class FamilyLayout:
             "face", self.layout.faces[info.face_id], "bootstrap", purpose, info.region
         )
         return {context.key} if context in self.pieces else set()
-
-
-def source_pointers(value: JsonValue) -> list[Row]:
-    """Take exact source selections rather than ordinary foreign keys."""
-    if isinstance(value, list):
-        return [p for item in value for p in source_pointers(item)]
-    if not isinstance(value, dict):
-        return []
-    direct = [
-        object_value(value[field])
-        for field in ("source", "counterpart")
-        if isinstance(value.get(field), dict)
-    ]
-    return direct + [p for item in value.values() for p in source_pointers(item)]
 
 
 def available_fields(table: str, partition: str) -> tuple[str, ...]:

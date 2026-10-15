@@ -51,10 +51,11 @@ bucket 數只讀取目前候選 Schema 的 `bucket_count.const`，不接受呼�
 annotation_concept 固定放共用 catalog，並帶所需 label 文字閉包。
 
 繁中正文譯文的來源是 JP owner 時，JP `own_source` 與 EN `jp_source` 都依賴同一個
-`purpose=translation`、`region=null` 的來源家族檔。位置從 JP 第一次出貨起固定，
-不等 EN 加入才搬動，也不依引用次數移動。共用檔帶譯文、繁中文字、譯文標註與來源文字；
-本地字典不再重出自身所選共用譯文閉包已供應的同 ID；共用檔增加其他列不搬動本地副本。名稱字典與輕量名稱 witness 仍屬 catalog；
-正文不另出 witness，完整來源呈現由 exact pointer 與 `source_refs` 載入。
+`purpose=translation`、`region=null` 的共用譯文檔，按來源 JP owner 的永久家族放置。
+位置從 JP 第一次出貨起固定，不等 EN 加入才搬動，也不依引用次數移動。
+共用譯文檔帶譯文、繁中文字、譯文標註與來源文字；本地字典不再重出自身所選譯文閉包
+已供應的同 ID，共用譯文檔增加其他列不搬動本地副本。名稱字典與輕量名稱 witness
+仍屬 catalog；正文不另出 witness，完整來源呈現由 exact pointer 與 `source_refs` 載入。
 
 4.0.0 使用 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 的 N=64，
 每個 `(用途,地區,家族[,固定 band])` 一個家族檔。catalog 每包每區一檔；card／face
@@ -64,8 +65,8 @@ default printing 的基本列進 catalog，其餘印刷的卡號定位三格按�
 商品與引擎資料亦按用途放背景檔，不阻塞基本目錄冷載。
 
 背景一般家族 width=64，BP01／CP04 固定 width=32（兩帶），global width=8（八帶）；
-共用正文譯文依來源 JP owner 的家族與固定 band 出貨。images 保留原 physical 成員：global width=1、
-home_set width=32。Python producer 與 reader 共用 contracts 的寬度表，
+共用譯文檔依來源 JP owner 的家族沿用同一固定 band。images 保留原 physical 成員：
+global width=1、home_set width=32。Python producer 與 reader 共用 contracts 的寬度表，
 各自計算分組與驗證；不按資料大小動態換 width，也不跨家族填裝。
 同一 File 的相同 fragment 身分按完整 PK 合併排序，先定出 catalog／print base bytes
 與 hash，再建立 row_index、exact base 與 dependencies。

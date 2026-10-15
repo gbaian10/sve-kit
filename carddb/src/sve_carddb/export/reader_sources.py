@@ -2,30 +2,12 @@
 
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue
-
 from sve_carddb.core.json import array, canonical, object_value, string
-from sve_carddb.export.references import references
+from sve_carddb.export.references import DICTIONARIES, references, source_pointers
 from sve_carddb.export.text_owners import TextOwners, row_owners
 
 if TYPE_CHECKING:
     from sve_carddb.export.reader import Fragment, Row, View
-
-DICTIONARIES = frozenset(
-    {"text_unit", "translation", "annotation_set", "annotation_concept"}
-)
-
-
-def _pointers(value: JsonValue) -> list[Row]:
-    if isinstance(value, list):
-        return [p for item in value for p in _pointers(item)]
-    if not isinstance(value, dict):
-        return []
-    return [
-        object_value(value[field])
-        for field in ("source", "counterpart")
-        if isinstance(value.get(field), dict)
-    ] + [p for item in value.values() for p in _pointers(item)]
 
 
 def validate_local_dictionaries(
@@ -118,8 +100,7 @@ def _source_references(
     expected: dict[str, set[str]] = {}
     for fragment in fragments:
         for row in fragment.rows:
-            for raw in _pointers(row):
-                pointer = object_value(raw)
+            for pointer in source_pointers(row):
                 owners.pointer(pointer)
                 expected.setdefault(fragment.file, set()).update(
                     locations[canonical(pointer["owner"])]

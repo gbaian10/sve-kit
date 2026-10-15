@@ -214,7 +214,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 ## 3. 分檔、下載順序與記憶體
 
-穩定 owner 是資料分片規則，與商品收錄分開：card/revision/support 跟 `card.home_set_id`；printing 跟第一次配發的 `printing.home_set_id`；再錄新 printing 到新 owner，舊列不搬。`printing_product` 新關係跟 printing owner，可引用舊 card，不能複製舊 card。QA／CR 依固定 ID bucket；字典按檔局部出貨，JP 來源繁中正文譯文固定放來源 JP owner 的共用家族檔，不依後續 EN 引用搬動。各 family 過大時依已固定 ID bucket 拆子片，快照清單決定檔案；翻譯/勘誤只更動涉及的片。
+穩定 owner 是資料分片規則，與商品收錄分開：card/revision/support 跟 `card.home_set_id`；printing 跟第一次配發的 `printing.home_set_id`；再錄新 printing 到新 owner，舊列不搬。`printing_product` 新關係跟 printing owner，可引用舊 card，不能複製舊 card。QA／CR 依固定 ID bucket；字典按檔局部出貨，JP 來源繁中正文譯文固定放來源 JP owner 家族的共用譯文檔，不依後續 EN 引用搬動。各 family 過大時依已固定 ID bucket 拆子片，快照清單決定檔案；翻譯/勘誤只更動涉及的片。
 
 基本目錄是所選區全部卡片／面、current／暫顯名稱與可用名稱翻譯、基本數值、卡號定位及基本 facet／字典的完整集合。首頁先顯示，之後背景下載所選 jp／en 基本目錄；整區驗畢且索引完成才開放搜尋。下載中可打字並顯示「資料下載中」，完成後自動搜尋一次，不顯示部分結果。稀有度、異圖與完整印刷資料在基本目錄之後背景補齊；未備妥的進階條件明示載入中，使用時須等完整用途閉包。另一區只在切換或對照時下載；效果全文、Q&A／裁定、商品收錄、引擎支援與歷史按需，不要求首訪三語全量或 PWA 整庫預取。所有連線使用同一政策，不做省流量模式。直接連結單卡可先讀其精確閉包，但不代表整區搜尋 ready。
 
@@ -238,7 +238,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `rules_name`、`face_rules_name` | 無 | 全部原欄位，global detail |
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
 | `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包，隨各 catalog 局部出貨 | 隨使用它的 detail／print-detail／history／product 局部出貨；自身所選共用譯文閉包已供應者不重出；同 ID 副本完整同值 |
-| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列，隨各 catalog 局部出貨 | 按檔局部出貨；JP 來源繁中正文譯文固定放來源 JP 家族共用檔；同 ID 副本完整同值 |
+| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列，隨各 catalog 局部出貨 | 按檔局部出貨；JP 來源繁中正文譯文固定放來源 JP 家族的共用譯文檔；同 ID 副本完整同值 |
 | `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要的 annotation_set 隨各 catalog 局部出貨；annotation_concept 全部固定在共用 catalog | annotation_set 隨局部或共用譯文字典出貨；正文按需，全部文字檔合計含全部引用 |
 | `field_annotation` | 隨原文欄位；display name／字典／商品等 | 隨 effect／printing／QA／CR 等；非 display revision 的用途在 history，詳[位置分片](public-annotation.md#5-分片閉包與消費表) |
 | 其餘文字集合 | 無 | 完整白名單列 |

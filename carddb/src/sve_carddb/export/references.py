@@ -2,13 +2,16 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.json import array, string
+from sve_carddb.core.json import array, object_value, string
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from pydantic import JsonValue
 
+DICTIONARIES = frozenset(
+    {"text_unit", "translation", "annotation_set", "annotation_concept"}
+)
 
 REFERENCES = {
     "card_id": "card",
@@ -71,3 +74,17 @@ def references(value: JsonValue) -> Iterator[tuple[str, str]]:
                 for identifier in array(item):
                     yield ARRAY_REFERENCES[field], string(identifier)
             yield from references(item)
+
+
+def source_pointers(value: JsonValue) -> list[dict[str, JsonValue]]:
+    """Take exact source selections rather than ordinary foreign keys."""
+    if isinstance(value, list):
+        return [p for item in value for p in source_pointers(item)]
+    if not isinstance(value, dict):
+        return []
+    direct = [
+        object_value(value[field])
+        for field in ("source", "counterpart")
+        if isinstance(value.get(field), dict)
+    ]
+    return direct + [p for item in value.values() for p in source_pointers(item)]
