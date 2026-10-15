@@ -28,36 +28,110 @@ function client(region: "jp" | "en" = "jp", entry: "index" | "preview" = "index"
   return { client, requests, files }
 }
 
+function routingClient(table: "card_route_alias" | "route_override", row: readonly string[]) {
+  const h = client("jp", "preview")
+  const manifest = structuredClone(built.manifest)
+  const files = arrayValue(manifest["files"]).map((file) => objectValue(file))
+  const file = files.find((file) => JSON.stringify(file["row_counts"]).includes(table))
+  if (!file) throw new Error("missing routing file")
+  const path = stringValue(file["path"])
+  const raw = h.files.get(path)
+  if (!raw) throw new Error("missing routing bytes")
+  const container = objectValue(parseJson(raw))
+  const fragment = arrayValue(arrayValue(objectValue(container["tables"])[table])[0])
+  fragment[4] = [[...row]]
+  const bytes = canonical(container)
+  file["bytes"] = bytes.length
+  file["sha256"] = digest(bytes)
+  h.files.set(path, bytes)
+  const manifestBytes = canonical(manifest)
+  h.files.set(built.manifestPath, manifestBytes)
+  h.files.set(
+    "snapshots/preview/current.json",
+    canonical({
+      manifest_path: built.manifestPath,
+      manifest_sha256: digest(manifestBytes),
+    }),
+  )
+  return { ...h, manifestFiles: files }
+}
+
+function expectCatalogsOnce(h: ReturnType<typeof routingClient>) {
+  for (const region of ["jp", "en"]) {
+    const paths = h.manifestFiles
+      .filter((file) => file["purpose"] === "catalog" && file["region"] === region)
+      .map((file) => stringValue(file["path"]))
+    expect(paths.length).toBeGreaterThan(0)
+    expect(h.requests.filter((path) => paths.includes(path)).sort()).toEqual(paths.sort())
+  }
+}
+
 describe("catalog-based cold card routes", () => {
-  it("reports a broken alias without downloading the other region", async () => {
-    const h = client("jp", "preview")
-    const manifest = structuredClone(built.manifest)
-    const files = arrayValue(manifest["files"]).map((file) => objectValue(file))
-    const file = files.find((file) =>
-      JSON.stringify(file["row_counts"]).includes("card_route_alias"),
-    )
-    if (!file) throw new Error("missing alias file")
-    const path = stringValue(file["path"])
-    const raw = h.files.get(path)
-    if (!raw) throw new Error("missing alias bytes")
-    const text = new TextDecoder().decode(raw).replace('"BP01-002a"', '"MISSING-001"')
-    const bytes = canonical(parseJson(new TextEncoder().encode(text)))
-    file["bytes"] = bytes.length
-    file["sha256"] = digest(bytes)
-    h.files.set(path, bytes)
-    const manifestBytes = canonical(manifest)
-    h.files.set(built.manifestPath, manifestBytes)
-    h.files.set(
-      "snapshots/preview/current.json",
-      canonical({
-        manifest_path: built.manifestPath,
-        manifest_sha256: digest(manifestBytes),
-      }),
-    )
+  it("opens an EN alias target from a JP client", async () => {
+    const h = routingClient("card_route_alias", [
+      "official",
+      "BP01EN-002A",
+      "official",
+      "BP01EN-002",
+      "renumbered",
+    ])
+    const result = await locateCard(h.client, { namespace: "official", key: "BP01EN-002A" })
+    expect(result.printing).toMatchObject({
+      id: "p:bp01-002-en",
+      region: "en",
+      cardNo: "BP01EN-002",
+    })
+    expectCatalogsOnce(h)
+  })
+
+  it("opens an EN override target from a JP client", async () => {
+    const h = routingClient("route_override", ["BP01EN-002", "p:bp01-002-en"])
+    const result = await locateCard(h.client, { namespace: "official", key: "BP01EN-002" })
+    expect(result.printing).toMatchObject({
+      id: "p:bp01-002-en",
+      region: "en",
+      cardNo: "BP01EN-002",
+    })
+    expectCatalogsOnce(h)
+  })
+
+  it.each([
+    {
+      table: "card_route_alias" as const,
+      row: ["official", "BP01-002A", "official", "MISSING-001", "renumbered"],
+      key: "BP01-002A",
+      message: "card route alias target is missing",
+    },
+    {
+      table: "route_override" as const,
+      row: ["BP01-002", "p:missing"],
+      key: "BP01-002",
+      message: "route override has no matching printing",
+    },
+  ])(
+    "reports a missing $table target after checking each region once",
+    async ({ table, row, key, message }) => {
+      const h = routingClient(table, row)
+      await expect(locateCard(h.client, { namespace: "official", key })).rejects.toMatchObject({
+        kind: "reference",
+        message,
+      })
+      expectCatalogsOnce(h)
+    },
+  )
+
+  it("rejects a cyclic alias without downloading the other region", async () => {
+    const h = routingClient("card_route_alias", [
+      "official",
+      "OLD-001",
+      "official",
+      "OLD-001",
+      "renumbered",
+    ])
     await expect(
-      locateCard(h.client, { namespace: "official", key: "BP01-002A" }),
-    ).rejects.toMatchObject({ kind: "reference", message: "card route alias target is missing" })
-    const en = files.filter((file) => file["region"] === "en").map((file) => file["path"])
+      locateCard(h.client, { namespace: "official", key: "OLD-001" }),
+    ).rejects.toMatchObject({ kind: "reference", message: "cyclic card route alias" })
+    const en = h.manifestFiles.filter((file) => file["region"] === "en").map((file) => file["path"])
     expect(h.requests.filter((path) => en.includes(path))).toEqual([])
   })
 
