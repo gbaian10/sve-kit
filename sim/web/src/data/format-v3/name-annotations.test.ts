@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { createAnnotatedTextResolver } from "../annotated-text"
 import { createSnapshotClient, type SnapshotClient } from "../client"
-import { bucketOf, homeSetOwner } from "../locator"
+import { homeSetOwner } from "../locator"
 import { v3Fixture } from "../v3-fixture"
 import {
   arrayValue,
@@ -14,8 +14,8 @@ import {
   stringValue,
 } from "./json"
 import { wholeName } from "./name-annotations"
-import { type Fragment } from "./reader"
-import { digest } from "./sha256"
+import { type Fragment, readContainer } from "./reader"
+import { bucket, digest } from "./sha256"
 
 const fixture = () => objectValue(v3Fixture("whole-name-native.json"))
 function origin() {
@@ -72,31 +72,63 @@ async function sourceHistory() {
   selection["basis"] = "jp_source"
   objectValue(objectValue(selection["source"])["owner"])["id"] = donor.id
   const owner = homeSetOwner(stringValue(card["home_set_id"]))
-  const bucket = bucketOf([card["id"] ?? null], 64)
-  const historyKey = `text/history/home_set/family/band/${String(Math.floor(bucket / 32))}`
+  const historyKey = "history/jp/family-family/0"
   snapshot.files.set(historyKey, {
+    key: historyKey,
     role: "text",
-    row_counts: [{ table: "face_revision", partition: "history", owner, bucket, count: 1 }],
+    purpose: "history",
+    region: "jp",
+    segment: "family-family:band-0",
+    row_counts: [
+      [
+        "face_revision",
+        owner["kind"] ?? null,
+        owner["id"] ?? null,
+        "history",
+        "family-family:band-0",
+        1,
+      ],
+    ],
   })
   // These manifest candidates must never be fetched for this card's source closure.
   for (let index = 0; index < 20; index++)
     snapshot.files.set(`unrelated-${String(index)}`, {
       role: "text",
+      key: `unrelated-${String(index)}`,
+      purpose: "history",
+      region: "jp",
+      segment: `family-other-${String(index)}:band-0`,
       row_counts: [
-        {
-          table: "face_revision",
-          partition: "history",
-          owner: homeSetOwner(`other-${String(index)}`),
-          bucket,
-          count: 1,
-        },
+        [
+          "face_revision",
+          "home_set",
+          `other-${String(index)}`,
+          "history",
+          `family-other-${String(index)}:band-0`,
+          1,
+        ],
       ],
     })
   const fragment: Fragment = {
     file: historyKey,
     table: "face_revision",
-    identity: canonicalText(["face_revision", owner, bucket, "history"]),
-    value: { owner, bucket, partition: "history", base: null },
+    identity: canonicalText([
+      historyKey,
+      "face_revision",
+      owner,
+      "jp",
+      "history",
+      "family-family:band-0",
+      "history",
+    ]),
+    value: {
+      owner,
+      region: "jp",
+      purpose: "history",
+      segment: "family-family:band-0",
+      partition: "history",
+      base: null,
+    },
     rows: [donor],
   }
   return { client, snapshot, revision, historyKey, fragment }
@@ -129,6 +161,39 @@ describe("whole names on exact source owners", () => {
       (objectValue(data["expected"])["translation"] as JsonObject[])[0]?.["annotation_set_id"],
     )
     expect(view?.translation?.["annotation_kind"]).toBe("whole_name")
+  })
+  it("uses a catalog name witness without fetching its source body", async () => {
+    const { client, snapshot, revision, fragment } = await sourceHistory()
+    const donor = fragment.rows[0]
+    const selection = objectValue(arrayValue(revision["translations"])[0])
+    const sources = readContainer(
+      { key: "catalog/shared/shared/0", purpose: "catalog", region: null, row_counts: [] },
+      {
+        format_version: "4.0.0",
+        types: {},
+        tables: {},
+        name_sources: [
+          [
+            [objectValue(selection["source"])["owner"] ?? null, "name", null],
+            donor?.["name_unit_id"] ?? null,
+            donor?.["name_concept_id"] ?? null,
+          ],
+        ],
+      },
+    )
+    const witnessed = { ...snapshot, bootstrap: [...snapshot.bootstrap, ...sources] }
+    const resolver = createAnnotatedTextResolver({
+      ...client,
+      snapshot: () => witnessed,
+      fragments: () => Promise.reject(new Error("source body should stay unloaded")),
+    })
+    const result = await resolver.resolve(
+      { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
+      "zh-Hant",
+    )
+    expect(result?.source?.annotation?.["occurrences"]).toHaveLength(1)
+    expect(result?.translated?.annotation?.["occurrences"]).toHaveLength(1)
+    expect(result?.source?.unit["id"]).toBe(donor?.["name_unit_id"])
   })
   it("stays pending while the exact source is fetching, then rejects a complete missing source", async () => {
     const { client, revision, historyKey } = await sourceHistory()
@@ -211,16 +276,19 @@ describe("whole names on exact source owners", () => {
     const ids = (objectValue(data["expected"])["annotation_set"] as JsonObject[]).map(
       (row) => row["id"] ?? null,
     )
-    snapshot.files.set("virtual-set-trap", {
-      role: "text",
-      row_counts: ids.map((id) => ({
-        table: "annotation_set",
-        owner: { kind: "global", id: null },
-        bucket: bucketOf([id], 64),
-        partition: "detail",
-        count: 1,
-      })),
-    })
+    for (const id of ids) {
+      const band = Math.floor(bucket([id], 64) / 2)
+      snapshot.files.set(`virtual-set-trap-${String(band)}`, {
+        key: `virtual-set-trap-${String(band)}`,
+        role: "text",
+        purpose: "dictionary",
+        region: null,
+        segment: `shared:band-${String(band)}`,
+        row_counts: [
+          ["annotation_set", "global", null, "detail", `shared:band-${String(band)}`, 1],
+        ],
+      })
+    }
     const resolver = createAnnotatedTextResolver({
       ...client,
       fragments: () => {

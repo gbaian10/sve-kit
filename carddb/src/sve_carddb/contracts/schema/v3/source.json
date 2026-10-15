@@ -130,6 +130,7 @@
     "annotation_concept",
     "Owner",
     "FileRef",
+    "FragmentOwner",
     "Base",
     "card_bootstrap",
     "card_bootstrap_fragment",
@@ -504,19 +505,19 @@
         "owner": {
           "$ref": "#/$defs/Owner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
         "partition": {
           "const": "bootstrap"
+        },
+        "segment": {
+          "$ref": "#/$defs/ID"
         }
       },
       "required": [
         "file",
         "table",
         "owner",
-        "bucket",
-        "partition"
+        "partition",
+        "segment"
       ],
       "additionalProperties": false
     },
@@ -1021,6 +1022,56 @@
             }
           },
           "additionalProperties": false
+        },
+        "card_locators": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/ID"
+                },
+                {
+                  "$ref": "#/$defs/ID"
+                },
+                {
+                  "$ref": "#/$defs/Text"
+                }
+              ],
+              "minItems": 3,
+              "maxItems": 3,
+              "items": false
+            }
+          }
+        },
+        "name_sources": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/PublicTextPointer"
+              },
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ID"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "minItems": 3,
+            "maxItems": 3,
+            "items": false
+          }
         }
       },
       "required": [
@@ -1304,9 +1355,9 @@
         "row_counts": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "table": {
+            "type": "array",
+            "prefixItems": [
+              {
                 "enum": [
                   "card",
                   "face",
@@ -1356,31 +1407,39 @@
                   "field_annotation"
                 ]
               },
-              "owner": {
-                "$ref": "#/$defs/Owner"
+              {
+                "enum": [
+                  "global",
+                  "home_set"
+                ]
               },
-              "bucket": {
-                "$ref": "#/$defs/UInt"
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ID"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              "partition": {
+              {
                 "enum": [
                   "bootstrap",
                   "detail",
                   "history"
                 ]
               },
-              "count": {
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
                 "$ref": "#/$defs/UInt"
               }
-            },
-            "required": [
-              "table",
-              "owner",
-              "bucket",
-              "partition",
-              "count"
             ],
-            "additionalProperties": false
+            "minItems": 6,
+            "maxItems": 6,
+            "items": false
           }
         },
         "dependencies": {
@@ -1397,6 +1456,32 @@
             "images",
             "programs"
           ]
+        },
+        "purpose": {
+          "enum": [
+            "catalog",
+            "print",
+            "detail",
+            "print-detail",
+            "product",
+            "history",
+            "engine",
+            "region-state",
+            "dictionary",
+            "images",
+            "config",
+            "programs"
+          ]
+        },
+        "region": {
+          "enum": [
+            "jp",
+            "en",
+            null
+          ]
+        },
+        "segment": {
+          "$ref": "#/$defs/ID"
         }
       },
       "required": [
@@ -1407,7 +1492,10 @@
         "key",
         "row_counts",
         "dependencies",
-        "role"
+        "role",
+        "purpose",
+        "region",
+        "segment"
       ],
       "additionalProperties": false
     },
@@ -2709,6 +2797,38 @@
         "id"
       ],
       "additionalProperties": false
+    },
+    "FragmentOwner": {
+      "oneOf": [
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "global"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "home_set"
+            },
+            {
+              "$ref": "#/$defs/ID"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false
+        }
+      ]
     }
   },
   "tuples": {

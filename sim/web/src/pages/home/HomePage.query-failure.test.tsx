@@ -4,7 +4,7 @@ import { afterAll, beforeEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
-import { type JsonObject, stringValue } from "../../data"
+import { type JsonObject, type JsonValue, stringValue } from "../../data"
 import { prefsStore, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { TestSearchWorker } from "../../test-utils/search-worker"
@@ -20,7 +20,7 @@ it("shows query failures after readiness and retries without losing history or i
   const metadata = new Set(
     (built.manifest["files"] as JsonObject[])
       .filter((file) =>
-        (file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image"),
+        (file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image"),
       )
       .map((file) => stringValue(file["path"])),
   )

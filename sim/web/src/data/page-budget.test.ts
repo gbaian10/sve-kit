@@ -22,8 +22,20 @@ function page(extra: number) {
     files.set(key, {
       key,
       role: "images",
+      purpose: "images",
+      region: null,
+      segment: `family-set:${String(i)}:band-${String(Math.floor(number / 32))}`,
       bytes: 503316 + (i === 0 ? extra : 0),
-      row_counts: [{ table: "printing_image", partition: "detail", owner, bucket: number }],
+      row_counts: [
+        [
+          "printing_image",
+          owner.kind,
+          owner.id,
+          "detail",
+          `family-set:${String(i)}:band-${String(Math.floor(number / 32))}`,
+          1,
+        ],
+      ],
     })
     bootstrap.push({
       file: "bootstrap",

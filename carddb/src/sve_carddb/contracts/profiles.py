@@ -13,13 +13,13 @@ class Profile:
     capabilities: tuple[str, ...]
 
     @staticmethod
-    def width(role: str, partition: str, kind: str, owner: str) -> int:
+    def width(purpose: str, family: str) -> int:
         """Keep physical membership stable across data versions, including exceptions."""
-        if role == "images":
-            return 1 if kind == "global" else 32
-        if role == "bootstrap":
-            return 8 if kind == "global" else 32 if owner in {"BP01", "CP04"} else 64
-        return 2 if kind == "global" and partition == "detail" else 32
+        if purpose == "images":
+            return 32 if family else 1
+        if purpose == "dictionary":
+            return 2
+        return 32 if family in {"BP01", "CP04"} else 64 if family else 8
 
 
 PROFILES = (

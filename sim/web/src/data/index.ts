@@ -20,6 +20,7 @@ export {
   arrayValue,
   canonicalText,
   type JsonObject,
+  type JsonValue,
   objectValue,
   parseJson,
   stringValue,

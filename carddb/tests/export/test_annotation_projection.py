@@ -171,6 +171,9 @@ def test_reader_rejects_annotation_uses_outside_source_field_partition() -> None
         validate_view(view.tables, manifest, fragments)
         for fragment in fragments:
             fragment.value["partition"] = "detail"
-            with pytest.raises(ValueError, match=r"annotation|Annotation"):
+            if fragment.table == "annotation_set":
                 validate_view(view.tables, manifest, fragments)
+            else:
+                with pytest.raises(ValueError, match=r"annotation|Annotation"):
+                    validate_view(view.tables, manifest, fragments)
             fragment.value["partition"] = "bootstrap"

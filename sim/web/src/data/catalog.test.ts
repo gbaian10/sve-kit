@@ -20,6 +20,11 @@ const fetcher: Fetcher = (url) => {
 }
 const client = createSnapshotClient("/cdn", { fetch: fetcher })
 await client.load()
+await client.prefetchPrintings?.()
+await client.selectRegion?.("en")
+await client.prefetchPrintings?.()
+await client.selectRegion?.("jp")
+await client.prefetchPrintings?.()
 const snapshot = client.snapshot()
 if (!snapshot) throw new Error("fixture did not load")
 const catalog = createCatalog(snapshot)
@@ -79,12 +84,12 @@ describe("catalog", () => {
   it("lists results in snapshot order and filters by class", () => {
     const all = catalog.results(DEFAULT_QUERY, "jp")
     expect(all).toHaveLength(catalog.entries.length)
-    expect(all[0]).toEqual({ key: "c:bp01-021", printingId: "p:bp01-021" })
+    expect(all[0]).toEqual({ key: "c:bp01-001", printingId: "p:bp01-001" })
     const bishops = catalog.results({ ...DEFAULT_QUERY, classes: ["bishop"] }, "en")
     expect(bishops.every((item) => catalog.summary(item.printingId)?.classCode === "bishop")).toBe(
       true,
     )
-    expect(bishops[0]?.printingId).toBe("p:bp01-051-en")
+    expect(bishops[0]?.printingId).toBe("p:bp01-050-en")
   })
 
   it("labels classes in the UI language and caches one catalog per snapshot", () => {
@@ -103,7 +108,7 @@ describe("pending display in the list", () => {
       bootstrap: snapshot.bootstrap.map((fragment) => ({
         ...fragment,
         rows: fragment.rows.map((row) =>
-          row["id"] === "f:bp01-001"
+          row["id"] === "f:bp01-001" && fragment.value["region"] === "jp"
             ? {
                 ...row,
                 current: (row["current"] as { region: string }[]).filter(
@@ -156,7 +161,7 @@ describe("pending display in the list", () => {
       bootstrap: snapshot.bootstrap.map((fragment) => ({
         ...fragment,
         rows: fragment.rows.map((row) =>
-          row["id"] === "f:bp01-001"
+          row["id"] === "f:bp01-001" && fragment.value["region"] === "en"
             ? {
                 ...row,
                 current: (row["current"] as { region: string }[]).filter(

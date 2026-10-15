@@ -1,4 +1,5 @@
 import {
+  arrayValue,
   canonical,
   type JsonObject,
   type JsonValue,
@@ -27,25 +28,53 @@ export function v3Version(
   manifest["data_version"] = `20261004T01000${String(number)}Z-0001`
   manifest["published_at"] = `2026-10-04T01:00:0${String(number)}Z`
   const files = new Map<string, Uint8Array>()
-  for (const file of manifest["files"] as JsonObject[]) {
+  const metadata = manifest["files"] as JsonObject[]
+  const oldHashes = new Map(metadata.map((f) => [stringValue(f["key"]), f["sha256"]]))
+  const hashes = new Map(oldHashes)
+  const rebind = (value: JsonValue): void => {
+    if (Array.isArray(value)) {
+      for (const item of value) rebind(item)
+      return
+    }
+    if (value === null || typeof value !== "object") return
+    if (
+      Object.keys(value).length === 2 &&
+      typeof value["key"] === "string" &&
+      value["sha256"] === oldHashes.get(value["key"])
+    )
+      value["sha256"] = hashes.get(value["key"]) ?? null
+    else for (const item of Object.values(value)) rebind(item)
+  }
+  const priority = (file: JsonObject) =>
+    file["purpose"] === "config" || file["purpose"] === "programs"
+      ? 0
+      : file["purpose"] === "catalog"
+        ? 1
+        : file["purpose"] === "print" || file["purpose"] === "region-state"
+          ? 2
+          : file["purpose"] === "images"
+            ? 4
+            : 3
+  for (const file of [...metadata].sort(
+    (a, b) =>
+      priority(a) - priority(b) || (a["region"] === null ? 0 : 1) - (b["region"] === null ? 0 : 1),
+  )) {
     const value = objectValue(v3Fixture(`payloads/${stringValue(file["sha256"]).slice(7)}.json`))
     if (mutate && value["tables"]) {
       for (const [table, fragments] of Object.entries(objectValue(value["tables"])))
-        for (const fragment of fragments as JsonObject[])
-          for (const row of fragment["rows"] as JsonValue[][]) mutate(table, row)
+        for (const raw of arrayValue(fragments))
+          for (const row of arrayValue(arrayValue(raw)[4])) mutate(table, arrayValue(row))
     }
+    rebind(value)
     const bytes = canonical(value)
-    const old = file["sha256"]
     file["sha256"] = digest(bytes)
     file["bytes"] = bytes.length
     file["path"] = `snapshots/blobs/${digest(bytes).slice(7)}.json`
-    if (old !== file["sha256"]) {
-      for (const dependent of manifest["files"] as JsonObject[])
-        for (const dep of dependent["dependencies"] as JsonObject[])
-          if (dep["key"] === file["key"]) dep["sha256"] = file["sha256"] ?? null
-    }
+    hashes.set(stringValue(file["key"]), file["sha256"])
     files.set(stringValue(file["path"]), bytes)
   }
+  for (const file of metadata) rebind(file["dependencies"] ?? [])
+  rebind(manifest["config_ref"] ?? null)
   mutateManifest?.(manifest)
   const bytes = canonical(manifest)
   const path = `snapshots/manifests/${digest(bytes).slice(7)}.json`

@@ -14,8 +14,9 @@ def validate_media(
     view: View, fragments: list[Fragment], files: dict[str, Row], config_ref: Row
 ) -> None:
     """Require the public media descriptor and its exact bootstrap closure."""
-    print_locations: dict[str, str] = {}
-    face_locations: dict[str, str] = {}
+    print_locations: dict[tuple[str, str], str] = {}
+    face_locations: dict[tuple[str, str], str] = {}
+    printing_regions = {string(p["id"]): string(p["region"]) for p in view["printing"]}
     for fragment in fragments:
         if fragment.value["partition"] == "bootstrap" and fragment.table in {
             "printing",
@@ -25,7 +26,9 @@ def validate_media(
                 print_locations if fragment.table == "printing" else face_locations
             )
             for row in fragment.rows:
-                locations[string(row["id"])] = fragment.file
+                locations[string(row["id"]), string(fragment.value["region"])] = (
+                    fragment.file
+                )
     needed: dict[str, set[str]] = {
         key: {string(config_ref["key"])}
         for key, f in files.items()
@@ -36,8 +39,14 @@ def validate_media(
             continue
         for row in fragment.rows:
             needed[fragment.file] |= {
-                print_locations[string(row["printing_id"])],
-                face_locations[string(row["face_id"])],
+                print_locations[
+                    string(row["printing_id"]),
+                    printing_regions[string(row["printing_id"])],
+                ],
+                face_locations[
+                    string(row["face_id"]),
+                    printing_regions[string(row["printing_id"])],
+                ],
             }
     for key, keys in needed.items():
         expected = [{"key": k, "sha256": files[k]["sha256"]} for k in sorted(keys)]

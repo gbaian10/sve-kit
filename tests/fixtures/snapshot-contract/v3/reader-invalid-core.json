@@ -4,7 +4,7 @@
     "target": "manifest",
     "path": [
       "files",
-      19,
+      3,
       "dependencies",
       0,
       "sha256"
@@ -14,12 +14,12 @@
   },
   {
     "name": "base-hash",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "base",
+      3,
       "file",
       "sha256"
     ],
@@ -28,12 +28,12 @@
   },
   {
     "name": "row-index-out-of-range",
-    "target": "text/detail/home_set/set%3Aa/band/1",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
-      0,
-      "rows",
+      1,
+      4,
       0,
       0
     ],
@@ -42,12 +42,12 @@
   },
   {
     "name": "row-index-duplicate",
-    "target": "text/detail/home_set/set%3Aa/band/1",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
-      0,
-      "rows"
+      1,
+      4
     ],
     "value": [
       [
@@ -157,12 +157,12 @@
   },
   {
     "name": "row-index-missing",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "rows"
+      4
     ],
     "value": [],
     "rehash": true,
@@ -170,12 +170,12 @@
   },
   {
     "name": "face-ordinal-out-of-range",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "rows",
+      4,
       0,
       1,
       1,
@@ -186,12 +186,12 @@
   },
   {
     "name": "face-ordinal-duplicate",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "rows",
+      4,
       0,
       1,
       1,
@@ -202,12 +202,12 @@
   },
   {
     "name": "face-ordinal-missing",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "rows",
+      4,
       0,
       1
     ],
@@ -230,12 +230,12 @@
   },
   {
     "name": "dangling-text",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       0,
       6
     ],
@@ -244,12 +244,12 @@
   },
   {
     "name": "duplicate-translation",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       0,
       8
     ],
@@ -273,12 +273,12 @@
   },
   {
     "name": "wrong-translation-partition",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       0,
       8
     ],
@@ -295,7 +295,7 @@
   },
   {
     "name": "wrong-descriptor",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "detail/jp/family-set%3Aa/0",
     "path": [
       "types",
       "Section",
@@ -309,7 +309,7 @@
   },
   {
     "name": "root-row-descriptor",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "detail/jp/family-set%3Aa/0",
     "path": [
       "types",
       "printing_detail"
@@ -334,16 +334,70 @@
   },
   {
     "name": "wrong-columns",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
-      0,
-      "columns"
+      0
     ],
     "value": [
-      "faces",
-      "row_index"
+      [
+        "home_set",
+        "set:a"
+      ],
+      "detail",
+      "catalog:family-set:a",
+      {
+        "file": {
+          "key": "catalog/jp/family-set%3Aa/0",
+          "sha256": "sha256:7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c"
+        },
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "partition": "bootstrap",
+        "segment": "family-set:a",
+        "table": "printing"
+      },
+      [
+        [
+          0,
+          [
+            [
+              0,
+              null,
+              null,
+              null,
+              "unknown",
+              [
+                [
+                  "r:a2",
+                  "available",
+                  "https://example.invalid/observations/a"
+                ]
+              ],
+              [],
+              [],
+              [],
+              null
+            ],
+            [
+              1,
+              null,
+              null,
+              null,
+              "unknown",
+              [],
+              [],
+              [],
+              [],
+              null
+            ]
+          ]
+        ]
+      ],
+      "wrong-columns"
     ],
     "rehash": true
   },
@@ -352,10 +406,10 @@
     "target": "manifest",
     "path": [
       "files",
-      19,
+      3,
       "row_counts",
       0,
-      "count"
+      5
     ],
     "value": 99,
     "rehash": false
@@ -397,7 +451,7 @@
     "target": "manifest",
     "path": [
       "files",
-      19,
+      3,
       "dependencies"
     ],
     "value": [],
@@ -420,12 +474,12 @@
   },
   {
     "name": "malformed-text-id",
-    "target": "text/detail/global/global/band/23",
+    "target": "dictionary/shared/shared/23",
     "path": [
       "tables",
       "text_unit",
       0,
-      "rows",
+      4,
       0,
       2
     ],
@@ -434,12 +488,12 @@
   },
   {
     "name": "current-in-history",
-    "target": "text/history/home_set/set%3Aa/band/0",
+    "target": "history/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       0,
       0
     ],
@@ -448,12 +502,12 @@
   },
   {
     "name": "dangling-vocabulary",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       0,
       7
     ],
@@ -468,12 +522,12 @@
   },
   {
     "name": "spelling-undeclared",
-    "target": "text/detail/global/global/band/18",
+    "target": "detail/shared/shared/4",
     "path": [
       "tables",
       "text_symbol",
       0,
-      "rows",
+      4,
       0,
       4,
       0,
@@ -485,12 +539,12 @@
   },
   {
     "name": "spelling-disabled-uint",
-    "target": "text/detail/global/global/band/18",
+    "target": "detail/shared/shared/4",
     "path": [
       "tables",
       "text_symbol",
       0,
-      "rows",
+      4,
       0,
       2,
       "parameters",
@@ -503,12 +557,12 @@
   },
   {
     "name": "spelling-disabled-variable",
-    "target": "text/detail/global/global/band/18",
+    "target": "detail/shared/shared/4",
     "path": [
       "tables",
       "text_symbol",
       0,
-      "rows",
+      4,
       0,
       2,
       "parameters",
@@ -521,12 +575,12 @@
   },
   {
     "name": "parameter-inverted",
-    "target": "text/detail/global/global/band/18",
+    "target": "detail/shared/shared/4",
     "path": [
       "tables",
       "text_symbol",
       0,
-      "rows",
+      4,
       0,
       2,
       "parameters",
@@ -540,12 +594,12 @@
   },
   {
     "name": "parameter-duplicate",
-    "target": "text/detail/global/global/band/18",
+    "target": "detail/shared/shared/4",
     "path": [
       "tables",
       "text_symbol",
       0,
-      "rows",
+      4,
       0,
       2,
       "parameters"
@@ -577,12 +631,12 @@
   },
   {
     "name": "parameter-unsorted",
-    "target": "text/detail/global/global/band/18",
+    "target": "detail/shared/shared/4",
     "path": [
       "tables",
       "text_symbol",
       0,
-      "rows",
+      4,
       0,
       2,
       "parameters"
@@ -611,12 +665,12 @@
   },
   {
     "name": "hint-parameters-disagree",
-    "target": "text/detail/global/global/band/6",
+    "target": "detail/shared/shared/1",
     "path": [
       "tables",
       "ruling_revision",
       0,
-      "rows",
+      4,
       0,
       12,
       1,
@@ -632,12 +686,12 @@
   },
   {
     "name": "variant-unapproved",
-    "target": "images/detail/home_set/set%3Aa/band/1",
+    "target": "images/shared/family-set%3Aa/1",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       0,
       3
     ],
@@ -646,12 +700,12 @@
     "error": "approved available image",
     "setup": [
       {
-        "target": "images/detail/home_set/set%3Aa/band/0",
+        "target": "images/shared/family-set%3Aa/0",
         "path": [
           "tables",
           "printing_image",
           0,
-          "rows",
+          4,
           0,
           3
         ],
@@ -662,12 +716,12 @@
   },
   {
     "name": "variant-unavailable",
-    "target": "images/detail/home_set/set%3Aa/band/1",
+    "target": "images/shared/family-set%3Aa/1",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       0,
       4
     ],
@@ -676,12 +730,12 @@
     "error": "approved available image",
     "setup": [
       {
-        "target": "images/detail/home_set/set%3Aa/band/0",
+        "target": "images/shared/family-set%3Aa/0",
         "path": [
           "tables",
           "printing_image",
           0,
-          "rows",
+          4,
           0,
           4
         ],
@@ -710,12 +764,12 @@
   },
   {
     "name": "revision-date-unicode",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       1,
       2
     ],
@@ -724,12 +778,12 @@
   },
   {
     "name": "pending-cross-face-observation",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "rows",
+      4,
       0,
       1,
       0,
@@ -743,12 +797,12 @@
   },
   {
     "name": "pending-candidate-without-own-observation",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -762,12 +816,12 @@
   },
   {
     "name": "pending-null-cannot-replace-available-observation",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -781,12 +835,12 @@
   },
   {
     "name": "pending-undated-inventory-incomplete",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -798,12 +852,12 @@
   },
   {
     "name": "pending-preserves-valid-current",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -818,12 +872,12 @@
   },
   {
     "name": "pending-current-display-must-match",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -838,12 +892,12 @@
   },
   {
     "name": "pending-display-not-candidate",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -857,24 +911,24 @@
     "error": "Display is not a pending candidate",
     "setup": [
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           4
         ],
         "value": []
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -886,12 +940,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "engine/shared/family-set%3Aa/0",
         "path": [
           "tables",
           "card_engine_support",
           0,
-          "rows",
+          4,
           0,
           3
         ],
@@ -905,12 +959,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -921,45 +975,45 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/global/global/band/7",
+        "target": "product/jp/shared/7",
         "path": [
           "tables",
           "product",
           0,
-          "rows",
+          4,
           0,
           6
         ],
         "value": "2026-01-01"
       },
       {
-        "target": "bootstrap/bootstrap/global/global/band/7",
+        "target": "product/jp/shared/7",
         "path": [
           "tables",
           "product",
           0,
-          "rows",
+          4,
           0,
           7
         ],
         "value": "day"
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "print/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "printing_product"
         ],
         "value": [
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 29,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": [
+          [
+            [
+              "home_set",
+              "set:a"
+            ],
+            "bootstrap",
+            "family-set:a:band-0",
+            null,
+            [
               [
                 "p:a",
                 "prod:null",
@@ -971,498 +1025,43 @@
                 "unknown"
               ]
             ]
-          },
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 43,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": []
-          }
+          ]
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face_revision",
           0,
-          "rows",
+          4,
           0,
           0
         ],
         "value": "r:a1"
       },
       {
-        "target": "text/history/home_set/set%3Aa/band/0",
+        "target": "history/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face_revision",
           0,
-          "rows",
+          4,
           0,
           0
         ],
         "value": "r:a2"
-      },
-      {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-        "path": [
-          "types"
-        ],
-        "value": {
-          "Current": {
-            "columns": [
-              "region",
-              "revision_id",
-              "basis"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "scalar": "ID"
-              },
-              {
-                "enum": [
-                  "dated_effective",
-                  "latest_observed_no_errata",
-                  "latest_adopted_wording",
-                  "reviewed_override"
-                ]
-              }
-            ]
-          },
-          "FieldTranslation": {
-            "columns": [
-              "field",
-              "ordinal",
-              "target_lang",
-              "translation_id",
-              "basis",
-              "source",
-              "counterpart"
-            ],
-            "items": [
-              {
-                "enum": [
-                  "name",
-                  "effect",
-                  "flavor",
-                  "question",
-                  "answer",
-                  "section",
-                  "label",
-                  "action_label"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "UInt"
-                }
-              },
-              {
-                "scalar": "Lang"
-              },
-              {
-                "scalar": "ID"
-              },
-              {
-                "enum": [
-                  "own_source",
-                  "jp_source",
-                  "official_counterpart"
-                ]
-              },
-              {
-                "ref": "PublicTextPointer"
-              },
-              {
-                "nullable": {
-                  "ref": "PublicTextPointer"
-                }
-              }
-            ]
-          },
-          "PrintingFaceBootstrap": {
-            "columns": [
-              "face_id",
-              "art_id",
-              "frame_code",
-              "signed",
-              "embellishment_state",
-              "stamps"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Code"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Bool"
-                }
-              },
-              {
-                "enum": [
-                  "unreviewed",
-                  "sampled",
-                  "confirmed"
-                ]
-              },
-              {
-                "array": {
-                  "ref": "PrintingStamp"
-                }
-              }
-            ]
-          },
-          "PrintingStamp": {
-            "columns": [
-              "stamp_id",
-              "position",
-              "color"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              }
-            ]
-          },
-          "ProgramRef": {
-            "columns": [
-              "file_key",
-              "entry_id"
-            ],
-            "items": [
-              {
-                "scalar": "Text"
-              },
-              {
-                "scalar": "ID"
-              }
-            ]
-          },
-          "PublicTextPointer": {
-            "columns": [
-              "owner",
-              "field",
-              "ordinal"
-            ],
-            "items": [
-              {
-                "json": "PublicTextOwner"
-              },
-              {
-                "enum": [
-                  "name",
-                  "effect",
-                  "flavor",
-                  "question",
-                  "answer",
-                  "section",
-                  "label",
-                  "action_label"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "UInt"
-                }
-              }
-            ]
-          },
-          "RegionBlock": {
-            "columns": [
-              "region",
-              "reasons"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "array": {
-                  "scalar": "Code"
-                }
-              }
-            ]
-          },
-          "RegionView": {
-            "columns": [
-              "region",
-              "release_state",
-              "mapping_state",
-              "availability_override_as_of",
-              "mapping_as_of",
-              "mapping_scope",
-              "default_printing_id",
-              "default_method",
-              "deck_role",
-              "debut_product_ids",
-              "debut_state"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "enum": [
-                  "released",
-                  "unknown",
-                  "announced",
-                  "not_released_confirmed"
-                ]
-              },
-              {
-                "enum": [
-                  "unmapped",
-                  "pending",
-                  "confirmed",
-                  "confirmed_none"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "Date"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Date"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "override",
-                    "fallback",
-                    "earliest_general",
-                    "candidate_general"
-                  ]
-                }
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "main",
-                    "evolve",
-                    "leader",
-                    "extra"
-                  ]
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "known",
-                  "unknown"
-                ]
-              }
-            ]
-          },
-          "Support": {
-            "columns": [
-              "status",
-              "dsl_status",
-              "dsl_version",
-              "dsl_id",
-              "validation_state",
-              "reasons",
-              "reason_detail",
-              "program_ref",
-              "ruling_revision_ids"
-            ],
-            "items": [
-              {
-                "enum": [
-                  "missing_dsl",
-                  "draft",
-                  "reviewed",
-                  "engine_passed",
-                  "load_rejected"
-                ]
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "draft",
-                    "reviewed",
-                    "verified",
-                    "disputed"
-                  ]
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "fresh",
-                  "stale",
-                  "not_applicable"
-                ]
-              },
-              {
-                "array": {
-                  "scalar": "Code"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "ref": "ProgramRef"
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          },
-          "SupportOverride": {
-            "columns": [
-              "region",
-              "support"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "ref": "Support"
-              }
-            ]
-          },
-          "WordingCandidate": {
-            "columns": [
-              "printing_id",
-              "revision_id"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          },
-          "WordingDisplay": {
-            "columns": [
-              "revision_id",
-              "basis"
-            ],
-            "items": [
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "current",
-                  "latest_known_release",
-                  "candidates"
-                ]
-              }
-            ]
-          },
-          "WordingView": {
-            "columns": [
-              "region",
-              "state",
-              "display",
-              "candidates",
-              "undated_printing_ids"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "enum": [
-                  "pending"
-                ]
-              },
-              {
-                "ref": "WordingDisplay"
-              },
-              {
-                "array": {
-                  "ref": "WordingCandidate"
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          }
-        }
       }
     ]
   },
   {
     "name": "pending-display-cross-face",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       0,
       1
     ],
@@ -1472,12 +1071,12 @@
   },
   {
     "name": "pending-display-cross-region",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face_revision",
       0,
-      "rows",
+      4,
       0,
       2
     ],
@@ -1487,12 +1086,12 @@
   },
   {
     "name": "pending-latest-without-day",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -1506,24 +1105,24 @@
     "error": "complete release day",
     "setup": [
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           4
         ],
         "value": []
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -1535,12 +1134,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "engine/shared/family-set%3Aa/0",
         "path": [
           "tables",
           "card_engine_support",
           0,
-          "rows",
+          4,
           0,
           3
         ],
@@ -1557,21 +1156,21 @@
   },
   {
     "name": "pending-latest-null-candidate",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "print/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_product"
     ],
     "value": [
-      {
-        "owner": {
-          "id": "set:a",
-          "kind": "home_set"
-        },
-        "bucket": 29,
-        "partition": "bootstrap",
-        "base": null,
-        "rows": [
+      [
+        [
+          "home_set",
+          "set:a"
+        ],
+        "bootstrap",
+        "family-set:a:band-0",
+        null,
+        [
           [
             "p:a",
             "prod:null",
@@ -1581,18 +1180,7 @@
             "other",
             null,
             "unknown"
-          ]
-        ]
-      },
-      {
-        "owner": {
-          "id": "set:a",
-          "kind": "home_set"
-        },
-        "bucket": 43,
-        "partition": "bootstrap",
-        "base": null,
-        "rows": [
+          ],
           [
             "p:b",
             "prod:null",
@@ -1604,30 +1192,30 @@
             "unknown"
           ]
         ]
-      }
+      ]
     ],
     "rehash": true,
     "error": "unavailable/latest",
     "setup": [
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           4
         ],
         "value": []
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -1639,12 +1227,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "engine/shared/family-set%3Aa/0",
         "path": [
           "tables",
           "card_engine_support",
           0,
-          "rows",
+          4,
           0,
           3
         ],
@@ -1658,12 +1246,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -1674,45 +1262,45 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/global/global/band/7",
+        "target": "product/jp/shared/7",
         "path": [
           "tables",
           "product",
           0,
-          "rows",
+          4,
           0,
           6
         ],
         "value": "2026-01-01"
       },
       {
-        "target": "bootstrap/bootstrap/global/global/band/7",
+        "target": "product/jp/shared/7",
         "path": [
           "tables",
           "product",
           0,
-          "rows",
+          4,
           0,
           7
         ],
         "value": "day"
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "print/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "printing_product"
         ],
         "value": [
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 29,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": [
+          [
+            [
+              "home_set",
+              "set:a"
+            ],
+            "bootstrap",
+            "family-set:a:band-0",
+            null,
+            [
               [
                 "p:a",
                 "prod:null",
@@ -1724,488 +1312,33 @@
                 "unknown"
               ]
             ]
-          },
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 43,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": []
-          }
+          ]
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
           4
         ],
         "value": []
-      },
-      {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-        "path": [
-          "types"
-        ],
-        "value": {
-          "Current": {
-            "columns": [
-              "region",
-              "revision_id",
-              "basis"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "scalar": "ID"
-              },
-              {
-                "enum": [
-                  "dated_effective",
-                  "latest_observed_no_errata",
-                  "latest_adopted_wording",
-                  "reviewed_override"
-                ]
-              }
-            ]
-          },
-          "FieldTranslation": {
-            "columns": [
-              "field",
-              "ordinal",
-              "target_lang",
-              "translation_id",
-              "basis",
-              "source",
-              "counterpart"
-            ],
-            "items": [
-              {
-                "enum": [
-                  "name",
-                  "effect",
-                  "flavor",
-                  "question",
-                  "answer",
-                  "section",
-                  "label",
-                  "action_label"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "UInt"
-                }
-              },
-              {
-                "scalar": "Lang"
-              },
-              {
-                "scalar": "ID"
-              },
-              {
-                "enum": [
-                  "own_source",
-                  "jp_source",
-                  "official_counterpart"
-                ]
-              },
-              {
-                "ref": "PublicTextPointer"
-              },
-              {
-                "nullable": {
-                  "ref": "PublicTextPointer"
-                }
-              }
-            ]
-          },
-          "PrintingFaceBootstrap": {
-            "columns": [
-              "face_id",
-              "art_id",
-              "frame_code",
-              "signed",
-              "embellishment_state",
-              "stamps"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Code"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Bool"
-                }
-              },
-              {
-                "enum": [
-                  "unreviewed",
-                  "sampled",
-                  "confirmed"
-                ]
-              },
-              {
-                "array": {
-                  "ref": "PrintingStamp"
-                }
-              }
-            ]
-          },
-          "PrintingStamp": {
-            "columns": [
-              "stamp_id",
-              "position",
-              "color"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              }
-            ]
-          },
-          "ProgramRef": {
-            "columns": [
-              "file_key",
-              "entry_id"
-            ],
-            "items": [
-              {
-                "scalar": "Text"
-              },
-              {
-                "scalar": "ID"
-              }
-            ]
-          },
-          "PublicTextPointer": {
-            "columns": [
-              "owner",
-              "field",
-              "ordinal"
-            ],
-            "items": [
-              {
-                "json": "PublicTextOwner"
-              },
-              {
-                "enum": [
-                  "name",
-                  "effect",
-                  "flavor",
-                  "question",
-                  "answer",
-                  "section",
-                  "label",
-                  "action_label"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "UInt"
-                }
-              }
-            ]
-          },
-          "RegionBlock": {
-            "columns": [
-              "region",
-              "reasons"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "array": {
-                  "scalar": "Code"
-                }
-              }
-            ]
-          },
-          "RegionView": {
-            "columns": [
-              "region",
-              "release_state",
-              "mapping_state",
-              "availability_override_as_of",
-              "mapping_as_of",
-              "mapping_scope",
-              "default_printing_id",
-              "default_method",
-              "deck_role",
-              "debut_product_ids",
-              "debut_state"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "enum": [
-                  "released",
-                  "unknown",
-                  "announced",
-                  "not_released_confirmed"
-                ]
-              },
-              {
-                "enum": [
-                  "unmapped",
-                  "pending",
-                  "confirmed",
-                  "confirmed_none"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "Date"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Date"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "override",
-                    "fallback",
-                    "earliest_general",
-                    "candidate_general"
-                  ]
-                }
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "main",
-                    "evolve",
-                    "leader",
-                    "extra"
-                  ]
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "known",
-                  "unknown"
-                ]
-              }
-            ]
-          },
-          "Support": {
-            "columns": [
-              "status",
-              "dsl_status",
-              "dsl_version",
-              "dsl_id",
-              "validation_state",
-              "reasons",
-              "reason_detail",
-              "program_ref",
-              "ruling_revision_ids"
-            ],
-            "items": [
-              {
-                "enum": [
-                  "missing_dsl",
-                  "draft",
-                  "reviewed",
-                  "engine_passed",
-                  "load_rejected"
-                ]
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "draft",
-                    "reviewed",
-                    "verified",
-                    "disputed"
-                  ]
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "fresh",
-                  "stale",
-                  "not_applicable"
-                ]
-              },
-              {
-                "array": {
-                  "scalar": "Code"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "ref": "ProgramRef"
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          },
-          "SupportOverride": {
-            "columns": [
-              "region",
-              "support"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "ref": "Support"
-              }
-            ]
-          },
-          "WordingCandidate": {
-            "columns": [
-              "printing_id",
-              "revision_id"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          },
-          "WordingDisplay": {
-            "columns": [
-              "revision_id",
-              "basis"
-            ],
-            "items": [
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "current",
-                  "latest_known_release",
-                  "candidates"
-                ]
-              }
-            ]
-          },
-          "WordingView": {
-            "columns": [
-              "region",
-              "state",
-              "display",
-              "candidates",
-              "undated_printing_ids"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "enum": [
-                  "pending"
-                ]
-              },
-              {
-                "ref": "WordingDisplay"
-              },
-              {
-                "array": {
-                  "ref": "WordingCandidate"
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          }
-        }
       }
     ]
   },
   {
     "name": "pending-display-not-latest",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -2219,24 +1352,24 @@
     "error": "unavailable/latest",
     "setup": [
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           4
         ],
         "value": []
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -2248,12 +1381,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "engine/shared/family-set%3Aa/0",
         "path": [
           "tables",
           "card_engine_support",
           0,
-          "rows",
+          4,
           0,
           3
         ],
@@ -2267,12 +1400,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -2283,45 +1416,45 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/global/global/band/7",
+        "target": "product/jp/shared/7",
         "path": [
           "tables",
           "product",
           0,
-          "rows",
+          4,
           0,
           6
         ],
         "value": "2026-01-01"
       },
       {
-        "target": "bootstrap/bootstrap/global/global/band/7",
+        "target": "product/jp/shared/7",
         "path": [
           "tables",
           "product",
           0,
-          "rows",
+          4,
           0,
           7
         ],
         "value": "day"
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "print/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "printing_product"
         ],
         "value": [
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 29,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": [
+          [
+            [
+              "home_set",
+              "set:a"
+            ],
+            "bootstrap",
+            "family-set:a:band-0",
+            null,
+            [
               [
                 "p:a",
                 "prod:null",
@@ -2333,26 +1466,16 @@
                 "unknown"
               ]
             ]
-          },
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 43,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": []
-          }
+          ]
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -2361,12 +1484,12 @@
         "value": []
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -2377,21 +1500,21 @@
         "value": "r:a1"
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "print/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "printing_product"
         ],
         "value": [
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 29,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": [
+          [
+            [
+              "home_set",
+              "set:a"
+            ],
+            "bootstrap",
+            "family-set:a:band-0",
+            null,
+            [
               [
                 "p:a",
                 "prod:null",
@@ -2401,18 +1524,7 @@
                 "other",
                 null,
                 "unknown"
-              ]
-            ]
-          },
-          {
-            "owner": {
-              "id": "set:a",
-              "kind": "home_set"
-            },
-            "bucket": 43,
-            "partition": "bootstrap",
-            "base": null,
-            "rows": [
+              ],
               [
                 "p:b",
                 "prod:null",
@@ -2424,16 +1536,16 @@
                 "unknown"
               ]
             ]
-          }
+          ]
         ]
       },
       {
-        "target": "text/detail/home_set/set%3Aa/band/1",
+        "target": "print-detail/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "printing",
-          0,
-          "rows",
+          1,
+          4,
           0,
           1,
           0,
@@ -2446,462 +1558,17 @@
             "https://example.invalid/observations/b"
           ]
         ]
-      },
-      {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-        "path": [
-          "types"
-        ],
-        "value": {
-          "Current": {
-            "columns": [
-              "region",
-              "revision_id",
-              "basis"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "scalar": "ID"
-              },
-              {
-                "enum": [
-                  "dated_effective",
-                  "latest_observed_no_errata",
-                  "latest_adopted_wording",
-                  "reviewed_override"
-                ]
-              }
-            ]
-          },
-          "FieldTranslation": {
-            "columns": [
-              "field",
-              "ordinal",
-              "target_lang",
-              "translation_id",
-              "basis",
-              "source",
-              "counterpart"
-            ],
-            "items": [
-              {
-                "enum": [
-                  "name",
-                  "effect",
-                  "flavor",
-                  "question",
-                  "answer",
-                  "section",
-                  "label",
-                  "action_label"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "UInt"
-                }
-              },
-              {
-                "scalar": "Lang"
-              },
-              {
-                "scalar": "ID"
-              },
-              {
-                "enum": [
-                  "own_source",
-                  "jp_source",
-                  "official_counterpart"
-                ]
-              },
-              {
-                "ref": "PublicTextPointer"
-              },
-              {
-                "nullable": {
-                  "ref": "PublicTextPointer"
-                }
-              }
-            ]
-          },
-          "PrintingFaceBootstrap": {
-            "columns": [
-              "face_id",
-              "art_id",
-              "frame_code",
-              "signed",
-              "embellishment_state",
-              "stamps"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Code"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Bool"
-                }
-              },
-              {
-                "enum": [
-                  "unreviewed",
-                  "sampled",
-                  "confirmed"
-                ]
-              },
-              {
-                "array": {
-                  "ref": "PrintingStamp"
-                }
-              }
-            ]
-          },
-          "PrintingStamp": {
-            "columns": [
-              "stamp_id",
-              "position",
-              "color"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              }
-            ]
-          },
-          "ProgramRef": {
-            "columns": [
-              "file_key",
-              "entry_id"
-            ],
-            "items": [
-              {
-                "scalar": "Text"
-              },
-              {
-                "scalar": "ID"
-              }
-            ]
-          },
-          "PublicTextPointer": {
-            "columns": [
-              "owner",
-              "field",
-              "ordinal"
-            ],
-            "items": [
-              {
-                "json": "PublicTextOwner"
-              },
-              {
-                "enum": [
-                  "name",
-                  "effect",
-                  "flavor",
-                  "question",
-                  "answer",
-                  "section",
-                  "label",
-                  "action_label"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "UInt"
-                }
-              }
-            ]
-          },
-          "RegionBlock": {
-            "columns": [
-              "region",
-              "reasons"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "array": {
-                  "scalar": "Code"
-                }
-              }
-            ]
-          },
-          "RegionView": {
-            "columns": [
-              "region",
-              "release_state",
-              "mapping_state",
-              "availability_override_as_of",
-              "mapping_as_of",
-              "mapping_scope",
-              "default_printing_id",
-              "default_method",
-              "deck_role",
-              "debut_product_ids",
-              "debut_state"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "enum": [
-                  "released",
-                  "unknown",
-                  "announced",
-                  "not_released_confirmed"
-                ]
-              },
-              {
-                "enum": [
-                  "unmapped",
-                  "pending",
-                  "confirmed",
-                  "confirmed_none"
-                ]
-              },
-              {
-                "nullable": {
-                  "scalar": "Date"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Date"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "override",
-                    "fallback",
-                    "earliest_general",
-                    "candidate_general"
-                  ]
-                }
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "main",
-                    "evolve",
-                    "leader",
-                    "extra"
-                  ]
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "known",
-                  "unknown"
-                ]
-              }
-            ]
-          },
-          "Support": {
-            "columns": [
-              "status",
-              "dsl_status",
-              "dsl_version",
-              "dsl_id",
-              "validation_state",
-              "reasons",
-              "reason_detail",
-              "program_ref",
-              "ruling_revision_ids"
-            ],
-            "items": [
-              {
-                "enum": [
-                  "missing_dsl",
-                  "draft",
-                  "reviewed",
-                  "engine_passed",
-                  "load_rejected"
-                ]
-              },
-              {
-                "nullable": {
-                  "enum": [
-                    "draft",
-                    "reviewed",
-                    "verified",
-                    "disputed"
-                  ]
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "fresh",
-                  "stale",
-                  "not_applicable"
-                ]
-              },
-              {
-                "array": {
-                  "scalar": "Code"
-                }
-              },
-              {
-                "nullable": {
-                  "scalar": "Text"
-                }
-              },
-              {
-                "nullable": {
-                  "ref": "ProgramRef"
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          },
-          "SupportOverride": {
-            "columns": [
-              "region",
-              "support"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "ref": "Support"
-              }
-            ]
-          },
-          "WordingCandidate": {
-            "columns": [
-              "printing_id",
-              "revision_id"
-            ],
-            "items": [
-              {
-                "scalar": "ID"
-              },
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          },
-          "WordingDisplay": {
-            "columns": [
-              "revision_id",
-              "basis"
-            ],
-            "items": [
-              {
-                "nullable": {
-                  "scalar": "ID"
-                }
-              },
-              {
-                "enum": [
-                  "current",
-                  "latest_known_release",
-                  "candidates"
-                ]
-              }
-            ]
-          },
-          "WordingView": {
-            "columns": [
-              "region",
-              "state",
-              "display",
-              "candidates",
-              "undated_printing_ids"
-            ],
-            "items": [
-              {
-                "scalar": "Region"
-              },
-              {
-                "enum": [
-                  "pending"
-                ]
-              },
-              {
-                "ref": "WordingDisplay"
-              },
-              {
-                "array": {
-                  "ref": "WordingCandidate"
-                }
-              },
-              {
-                "array": {
-                  "scalar": "ID"
-                }
-              }
-            ]
-          }
-        }
       }
     ]
   },
   {
     "name": "pending-region-without-printing",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       1,
       5
     ],
@@ -2925,16 +1592,16 @@
       ]
     ],
     "rehash": true,
-    "error": "requires pending wording"
+    "error": "Regional row escapes File scope"
   },
   {
     "name": "pending-candidate-cross-region",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -2944,27 +1611,27 @@
     ],
     "value": null,
     "rehash": true,
-    "error": "another printing face/region",
+    "error": "Text owner card region is missing or ambiguous",
     "setup": [
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "printing",
           0,
-          "rows",
+          4,
           0,
           2
         ],
         "value": "en"
       },
       {
-        "target": "text/detail/home_set/set%3Aa/band/0",
+        "target": "print-detail/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "printing",
           0,
-          "rows",
+          4,
           0,
           1,
           0,
@@ -2973,12 +1640,12 @@
         "value": []
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5
         ],
@@ -3025,12 +1692,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           1,
           5
         ],
@@ -3055,12 +1722,12 @@
         ]
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "engine/shared/family-set%3Aa/0",
         "path": [
           "tables",
           "card_engine_support",
           0,
-          "rows",
+          4,
           0,
           3
         ],
@@ -3077,12 +1744,12 @@
   },
   {
     "name": "pending-observation-cross-region",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "rows",
+      4,
       0,
       1,
       0,
@@ -3096,27 +1763,27 @@
       ]
     ],
     "rehash": true,
-    "error": "Observation revision belongs",
+    "error": "Text owner card region is missing or ambiguous",
     "setup": [
       {
-        "target": "text/history/home_set/set%3Aa/band/0",
+        "target": "history/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face_revision",
           0,
-          "rows",
+          4,
           0,
           2
         ],
         "value": "en"
       },
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "face",
           0,
-          "rows",
+          4,
           0,
           5,
           0,
@@ -3130,12 +1797,12 @@
   },
   {
     "name": "pending-wording-unsorted",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5
     ],
@@ -3190,12 +1857,12 @@
   },
   {
     "name": "pending-candidates-unsorted",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows",
+      4,
       0,
       5,
       0,
@@ -3216,12 +1883,12 @@
   },
   {
     "name": "pending-observations-unsorted",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
       0,
-      "rows",
+      4,
       0,
       1,
       0,

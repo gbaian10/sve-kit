@@ -10,10 +10,10 @@ import {
   stringValue,
 } from "./format-v3/json"
 import { translationNameConcept, wholeName } from "./format-v3/name-annotations"
-import type { Fragment, View } from "./format-v3/reader"
+import { type Fragment, mergedRows, type View } from "./format-v3/reader"
 import { definition } from "./format-v3/schema"
 import { annotationFailure, type TextOwner, TextOwners } from "./format-v3/text-owners"
-import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
+import { createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 
 export interface AnnotatedText {
   readonly unit: JsonObject
@@ -75,7 +75,6 @@ class PageClosure {
   readonly snapshot: LoadedSnapshot
   readonly client: SnapshotClient
   readonly locate: ReturnType<typeof createLocator>
-  readonly count: number
   readonly fragments: Fragment[] = []
   private owners: TextOwners | undefined
   private locations: ReturnType<typeof annotationLocations> | undefined
@@ -84,18 +83,35 @@ class PageClosure {
     this.client = client
     this.snapshot = snapshot
     this.locate = createLocator(snapshot.files)
-    this.count = integerValue(objectValue(snapshot.manifest["partitioning"])["bucket_count"])
     this.add(snapshot.bootstrap)
     for (const fragment of snapshot.bootstrap) this.loaded.add(fragment.file)
   }
 
   add(fragments: readonly Fragment[]): void {
     for (const fragment of fragments) {
+      if (fragment.table === "card_locator" || fragment.table === "__name_sources") {
+        this.fragments.push(fragment)
+        continue
+      }
       this.fragments.push(fragment)
       const rows = this.rows.get(fragment.table) ?? new Map<string, JsonObject>()
       let replaced = false
-      for (const row of fragment.rows) {
+      for (let row of fragment.rows) {
         const identity = key(fragment.table, row)
+        const previous = rows.get(identity)
+        if (
+          previous &&
+          ["card", "face"].includes(fragment.table) &&
+          canonicalText(previous) !== canonicalText(row)
+        )
+          row =
+            mergedRows(
+              [
+                { ...fragment, rows: [previous] },
+                { ...fragment, rows: [row] },
+              ],
+              fragment.table,
+            )[0] ?? row
         replaced ||= rows.has(identity)
         rows.set(identity, row)
       }
@@ -125,11 +141,29 @@ class PageClosure {
     partition: "bootstrap" | "detail" | "history",
     physicalOwner = GLOBAL_OWNER,
     entityKey = primaryKey,
+    region: string | undefined = this.snapshot.region,
+    purpose?: string,
   ): Promise<void> {
+    const basic =
+      table === "printing" && partition === "detail"
+        ? this.fragments.find(
+            (fragment) =>
+              fragment.table === table &&
+              fragment.value["partition"] === "bootstrap" &&
+              fragment.rows.some((row) => row["id"] === primaryKey[0]) &&
+              (region === undefined || fragment.value["region"] === region),
+          )
+        : undefined
+    const segment = basic
+      ? `${stringValue(basic.value["purpose"])}:${stringValue(basic.value["segment"])}`
+      : undefined
     const file = this.locate({
+      ...(segment ? { segment } : {}),
       table,
       owner: physicalOwner,
-      bucket: bucketOf(entityKey, this.count),
+      entityKey,
+      region,
+      ...(purpose || basic ? { purpose: purpose ?? "print-detail" } : {}),
       partition,
     })
     // A missing logical fragment is empty only after consulting this verified manifest.
@@ -140,8 +174,19 @@ class PageClosure {
     if (!running) {
       running = this.client
         .fragments(file)
-        .then((fragments) => {
-          if (this.client.snapshot() !== this.snapshot) throw new Error("snapshot replaced")
+        .then(async (fragments) => {
+          for (const fragment of fragments) {
+            if (fragment.value["base"] == null) continue
+            const baseKey = stringValue(
+              objectValue(objectValue(fragment.value["base"])["file"])["key"],
+            )
+            if (!this.loaded.has(baseKey)) {
+              this.add(await this.client.fragments(baseKey))
+              this.loaded.add(baseKey)
+            }
+          }
+          if (this.client.snapshot()?.manifestHash !== this.snapshot.manifestHash)
+            throw new Error("snapshot replaced")
           this.add(fragments)
           this.loaded.add(file)
         })
@@ -164,7 +209,10 @@ class PageClosure {
   }
 
   textOwners(): TextOwners {
-    this.owners ??= new TextOwners(this.view())
+    if (!this.owners) {
+      this.owners = new TextOwners(this.view())
+      this.owners.includeNameSources(this.fragments.flatMap((f) => f.nameSources ?? []))
+    }
     return this.owners
   }
 
@@ -184,11 +232,56 @@ class PageClosure {
   async original(
     pointer: JsonObject,
     receiver?: TextOwner,
+    region: string | undefined = this.snapshot.region,
   ): Promise<{ unitId: string; annotationId: JsonValue } | null> {
+    const witness = this.fragments
+      .flatMap((f) => f.nameSources ?? [])
+      .find((source) => canonicalText(source["pointer"] ?? null) === canonicalText(pointer))
+    if (pointer["field"] === "name" && typeof witness?.["name_concept_id"] === "string") {
+      const unit = await this.row("text_unit", witness["text_unit_id"] ?? null)
+      const annotation = wholeName(unit, witness["name_concept_id"])
+      this.virtualAnnotation(annotation)
+      const fields = this.rows.get("field_annotation") ?? new Map<string, JsonObject>()
+      fields.set(canonicalText([pointer["owner"] ?? null, "name", null]), {
+        ...pointer,
+        annotation_set_id: annotation["id"] ?? null,
+      })
+      this.rows.set("field_annotation", fields)
+      return {
+        unitId: stringValue(witness["text_unit_id"]),
+        annotationId: annotation["id"] ?? null,
+      }
+    }
     const value = objectValue(pointer["owner"])
     const field = stringValue(pointer["field"])
     const kind = stringValue(value["kind"])
     if (!OWNER_TABLES.includes(kind) && kind !== "printing_face") annotationFailure("owner")
+    if (kind === "printing_face" && !this.textOwners().byOwner.has(canonicalText(value))) {
+      const card = this.rows.get("card")?.get(canonicalText([receiver?.cardId ?? null]))
+      if (!card) annotationFailure("owner")
+      const owner = homeSetOwner(stringValue(card["home_set_id"]))
+      for (const purpose of ["catalog", "print"]) {
+        await this.load(
+          "printing",
+          [value["id"] ?? null],
+          "bootstrap",
+          owner,
+          [value["id"] ?? null],
+          region,
+          purpose,
+        )
+        if (this.textOwners().byOwner.has(canonicalText(value))) break
+      }
+      await this.load(
+        "printing",
+        [value["id"] ?? null],
+        "detail",
+        owner,
+        [value["id"] ?? null],
+        region,
+        "print-detail",
+      )
+    }
     if (!["face_revision", "printing_face"].includes(kind)) {
       const pk =
         kind === "vocabulary"
@@ -216,7 +309,7 @@ class PageClosure {
       const entity = [card["id"] ?? null]
       // Source owners and listed candidates live in their card's fixed bootstrap or history fragment.
       for (const partition of ["bootstrap", "history"] as const) {
-        await this.load(kind, [value["id"] ?? null], partition, physical, entity)
+        await this.load(kind, [value["id"] ?? null], partition, physical, entity, region)
         if (this.rows.get(kind)?.has(canonicalText([value["id"] ?? null]))) break
       }
     }
@@ -231,6 +324,7 @@ class PageClosure {
         location.partition === "bootstrap" ? "detail" : location.partition,
         location.physical,
         location.entity,
+        region,
       )
     const pk = [value, pointer["field"] ?? null, pointer["ordinal"] ?? null]
     await this.load(
@@ -239,6 +333,7 @@ class PageClosure {
       location.partition,
       location.physical,
       ["face_revision", "printing_face"].includes(kind) ? location.entity : pk,
+      region,
     )
     const unitId = this.textOwners().optionalPointer(pointer)
     if (unitId === null) return null
@@ -281,7 +376,8 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
     pointer: JsonObject,
     targetLang: string,
   ): Promise<SelectedText | null> => {
-    if (client.snapshot() !== snapshot) throw new Error("snapshot replaced")
+    if (client.snapshot()?.manifestHash !== snapshot.manifestHash)
+      throw new Error("snapshot replaced")
     const original = await page.original(pointer)
     if (original === null) return null
     const receiver = page.owner(objectValue(pointer["owner"]))
@@ -298,7 +394,16 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       ? { ...(await page.row("translation", selection["translation_id"] ?? null)) }
       : undefined
     const sourcePointer = selection ? objectValue(selection["source"]) : pointer
-    const source = await page.original(sourcePointer, receiver)
+    const receiverRegion = receiver.region ?? snapshot.region
+    const sourceRegion =
+      selection?.["basis"] === "jp_source"
+        ? "jp"
+        : selection?.["basis"] === "official_counterpart"
+          ? receiverRegion === "jp"
+            ? "en"
+            : "jp"
+          : receiverRegion
+    const source = await page.original(sourcePointer, receiver, sourceRegion)
     if (source === null) annotationFailure("owner")
     if (translation?.["annotation_kind"] === "whole_name" && selection) {
       const unit = await page.row("text_unit", translation["text_unit_id"] ?? null)
@@ -309,7 +414,7 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
     const pointers = [pointer, sourcePointer]
     if (selection?.["counterpart"] !== null && selection?.["counterpart"] !== undefined) {
       const counterpart = objectValue(selection["counterpart"])
-      await page.original(counterpart, receiver)
+      await page.original(counterpart, receiver, receiverRegion === "jp" ? "en" : "jp")
       pointers.push(counterpart)
     }
     const fieldRows = pointers.flatMap((value) => {
@@ -417,7 +522,8 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
         ? settled.get(canonicalText([pointer, targetLang]))
         : undefined,
     resolve: (pointer, targetLang) => {
-      if (client.snapshot() !== snapshot) return Promise.reject(new Error("snapshot replaced"))
+      if (client.snapshot()?.manifestHash !== snapshot.manifestHash)
+        return Promise.reject(new Error("snapshot replaced"))
       const id = canonicalText([pointer, targetLang])
       const value = settled.get(id)
       if (value !== undefined) return Promise.resolve(value)
@@ -425,7 +531,8 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       if (!promise) {
         promise = resolveText(pointer, targetLang)
           .then((result) => {
-            if (client.snapshot() !== snapshot) throw new Error("snapshot replaced")
+            if (client.snapshot()?.manifestHash !== snapshot.manifestHash)
+              throw new Error("snapshot replaced")
             settled.set(id, result)
             return result
           })

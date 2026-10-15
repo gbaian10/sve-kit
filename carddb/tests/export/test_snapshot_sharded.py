@@ -47,7 +47,21 @@ def fragments(snapshot: Snapshot) -> Iterator[tuple[str, str, dict[str, JsonValu
             object_value(parse(blob.raw)).get("tables", {})
         ).items():
             for entry in array(entries):
-                yield key, table, object_value(entry)
+                packed = array(entry)
+                yield (
+                    key,
+                    table,
+                    {
+                        "owner": {
+                            "kind": array(packed[0])[0],
+                            "id": array(packed[0])[1],
+                        },
+                        "partition": packed[1],
+                        "segment": packed[2],
+                        "base": packed[3],
+                        "rows": packed[4],
+                    },
+                )
 
 
 @pytest.fixture(scope="module")
@@ -168,16 +182,26 @@ def test_physical_bands_retain_distinct_fragments_and_multiple_bases(
     printing = [(k, f) for k, t, f in fragments(sharded) if t == "printing"]
     bootstrap = [(k, f) for k, f in printing if f["partition"] == "bootstrap"]
     detail = [(k, f) for k, f in printing if f["partition"] == "detail"]
-    assert len({k for k, _ in bootstrap}) == 1
-    assert len({k for k, _ in detail}) == 2
-    assert len(bootstrap) > 8
+    assert len({k for k, _ in bootstrap}) == 2
+    assert len({k for k, _ in detail}) == 1
+    assert len(bootstrap) == 2
+    assert len(detail) == 2
     for _, f in detail:
         base = object_value(f["base"])
-        matching = next(b for _, b in bootstrap if b["bucket"] == f["bucket"])
+        matching = next(
+            b
+            for key, b in bootstrap
+            if key == object_value(base["file"])["key"]
+            and b["segment"] == base["segment"]
+        )
         assert [array(row)[0] for row in array(f["rows"])] == list(
             range(len(array(matching["rows"])))
         )
-        assert base["bucket"] == f["bucket"]
+        assert f["segment"] == (
+            "catalog:"
+            if string(object_value(base["file"])["key"]).startswith("catalog/")
+            else "print:"
+        ) + string(base["segment"])
 
 
 @pytest.mark.parametrize(
@@ -202,7 +226,8 @@ def test_owner_exception_is_fixed(
         if t == "printing" and f["partition"] == "bootstrap"
     }
     assert keys == {
-        f"bootstrap/bootstrap/home_set/{owner}/band/{n}" for n in range(64 // width)
+        f"catalog/jp/family-{owner}/0",
+        *(f"print/jp/family-{owner}/{n}" for n in range(64 // width)),
     }
 
 
@@ -218,9 +243,9 @@ def test_image_variants_share_entity_bucket(
     for _, table, f in records:
         for row in array(f["rows"]):
             values = array(row)
-            assert f["bucket"] == bucket([values[0]], 64)
+            assert f["segment"] == "shared:band-" + str(bucket([values[0]], 64))
             if table == "image_variant":
-                assert bucket(values[:3], 64) != f["bucket"]
+                assert bucket(values[:3], 64) != bucket([values[0]], 64)
     assert expanded[0].tables["image_variant"]
 
 
@@ -242,7 +267,7 @@ def test_full_pk_variant_mutation_is_rejected_by_independent_reader(
 
     monkeypatch.setattr(Layout, "group", full_key)
     with pytest.raises(
-        ValueError, match=r"^Fragment entity bucket does not match fixed profile$"
+        ValueError, match=r"^File key does not match fixed band recipe$"
     ):
         export_snapshot(*expanded, BATCH, format_version=MEDIA)
 
@@ -276,7 +301,7 @@ def test_capacity_counts_all_fragments_and_region_whole_files(
     initial = [
         blob
         for key, blob in sharded.payloads.items()
-        if key.startswith("bootstrap/") or key == "config"
+        if key.startswith(("catalog/jp/", "catalog/shared/")) or key == "config"
     ]
     startup = object_value(object_value(report["startup_by_region"])["jp"])
     assert startup["raw"] == len(canonical(sharded.manifest)) + sum(
@@ -289,9 +314,19 @@ def test_capacity_counts_all_fragments_and_region_whole_files(
         local = [f for k, _, f in fragments(sharded) if k == item["key"]]
         assert item["rows"] == sum(len(array(f["rows"])) for f in local)
         assert item["owners"] == [
-            parse(raw) for raw in sorted({canonical(f["owner"]) for f in local})
+            parse(raw)
+            for raw in sorted(
+                {
+                    canonical(
+                        [
+                            object_value(f["owner"])["kind"],
+                            object_value(f["owner"])["id"],
+                        ]
+                    )
+                    for f in local
+                }
+            )
         ]
-        assert item["buckets"] == sorted({integer(f["bucket"]) for f in local})
         assert item["partitions"] == sorted({string(f["partition"]) for f in local})
     image_blobs = [b for k, b in sharded.payloads.items() if k.startswith("images/")]
     assert object_value(report["images_metadata"])["raw"] == sum(
@@ -314,7 +349,7 @@ def test_image_increment_changes_only_one_entity_file(
     assert all(
         changed.payloads[k] == blob
         for k, blob in sharded.payloads.items()
-        if not k.startswith("images/detail/global/")
+        if not k.startswith("images/shared/shared/")
     )
 
 
@@ -334,7 +369,7 @@ def image_mutation(
     file = next(
         object_value(f)
         for f in array(manifest["files"])
-        if string(object_value(f)["key"]).startswith("images/detail/global/")
+        if string(object_value(f)["key"]).startswith("images/shared/shared/")
     )
     key = string(file["key"])
     value = object_value(parse(blobs.pop(key)))
@@ -349,17 +384,12 @@ def image_mutation(
                 deepcopy(array(entries["image_asset"])[0])
             )
         else:
+            band = 64 if change == "out_of_range" else int(key.rsplit("/", 1)[1]) + 1
             for raw_entries in entries.values():
                 for raw in array(raw_entries):
-                    f = object_value(raw)
-                    f["bucket"] = (
-                        64
-                        if change == "out_of_range"
-                        else (integer(f["bucket"]) + 1) % 64
-                    )
-            if change != "out_of_range":
-                first = object_value(array(entries["image_asset"])[0])
-                file["key"] = key.rsplit("/", 1)[0] + "/" + str(first["bucket"])
+                    array(raw)[2] = "shared:band-" + str(band)
+            file["segment"] = "shared:band-" + str(band)
+            file["key"] = key.rsplit("/", 1)[0] + "/" + str(band)
     encoded = canonical(value)
     file.update(
         sha256=digest(encoded),
@@ -367,14 +397,10 @@ def image_mutation(
         path="snapshots/blobs/" + digest(encoded)[7:] + ".json",
     )
     file["row_counts"] = [
-        {
-            "table": table,
-            **{name: f[name] for name in ("owner", "bucket", "partition")},
-            "count": len(array(f["rows"])),
-        }
+        [table, array(f[0])[0], array(f[0])[1], f[1], f[2], len(array(f[4]))]
         for table, entries in object_value(value["tables"]).items()
         for entry in array(entries)
-        for f in (object_value(entry),)
+        for f in (array(entry),)
     ]
     blobs[string(file["key"])] = encoded
     array(manifest["files"]).sort(key=lambda item: string(object_value(item)["key"]))
@@ -387,8 +413,8 @@ def image_mutation(
         ("mixed_profile", "Payload format differs from manifest"),
         ("wrong_key", "File key does not match fixed band recipe"),
         ("duplicate", "Duplicate fragment identity"),
-        ("wrong_bucket", "Fragment entity bucket does not match fixed profile"),
-        ("out_of_range", "Fragment role or bucket does not match profile"),
+        ("wrong_bucket", "File key does not match fixed band recipe"),
+        ("out_of_range", "File key does not match fixed band recipe"),
     ],
 )
 def test_resealed_semantic_mutations_rejected(
@@ -436,13 +462,13 @@ def test_incremental_replacements_are_bounded(
         ownership = Ownership(
             dict(ownership.printing_home) | {"p:incremental": "family"}
         )
-        prefix = "bootstrap/bootstrap/home_set/family/"
+        prefix = "print/jp/family-family/"
     elif change == "base_value":
         projection.tables["printing"][0]["rarity_raw"] = "Synthetic changed rarity"
-        prefix = "bootstrap/bootstrap/home_set/family/"
+        prefix = "print/jp/family-family/"
     elif change == "qa":
         projection.tables["qa_version"][0]["published_on"] = "2026-10-01"
-        prefix = "text/detail/global/"
+        prefix = "detail/shared/shared/"
     else:
         names = {
             object_value(item)["translation_id"]
@@ -469,7 +495,7 @@ def test_incremental_replacements_are_bounded(
         translated["text_unit_id"] = text["id"]
         projection.tables["text_unit"].sort(key=lambda r: string(r["id"]))
         assert old != text["id"]
-        prefix = "bootstrap/bootstrap/global/"
+        prefix = "catalog/jp/family-family/"
     result = export_snapshot(
         projection, ownership, BATCH, brotli=CODEC, format_version=MEDIA
     )
@@ -478,22 +504,16 @@ def test_incremental_replacements_are_bounded(
     )
     assert any(k.startswith(prefix) for k in keys)
     assert not any(k.startswith("images/") for k in keys)
-    assert len(keys) <= 4
-    if change in {"insert_printing", "base_value"}:
-        assert (
-            len([k for k in keys if k.startswith("text/detail/home_set/family/")]) == 2
-        )
-        bases = [
-            object_value(object_value(f["base"])["file"])
-            for k, t, f in fragments(result)
-            if t == "printing" and f["partition"] == "detail"
-        ]
-        assert len({canonical(b) for b in bases}) == 1
+    assert len(keys) <= (5 if change == "name_translation" else 4)
+    if change == "insert_printing":
         assert keys == [
-            "bootstrap/bootstrap/home_set/family/band/0",
-            "text/detail/home_set/family/band/0",
-            "text/detail/home_set/family/band/1",
+            "catalog/jp/family-family/0",
+            "detail/jp/family-family/0",
+            "print-detail/jp/family-family/0",
+            "print/jp/family-family/0",
         ]
+    elif change == "base_value":
+        assert keys == ["print-detail/jp/family-family/0", "print/jp/family-family/0"]
 
 
 def test_exact_fixed_band_width_matrix() -> None:
@@ -502,19 +522,19 @@ def test_exact_fixed_band_width_matrix() -> None:
         starmap(
             selected.width,
             [
-                ("images", "detail", "global", ""),
-                ("images", "detail", "home_set", "BP01"),
-                ("bootstrap", "bootstrap", "global", ""),
-                ("bootstrap", "bootstrap", "home_set", "BP01"),
-                ("bootstrap", "bootstrap", "home_set", "CP04"),
-                ("bootstrap", "bootstrap", "home_set", "BP02"),
-                ("text", "detail", "global", ""),
-                ("text", "detail", "home_set", "BP02"),
-                ("text", "history", "global", ""),
-                ("text", "history", "home_set", "BP02"),
+                ("images", ""),
+                ("images", "BP01"),
+                ("images", "BP02"),
+                ("dictionary", ""),
+                ("print", ""),
+                ("print", "BP01"),
+                ("print", "CP04"),
+                ("print", "BP02"),
+                ("history", ""),
+                ("history", "BP02"),
             ],
         )
-    ) == [1, 32, 8, 32, 32, 64, 2, 32, 32, 32]
+    ) == [1, 32, 32, 2, 8, 32, 32, 64, 8, 64]
 
 
 def test_shared_full_sha_bucket_goldens() -> None:
@@ -546,9 +566,9 @@ def test_pending_to_current_rebuilds_only_owner_bootstrap_and_details() -> None:
     )
     keys = list(map(string, array(update(initial, result)["changed_keys"])))
     assert keys
-    assert all("/home_set/set%3Aa/" in key for key in keys)
-    assert any(key.startswith("bootstrap/") for key in keys)
-    assert any(key.startswith("text/detail/") for key in keys)
+    assert all("/family-set%3Aa/" in key for key in keys)
+    assert any(key.startswith("catalog/") for key in keys)
+    assert any(key.startswith("detail/") for key in keys)
     assert not any(key.startswith("images/") for key in keys)
 
 
@@ -561,7 +581,7 @@ def test_reader_detects_missing_types_and_payload(
         object_value(f)
         for f in array(manifest["files"])
         if object_value(f)["role"] == "bootstrap"
-        and string(object_value(f)["key"]).startswith("bootstrap/bootstrap/home_set/")
+        and string(object_value(f)["key"]).startswith("catalog/jp/family-")
     )
     payload = object_value(parse(sharded.payloads[string(file["key"])].raw))
     assert payload["types"]
@@ -641,5 +661,5 @@ def test_new_card_does_not_move_existing_owner_or_image_files(
     )
     keys = array(update(sharded, result, brotli=CODEC)["changed_keys"])
     assert keys
-    assert len(keys) <= 3
-    assert all("/home_set/family/" in string(k) for k in keys)
+    assert len(keys) <= 5
+    assert all("/family-family/" in string(k) for k in keys)

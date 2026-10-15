@@ -1,8 +1,8 @@
 # 卡表快照容量與記憶體預算
 
 本文件定義容量帳的對象、量法與設計門檻；分片與欄位白名單依 [snapshot-format](snapshot-format.md)，容器與 join 依 [snapshot-transport](snapshot-transport.md)。
-基本目錄的載入分類與容量分界依 [#506 的維護者決定](https://github.com/gbaian10/sve-kit/issues/506)。
-N0 的 producer／reader 已接線；下列基本目錄裝檔與部分 reader 語意是設計要求，不宣稱現有 exporter／Worker 已完成或手機效能已通過。
+基本目錄的載入分類與容量分界依 [#510 的維護者決定](https://github.com/gbaian10/sve-kit/issues/510)。
+producer／reader 使用每包每區的基本目錄與固定背景帶，容量帳依區計算。詳情字典的局部化另行實作；容量驗收不代表手機效能已通過。
 
 ## 基本目錄與載入分類
 
@@ -28,10 +28,10 @@ MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 
 | 項目 | 門檻／分界 | 對象與量法 |
 | --- | --- | --- |
 | 基本目錄冷載，依所選版本 | Brotli 2 MiB（2,097,152 bytes）分界 | 完整 manifest＋config＋整區基本目錄實際 File 及必要依賴；按 key 去重 |
-| 基本目錄容器 | 解壓後 ≤ 2 MiB | 穩定封存檔、最近包各自的檔與共用檔；整個 File 的 types、字典、fragment metadata、rows 都計入 |
+| 基本目錄容器 | 解壓後 ≤ 2 MiB | 每包每區的家族檔與共用檔；整個 File 的 types、字典、fragment metadata、rows 都計入 |
 | 詳情與其他資料檔 | 解壓後 ≤ 512 KiB（524,288 bytes） | 基本目錄容器以外裝 fragment 的實際 File，含詳情、印刷擴充、history 與 images；整檔計，不只量單一 fragment；config／programs 另報 |
 | 全部文字 raw | 每次報告、明顯成長時檢討 | 全部分片的 bootstrap／text／config 聯集＋manifest，兩區合計；changes 另報 |
-| 完整文字閉包，依單一版本 | Brotli ≤ 8 MiB（8,388,608 bytes） | 該區全部文字及其完整引用閉包＋manifest，含共享、JP 來源與必要跨區資料 |
+| 完整文字閉包，依單一版本 | Brotli ≤ 8 MiB（8,388,608 bytes） | 該區全部文字、共用檔及直接來源呈現的一跳閉包＋manifest，含共享、JP 來源與必要跨區資料 |
 
 基本目錄略超 2 MiB 可接受，報精確 bytes、差額 `actual_br - 2,097,152` 與比例；明顯超出才交維護者看數字與改善方案。
 不自行發明「略超」的百分比硬門檻，不把跨過分界一律當停止條件，也不自行放寬分界。
@@ -43,9 +43,9 @@ manifest、changes 的封套與整檔量另列，不套資料 File 的單檔上�
 ## 容量帳與完整來源
 
 基本目錄、後續背景與各按需用途均列實際 File key 集合、raw／br、檔數及依賴。
-依單一版本計壓縮完整文字時，從該區所有文字用途取傳遞閉包，不限當前 UI 語言、current 或基本目錄：
-完整 source 原文 owner、text_unit、sections、annotation，official_counterpart 雙端，必要跨區 card／face／printing／revision、說明正文、卡號索引與所有字典都必須計入。
-EN 的 JP 依據即使平常按需才下載，仍屬 EN 完整文字帳。共享／混區 File 整檔計入每個需要它的版本，不按列數或語言比例分攤。
+單區完整文字先取所選區與 region=null 的全部文字用途、config，沿強 dependencies 得基礎集合 C0。只查 C0 的直接 source／counterpart owner 呈現所需檔 S，最後取 C0∪S 的強依賴閉包並加 manifest，不沿新加入來源檔的 source pointer 或一般商品、其他印刷外鍵展開。source 是 printed 或歷史 revision 時，其 print-detail／history 也在直接呈現集合內。
+
+Python measure 用已驗 owner／pointer 與裝檔映射直接計算，目前不依賴 wire source_refs。共享、跨區 File 整檔計入；原文、sections、annotation 與必要字典都算；語意 join 去重不等於物理 bytes 去重。manifest 的 raw／Brotli 獨立報告。
 
 同一用途帳內相同 File key 只加一次；相同文字／字典若實體重複裝在不同 File，每份都計，不能用邏輯去重掩蓋實際傳輸。
 兩區全量 raw 每次報告、明顯成長時檢討；其容量帳對 files 中 role=bootstrap/text/config 的所有 File 按 key 去重，再加 manifest；其他用途不能改列 DSL／debug 逃避文字門檻。

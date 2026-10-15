@@ -119,7 +119,15 @@ def test_current_translation_shape_rejected_inside_resealed_wire(
     wire: tuple[dict[str, JsonValue], dict[str, JsonValue]], case: JsonValue
 ) -> None:
     manifest, payloads = deepcopy(wire)
-    payloads["bootstrap/bootstrap/global/global/band/2"] = object_value(case)["value"]
+    # Apply the invalid translation to a real declared container, then seal the wire.
+    target = next(
+        key
+        for key, value in payloads.items()
+        if "translation" in object_value(object_value(value).get("tables", {}))
+    )
+    invalid = object_value(object_value(case)["value"])
+    table = object_value(object_value(payloads[target])["tables"])
+    table["translation"] = object_value(invalid["tables"])["translation"]
     blobs = _reseal(manifest, payloads)
     with pytest.raises(ValidationError):
         read_snapshot(manifest, blobs)

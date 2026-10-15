@@ -9,6 +9,7 @@ import {
   canonical,
   integerValue,
   type JsonObject,
+  type JsonValue,
   objectValue,
   stringValue,
 } from "./format-v3/json"
@@ -108,8 +109,8 @@ describe("4.0 display projection", () => {
     ).toBeUndefined()
     const global = [...(client.snapshot()?.files.values() ?? [])]
       .filter((f) =>
-        (f["row_counts"] as JsonObject[]).some(
-          (c) => c["table"] === "image_asset" || c["table"] === "image_variant",
+        (f["row_counts"] as JsonValue[][]).some(
+          (c) => c[0] === "image_asset" || c[0] === "image_variant",
         ),
       )
       .map((f) => stringValue(f["path"]))
@@ -125,7 +126,7 @@ describe("4.0 display projection", () => {
     await client.load()
     await loadImagePage(client, [front])
     const file = [...(client.snapshot()?.files.values() ?? [])].find((f) =>
-      (f["row_counts"] as JsonObject[]).some((c) => c["table"] === "image_asset"),
+      (f["row_counts"] as JsonValue[][]).some((c) => c[0] === "image_asset"),
     )
     if (!file) throw new Error("missing details")
     expect(served.requests).not.toContain(file["path"])
@@ -194,7 +195,7 @@ describe("Index v2 finite window", () => {
       const text = (first.manifest["files"] as JsonObject[]).find((f) =>
         kind === "text"
           ? f["role"] === "text"
-          : (f["row_counts"] as JsonObject[]).some((c) => c["table"] === "printing_image"),
+          : (f["row_counts"] as JsonValue[][]).some((c) => c[0] === "printing_image"),
       )
       if (!text) throw new Error("missing text")
       let oldSignal: AbortSignal | null | undefined
@@ -350,7 +351,7 @@ describe("Index v2 finite window", () => {
       const text = [...(client.snapshot()?.files.values() ?? [])].find((f) =>
         kind === "text"
           ? f["role"] === "text"
-          : (f["row_counts"] as JsonObject[]).some((c) => c["table"] === "printing_image"),
+          : (f["row_counts"] as JsonValue[][]).some((c) => c[0] === "printing_image"),
       )
       if (!text) throw new Error("missing text")
       served.files.delete(stringValue(text["path"]))

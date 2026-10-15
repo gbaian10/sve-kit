@@ -10,7 +10,13 @@ import { sharedAnnotatedTextResolver } from "../annotated-text"
 import { createCatalog } from "../catalog"
 import type { Fetcher } from "../cdn"
 import { createSnapshotClient } from "../client"
-import { canonical, type JsonObject, objectValue, stringValue } from "../format-v3/json"
+import {
+  canonical,
+  type JsonObject,
+  type JsonValue,
+  objectValue,
+  stringValue,
+} from "../format-v3/json"
 import { digest } from "../format-v3/sha256"
 import {
   type QueryFailure,
@@ -21,7 +27,6 @@ import {
   SearchSession,
   type SearchStatus,
 } from "../index"
-import { bucketOf } from "../locator"
 const numeric = new Intl.Collator("en", { numeric: true, sensitivity: "base" })
 function orderExpected(
   catalog: ReturnType<typeof createCatalog>,
@@ -167,7 +172,7 @@ function crossing(served = origin()) {
   }
 }
 const bootstrapFile = (built.manifest["files"] as JsonObject[]).find(
-  (file) => file["role"] === "bootstrap",
+  (file) => file["purpose"] === "catalog" && file["region"] === "jp",
 )
 if (!bootstrapFile) throw new Error("fixture has no bootstrap")
 const heldPath = stringValue(bootstrapFile["path"])
@@ -632,11 +637,16 @@ it("set filters follow the printing owner dictionary and open a matching printin
   const served = origin()
   const client = createSnapshotClient(base, { fetch: served.fetcher })
   await client.load()
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("en")
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("jp")
+  await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing fixture")
   const columns = new BootstrapColumns()
   for (const fragment of snapshot.bootstrap) {
-    if (fragment.table !== "printing") {
+    if (fragment.table !== "printing" && fragment.table !== "card_locator") {
       columns.ingest([fragment])
       continue
     }
@@ -644,7 +654,7 @@ it("set filters follow the printing owner dictionary and open a matching printin
       columns.ingest([
         {
           ...fragment,
-          rows: [row],
+          rows: [{ ...row, home_set_id: row["id"] === "p:bp01-001" ? "set:sd01" : "set:bp01" }],
           value: {
             ...fragment.value,
             owner: { kind: "home_set", id: row["id"] === "p:bp01-001" ? "set:sd01" : "set:bp01" },
@@ -790,6 +800,11 @@ it("persistent cache evicts all but two successful plans per edition without evi
 it("staging refuses lookups outside its search projection", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("en")
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("jp")
+  await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
   const columns = new BootstrapColumns()
@@ -826,6 +841,7 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
   const served = origin()
   const client = createSnapshotClient(base, { fetch: served.fetcher })
   await client.load()
+  await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
   const catalog = createCatalog(snapshot)
@@ -847,6 +863,16 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
       texts.add(name.text.slice(1))
     }
   for (const edition of ["jp", "en"] as const) {
+    const client = createSnapshotClient(base, {
+      fetch: served.fetcher,
+      region: edition,
+      cacheStorage: memoryCache(),
+    })
+    await client.load()
+    await client.prefetchPrintings?.()
+    const selectedSnapshot = client.snapshot()
+    if (!selectedSnapshot) throw new Error("missing regional snapshot")
+    const catalog = createCatalog(selectedSnapshot)
     const h = harness(served)
     h.session.load(base, edition, "preview")
     await h.settled()
@@ -927,6 +953,11 @@ it("an edition query is pending exactly while a load for that edition is in flig
 it("cost columns preserve the signed safe integers accepted by the snapshot reader", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("en")
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("jp")
+  await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
   for (const cost of [-3, 2 ** 40]) {
@@ -993,6 +1024,11 @@ it("cache cleanup still reclaims stale plans when a blob write hits quota", asyn
 it("a stored index image answers every query like the index it was encoded from", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("en")
+  await client.prefetchPrintings?.()
+  await client.selectRegion?.("jp")
+  await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
   const catalog = createCatalog(snapshot)
@@ -1061,6 +1097,29 @@ describe("persistent index images", () => {
     const after = second.status().result
     if (before.phase !== "complete" || after.phase !== "complete") throw new Error("missing result")
     expect(after.page).toEqual(before.page)
+  })
+
+  it("does not store a catalog-only index when the background printing download fails", async () => {
+    const storage = memoryCache()
+    const served = origin()
+    const product = (built.manifest["files"] as JsonObject[]).find(
+      (file) => file["purpose"] === "product" && file["region"] === "jp",
+    )
+    if (!product) throw new Error("fixture has no product file")
+    const path = stringValue(product["path"])
+    const bytes = served.files.get(path)
+    if (!bytes) throw new Error("product payload missing")
+    served.files.delete(path)
+    const first = harness(served, storage)
+    first.session.load(base, "jp", "preview")
+    await first.settled()
+    expect(first.status()).toMatchObject({ phase: "ready" })
+    served.files.set(path, bytes)
+    const second = harness(served, storage)
+    second.session.load(base, "jp", "preview")
+    await second.settled()
+    expect(readyMetrics(second.events).slice(-1)).toMatchObject([{ restored: false }])
+    expect(second.served.requests).toContain(path)
   })
 
   it("rebuilds when the manifest, edition or build differs from the stored image", async () => {
@@ -1181,7 +1240,7 @@ it("a complete cached view and index are usable while the entry is blocked, with
   first.session.load(base, "jp", "preview")
   await first.settled()
   const metadata = (built.manifest["files"] as JsonObject[]).filter((file) =>
-    (file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image"),
+    (file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image"),
   )
   const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
   for (const file of metadata) {
@@ -1246,7 +1305,7 @@ it("missing or half-written views recover and image errors cannot become an unav
   const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
   await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
   for (const file of built.manifest["files"] as JsonObject[])
-    if ((file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image")) {
+    if ((file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image")) {
       await blobs.delete(`${base}/${stringValue(file["path"])}`)
       served.files.set(stringValue(file["path"]), new Uint8Array([0]))
     }
@@ -1377,7 +1436,7 @@ it("channels asking for the same page at once share one image metadata read", as
   const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
   const metadata = (built.manifest["files"] as JsonObject[])
     .filter((file) =>
-      (file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image"),
+      (file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image"),
     )
     .map((file) => stringValue(file["path"]))
   for (const path of metadata) await blobs.delete(`${base}/${path}`)
@@ -1406,7 +1465,9 @@ it("separates config, bootstrap, index building and visible-image preparation", 
   )
   const progress = h.events.filter((event) => event.kind === "progress")
   const files = built.manifest["files"] as JsonObject[]
-  const total = files.filter((file) => file["role"] === "bootstrap").length
+  const total = files.filter(
+    (file) => file["purpose"] === "catalog" && (file["region"] === null || file["region"] === "jp"),
+  ).length
   expect(progress.every((event) => event.total === total)).toBe(true)
   expect(progress.map((event) => event.done)).toEqual(
     Array.from({ length: total + 1 }, (_, i) => i),
@@ -1423,10 +1484,20 @@ it("printing pages preserve every edition printing, independent numbering, filte
     cacheStorage: memoryCache(),
   })
   await client.load()
+  await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
-  const catalog = createCatalog(snapshot)
   for (const edition of ["jp", "en"] as const) {
+    const client = createSnapshotClient(base, {
+      fetch: served.fetcher,
+      region: edition,
+      cacheStorage: memoryCache(),
+    })
+    await client.load()
+    await client.prefetchPrintings?.()
+    const selectedSnapshot = client.snapshot()
+    if (!selectedSnapshot) throw new Error("missing regional snapshot")
+    const catalog = createCatalog(selectedSnapshot)
     const storage = memoryCache()
     const h = harness(served, storage)
     h.session.load(base, edition, "preview")
@@ -1507,6 +1578,7 @@ it("printing pages preserve every edition printing, independent numbering, filte
 it("keeps two printings of one card as separate numbered items after index restore", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
+  await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
   const owner = snapshot.bootstrap.find(
@@ -1581,6 +1653,7 @@ it.each(["jp", "en"] as const)(
     const served = origin()
     const client = createSnapshotClient(base, { fetch: served.fetcher })
     await client.load()
+    await client.selectRegion?.(edition)
     const snapshot = client.snapshot()
     if (!snapshot) throw new Error("oracle missing")
     const catalog = createCatalog(snapshot)
@@ -1633,11 +1706,12 @@ it("a pending visible preview neither blocks list queries nor publishes after it
   const summary = first.page.items[0]?.summary
   if (!summary) throw new Error("target missing")
   const detail = (built.manifest["files"] as JsonObject[]).find((file) =>
-    (file["row_counts"] as JsonObject[]).some(
+    (file["row_counts"] as JsonValue[][]).some(
       (count) =>
-        count["table"] === "face_revision" &&
-        count["partition"] === "detail" &&
-        count["bucket"] === bucketOf([summary.cardId], 64),
+        count[0] === "face_revision" &&
+        count[3] === "detail" &&
+        count[2] === "set:" + (summary.cardNo.split("-")[0]?.toLowerCase() ?? "") &&
+        file["region"] === "jp",
     ),
   )
   if (!detail) throw new Error("preview detail missing")
@@ -1715,6 +1789,9 @@ describe("set releases and counts", () => {
   it("retains all composite product families and their first dates across index restore", async () => {
     const client = createSnapshotClient(base, { fetch: origin().fetcher })
     await client.load()
+    await client.prefetchPrintings?.()
+    await client.selectRegion?.("en")
+    await client.prefetchPrintings?.()
     const snapshot = client.snapshot()
     if (!snapshot) throw new Error("missing snapshot")
     const columns = new BootstrapColumns()

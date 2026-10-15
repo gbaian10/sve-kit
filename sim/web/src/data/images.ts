@@ -3,7 +3,7 @@ import type { Row } from "./format-v3/decode"
 import { SnapshotError } from "./format-v3/errors"
 import { integerValue, objectValue, stringValue } from "./format-v3/json"
 import { mediaImageSource } from "./image-url"
-import { bucketOf, createLocator } from "./locator"
+import { createLocator } from "./locator"
 
 export interface ImageSource {
   readonly src: string
@@ -71,7 +71,8 @@ async function readMediaFaces(
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("snapshot not loaded")
   const check = () => {
-    if (signal?.aborted || client.snapshot() !== snapshot) throw new Error("image page cancelled")
+    if (signal?.aborted || client.snapshot()?.manifestHash !== snapshot.manifestHash)
+      throw new Error("image page cancelled")
   }
   const lookup = mediaLookup(snapshot)
   const printings = new Map<string, Row>()
@@ -86,7 +87,7 @@ async function readMediaFaces(
     const key = lookup.locate({
       table: "printing_image",
       owner: printing.owner,
-      bucket: bucketOf([printingId], 64),
+      entityKey: [printingId],
       partition: "detail",
     })
     if (key) keys.add(key)
@@ -164,7 +165,8 @@ export async function loadImagePage(
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("snapshot not loaded")
   const check = () => {
-    if (signal?.aborted || client.snapshot() !== snapshot) throw new Error("image page cancelled")
+    if (signal?.aborted || client.snapshot()?.manifestHash !== snapshot.manifestHash)
+      throw new Error("image page cancelled")
   }
   check()
   const cache = faceCache(snapshot)

@@ -65,12 +65,15 @@ def container(
         "types": {name: descriptor(name, format_version) for name in sorted(used)},
         "tables": {
             table: [
-                {
-                    key: value
-                    for key, value in object_value(fragment).items()
-                    if key != "columns"
-                }
+                [
+                    [object_value(f["owner"])["kind"], object_value(f["owner"])["id"]],
+                    f["partition"],
+                    f["segment"],
+                    f["base"],
+                    f["rows"],
+                ]
                 for fragment in array(fragments)
+                for f in (object_value(fragment),)
             ]
             for table, fragments in tables.items()
         },

@@ -77,8 +77,8 @@ def test_schema_regeneration_and_frozen_column_boundaries() -> None:
     assert columns("printing_image") == columns("printing_image", MEDIA)
     assert "path" not in columns("image_variant")
     assert "path" not in columns("image_variant", MEDIA)
-    assert profile(MEDIA).width("images", "detail", "home_set", "BP01") == 32
-    assert profile(MEDIA).width("images", "detail", "global", "") == 1
+    assert profile(MEDIA).width("images", "BP01") == 32
+    assert profile(MEDIA).width("images", "") == 1
 
 
 def test_shared_image_url_vectors() -> None:
@@ -152,7 +152,7 @@ def test_project_export_and_preview(images: PublicImages, tmp_path: Path) -> Non
     deps = [
         array(f["dependencies"])
         for f in files.values()
-        if f["role"] == "images" and "/home_set/" in string(f["key"])
+        if f["role"] == "images" and "/family-" in string(f["key"])
     ]
     assert deps
     assert all(len(d) >= 2 for d in deps)
@@ -389,9 +389,9 @@ def _changed_payload(
         for r in array(manifest["files"])
         for f in (object_value(r),)
     }
-    key = next(k for k in files if k.startswith("images/detail/home_set/"))
+    key = next(k for k in files if k.startswith("images/shared/family-"))
     if add_dependency:
-        extra = next(k for k in files if k.startswith("images/detail/global/"))
+        extra = next(k for k in files if k.startswith("images/shared/shared/"))
         array(files[key]["dependencies"]).append(
             {"key": extra, "sha256": files[extra]["sha256"]}
         )
@@ -500,7 +500,7 @@ def test_media_uses_printing_home_not_card_home(images: PublicImages) -> None:
         plan.projection, Ownership(homes), BATCH, format_version=MEDIA
     )
     assert any(
-        string(object_value(f)["key"]).startswith("images/detail/home_set/new%3Ahome/")
+        string(object_value(f)["key"]).startswith("images/shared/family-new%3Ahome/")
         for f in array(snapshot.manifest["files"])
     )
 

@@ -7796,6 +7796,38 @@
       ],
       "additionalProperties": false
     },
+    "FragmentOwner": {
+      "oneOf": [
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "global"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "home_set"
+            },
+            {
+              "$ref": "#/$defs/ID"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false
+        }
+      ]
+    },
     "Base": {
       "type": "object",
       "properties": {
@@ -7808,19 +7840,19 @@
         "owner": {
           "$ref": "#/$defs/Owner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
         "partition": {
           "const": "bootstrap"
+        },
+        "segment": {
+          "$ref": "#/$defs/ID"
         }
       },
       "required": [
         "file",
         "table",
         "owner",
-        "bucket",
-        "partition"
+        "partition",
+        "segment"
       ],
       "additionalProperties": false
     },
@@ -7903,35 +7935,30 @@
       ]
     },
     "card_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/card_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "face_bootstrap": {
       "type": "array",
@@ -8004,35 +8031,30 @@
       ]
     },
     "face_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/face_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "printing_bootstrap": {
       "type": "array",
@@ -8453,35 +8475,30 @@
       ]
     },
     "printing_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/printing_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "printing_detail": {
       "type": "array",
@@ -8515,35 +8532,30 @@
       ]
     },
     "printing_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "$ref": "#/$defs/Base"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/printing_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "product_family_bootstrap": {
       "type": "array",
@@ -8621,35 +8633,30 @@
       ]
     },
     "product_family_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/product_family_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "product_bootstrap": {
       "type": "array",
@@ -8791,35 +8798,30 @@
       ]
     },
     "product_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/product_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "printing_product_bootstrap": {
       "type": "array",
@@ -8958,35 +8960,30 @@
       ]
     },
     "printing_product_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/printing_product_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "identity_change_bootstrap": {
       "type": "array",
@@ -9067,35 +9064,30 @@
       ]
     },
     "identity_change_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/identity_change_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "art_detail": {
       "type": "array",
@@ -9187,35 +9179,30 @@
       ]
     },
     "art_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/art_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "artist_detail": {
       "type": "array",
@@ -9244,35 +9231,30 @@
       ]
     },
     "artist_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/artist_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "stamp_bootstrap": {
       "type": "array",
@@ -9376,35 +9358,30 @@
       ]
     },
     "stamp_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/stamp_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "text_unit_bootstrap": {
       "type": "array",
@@ -9441,35 +9418,30 @@
       ]
     },
     "text_unit_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/text_unit_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "text_unit_detail": {
       "type": "array",
@@ -9506,35 +9478,30 @@
       ]
     },
     "text_unit_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/text_unit_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "face_revision_bootstrap": {
       "type": "array",
@@ -9712,35 +9679,30 @@
       ]
     },
     "face_revision_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/face_revision_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "face_revision_detail": {
       "type": "array",
@@ -9874,35 +9836,30 @@
       ]
     },
     "face_revision_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "$ref": "#/$defs/Base"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/face_revision_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "face_revision_history": {
       "type": "array",
@@ -10180,35 +10137,30 @@
       ]
     },
     "face_revision_history_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "history"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/face_revision_history"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "translation_bootstrap": {
       "type": "array",
@@ -10319,35 +10271,30 @@
       ]
     },
     "translation_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/translation_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "translation_detail": {
       "type": "array",
@@ -10458,35 +10405,30 @@
       ]
     },
     "translation_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/translation_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "qa_detail": {
       "type": "array",
@@ -10554,35 +10496,30 @@
       ]
     },
     "qa_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/qa_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "qa_version_detail": {
       "type": "array",
@@ -10717,35 +10654,30 @@
       ]
     },
     "qa_version_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/qa_version_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "cr_version_detail": {
       "type": "array",
@@ -10820,35 +10752,30 @@
       ]
     },
     "cr_version_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/cr_version_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "cr_clause_detail": {
       "type": "array",
@@ -10903,35 +10830,30 @@
       ]
     },
     "cr_clause_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/cr_clause_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "errata_detail": {
       "type": "array",
@@ -10979,35 +10901,30 @@
       ]
     },
     "errata_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/errata_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "ruling_revision_detail": {
       "type": "array",
@@ -11156,35 +11073,30 @@
       ]
     },
     "ruling_revision_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/ruling_revision_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "rules_name_bootstrap": {
       "type": "array",
@@ -11220,35 +11132,30 @@
       ]
     },
     "rules_name_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/rules_name"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "face_rules_name_bootstrap": {
       "type": "array",
@@ -11299,35 +11206,30 @@
       ]
     },
     "face_rules_name_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/face_rules_name"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "rules_profile_bootstrap": {
       "type": "array",
@@ -11382,35 +11284,30 @@
       ]
     },
     "rules_profile_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/rules_profile_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "restriction_bootstrap": {
       "type": "array",
@@ -11606,35 +11503,30 @@
       ]
     },
     "restriction_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/restriction_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "card_related_detail": {
       "type": "array",
@@ -11777,35 +11669,30 @@
       ]
     },
     "card_related_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/card_related_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "digital_card_detail": {
       "type": "array",
@@ -11880,35 +11767,30 @@
       ]
     },
     "digital_card_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/digital_card_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "digital_art_detail": {
       "type": "array",
@@ -11959,35 +11841,30 @@
       ]
     },
     "digital_art_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/digital_art_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "digital_link_detail": {
       "type": "array",
@@ -12121,35 +11998,30 @@
       ]
     },
     "digital_link_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/digital_link_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "digital_art_link_detail": {
       "type": "array",
@@ -12208,35 +12080,30 @@
       ]
     },
     "digital_art_link_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/digital_art_link_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "digital_link_coverage_detail": {
       "type": "array",
@@ -12295,35 +12162,30 @@
       ]
     },
     "digital_link_coverage_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/digital_link_coverage_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "voice_detail": {
       "type": "array",
@@ -12572,35 +12434,30 @@
       ]
     },
     "voice_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/voice_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "card_voice_detail": {
       "type": "array",
@@ -12642,35 +12499,30 @@
       ]
     },
     "card_voice_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/card_voice_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "keyword_bootstrap": {
       "type": "array",
@@ -12761,35 +12613,30 @@
       ]
     },
     "keyword_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/keyword_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "mechanic_projection_bootstrap": {
       "type": "array",
@@ -12865,35 +12712,30 @@
       ]
     },
     "mechanic_projection_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/mechanic_projection_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "card_mechanic_coverage_bootstrap": {
       "type": "array",
@@ -12985,35 +12827,30 @@
       ]
     },
     "card_mechanic_coverage_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/card_mechanic_coverage_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "card_engine_support_bootstrap": {
       "type": "array",
@@ -13066,35 +12903,30 @@
       ]
     },
     "card_engine_support_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/card_engine_support_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "vocabulary_bootstrap": {
       "type": "array",
@@ -13149,35 +12981,30 @@
       ]
     },
     "vocabulary_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/vocabulary_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "search_alias_bootstrap": {
       "type": "array",
@@ -13227,35 +13054,30 @@
       ]
     },
     "search_alias_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/search_alias_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "text_symbol_detail": {
       "type": "array",
@@ -13331,35 +13153,30 @@
       ]
     },
     "text_symbol_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/text_symbol_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "card_route_alias_detail": {
       "type": "array",
@@ -13429,35 +13246,30 @@
       ]
     },
     "card_route_alias_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/card_route_alias_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "route_override_detail": {
       "type": "array",
@@ -13486,35 +13298,30 @@
       ]
     },
     "route_override_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/route_override_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "image_asset_detail": {
       "type": "array",
@@ -13598,35 +13405,30 @@
       ]
     },
     "image_asset_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/image_asset_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "printing_image_detail": {
       "type": "array",
@@ -13734,35 +13536,30 @@
       ]
     },
     "printing_image_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/printing_image_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "image_variant_detail": {
       "type": "array",
@@ -13833,35 +13630,30 @@
       ]
     },
     "image_variant_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/image_variant_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "annotation_set_bootstrap": {
       "type": "array",
@@ -13903,35 +13695,30 @@
       ]
     },
     "annotation_set_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/annotation_set_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "annotation_set_detail": {
       "type": "array",
@@ -13973,35 +13760,30 @@
       ]
     },
     "annotation_set_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/annotation_set_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "annotation_concept_bootstrap": {
       "type": "array",
@@ -14068,35 +13850,30 @@
       ]
     },
     "annotation_concept_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/annotation_concept_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "annotation_concept_detail": {
       "type": "array",
@@ -14163,35 +13940,30 @@
       ]
     },
     "annotation_concept_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/annotation_concept_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "field_annotation_bootstrap": {
       "type": "array",
@@ -14252,35 +14024,30 @@
       ]
     },
     "field_annotation_bootstrap_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "bootstrap"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/field_annotation_bootstrap"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "field_annotation_detail": {
       "type": "array",
@@ -14341,35 +14108,30 @@
       ]
     },
     "field_annotation_detail_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "detail"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/field_annotation_detail"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "field_annotation_history": {
       "type": "array",
@@ -14430,35 +14192,30 @@
       ]
     },
     "field_annotation_history_fragment": {
-      "type": "object",
-      "properties": {
-        "owner": {
-          "$ref": "#/$defs/Owner"
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
         },
-        "bucket": {
-          "$ref": "#/$defs/UInt"
-        },
-        "partition": {
+        {
           "const": "history"
         },
-        "base": {
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
           "type": "null"
         },
-        "rows": {
+        {
           "type": "array",
           "items": {
             "$ref": "#/$defs/field_annotation_history"
           }
         }
-      },
-      "required": [
-        "owner",
-        "bucket",
-        "partition",
-        "base",
-        "rows"
       ],
-      "additionalProperties": false
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
     },
     "Types": {
       "type": "object",
@@ -16108,6 +15865,56 @@
             }
           },
           "additionalProperties": false
+        },
+        "card_locators": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/ID"
+                },
+                {
+                  "$ref": "#/$defs/ID"
+                },
+                {
+                  "$ref": "#/$defs/Text"
+                }
+              ],
+              "minItems": 3,
+              "maxItems": 3,
+              "items": false
+            }
+          }
+        },
+        "name_sources": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/PublicTextPointer"
+              },
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ID"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "minItems": 3,
+            "maxItems": 3,
+            "items": false
+          }
         }
       },
       "required": [
@@ -16391,9 +16198,9 @@
         "row_counts": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "table": {
+            "type": "array",
+            "prefixItems": [
+              {
                 "enum": [
                   "card",
                   "face",
@@ -16443,31 +16250,39 @@
                   "field_annotation"
                 ]
               },
-              "owner": {
-                "$ref": "#/$defs/Owner"
+              {
+                "enum": [
+                  "global",
+                  "home_set"
+                ]
               },
-              "bucket": {
-                "$ref": "#/$defs/UInt"
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ID"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
-              "partition": {
+              {
                 "enum": [
                   "bootstrap",
                   "detail",
                   "history"
                 ]
               },
-              "count": {
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
                 "$ref": "#/$defs/UInt"
               }
-            },
-            "required": [
-              "table",
-              "owner",
-              "bucket",
-              "partition",
-              "count"
             ],
-            "additionalProperties": false
+            "minItems": 6,
+            "maxItems": 6,
+            "items": false
           }
         },
         "dependencies": {
@@ -16484,6 +16299,32 @@
             "images",
             "programs"
           ]
+        },
+        "purpose": {
+          "enum": [
+            "catalog",
+            "print",
+            "detail",
+            "print-detail",
+            "product",
+            "history",
+            "engine",
+            "region-state",
+            "dictionary",
+            "images",
+            "config",
+            "programs"
+          ]
+        },
+        "region": {
+          "enum": [
+            "jp",
+            "en",
+            null
+          ]
+        },
+        "segment": {
+          "$ref": "#/$defs/ID"
         }
       },
       "required": [
@@ -16494,7 +16335,10 @@
         "key",
         "row_counts",
         "dependencies",
-        "role"
+        "role",
+        "purpose",
+        "region",
+        "segment"
       ],
       "additionalProperties": false
     },

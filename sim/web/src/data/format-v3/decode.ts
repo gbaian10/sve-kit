@@ -1,3 +1,4 @@
+import { fail } from "./errors"
 import {
   arrayValue,
   type JsonObject,
@@ -41,6 +42,7 @@ export function decodeRow(
   const kinds = arrayValue(definition(name, version)["x-types"] ?? null)
   const names = columns(name, version)
   const cells = arrayValue(value, path)
+  if (cells.length !== names.length) fail("shape", "row tuple length", path)
   const row: Row = {}
   names.forEach((column, index) => {
     row[column] = decodeType(

@@ -11,15 +11,7 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.generate_schema import generate
 from sve_carddb.contracts.snapshot import definition, schema, tables, validate
-from sve_carddb.core.json import (
-    array,
-    canonical,
-    digest,
-    integer,
-    object_value,
-    parse,
-    string,
-)
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.project import Projection
 from sve_carddb.export.reader import read_snapshot
@@ -157,21 +149,21 @@ def test_reader_container_errors_hide_fragment_text(failure: str) -> None:
     manifest = object_value(fixture("manifest.json"))
     values = {key: parse(raw) for key, raw in payloads().items()}
     fragment = next(
-        object_value(entry)
+        array(entry)
         for value in values.values()
         for entry in array(
             object_value(object_value(value).get("tables", {})).get("text_unit", [])
         )
-        if object_value(entry)["partition"] == "detail"
+        if array(entry)[1] == "detail"
     )
-    original = array(array(fragment["rows"])[0])
+    original = array(array(fragment[4])[0])
     texts = [f"Synthetic private wording {index}" for index in range(51)]
     rows: list[JsonValue] = [[*original[:2], text] for text in texts]
-    fragment["rows"] = rows
+    fragment[4] = rows
     if failure == "row":
         array(rows[25])[2] = None
     else:
-        fragment["extra"] = "Synthetic unexpected value"
+        fragment.append("Synthetic unexpected value")
     blobs = _reseal(manifest, values)
 
     with pytest.raises(ValidationError) as caught:
@@ -187,10 +179,10 @@ def test_reader_container_errors_hide_fragment_text(failure: str) -> None:
     assert list(error.absolute_path)[:2] == ["tables", "text_unit"]
     assert "schema_path=" in error.message
     if failure == "row":
-        assert "'rows', 25, 2]" in error.message
+        assert "4, 25, 2]" in error.message
         assert "type:" in error.message
     else:
-        assert "additionalProperties:" in error.message
+        assert "maxItems:" in error.message
 
 
 @pytest.mark.parametrize(
@@ -375,13 +367,11 @@ def test_dangling_vocabulary_is_not_repaired() -> None:
     bootstrap = next(
         object_value(v)
         for key, v in values.items()
-        if key.startswith("bootstrap/")
+        if key.startswith("catalog/")
         and "face_revision" in object_value(object_value(v)["tables"])
     )
-    fragment = object_value(
-        array(object_value(bootstrap["tables"])["face_revision"])[0]
-    )
-    array(array(fragment["rows"])[0])[5] = "missing_type"
+    fragment = array(array(object_value(bootstrap["tables"])["face_revision"])[0])
+    array(array(fragment[4])[0])[5] = "missing_type"
     with pytest.raises(ValueError, match="Vocabulary reference missing"):
         read_snapshot(manifest, _reseal(manifest, values))
 
@@ -393,7 +383,7 @@ def test_matching_member_hash_cannot_bypass_payload_schema(member: str) -> None:
     key = (
         "config"
         if member == "config"
-        else next(k for k in values if k.startswith("bootstrap/"))
+        else next(k for k in values if k.startswith("catalog/"))
     )
     object_value(values[key])["unexpected"] = True
     blobs = _reseal(manifest, values)
@@ -402,6 +392,7 @@ def test_matching_member_hash_cannot_bypass_payload_schema(member: str) -> None:
         {key: compress(value, None) for key, value in blobs.items()},
         {},
         compress(canonical(manifest), None),
+        {},
     )
     with pytest.raises(ValidationError):
         snapshot.verify(Projection({}, {}, {}))
@@ -419,13 +410,13 @@ def test_sorted_base_is_required_even_with_valid_new_hashes() -> None:
     manifest = object_value(fixture("manifest.json"))
     values = {key: parse(raw) for key, raw in payloads().items()}
     fragment = next(
-        object_value(f)
+        array(f)
         for key, raw in values.items()
-        if key.startswith("bootstrap/")
+        if key.startswith("catalog/")
         for f in array(object_value(object_value(raw)["tables"]).get("face", []))
-        if len(array(object_value(f)["rows"])) > 1
+        if len(array(array(f)[4])) > 1
     )
-    fragment["rows"] = list(reversed(array(fragment["rows"])))
+    fragment[4] = list(reversed(array(fragment[4])))
     with pytest.raises(ValueError, match=r"^Rows must be sorted with unique keys$"):
         read_snapshot(manifest, _reseal(manifest, values))
 
@@ -446,27 +437,27 @@ def test_fragment_index_rejects_resealed_invalid_members(
     values = {key: parse(raw) for key, raw in payloads().items()}
     if change in {"base", "missing_base"}:
         base = next(
-            object_value(object_value(fragment)["base"])
+            object_value(array(fragment)[3])
             for value in values.values()
             for entries in object_value(object_value(value).get("tables", {})).values()
             for fragment in array(entries)
-            if object_value(fragment)["base"] is not None
+            if array(fragment)[3] is not None
         )
-        target = base
-        if change == "missing_base":
-            # Moving the referenced bootstrap fragment leaves a consistent base unmatched.
+        if change == "base":
+            object_value(base["owner"])["id"] = "set:wrong"
+        else:
             file = object_value(values[string(object_value(base["file"])["key"])])
             target = next(
-                object_value(fragment)
-                for fragment in array(
-                    object_value(file["tables"])[string(base["table"])]
-                )
-                if all(
-                    object_value(fragment)[field] == base[field]
-                    for field in ("owner", "bucket")
-                )
+                array(f)
+                for f in array(object_value(file["tables"])[string(base["table"])])
+                if array(f)[0]
+                == [
+                    object_value(base["owner"])["kind"],
+                    object_value(base["owner"])["id"],
+                ]
+                and array(f)[2] == base["segment"]
             )
-        target["bucket"] = (integer(target["bucket"]) + 1) % 64
+            target[2] = "missing-segment"
     else:
         entries = next(
             array(entries)

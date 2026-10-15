@@ -7,7 +7,7 @@ import {
   stringValue,
 } from "../format-v3/json"
 import { type Files, findBase, type Fragment, joinDetail } from "../format-v3/reader"
-import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "../locator"
+import { createLocator, GLOBAL_OWNER, homeSetOwner } from "../locator"
 import type { SearchBlobs } from "./blobs"
 import type { SearchIndex } from "./index"
 import type { AbilityPreview } from "./messages"
@@ -18,12 +18,11 @@ export class PreviewReader {
   private readonly running = new Map<string, Promise<readonly Fragment[]>>()
   private readonly settled = new Map<string, AbilityPreview | null>()
   private readonly files: Files
-  private readonly count: number
+  private region: string | undefined
   private readonly version: string
   private readonly blobs: SearchBlobs
-  constructor(files: Files, count: number, version: string, blobs: SearchBlobs) {
+  constructor(files: Files, _count: number, version: string, blobs: SearchBlobs) {
     this.files = files
-    this.count = count
     this.version = version
     this.blobs = blobs
     this.locate = createLocator(
@@ -39,7 +38,7 @@ export class PreviewReader {
     entity = id,
     partition: "bootstrap" | "detail" = "detail",
   ): Promise<JsonObject | undefined> {
-    const key = this.locate({ table, owner, bucket: bucketOf([entity], this.count), partition })
+    const key = this.locate({ table, owner, entityKey: [entity], region: this.region, partition })
     if (!key) return undefined
     const fragments = await this.fragments(key, signal)
     signal.throwIfAborted()
@@ -90,6 +89,7 @@ export class PreviewReader {
     const summary = index.recent([printingId])[0]?.summary
     const target = index.imageTargets([printingId]).find((face) => face.faceId === faceId)
     if (!summary || !target) throw new Error("preview face is not in this edition")
+    this.region = summary.region
     const owner = homeSetOwner(target.owner)
     const face = await this.row("face", faceId, signal, owner, summary.cardId, "bootstrap")
     if (!face) throw new Error("preview face missing")

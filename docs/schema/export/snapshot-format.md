@@ -3,7 +3,7 @@
 本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
 瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（§4.1）。
 瀏覽器使用原生 `JSON.parse`，不重做嚴格 token 掃描、canonical 重編碼、Schema、descriptor、分片位置／bucket 或跨表一致性驗證。
-固定 schema 欄序只用於 tuple 解碼，bucket 只用於按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
+固定 schema 欄序只用於 tuple 解碼，內部 hash bucket 只用於固定 band 分配與按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
 
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
@@ -15,7 +15,7 @@
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
 本文的 basis、annotation 與改動欄序依 [4.0.0 公開 annotation 契約](public-annotation.md)。
-目前 producer／reader 為 4.0.0；N0 已完成四層建置與 annotation 接線，既有容量超標依維護者豁免交付。本文件的基本目錄載入與容器要求是尚未發布的 4.0.0 設計修訂；不宣稱 exporter／Worker 已完成或效能通過。
+目前 producer／reader 為 4.0.0；已接線四層建置、annotation、每包每區基本目錄及固定背景帶。詳情字典仍沿全域 band，局部化另行實作；容量與記憶體效能依 [size-budget](size-budget.md) 分別驗收。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -23,7 +23,7 @@
 
 `engine_support_target` 恰含 `engine_version,engine_build_hash,validation_policy_id`，三欄全 null 或全有值；逐卡狀態不重複它。files 的完整形狀、hash／壓縮大小及依賴規則見 [傳輸契約 §2](snapshot-transport.md#2-快照清單與檔案描述)。
 
-傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；wire Fragment 完整包含 `owner,bucket,partition,base,rows`；root row 欄序與型別由 format 的固定 `(table,partition)` schema 決定，容器 types 只保存用到的巢狀 tuple descriptor，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。4.0 manifest 的 `format_version/min_reader_version` 及完整八個 `required_capabilities` 依[公開 annotation §1](public-annotation.md#1-版本與驗證邊界)；缺能力或未知版本即拒絕。
+傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；wire Fragment 為固定 tuple `[OwnerTuple,partition,segment,base,rows]`，File 明示 purpose／region／segment；root row 欄序與型別由 format 的固定 `(table,partition)` schema 決定，容器 types 只保存用到的巢狀 tuple descriptor，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。4.0 manifest 的 `format_version/min_reader_version` 及完整八個 `required_capabilities` 依[公開 annotation §1](public-annotation.md#1-版本與驗證邊界)；缺能力或未知版本即拒絕。
 
 巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個容器只附用到的巢狀 types，各型別一份，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
@@ -206,7 +206,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 分片時，稀疏的 `face.wording` 隨 face 進啟動包，帶未定狀態、暫顯／候選 revision 引用及未知日期版次 ID；PrintingFace.observations 進 printing 詳情。`current_ref` 為所有 face.current.revision_id 的去重集合；`display_ref` 為 current_ref 加上 pending wording.display 非 null revision ID 的聯集，**不加入其餘 candidates**。每個 pending face-region 最多一筆 display revision，其 §3.1 輕量投影、名稱及可用名稱翻譯的文字閉包均進 bootstrap，讓整區基本目錄完成後可使用暫顯卡名／數值；其餘欄位仍走 detail。這只是顯示分割，不建立 current 或採納。
 
-不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿既有 bucket 分片閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
+不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿固定家族檔及全域字典 band 閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
 
 開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡在基本目錄使用其名稱與數值，標表記未定；沒有唯一 display 時保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display 名稱，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
 
@@ -226,7 +226,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 ### 3.1 欄位主儲存與載入用途
 
-§2 的 43 個文字集合是完整**邏輯讀取視圖**，不是額外下載的全欄主表。傳輸以同一 table 的固定欄位分割（fragment）分成啟動包（bootstrap）和詳情分片（detail），跨表 FK 保留永久 ID；同表詳情分片不重複永久 PK，而以片內 `row_index` 指向啟動包列（printing.faces 用 `face_ordinal`），每個實體欄位值只在一處。下表記錄 N0 已接線的完整欄位分割；基本目錄重新裝檔不把此表所有 bootstrap 欄位當成必載。「其餘」精確指 §2 白名單扣去該列啟動包欄，非任意省欄。
+§2 的 43 個文字集合是完整**邏輯讀取視圖**，不是額外下載的全欄主表。傳輸以同一 table 的固定欄位分割（fragment）分成啟動包（bootstrap）和詳情分片（detail），跨表 FK 保留永久 ID；同表詳情分片不重複永久 PK，而以片內 `row_index` 指向啟動包列（printing.faces 用 `face_ordinal`），同 ID 的必要字典副本須完整同值。下表記錄 N0 已接線的完整欄位分割；基本目錄重新裝檔不把此表所有 bootstrap 欄位當成必載。「其餘」精確指 §2 白名單扣去該列啟動包欄，非任意省欄。
 
 | 邏輯集合/列範圍 | 啟動包唯一儲存欄位 | 詳情分片唯一儲存欄位 |
 | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -237,15 +237,15 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `card_engine_support`、`mechanic_projection`、`card_mechanic_coverage` | 全部欄位；status/reasons 不複製進 `card_facet` | 無 |
 | `rules_name`、`face_rules_name` | 無 | 全部原欄位，global detail |
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
-| `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包；每個文字 ID 只在其固定 bucket 的啟動包或詳情分片一邊 | 非上述閉包的其餘文字列 |
-| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列 | 其餘翻譯列；同 ID 兩用途時歸啟動包，只存一次 |
-| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要閉包；同 ID 只存一次 | 其餘集合列；正文按需，全部文字檔合計含全部引用 |
+| `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包，隨各 catalog 局部出貨 | 全部文字列暫沿全域 band，含 catalog 已有的副本；同 ID 副本完整同值 |
+| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列，隨各 catalog 局部出貨 | 全部翻譯列暫沿全域 band；同 ID 副本完整同值 |
+| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要的 annotation_set 隨各 catalog 局部出貨；annotation_concept 全部固定在共用 catalog | annotation_set 全部列暫沿全域 band；正文按需，全部文字檔合計含全部引用 |
 | `field_annotation` | 隨原文欄位；display name／字典／商品等 | 隨 effect／printing／QA／CR 等；非 display revision 的用途在 history，詳[位置分片](public-annotation.md#5-分片閉包與消費表) |
 | 其餘文字集合 | 無 | 完整白名單列 |
 
 `rules_name`／`face_rules_name` 的全部欄位唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。商品收錄、完整 printing 裝飾與 support 可背景／按需；保留其完整欄位與邏輯參照。
 
-表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。owner/bucket 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
+表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。永久 owner 與固定背景 band 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
 
 `card_facet/printing_facet/rules_facet` 只是 reader 建出的索引視圖，**不出貨三份 facet 列**。職業/作品/類型/數值/特性從現行 `face_revision`；無 current 的表記未定依 §2.3 的暫顯／候選及未定 facet 規則，不因此隱藏卡片；稀有度/標誌/圖從 printing 與裝飾片；三語名字從 name 的 `FieldTranslation→translation→text_unit`，缺譯 state=missing 並回原文；引擎五態按 `Support/region_blocks` 推導。Q&A/errata 的存在與否用快照清單的兩個稀疏 card ID 集合 `qa_card_ids/errata_card_ids`，加 `source_windows` 覆蓋判 present/absent/unknown，無閉包不能假 absent。兩集合是唯一額外 facet 摘要，容量另量。`rules_facet` 從已下載 rules/profile/restriction 與指定日期計算，不存第二份每卡/賽制摘要；也不能把單卡摘要當整副牌合法性。
 

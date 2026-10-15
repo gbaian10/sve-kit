@@ -1,11 +1,19 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
+import { createCatalog } from "./catalog"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient, type SnapshotStatus } from "./client"
-import { canonical, type JsonObject, objectValue, parseJson, stringValue } from "./format-v3/json"
+import {
+  canonical,
+  type JsonObject,
+  type JsonValue,
+  objectValue,
+  parseJson,
+  stringValue,
+} from "./format-v3/json"
 import { transferDigest } from "./integrity"
 import { VerifiedCache } from "./verified-cache"
 
@@ -17,11 +25,12 @@ const built = await buildSnapshot({ encodeImage: stubImage })
 
 const keyFor = (table: string, partition: string, owner: string | null = null): string => {
   const file = (built.manifest["files"] as JsonObject[]).find((f) =>
-    (f["row_counts"] as JsonObject[]).some(
+    (f["row_counts"] as JsonValue[][]).some(
       (r) =>
-        r["table"] === table &&
-        r["partition"] === partition &&
-        (r["owner"] as JsonObject)["id"] === owner,
+        r[0] === table &&
+        r[3] === partition &&
+        r[2] === owner &&
+        (f["region"] === "jp" || f["region"] === null),
     ),
   )
   if (!file) throw new Error(`fixture has no ${table}/${partition}`)
@@ -62,10 +71,83 @@ function serve(base: string, files = new Map(built.files)): Served {
 }
 
 describe("createSnapshotClient", () => {
+  it("completes only the selected catalog and locates nondefault card numbers before printing preload", async () => {
+    const served = serve("/cdn")
+    const selected = (built.manifest["files"] as JsonObject[]).filter(
+      (file) =>
+        file["purpose"] === "catalog" && (file["region"] === null || file["region"] === "jp"),
+    )
+    const held = stringValue(selected.find((file) => file["region"] === "jp")?.["path"])
+    const gate = Promise.withResolvers<undefined>()
+    const client = createSnapshotClient("/cdn", {
+      cacheStorage: memoryCache(),
+      fetch: async (url, init) => {
+        if (url.endsWith(held)) await gate.promise
+        return served.fetcher(url, init)
+      },
+    })
+    const loading = client.load()
+    await expect.poll(() => client.status().state).toBe("loading")
+    expect(client.snapshot()).toBeNull()
+    gate.resolve(undefined)
+    await loading
+    expect(client.status().state).toBe("ready")
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("missing selected snapshot")
+    const descriptor = new Map(
+      (built.manifest["files"] as JsonObject[]).map((file) => [stringValue(file["path"]), file]),
+    )
+    for (const path of served.requests) {
+      const file = descriptor.get(path)
+      if (file)
+        expect(
+          file["purpose"] === "config" ||
+            (file["purpose"] === "catalog" && (file["region"] === "jp" || file["region"] === null)),
+        ).toBe(true)
+    }
+    const locator = snapshot.bootstrap.find((fragment) => fragment.table === "card_locator")
+      ?.rows[0]
+    if (!locator) throw new Error("missing nondefault printing locator")
+    const index = createCatalog(snapshot).index
+    expect(index.printingByCardNo("jp", stringValue(locator["card_no"]))?.["id"]).toBe(
+      locator["id"],
+    )
+    await client.prefetchPrintings?.()
+    expect(client.snapshot()?.printingReady).toBe(true)
+    expect(
+      createCatalog(client.snapshot() ?? snapshot).index.printing(stringValue(locator["id"]))?.[
+        "int_id"
+      ],
+    ).toBeTypeOf("number")
+  })
+
+  it("retains finite regional rows across same-version switches without duplicating background printings", async () => {
+    const client = createSnapshotClient("/cdn", {
+      fetch: serve("/cdn").fetcher,
+      cacheStorage: memoryCache(),
+    })
+    await client.load()
+    await client.prefetchPrintings?.()
+    await client.selectRegion?.("en")
+    await client.prefetchPrintings?.()
+    await client.selectRegion?.("jp")
+    await client.prefetchPrintings?.()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("missing switched snapshot")
+    const index = createCatalog(snapshot).index
+    expect(index.cards.some((card) => (card["regions"] as JsonObject[]).length === 2)).toBe(true)
+    const printings = index.cards.flatMap((card) => index.printingsOf(stringValue(card["id"])))
+    expect(new Set(printings.map((row) => row["id"])).size).toBe(printings.length)
+    expect(new Set(printings.map((row) => row["region"]))).toEqual(new Set(["jp", "en"]))
+  })
+
   it("cancels the rest of the startup batch when one file fails", async () => {
     const served = serve("/cdn")
     const startupKeys = (built.manifest["files"] as JsonObject[])
-      .filter((file) => file["role"] === "bootstrap")
+      .filter(
+        (file) =>
+          file["purpose"] === "catalog" && (file["region"] === "jp" || file["region"] === null),
+      )
       .map((file) => stringValue(file["path"]))
     const [failing, ...held] = startupKeys
     const cancelled: string[] = []
@@ -286,7 +368,7 @@ describe("createSnapshotClient", () => {
     expect(served.requests.length).toBe(before)
     await client.fragments(textKey)
     await client.fragments(printingKey)
-    expect(served.requests.length).toBe(before + 2)
+    expect(served.requests.length).toBe(before + 3)
     await expect(client.fragments("programs")).rejects.toThrow("not a detail file")
     await expect(client.fragments("nope")).rejects.toThrow("unknown file")
   })
@@ -468,7 +550,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
       .poll(
         async () => {
           const cache = await namespace(storage)
-          return (await cache.keys()).some((request) => request.url.includes("/adopted-index/"))
+          return (await cache.keys()).some((request) => request.url.includes("/adopted-index-jp/"))
         },
         { timeout: 10_000 },
       )
@@ -481,6 +563,33 @@ describe("createSnapshotClient: verified snapshot records", () => {
     })
     return seen
   }
+
+  it("persists the adopted catalog when printing preload finishes before idle serialization", async () => {
+    let completeIdle = () => {}
+    vi.stubGlobal("requestIdleCallback", (callback: () => void) => {
+      completeIdle = callback
+      return 0
+    })
+    try {
+      const storage = memoryCache()
+      const original = createSnapshotClient(base, {
+        fetch: serve(base).fetcher,
+        cacheStorage: storage,
+      })
+      await original.load()
+      await original.prefetchPrintings?.()
+      expect(original.snapshot()?.printingReady).toBe(true)
+      completeIdle()
+      await persisted(storage)
+      const served = serve(base)
+      const restored = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+      await restored.load()
+      await expect.poll(() => restored.status().state).toBe("ready")
+      expect(served.requests).toEqual([INDEX])
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 
   it("restores the same manifest without fetching or decoding the manifest and startup files", async () => {
     const storage = memoryCache()
@@ -561,7 +670,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
       const cache = await open(name)
       const match = cache.match.bind(cache)
       cache.match = async (key, options) => {
-        if ((key instanceof Request ? key.url : String(key)).includes("/adopted-index/")) {
+        if ((key instanceof Request ? key.url : String(key)).includes("/adopted-index-jp/")) {
           notifyRestore()
           await heldRestore
         }
@@ -618,14 +727,14 @@ describe("createSnapshotClient: verified snapshot records", () => {
       const snapshot = original.snapshot()
       if (!response || !snapshot) throw new Error("missing stored snapshot")
       const originalBytes = new Uint8Array(await response.arrayBuffer())
-      const stored = new VerifiedCache(base, "snapshot", 1, storage)
+      const stored = new VerifiedCache(base, "snapshot", 2, storage)
       if (failure === "adoption") {
         const record = objectValue(parseJson(originalBytes))
         const manifest = objectValue(record["manifest"])
         const files = manifest["files"] as JsonObject[]
         // This is readable by catalog restore but fails when constructing image metadata at adoption.
         await stored.write(
-          "snapshot",
+          "snapshot-jp",
           snapshot.manifestHash,
           canonical({
             ...record,
@@ -655,7 +764,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
       expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
       expect(client.snapshot()).toBeNull()
       unsubscribe()
-      await stored.write("snapshot", snapshot.manifestHash, originalBytes)
+      await stored.write("snapshot-jp", snapshot.manifestHash, originalBytes)
       await client.retry()
       await client.reload()
       expect(client.status()).toEqual(original.status())
@@ -678,7 +787,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
       await persisted(storage)
       const cache = await namespace(storage)
       const selection = (await cache.keys()).find((request) =>
-        request.url.includes("/adopted-index/"),
+        request.url.includes("/adopted-index-jp/"),
       )
       const older = selection && (await cache.match(selection))
       if (!selection || !older) throw new Error("missing adopted selection")
@@ -885,7 +994,9 @@ describe("createSnapshotClient: verified snapshot records", () => {
     await expect
       .poll(async () => {
         const cache = await namespace(storage)
-        const key = (await cache.keys()).find((request) => request.url.includes("/adopted-index/"))
+        const key = (await cache.keys()).find((request) =>
+          request.url.includes("/adopted-index-jp/"),
+        )
         const response = key && (await cache.match(key))
         if (!response) return undefined
         return objectValue(parseJson(await response.text()))["manifestHash"]
@@ -908,7 +1019,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
       await original.load()
       await persisted(storage)
       const cache = await namespace(storage)
-      const key = (await cache.keys()).find((request) => request.url.includes("/adopted-index/"))
+      const key = (await cache.keys()).find((request) => request.url.includes("/adopted-index-jp/"))
       if (!key) throw new Error("missing selection")
       if (condition === "missing") await cache.delete(key)
       else {
@@ -954,7 +1065,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
     await client.load()
     await persisted(storage)
     expect(served.requests).toEqual([INDEX])
-    expect(writes).toEqual([expect.stringContaining("/adopted-index/")])
+    expect(writes).toEqual([expect.stringContaining("/adopted-index-jp/")])
   })
 
   it("keeps a newer index check when an earlier snapshot write finishes later", async () => {
@@ -975,7 +1086,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
     }
     const revision = async () => {
       const cache = await namespace(storage)
-      const key = (await cache.keys()).find((request) => request.url.includes("/adopted-index/"))
+      const key = (await cache.keys()).find((request) => request.url.includes("/adopted-index-jp/"))
       const response = key && (await cache.match(key))
       return response ? objectValue(parseJson(await response.text()))["revision"] : undefined
     }
@@ -1045,7 +1156,8 @@ describe("createSnapshotClient: verified snapshot records", () => {
     const storage = memoryCache()
     const files = new Map(built.files)
     const bootstrap = (built.manifest["files"] as JsonObject[]).find(
-      (file) => file["role"] === "bootstrap",
+      (file) =>
+        file["purpose"] === "catalog" && (file["region"] === "jp" || file["region"] === null),
     )
     files.set(stringValue(bootstrap?.["path"]), new Uint8Array([1, 2, 3]))
     const client = createSnapshotClient(base, {

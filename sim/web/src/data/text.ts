@@ -1,6 +1,6 @@
 import type { SnapshotClient } from "./client"
-import { integerValue, objectValue, stringValue } from "./format-v3/json"
-import { bucketOf, createLocator, GLOBAL_OWNER } from "./locator"
+import { stringValue } from "./format-v3/json"
+import { createLocator, GLOBAL_OWNER } from "./locator"
 import type { CardIndex } from "./store"
 
 export interface TextResolver {
@@ -14,7 +14,6 @@ export function createTextResolver(client: SnapshotClient, index: CardIndex): Te
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("snapshot not loaded")
   const locate = createLocator(snapshot.files)
-  const bucketCount = integerValue(objectValue(snapshot.manifest["partitioning"])["bucket_count"])
   const loaded = new Map<string, string>()
   const textOf = (unitId: string): string | undefined => {
     const row = index.textUnit(unitId)
@@ -28,7 +27,7 @@ export function createTextResolver(client: SnapshotClient, index: CardIndex): Te
       const key = locate({
         table: "text_unit",
         owner: GLOBAL_OWNER,
-        bucket: bucketOf([unitId], bucketCount),
+        entityKey: [unitId],
         partition: "detail",
       })
       if (key !== undefined) keys.add(key)

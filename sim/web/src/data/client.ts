@@ -12,7 +12,15 @@ import {
   parseJson,
   stringValue,
 } from "./format-v3/json"
-import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v3/reader"
+import {
+  catalogKeys,
+  type Files,
+  findBase,
+  type Fragment,
+  isCompatible,
+  joinDetail,
+  validateCatalog,
+} from "./format-v3/reader"
 import { checkEntry, indexEntries } from "./index-entry"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
@@ -51,6 +59,8 @@ export type SnapshotStatus =
 
 export interface LoadedSnapshot {
   readonly dataVersion: string
+  readonly region?: "jp" | "en"
+  readonly printingReady?: boolean
   readonly entrySource?: "current" | "previous"
   readonly manifestHash: string
   readonly manifest: JsonObject
@@ -61,6 +71,7 @@ export interface LoadedSnapshot {
 }
 
 export interface SnapshotClientOptions {
+  readonly region?: "jp" | "en"
   readonly fetch?: Fetcher
   /** `index`: the current/previous version index (format §4.1); `preview`: a preview root's pointer file. */
   readonly entry?: "index" | "preview"
@@ -77,10 +88,13 @@ export interface SnapshotClient {
   readonly retry: () => Promise<void>
   /** Reads the version index again even when ready; the active snapshot only changes on success. */
   readonly reload: () => Promise<void>
+  readonly setRegion?: (region: "jp" | "en") => void
+  readonly selectRegion?: (region: "jp" | "en") => Promise<void>
   readonly snapshot: () => LoadedSnapshot | null
   /** A text, history or images file, decoded and joined onto its bootstrap base; cached LRU. */
   readonly fragments: (fileKey: string) => Promise<readonly Fragment[]>
   readonly metadataStatus: () => MetadataProgress
+  readonly prefetchPrintings?: () => Promise<void>
   readonly prefetchImages: () => Promise<void>
   readonly cancelImagePrefetch: () => void
 }
@@ -90,7 +104,7 @@ const INDEX_FORMAT = 2
 // Preview roots have no permanent index (format §4.2); until #4 Q12 settles, dev reads this pointer.
 const PREVIEW_POINTER = "snapshots/preview/current.json"
 // Bump whenever the stored snapshot record changes shape.
-const SNAPSHOT_RECORD_FORMAT = 1
+const SNAPSHOT_RECORD_FORMAT = 2
 class NoCompatibleVersion extends Error {}
 
 function failureOf(error: unknown): LoadFailure {
@@ -123,6 +137,7 @@ export function createSnapshotClient(
   let detailBytes = 0
   const listeners = new Set<() => void>()
   let status: SnapshotStatus = { state: "idle" }
+  let region = options.region ?? "jp"
   let loaded: LoadedSnapshot | null = null
   let pending: Promise<void> | null = null
   let startup: Promise<void> | null = null
@@ -217,14 +232,18 @@ export function createSnapshotClient(
 
   // A record holds what one full download verified, so it replaces the manifest, every startup
   // file and all of their checks; anything unreadable falls back to that download.
-  const restore = async (manifestHash: string): Promise<LoadedSnapshot | undefined> => {
-    const bytes = await stored.read("snapshot", manifestHash)
+  const restore = async (
+    manifestHash: string,
+    selectedRegion = region,
+  ): Promise<LoadedSnapshot | undefined> => {
+    const bytes = await stored.read(`snapshot-${selectedRegion}`, manifestHash)
     if (!bytes) return undefined
     try {
       const record = objectValue(JSON.parse(new TextDecoder().decode(bytes)) as JsonValue)
       const manifest = objectValue(record["manifest"])
       return {
         dataVersion: stringValue(manifest["data_version"]),
+        region: selectedRegion,
         manifestHash,
         manifest,
         // Rebuild the manifest file lookup without downloading it again.
@@ -239,7 +258,7 @@ export function createSnapshotClient(
         bootstrap: arrayValue(record["bootstrap"]) as unknown as Fragment[],
       }
     } catch {
-      await stored.remove("snapshot", manifestHash)
+      await stored.remove(`snapshot-${selectedRegion}`, manifestHash)
       return undefined
     }
   }
@@ -273,13 +292,14 @@ export function createSnapshotClient(
       payload.set(part, offset)
       offset += part.length
     }
-    await stored.write("snapshot", snapshot.manifestHash, payload)
+    await stored.write(`snapshot-${snapshot.region ?? region}`, snapshot.manifestHash, payload)
   }
 
   const download = async (
     previous: LoadedSnapshot | null,
     entryBytes?: Promise<Uint8Array>,
   ): Promise<{ readonly snapshot: LoadedSnapshot; readonly downloaded: boolean }> => {
+    const selectedRegion = region
     const progress = (phase: LoadPhase, files?: { done: number; total: number }) => {
       set(
         previous
@@ -297,13 +317,14 @@ export function createSnapshotClient(
     // A check that finds the same manifest keeps the loaded snapshot and its caches as they are.
     if (
       previous &&
+      previous.region === selectedRegion &&
       previous.manifestHash === stringValue(chosen["manifest_sha256"]) &&
       (previous.entrySource ?? "current") === source
     ) {
       matchEntry(chosen, previous.manifest)
       return { snapshot: previous, downloaded: false }
     }
-    const restored = await restore(stringValue(chosen["manifest_sha256"]))
+    const restored = await restore(stringValue(chosen["manifest_sha256"]), selectedRegion)
     if (restored) {
       matchEntry(chosen, restored.manifest)
       return { snapshot: { ...restored, entrySource: source }, downloaded: false }
@@ -323,9 +344,11 @@ export function createSnapshotClient(
     let config: JsonObject | null = null
     // Startup files are fetched together: one at a time cost a full round trip each, about a
     // minute behind a real CDN. Results are applied in manifest order.
-    const startup = [...files].filter(
-      ([, file]) => file["role"] === "config" || file["role"] === "bootstrap",
-    )
+    const startup = catalogKeys(files, selectedRegion).map((key) => {
+      const file = files.get(key)
+      if (!file) throw new SnapshotError("payload-set", "missing catalog file")
+      return [key, file] as const
+    })
     // A first download shows how many files have arrived, so a slow start reads as progress
     // rather than a stuck page. A background update keeps the old data and needs no count.
     let done = 0
@@ -357,7 +380,12 @@ export function createSnapshotClient(
       else throw new SnapshotError("shape", "unexpected startup payload")
     }
     if (!config) throw new SnapshotError("config-programs-count", "config file missing")
+    if (previous?.manifestHash === stringValue(chosen["manifest_sha256"])) {
+      const present = new Set(bootstrap.map((f) => f.identity))
+      bootstrap.push(...previous.bootstrap.filter((f) => !present.has(f.identity)))
+    }
     const snapshot: LoadedSnapshot = {
+      region: selectedRegion,
       entrySource: source,
       dataVersion: stringValue(manifest["data_version"]),
       manifestHash: stringValue(chosen["manifest_sha256"]),
@@ -366,12 +394,23 @@ export function createSnapshotClient(
       config,
       bootstrap,
     }
+    validateCatalog(bootstrap)
     catalogOf(snapshot)
     return { snapshot, downloaded: true }
   }
 
   const adopt = (candidate: LoadedSnapshot): void => {
     const previous = loaded
+    if (previous?.manifestHash === candidate.manifestHash) {
+      const present = new Set(candidate.bootstrap.map((fragment) => fragment.identity))
+      candidate = {
+        ...candidate,
+        bootstrap: [
+          ...candidate.bootstrap,
+          ...previous.bootstrap.filter((fragment) => !present.has(fragment.identity)),
+        ],
+      }
+    }
     catalogOf(candidate)
     metadata?.dispose()
     detailAbort.abort()
@@ -386,9 +425,7 @@ export function createSnapshotClient(
         [...candidate.files].filter(
           ([, file]) =>
             file["role"] === "images" &&
-            arrayValue(file["row_counts"]).some(
-              (c) => objectValue(c)["table"] === "printing_image",
-            ),
+            arrayValue(file["row_counts"]).some((c) => arrayValue(c)[0] === "printing_image"),
         ),
       ),
       fetcher,
@@ -412,17 +449,23 @@ export function createSnapshotClient(
     }
     if (writeSnapshot) await persist(snapshot)
     // A slower serialization must not replace the selection of a newer adopted snapshot.
-    if (loaded !== snapshot || selection.revision !== lastRevision || selection.index !== lastIndex)
+    if (
+      loaded?.manifestHash !== snapshot.manifestHash ||
+      loaded.region !== snapshot.region ||
+      selection.revision !== lastRevision ||
+      selection.index !== lastIndex
+    )
       return
     await stored.write(
-      `adopted-${entry}`,
+      `adopted-${entry}-${snapshot.region ?? region}`,
       "active",
       new TextEncoder().encode(JSON.stringify(selection)),
     )
   }
 
   const restoreAdopted = async (): Promise<LoadedSnapshot | undefined> => {
-    const bytes = await stored.read(`adopted-${entry}`, "active")
+    const selectedRegion = region
+    const bytes = await stored.read(`adopted-${entry}-${selectedRegion}`, "active")
     if (!bytes) return undefined
     try {
       const selection = objectValue(parseJson(bytes))
@@ -430,7 +473,7 @@ export function createSnapshotClient(
       if (source !== "current" && source !== "previous") return undefined
       const revision = integerValue(selection["revision"])
       const signature = stringValue(selection["index"])
-      const snapshot = await restore(stringValue(selection["manifestHash"]))
+      const snapshot = await restore(stringValue(selection["manifestHash"]), selectedRegion)
       if (!snapshot) return undefined
       const restored: LoadedSnapshot = { ...snapshot, entrySource: source }
       catalogOf(restored)
@@ -440,7 +483,7 @@ export function createSnapshotClient(
       }
       return restored
     } catch {
-      await stored.remove(`adopted-${entry}`, "active")
+      await stored.remove(`adopted-${entry}-${selectedRegion}`, "active")
       return undefined
     }
   }
@@ -450,6 +493,10 @@ export function createSnapshotClient(
     const previous = loaded
     try {
       const { snapshot: candidate, downloaded } = await download(previous, entryBytes)
+      if (candidate.region !== region) {
+        await run()
+        return
+      }
       if (candidate !== previous) adopt(candidate)
       set({
         state: "ready",
@@ -457,7 +504,7 @@ export function createSnapshotClient(
         ...(candidate.entrySource === "previous" ? { outdated: true } : {}),
       })
       // A restored record is already stored; serializing tens of megabytes again only costs time.
-      void remember(candidate, downloaded).catch(() => undefined)
+      void remember(loaded ?? candidate, downloaded).catch(() => undefined)
     } catch (error) {
       const failure = failureOf(error)
       if (previous)
@@ -483,7 +530,7 @@ export function createSnapshotClient(
       // Network can fail before local storage finishes; run still classifies the original rejection.
       void entryBytes.catch(() => undefined)
       const cached = await restoreAdopted()
-      if (cached) {
+      if (cached && cached.region === region) {
         adopt(cached)
         set({
           state: "ready",
@@ -527,14 +574,14 @@ export function createSnapshotClient(
     const file = snapshot.files.get(key)
     if (!file) throw new SnapshotError("payload-set", `unknown file ${key}`)
     const signal = detailAbort.signal
-    const active = () => !signal.aborted && loaded === snapshot
+    const active = () => !signal.aborted && loaded?.manifestHash === snapshot.manifestHash
     const role = file["role"]
-    if (role !== "text" && role !== "images")
+    if (role !== "text" && role !== "images" && role !== "bootstrap")
       throw new SnapshotError("payload-set", `${key} is not a detail file`)
     const data =
       role === "images" &&
       metadata &&
-      arrayValue(file["row_counts"]).some((c) => objectValue(c)["table"] === "printing_image")
+      arrayValue(file["row_counts"]).some((c) => arrayValue(c)[0] === "printing_image")
         ? await metadata.read(key)
         : await fetchVerified(
             stringValue(file["path"]),
@@ -551,9 +598,21 @@ export function createSnapshotClient(
     const faces = fragments.some((fragment) => fragment.value["base"] !== null)
       ? facesOf(snapshot)
       : new Map<string, JsonObject>()
+    const bases: Fragment[] = [...snapshot.bootstrap, ...fragments]
+    for (const fragment of fragments) {
+      if (fragment.value["base"] === null) continue
+      const ref = objectValue(objectValue(fragment.value["base"])["file"])
+      const baseKey = stringValue(ref["key"])
+      if (snapshot.files.get(baseKey)?.["sha256"] !== ref["sha256"])
+        throw new SnapshotError("base-missing", "exact base hash")
+      if (!bases.some((f) => f.file === baseKey)) bases.push(...(await loadFile(snapshot, baseKey)))
+    }
+    for (const fragment of bases)
+      if (fragment.table === "face")
+        for (const row of fragment.rows) faces.set(stringValue(row["id"]), row)
     return fragments.map((fragment) => {
       if (fragment.value["base"] === null) return fragment
-      const base = findBase(fragment, [...snapshot.bootstrap, ...fragments])
+      const base = findBase(fragment, bases)
       return { ...fragment, rows: joinDetail(fragment, base, faces) }
     })
   }
@@ -603,6 +662,44 @@ export function createSnapshotClient(
     return promise
   }
 
+  let printingPending: { key: string; promise: Promise<void> } | undefined
+  const prefetchPrintings = (): Promise<void> => {
+    const snapshot = loaded
+    if (!snapshot || snapshot.printingReady) return Promise.resolve()
+    const selectedRegion = snapshot.region ?? options.region ?? "jp"
+    const key = `${snapshot.manifestHash}/${selectedRegion}`
+    if (printingPending?.key === key) return printingPending.promise
+    const promise = Promise.all(
+      [...snapshot.files]
+        .filter(
+          ([, file]) =>
+            ["print", "product"].includes(stringValue(file["purpose"])) &&
+            (file["region"] === null || file["region"] === selectedRegion),
+        )
+        .map(([key]) => fragments(key)),
+    )
+      .then((values) => {
+        if (loaded !== snapshot) return
+        const present = new Set(snapshot.bootstrap.map((fragment) => fragment.identity))
+        const supplemented: LoadedSnapshot = {
+          ...snapshot,
+          printingReady: true,
+          bootstrap: [
+            ...snapshot.bootstrap,
+            ...values.flat().filter((fragment) => !present.has(fragment.identity)),
+          ],
+        }
+        catalogOf(supplemented)
+        loaded = supplemented
+        if (status.state === "ready") set({ ...status })
+      })
+      .finally(() => {
+        if (printingPending?.promise === promise) printingPending = undefined
+      })
+    printingPending = { key, promise }
+    return promise
+  }
+
   const reload = (): Promise<void> => {
     if (pending) return pending
     if (startup) {
@@ -628,10 +725,25 @@ export function createSnapshotClient(
       return load()
     },
     reload,
+    setRegion: (next) => {
+      if (next === region) return
+      if (loaded)
+        void (async () => {
+          region = next
+          await reload()
+        })()
+      else region = next
+    },
+    selectRegion: async (next) => {
+      if (next === region) return load()
+      region = next
+      await reload()
+    },
     snapshot: () => loaded,
     fragments,
     metadataStatus: () =>
       metadata?.status() ?? { state: "idle", done: 0, total: 0, persistent: false },
+    prefetchPrintings,
     prefetchImages: () => metadata?.prefetch() ?? Promise.resolve(),
     cancelImagePrefetch: () => metadata?.cancel(),
   }

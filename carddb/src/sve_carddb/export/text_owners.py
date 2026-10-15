@@ -11,6 +11,33 @@ if TYPE_CHECKING:
     from sve_carddb.export.reader import Row, View
 
 
+def row_owners(table: str, row: Row) -> list[Row]:
+    """Enumerate closed text owner keys, including composite printed faces."""
+    if table == "printing":
+        return [
+            {
+                "kind": "printing_face",
+                "id": row["id"],
+                "face_id": object_value(f)["face_id"],
+            }
+            for f in array(row["faces"])
+        ]
+    if table == "vocabulary":
+        return [
+            {"kind": "vocabulary", "vocabulary_kind": row["kind"], "code": row["code"]}
+        ]
+    if table in {
+        "face_revision",
+        "product",
+        "product_family",
+        "keyword",
+        "qa_version",
+        "cr_clause",
+    }:
+        return [{"kind": table, "id": row["id"]}]
+    return []
+
+
 def owner_key(owner: Row) -> bytes:
     """Reject a loose DB owner or extra key before an equal string can hide the mistake."""
     kind = string(owner["kind"])

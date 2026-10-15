@@ -10,6 +10,7 @@ from sve_carddb.contracts.snapshot import columns, definition
 from sve_carddb.core.json import array, object_value, string
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.project.source import Source
+from sve_carddb.export.semantics import row_key
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -245,3 +246,32 @@ def references(value: JsonValue) -> tuple[set[str], set[str]]:
             texts |= nested_texts
             translations |= nested_translations
     return texts, translations
+
+
+def _key(row: Record, fields: list[str]) -> tuple[tuple[int, int | str | bytes], ...]:
+    return tuple(row_key(row[field]) for field in fields)
+
+
+def ordered(table: str, rows: list[Record]) -> list[Record]:
+    """Fix the complete PK order before interpreting positional detail indices."""
+    fields = [string(item) for item in array(definition(table)["x-primary-key"])]
+    keys = [_key(row, fields) for row in rows]
+    if len(set(keys)) != len(keys):
+        raise ValueError("Duplicate public primary key")
+    return sorted(rows, key=lambda row: _key(row, fields))
+
+
+def concept_references(row: Record) -> set[str]:
+    """Collect annotation concepts while leaving vocabulary in the shared catalog."""
+    result: set[str] = set()
+    for raw in array(row["occurrences"]):
+        reference = object_value(object_value(raw)["reference"])
+        if reference["kind"] != "vocabulary":
+            result.add(
+                string(
+                    reference["term_id"]
+                    if reference["kind"] == "card_name"
+                    else reference["key"]
+                )
+            )
+    return result
