@@ -145,7 +145,7 @@ export async function locateCard(
   } catch (error) {
     if (
       !(error instanceof CardRouteError) ||
-      !["not-found", "needs-update", "reference"].includes(error.kind) ||
+      !["not-found", "needs-update"].includes(error.kind) ||
       input.hint
     )
       throw error

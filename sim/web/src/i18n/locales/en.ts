@@ -223,6 +223,7 @@ export default {
     retry: "Retry",
   },
   sets: {
+    notFound: "Card set not found",
     kind: {
       booster: "Boosters",
       collaboration: "Collaborations",

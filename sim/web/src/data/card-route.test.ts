@@ -5,13 +5,16 @@ import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
 import { locateCard } from "./card-route"
 import { createSnapshotClient } from "./client"
+import { arrayValue, canonical, objectValue, parseJson, stringValue } from "./format-v3/json"
+import { digest } from "./format-v3/sha256"
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
-function client(region: "jp" | "en" = "jp") {
+function client(region: "jp" | "en" = "jp", entry: "index" | "preview" = "index") {
   const requests: string[] = []
   const files = new Map(built.files)
   const client = createSnapshotClient("https://cdn.test", {
     region,
+    entry,
     cacheStorage: memoryCache(),
     fetch: (url) => {
       const path = url.slice("https://cdn.test/".length)
@@ -26,6 +29,38 @@ function client(region: "jp" | "en" = "jp") {
 }
 
 describe("catalog-based cold card routes", () => {
+  it("reports a broken alias without downloading the other region", async () => {
+    const h = client("jp", "preview")
+    const manifest = structuredClone(built.manifest)
+    const files = arrayValue(manifest["files"]).map((file) => objectValue(file))
+    const file = files.find((file) =>
+      JSON.stringify(file["row_counts"]).includes("card_route_alias"),
+    )
+    if (!file) throw new Error("missing alias file")
+    const path = stringValue(file["path"])
+    const raw = h.files.get(path)
+    if (!raw) throw new Error("missing alias bytes")
+    const text = new TextDecoder().decode(raw).replace('"BP01-002a"', '"MISSING-001"')
+    const bytes = canonical(parseJson(new TextEncoder().encode(text)))
+    file["bytes"] = bytes.length
+    file["sha256"] = digest(bytes)
+    h.files.set(path, bytes)
+    const manifestBytes = canonical(manifest)
+    h.files.set(built.manifestPath, manifestBytes)
+    h.files.set(
+      "snapshots/preview/current.json",
+      canonical({
+        manifest_path: built.manifestPath,
+        manifest_sha256: digest(manifestBytes),
+      }),
+    )
+    await expect(
+      locateCard(h.client, { namespace: "official", key: "BP01-002A" }),
+    ).rejects.toMatchObject({ kind: "reference", message: "card route alias target is missing" })
+    const en = files.filter((file) => file["region"] === "en").map((file) => file["path"])
+    expect(h.requests.filter((path) => en.includes(path))).toEqual([])
+  })
+
   it("opens a non-default lowercase printing through a permanent alias", async () => {
     const h = client()
     const result = await locateCard(h.client, { namespace: "official", key: "BP01-002A" })

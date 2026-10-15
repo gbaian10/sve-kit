@@ -51,6 +51,16 @@ async function goHome(router: Awaited<ReturnType<typeof open>>["router"]) {
 }
 
 describe("home search", () => {
+  it("keeps the EN list background when opening a recent card from home", async () => {
+    prefsStore.set({ cardEdition: "en" })
+    recentStore.push("p:bp01-002-en")
+    const { router } = await open()
+    await userEvent.click(screen.getByRole("combobox"))
+    const list = await screen.findByRole("listbox")
+    await userEvent.click(await within(list).findByRole("option", { name: /BP01EN-002/u }))
+    expect(router.state.location.state).toMatchObject({ background: "?ed=en" })
+  })
+
   it("opens the first suggestion with Enter and keeps the text when coming back", async () => {
     const { router } = await open()
     const user = userEvent.setup()

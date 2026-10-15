@@ -219,6 +219,7 @@ export default {
     retry: "再試行",
   },
   sets: {
+    notFound: "このカードパックが見つかりません",
     kind: {
       booster: "ブースター",
       collaboration: "コラボパック",

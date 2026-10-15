@@ -1,5 +1,5 @@
-import { useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
-import { UNSAFE_LocationContext } from "react-router"
+import { type RefObject, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
+import { useLocation } from "react-router"
 
 import {
   activeSnapshotRoot,
@@ -33,6 +33,7 @@ import {
   stringValue,
   useSnapshotRoot,
   useSnapshotStatus,
+  type ViewFace,
   viewImages,
 } from "../data"
 import { DEFAULT_QUERY } from "../domain/query/model"
@@ -126,19 +127,16 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
 }
 
 export function useRouteEdition(): Region {
-  const context = useContext(UNSAFE_LocationContext) as {
-    location: { pathname: string; search: string; state: unknown }
-  } | null
-  const location = context?.location
+  const location = useLocation()
   const { cardEdition } = usePrefs()
-  const pathname = location?.pathname ?? "/"
-  const search = location?.search ?? ""
+  const pathname = location.pathname
+  const search = location.search
   if (pathname === "/cards" || pathname === "/sets" || pathname.startsWith("/sets/"))
     return new URLSearchParams(search).get("ed") === "en" ? "en" : "jp"
   if (pathname.startsWith("/cards/")) {
     const params = new URLSearchParams(search)
     if (params.has("ed")) return params.get("ed") === "en" ? "en" : "jp"
-    const state = location?.state as { route?: { region?: string } } | null
+    const state = location.state as { route?: { region?: string } } | null
     if (state?.route?.region === "jp" || state?.route?.region === "en") return state.route.region
     // This only schedules the first catalog. Route resolution still checks the exact raw key.
     return /en(?:-|$)/iu.test(pathname.split("/")[2] ?? "") ? "en" : "jp"
@@ -258,6 +256,7 @@ function useSearchView(query: SearchQuery) {
   return { result, view, images, status }
 }
 export function useListView(query: SearchQuery, pages: number) {
+  const imageRoot = useRef<HTMLDivElement>(null)
   const { root } = useActiveSnapshot()
   const { session } = workerOf(root)
   const key = JSON.stringify(query)
@@ -353,87 +352,125 @@ export function useListView(query: SearchQuery, pages: number) {
     return store.release
   }, [store, pages])
   const result = useSyncExternalStore(store.subscribe, store.get, store.get)
-  const images = useVisibleResultImages(result.view)
+  const images = useVisibleResultImages(result.view, imageRoot, query.edition)
   useEffect(() => {
     if (result.view) performance.mark("sve-view-ready")
   }, [result.view])
-  return { ...result, images, retry: store.retry }
+  return { ...result, images, imageRoot, retry: store.retry }
+}
+
+function retainedFaces(
+  channel: SearchChannel,
+  root: string | undefined,
+  manifestHash: string | undefined,
+  edition: Region | undefined,
+) {
+  const collected = new Map<string, ViewFace>()
+  let faces: readonly ViewFace[] = []
+  const collect = () => {
+    const next = channel.getStatus()
+    const result = next.result
+    if (
+      result.phase !== "complete" ||
+      !result.faces ||
+      result.manifestHash !== manifestHash ||
+      result.root !== root ||
+      next.lastInput?.edition !== edition
+    )
+      return
+    for (const face of result.faces) collected.set(faceKeyOf(face.printingId, face.faceId), face)
+    faces = [...collected.values()]
+  }
+  collect()
+  return {
+    get: () => faces,
+    subscribe: (listener: () => void) =>
+      channel.subscribe(() => {
+        collect()
+        listener()
+      }),
+  }
 }
 
 /** Image metadata is independent of search readiness and follows visible card slots. */
-function useVisibleResultImages(view: CompleteView | undefined) {
-  const { channel, status } = useWorkerChannel(JSON.stringify(view?.query ?? null))
+function useVisibleResultImages(
+  view: CompleteView | undefined,
+  imageRoot: RefObject<HTMLDivElement | null>,
+  edition: Region,
+) {
+  const { channel, status } = useWorkerChannel()
   const state = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
   const [wanted, setWanted] = useState<readonly string[]>([])
-  const key = view
-    ? JSON.stringify([view.query, view.page.items.map((item) => item.printingId)])
-    : ""
+  const retained = useMemo(
+    () => retainedFaces(channel, status.root, status.manifestHash, edition),
+    [channel, status.root, status.manifestHash, edition],
+  )
+  const faces = useSyncExternalStore(retained.subscribe, retained.get, retained.get)
+  const key = view ? JSON.stringify(view.page.items.map((item) => item.printingId)) : ""
   useEffect(() => {
-    if (!view) return
+    const root = imageRoot.current
+    if (!view || !root) return
+    const allowed = new Set(view.page.items.map((item) => item.printingId))
     const visible = new Set<Element>()
     const scan = () => {
       const ids = [
         ...new Set(
           [...visible]
-            .filter((node) => node.isConnected)
+            .filter((node) => root.contains(node))
             .map((node) => node.getAttribute("data-image-printing") ?? ""),
         ),
       ]
-        .filter(Boolean)
+        .filter((id) => allowed.has(id))
         .sort()
       setWanted((previous) => (JSON.stringify(previous) === JSON.stringify(ids) ? previous : ids))
     }
     const observer =
       typeof IntersectionObserver === "undefined"
         ? undefined
-        : new IntersectionObserver((entries) => {
-            for (const entry of entries) {
-              if (entry.isIntersecting) visible.add(entry.target)
-              else visible.delete(entry.target)
-            }
-            scan()
-          })
+        : new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (entry.isIntersecting) visible.add(entry.target)
+                else visible.delete(entry.target)
+              }
+              scan()
+            },
+            { rootMargin: `${String(window.innerHeight * 1.5)}px 0px` },
+          )
     const observed = new Set<Element>()
     const scanNodes = () => {
-      for (const node of document.querySelectorAll("[data-image-printing]")) {
-        if (observed.has(node)) continue
+      for (const node of root.querySelectorAll("[data-image-printing]")) {
+        if (observed.has(node) || !allowed.has(node.getAttribute("data-image-printing") ?? ""))
+          continue
         observed.add(node)
         if (observer) observer.observe(node)
         else visible.add(node)
       }
       for (const node of observed) {
-        if (node.isConnected) continue
+        if (root.contains(node)) continue
         observer?.unobserve(node)
         observed.delete(node)
         visible.delete(node)
       }
-      if (!observer) scan()
+      scan()
     }
     const mutations = new MutationObserver(scanNodes)
-    mutations.observe(document.body, { childList: true, subtree: true })
+    mutations.observe(root, { childList: true, subtree: true })
     scanNodes()
     return () => {
       observer?.disconnect()
       mutations.disconnect()
     }
-  }, [key, view])
-  const edition = view?.query.edition
-  const ids = JSON.stringify(wanted)
+  }, [imageRoot, key, view])
+  const ids = JSON.stringify(wanted.filter((id) => !faces.some((face) => face.printingId === id)))
   useEffect(() => {
-    if (edition && wanted.length) channel.images(JSON.parse(ids) as string[], edition)
-  }, [channel, ids, edition, wanted.length])
-  const faces =
-    state.result.phase === "complete"
-      ? state.result.faces
-      : state.previous &&
-          state.previous.manifestHash === status.manifestHash &&
-          state.previous.root === status.root
-        ? state.previous.faces
-        : undefined
+    const missing = JSON.parse(ids) as string[]
+    if (missing.length) channel.images(missing, edition)
+  }, [channel, ids, edition])
   const failed = state.result.phase === "error"
   return useMemo(() => {
     if (!view) return undefined
-    const images = viewImages({ ...view, faces: faces ?? [] })
+    const images = viewImages({ ...view, faces })
     return failed ? { ...images, failed: true, known: () => true } : images
   }, [view, faces, failed])
 }

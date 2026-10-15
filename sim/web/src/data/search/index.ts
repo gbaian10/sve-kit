@@ -104,7 +104,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 7
+export const INDEX_IMAGE_FORMAT = 8
 
 interface Parts {
   readonly pool: StringPool
@@ -656,7 +656,7 @@ export class SearchIndex {
               : second === null
                 ? -1
                 : typeof first === "string" && typeof second === "string"
-                  ? first.localeCompare(second)
+                  ? first.localeCompare(second, this.edition === "jp" ? "ja" : "en")
                   : Number(first) - Number(second)) || (this.order[a] ?? 0) - (this.order[b] ?? 0)
         )
       })

@@ -1,4 +1,12 @@
-import { act, render, renderHook, screen } from "@testing-library/react"
+import {
+  act,
+  render as testingRender,
+  renderHook as testingRenderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react"
+import { type ReactNode, useState } from "react"
+import { MemoryRouter } from "react-router"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { ClassQuickBar } from "../components/search/ClassQuickBar"
@@ -12,6 +20,15 @@ import {
   useSearchReadiness,
   useSetOptions,
 } from "./snapshot"
+
+function Router({ children }: { children: ReactNode }) {
+  return <MemoryRouter>{children}</MemoryRouter>
+}
+const renderHook: typeof testingRenderHook = (hook, options) =>
+  testingRenderHook(hook, { wrapper: Router, ...options })
+function render(element: ReactNode) {
+  return testingRender(element, { wrapper: Router })
+}
 
 // Control the browser boundary; the real session still owns generations and query identities.
 const fake = vi.hoisted(() => ({
@@ -85,7 +102,10 @@ function answer() {
   })
 }
 /** Answers each channel's latest view request with one item named after its page offset. */
-function answerViews(classes: NonNullable<ReturnType<typeof useSetOptions>["classes"]> = []) {
+function answerViews(
+  classes: NonNullable<ReturnType<typeof useSetOptions>["classes"]> = [],
+  ids = ["p"],
+) {
   const latest = new Map<number, Extract<SearchRequest, { kind: "view" }>>()
   for (const request of fake.requests)
     if (request.kind === "view") latest.set(request.channelId, request)
@@ -101,7 +121,11 @@ function answerViews(classes: NonNullable<ReturnType<typeof useSetOptions>["clas
         page: {
           total: 120,
           offset,
-          items: [{ key: `c:${String(offset)}`, printingId: "p", summary: undefined }],
+          items: ids.map((printingId, i) => ({
+            key: `c:${String(offset + i)}`,
+            printingId,
+            summary: undefined,
+          })),
         },
         options: { classes, sets: [] },
         faces: [],
@@ -359,4 +383,135 @@ it("visible ability previews stay complete during replacement but never cross ed
   })
   rerender({ edition: "en" })
   expect(result.current).toMatchObject({ phase: "error", error: { kind: "edition-not-ready" } })
+})
+
+it("prefetches nearby result slots only and retains faces until the snapshot changes", async () => {
+  const observers: {
+    callback: IntersectionObserverCallback
+    nodes: Set<Element>
+    options: IntersectionObserverInit | undefined
+  }[] = []
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      entry: (typeof observers)[number]
+      constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+        this.entry = { callback, nodes: new Set(), options }
+        observers.push(this.entry)
+      }
+      observe(node: Element) {
+        this.entry.nodes.add(node)
+      }
+      unobserve(node: Element) {
+        this.entry.nodes.delete(node)
+      }
+      disconnect() {
+        this.entry.nodes.clear()
+      }
+    },
+  )
+  function Results() {
+    const [filtered, setFiltered] = useState(false)
+    const { view, images, imageRoot } = useListView(
+      { ...query, state: { ...DEFAULT_QUERY, text: filtered ? "synthetic" : "" } },
+      1,
+    )
+    return (
+      <>
+        <button
+          onClick={() => {
+            setFiltered(true)
+          }}
+        >
+          Filter
+        </button>
+        <span data-testid="outside" data-image-printing="outside" />
+        <div ref={imageRoot}>
+          {view?.page.items.map((item) => (
+            <span
+              key={item.printingId}
+              data-testid={item.printingId}
+              data-image-printing={item.printingId}
+            />
+          ))}
+          <output data-testid="known">
+            {["p", "q"].filter((id) => images?.known?.(id, "f")).join(",")}
+          </output>
+        </div>
+      </>
+    )
+  }
+  render(<Results />)
+  ready()
+  answerViews([], ["p", "q"])
+  expect(screen.getByTestId("known")).toBeEmptyDOMElement()
+  const near = (id: string, distance: number) => {
+    const node = screen.getByTestId(id)
+    const observer = observers.findLast((observer) => observer.nodes.has(node))
+    if (!observer) throw new Error("slot is not observed")
+    const margin = Number.parseFloat(observer.options?.rootMargin ?? "0")
+    act(() => {
+      observer.callback(
+        [
+          {
+            target: node,
+            isIntersecting: distance <= margin,
+            boundingClientRect: node.getBoundingClientRect(),
+            intersectionRatio: 1,
+            intersectionRect: node.getBoundingClientRect(),
+            rootBounds: null,
+            time: 0,
+          },
+        ],
+        {} as IntersectionObserver,
+      )
+    })
+  }
+  const imagesRequests = () => fake.requests.filter((request) => request.kind === "images")
+  near("p", window.innerHeight)
+  await waitFor(() => {
+    expect(imagesRequests().at(-1)).toMatchObject({ printingIds: ["p"] })
+  })
+  expect(observers.some((observer) => observer.nodes.has(screen.getByTestId("outside")))).toBe(
+    false,
+  )
+  const answerImages = (printingId: string) => {
+    const request = imagesRequests().at(-1)
+    if (!request) throw new Error("image request missing")
+    emit({
+      kind: "images-result",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      faces: [
+        { printingId, faceId: "f", intId: 1, ordinal: 0, asset: { availability: "missing" } },
+      ],
+    })
+  }
+  answerImages("p")
+  expect(screen.getByTestId("known")).toHaveTextContent("p")
+  const count = imagesRequests().length
+  near("p", window.innerHeight * 3)
+  near("p", 0)
+  expect(imagesRequests()).toHaveLength(count)
+  near("p", window.innerHeight * 3)
+  near("q", 0)
+  await waitFor(() => {
+    expect(imagesRequests().at(-1)).toMatchObject({ printingIds: ["q"] })
+  })
+  answerImages("q")
+  expect(screen.getByTestId("known")).toHaveTextContent("p,q")
+  act(() => {
+    screen.getByRole("button", { name: "Filter" }).click()
+  })
+  answerViews([], ["p", "q"])
+  expect(screen.getByTestId("known")).toHaveTextContent("p,q")
+  const beforeReturn = imagesRequests().length
+  near("p", 0)
+  expect(imagesRequests()).toHaveLength(beforeReturn)
+  act(() => {
+    window.dispatchEvent(new Event("online"))
+  })
+  ready("v2")
+  expect(screen.getByTestId("known")).toBeEmptyDOMElement()
 })

@@ -11,6 +11,18 @@ afterEach(() => {
 })
 
 describe("AccountMenuPanel", () => {
+  it("opens the chosen edition's list when switching from a fixed card printing", async () => {
+    const { router } = await renderInRouter(<AccountMenuPanel />, {
+      initialEntries: ["/cards/BP01-002"],
+    })
+    await userEvent.click(screen.getByRole("radio", { name: "英版" }))
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("?ed=en")
+    expect(screen.getByRole("radio", { name: "英版" })).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(screen.getByRole("radio", { name: "日版" }))
+    expect(router.state.location.search).toBe("")
+  })
+
   it("writes every choice to the preferences", async () => {
     await renderInRouter(<AccountMenuPanel />)
     await userEvent.click(screen.getByRole("radio", { name: "英版" }))

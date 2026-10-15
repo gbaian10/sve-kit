@@ -15,11 +15,20 @@ const stubImage = ({ width, height, seed }: { width: number; height: number; see
     new TextEncoder().encode(`stub:${String(width)}x${String(height)}:${String(seed)}`),
   )
 const built = await buildSnapshot({ encodeImage: stubImage })
+let failImageMetadata = false
+const imageMetadataPaths = new Set(
+  (built.manifest["files"] as { path: string; row_counts: unknown }[])
+    .filter((file) => JSON.stringify(file.row_counts).includes("printing_image"))
+    .map((file) => file.path),
+)
 
 beforeAll(() => {
   vi.stubGlobal("fetch", (input: RequestInfo | URL) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
-    const bytes = built.files.get(url.replace(/^.*\/cdn\//u, ""))
+    const path = url.replace(/^.*\/cdn\//u, "")
+    if (failImageMetadata && imageMetadataPaths.has(path))
+      return Promise.resolve(new Response(null, { status: 503 }))
+    const bytes = built.files.get(path)
     return Promise.resolve(
       bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
     )
@@ -29,6 +38,7 @@ afterAll(() => {
   vi.unstubAllGlobals()
 })
 afterEach(() => {
+  failImageMetadata = false
   prefsStore.set(DEFAULT_PREFS)
   recentStore.clear()
 })
@@ -43,6 +53,51 @@ async function open(path = "/cards") {
 }
 
 describe("CardsPage", () => {
+  it.each([
+    ["zh-TW", "銅"],
+    ["ja", "ブロンズ"],
+    ["en", "Bronze"],
+  ] as const)(
+    "keeps vocabulary rarity labels when image metadata fails in %s",
+    async (language, label) => {
+      failImageMetadata = true
+      prefsStore.set({ uiLanguage: language })
+      await renderRoutes(routes, { initialEntries: ["/cards?view=grid"], language })
+      await waitFor(
+        () => {
+          const cell = document.querySelector("[data-result-key]")
+          expect(cell).not.toBeNull()
+          expect(cell).toHaveTextContent(label)
+        },
+        { timeout: 4000 },
+      )
+      await waitFor(
+        () => {
+          const slot = document.querySelector("[data-image-printing]")
+          expect(slot).toHaveTextContent(
+            language === "zh-TW"
+              ? "卡圖資訊載入失敗"
+              : language === "ja"
+                ? "画像情報を読み込めませんでした"
+                : "Could not load image metadata",
+          )
+        },
+        { timeout: 4000 },
+      )
+    },
+  )
+
+  it.each(["/sets/UNKNOWN", "/sets/UNKNOWN?set=bp01"])(
+    "reports a missing set at %s",
+    async (path) => {
+      prefsStore.set({ uiLanguage: "zh-TW" })
+      await renderRoutes(routes, { initialEntries: [path] })
+      expect(await screen.findByText("找不到這個卡包", {}, { timeout: 4000 })).toBeVisible()
+      expect(screen.queryByText("沒有符合的卡")).not.toBeInTheDocument()
+      expect(document.querySelector("[data-result-key]")).toBeNull()
+    },
+  )
+
   it("loads table illustration crops from the independent visible-image channel", async () => {
     await open("/cards?view=table")
     await waitFor(
