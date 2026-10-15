@@ -15,7 +15,7 @@
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
 本文的 basis、annotation 與改動欄序依 [4.0.0 公開 annotation 契約](public-annotation.md)。
-目前 producer／reader 為 4.0.0；已接線四層建置、annotation、每包每區基本目錄及固定背景帶。詳情字典仍沿全域 band，局部化另行實作；容量與記憶體效能依 [size-budget](size-budget.md) 分別驗收。
+目前 producer／reader 為 4.0.0；已接線四層建置、annotation、每包每區基本目錄及固定背景帶。詳情字典按檔局部化，JP 來源正文譯文固定共用，來源呈現按一跳載入；容量與記憶體效能依 [size-budget](size-budget.md) 分別驗收。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -206,7 +206,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 分片時，稀疏的 `face.wording` 隨 face 進啟動包，帶未定狀態、暫顯／候選 revision 引用及未知日期版次 ID；PrintingFace.observations 進 printing 詳情。`current_ref` 為所有 face.current.revision_id 的去重集合；`display_ref` 為 current_ref 加上 pending wording.display 非 null revision ID 的聯集，**不加入其餘 candidates**。每個 pending face-region 最多一筆 display revision，其 §3.1 輕量投影、名稱及可用名稱翻譯的文字閉包均進 bootstrap，讓整區基本目錄完成後可使用暫顯卡名／數值；其餘欄位仍走 detail。這只是顯示分割，不建立 current 或採納。
 
-不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿固定家族檔及全域字典 band 閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
+不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿局部字典及固定共用譯文檔的強依賴閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
 
 開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡在基本目錄使用其名稱與數值，標表記未定；沒有唯一 display 時保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display 名稱，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
 
@@ -214,7 +214,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 ## 3. 分檔、下載順序與記憶體
 
-穩定 owner 是資料分片規則，與商品收錄分開：card/revision/support 跟 `card.home_set_id`；printing 跟第一次配發的 `printing.home_set_id`；再錄新 printing 到新 owner，舊列不搬。`printing_product` 新關係跟 printing owner，可引用舊 card，不能複製舊 card。shared 字典/QA/CR/`text_unit` 依固定 ID bucket；`text_unit` 不按「最新使用者」移動 owner。各 family 過大時依已固定 ID bucket 拆子片，快照清單決定檔案；翻譯/勘誤只更動涉及的片。
+穩定 owner 是資料分片規則，與商品收錄分開：card/revision/support 跟 `card.home_set_id`；printing 跟第一次配發的 `printing.home_set_id`；再錄新 printing 到新 owner，舊列不搬。`printing_product` 新關係跟 printing owner，可引用舊 card，不能複製舊 card。QA／CR 依固定 ID bucket；字典按檔局部出貨，JP 來源繁中正文譯文固定放來源 JP owner 的共用家族檔，不依後續 EN 引用搬動。各 family 過大時依已固定 ID bucket 拆子片，快照清單決定檔案；翻譯/勘誤只更動涉及的片。
 
 基本目錄是所選區全部卡片／面、current／暫顯名稱與可用名稱翻譯、基本數值、卡號定位及基本 facet／字典的完整集合。首頁先顯示，之後背景下載所選 jp／en 基本目錄；整區驗畢且索引完成才開放搜尋。下載中可打字並顯示「資料下載中」，完成後自動搜尋一次，不顯示部分結果。稀有度、異圖與完整印刷資料在基本目錄之後背景補齊；未備妥的進階條件明示載入中，使用時須等完整用途閉包。另一區只在切換或對照時下載；效果全文、Q&A／裁定、商品收錄、引擎支援與歷史按需，不要求首訪三語全量或 PWA 整庫預取。所有連線使用同一政策，不做省流量模式。直接連結單卡可先讀其精確閉包，但不代表整區搜尋 ready。
 
@@ -237,15 +237,15 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `card_engine_support`、`mechanic_projection`、`card_mechanic_coverage` | 全部欄位；status/reasons 不複製進 `card_facet` | 無 |
 | `rules_name`、`face_rules_name` | 無 | 全部原欄位，global detail |
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
-| `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包，隨各 catalog 局部出貨 | 全部文字列暫沿全域 band，含 catalog 已有的副本；同 ID 副本完整同值 |
-| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列，隨各 catalog 局部出貨 | 全部翻譯列暫沿全域 band；同 ID 副本完整同值 |
-| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要的 annotation_set 隨各 catalog 局部出貨；annotation_concept 全部固定在共用 catalog | annotation_set 全部列暫沿全域 band；正文按需，全部文字檔合計含全部引用 |
+| `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包，隨各 catalog 局部出貨 | 隨使用它的 detail／print-detail／history／product 局部出貨；自身所選共用譯文閉包已供應者不重出；同 ID 副本完整同值 |
+| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列，隨各 catalog 局部出貨 | 按檔局部出貨；JP 來源繁中正文譯文固定放來源 JP 家族共用檔；同 ID 副本完整同值 |
+| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要的 annotation_set 隨各 catalog 局部出貨；annotation_concept 全部固定在共用 catalog | annotation_set 隨局部或共用譯文字典出貨；正文按需，全部文字檔合計含全部引用 |
 | `field_annotation` | 隨原文欄位；display name／字典／商品等 | 隨 effect／printing／QA／CR 等；非 display revision 的用途在 history，詳[位置分片](public-annotation.md#5-分片閉包與消費表) |
 | 其餘文字集合 | 無 | 完整白名單列 |
 
 `rules_name`／`face_rules_name` 的全部欄位唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。商品收錄、完整 printing 裝飾與 support 可背景／按需；保留其完整欄位與邏輯參照。
 
-表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。永久 owner 與固定背景 band 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
+表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。永久 owner 與固定背景 band 穩定，不因分片切換改永久 ID；字典選用狀態變更可更新實際依賴它的檔案。
 
 `card_facet/printing_facet/rules_facet` 只是 reader 建出的索引視圖，**不出貨三份 facet 列**。職業/作品/類型/數值/特性從現行 `face_revision`；無 current 的表記未定依 §2.3 的暫顯／候選及未定 facet 規則，不因此隱藏卡片；稀有度/標誌/圖從 printing 與裝飾片；三語名字從 name 的 `FieldTranslation→translation→text_unit`，缺譯 state=missing 並回原文；引擎五態按 `Support/region_blocks` 推導。Q&A/errata 的存在與否用快照清單的兩個稀疏 card ID 集合 `qa_card_ids/errata_card_ids`，加 `source_windows` 覆蓋判 present/absent/unknown，無閉包不能假 absent。兩集合是唯一額外 facet 摘要，容量另量。`rules_facet` 從已下載 rules/profile/restriction 與指定日期計算，不存第二份每卡/賽制摘要；也不能把單卡摘要當整副牌合法性。
 
