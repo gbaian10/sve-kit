@@ -47,8 +47,15 @@ bucket 數只讀取目前候選 Schema 的 `bucket_count.const`，不接受呼�
 分片鍵採 canonical 主實體／完整主鍵陣列與全 SHA-256；永久 ID 不縮短、不重配。
 現行加 pending 暫顯的 `display_ref` 決定 revision 的 bootstrap/detail；其餘完整列
 只進 history。名稱所需的 text、translation 與 annotation_set 在 catalog 裝局部副本；
-詳情字典仍沿全域固定 band 保存完整列。同 ID 的副本完整值須相等，不能省欄或換用途。
+詳情、印刷詳情與 history 的字典按實體檔局部出貨；商品名使用 product 檔自己的小字典。同 ID 的副本完整值須相等，不能省欄或換用途。
 annotation_concept 固定放共用 catalog，並帶所需 label 文字閉包。
+
+繁中正文譯文的來源是 JP owner 時，JP `own_source` 與 EN `jp_source` 都依賴同一個
+`purpose=translation`、`region=null` 的共用譯文檔，按來源 JP owner 的永久家族放置。
+位置從 JP 第一次出貨起固定，不等 EN 加入才搬動，也不依引用次數移動。
+共用譯文檔帶譯文、繁中文字、譯文標註與來源文字；本地字典不再重出自身所選譯文閉包
+已供應的同 ID，共用譯文檔增加其他列不搬動本地副本。名稱字典與輕量名稱 witness
+仍屬 catalog；正文不另出 witness，完整來源呈現由 exact pointer 與 `source_refs` 載入。
 
 4.0.0 使用 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 的 N=64，
 每個 `(用途,地區,家族[,固定 band])` 一個家族檔。catalog 每包每區一檔；card／face
@@ -58,8 +65,8 @@ default printing 的基本列進 catalog，其餘印刷的卡號定位三格按�
 商品與引擎資料亦按用途放背景檔，不阻塞基本目錄冷載。
 
 背景一般家族 width=64，BP01／CP04 固定 width=32（兩帶），global width=8（八帶）；
-詳情全域字典 width=2（32 帶）。images 保留原 physical 成員：global width=1、
-home_set width=32。Python producer 與 reader 共用 contracts 的寬度表，
+共用譯文檔依來源 JP owner 的家族沿用同一固定 band。images 保留原 physical 成員：
+global width=1、home_set width=32。Python producer 與 reader 共用 contracts 的寬度表，
 各自計算分組與驗證；不按資料大小動態換 width，也不跨家族填裝。
 同一 File 的相同 fragment 身分按完整 PK 合併排序，先定出 catalog／print base bytes
 與 hash，再建立 row_index、exact base 與 dependencies。
@@ -91,7 +98,7 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 單區完整文字採一跳閉包：C0 是所選區與共用的 bootstrap／text／config 加強依賴，
 再加入 C0 直接引用的 source／counterpart owner 所在檔及其呈現所需的卡片／面上下文，
 最後補齊聯集的強依賴。來源檔自身的其他來源引用不再遞移展開。
-Python 直接使用建置端 `Snapshot.source_files` 計算，不依賴公開 manifest 的 source_refs。
+Python measure 與 Web 共用 manifest File 的 `source_refs`：先驗 exact FileRef，再取一跳來源及其強依賴。
 單區完整文字 Brotli ≤8 MiB；兩區全部文字 raw（全部文字分片＋manifest）每次報告、
 明顯成長時檢討。基本文字就緒而日文依據／標註未備妥時亦不免計來源資料。
 

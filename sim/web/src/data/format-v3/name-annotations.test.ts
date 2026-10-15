@@ -15,7 +15,7 @@ import {
 } from "./json"
 import { wholeName } from "./name-annotations"
 import { type Fragment, readContainer } from "./reader"
-import { bucket, digest } from "./sha256"
+import { digest } from "./sha256"
 
 const fixture = () => objectValue(v3Fixture("whole-name-native.json"))
 function origin() {
@@ -268,31 +268,15 @@ describe("whole names on exact source owners", () => {
       ),
     ).rejects.toThrow("public-annotation/owner")
   })
-  it("uses restored name sets without fetching their unrelated detail bucket", async () => {
+  it("uses restored name sets without fetching detail files", async () => {
     const { data, client } = origin()
     await client.load()
     const snapshot = client.snapshot()
     if (!snapshot) throw new Error("missing loaded snapshot")
-    const ids = (objectValue(data["expected"])["annotation_set"] as JsonObject[]).map(
-      (row) => row["id"] ?? null,
-    )
-    for (const id of ids) {
-      const band = Math.floor(bucket([id], 64) / 2)
-      snapshot.files.set(`virtual-set-trap-${String(band)}`, {
-        key: `virtual-set-trap-${String(band)}`,
-        role: "text",
-        purpose: "dictionary",
-        region: null,
-        segment: `shared:band-${String(band)}`,
-        row_counts: [
-          ["annotation_set", "global", null, "detail", `shared:band-${String(band)}`, 1],
-        ],
-      })
-    }
     const resolver = createAnnotatedTextResolver({
       ...client,
       fragments: () => {
-        throw new Error("virtual set detail bucket fetched")
+        throw new Error("virtual name set fetched from a detail file")
       },
     })
     const result = await resolver.resolve(

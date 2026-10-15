@@ -45,7 +45,6 @@ def test_catalog_contains_all_printing_locations_and_preserves_unknown_region(
         "detail",
         "print-detail",
         "engine",
-        "dictionary",
     }
 
 

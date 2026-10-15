@@ -134,5 +134,6 @@ def _reseal(
         blobs[key] = raw
     for file in files.values():
         rebind(file["dependencies"])
+        rebind(file["source_refs"])
     rebind(manifest["config_ref"])
     return blobs

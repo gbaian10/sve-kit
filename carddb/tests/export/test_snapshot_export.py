@@ -516,7 +516,7 @@ def test_export_validates_semantics_beyond_tuple_shape(
             if field == "type_code"
             else "missing:synthetic-reference"
         )
-    with pytest.raises(ValueError, match=r"Dangling|Vocabulary"):
+    with pytest.raises(ValueError, match=r"Dangling|Vocabulary|Missing dictionary"):
         export_snapshot(projection, ownership, BATCH)
 
 
@@ -562,7 +562,7 @@ def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     projection.tables["text_unit"].sort(key=lambda row: string(row["id"]))
     physical["flavor_unit_id"] = identifier
     with pytest.raises(
-        ValueError, match="Snapshot shard exceeds raw limit: dictionary/"
+        ValueError, match="Snapshot shard exceeds raw limit: print-detail/"
     ):
         export_snapshot(projection, ownership, BATCH, format_version=format_version)
 

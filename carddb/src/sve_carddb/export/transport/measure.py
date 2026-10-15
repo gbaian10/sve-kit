@@ -64,7 +64,6 @@ def measure(
         for key, file in files.items()
         if file["role"] in {"bootstrap", "text", "config"}
     }
-    source_files = snapshot.source_files
     startup: dict[str, JsonValue] = {}
     complete: dict[str, JsonValue] = {}
     for raw_region in array(snapshot.manifest["regions"]):
@@ -87,7 +86,11 @@ def measure(
             and integer(sizes["br"]) > 2 * MIB,
         }
         c0 = closure({key for key in text if files[key]["region"] in {region, None}})
-        sources = {source for key in c0 for source in source_files.get(key, set())}
+        sources = {
+            string(object_value(ref)["key"])
+            for key in c0
+            for ref in array(files[key]["source_refs"])
+        }
         full = closure(c0 | sources)
         complete[region] = accounted_sizes(
             snapshot.payloads, full, manifest=manifest

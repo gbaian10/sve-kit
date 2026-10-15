@@ -593,24 +593,24 @@ export function createSnapshotClient(
     const version = stringValue(snapshot.manifest["format_version"])
     const result = await decode({ kind: "file", file, bytes: data, version })
     if (result.kind !== "fragments") throw new SnapshotError("shape", "expected fragments")
-    const fragments = result.fragments
+    const decoded = result.fragments
     if (!active()) throw new Error("snapshot replaced")
-    const faces = fragments.some((fragment) => fragment.value["base"] !== null)
+    const faces = decoded.some((fragment) => fragment.value["base"] !== null)
       ? facesOf(snapshot)
       : new Map<string, JsonObject>()
-    const bases: Fragment[] = [...snapshot.bootstrap, ...fragments]
-    for (const fragment of fragments) {
+    const bases: Fragment[] = [...snapshot.bootstrap, ...decoded]
+    for (const fragment of decoded) {
       if (fragment.value["base"] === null) continue
       const ref = objectValue(objectValue(fragment.value["base"])["file"])
       const baseKey = stringValue(ref["key"])
       if (snapshot.files.get(baseKey)?.["sha256"] !== ref["sha256"])
         throw new SnapshotError("base-missing", "exact base hash")
-      if (!bases.some((f) => f.file === baseKey)) bases.push(...(await loadFile(snapshot, baseKey)))
+      if (!bases.some((f) => f.file === baseKey)) bases.push(...(await fragments(baseKey)))
     }
     for (const fragment of bases)
       if (fragment.table === "face")
         for (const row of fragment.rows) faces.set(stringValue(row["id"]), row)
-    return fragments.map((fragment) => {
+    return decoded.map((fragment) => {
       if (fragment.value["base"] === null) return fragment
       const base = findBase(fragment, bases)
       return { ...fragment, rows: joinDetail(fragment, base, faces) }

@@ -53,13 +53,14 @@ manifest 是一般 JSON object，不使用 tuple。完整欄位如下；引用�
 
 `FileRef = {key:Text,sha256:Hash}`；必須同時吻合 files 中該 key 的 hash。`Blob = {path:Path,sha256:Hash,bytes:UInt,compressed_bytes:{br:UInt?}}`，bytes > 0；壓縮值非 null 時亦 > 0。
 
-`File` 的完整形狀是 `{key,path,sha256,bytes,compressed_bytes,row_counts,dependencies,role,purpose,region,segment}`。其中 Blob 五欄同上，另外：
+`File` 的完整形狀是 `{key,path,sha256,bytes,compressed_bytes,row_counts,dependencies,source_refs,role,purpose,region,segment}`。其中 Blob 五欄同上，另外：
 
 - `key` 是此快照內的邏輯檔案鍵，不是永久卡片 ID，也不是下載 path。相同檔案鍵在下一快照可以有新 hash。
 - `role` 為 `bootstrap/text/config/images/programs`；它是下載類別，不代替 fragment 的 partition 或用途就緒。config 為單一物件，images 為三影像集合，programs 為 DSL 附件，其餘為文字欄位分割容器。
 - `row_counts` 是 `[[table,owner_kind,owner_id,partition,segment,count]]`，逐一對應容器 fragment（含零列），count 是該 fragment 的 rows 長度，不是 join 後實體數。config 為 []；programs 也為 []，entries 長度由附件驗證。
-- `purpose` 為 `catalog/print/detail/print-detail/product/history/engine/region-state/dictionary/images/config/programs`；`region` 為 `jp/en/null`，null 代表共用且整檔計費；`segment` 是家族與固定 band 的裝檔座標，與永久 owner 分開。用途與地區不從 key、role 或卡面語言推測。
+- `purpose` 為 `catalog/print/detail/print-detail/product/history/engine/region-state/translation/images/config/programs`；`region` 為 `jp/en/null`，null 代表共用且整檔計費；`segment` 是家族與固定 band 的裝檔座標，與永久 owner 分開。用途與地區不從 key、role 或卡面語言推測。
 - `dependencies` 是按 key 排序的唯一 `[FileRef]`；只表達解析／join 所需的先行檔案，須為 DAG，不包含所有邏輯 FK。所有邏輯 FK 的整體閉包仍由 producer 驗證，不能藉省 dependencies 規避。image 檔依賴 config，具有 base 的 fragment 所在 File 至少依賴其精確 base 檔；不能只由 role 推導依賴方向或把所有邏輯來源引用變成強制下載。
+- `source_refs` 是按 key 排序、唯一的直接來源呈現 `[FileRef]`，允許互相指向。只包含 exact source／counterpart owner 的原文、sections、各自 annotation、字典與必要 card／face／printing／revision 所在檔；printed 或歷史來源包含其 print-detail／history。不把普通商品或其他印刷的 FK 放入。消費端只展開當次來源一跳及強 dependencies，不沿新加入檔自己的 source_refs 遞移。
 
 JSON blob 使用 `snapshots/blobs/<64hex>.json`；Brotli 表示在同 path 加 `.br`，固定品質 11；壓縮器及版本由 producer recipe 釘住，兩次 clean export 壓縮 bytes 須相同。null 表示沒有該表示，不能當作零 bytes。下載後先核實壓縮長度，解壓後核 canonical bytes 長度與 sha256；不是拿壓縮內容算 File.sha256。HTTP 自動解壓的 client 要在能觀測傳輸長度的層驗證，不能把已解壓長度拿來比 compressed_bytes。
 
@@ -210,7 +211,7 @@ role 是下載類別，partition 是欄位分割。catalog 使用 role=bootstrap
 
 printing/detail 與現行／暫顯 face_revision/detail 的 `base={file:FileRef,table,owner,segment,partition:"bootstrap"}`。exact 身分是 `(FileRef.key,FileRef.sha256,table,owner,region,segment,purpose,partition)`，base 的 region／purpose 由 exact FileRef 對應的 File scope 取得；table、永久 owner 與地區須吻合 detail。不能指自己或另一 manifest，FileRef 必列入 dependencies。detail segment 明列 base 來源用途與 band，不能只靠 home_set 判定。
 
-`card_locators={永久家族:[[printing_id,card_id,card_no]]}` 只列非 default printing，按 printing_id 排序並依真正 printing home 裝檔；與 default 基本列的聯集恰好覆蓋全部 printing，重複或漏列拒收。`name_sources=[[PublicTextPointer,text_unit_id,source_name_concept_id]]` 是名稱的有限來源 witness，pointer 使用固定 nested tuple，逐筆驗來源值；同檔已有欄位不重複出貨。正文來源呈現及 manifest source_refs 留後續詳情契約，本格式不出 source_refs。
+`card_locators={永久家族:[[printing_id,card_id,card_no]]}` 只列非 default printing，按 printing_id 排序並依真正 printing home 裝檔；與 default 基本列的聯集恰好覆蓋全部 printing，重複或漏列拒收。`name_sources=[[PublicTextPointer,text_unit_id,source_name_concept_id]]` 是名稱的有限來源 witness，pointer 使用固定 nested tuple，逐筆驗來源值；同檔已有欄位不重複出貨。名稱 witness 只供不讀來源正文時的整名標註；正文不另出 witness，完整來源呈現使用 File.source_refs。
 
 ### 4.1 完整欄序
 
@@ -290,6 +291,7 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
     ]
   ],
   "dependencies": [],
+  "source_refs": [],
   "role": "bootstrap",
   "purpose": "catalog",
   "region": null,
@@ -307,12 +309,20 @@ card.regions、face.current／wording 按區拆列，合回時依 region 鍵排�
 
 **基本目錄完成**：manifest、config、所選區所有 purpose=catalog 且 region∈{所選區,null} 的檔及其強依賴全部取得、驗證與 join 完成，才開放搜尋。印刷背景尚未完成時卡號定位、卡包篩選已可用；印刷 facet 依用途完成狀態處理。切版本不用舊版列補新版本；切區合回沿上述有限規則。
 
-名稱字典隨 catalog 局部出貨，annotation_concept 固定放小共用 catalog，含必要 label text 閉包。詳情字典暫沿全域 band，名稱副本與全域字典可並存；同 ID 完整值必須相等，缺引用或異值拒收。共用 hash 放 manifest FileRef dependencies，不嵌家族 payload，無內容變更的家族不因共用 hash 改寫。
+名稱字典隨 catalog 局部出貨，annotation_concept 固定放小共用 catalog，含必要 label text 閉包。詳情、印刷詳情及 history 的字典按檔局部化，商品名使用 product 檔自己的小字典；同 ID 完整值必須相等，缺引用或異值拒收。共用 hash 放 manifest FileRef dependencies，不嵌家族 payload，無內容變更的家族不因共用 hash 改寫。
 
 row_index 只對該 exact base 有效；基礎列按完整 PK 排序，索引範圍、順序、唯一性、完整覆蓋均須通過。base bytes/hash 變更時重建受影響 detail 的 exact refs，按物理檔案計更新量。
 
 部分 reader 的介面依[公開 annotation §4.1](public-annotation.md#41-三種就緒狀態與部分-reader)：取得用途 keys、載入／驗證、提供基本文字與來源／標註分開狀態。
 只載基本目錄不宣稱完整 view 或文字離線備妥；完整 Python reader／read_api／publish 仍驗全閉包。
+
+JP 來源的繁中正文譯文（JP own_source／EN jp_source）固定放在來源 JP owner 永久家族的
+共用譯文檔（`purpose=translation,region=null`），沿相同固定背景 band。檔內含 translation、繁中文字、
+譯文 annotation_set 及必要 source_unit_id 文字閉包；JP 與 EN 透過 manifest dependencies
+依賴它，本地不重出自身所選譯文閉包已供應的同 ID；共用譯文檔的其他列不影響本地副本位置。
+JP 首次出貨就使用此位置，不因 EN 加包或引用數改變而搬動。
+catalog 名稱譯文仍按 catalog 局部出貨。完整來源 owner、sections 與原文標註留在原家族的呈現檔，
+由 source_refs 按需載入；名稱 witness 不替代正文。缺局部字典即拒收，不能從無依賴關係的其他檔補洞。
 
 ## 5. 永久 owner 與固定背景 band
 
@@ -320,7 +330,7 @@ card、face、face_revision、support、卡片關係跟 card.home_set_id；print
 
 ### 5.1 固定配置
 
-4.0 固定內部 N=64、min_reader_version=4.0.0，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶，BP01／CP04 固定兩帶，global 八帶；詳情全域字典暫保留 32 帶。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
+4.0 固定內部 N=64、min_reader_version=4.0.0，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶，BP01／CP04 固定兩帶，global 八帶。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
 
 catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 `:band-<n>`。File key 為 `<purpose>/<region-or-shared>/<family-or-shared>/<band>`，家族 ID 按 UTF-8 percent encode（只保留 unreserved），catalog band 固定 0。config、programs 各一檔，key 同用途，region=null、segment=shared。
 

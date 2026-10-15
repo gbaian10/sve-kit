@@ -99,7 +99,7 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 基本目錄冷載依所選日版／英版各計完整 manifest＋config＋實際必載片及依賴，共用／混區 File 整檔計、不按語言比例分攤。
 Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；raw 另報，不另設硬門檻。
 基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB，含 types／字典／base metadata。
-N0 現有量測 API 與[傳輸 §5.1](snapshot-transport.md#51-固定配置) 的 bands 不代表已完成新裝檔或單區完整文字帳；不因容量減少 pending／名稱／facet／公開欄位。
+每包每區的家族檔、局部字典與單區一跳完整文字帳依[傳輸 §5.1](snapshot-transport.md#51-固定配置) 量測；容量驗收不代替手機效能驗收，也不因容量減少 pending／名稱／facet／公開欄位。
 
 只載可見面的卡包 media 與圖片；全域來源詳情按需，不全量預取圖片或建立全庫影像索引。
 未完成的下載須標進度，CacheStorage 已驗 bytes 保存成功且未清除時，暖頁 metadata 不向外重抓。

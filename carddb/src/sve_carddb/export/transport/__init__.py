@@ -43,7 +43,6 @@ class Snapshot:
     payloads: dict[str, Blob]
     compression_recipe: dict[str, str | int | None]
     manifest_blob: Blob
-    source_files: dict[str, frozenset[str]]
 
     def verify(self, projection: Projection) -> None:
         """Require the reader's join to equal the logical view."""
@@ -118,6 +117,7 @@ class _Files:
             "segment": scope.segment if scope is not None else "shared",
             "row_counts": counts,
             "dependencies": dependencies,
+            "source_refs": [],
         }
         self.files[key] = file
         self.raw[key] = raw
@@ -128,7 +128,6 @@ class _Files:
         self,
         manifest: Record,
         projection: Projection,
-        source_files: dict[str, frozenset[str]],
     ) -> Snapshot:
         """Join sealed raw bytes while compression fills only transfer lengths."""
         joined = join_payloads(manifest, self.raw)
@@ -152,7 +151,6 @@ class _Files:
             payloads,
             recipe(self.brotli),
             compress(canonical(complete), self.brotli),
-            source_files,
         )
 
 
@@ -194,7 +192,7 @@ def export_snapshot(
             {"format_version": format_version, "entries": []},
             [],
         )
-        source_files = FamilyLayout(layout).seal(files, config)
+        FamilyLayout(layout).seal(files, config)
         languages = json_list(
             sorted(
                 {
@@ -218,4 +216,4 @@ def export_snapshot(
             "partitioning": partitioning,
             "changes_ref": None,
         }
-        return files.snapshot(manifest, projection, source_files)
+        return files.snapshot(manifest, projection)
