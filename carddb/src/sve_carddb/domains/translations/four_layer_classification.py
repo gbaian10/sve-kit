@@ -33,6 +33,7 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_n1_leaves import DOMAINS as N1_DOMAINS
 from sve_carddb.domains.translations.four_layer_normalizer import (
+    PREPARATION_VERSION,
     VERSION,
     SourcePart,
     normalize_source,
@@ -146,6 +147,20 @@ class Recognized:
             raise ValueError("Unresolved source leaves cannot create an active binding")
         if normalizer_version != VERSION:
             raise ValueError("Unsupported four-layer normalizer version")
+        return self.bind_version(source, part, normalizer_version=normalizer_version)
+
+    def bind_version(
+        self,
+        source: SourceDescriptor,
+        part: SourcePart,
+        *,
+        normalizer_version: str,
+    ) -> tuple[Frame, SourceBinding]:
+        """Construct identity after the production or preparation entry selects its version."""
+        if normalizer_version not in {VERSION, PREPARATION_VERSION}:
+            raise ValueError("Unsupported four-layer normalizer version")
+        if self.issues:
+            raise ValueError("Unresolved source leaves cannot create an active binding")
         occurrence = OccurrenceKey(
             owner=source.owner,
             field=source.field,

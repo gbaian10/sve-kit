@@ -371,6 +371,12 @@ class Renderer:
                 raise ValueError("Selected form key differs from its identity")
             validate_form(selected_form.definition)
 
+    def expression_target(  # ruff: ignore[no-self-use] -- preparation overrides this presentation hook
+        self, _item: BoundTarget, _expr: Expression, _lang: str
+    ) -> SelectedTarget:
+        """Only the isolated preparation renderer supplies finite expression targets."""
+        raise MissingValueError("unsupported_quantity_presentation")
+
     def references(self, item: BoundTarget, name: str) -> tuple[Reference, ...]:
         """Resolve codes and references without searching translated text."""
         slot = next(s for s in item.frame.leaf_schema.slots if s.name == name)
@@ -566,9 +572,9 @@ class _Output:
         elif isinstance(value, tuple):
             self.zones(item, value, path)
         elif isinstance(value, QuantitySpec):
-            self.quantity(value)
+            self.quantity(item, value, path)
         elif isinstance(value, (Bound, Constant, Expression)):
-            self.expression(value)
+            self.expression(item, value, path)
         elif isinstance(value, str):
             if slot.type == "LiteralLayout":
                 self.text += value
@@ -631,19 +637,39 @@ class _Output:
             raise ValueError("Typed code lacks its registered concept reference")
         self.label(reference)
 
-    def expression(self, value: Bound | Constant | Expression) -> None:
+    def expression(
+        self,
+        item: BoundTarget,
+        value: Bound | Constant | Expression,
+        path: tuple[int, ...],
+    ) -> None:
         if isinstance(value, Constant):
             self.text += str(value.value)
+        elif isinstance(value, Expression):
+            selected = self.renderer.expression_target(item, value, self.lang)
+            self.dependencies.append(
+                {
+                    "expression": value.expression_id,
+                    "target": selected.target.model_dump(mode="json"),
+                    "origin": selected.origin,
+                    "low_confidence": selected.low_confidence,
+                }
+            )
+            self.quality.append((selected.origin, selected.low_confidence))
+            for index, node in enumerate(selected.target.nodes):
+                self.node(item, node, (*path, index))
         else:
             raise MissingValueError("unsupported_quantity_presentation")
 
-    def quantity(self, value: QuantitySpec) -> None:
+    def quantity(
+        self, item: BoundTarget, value: QuantitySpec, path: tuple[int, ...]
+    ) -> None:
         if value.mode in {"all", "any"}:
             self.text += {"all": "所有", "any": "任意數量的"}[value.mode]
         else:
             self.text += {"exact": "", "up_to": "至多", "at_least": "至少"}[value.mode]
             assert value.expr is not None
-            self.expression(value.expr)
+            self.expression(item, value.expr, path)
 
     def form(self, item: BoundTarget, node: FormNode, path: tuple[int, ...]) -> None:
         selected = self.renderer.forms[node.form_id, self.lang]

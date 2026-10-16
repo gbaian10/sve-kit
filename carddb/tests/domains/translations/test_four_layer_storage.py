@@ -566,3 +566,42 @@ def test_annotation_concept_category_and_current_emphasis_are_checked(
         )
     with pytest.raises(ValueError, match="Invalid stored annotation set"):
         read_annotation(db, selected.id)
+
+
+@pytest.mark.parametrize("version", ["four-layer-jp-v3", "four-layer-jp-v999"])
+def test_sqlite_source_contract_rejects_nonproduction_versions(
+    stored: tuple[Database, Frame, SourceBinding], version: str
+) -> None:
+    db, frame, _ = stored
+    with pytest.raises(ValidationError), db.transaction():
+        db.update(
+            "sentence_template",
+            {"id": frame.id},
+            {
+                "source": Json(
+                    frame.source.model_dump(mode="json")
+                    | {"normalizer_version": version}
+                ),
+            },
+        )
+
+
+def test_sqlite_v2_projection_does_not_admit_choice_context_ports(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, _ = stored
+    projection = frame.projection.model_dump(mode="json") | {
+        "scopes": [{"id": "ability", "parent": None, "kind": "ability"}],
+        "exports": [
+            {
+                "name": "choice",
+                "type": "ChoiceContext",
+                "source_role": "choice_mode_count",
+                "scope": "ability",
+            }
+        ],
+    }
+    with pytest.raises(ValidationError), db.transaction():
+        db.update(
+            "sentence_template", {"id": frame.id}, {"projection": Json(projection)}
+        )

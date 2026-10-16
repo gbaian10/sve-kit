@@ -24,7 +24,7 @@ from sve_carddb.contracts.source_binding import (
     TracePiece,
     TypedValue,
 )
-from sve_carddb.core.json import canonical, parse
+from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import RecordData, UInt
 
 HASH = r"[0-9a-f]{64}"
@@ -276,4 +276,19 @@ def schemas() -> dict[str, JsonValue]:
             )
         )
         declarations[name] = parse(canonical(adapter.json_schema()))
+    # Preparation models must not widen the production SQLite boundary.
+    source_properties = object_value(
+        object_value(declarations["FrameSource"])["properties"]
+    )
+    object_value(source_properties["normalizer_version"])["const"] = "four-layer-jp-v2"
+    projection = object_value(declarations["FrameProjection"])
+    port = object_value(object_value(projection["$defs"])["Port"])
+    port_type = object_value(object_value(port["properties"])["type"])
+    port_type["enum"] = [
+        "ObjectSet",
+        "PlayerRef",
+        "ReceiptId",
+        "CapturedValue",
+        "QuantityExpr",
+    ]
     return declarations

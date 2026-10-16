@@ -395,7 +395,13 @@ def _references(records: tuple[Record, ...], locations: Mapping[str, str]) -> No
     for record in records:
         with _located(record, locations):
             if isinstance(record, FrameRecord):
-                if record.data.source.normalizer_version != VERSION:
+                if record.data.source.normalizer_version != VERSION or any(
+                    port.type == "ChoiceContext"
+                    for port in (
+                        *record.data.projection.imports,
+                        *record.data.projection.exports,
+                    )
+                ):
                     raise ValueError(
                         "Unsupported four-layer authored normalizer version"
                     )
