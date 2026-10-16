@@ -16,9 +16,11 @@ from sve_carddb.contracts.n0 import SAFE_INTEGER
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf, leaf
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.four_layer_normalizer import SourceField
+from sve_carddb.domains.translations.four_layer_semantics import classify_semantics
 from sve_carddb.domains.translations.recognition.provenance import merged
 
 if TYPE_CHECKING:
+    from sve_carddb.contracts.source_binding import SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import (
         Classifier,
         Recognized,
@@ -71,7 +73,8 @@ def _nat(
             type="Nat",
             role=role,
             domain=Domain(values=(), min=minimum, max=maximum),
-            required=True,
+            # A pure omitted amount stays optional so a target may keep the printed wording.
+            required=span is not None,
             occurrences=(span,) if span else (),
         ),
         value,
@@ -189,14 +192,18 @@ def _sources(raw: str, part: SourcePart, classifier: Classifier) -> list[Leaf]:
         value = VocabularyReference(kind="vocabulary", key=("type", code))
         if value in getattr(domain, "references", ()):
             span = Span(start=match.start("kind"), end=match.end("kind"))
+            # Other headers keep their declared kind spelling in canonical source.
             result.append(
-                leaf(
-                    "CardKind",
-                    "declared_kind",
-                    "card_kind.any.v1",
-                    value,
-                    ((span,),),
-                    "N2-B15",
+                replace(
+                    leaf(
+                        "CardKind",
+                        "declared_kind",
+                        "card_kind.any.v1",
+                        value,
+                        ((span,),),
+                        "N2-B15",
+                    ),
+                    abstract=False,
                 )
             )
     elif part.source_span.role == "reminder" and (match := _REMINDER.fullmatch(text)):
@@ -225,6 +232,7 @@ def _use(found: Recognized, name: str) -> int:
 
 def _update(
     raw: str,
+    source: SourceDescriptor,
     original: SourcePart,
     current: SourcePart,
     found: Recognized,
@@ -322,13 +330,22 @@ def _update(
             for h in candidate.slots
         ):
             issues.discard("unknown_or_ambiguous_vocabulary")
-    return transform(
+    updated, result, rows = transform(
         raw,
         current,
         leaves,
         (),
         replace(found, issues=tuple(sorted(issues)), semantics=None),
     )
+    if original.source_span.role == "token_header" and not result.issues:
+        # A completed bare kind is the same registered construction as other headers.
+        result = replace(
+            result,
+            semantics=classify_semantics(
+                source, updated, result.schema, classifier.terms, None, None
+            ),
+        )
+    return updated, result, rows
 
 
 def prepare_parameters(
@@ -341,7 +358,9 @@ def prepare_parameters(
     recognized = list(derived.recognized)
     rows = list(derived.registry_rows)
     for i, original in enumerate(derived.original.parts):
-        if update := _update(raw, original, parts[i], recognized[i], classifier):
+        if update := _update(
+            raw, derived.field.source, original, parts[i], recognized[i], classifier
+        ):
             parts[i], recognized[i], rows[i] = update
     return replace(
         derived,

@@ -846,8 +846,10 @@ Bound 的 import 必須存在且型別正確，來源證明的使用 scope 只�
 | 已分段、指定本回合攻擊力／體力的從者提醒 | 兩個 `Nat/stat_value`，0..安全整數 | 設定值不當增減量，提醒的期間、stat 引用及依附不改 |
 
 付款量省略時，僅土之秘術具名規則給值 1；其 occurrence 為 omitted，
-raw／canonical spans 為空，`resolution_rule=earth_rite.omitted_amount.v1`。
+raw／canonical spans 為空，`resolution_rule=earth_rite.omitted_amount.v1`；
+與其他純省略槽相同為 required=false，target 可只呈現能力名而維持卡面寫法。
 明示數字仍有自己的來源位置。不能因付款葉已辨識而解除同片段的其他數值阻擋。
+標頭的種類拼寫與其他標頭一樣留在 canonical；補齊後的完整標頭沿既有 `token_header.v1` 判定。
 骰子的 `term:object.die` 引用只隨已辨識的上述點數條件產生，
 不全域抽取其他擲骰敘述，也不建立宣告、history、RNG 或未印刷的 else。
 

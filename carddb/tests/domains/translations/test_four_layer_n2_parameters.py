@@ -98,6 +98,23 @@ def test_payment_is_positive_and_omission_has_no_fabricated_span(
     assert occurrence.resolution_rule == (
         None if suffix else "earth_rite.omitted_amount.v1"
     )
+    printed = Target.model_validate_json(
+        canonical(
+            {
+                "format": 1,
+                "nodes": [
+                    {"kind": "Literal", "text": "【"},
+                    {"kind": "LeafRef", "slot": slots["ability"].name},
+                    {"kind": "Literal", "text": "】"},
+                ],
+            }
+        )
+    )
+    if suffix:
+        with pytest.raises(ValueError, match="required"):
+            printed.verify(frame.leaf_schema, "zh-Hant", {})
+    else:
+        printed.verify(frame.leaf_schema, "zh-Hant", {})
     assert "earth_rite_amount" not in {
         s.role for s in before.recognized[0].schema.slots
     }
@@ -175,6 +192,8 @@ def test_only_complete_bare_headers_gain_declared_kind(kind: str, code: str) -> 
     )
     frame, binding = prepared.bind(ordinal)
     prepared.verify(raw, engine(), frame, binding)
+    assert frame.semantic_variant.key == "token_header.v1"
+    assert prepared.derived.field.parts[ordinal].canonical_source == raw
     found = next(
         r
         for p, r in zip(
