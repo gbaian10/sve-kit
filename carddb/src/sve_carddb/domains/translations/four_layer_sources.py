@@ -108,6 +108,8 @@ def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner a
     else:
         unit_id = _string(row[fields[field.field]])
         source_field = "text" if field.field == "effect" else field.field
+        if lang == "en" and field.field == "flavor":
+            source_field = "speech"
         locator = f"/faces/{face_ordinal}/{source_field}"
     source_id = _string(row["source_id"])
     unit = _row(db, "text_unit", {"id": unit_id})
