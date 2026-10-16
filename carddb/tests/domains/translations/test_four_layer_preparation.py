@@ -269,9 +269,7 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
         bind_recognized(renamed, field, field.parts[0], ambiguous, mixed=True) is None
     )
     # Matching synthetic evidence cannot authorize an unsealed source relation.
-    with pytest.raises(
-        ValueError, match=r"identity|payload|construction|canonical|source|hash"
-    ):
+    with pytest.raises(ValueError, match="exact source construction"):
         prepared.verify("甲乙", classifier(), renamed, binding)
 
 

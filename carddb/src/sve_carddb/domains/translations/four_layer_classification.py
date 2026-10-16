@@ -143,8 +143,6 @@ class Recognized:
         normalizer_version: str = VERSION,
     ) -> tuple[Frame, SourceBinding]:
         """Unknown body semantics stay scoped to the exact occurrence, without macro eligibility."""
-        if self.issues:
-            raise ValueError("Unresolved source leaves cannot create an active binding")
         if normalizer_version != VERSION:
             raise ValueError("Unsupported four-layer normalizer version")
         return self.bind_version(source, part, normalizer_version=normalizer_version)

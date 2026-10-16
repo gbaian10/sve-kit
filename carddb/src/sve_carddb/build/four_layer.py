@@ -1,6 +1,6 @@
 """Four-layer relational declarations and named JSON contracts for build boundaries."""
 
-from typing import Annotated
+from typing import Annotated, get_args
 
 from pydantic import ConfigDict, Field, JsonValue, TypeAdapter
 
@@ -285,10 +285,6 @@ def schemas() -> dict[str, JsonValue]:
     port = object_value(object_value(projection["$defs"])["Port"])
     port_type = object_value(object_value(port["properties"])["type"])
     port_type["enum"] = [
-        "ObjectSet",
-        "PlayerRef",
-        "ReceiptId",
-        "CapturedValue",
-        "QuantityExpr",
+        name for name in get_args(four_layer.PortType) if name != "ChoiceContext"
     ]
     return declarations
