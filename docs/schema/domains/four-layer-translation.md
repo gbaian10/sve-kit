@@ -769,9 +769,29 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 與 SQLite 來源契約拒絕 v3 及未知版；v2 authored／SQLite 不接受 ChoiceContext port。
 準備入口在正式切換時移除，不是永久雙版執行設定。
 
-此接口目前沿用正式來源辨識，不因登錄共用型別就接受新的來源句型。
+此接口只在正式來源辨識上套用下述已封版的家族規則，不因登錄共用型別就接受其他來源句型。
 `ChoiceContext` 僅是 PortType，Port 仍只有 name、type、source_role、scope，
 不是 LeafType。選項的來源連接必須另由完整來源重建，型別本身不授予可執行資格。
+
+B05 僅描述同一片段、同能力中已有唯一在前 intro、常數 choice_mode_count 與
+按印刷次序連續 1..K 的 choice_index。沿既有完整欄位的 choice 守衛，所有 intro／序號
+均須已具 typed 葉且無來源問題；跨片段、孤兒、歧義及缺卡名／數值前置者不加接口。
+`PreparedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v3 frame／binding
+並附接口，接口沿既有 `interface_key` 獨立驗證，不進 frame hash；`verify` 從原文重建後比對。
+`choice` 能力 scope 匯出
+`ChoiceContext/choice_mode_count`，依印刷序的 `choice_1`…`choice_K` branch scope
+各匯入 `ChoiceContext/choice_index`。Port 名稱與 scope 相同，沿契約按名稱排序；
+實際序號與 mode 由來源葉及 occurrence 重驗，不塞進 Port。canonical、leaf schema、
+值、位置與 target 形狀保持不變，原 pending 語義仍 pending；這是 I，不能當嚴格 V 搬移。
+不新增 bound mode、跨行或選項歷史關係。
+
+B01 僅接受完整的本物件具名指示物容量句：明示「これに」、具名種類、
+「カウンターは」、常數與「個まで置ける。」。容量為 `Nat/counter_capacity`，
+0..9007199254740991，沿數字的精確 raw occurrence，不是 counter_amount 或 threshold。
+具名種類保留字面，`term:object.counter` 以既有 `Concept/rule_term` 閉域引用，
+缺概念時保持 pending，缺語言選詞時沿既有 renderer 整欄 fallback。
+不新增具名指示物概念或 CounterNP／Form，不建立其他 holder、Stack 或歷史關係。
+這是 S，既有容量用途須經準備 bind／verify 後才能建立 target；正式 v2 辨識仍不變。
 
 `four_layer_expressions.DEFINITIONS` 是封閉的 expression 登錄。
 結果 measure 為 `card_count`，read_structure 為 `current_zone_count`，
