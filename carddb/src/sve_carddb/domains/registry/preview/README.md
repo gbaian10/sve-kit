@@ -38,9 +38,34 @@ number, region, descriptor kind, HTML media type and both observation hashes are
 checked. Face rarity/credits come from the original source face index.
 See [offline extraction](../../../parse/README.md) for the EN rendering contract.
 Neither provider reads historical JSONL or uses it as source evidence.
-`coverage(hash)` means the **complete historic review input** with that exact hash
-has been independently pinned and verified. A batch of individual HTML sources
-is not that old JSONL input; `FrozenJP.coverage` therefore returns false.
+`coverage(review)` matches the complete historical input against the review's
+region (`jp`), exact v1 scope, original date and exact bytes hash. `FrozenJP` and
+`FrozenEN` keep returning false: raw HTML is not a historical JSONL review input.
+`FrozenRegions(..., review_inputs=RegistryReviewInputs(pin))` delegates coverage
+to the independent reader. Without a pin the review remains excluded with
+`missing_review_coverage`.
+
+`ReviewInputPin` contains `root`, `batch_id`, `inventory_sha256`, `coverage_hash`,
+`bytes` and `as_of`. The root locates permanent batches from authored-layout §3.6;
+use the existing `2026-09-28-identity-confirmed-v1` batch for the original reviews,
+never a `spec/` copy. The reader verifies the pinned inventory bytes, its JP entry,
+the unique JP entry in SHA256SUMS and exact `jp.jsonl` bytes/size, then extracts
+unique card numbers. Filenames are fixed and resolved paths cannot escape the
+batch. Explicit broken pins abort the build. It never follows inventory
+`predecessor`/`copied_from` paths or treats the JSONL as official raw evidence.
+
+All registry JP printing numbers must be contained in this historical set,
+including printings outside the output regions or with unavailable raw evidence.
+Otherwise reviews are excluded with `review_scope_outdated` and the report lists
+`uncovered_jp_card_numbers`. Comparing card numbers avoids rejecting unchanged
+scope merely because parsed traits changed. Newly registered JP cards require
+review renewal; the historical date never advances automatically. EN observation,
+identity, source and current checks still apply.
+
+The text and image workflows share `registry_provider`. The plan report and F1
+configuration retain the verified pin, fixed filename, region and scope, without
+the private root or other inventory fields. Review source IDs still refer to the
+authored review; this artifact does not manufacture an HTTP source record.
 
 ## Projection diagnostics
 

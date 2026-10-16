@@ -18,6 +18,23 @@ Readers scan only the dedicated data directories, validate types, size limits,
 unique keys and references, then sort records. Shard numbers need not be contiguous
 and records need not arrive sorted. Permanent registry allocation order is unchanged.
 
+Optional `registry_review_inputs` pins `{root,batch_id,inventory_sha256,
+coverage_hash,bytes,as_of}` to a permanent authored-layout §3.6 registry batch.
+The historical reviews use `2026-09-28-identity-confirmed-v1`, never a draft copy.
+Only fixed `jp.jsonl`, `inventory.json` and `SHA256SUMS` are read: inventory bytes,
+both JP entries and the entire JSONL hash/size must match. Explicit broken pins
+abort; missing pins exclude reviews. Coverage matches `jp`, the exact v1 scope,
+the original date and hash. All registry JP printing numbers must be contained
+in the historical set, or `review_scope_outdated` excludes reviews and the report
+lists `uncovered_jp_card_numbers`. New JP cards need review renewal. EN source,
+identity and current checks remain in force, without granting EN DSL support.
+
+Text and image builds share the same provider factory. F1 configuration and the
+plan report retain the verified pin without the private root or inventory's
+`predecessor`/`copied_from` paths. The artifact does not create official HTTP
+source records; review sources still point to authored records. Output roots must
+also be disjoint from the permanent review input root.
+
 The revision identifies the checkout for provenance; uncommitted authored edits
 apply. Builds use the running parser and current configuration directly. Frozen
 raw hashes, archive metadata, exact text, source language and owner applicability

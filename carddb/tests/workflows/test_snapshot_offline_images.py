@@ -250,8 +250,7 @@ def test_independent_image_cli_requires_initial_state_and_reuses_versions(
 
     case, _, _ = prepared
     recipe, assets, roots = regional_images
-    for name in ("FrozenEN", "FrozenJP", "FrozenRegions"):
-        monkeypatch.setattr(producer, name, lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(producer, "registry_provider", lambda *_args: None)
     monkeypatch.setattr(
         producer, "plan_preview", lambda *_args, **_kwargs: case.identity
     )

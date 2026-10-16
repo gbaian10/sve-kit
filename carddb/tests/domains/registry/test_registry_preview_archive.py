@@ -19,6 +19,7 @@ from sve_carddb.parse.pages.official_jp import card_url
 
 from ...ingest.test_source_archive import NOW, _put, _resource, _store
 from ...support.registry_observation_fixtures import parsed_card
+from ...support.registry_preview_fixtures import mapping_review
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -89,7 +90,7 @@ def test_pins_version_url_hash_first_receipt_and_parser(
     assert found.faces[0].rarity_raw == "LG"
     assert provider.card("jp", "MISSING") is None
     assert provider.card("en", "TEST-001") is None
-    assert not provider.coverage(latest.batch_id)
+    assert not provider.coverage(mapping_review(latest.batch_id))
 
 
 @pytest.mark.parametrize("kind", ["descriptors", "receipts", "raw"])

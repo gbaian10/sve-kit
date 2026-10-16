@@ -27,6 +27,7 @@ from sve_carddb.parse.pages.extract_en import extract_card
 from ...ingest.test_source_archive import NOW, _put, _resource, _store
 from ...support.en_extract_fixtures import page
 from ...support.registry_observation_fixtures import parsed_card
+from ...support.registry_preview_fixtures import mapping_review
 from .test_registry_preview_archive import RAW as JP_RAW
 
 if TYPE_CHECKING:
@@ -111,8 +112,8 @@ def test_exact_en_source_pins_first_receipt_and_recomputes_both_hashes(
     assert provider.card("jp", NUMBER) is None
     assert provider.card("en", "MISSING") is None
     assert provider.card("en", NUMBER.removesuffix("EN")) is None
-    assert not provider.coverage(latest.batch_id)
-    assert not provider.coverage("sha256:" + "0" * 64)
+    assert not provider.coverage(mapping_review(latest.batch_id))
+    assert not provider.coverage(mapping_review("sha256:" + "0" * 64))
 
 
 @pytest.mark.parametrize("kind", ["descriptors", "receipts", "raw"])
@@ -249,7 +250,7 @@ def test_composition_dispatches_explicit_regions_without_cross_region_fallback(
     assert provider.card("en", NUMBER) == en_provider.card("en", NUMBER)
     assert provider.card("jp", NUMBER) is None
     assert provider.card("en", "TEST-001") is None
-    assert not provider.coverage(sealed.batch_id)
+    assert not provider.coverage(mapping_review(sealed.batch_id))
 
 
 def test_archive_cli_extracts_en_twice_without_mutating_the_sealed_input(

@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 
     from sve_carddb.core.regions import Region
     from sve_carddb.domains.registry.preview.evidence import CardEvidence
+    from sve_carddb.domains.registry.preview.review_inputs import RegistryReviewInputs
+    from sve_carddb.domains.registry.records import MappingReviewData
 
 
 @dataclass(frozen=True)
@@ -16,11 +18,12 @@ class MemoryEvidence:
 
     cards: Mapping[tuple[Region, str], CardEvidence]
     coverage_hashes: frozenset[str] = frozenset()
+    review_inputs: RegistryReviewInputs | None = None
 
     def card(self, region: Region, card_no: str) -> CardEvidence | None:
         """Resolve a pinned extracted source by exact region and card number."""
         return self.cards.get((region, card_no))
 
-    def coverage(self, coverage_hash: str) -> bool:
+    def coverage(self, review: MappingReviewData) -> bool:
         """Check a pinned complete review input, independently from individual cards."""
-        return coverage_hash in self.coverage_hashes
+        return review.coverage_hash in self.coverage_hashes

@@ -45,6 +45,13 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 | `as_of`、`data_version`、`published_at` | 查核日期、preview 批次識別與 UTC 時間 |
 | `feedback_url`、`grammar_version`、`normalizer_version` | 公開 config；normalizer 應與目標前端一致 |
 | `name_policy` | 選填；目前只接受 `approved-frozen-v1` |
+| `registry_review_inputs` | 選填 `{root,batch_id,inventory_sha256,coverage_hash,bytes,as_of}`；只指向 [authored-layout §3.6](../domains/authored-layout.md#36-輸入保存) 的永久批次與固定 `jp.jsonl`，不引用草稿副本 |
+
+明示審閱 pin 時，建置驗 inventory／SHA256SUMS 的 JP 條目與完整 JSONL exact bytes；
+壞 pin 拒絕整次建置，缺 pin 則排除 mapping review。region／v1 scope／原 as_of／hash 必須吻合；
+登錄 JP 卡號超出歷史集合時以 `review_scope_outdated` 排除，報告列出卡號。
+F1 configuration 與診斷記錄已驗 pin，排除私人 root 及 inventory 的舊路徑。
+所有公開／私人／bundle／圖片輸出均須與永久輸入根分離。這不更新查核日期或授予 EN DSL 資格。
 
 建置只讀凍結批次與 authored，不開 live manifest、不抓官網。文字封存來源逐份驗 hash，圖片真實性由獨立 producer 驗證，
 輸入記錄驗 source-use 閉包，建置 DB 驗 FK／JSON，公開投影驗參照閉包；匯出後由
@@ -60,7 +67,7 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 
 將 `carddb/docker/.env.example` 複製為同目錄的 `.env`，填入配方使用的絕對路徑；
 在 repo 外的執行目錄放 `recipe.json`，執行 `carddb/docker/export.sh <執行目錄>`。
-容器以呼叫者的 uid／gid 執行，repo／人寫資料與封存庫唯讀掛載；
+容器以呼叫者的 uid／gid 執行，repo／人寫資料、封存庫與 `SVE_REGISTRY_REVIEW_INPUTS`（即配方的 `registry_review_inputs.root`）唯讀掛載；
 `EXPORT_CPUS`、`EXPORT_MEMORY` 設 CPU／記憶體硬上限，swap 停用。
 `SVE_IMAGE_INDEX` 指定索引檔；容器不掛載圖片庫或轉檔快取。`EXPORT_BROTLI=0` 略過 Brotli，`EXPORT_PROFILE=1` 啟用 py-spy。
 每完成一段即寫 stderr；`SVE_STAGE_LOG` 指定追加時間、CPU 與記憶體的 TSV，

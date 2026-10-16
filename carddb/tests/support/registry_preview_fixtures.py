@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import ArchivePin, BuildContext, Source
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.domains.registry.records import CardData, PrintingData
+from sve_carddb.domains.registry.preview.review_inputs import JP_REVIEW_SCOPE
+from sve_carddb.domains.registry.records import (
+    CardData,
+    MappingReviewData,
+    PrintingData,
+)
 
 from .build_db_fixtures import rows
 from .identity_evidence_fixtures import MemoryEvidence
@@ -84,3 +89,16 @@ def parents(db: Database, plan: PreviewPlan) -> None:
                 fixtures["product_family"]
                 | {"id": family, "code": f"test{index}", "public_code": f"TEST{index}"},
             )
+
+
+def mapping_review(coverage_hash: str) -> MappingReviewData:
+    """Describe a complete synthetic historical JP review for raw-provider refusals."""
+    return MappingReviewData(
+        card_id="c:" + "0" * 32,
+        target_region="jp",
+        state="confirmed_none",
+        as_of="2026-09-28",
+        coverage_scope=JP_REVIEW_SCOPE,
+        coverage_hash=coverage_hash,
+        observations=(),
+    )

@@ -37,6 +37,10 @@ from sve_carddb.domains.registry.preview import (
     FrozenRegions,
     plan_preview,
 )
+from sve_carddb.domains.registry.preview.review_inputs import (
+    RegistryReviewInputs,
+    ReviewInputPin,
+)
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.rulings.reader import load as load_rulings
@@ -106,6 +110,7 @@ class Inputs(RecordData):
     grammar_version: Text
     normalizer_version: Text
     name_policy: Literal["approved-frozen-v1"] | None = None
+    registry_review_inputs: ReviewInputPin | None = None
 
     @model_validator(mode="after")
     def regional_scope(self) -> Inputs:
@@ -117,9 +122,42 @@ class Inputs(RecordData):
             raise ValueError("Offline composition requires a preview- data version")
         return self
 
+    def protected_inputs(self) -> tuple[Path, ...]:
+        """Output must never overwrite permanent review inputs either."""
+        return (self.repo, self.archive) + (
+            (self.registry_review_inputs.root,) if self.registry_review_inputs else ()
+        )
+
     def batch(self) -> Batch:
         """Keep the launch scope explicit rather than deriving it from loaded rows."""
         return Batch(self.data_version, self.published_at, self.as_of, ("en", "jp"))
+
+
+def registry_provider(inputs: Inputs, batches: FrozenBatches) -> FrozenRegions:
+    """Share the same verified coverage and raw evidence in text and image builds."""
+    review = (
+        RegistryReviewInputs(inputs.registry_review_inputs)
+        if inputs.registry_review_inputs is not None
+        else None
+    )
+    en, jp = inputs.sources
+    return FrozenRegions(
+        en=FrozenEN(
+            inputs.archive,
+            inputs.store_id,
+            en.card_batch,
+            parser_version=en.parser_version,
+            sources=batches.batch(inputs.archive, inputs.store_id, en.card_batch),
+        ),
+        jp=FrozenJP(
+            inputs.archive,
+            inputs.store_id,
+            jp.card_batch,
+            parser_version=jp.parser_version,
+            sources=batches.batch(inputs.archive, inputs.store_id, jp.card_batch),
+        ),
+        review_inputs=review,
+    )
 
 
 @dataclass(frozen=True)
@@ -297,7 +335,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
 
     if bundle_dir is not None:
-        for protected in (inputs.repo, inputs.archive):
+        for protected in inputs.protected_inputs():
             output, source = bundle_dir.resolve(), protected.resolve()
             if output.is_relative_to(source) or source.is_relative_to(output):
                 raise ValueError(
@@ -315,25 +353,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 "Image index differs from the recipe's regional image pins"
             )
     mark("load image index metadata")
-    en, jp = inputs.sources
+    _, jp = inputs.sources
     identity = plan_preview(
         authored_root(inputs.repo),
-        FrozenRegions(
-            en=FrozenEN(
-                inputs.archive,
-                inputs.store_id,
-                en.card_batch,
-                parser_version=en.parser_version,
-                sources=batches.batch(inputs.archive, inputs.store_id, en.card_batch),
-            ),
-            jp=FrozenJP(
-                inputs.archive,
-                inputs.store_id,
-                jp.card_batch,
-                parser_version=jp.parser_version,
-                sources=batches.batch(inputs.archive, inputs.store_id, jp.card_batch),
-            ),
-        ),
+        registry_provider(inputs, batches),
         regions=("en", "jp"),
     )
     mark("plan preview identity")
@@ -411,8 +434,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         "product_identity": identities.configuration(),
         "offline_recipe": inputs.model_dump(
             mode="json",
-            exclude={"repo", "archive"},
+            exclude={"repo", "archive", "registry_review_inputs"},
         ),
+        "registry_review_inputs": identity.review_input_pin,
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
@@ -669,6 +693,22 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 "formal release gates (#34)",
                 *([] if image_index is not None else ["image publication (#35)"]),
                 "Web handoff and acceptance",
+            ],
+        }
+        report["registry_reviews"] = {
+            "registry_review_inputs": identity.review_input_pin,
+            "uncovered_jp_card_numbers": list[JsonValue](
+                identity.uncovered_jp_card_numbers
+            ),
+            "records": [
+                {
+                    "record_key": item.record_key,
+                    "disposition": item.disposition,
+                    "reasons": list[JsonValue](item.reasons),
+                }
+                for item in identity.projections
+                if identity.snapshot.records[item.record_key].kind
+                == "region_mapping_review"
             ],
         }
         report["flavor_translations"] = dict[str, JsonValue](flavor_report.payload())

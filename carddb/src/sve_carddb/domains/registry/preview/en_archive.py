@@ -14,9 +14,13 @@ if TYPE_CHECKING:
 
     from sve_carddb.core.regions import Region
     from sve_carddb.domains.registry.preview.archive import FrozenJP
+    from sve_carddb.domains.registry.preview.review_inputs import RegistryReviewInputs
+    from sve_carddb.domains.registry.records import MappingReviewData
 
 
 class FrozenEN:
+    review_inputs: RegistryReviewInputs | None = None
+
     def __init__(
         self,
         root: Path,
@@ -35,7 +39,7 @@ class FrozenEN:
         self.batch_id = batch_id
 
     @staticmethod
-    def coverage(_coverage_hash: str) -> bool:
+    def coverage(_review: MappingReviewData) -> bool:
         """Neither card HTML nor a legacy renderer comparison proves review coverage."""
         return False
 
@@ -73,15 +77,21 @@ class FrozenEN:
 
 
 class FrozenRegions:
-    def __init__(self, *, jp: FrozenJP, en: FrozenEN) -> None:
+    def __init__(
+        self,
+        *,
+        jp: FrozenJP,
+        en: FrozenEN,
+        review_inputs: RegistryReviewInputs | None = None,
+    ) -> None:
         self.jp = jp
         self.en = en
+        self.review_inputs = review_inputs
 
     def card(self, region: Region, card_no: str) -> CardEvidence | None:
         """Dispatch by the explicit region; suffixes never infer identity."""
         return (self.jp if region == "jp" else self.en).card(region, card_no)
 
-    @staticmethod
-    def coverage(_coverage_hash: str) -> bool:
-        """Composition of raw batches still does not prove historical review scope."""
-        return False
+    def coverage(self, review: MappingReviewData) -> bool:
+        """Historical coverage comes only from independently verified registry inputs."""
+        return self.review_inputs is not None and self.review_inputs.coverage(review)
