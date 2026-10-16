@@ -151,6 +151,21 @@ def test_expression_formals_bind_different_actual_names_and_propagate_render_evi
     assert prepared.required_references(item, "zh-Hant")
     with pytest.raises(ValueError, match="required"):
         renderer.render("ctx:synthetic", "zh-Hant", (item,))
+    explicit = replace(
+        item,
+        selected=SelectedTarget(
+            Target(
+                format=1,
+                nodes=tuple(
+                    LeafRef(kind="LeafRef", slot=s.name)
+                    for s in item.frame.leaf_schema.slots
+                ),
+            )
+        ),
+    )
+    assert renderer.render("ctx:synthetic", "zh-Hant", (explicit,)).issues == (
+        "unsupported_quantity_presentation",
+    )
     missing = PreparationRenderer(renderer, ExpressionTargets({})).render(
         "ctx:synthetic", "zh-Hant", (item,)
     )

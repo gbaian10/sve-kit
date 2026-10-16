@@ -831,8 +831,9 @@ ID 為 `count.current_zone.<依序形參>.<固定限定>.<偏移>.v1`，沒有�
 `ExpressionTargets` 依語言選取既有 Target，僅允許 Literal／LeafRef／Form。
 Target 引用規則的形參；`Expression.leaves` 依序提供實際 frame 槽名，
 兩者不必同名。展開先驗型別、角色、閉域與完整必要參數，再代入實參。
-準備版主 Target 引用 expression 槽（LeafRef、Form 或 CountExpr）時，其實參也計入
-required 使用閉包；未引用的 expression 不傳遞使用。expression 譯文仍必須呈現全部形參。
+準備版主 Target 以任一節點引用 expression 槽時（LeafRef、Form、CountExpr，
+或數量為 expression 的 CardNP／UnionNP），其實參也計入 required 使用閉包；
+未引用的 expression 不傳遞使用。expression 譯文仍必須呈現全部形參。
 `PreparedField.verify(..., target=..., lang=..., forms=...)` 對候選 authored target
 與準備 renderer 共用此規則；缺 expression 引用或實參值仍拒絕。
 正式 v2 的 Target 驗證、authored 載入及 renderer 不啟用此閉包。
