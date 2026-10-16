@@ -165,6 +165,13 @@ describe("CardsPage", () => {
     expect(options[0]).toHaveTextContent("試作聖堂騎士")
     expect(options[0]).toHaveTextContent("BP01-051")
     expect(options[0]).toHaveTextContent("符合：卡號")
+    await waitFor(() => {
+      expect(options[0]?.querySelector("img")).toHaveAttribute(
+        "src",
+        expect.stringContaining("/images/card_"),
+      )
+      expect(options[0]).toBeInTheDocument()
+    })
     await user.keyboard("{ArrowDown}")
     expect(input).toHaveAttribute("aria-activedescendant", options[0]?.id)
     expect(options[0]).toHaveAttribute("aria-selected", "true")

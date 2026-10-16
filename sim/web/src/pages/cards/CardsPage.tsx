@@ -25,7 +25,7 @@ import { Button } from "../../components/ui/Button"
 import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
-import { type CardSummary, type ImageSource, type SearchQuery, viewImages } from "../../data"
+import { type CardSummary, type ImageSource, type SearchQuery } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -144,24 +144,7 @@ export function CardsPage() {
           : [],
     [debounced, suggestionRows, recentResult, nameOf],
   )
-  const thumbnailFaces =
-    debounced !== ""
-      ? suggestionRows?.faces
-      : recentResult.phase === "complete"
-        ? recentResult.faces
-        : undefined
-  const suggestionImages = useMemo(
-    () =>
-      thumbnailFaces
-        ? viewImages({
-            query: { state: DEFAULT_QUERY, edition },
-            page: { items: [], total: 0, offset: 0 },
-            options: { classes: [], sets: [] },
-            faces: thumbnailFaces,
-          })
-        : undefined,
-    [thumbnailFaces, edition],
-  )
+  const suggestionImages = debounced !== "" ? suggestionState.images : recentResult.images
   const listOpen =
     focused &&
     readiness.phase === "ready" &&

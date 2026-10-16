@@ -25,7 +25,7 @@ import { editionUrl, querySearch } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { recentStore } from "../../settings"
-import { cardPath, faceImages, homeEntryState, readHomeEntry } from "./home-model"
+import { cardPath, homeEntryState, readHomeEntry } from "./home-model"
 
 const DEBOUNCE_MS = 150
 const SHORTCUT =
@@ -95,10 +95,7 @@ export function HomeSearch({
           })),
     [settled, recent, shown, nameOf],
   )
-  const suggestionImages = useMemo(
-    () => (shown?.faces ? faceImages(shown.faces, edition) : undefined),
-    [shown, edition],
-  )
+  const suggestionImages = suggestion.images
   const total = complete ? suggestion.result.page.total : 0
   const stale = input !== debounced || (settled !== "" && !complete)
   const active =

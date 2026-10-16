@@ -1,7 +1,6 @@
-import { type CardSummary, type CompleteView, type ImageIndex, viewImages } from "../../data"
+import { type CardSummary } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import type { DisplayedText, NameSource } from "../../domain/nameDisplay"
-import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region, TextLang } from "../../domain/search"
 
 export const RECENT_SET_LIMIT = 3
@@ -26,16 +25,6 @@ export function setPath(publicCode: string, edition: Region = "jp"): string {
 export function setLabel(name: NameSource, lang: TextLang): DisplayedText {
   const translated = name.translations[lang]
   return translated ? { text: translated, lang } : name.original
-}
-
-/** Thumbnails of the faces a suggestion or recent answer brought along. */
-export function faceImages(faces: CompleteView["faces"], edition: Region): ImageIndex {
-  return viewImages({
-    query: { state: DEFAULT_QUERY, edition },
-    page: { items: [], total: 0, offset: 0 },
-    options: { classes: [], sets: [] },
-    faces,
-  })
 }
 
 /** What the home page keeps on its own history entry, so back restores the typed text. */

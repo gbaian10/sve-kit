@@ -20,6 +20,7 @@ import {
   type QueryFailure,
   retainedImageIndex,
   type SearchChannel,
+  type SearchChannelStatus,
   type SearchQuery,
   SearchSession,
   type SearchStatus,
@@ -475,12 +476,51 @@ function useVisibleResultImages(
   }, [view, faces, failed])
 }
 
-export function useWorkerSuggestions(text: string, edition: Region) {
+function useSummaryImages(result: SearchChannelStatus["previous"], edition: Region) {
+  const { channel, status } = useWorkerChannel(edition)
+  const state = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  const retained = useMemo(
+    () => retainedFaces(channel, status.root, status.manifestHash, edition),
+    [channel, status.root, status.manifestHash, edition],
+  )
+  const faces = useSyncExternalStore(retained.subscribe, retained.get, retained.get)
+  const matches = result?.root === status.root && result?.manifestHash === status.manifestHash
+  const ids = JSON.stringify(
+    matches
+      ? (result?.suggestions ?? result?.recent ?? [])
+          .flatMap((item) => (item.summary ? [item.summary.printingId] : []))
+          .filter((id) => !faces.some((face) => face.printingId === id))
+      : [],
+  )
+  useEffect(() => {
+    const missing = JSON.parse(ids) as string[]
+    if (missing.length) channel.images(missing, edition)
+  }, [channel, ids, edition, status.root, status.manifestHash])
+  const failed = state.result.phase === "error"
+  return useMemo(() => {
+    if (!result || !matches) return undefined
+    const images = viewImages({
+      query: { state: DEFAULT_QUERY, edition },
+      page: result.page,
+      options: { classes: [], sets: [] },
+      faces,
+    })
+    return failed ? { ...images, failed: true, known: () => true } : images
+  }, [result, matches, edition, faces, failed])
+}
+
+export function useWorkerSuggestions(
+  text: string,
+  edition: Region,
+): SearchChannelStatus & { readonly images: ImageIndex | undefined } {
   const { channel } = useWorkerChannel(edition)
   useEffect(() => {
     channel.suggest(text, edition)
   }, [channel, text, edition])
-  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  const state = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  const shown = state.result.phase === "complete" ? state.result : state.previous
+  const images = useSummaryImages(shown, edition)
+  return { ...state, images }
 }
 export function useRecentSummaries(ids: readonly string[], edition: Region) {
   const { channel } = useWorkerChannel(JSON.stringify([ids, edition]))
@@ -488,7 +528,13 @@ export function useRecentSummaries(ids: readonly string[], edition: Region) {
   useEffect(() => {
     channel.recent(JSON.parse(key) as string[], edition)
   }, [channel, key, edition])
-  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus).result
+  const result = useSyncExternalStore(
+    channel.subscribe,
+    channel.getStatus,
+    channel.getStatus,
+  ).result
+  const images = useSummaryImages(result.phase === "complete" ? result : undefined, edition)
+  return { ...result, images }
 }
 export function useSetOptions() {
   const cardEdition = useRouteEdition()

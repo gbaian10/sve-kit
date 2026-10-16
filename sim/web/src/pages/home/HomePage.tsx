@@ -14,7 +14,7 @@ import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { recentSets } from "../../domain/sets"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs, useRecent } from "../../settings"
-import { faceImages, RECENT_SET_LIMIT, type SetEntry, setLabel } from "./home-model"
+import { RECENT_SET_LIMIT, type SetEntry, setLabel } from "./home-model"
 import { HomeSearch } from "./HomeSearch"
 import { NewPackBanner, type PackCountState } from "./NewPackBanner"
 import { OfficialNews } from "./OfficialNews"
@@ -47,13 +47,7 @@ export function HomePage() {
         : null,
     [recentResult, nameOf],
   )
-  const recentImages = useMemo(
-    () =>
-      recentResult.phase === "complete" && recentResult.faces
-        ? faceImages(recentResult.faces, edition)
-        : undefined,
-    [recentResult, edition],
-  )
+  const recentImages = recentResult.images
   const releases = useSetReleases(edition)
   const sets = useMemo<SetEntry[] | null>(() => {
     const { lastInput, result } = releases
