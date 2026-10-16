@@ -1073,7 +1073,8 @@ CurrentTurn 識別是待 lowering 的來源參數，沒有建立 runtime 使用�
 
 A7 在參與來源片段保存 `ModeCountRule`。intro 的有限區域張數、關鍵字門檻及主戰者生命
 條件使用家族自有 descriptor，保留原有常數 QuantitySpec 的 exact／up_to／at_least
-含義；比較本身不擴張舊 B11 接受域。已由其他家族產生、且 occurrence 落在該條件內的
+含義；比較本身不擴張舊 B11 接受域。主戰者生命條件使用新角色 `mode_condition_owner`，
+不借用卡片集合的 `counted_owner`。已由其他家族產生、且 occurrence 落在該條件內的
 typed predicate 可直接消費；typed 數值讀取可接顯式張數下限。條件 provider 的 scope
 與 imports 沿原 projection 保留，不以字面值相同配對。
 
