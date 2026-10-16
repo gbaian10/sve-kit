@@ -1,5 +1,6 @@
 """Default-printing policy through the public selector with synthetic build rows."""
 
+import sqlite3
 from typing import TYPE_CHECKING
 
 import pytest
@@ -104,7 +105,9 @@ def test_same_rarity_uses_permanent_home_release_then_card_number_then_id() -> N
             populate(db)
         assert select_defaults(db)[0].printing_id == "z-id"
         with db.transaction():
-            db.update("printing", {"id": "a-id"}, {"card_no": "A"})
+            db.update(
+                "printing", {"id": "a-id"}, {"card_no": "A", "variant_key": "alternate"}
+            )
         assert select_defaults(db)[0].printing_id == "a-id"
         assert db.rows("card")[0].values["home_set_id"] == "family"
 
@@ -172,8 +175,15 @@ def test_groups_are_scoped_to_card_and_region() -> None:
             printing(db, "jp", "JP", changes={"rarity_raw": "SL"})
             printing(db, "en", "EN", region="en", changes={"rarity_raw": "Bronze"})
             db.insert("card", values["card"] | {"id": "other"})
-            printing(
-                db, "other", "OTHER", changes={"card_id": "other", "rarity_raw": "BR"}
+            db.insert(
+                "printing",
+                values["printing"]
+                | {
+                    "id": "other",
+                    "card_id": "other",
+                    "card_no": "OTHER",
+                    "rarity_raw": "BR",
+                },
             )
             populate(db)
         assert [
@@ -206,16 +216,19 @@ def test_confirmed_override_precedes_rarity_and_keeps_url_identity() -> None:
             select_defaults(db)
 
 
-def test_override_must_select_same_card_and_region() -> None:
+def test_override_cannot_cross_regions() -> None:
     with create_database(compile_t0()) as db:
         values = base(db)
         assert select_defaults(db) == ()
         with db.transaction():
             printing(db, "jp", "JP")
             printing(db, "en", "EN", region="en")
+        with (
+            pytest.raises(sqlite3.IntegrityError, match="Foreign key"),
+            db.transaction(),
+        ):
             db.insert(
                 "default_printing_override",
                 values["default_printing_override"] | {"printing_id": "en"},
             )
-        with pytest.raises(ValueError, match="same card and region"):
-            select_defaults(db)
+        assert select_defaults(db)[1].printing_id == "jp"
