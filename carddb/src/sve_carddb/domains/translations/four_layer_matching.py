@@ -82,7 +82,12 @@ def _signature(slot: LeafSlot) -> tuple[object, ...]:
 
 
 def bind_recognized(
-    frame: Frame, field: SourceField, part: SourcePart, recognized: Recognized
+    frame: Frame,
+    field: SourceField,
+    part: SourcePart,
+    recognized: Recognized,
+    *,
+    mixed: bool = False,
 ) -> SourceBinding | None:
     """Map complete signatures and construction order, including independent omitted operands."""
     expected_omitted = tuple(s for s in recognized.schema.slots if not s.occurrences)
@@ -108,6 +113,8 @@ def bind_recognized(
     if actual.keys() != expected.keys() or any(
         _signature(slot) != _signature(expected[pos]) for pos, slot in actual.items()
     ):
+        return None
+    if mixed and not _mixed_names(recognized, actual, omitted_names):
         return None
     values: dict[str, TypedValue] = {}
     occurrences: list[LeafOccurrence] = []
@@ -146,3 +153,22 @@ def bind_recognized(
         trace=part.trace,
     )
     return binding.model_copy(update={"id": "bind:" + hash_payload(binding.payload())})
+
+
+def _mixed_names(
+    recognized: Recognized,
+    actual: dict[tuple[int, int], LeafSlot],
+    omitted_names: dict[str, str],
+) -> bool:
+    for slot in recognized.schema.slots:
+        if not slot.occurrences:
+            continue
+        names = {actual[span.start, span.end].name for span in slot.occurrences}
+        if len(names) == 1:
+            omitted_names[slot.name] = names.pop()
+        elif any(
+            o.slot == slot.name and o.source_presence == "omitted"
+            for o in recognized.occurrences
+        ):
+            return False
+    return True

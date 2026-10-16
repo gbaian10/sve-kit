@@ -759,3 +759,55 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 公開 3.0 的 producer／Python 與 TS reader 已同步接線；舊公開 wire 文件不得再作「divergence 禁止 JP 繁中」的政策依據。
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。
+
+## 11. 隔離的 v3 準備接口
+
+`four_layer_preparation.derive_preparation(raw, source, classifier)` 產生 `PreparedField`，
+由其 `bind` 建立 `four-layer-jp-v3` 身分，`verify` 從原始來源重新 derive，
+再驗完整 frame、binding、語義及接口。這是私人比較材料的入口；正式 workflow
+仍呼叫 `derive_source`，固定產生 `four-layer-jp-v2`。正式 classifier、authored
+與 SQLite 來源契約拒絕 v3 及未知版；v2 authored／SQLite 不接受 ChoiceContext port。
+準備入口在正式切換時移除，不是永久雙版執行設定。
+
+此接口目前沿用正式來源辨識，不因登錄共用型別就接受新的來源句型。
+`ChoiceContext` 僅是 PortType，Port 仍只有 name、type、source_role、scope，
+不是 LeafType。選項的來源連接必須另由完整來源重建，型別本身不授予可執行資格。
+
+`four_layer_expressions.DEFINITIONS` 是封閉的 expression 登錄。
+結果 measure 為 `card_count`，read_structure 為 `current_zone_count`，
+只含下列參數／限定組合，以及明示的一層常數偏移：
+
+| 依序形參 | 固定限定 | 偏移 |
+| --- | --- | --- |
+| owner、zone | 無 | 無／subtract_offset |
+| owner、zone、kind | 無 | 無／add_offset |
+| owner、zone、name | 無 | 無／add_offset |
+| owner、zone、card | 無 | 無 |
+| owner、zone、kind、trait | 無／exclude_this | 無 |
+| owner、zone、card、trait | 無 | 無 |
+| owner、zone、class、kind | 無 | 無 |
+| owner、zone、class、card | 無 | 無 |
+| owner、zone、keyword、kind | 無／exclude_this | 無 |
+| owner、zone、token_status、trait | token | 無 |
+| owner、zone、kind | exclude_this | 無 |
+
+ID 為 `count.current_zone.<依序形參>.<固定限定>.<偏移>.v1`，沒有的部分省略；
+例如 `count.current_zone.owner.zone.v1`。偏移的最後一個形參為 `offset`，
+對應 `Nat/arithmetic_offset`；其他形參依序對應同名的 `read_*` 角色，
+使用原有閉域。專用域 `quantity.count_expression.current_zone.v1`
+只收此登錄內的 QuantityExpr，不放寬任何既有常數域。
+沒有任意運算式 parser、數值求值或負數截零。
+
+`ExpressionTargets` 依語言選取既有 Target，僅允許 Literal／LeafRef／Form。
+Target 引用規則的形參；`Expression.leaves` 依序提供實際 frame 槽名，
+兩者不必同名。展開先驗型別、角色、閉域與完整必要參數，再代入實參。
+`PreparationRenderer` 沿既有 renderer 保留引用閉包、文字範圍、葉路徑、origin
+及低信心；缺語言 Target 仍整欄 fallback。未知 ID、錯參數、缺實參、循環皆拒絕。
+Bound 的 import 必須存在且型別正確，來源證明的使用 scope 只能看見本 scope
+或祖先 scope 的 import，不能借用同層另一 branch；此登錄域本身不放行 bound。
+
+共用 `bind_recognized` 的 mixed 映射僅由準備路徑啟用：omitted occurrence
+沿同一 recognized 槽的完整 explicit 簽章與實際位置對應，保留 resolution_rule，
+不按值尋找 antecedent；不能唯一定位就拒絕。純 omitted 槽仍按既有建構順序配對。
+正式 v2 保留原本對 explicit 槽之 omitted occurrence 的拒絕。
+共用映射可表達某種形狀，不等於來源已核准該省略關係；準備 verify 仍須重新 derive 證明。

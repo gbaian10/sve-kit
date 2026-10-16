@@ -399,6 +399,14 @@ def _references(records: tuple[Record, ...], locations: Mapping[str, str]) -> No
                     raise ValueError(
                         "Unsupported four-layer authored normalizer version"
                     )
+                if any(
+                    port.type == "ChoiceContext"
+                    for port in (
+                        *record.data.projection.imports,
+                        *record.data.projection.exports,
+                    )
+                ):
+                    raise ValueError("Unsupported four-layer authored port type")
             elif isinstance(record, FormRecord):
                 validate_form(record.data)
             elif isinstance(record, (TargetRecord, TargetVariantRecord)):

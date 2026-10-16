@@ -36,7 +36,12 @@ LeafType = Literal[
     "LiteralLayout",
 ]
 PortType = Literal[
-    "ObjectSet", "PlayerRef", "ReceiptId", "CapturedValue", "QuantityExpr"
+    "ObjectSet",
+    "PlayerRef",
+    "ReceiptId",
+    "CapturedValue",
+    "QuantityExpr",
+    "ChoiceContext",
 ]
 
 
