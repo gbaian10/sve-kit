@@ -120,10 +120,11 @@ JP 量測不足以凍結正式配置；正式前還須量 EN、雙區與完整�
 ## 唯讀匯出邊界
 
 `carddb` 的 `sve_carddb.export.read_api` 提供發布端使用的唯讀入口。
-`load_export(root)` 驗證 preview 指標、canonical JSON、檔名與內容 hash、完整分片引用、
-壓縮旁檔及圖片尺寸／格式，再回傳 `Export`。`members` 包含公開 key、原始 bytes 與
-`encoding`；`images` 包含永久 key、版本化 URL、尺寸與 bytes，`load_export(root, image_root=...)` 可指定獨立固定 key 圖片根；`Export.image(item)`
-每次重新讀取並核對圖片。傳輸 header 由發布端決定。
+`load_export(root)` 驗證 preview 指標、canonical JSON、檔名與內容 hash、完整分片引用及
+壓縮旁檔，再回傳 `Export`，不讀圖片檔。`members` 包含公開 key、原始 bytes 與
+`encoding`；`images` 只列引用圖片的永久 key、版本化 URL 與 bytes，供比對遠端卡圖上傳清單。
+`load_image_upload(path)` 讀內容定址的卡圖上傳描述，`read_image_inventory(raw)` 驗遠端清單，
+兩者都不開圖檔。傳輸 header 由發布端決定。
 
 `read_index(raw)` 驗證 canonical 版本索引；`validate_index(value)` 驗證索引形狀。
 GC 使用 `retained_manifest(raw, entry)` 核對保留的 manifest、`closure(path, manifest)`

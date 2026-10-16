@@ -141,8 +141,9 @@ GC never runs automatically. Do not run it between images upload and snapshot
 upload: current does not yet retain the next images. If collected then, their
 missing inventory claims block publication and images upload restores them.
 Tool-external edits/deletions can invalidate claims and are outside this trust
-model; repair by removing affected claims while no writers run, then reuploading
-the correct producer input. ETag conditions detect conflicts, not a distributed lock.
+model. To repair, delete `_publish/images.json` while no writers run; the next
+images upload then treats the bucket as a first baseline and reuploads every
+described image. ETag conditions detect conflicts, not a distributed lock.
 
 ## Maintainer development rehearsal
 
