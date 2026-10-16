@@ -151,7 +151,7 @@ export function CardText({
         stringValue(value.original.unit["lang"]) !== language && (
           <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
         )}
-      <Button size="sm" className="gap-1" onClick={() => void copyText()}>
+      <Button size="sm" onClick={() => void copyText()}>
         <Copy className="size-4" aria-hidden="true" />
         {t("card.copyText")}
       </Button>
