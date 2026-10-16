@@ -99,7 +99,9 @@ The manifest's own optional `.br` has no descriptor, so it is always a create-on
 candidate when uploading that manifest, with the same collision recovery. The
 `changes_ref` descriptor is included; `changes.from` never recurses to a third version.
 Missing or damaged retained manifests stop publication. Objects deleted outside
-the tool are not repaired by this manifest-based trust model.
+the tool are not repaired by this manifest-based trust model. Reused objects are
+not compared with the JSON header contract either: future JSON header changes
+require an explicit retransmission/migration, even when hashes match.
 
 The snapshot command rechecks the inventory, then conditionally
 commits `snapshots/versions/index.json` last and reads it back. First revision is 1;
