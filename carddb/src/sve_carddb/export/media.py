@@ -221,6 +221,9 @@ def prepare_media(  # ruff: ignore[too-many-locals, complex-structure] -- indexe
                 {
                     "path": path,
                     "source": variant["path"],
+                    "version": versions[
+                        string(variant["size_key"]).split("_", 1)[0] + "_version"
+                    ],
                     "sha256": "sha256:" + PurePosixPath(string(variant["path"])).stem,
                     **{f: variant[f] for f in ("width", "height", "bytes")},
                 }

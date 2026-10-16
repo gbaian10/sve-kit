@@ -21,6 +21,12 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
+from sve_carddb.export.image_upload import (
+    IMAGE_KEY,
+    ImageInventory,
+    ImageObject,
+    ImageUpload,
+)
 from sve_carddb.export.media_urls import display_url
 from sve_carddb.export.publication import require_preview
 from sve_carddb.export.reader import read_snapshot
@@ -41,6 +47,9 @@ __all__ = [
     "Export",
     "ExportError",
     "ImageFile",
+    "ImageInventory",
+    "ImageObject",
+    "ImageUpload",
     "Member",
     "array",
     "canonical",
@@ -51,8 +60,10 @@ __all__ = [
     "image_files",
     "integer",
     "load_export",
+    "load_image_upload",
     "object_value",
     "parse",
+    "read_image_inventory",
     "read_index",
     "read_member",
     "retained_manifest",
@@ -63,9 +74,6 @@ __all__ = [
 POINTER = "snapshots/preview/current.json"
 INDEX = "snapshots/versions/index.json"
 JSON_KEY = re.compile(r"snapshots/(?:blobs|manifests)/[0-9a-f]{64}\.json(?:\.br)?\Z")
-IMAGE_KEY = re.compile(
-    r"images/(?:card_[sml]|art_[sm])/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp\Z"
-)
 _ENTRY = (
     "data_version",
     "published_at",
@@ -193,20 +201,22 @@ def image_files(tables: dict[str, list[Row]]) -> tuple[ImageFile, ...]:
     return tuple(result[k] for k in sorted(result))
 
 
-def load_export(root: Path, *, image_root: Path | None = None) -> Export:
+def load_export(
+    root: Path, *, image_root: Path | None = None, verify_images: bool = True
+) -> Export:
     """Validate the pointer's whole public closure before credentials or HTTP."""
     directory(root)
     if image_root is not None:
         directory(image_root)
     try:
-        return _load(root, image_root)
+        return _load(root, image_root, verify_images=verify_images)
     except ExportError:
         raise
     except ValueError, OSError, KeyError, TypeError, SchemaError:
         raise ExportError("Export validation failed") from None
 
 
-def _load(root: Path, image_root: Path | None) -> Export:
+def _load(root: Path, image_root: Path | None, *, verify_images: bool) -> Export:
     path, raw, manifest = _manifest(root)
     members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
@@ -229,8 +239,9 @@ def _load(root: Path, image_root: Path | None) -> Export:
         image_files(tables),
         image_root,
     )
-    for item in export.images:
-        export.image(item)
+    if verify_images:
+        for item in export.images:
+            export.image(item)
     return export
 
 
@@ -324,3 +335,27 @@ def current_image_keys(
 ) -> set[str]:
     """Images follow current only; callers supply verified retained payload bytes."""
     return {item.key for item in image_files(read_snapshot(manifest, payloads))}
+
+
+def load_image_upload(path: Path) -> ImageUpload:
+    """Read a content-addressed producer description without opening any bitmap."""
+    try:
+        directory(path.parent)
+        raw = read_member(path.parent, path.name)
+        result = ImageUpload.model_validate_json(raw)
+    except ValueError, OSError:
+        raise ExportError("Invalid image upload description") from None
+    if raw != result.content() or path.name != digest(raw)[7:] + ".json":
+        raise ExportError("Invalid image upload description")
+    return result
+
+
+def read_image_inventory(raw: bytes) -> ImageInventory:
+    """Reject damaged or unknown control metadata instead of treating it as empty."""
+    try:
+        result = ImageInventory.model_validate_json(raw)
+    except ValueError:
+        raise ExportError("Invalid image upload inventory") from None
+    if raw != result.content():
+        raise ExportError("Invalid image upload inventory")
+    return result
