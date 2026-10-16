@@ -12,6 +12,7 @@ from sve_carddb.contracts.four_layer import (
     LiteralNode,
     ReceiptRef,
     Target,
+    VocabularyReference,
 )
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations.four_layer_classification import Term
@@ -267,7 +268,7 @@ def test_scaling_renders_required_operands_and_annotations() -> None:
     for label_ref, text in (
         (base.code_references["Player", "self"], "自己"),
         (base.code_references["ZoneSet", "battlefield"], "戰場"),
-        (base.code_references["CardKind", "follower"], "從者"),
+        (VocabularyReference(kind="vocabulary", key=("type", "follower")), "從者"),
         (GlossaryReference(kind="glossary", key="term:trait.synthetic"), "測試族"),
     ):
         labels[canonical(label_ref.model_dump(mode="json")), "zh-Hant"] = Label(
@@ -348,7 +349,12 @@ def test_both_result_read_branches_keep_independent_class_and_provider() -> None
         "【1】墓場の{仮クラス}フォロワー1枚を消滅：それに「これによって消滅した{仮クラス}フォロワーの攻撃力」の3倍のダメージ。"
         "【2】墓場の「{仮クラス}でないフォロワー」1枚を消滅：それに「これによって消滅した「{仮クラス}でないフォロワー」の攻撃力」と同じダメージ。"
     )
-    engine = n1_classifier()
+    base_engine = n1_classifier()
+    engine = classifier(
+        tuple(base_engine.terms.values()),
+        (*base_engine.rules.enabled(), "suffix_unit_items", "bracket_choice_index"),
+        vocabulary=base_engine.references.vocabulary,
+    )
     prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
@@ -392,7 +398,7 @@ def test_both_result_read_branches_keep_independent_class_and_provider() -> None
 
 def test_mixed_payment_and_other_ability_x_stay_separate() -> None:
     raw = (
-        "{起動}{コストX}これの仮カウンターX個を取る：自分のデッキから元のコストX以下のフォロワー1枚を探す。\n"
+        "{起動}{コストX}これの仮カウンターX個を取る：自分のデッキから元のコストX以下のフォロワーを探す。\n"
         "{ファンファーレ}これに仮カウンターX個を置く。Xは「自分のPP最大値」である。"
     )
     engine = read_engine()
@@ -439,7 +445,7 @@ def test_card_receipt_rejects_other_results(result: str) -> None:
             )
         }
     )
-    with pytest.raises(ValueError, match="amount result"):
+    with pytest.raises(ValueError, match="wrong result kind"):
         verify_quantities(
             frame.model_copy(update={"projection": projection}),
             binding,
