@@ -159,6 +159,16 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 
 `region_mapping_review` 的 `data` 為 `card_id/target_region/state/as_of/coverage_scope/coverage_hash/observations`。本批 target_region=jp、state=confirmed_none；新增記錄的 as_of 取 CLI 的 `--as-of`（JP 輸入的日期），coverage_hash 是當次完整 JP 萃取輸入檔的 SHA-256，observations 釘受審 EN 版次。匯入 source_id 指這份 immutable authored 查核紀錄；不是推論永遠不會出日版。
 
+正式建置可用選填 `registry_review_inputs` pin 驗回 §3.6 永久批次的 `jp.jsonl`；
+`coverage(review)` 必須同時符合 target_region=jp、原 as_of、原 coverage_hash 與 v1 範圍字串
+`All Japanese official card extractions in the reviewed input batch`。這是恢復歷史查核，
+不把配方日期當成新的查核日期，也不以 HTML 批次 hash 代替完整萃取輸入 hash。
+缺 pin 或 review 的地區／範圍／日期／hash 不符時，以 `missing_review_coverage` 排除。
+另要求登錄內**全部 JP printing 的原樣卡號集合**包含於已驗 `jp.jsonl` 的卡號集合；
+超出時以 `review_scope_outdated` 排除 review，報告列出 `uncovered_jp_card_numbers`。
+只比卡號集合，不要求目前來源的整份萃取 hash 相等。新 JP 包加入登錄後須依 §12 重審續版，
+在重審前相關 EN 特例退回原文；不自動配對新卡或延伸舊批准。EN observations、current 與翻譯身分閘門照原規則重驗。
+
 `art` 的 `data` 為 `id/card_id/face_id/classification/uses/observation`，uses 是 printing_id＋face_id 陣列。本批原創插畫只掛已確認的 EN printing；未確認基準及跨版次同圖組，故 classification=unclassified，不造假 base／alternate 或 JP art。`art_id=null` 的其他 printing 不代表沒有插畫。
 
 `card_related` 的 `data` 為 `id/from_card_id/to_card_id/relation/source_kind/target_printing_id/suggested_count/dsl_id/evidence`。relation=same_rules_reskin、source_kind=authored，三個選用欄為 null。evidence 逐筆記 `role: from|to` 及全部兩端已採納版次的觀測；匯入時逐地區比對兩端來源。相同換皮卡的普通／特殊 printing 只產一條關係，禁止自指、多目標與反向重複。只能在兩端都有版次且來源驗證仍匹配的地區投影；任一端目前來源改變就停止該地區投影，依 build-db §5 重審。不能繼承原卡 DSL 或構築張數。
@@ -203,6 +213,20 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 | decisions.json | 本批使用的初始化決定檔，欄位見 §3.5 |
 
 舊批次的取得方式是從保存目錄或其備份複製上述檔案，使用 SHA256SUMS 驗證；不依賴 session 暫存檔、個人草稿或重新生成候選。舊批次搭配當時的 Git commit 重現。inventory.json 記各檔 hash、大小與來源。SHA256SUMS 與決定檔都需納入批次備份；git 不存官方原文。
+
+正式配方的選填 `registry_review_inputs` 為
+`{root,batch_id,inventory_sha256,coverage_hash,bytes,as_of}`：root 是本節永久批次的絕對父目錄，
+batch_id 是單一目錄名稱；不得引用 `spec/` 或其他草稿副本。既有歷史查核使用
+`2026-09-28-identity-confirmed-v1`，不另建立恢復批次。
+reader 僅讀固定的 `inventory.json`、`SHA256SUMS`、`jp.jsonl`，拒絕逸出批次的路徑；
+先驗 inventory exact bytes hash，再核對其中 JP 條目的 hash／bytes 及 SHA256SUMS 的唯一 JP 條目，
+最後驗整份 JP exact bytes hash／大小與 JSONL 卡號唯一性。只取卡號，不另驗 Card 全欄位。
+明示 pin 的檔案缺失、hash 不符或無效輸入會拒絕整次 build，不從 latest 或草稿補資料。
+這個窄 reader 不重跑初始化，也不放寬新批次的完整輸入保存要求。
+inventory 中的 predecessor／copied_from 僅屬歷史說明，不追讀、不帶入 F1 或報告；
+F1 configuration 與診斷只記實際已驗的 pin（含固定 filename、target_region 與 coverage_scope），
+排除私人 root。JSONL 不產生假官方 source_record，review.source_id 仍指 authored 查核記錄。
+文字與圖片建置共用同一個 provider 工廠，所有輸出根亦須與永久輸入根分離。
 
 新批次依序執行：
 
