@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.contracts.four_layer import (
     ContextExpression,
     EventRef,
+    Expression,
     LinkedCondition,
     ObjectGeneration,
     ObjectSetRef,
@@ -27,6 +28,8 @@ from sve_carddb.domains.translations.four_layer_provenance import PROVENANCE_FAM
 from sve_carddb.domains.translations.four_layer_total_sources import FAMILY as TOTALS
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sve_carddb.contracts.four_layer import ModeCountRule, Projection
     from sve_carddb.contracts.source_binding import TypedValue
     from sve_carddb.domains.translations.four_layer_classification import (
@@ -80,6 +83,51 @@ def verify_claims(before: PreparedField, after: PreparedField) -> None:
         anchors.add(anchor)
         if positions and count != 1:
             raise ValueError("Preparation families duplicate a source construction")
+
+
+def _operands(values: Mapping[str, TypedValue], name: str, seen: set[str]) -> set[str]:
+    value = values.get(name)
+    if isinstance(value, (Expression, ContextExpression, PredicateExpr)):
+        for leaf in value.leaves:
+            if leaf not in seen:
+                seen.add(leaf)
+                _operands(values, leaf, seen)
+    return seen
+
+
+def verify_nesting(prepared: PreparedField) -> None:
+    """A construction inside another node's source extent must be one of its operands."""
+    # Descriptor IDs can encode literal text, so anchors alone miss a second encoding.
+    for found in prepared.derived.recognized:
+        spans = {
+            name: tuple(
+                s for o in found.occurrences if o.slot == name for s in o.raw_spans
+            )
+            for name in found.values
+        }
+        nodes = {
+            name: value
+            for name, value in found.values.items()
+            if isinstance(value, (ContextExpression, PredicateExpr))
+        }
+        for outer, value in nodes.items():
+            leaves = [s for leaf in value.leaves for s in spans.get(leaf, ())]
+            if not leaves:
+                continue
+            start, end = min(s.start for s in leaves), max(s.end for s in leaves)
+            for inner in nodes:
+                if (
+                    inner == outer
+                    or inner in _operands(found.values, outer, set())
+                    or outer in _operands(found.values, inner, set())
+                ):
+                    continue
+                if spans[inner] and all(
+                    start <= s.start and s.end <= end for s in spans[inner]
+                ):
+                    raise ValueError(
+                        "Preparation families encode one source construction twice"
+                    )
 
 
 def _remap_ports(before: PreparedField, after: PreparedField) -> PreparedField:
@@ -372,6 +420,7 @@ def prepare_integrated(
         updated = family.prepare(raw, prepared, classifier, context)
         verify_claims(prepared, updated)
         prepared = _remap_ports(prepared, updated)
+    verify_nesting(prepared)
     return _link_conditions(raw, _scopes(raw, prepared))
 
 

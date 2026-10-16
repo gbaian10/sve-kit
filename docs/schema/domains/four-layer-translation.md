@@ -1041,6 +1041,7 @@ BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍�
 不同名選取使用 `name.selection.distinct.v1`，結果是 Bool。兩者不互換。
 相對名稱條件保存 holder／選取物件／處理結果來源，不以卡名顯示字猜接。
 公開來源入口、required 閉包與正常 renderer 使用相同的家族 registry。
+本回合歷史子句內的同名除外屬 §11.10 的歷史查詢；本家族即使單獨啟用也跳過該段，不另編名稱條件。
 
 | 來源結構 | 新域／角色 | 實參與來源 |
 | --- | --- | --- |
@@ -1206,6 +1207,9 @@ EntryFact 的持久連接、Unknown、來源快照／LKI、授予能力持有者
 `verify_claims` 在每個 provider 後確認已擁有的 descriptor 及原始 occurrence 保留且唯一；
 新增使用點可以延伸同一讀值的 occurrence，不能取代原 provider。
 相同來源 anchor 的重複構造會報錯；同片段的不同構造仍可組合。
+descriptor ID 可以把原文字面編進構造而不留槽，所以全部 provider 後另由 `verify_nesting` 檢查：
+某個 context／predicate 的 occurrence 若落在另一個節點直接葉的原文範圍內，
+必須是該節點的 operand（或反之），否則視為同一構造被編兩次而報錯。
 變換槽名時同步重映射 expression DAG 與既有 port 的 source_leaves，
 不能因槽名剛好仍存在而借到另一個值。
 

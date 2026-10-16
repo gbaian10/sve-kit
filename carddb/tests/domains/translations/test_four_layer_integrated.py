@@ -21,6 +21,7 @@ from sve_carddb.contracts.four_layer import (
     VocabularyReference,
 )
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations import four_layer_integrated, four_layer_names
 from sve_carddb.domains.translations.four_layer_context import verify_mode_count
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
@@ -197,6 +198,23 @@ def test_additional_ability_heads_prevent_x_borrowing(head: str) -> None:
     assert len([o for o in binding.occurrences if o.slot == read]) == 1
 
 
+def test_option_rename_keeps_the_read_port_source_leaf() -> None:
+    prepared = prepare(
+        "下記から1つチョイスする。自分の墓場が7枚以上なら、代わりに2つまで。\n"
+        "【1】相手のフォロワー1体にXダメージ。Xは「自分のPP最大値」である。\n【2】仮乙。"
+    )
+    leaves = [
+        binding.values[name]
+        for frame, binding in (
+            prepared.bind(i) for i in range(len(prepared.interfaces))
+        )
+        for port in frame.projection.imports
+        if port.evidence
+        for name in port.evidence.source_leaves
+    ]
+    assert leaves == ["self"]
+
+
 def test_holder_symbols_agree_across_name_and_entry_providers() -> None:
     prepared = prepare(
         "これが手札以外から場に出ていたなら、自分の墓場の「これと同名を除く仮族・フォロワー」を選ぶ。"
@@ -236,6 +254,33 @@ def test_duplicate_source_claim_is_rejected() -> None:
     after = replace(prepared, derived=replace(prepared.derived, recognized=(forged,)))
     with pytest.raises(ValueError, match=r"owned source construction|duplicate"):
         verify_claims(prepared, after)
+
+
+@pytest.mark.parametrize(
+    ("raw", "undo"),
+    [
+        (
+            "このターン中に自分の「これと同名を除く仮族・フォロワー」が場から手札に戻っていたなら、7枚引く。",
+            "history",
+        ),
+        (
+            "自分のデッキから「これと同名を除く仮族・カード」を元のコストの合計が7以下になるように2枚選ぶ。",
+            "aggregate",
+        ),
+    ],
+)
+def test_second_encoding_of_an_owned_construction_is_rejected(
+    monkeypatch: pytest.MonkeyPatch, raw: str, undo: str
+) -> None:
+    if undo == "history":
+        monkeypatch.setattr(four_layer_names, "name_filter_spans", lambda _: ())
+    else:
+        # Totals before names re-encode the exclusion in the aggregate noun shape.
+        history, entry, names, totals, *rest = four_layer_integrated.PROVIDERS
+        order = (history, entry, totals, names, *rest)
+        monkeypatch.setattr(four_layer_integrated, "PROVIDERS", order)
+    with pytest.raises(ValueError, match="one source construction twice"):
+        derive_preparation(raw, source(raw), engine(), families=(FAMILY,))
 
 
 def test_linked_condition_rejects_a_different_source_occurrence() -> None:
