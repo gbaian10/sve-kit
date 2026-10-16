@@ -175,7 +175,14 @@ vi.mock("../../app/snapshot", () => {
                 cardNo: "BP-SYNTHETIC",
                 region: "jp",
                 classCode: null,
-                name: { original: { lang: "ja", text: "Synthetic front" }, translations: {} },
+                // A pending card's catalog name is the card-number stand-in.
+                name: {
+                  original: {
+                    lang: "ja",
+                    text: state.originalName ? "BP-SYNTHETIC" : "Synthetic front",
+                  },
+                  translations: {},
+                },
                 cost: 1,
                 attack: 1,
                 defense: 1,
