@@ -223,6 +223,7 @@ const zhTW = {
   },
   cardPage: {
     switchingEdition: "正在載入另一版本資料…",
+    otherEditionFailed: "另一版本資料載入失敗。",
     notCollected: { jp: "日版尚未收錄這張卡", en: "英版尚未收錄這張卡" },
     needsUpdate: "卡表需要更新",
     routeFailed: "無法定位卡片",

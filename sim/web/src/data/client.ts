@@ -152,6 +152,9 @@ export function createSnapshotClient(
   let details = new Map<string, readonly Fragment[]>()
   let inflight = new Map<string, Promise<readonly Fragment[]>>()
   const catalogs = new Map<string, LoadedSnapshot>()
+  // Comparison catalogs are complete startup sets that no record holds yet; the first adoption
+  // stores one, so the next visit restores it instead of downloading again.
+  const unsaved = new WeakSet<LoadedSnapshot>()
 
   const set = (next: SnapshotStatus) => {
     status = next
@@ -332,12 +335,15 @@ export function createSnapshotClient(
       matchEntry(chosen, previous.manifest)
       return { snapshot: previous, downloaded: false }
     }
+    const cached = catalogs.get(`${stringValue(chosen["manifest_sha256"])}/${selectedRegion}`)
     const restored =
-      catalogs.get(`${stringValue(chosen["manifest_sha256"])}/${selectedRegion}`) ??
-      (await restore(stringValue(chosen["manifest_sha256"]), selectedRegion))
+      cached ?? (await restore(stringValue(chosen["manifest_sha256"]), selectedRegion))
     if (restored) {
       matchEntry(chosen, restored.manifest)
-      return { snapshot: { ...restored, entrySource: source }, downloaded: false }
+      return {
+        snapshot: { ...restored, entrySource: source },
+        downloaded: cached !== undefined && unsaved.delete(cached),
+      }
     }
     progress("manifest")
     const manifestBytes = await fetchVerified(
@@ -785,6 +791,7 @@ export function createSnapshotClient(
     }
     validateCatalog(candidate.bootstrap)
     catalogOf(candidate)
+    unsaved.add(candidate)
     catalogs.set(key, candidate)
     return candidate
   }

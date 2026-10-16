@@ -120,6 +120,25 @@ it("requests no other-region data when off, waits for selected readiness, and ke
   ).toBe(true)
 })
 
+it("keeps a downloaded comparison while the selected edition rechecks its data", async () => {
+  const h = harness()
+  const { result, rerender } = renderHook(
+    ({ ready }) => useOtherEdition(h.client, "jp", true, ready, "sha256:selected"),
+    { initialProps: { ready: true } },
+  )
+  await waitFor(() => {
+    expect(result.current.catalog).toBeDefined()
+  })
+  const requested = h.requests.length
+  rerender({ ready: false })
+  rerender({ ready: true })
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  })
+  expect(h.requests).toHaveLength(requested)
+  expect(result.current.catalog).toBeDefined()
+})
+
 it("ignores a late comparison after disabling and retries a failed download", async () => {
   const h = harness()
   await h.client.load()
@@ -187,8 +206,10 @@ it("keeps the card when switching with comparison off, shows loading, and recove
   act(() => {
     h.release()
   })
-  expect(await screen.findByRole("alert")).toBeInTheDocument()
+  expect(await screen.findByRole("alert")).toHaveTextContent("另一版本資料載入失敗")
   expect(router.state.location.pathname).toBe("/cards/BP01-002")
+  expect(prefsStore.get().cardEdition).toBe("jp")
+  expect(h.client.snapshot()?.region).toBe("jp")
   h.fail(false)
   await userEvent.click(screen.getByRole("button", { name: "重試" }))
   await waitFor(() => {
@@ -197,6 +218,19 @@ it("keeps the card when switching with comparison off, shows loading, and recove
   expect(router.state.location.state).toMatchObject({
     route: { cardId: "c:bp01-002", region: "en" },
   })
+})
+
+it("opens the chosen edition's list from a card URL that names no card", async () => {
+  harness()
+  const { router } = await renderInRouter(<AccountMenuPanel />, {
+    initialEntries: ["/cards/BP99-999"],
+  })
+  await userEvent.click(screen.getByRole("radio", { name: "英版" }))
+  await waitFor(() => {
+    expect(router.state.location.pathname + router.state.location.search).toBe("/cards?ed=en")
+  })
+  expect(prefsStore.get().cardEdition).toBe("en")
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument()
 })
 
 it("opens another-region direct links even with comparison off", async () => {

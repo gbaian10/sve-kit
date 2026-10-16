@@ -18,8 +18,10 @@ export function useOtherEdition(
     error?: unknown
   }>()
   const key = `${client.base}/${manifestHash ?? ""}/${edition}/${String(attempt)}`
+  // Background rechecks toggle readiness; a finished comparison must not be requested again.
+  const loaded = result?.key === key && result.snapshot !== undefined
   useEffect(() => {
-    if (!enabled || !ready || !client.catalog) return
+    if (!enabled || !ready || loaded || !client.catalog) return
     const abort = new AbortController()
     void (async () => {
       const snapshot = await client.catalog?.(edition === "jp" ? "en" : "jp", abort.signal)
@@ -30,7 +32,7 @@ export function useOtherEdition(
     return () => {
       abort.abort()
     }
-  }, [client, edition, enabled, ready, key])
+  }, [client, edition, enabled, ready, loaded, key])
   const current = enabled && result?.key === key ? result : undefined
   return {
     snapshot: current?.snapshot,

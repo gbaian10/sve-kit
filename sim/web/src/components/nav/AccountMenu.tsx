@@ -7,7 +7,7 @@ import { routeState } from "../../app/listEntryState"
 import { useRouteEdition } from "../../app/snapshot"
 import { useSystemDark } from "../../app/useSystemDark"
 import { locateEdition, snapshotClient, useSnapshotRoot } from "../../data"
-import { printingPath } from "../../domain/cardRoute"
+import { CardRouteError, printingPath } from "../../domain/cardRoute"
 import type { Region } from "../../domain/search"
 import { type Accent, ACCENTS, resolveTheme, THEME_PREFS } from "../../domain/theme"
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
@@ -145,9 +145,19 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
       } else {
         void navigate(printingPath(target), { state: routeState(target) })
       }
-    } catch {
-      if (!abort.signal.aborted)
-        setTransition({ key: switchKey, edition: cardEdition, state: "error" })
+    } catch (error) {
+      if (abort.signal.aborted) return
+      // A URL that names no card has no card to keep; edition browsing starts at its list.
+      if (
+        error instanceof CardRouteError &&
+        (error.kind === "not-found" || error.kind === "invalid")
+      ) {
+        setTransition(null)
+        prefsStore.set({ cardEdition })
+        void navigate(cardEdition === "en" ? "/cards?ed=en" : "/cards")
+        return
+      }
+      setTransition({ key: switchKey, edition: cardEdition, state: "error" })
     }
   }
   const textDisplayOptions = TEXT_DISPLAYS.map((value) => ({
@@ -178,7 +188,7 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
       )}
       {currentTransition?.state === "error" && (
         <div role="alert" className="text-13 text-text-2">
-          {t("cardPage.routeFailedHint")}
+          {t("cardPage.otherEditionFailed")}
           <button
             type="button"
             className="h-11 px-2 text-accent-text"

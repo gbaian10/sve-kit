@@ -231,6 +231,7 @@ export default {
   },
   cardPage: {
     switchingEdition: "別のバージョンを読み込み中…",
+    otherEditionFailed: "別のバージョンを読み込めませんでした。",
     notCollected: { jp: "このカードは日本語版に未収録です", en: "このカードは英語版に未収録です" },
     needsUpdate: "カードデータの更新が必要です",
     routeFailed: "カードを読み込めません",

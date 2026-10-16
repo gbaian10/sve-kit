@@ -38,7 +38,7 @@ export function AppShell() {
     edition,
     showsOtherEdition(prefs, edition),
     readiness.phase === "ready" && readiness.edition === edition && !readiness.updating,
-    status.state === "ready" ? status.dataVersion : undefined,
+    readiness.manifestHash,
   )
   return (
     <ToastProvider>

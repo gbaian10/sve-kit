@@ -565,7 +565,7 @@ export function CardView({
           )}
           {(other.error !== undefined || completePrintings?.error !== undefined) && (
             <div role="alert" className="mt-6 text-13 text-text-2">
-              {t("cardPage.routeFailedHint")}
+              {t("cardPage.otherEditionFailed")}
               <Button
                 onClick={() => {
                   other.retry()
@@ -576,7 +576,7 @@ export function CardView({
               </Button>
             </div>
           )}
-          {printings.length > 0 && (
+          {printings.length > 1 && (
             <section className="mt-6" aria-label={t("cardPage.printings")}>
               <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
               {printingGroups(printings).map(
