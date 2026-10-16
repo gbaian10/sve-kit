@@ -3,11 +3,14 @@
 import pytest
 
 from sve_carddb.contracts.four_layer import (
+    CountArgs,
+    CountExpr,
     Expression,
     LeafRef,
     LeafSchema,
     LeafType,
     LiteralNode,
+    SlotRef,
     Target,
     hash_payload,
 )
@@ -16,6 +19,7 @@ from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
     PreparationRenderer,
+    target_dependencies,
 )
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
 from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
@@ -227,19 +231,32 @@ def test_missing_card_name_cannot_be_replaced_by_a_literal_count() -> None:
         prepared.bind(0)
 
 
-def test_prepared_count_renders_through_normal_labels_and_annotation_paths() -> None:
-    raw = "X枚引く。Xは「自分の消滅領域の枚数」である。"
+@pytest.mark.parametrize("offset", [False, True], ids=["B11", "B03"])
+def test_prepared_count_renders_through_normal_labels_and_annotation_paths(  # ruff: ignore[too-many-locals] -- keep source, rendering and reference evidence in one synthetic case
+    offset: bool,
+) -> None:
+    raw = "X枚引く。Xは「自分の消滅領域の枚数" + ("-7" if offset else "") + "」である。"
     engine = n1_classifier()
     prepared = derive_preparation(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
+    name, expr = next(
+        (n, v) for n, v in binding.values.items() if isinstance(v, Expression)
+    )
     selected = SelectedTarget(
         Target(
             format=1,
-            nodes=tuple(
-                LeafRef(kind="LeafRef", slot=s.name) for s in frame.leaf_schema.slots
+            nodes=(
+                LiteralNode(kind="Literal", text="抽取與"),
+                CountExpr(
+                    kind="NP",
+                    constructor="CountExpr",
+                    args=CountArgs(expr=SlotRef(slot=name)),
+                ),
+                LiteralNode(kind="Literal", text="相同張數的卡片。"),
             ),
         )
     )
+    prepared.verify(raw, engine, frame, binding, target=selected.target)
     target = Target(
         format=1,
         nodes=(
@@ -247,14 +264,18 @@ def test_prepared_count_renders_through_normal_labels_and_annotation_paths() -> 
             LiteralNode(kind="Literal", text="的"),
             LeafRef(kind="LeafRef", slot="zone"),
             LiteralNode(kind="Literal", text="張數"),
+            *(
+                (
+                    LiteralNode(kind="Literal", text="減去"),
+                    LeafRef(kind="LeafRef", slot="offset"),
+                )
+                if offset
+                else ()
+            ),
         ),
     )
     expression = ExpressionTargets(
-        {
-            ("count.current_zone.owner.zone.v1", "zh-Hant"): SelectedTarget(
-                target, low_confidence=True
-            )
-        }
+        {(expr.expression_id, "zh-Hant"): SelectedTarget(target, low_confidence=True)}
     )
     base = Renderer({}, {}, {}, domains=engine.domains)
     labels = {}
@@ -274,9 +295,51 @@ def test_prepared_count_renders_through_normal_labels_and_annotation_paths() -> 
     item = BoundTarget(frame, binding, selected)
     result = renderer.render("ctx:synthetic", "zh-Hant", (item,))
     assert result.rendered is not None
-    assert result.rendered.text == "自己的消失區張數自己消失區"
+    assert result.rendered.text == (
+        "抽取與自己的消失區張數" + ("減去7" if offset else "") + "相同張數的卡片。"
+    )
     assert result.rendered.low_confidence
-    assert len(result.rendered.annotation.occurrences) == 4
+    assert len(result.rendered.annotation.occurrences) == 2
     assert any(len(o.node_path) > 1 for o in result.rendered.leaves)
+    assert len(result.rendered.leaves) == (4 if offset else 3)
+    for occurrence in result.rendered.annotation.occurrences:
+        assert len(occurrence.ranges) == 1
+        span = occurrence.ranges[0]
+        assert result.rendered.text[span.start : span.end] in {"自己", "消失區"}
+    assert renderer.required_references(item, "zh-Hant")
+    missing_expression = Target(
+        format=1,
+        nodes=tuple(LeafRef(kind="LeafRef", slot=n) for n in expr.leaves),
+    )
+    with pytest.raises(ValueError, match="required"):
+        prepared.verify(raw, engine, frame, binding, target=missing_expression)
+    with pytest.raises(ValueError, match="required"):
+        renderer.render(
+            "ctx:synthetic",
+            "zh-Hant",
+            (BoundTarget(frame, binding, SelectedTarget(missing_expression)),),
+        )
+    with pytest.raises(ValueError, match="required"):
+        selected.target.verify(frame.leaf_schema, "zh-Hant", {})
+    with pytest.raises(ValueError, match="required"):
+        base.render("ctx:synthetic", "zh-Hant", (item,))
+    old_frame = frame.model_copy(
+        update={
+            "source": frame.source.model_copy(
+                update={"normalizer_version": "four-layer-jp-v2"}
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="v3"):
+        target_dependencies(old_frame, binding)
+    values = dict(binding.values)
+    values.pop(expr.leaves[0])
+    missing_actual = binding.model_copy(update={"values": values})
+    with pytest.raises(ValueError, match="missing actual"):
+        renderer.render(
+            "ctx:synthetic", "zh-Hant", (BoundTarget(frame, missing_actual, selected),)
+        )
+    with pytest.raises(ValueError, match="missing required leaf values"):
+        prepared.verify(raw, engine, frame, missing_actual, target=selected.target)
     renderer.labels.clear()
     assert renderer.render("ctx:synthetic", "zh-Hant", (item,)).rendered is None

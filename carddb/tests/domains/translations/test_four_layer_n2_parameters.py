@@ -286,7 +286,14 @@ def test_payment_form_uses_normal_labels_ranges_and_missing_label_fallback(
             ),
         ),
     )
-    prepared.verify(raw, catalog, frame, binding, target=target)
+    prepared.verify(
+        raw,
+        catalog,
+        frame,
+        binding,
+        target=target,
+        forms={key: value.definition for key, value in forms.items()},
+    )
     item = BoundTarget(frame, binding, SelectedTarget(target))
     reference = GlossaryReference(kind="glossary", key="term:ability.earth_rite")
     labels = {
@@ -374,7 +381,9 @@ def test_interval_form_renders_only_bounds_and_rejects_hidden_arguments() -> Non
             }
         )
     )
-    prepared.verify(raw, catalog, frame, binding, target=target)
+    prepared.verify(
+        raw, catalog, frame, binding, target=target, forms={(form.id, form.lang): form}
+    )
     result = renderer.render(
         "ctx:synthetic",
         "zh-Hant",

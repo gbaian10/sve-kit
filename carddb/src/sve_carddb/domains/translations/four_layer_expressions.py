@@ -200,6 +200,20 @@ def verify_quantities(
         visit(name)
 
 
+def target_dependencies(
+    frame: Frame, binding: SourceBinding
+) -> dict[str, tuple[str, ...]]:
+    """Only preparation targets inherit usage through source-bound expression actuals."""
+    if frame.source.normalizer_version != PREPARATION_VERSION:
+        raise ValueError("Expression target dependencies require a v3 frame")
+    dependencies = {}
+    for name, value in binding.values.items():
+        expr = value.expr if isinstance(value, QuantitySpec) else value
+        if isinstance(expr, Expression):
+            dependencies[name] = expr.leaves
+    return dependencies
+
+
 class ExpressionTargets:
     def __init__(self, targets: Mapping[tuple[str, str], SelectedTarget]) -> None:
         self.targets = dict(targets)
@@ -287,6 +301,22 @@ class PreparationRenderer(Renderer):
             item.frame.leaf_schema,
             lang,
             {key: form.definition for key, form in self.forms.items()},
+        )
+
+    @override
+    def verify_target(
+        self,
+        item: BoundTarget,
+        lang: str,
+        forms: Mapping[tuple[str, str], FormDefinition],
+    ) -> None:
+        """Expression translations must present all formals, so their actuals count as used."""
+        assert item.selected is not None
+        item.selected.target.verify(
+            item.frame.leaf_schema,
+            lang,
+            forms,
+            dependencies=target_dependencies(item.frame, item.binding),
         )
 
     @override

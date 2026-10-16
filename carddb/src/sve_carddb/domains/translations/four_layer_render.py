@@ -420,6 +420,16 @@ class Renderer:
                     result.add((slot.name, slot.role, key))
         return frozenset(result)
 
+    def verify_target(  # ruff: ignore[no-self-use] -- preparation supplies expression dependencies
+        self,
+        item: BoundTarget,
+        lang: str,
+        forms: Mapping[tuple[str, str], FormDefinition],
+    ) -> None:
+        """Keep production target usage independent of preparation expression bindings."""
+        assert item.selected is not None
+        item.selected.target.verify(item.frame.leaf_schema, lang, forms)
+
     def render(
         self, context_id: str, lang: str, plan: tuple[BoundTarget, ...]
     ) -> Result:
@@ -430,7 +440,7 @@ class Renderer:
         for item in plan:
             if item.selected is None:
                 return Result(None, ("missing_template_translation",))
-            item.selected.target.verify(item.frame.leaf_schema, lang, definitions)
+            self.verify_target(item, lang, definitions)
         output = _Output(self, lang)
         try:
             for item in _assembly(plan):
