@@ -94,7 +94,10 @@ export interface SnapshotClient {
   /** Loads another catalog without changing the active region or its readiness. */
   readonly catalog?: (region: "jp" | "en", signal: AbortSignal) => Promise<LoadedSnapshot>
   /** A text, history or images file, decoded and joined onto its bootstrap base; cached LRU. */
-  readonly fragments: (fileKey: string) => Promise<readonly Fragment[]>
+  readonly fragments: (
+    fileKey: string,
+    backgroundSignal?: AbortSignal,
+  ) => Promise<readonly Fragment[]>
   readonly metadataStatus: () => MetadataProgress
   readonly prefetchPrintings?: () => Promise<void>
   readonly prefetchImages: () => Promise<void>
@@ -168,13 +171,16 @@ export function createSnapshotClient(
     sha256: string,
     bytes?: number,
     signal?: AbortSignal,
-    background = false,
+    priority: "foreground" | "background" | "low" = "foreground",
   ): Promise<Uint8Array> => {
     for (let attempt = 0; ; attempt += 1) {
       const data = await fetchBytes(
-        background ? requests.background : fetcher,
+        priority === "foreground" ? fetcher : requests.background,
         url(path),
-        signal ? { signal } : undefined,
+        {
+          ...(signal ? { signal } : {}),
+          ...(priority === "low" ? { priority: "low" } : {}),
+        },
       )
       if ((await transferDigest(data)) === sha256 && (bytes === undefined || data.length === bytes))
         return data
@@ -589,10 +595,16 @@ export function createSnapshotClient(
     return faces
   }
 
-  const loadFile = async (snapshot: LoadedSnapshot, key: string): Promise<readonly Fragment[]> => {
+  const loadFile = async (
+    snapshot: LoadedSnapshot,
+    key: string,
+    backgroundSignal?: AbortSignal,
+  ): Promise<readonly Fragment[]> => {
     const file = snapshot.files.get(key)
     if (!file) throw new SnapshotError("payload-set", `unknown file ${key}`)
-    const signal = detailAbort.signal
+    const signal = backgroundSignal
+      ? AbortSignal.any([detailAbort.signal, backgroundSignal])
+      : detailAbort.signal
     const active = () => !signal.aborted && loaded?.manifestHash === snapshot.manifestHash
     const role = file["role"]
     if (role !== "text" && role !== "images" && role !== "bootstrap")
@@ -601,12 +613,13 @@ export function createSnapshotClient(
       role === "images" &&
       metadata &&
       arrayValue(file["row_counts"]).some((c) => arrayValue(c)[0] === "printing_image")
-        ? await metadata.read(key)
+        ? await metadata.read(key, backgroundSignal === undefined, backgroundSignal)
         : await fetchVerified(
             stringValue(file["path"]),
             stringValue(file["sha256"]),
             integerValue(file["bytes"]),
             signal,
+            backgroundSignal ? "low" : "foreground",
           )
     if (!active()) throw new Error("snapshot replaced")
     const version = stringValue(snapshot.manifest["format_version"])
@@ -624,7 +637,8 @@ export function createSnapshotClient(
       const baseKey = stringValue(ref["key"])
       if (snapshot.files.get(baseKey)?.["sha256"] !== ref["sha256"])
         throw new SnapshotError("base-missing", "exact base hash")
-      if (!bases.some((f) => f.file === baseKey)) bases.push(...(await fragments(baseKey)))
+      if (!bases.some((f) => f.file === baseKey))
+        bases.push(...(await fragments(baseKey, backgroundSignal)))
     }
     for (const fragment of bases)
       if (fragment.table === "face")
@@ -636,7 +650,8 @@ export function createSnapshotClient(
     })
   }
 
-  const fragments = (fileKey: string): Promise<readonly Fragment[]> => {
+  const fragments: SnapshotClient["fragments"] = (fileKey, backgroundSignal) => {
+    if (backgroundSignal?.aborted) return Promise.reject(new Error("background read cancelled"))
     const snapshot = loaded
     if (!snapshot) return Promise.reject(new SnapshotError("payload-set", "snapshot not loaded"))
     const cached = details.get(fileKey)
@@ -646,12 +661,13 @@ export function createSnapshotClient(
       details.set(fileKey, cached)
       return Promise.resolve(cached)
     }
-    const running = inflight.get(fileKey)
+    const running = backgroundSignal ? undefined : inflight.get(fileKey)
     if (running) return running
     const started = inflight
-    const promise = loadFile(snapshot, fileKey)
+    const promise = loadFile(snapshot, fileKey, backgroundSignal)
       .catch(async (error: unknown) => {
         if (
+          backgroundSignal === undefined &&
           loaded === snapshot &&
           error instanceof NetworkError &&
           (error.status === 404 || error.status === 410)
@@ -661,10 +677,11 @@ export function createSnapshotClient(
       })
       .then((result) => {
         // Ignore a result for a snapshot that was replaced while the request ran.
-        if (started === inflight) {
+        if (started === inflight && !backgroundSignal?.aborted) {
           if (snapshot.files.get(fileKey)?.["role"] === "images") return result
+          if (!details.has(fileKey))
+            detailBytes += integerValue(snapshot.files.get(fileKey)?.["bytes"])
           details.set(fileKey, result)
-          detailBytes += integerValue(snapshot.files.get(fileKey)?.["bytes"])
           while (details.size > cacheSize || detailBytes > 12 * 1024 * 1024) {
             const oldest = details.keys().next().value
             if (oldest === undefined) break
@@ -675,9 +692,9 @@ export function createSnapshotClient(
         return result
       })
       .finally(() => {
-        if (started === inflight) inflight.delete(fileKey)
+        if (!backgroundSignal && started === inflight) inflight.delete(fileKey)
       })
-    inflight.set(fileKey, promise)
+    if (!backgroundSignal) inflight.set(fileKey, promise)
     return promise
   }
 
@@ -772,7 +789,7 @@ export function createSnapshotClient(
             stringValue(file["sha256"]),
             integerValue(file["bytes"]),
             signal,
-            true,
+            "background",
           )
           signal.throwIfAborted()
           const result = await decode({ kind: "file", file, bytes, version })

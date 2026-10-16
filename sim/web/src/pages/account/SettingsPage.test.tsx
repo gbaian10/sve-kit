@@ -67,3 +67,18 @@ it("refreshes estimates on demand, leaves caches untouched when clearing is canc
   expect(screen.getByRole("status")).toHaveTextContent("快取清除失敗或未完成")
   expect(await cache.keys()).toHaveLength(2)
 })
+
+it("starts preloading disabled and remembers both advanced switches", async () => {
+  prefsStore.set(DEFAULT_PREFS)
+  const view = await renderInRouter(<SettingsPage />)
+  for (const name of ["預先下載所有版次", "預先下載上一張／下一張"]) {
+    expect(screen.getByRole("switch", { name })).toHaveAttribute("aria-checked", "false")
+    await userEvent.click(screen.getByRole("switch", { name }))
+  }
+  expect(readPrefs()).toMatchObject({ preloadPrintings: true, preloadNeighbours: true })
+  view.unmount()
+  prefsStore.reload()
+  await renderInRouter(<SettingsPage />)
+  for (const name of ["預先下載所有版次", "預先下載上一張／下一張"])
+    expect(screen.getByRole("switch", { name })).toHaveAttribute("aria-checked", "true")
+})

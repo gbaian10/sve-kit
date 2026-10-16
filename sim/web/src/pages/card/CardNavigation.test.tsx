@@ -3,13 +3,20 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { prepareCardContent } from "../../app/card-content"
 import { routeState } from "../../app/listEntryState"
 import { ToastProvider } from "../../components/ui/Toast"
-import { type CardSummary, catalogOf, createSnapshotClient, type SnapshotClient } from "../../data"
+import {
+  type CardSummary,
+  catalogOf,
+  createSnapshotClient,
+  locateCard,
+  type SnapshotClient,
+} from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
-import { CardPage } from "./CardPage"
+import { CardPage, CardView } from "./CardPage"
 
 const state = vi.hoisted(() => ({
   client: null as SnapshotClient | null,
@@ -37,11 +44,13 @@ vi.mock("../../app/snapshot", async (original) => ({
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
 
-async function setup(pendingCandidate = false) {
-  const source = createSnapshotClient("https://cdn.test", {
+let sequence = 0
+async function setup(pendingCandidate = false, blockBackground = false) {
+  const base = `https://navigation-${String(sequence++)}.test`
+  const source = createSnapshotClient(base, {
     cacheStorage: memoryCache(),
     fetch: (url) => {
-      const bytes = built.files.get(url.slice("https://cdn.test/".length))
+      const bytes = built.files.get(url.slice(base.length + 1))
       return Promise.resolve(
         bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
       )
@@ -91,11 +100,23 @@ async function setup(pendingCandidate = false) {
   let historyHold: Promise<void> | undefined
   let historyFailure = false
   let failedPurposes = new Set<string>()
+  const backgroundReads: string[] = []
+  const backgroundSignals: AbortSignal[] = []
+  let releaseBackground: () => void = () => undefined
+  const backgroundHold = new Promise<void>((resolve) => {
+    releaseBackground = resolve
+  })
   const pinnedSnapshot = snapshot
   state.client = {
     ...source,
     snapshot: () => pinnedSnapshot,
-    fragments: async (key) => {
+    fragments: async (key, backgroundSignal) => {
+      if (backgroundSignal) {
+        backgroundReads.push(key)
+        backgroundSignals.push(backgroundSignal)
+        if (blockBackground) await backgroundHold
+        backgroundSignal.throwIfAborted()
+      }
       const pending = hold
       hold = undefined
       await pending
@@ -106,7 +127,7 @@ async function setup(pendingCandidate = false) {
       const purpose = pinnedSnapshot.files.get(key)?.["purpose"]
       if (typeof purpose === "string" && failedPurposes.has(purpose))
         throw new Error("synthetic read failure")
-      return source.fragments(key)
+      return source.fragments(key, backgroundSignal)
     },
   }
   const catalog = catalogOf(snapshot)
@@ -149,6 +170,9 @@ async function setup(pendingCandidate = false) {
   )
   return {
     ...rendered,
+    backgroundReads,
+    backgroundSignals,
+    releaseBackground,
     holdHistory: () => {
       let release: () => void = () => undefined
       historyHold = new Promise<void>((resolve) => {
@@ -291,4 +315,170 @@ describe("card navigation commits", () => {
     await screen.findByRole("heading", { name: "試作魔導士" })
     expect(screen.getByText("消費").parentElement).toHaveTextContent("4")
   })
+})
+
+it("waits for the current image before preparing a neighbour, then switches with its full prepared content", async () => {
+  prefsStore.set({ preloadNeighbours: true })
+  let release: () => void = () => undefined
+  const currentDecode = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const decode = vi
+    .fn()
+    .mockImplementationOnce(() => currentDecode)
+    .mockResolvedValue(undefined)
+  Object.defineProperty(HTMLImageElement.prototype, "decode", { configurable: true, value: decode })
+  const h = await setup()
+  expect(h.backgroundReads).toHaveLength(0)
+  await act(async () => {
+    release()
+    await currentDecode
+    const image = document.querySelector("article img[decoding]")
+    if (!image) throw new Error("missing first card image")
+    fireEvent.load(image)
+  })
+  await waitFor(() => {
+    expect(h.backgroundReads.length).toBeGreaterThan(0)
+  })
+  await waitFor(() => {
+    expect(decode).toHaveBeenCalledTimes(2)
+  })
+  await act(async () => {
+    await Promise.resolve()
+  })
+  h.failReads(["print", "detail", "images", "history"])
+  await userEvent.click(screen.getByRole("button", { name: "下一張" }))
+  await screen.findByRole("heading", { name: "試作隊長" })
+  expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
+  expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
+})
+
+it("discards a neighbour still preparing when the switch is turned off", async () => {
+  prefsStore.set({ preloadNeighbours: true })
+  let release: () => void = () => undefined
+  const neighbourDecode = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const decode = vi
+    .fn()
+    .mockResolvedValueOnce(undefined)
+    .mockImplementationOnce(() => neighbourDecode)
+    .mockResolvedValue(undefined)
+  Object.defineProperty(HTMLImageElement.prototype, "decode", { configurable: true, value: decode })
+  const h = await setup()
+  await waitFor(() => {
+    expect(decode).toHaveBeenCalledTimes(2)
+  })
+  act(() => {
+    prefsStore.set({ preloadNeighbours: false })
+  })
+  await act(async () => {
+    release()
+    await neighbourDecode
+  })
+  h.failReads(["print", "detail", "images", "history"])
+  await userEvent.click(screen.getByRole("button", { name: "下一張" }))
+  await screen.findByRole("heading", { name: "試作隊長" })
+  expect(await screen.findByText("卡圖資訊載入失敗")).toBeInTheDocument()
+})
+
+it.each(["button", "keyboard"])(
+  "cancels background work at %s navigation intent until the target commits",
+  async (action) => {
+    prefsStore.set({ preloadNeighbours: true, preloadPrintings: true })
+    const h = await setup(false, true)
+    try {
+      await waitFor(() => {
+        expect(h.backgroundSignals.length).toBeGreaterThan(0)
+      })
+      const releaseTarget = h.holdNextRead()
+      const observed: boolean[] = []
+      const unsubscribe = h.router.subscribe((router) => {
+        if (router.location.pathname !== "/cards/BP01-002" || observed.length) return
+        observed.push(h.backgroundSignals.every((signal) => signal.aborted))
+        state.order = state.order.map((summary) => ({ ...summary }))
+        prefsStore.set({ theme: "light" })
+      })
+      if (action === "button") fireEvent.click(screen.getByRole("button", { name: "下一張" }))
+      else fireEvent.keyDown(window, { key: "ArrowRight" })
+      expect(observed).toEqual([true])
+      expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
+      expect(h.backgroundSignals.every((signal) => signal.aborted)).toBe(true)
+      act(releaseTarget)
+      await screen.findByRole("heading", { name: "試作隊長" })
+      h.releaseBackground()
+      await waitFor(() => {
+        expect(h.backgroundSignals.some((signal) => !signal.aborted)).toBe(true)
+      })
+      unsubscribe()
+    } finally {
+      h.releaseBackground()
+    }
+  },
+)
+
+it("keeps the retained card paused when router context changes before the new content arrives", async () => {
+  const client = createSnapshotClient("https://retained.test", {
+    cacheStorage: memoryCache(),
+    fetch: (url) => {
+      const bytes = built.files.get(url.slice("https://retained.test/".length))
+      return Promise.resolve(
+        bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
+      )
+    },
+  })
+  await client.load()
+  const content = await prepareCardContent(
+    client,
+    await locateCard(client, { namespace: "official", key: "BP01-001", edition: "jp" }),
+    "zh-Hant",
+    "340px",
+  )
+  state.order = ["p:bp01-001", "p:bp01-002"].map((id) => {
+    const summary = content.catalog.summary(id)
+    if (!summary) throw new Error("missing synthetic neighbour")
+    return summary
+  })
+  prefsStore.set({ preloadNeighbours: true })
+  const signals: AbortSignal[] = []
+  const first = state.order[0]
+  if (!first) throw new Error("missing first synthetic card")
+  const h = await renderRoutes(
+    [
+      {
+        path: "/cards/:cardNo/:slug?",
+        element: (
+          <ToastProvider>
+            <CardView
+              client={content.client}
+              catalog={content.catalog}
+              status={{ state: "ready", dataVersion: content.snapshot.dataVersion }}
+              resolved={content.printing}
+              preparedImages={content.images}
+              onPrefetch={(_, signal) => {
+                signals.push(signal)
+                return Promise.resolve()
+              }}
+            />
+          </ToastProvider>
+        ),
+      },
+    ],
+    {
+      initialEntries: [
+        {
+          pathname: "/cards/BP01-001",
+          state: { background: "", resultKey: first.printingId, ...routeState(first) },
+        },
+      ],
+    },
+  )
+  await waitFor(() => {
+    expect(signals.length).toBeGreaterThan(0)
+  })
+  const initialEntry = h.router.state.location.key
+  fireEvent.click(screen.getByRole("button", { name: "下一張" }))
+  expect(h.router.state.location.key).not.toBe(initialEntry)
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-001")
+  expect(signals.every((signal) => signal.aborted)).toBe(true)
 })

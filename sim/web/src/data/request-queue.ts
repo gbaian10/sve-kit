@@ -39,7 +39,11 @@ export function requestQueue(fetcher: Fetcher): {
       const isBackground = !job.priority
       running += 1
       if (isBackground) background += 1
-      void fetcher(job.url, { ...job.init, signal: job.abort.signal })
+      void fetcher(job.url, {
+        ...job.init,
+        ...(job.priority && job.init?.priority === "low" ? { priority: "auto" } : {}),
+        signal: job.abort.signal,
+      })
         .then(async (response) => {
           const bytes = await response.arrayBuffer()
           for (const waiter of job.waiters)

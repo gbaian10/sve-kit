@@ -8,7 +8,9 @@ it("shares body reads, promotes queued work, and keeps the app network within it
   let peak = 0
   const gates = new Map<string, () => void>()
   const started: string[] = []
-  const queue = requestQueue((url) => {
+  const priorities = new Map<string, RequestPriority | undefined>()
+  const queue = requestQueue((url, init) => {
+    priorities.set(url, init?.priority)
     active += 1
     peak = Math.max(peak, active)
     started.push(url)
@@ -29,7 +31,9 @@ it("shares body reads, promotes queued work, and keeps the app network within it
       ),
     )
   })
-  const jobs = Array.from({ length: 40 }, (_, n) => queue.background(`https://test/${String(n)}`))
+  const jobs = Array.from({ length: 40 }, (_, n) =>
+    queue.background(`https://test/${String(n)}`, n === 39 ? { priority: "low" } : undefined),
+  )
   await Promise.resolve()
   expect(started).toHaveLength(24)
   const promoted = queue.foreground("https://test/39")
@@ -39,6 +43,7 @@ it("shares body reads, promotes queued work, and keeps the app network within it
   await Promise.resolve()
   expect(started).toHaveLength(32)
   expect(started[24]).toBe("https://test/39")
+  expect(priorities.get("https://test/39")).not.toBe("low")
   for (let round = 0; round < 6; round += 1) {
     for (const release of gates.values()) release()
     await new Promise((resolve) => setTimeout(resolve, 0))

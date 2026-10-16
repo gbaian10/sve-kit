@@ -31,6 +31,14 @@ const zhTW = {
     view: { grid: "卡圖", table: "表格", list: "清單" },
   },
   settings: {
+    advanced: "進階設定",
+    preloadPrintings: "預先下載所有版次",
+    preloadPrintingsHint:
+      "目前卡首圖就緒後下載其他版次；是否包含另一語言依顯示英版／日版資料設定。",
+    preloadNeighbours: "預先下載上一張／下一張",
+    preloadNeighboursHint:
+      "先準備鄰卡的文字與卡圖，減少換卡等待。會增加下載量；瀏覽器可能移除快取。",
+
     storage: "儲存空間",
     storageTotal: "本站總用量（估算）",
     storageImages: "卡圖快取內容（估算）",

@@ -1,9 +1,10 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, Link2 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
-import { type CardContent, prepareCardContent } from "../../app/card-content"
+import { type CardContent, cardContentKey, prepareCardContent } from "../../app/card-content"
+import { prefetchCards, type PrefetchTarget, summaryRoute } from "../../app/card-prefetch"
 import { useDialogHistory } from "../../app/dialog-history"
 import { LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
 import { useOtherEdition } from "../../app/other-edition"
@@ -30,6 +31,7 @@ import { Link } from "../../components/ui/Link"
 import { useToast } from "../../components/ui/toast-context"
 import {
   cardPrintings,
+  type CardRouteInput,
   type CardSummary,
   type Catalog,
   faceBasics,
@@ -70,17 +72,29 @@ export function CardPage() {
   const [attempt, setAttempt] = useState(0)
   const language = useTextLanguage()
   const [prepared, setPrepared] = useState(() => new Map<string, CardContent>())
+  const preparedRef = useRef(prepared)
+  const visited = useRef(new Set<string>())
+  const completedEditions = useRef(new Set<string>())
+  useEffect(() => {
+    preparedRef.current = prepared
+  }, [prepared])
   const routeKey = JSON.stringify((location.state as { route?: unknown } | null)?.route ?? null)
-  const inputKey = JSON.stringify([
-    client.base,
-    client.snapshot()?.manifestHash,
-    edition,
-    language,
-    routeKey,
-    attempt,
-    cardNo === undefined ? "provisional" : "official",
-    cardNo ?? intId ?? "",
-  ])
+  const input = useMemo<CardRouteInput>(() => {
+    const hint = JSON.parse(routeKey) as {
+      cardId: string
+      printingId: string
+      cardOwner: string
+      printingOwner: string
+      region: Region
+    } | null
+    return {
+      namespace: cardNo === undefined ? "provisional" : "official",
+      key: cardNo ?? intId ?? "",
+      edition,
+      ...(hint ? { hint: { ...hint, id: hint.printingId } } : {}),
+    }
+  }, [routeKey, cardNo, intId, edition])
+  const inputKey = cardContentKey(client, input, language, attempt)
   const cached = prepared.get(inputKey)
   const [located, setLocated] = useState<{
     key: string
@@ -92,19 +106,9 @@ export function CardPage() {
   useEffect(() => {
     if (!manifestHash || cached) return
     let active = true
-    const hint = JSON.parse(routeKey) as {
-      cardId: string
-      printingId: string
-      cardOwner: string
-      printingOwner: string
-      region: Region
-    } | null
-    const loading = locateCard(client, {
-      namespace: cardNo === undefined ? "provisional" : "official",
-      key: cardNo ?? intId ?? "",
-      edition,
-      ...(hint ? { hint: { ...hint, id: hint.printingId } } : {}),
-    }).then((value) => prepareCardContent(client, value, language, IMAGE_SIZES))
+    const loading = locateCard(client, input).then((value) =>
+      prepareCardContent(client, value, language, IMAGE_SIZES),
+    )
     void loading.then(
       (value) => {
         if (active) {
@@ -125,7 +129,7 @@ export function CardPage() {
     return () => {
       active = false
     }
-  }, [client, manifestHash, inputKey, cardNo, intId, routeKey, attempt, edition, language, cached])
+  }, [client, manifestHash, inputKey, input, language, cached])
   const current = cached !== undefined || located?.key === inputKey
   const result = cached
     ? { key: inputKey, value: cached }
@@ -145,6 +149,50 @@ export function CardPage() {
       clearTimeout(timer)
     }
   }, [pending, inputKey])
+  useEffect(() => {
+    if (current && result?.value) visited.current.add(inputKey)
+    for (const key of visited.current) if (!prepared.has(key)) visited.current.delete(key)
+  }, [current, result?.value, inputKey, prepared])
+  const onPrefetch = useCallback(
+    (targets: readonly PrefetchTarget[], signal: AbortSignal) => {
+      const protectedKeys = new Set([
+        inputKey,
+        ...targets
+          .filter((target) => target.neighbour)
+          .map(({ summary }) => cardContentKey(client, summaryRoute(summary), language, attempt)),
+      ])
+      return prefetchCards(
+        client,
+        targets.filter(({ summary, neighbour }) => {
+          const key = cardContentKey(client, summaryRoute(summary), language, attempt)
+          return !preparedRef.current.has(key) && (neighbour || !completedEditions.current.has(key))
+        }),
+        language,
+        IMAGE_SIZES,
+        signal,
+        (target, value) => {
+          if (signal.aborted || client.snapshot()?.manifestHash !== manifestHash) return
+          const key = cardContentKey(client, target, language, attempt)
+          completedEditions.current.add(key)
+          setPrepared((previous) => {
+            if (signal.aborted) return previous
+            const next = new Map(previous).set(key, value)
+            while (next.size > PREPARED_CARDS) {
+              const candidates = [...next.keys()].filter(
+                (candidate) => !protectedKeys.has(candidate),
+              )
+              const oldest =
+                candidates.find((candidate) => !visited.current.has(candidate)) ?? candidates[0]
+              if (oldest === undefined) break
+              next.delete(oldest)
+            }
+            return next.has(key) ? next : previous
+          })
+        },
+      )
+    },
+    [client, inputKey, language, attempt, manifestHash],
+  )
   const catalog = result?.value?.catalog ?? null
   const routeError = result?.error
   const resolved = result?.value?.printing
@@ -152,6 +200,7 @@ export function CardPage() {
     <CardView
       client={result?.value?.client ?? client}
       preparedImages={result?.value?.images}
+      onPrefetch={onPrefetch}
       pending={pending}
       showPending={pendingHint === inputKey}
       status={status}
@@ -177,6 +226,7 @@ export function CardView({
   pending = false,
   showPending = pending,
   preparedImages,
+  onPrefetch,
 }: {
   readonly client: SnapshotClient
   readonly status: SnapshotStatus
@@ -186,6 +236,7 @@ export function CardView({
   readonly routeError?: unknown
   readonly pending?: boolean
   readonly showPending?: boolean
+  readonly onPrefetch?: (targets: readonly PrefetchTarget[], signal: AbortSignal) => Promise<void>
   readonly preparedImages?: ImageIndex | undefined
 }) {
   const { t } = useTranslation()
@@ -320,6 +371,63 @@ export function CardView({
   }
   const previous = fromList ? neighbour(-1) : undefined
   const next = fromList ? neighbour(1) : undefined
+  const [readyImage, setReadyImage] = useState<string | null>(null)
+  const imageKey = JSON.stringify([client.base, client.snapshot()?.manifestHash, printingId])
+  const prefetchAbort = useRef<AbortController | null>(null)
+  const navigationFrom = useRef<string | null>(null)
+  const beginNavigation = useCallback(() => {
+    navigationFrom.current = imageKey
+    prefetchAbort.current?.abort()
+  }, [imageKey])
+  // A transition can render the old page again before committing its new target.
+  useEffect(() => {
+    if (!pending && navigationFrom.current !== imageKey) {
+      navigationFrom.current = null
+    }
+  }, [pending, imageKey])
+  const imageReady = useCallback(() => {
+    setReadyImage(imageKey)
+  }, [imageKey])
+  const previousSummary = previous?.summary
+  const nextSummary = next?.summary
+  useEffect(() => {
+    if (pending || navigationFrom.current === imageKey || readyImage !== imageKey || !onPrefetch)
+      return
+    const targets: PrefetchTarget[] = []
+    if (prefs.preloadNeighbours) {
+      for (const summary of [previousSummary, nextSummary])
+        if (summary) targets.push({ summary, neighbour: true })
+    }
+    if (prefs.preloadPrintings && completePrintings && !completePrintings.error) {
+      for (const row of completePrintings.value.index.printingsOf(cardId ?? "")) {
+        if (row["region"] !== region && !(showOther && other.catalog)) continue
+        const summary = completePrintings.value.summary(stringValue(row["id"]))
+        if (summary && summary.printingId !== printingId)
+          targets.push({ summary, neighbour: false })
+      }
+    }
+    const abort = new AbortController()
+    prefetchAbort.current = abort
+    void onPrefetch(targets, abort.signal)
+    return () => {
+      abort.abort()
+    }
+  }, [
+    pending,
+    readyImage,
+    imageKey,
+    onPrefetch,
+    prefs.preloadNeighbours,
+    prefs.preloadPrintings,
+    previousSummary,
+    nextSummary,
+    completePrintings,
+    cardId,
+    region,
+    showOther,
+    other.catalog,
+    printingId,
+  ])
   const canonical = summary
     ? summary.cardNoState === "provisional"
       ? printingPath(summary)
@@ -330,6 +438,7 @@ export function CardView({
       void navigate(canonical, { replace: true, state: location.state as unknown })
   }, [pending, canonical, summary?.cardNoState, location.pathname, location.state, navigate])
   const open = (target: NonNullable<typeof previous>) => {
+    if (target.summary.printingId !== printingId) beginNavigation()
     void navigate(printingPath(target.summary), {
       replace: true,
       state: { ...entry, resultKey: target.key, ...routeState(target.summary) },
@@ -349,8 +458,40 @@ export function CardView({
       else return
       event.preventDefault()
     }
+    const onLink = (event: MouseEvent) => {
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null
+      if (
+        !(link instanceof HTMLAnchorElement) ||
+        link.target === "_blank" ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return
+      const target = new URL(link.href)
+      if (summary && target.pathname === printingPath(summary) && target.search === location.search)
+        return
+      if (
+        target.origin === window.location.origin &&
+        (target.pathname !== location.pathname || target.search !== location.search)
+      )
+        beginNavigation()
+    }
+    document.addEventListener("click", onLink, true)
+    const onPopState = () => {
+      if (
+        window.location.pathname !== location.pathname ||
+        window.location.search !== location.search
+      )
+        beginNavigation()
+    }
+    window.addEventListener("popstate", onPopState)
     window.addEventListener("keydown", onKeyDown)
     return () => {
+      document.removeEventListener("click", onLink, true)
+      window.removeEventListener("popstate", onPopState)
       window.removeEventListener("keydown", onKeyDown)
     }
   })
@@ -501,7 +642,7 @@ export function CardView({
       >
         <div className="mt-1 flex flex-col items-center gap-3 lg:sticky lg:top-4 lg:self-start">
           {views.map(
-            ({ faceId, faceSummary, name }) =>
+            ({ faceId, ordinal, faceSummary, name }) =>
               faceSummary &&
               name && (
                 <button
@@ -519,6 +660,7 @@ export function CardView({
                 >
                   <CardImage
                     summary={faceSummary}
+                    onReady={ordinal === 0 ? imageReady : undefined}
                     name={name.primary}
                     images={images}
                     alt="decorative"

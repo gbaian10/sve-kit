@@ -115,6 +115,33 @@ export function SettingsPage() {
           />
         </SettingRow>
       </section>
+      <section aria-labelledby="settings-advanced" className="mt-6 rounded-block bg-surface-1 px-4">
+        <h2 id="settings-advanced" className="pt-3 text-13 font-semibold text-text-3">
+          {t("settings.advanced")}
+        </h2>
+        <SettingRow
+          className={ROW}
+          label={t("settings.preloadPrintings")}
+          hint={t("settings.preloadPrintingsHint")}
+        >
+          <Switch
+            label={t("settings.preloadPrintings")}
+            checked={prefs.preloadPrintings}
+            onChange={(preloadPrintings) => prefsStore.set({ preloadPrintings })}
+          />
+        </SettingRow>
+        <SettingRow
+          className={ROW}
+          label={t("settings.preloadNeighbours")}
+          hint={t("settings.preloadNeighboursHint")}
+        >
+          <Switch
+            label={t("settings.preloadNeighbours")}
+            checked={prefs.preloadNeighbours}
+            onChange={(preloadNeighbours) => prefsStore.set({ preloadNeighbours })}
+          />
+        </SettingRow>
+      </section>
       <StorageSettings />
     </>
   )

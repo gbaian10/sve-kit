@@ -25,6 +25,8 @@ export interface Prefs {
   readonly showOtherEdition: Readonly<Record<CardEdition, boolean>>
   readonly nameDisplay: TextDisplay
   readonly effectLanguage: TextDisplay
+  readonly preloadPrintings: boolean
+  readonly preloadNeighbours: boolean
   readonly symbolLabels: boolean
   readonly termEmphasis: boolean
   readonly theme: ThemePref
@@ -41,6 +43,8 @@ export const DEFAULT_PREFS: Prefs = {
   showOtherEdition: { jp: false, en: true },
   nameDisplay: "translated",
   effectLanguage: "both",
+  preloadPrintings: false,
+  preloadNeighbours: false,
   symbolLabels: false,
   termEmphasis: true,
   theme: "system",
@@ -76,6 +80,8 @@ const guards: Guards = {
   showOtherEdition: isEditionSwitches,
   nameDisplay: isTextDisplay,
   effectLanguage: isTextDisplay,
+  preloadPrintings: isBoolean,
+  preloadNeighbours: isBoolean,
   symbolLabels: isBoolean,
   termEmphasis: isBoolean,
   theme: isThemePref,

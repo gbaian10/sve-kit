@@ -183,3 +183,36 @@ describe("metadata library boundaries", () => {
     expect(bytes.status().done).toBe(0)
   })
 })
+
+it("rejects a cancelled scoped image read and ignores bytes arriving after cancellation", async () => {
+  const storage = memoryCache()
+  const { files, response } = await fixture([1], storage)
+  const gate = Promise.withResolvers<Response>()
+  const background = vi.fn<Fetcher>(() => gate.promise)
+  const bytes = new MetadataBytes(
+    "/cdn",
+    "scoped",
+    files,
+    (url) => Promise.resolve(response(url)),
+    () => undefined,
+    storage,
+    background,
+  )
+  const abort = new AbortController()
+  const reading = bytes.read("file0", false, abort.signal)
+  const rejected = expect(reading).rejects.toThrow()
+  await vi.waitFor(() => {
+    expect(background).toHaveBeenCalledTimes(1)
+  })
+  abort.abort()
+  await rejected
+  gate.resolve(response("/cdn/data0"))
+  await tick()
+  const cache = await storage.open("sve-images-%2Fcdn:-scoped")
+  expect(await cache.keys()).toHaveLength(0)
+  expect(await bytes.read("file0")).toHaveLength(1)
+  bytes.dispose()
+  await expect(bytes.read("file0", false, new AbortController().signal)).rejects.toThrow(
+    "snapshot replaced",
+  )
+})

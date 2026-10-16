@@ -33,6 +33,14 @@ export default {
     view: { grid: "Images", table: "Table", list: "List" },
   },
   settings: {
+    advanced: "Advanced settings",
+    preloadPrintings: "Preload all printings",
+    preloadPrintingsHint:
+      "Load other printings after the current card image is ready. Other languages follow the English/Japanese data display setting.",
+    preloadNeighbours: "Preload previous / next card",
+    preloadNeighboursHint:
+      "Prepare nearby card text and images to reduce switching time. Uses more data; the browser may remove cached content.",
+
     storage: "Storage",
     storageTotal: "Total site usage (estimate)",
     storageImages: "Card image payload (estimate)",

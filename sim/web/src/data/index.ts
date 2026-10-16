@@ -8,7 +8,7 @@ export {
   type SelectedText,
   sharedAnnotatedTextResolver,
 } from "./annotated-text"
-export { locateCard, type LocatedCard } from "./card-route"
+export { type CardRouteInput, locateCard, type LocatedCard } from "./card-route"
 export { type CardSummary, type Catalog, catalogOf, nameOf } from "./catalog"
 export {
   createSnapshotClient,
