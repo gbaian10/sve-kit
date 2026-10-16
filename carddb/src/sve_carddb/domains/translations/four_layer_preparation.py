@@ -1,10 +1,19 @@
 """Isolated v3 preparation; production workflows keep their v2 entry and readers."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner
+from sve_carddb.contracts.four_layer import (
+    FaceRevisionOwner,
+    PrintingFaceOwner,
+    hash_payload,
+)
 from sve_carddb.domains.translations.four_layer_choices import constant_choice_interface
+from sve_carddb.domains.translations.four_layer_context import (
+    DEFAULT_REGISTRY,
+    Descriptor,
+    Registry,
+)
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import (
     DOMAIN,
@@ -19,11 +28,12 @@ from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VE
 from sve_carddb.domains.translations.four_layer_reads import prepare_reads
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
 
     from sve_carddb.contracts.four_layer import (
         FormDefinition,
         Frame,
+        ModeCountRule,
         Projection,
         Target,
     )
@@ -37,6 +47,15 @@ if TYPE_CHECKING:
 class PreparedField:
     derived: DerivedField
     interfaces: tuple[Projection | None, ...]
+    mode_rules: tuple[tuple[ModeCountRule, ...], ...] = ()
+    families: tuple[PreparationFamily, ...] = ()
+
+    @property
+    def registry(self) -> Registry:
+        """Explicit family registration keeps parallel producers out of shared modules."""
+        return DEFAULT_REGISTRY.extend(
+            tuple(d for family in self.families for d in family.descriptors)
+        )
 
     def bind(self, ordinal: int) -> tuple[Frame, SourceBinding]:
         """Build preparation identities from the independently derived source evidence."""
@@ -48,6 +67,18 @@ class PreparedField:
         interface = self.interfaces[ordinal]
         if interface is not None:
             frame = frame.model_copy(update={"projection": interface})
+        if self.mode_rules and self.mode_rules[ordinal]:
+            frame = frame.model_copy(update={"mode_rules": self.mode_rules[ordinal]})
+            content_hash = hash_payload(
+                frame.payload(self.derived.field.parts[ordinal].canonical_source)
+            )
+            frame = frame.model_copy(
+                update={"content_hash": content_hash, "id": "frame:" + content_hash}
+            )
+            binding = binding.model_copy(update={"frame_id": frame.id})
+            binding = binding.model_copy(
+                update={"id": "bind:" + hash_payload(binding.payload())}
+            )
         return frame, binding
 
     def verify(  # ruff: ignore[too-many-arguments] -- optional authored targets need their own language and forms
@@ -65,8 +96,13 @@ class PreparedField:
         """Reconstruct exact source evidence; a version label never proves v3 validity."""
         if frame.source.normalizer_version != PREPARATION_VERSION:
             raise ValueError("Preparation requires the explicit v3 normalizer version")
+        registry = self.registry
         expected = derive_preparation(
-            raw, self.derived.field.source, classifier, context=context
+            raw,
+            self.derived.field.source,
+            classifier,
+            context=context,
+            families=self.families,
         )
         if self != expected:
             raise ValueError("Preparation differs from reconstructed source evidence")
@@ -80,7 +116,7 @@ class PreparedField:
             raw,
             frame,
             binding,
-            {**classifier.domains, DOMAIN_CODE: DOMAIN},
+            {**classifier.domains, DOMAIN_CODE: DOMAIN, **registry.domains},
             normalizer_version=PREPARATION_VERSION,
         )
         reconstructed = bind_recognized(
@@ -90,19 +126,29 @@ class PreparedField:
             reconstructed != binding
             or frame.semantic_variant != expected_frame.semantic_variant
             or frame.projection != expected_frame.projection
+            or frame.mode_rules != expected_frame.mode_rules
         ):
             raise ValueError(
                 "Preparation binding differs from exact source construction"
             )
-        verify_quantities(frame, binding, scopes={})
+        verify_quantities(frame, binding, scopes={}, registry=registry)
         if target is not None:
             target.verify(
                 frame.leaf_schema,
                 lang,
                 forms or {},
-                dependencies=target_dependencies(frame, binding),
+                dependencies=target_dependencies(frame, binding, registry=registry),
             )
             self.derived.verify_target(binding, target)
+
+
+@dataclass(frozen=True)
+class PreparationFamily:
+    name: str
+    descriptors: tuple[Descriptor, ...]
+    prepare: Callable[
+        [str, PreparedField, Classifier, CardContext | None], PreparedField
+    ]
 
 
 def derive_preparation(
@@ -111,6 +157,7 @@ def derive_preparation(
     classifier: Classifier,
     *,
     context: CardContext | None = None,
+    families: tuple[PreparationFamily, ...] = (),
 ) -> PreparedField:
     """Apply sealed source families only through the explicit preparation entry."""
     derived = derive_source(raw, source, classifier, context=context)
@@ -132,4 +179,15 @@ def derive_preparation(
             derived.field.parts, derived.original.parts, derived.recognized, strict=True
         )
     )
-    return PreparedField(derived, interfaces)
+    prepared = PreparedField(derived, interfaces)
+    if len({family.name for family in families}) != len(families):
+        raise ValueError("Preparation family names must be unique")
+    for family in families:
+        prepared = family.prepare(raw, prepared, classifier, context)
+    if len(prepared.interfaces) != len(prepared.derived.field.parts):
+        raise ValueError("Preparation interfaces must preserve source part order")
+    if prepared.mode_rules and len(prepared.mode_rules) != len(
+        prepared.derived.field.parts
+    ):
+        raise ValueError("Mode rules must preserve source part order")
+    return replace(prepared, families=families)

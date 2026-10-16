@@ -14,6 +14,7 @@ from sve_carddb.contracts.four_layer import (
     CardNameReference,
     CardNP,
     Constant,
+    ContextExpression,
     CountExpr,
     Expression,
     FormDefinition,
@@ -23,6 +24,7 @@ from sve_carddb.contracts.four_layer import (
     LeafRef,
     LeafType,
     LiteralNode,
+    PredicateExpr,
     QuantitySpec,
     QuantityValuePart,
     SlotRef,
@@ -372,7 +374,10 @@ class Renderer:
             validate_form(selected_form.definition)
 
     def expression_target(  # ruff: ignore[no-self-use] -- preparation overrides this presentation hook
-        self, _item: BoundTarget, _expr: Expression, _lang: str
+        self,
+        _item: BoundTarget,
+        _expr: Expression | ContextExpression | PredicateExpr,
+        _lang: str,
     ) -> SelectedTarget:
         """Only the isolated preparation renderer supplies finite expression targets."""
         raise MissingValueError("unsupported_quantity_presentation")
@@ -583,7 +588,9 @@ class _Output:
             self.zones(item, value, path)
         elif isinstance(value, QuantitySpec):
             self.quantity(item, value, path)
-        elif isinstance(value, (Bound, Constant, Expression)):
+        elif isinstance(
+            value, (Bound, Constant, Expression, ContextExpression, PredicateExpr)
+        ):
             self.expression(item, value, path)
         elif isinstance(value, str):
             if slot.type == "LiteralLayout":
@@ -650,12 +657,12 @@ class _Output:
     def expression(
         self,
         item: BoundTarget,
-        value: Bound | Constant | Expression,
+        value: Bound | Constant | Expression | ContextExpression | PredicateExpr,
         path: tuple[int, ...],
     ) -> None:
         if isinstance(value, Constant):
             self.text += str(value.value)
-        elif isinstance(value, Expression):
+        elif isinstance(value, (Expression, ContextExpression, PredicateExpr)):
             selected = self.renderer.expression_target(item, value, self.lang)
             self.dependencies.append(
                 {
