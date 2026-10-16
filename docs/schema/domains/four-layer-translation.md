@@ -929,7 +929,10 @@ leaf／import 簽章、capture 與 IR bridge；renderer 的 expression target ke
 同一 ability 的當前 scope 或祖先可見；不能從相鄰分支或其他 ability 借值。
 ObjectSet 明分單體／集合及 holder、event subject、selection、direct ability source；
 ReceiptId、CapturedValue、PlayerRef、ChoiceContext 與事件引用各有獨立型別。
-CapturedValue 的 Nat／Bool 與 measure 也必須符合簽章；缺 provider 不補 false 或 0。
+CapturedValue 的 Nat／Bool 與 measure 也必須符合簽章；ReceiptId 簽章必須宣告
+`receipt_result`（objects／amount／payment_complete），結果種類不同即拒絕。缺 provider 不補 false 或 0。
+準備階段的物件、事件與 receipt ID 是 producer 依來源位置給的符號參照，只用來證明
+同一 frame 內連到同一物件世代；不是 runtime 實例 ID，也不能用卡號、卡名或最近事件代替。
 
 入場域 `predicate.entry.provenance.v1` 的角色為 `entry_condition`，只登錄：
 
@@ -959,12 +962,16 @@ include_execution 與 at_query cutoff，授予能力中的查詢不凍結為授�
 不改變讀值本身的 measure，也不按 consumer 新造域。
 
 `quantity.scale.once.v1` 是 A1／A2 共用的一層常數倍率：`value:QuantityExpr` 與
-`factor:Nat/constant_multiplier`。基底必須是 registry 明列 scalable 的讀值；
+`factor:Nat/constant_multiplier`。基底必須是 registry 明列 scalable 的讀值，
+或沒有偏移的 §11.2 現時區域計數（直接重用 B11 expression，不另登錄一份）；
+帶偏移的 B11 expression 已用掉這一層。measure 為 `operand` 的其他家族 wrapper
+（例如 HalfUp）適用同一規則，因此 wrapper 之間不能互相包住。
 巢狀倍率、透過 alias 隱藏的巢狀倍率、predicate、未登錄組合與非正倍率均拒絕。
 Nat 常數葉及原 B11 接受域保持原意，沒有一般算式 parser。
 
 `ConditionSlot` 是 `resolved(predicate)` 或
-`pending(source_descriptor, source_span, raw_sha256, reason)`；reason 區分
+`pending(source_descriptor, source_span, raw_sha256, reason)`；span 為 owner 欄位 raw 座標，
+raw_sha256 是該段 raw 文字的 SHA-256。reason 區分
 `missing_provider`（已核來源尚待 provider）、`unsealed_source` 與 `ambiguous_source`。
 pending 保存來源，不能作真假分支。`ModeCountRule` 保存 base／alternative 的原
 exact／up_to 常數 QuantitySpec、ConditionSlot、ChoiceContext import 與 scope；
@@ -980,8 +987,9 @@ exact／up_to 常數 QuantitySpec、ConditionSlot、ChoiceContext import 與 sco
 `derive_preparation(..., families=(...))` 明示組合；空 tuple 的預設入口不啟用新 producer。
 `PreparedField.registry` 合併各家族 descriptor，`ExpressionTargets(..., registry=...)`
 使用相同閉域。家族 callback 接收 raw、PreparedField、Classifier 與可選 CardContext，回傳更新的來源準備結果；
-verify 以相同 families 重新 derive。家族自用 descriptor 透過 `Registry.extend` 登錄，
-不得覆寫共同 ID。共用簽章若需修改，先回報協調者修訂契約。
+verify 以相同 families 重新 derive。callback 只在原 projection 上補 scope、port 與 mode rule，
+不改 projection_kind／discriminator；整行 semantic pending 不因 port 而升格。
+家族自用 descriptor 透過 `Registry.extend` 登錄，不得覆寫共同 ID。共用簽章若需修改，先回報協調者修訂契約。
 
 可重用的公開合成契約在 `carddb/tests/domains/translations/context_fixtures.py`：
 `contract_case("A1" | "A2" | "A3" | "A11")` 提供 BoundTarget、renderer、expression targets
