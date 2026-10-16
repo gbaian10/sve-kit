@@ -8,12 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
-from sve_carddb.domains.registry.preview import (
-    FrozenEN,
-    FrozenJP,
-    FrozenRegions,
-    plan_preview,
-)
+from sve_carddb.domains.registry.preview import plan_preview
 from sve_carddb.domains.registry.records import AllocationData, FaceData, PrintingData
 from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import (
@@ -48,7 +43,7 @@ from sve_carddb.images.crops import load_image_crops
 from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
 from sve_carddb.parse.pages.official_jp import image_url
-from sve_carddb.workflows.offline import Inputs
+from sve_carddb.workflows.offline import Inputs, registry_provider
 
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
@@ -270,11 +265,9 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     library = PreviewRoots(image_assets_dir, image_cache_dir)
     roots = Roots(image_output_dir, private_dir)
     roots.verify()
-    library.validate(
-        (recipe.repo, recipe.archive, inputs, roots.preview, roots.private)
-    )
+    library.validate((*recipe.protected_inputs(), inputs, roots.preview, roots.private))
     for output in (roots.preview, roots.private):
-        for protected in (recipe.repo, recipe.archive, inputs):
+        for protected in (*recipe.protected_inputs(), inputs):
             if output.resolve().is_relative_to(
                 protected.resolve()
             ) or protected.resolve().is_relative_to(output.resolve()):
@@ -310,29 +303,9 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         sum(part.elapsed_seconds for part in parts),
     )
     text_batches = FrozenBatches()
-    en, jp = recipe.sources
     identity = plan_preview(
         authored_root(recipe.repo),
-        FrozenRegions(
-            en=FrozenEN(
-                recipe.archive,
-                recipe.store_id,
-                en.card_batch,
-                parser_version=en.parser_version,
-                sources=text_batches.batch(
-                    recipe.archive, recipe.store_id, en.card_batch
-                ),
-            ),
-            jp=FrozenJP(
-                recipe.archive,
-                recipe.store_id,
-                jp.card_batch,
-                parser_version=jp.parser_version,
-                sources=text_batches.batch(
-                    recipe.archive, recipe.store_id, jp.card_batch
-                ),
-            ),
-        ),
+        registry_provider(recipe, text_batches),
         regions=("en", "jp"),
     )
     texts = TextObservations(

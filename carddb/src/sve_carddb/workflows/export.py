@@ -28,7 +28,7 @@ app = typer.Typer(no_args_is_help=True, help="Export isolated offline previews."
 def verify_inputs(roots: Roots, inputs: Inputs) -> None:
     """No output may modify the input repo or archived immutable evidence."""
     roots.verify()
-    for protected in (inputs.repo, inputs.archive):
+    for protected in inputs.protected_inputs():
         source = protected.resolve()
         for output in (roots.preview, roots.private):
             root = output.resolve()
@@ -61,8 +61,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     verify_inputs(roots, recipe)
     mark("load recipe + verify inputs")
     for protected in (
-        recipe.repo,
-        recipe.archive,
+        *recipe.protected_inputs(),
         inputs,
         preview_dir,
         *(() if image_index is None else (image_index,)),

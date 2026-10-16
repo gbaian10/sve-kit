@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
     from sve_carddb.core.regions import Region
     from sve_carddb.domains.registry.inputs import Card
+    from sve_carddb.domains.registry.preview.review_inputs import RegistryReviewInputs
+    from sve_carddb.domains.registry.records import MappingReviewData
 
 
 @dataclass(frozen=True)
@@ -40,10 +42,15 @@ class CardEvidence:
 
 
 class EvidenceProvider(Protocol):
+    @property
+    def review_inputs(self) -> RegistryReviewInputs | None:
+        """Expose only verified historical scope for registry-wide containment checks."""
+        ...
+
     def card(self, region: Region, card_no: str) -> CardEvidence | None:
         """Resolve exact identity within pinned inputs; never fall back to latest."""
         ...
 
-    def coverage(self, coverage_hash: str) -> bool:
-        """Whether the complete historical review input with this hash is pinned."""
+    def coverage(self, review: MappingReviewData) -> bool:
+        """Whether the full historical input matches the review region, scope, date and hash."""
         ...

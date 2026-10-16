@@ -65,6 +65,8 @@ class PreviewPlan:
     regions: tuple[Region, ...]
     projections: tuple[Projection, ...]
     evidence: Mapping[tuple[Region, str], CardEvidence]
+    review_input_pin: dict[str, JsonValue] | None = None
+    uncovered_jp_card_numbers: tuple[str, ...] = ()
 
     def source_uses(self) -> tuple[SourceUse, ...]:
         """Declare all successfully read observations, including excluded identity evidence."""
@@ -90,6 +92,10 @@ class PreviewPlan:
         """Contain identifiers and hashes only; never official card text or corrections."""
         return {
             "regions": list[JsonValue](self.regions),
+            "registry_review_inputs": self.review_input_pin,
+            "uncovered_jp_card_numbers": list[JsonValue](
+                self.uncovered_jp_card_numbers
+            ),
             "next_int_id": dict(self.snapshot.files.index().next_int_id),
             "records": [
                 {
@@ -190,6 +196,20 @@ class _Projector:
             for item in snapshot.records.values()
             if isinstance(item.data, PrintingData)
         }
+        review_inputs = provider.review_inputs
+        self.review_input_pin = (
+            review_inputs.pin.configuration() if review_inputs is not None else None
+        )
+        self.uncovered_jp_card_numbers = (
+            tuple(
+                sorted(
+                    {p.card_no for p in self.printings.values() if p.region == "jp"}
+                    - review_inputs.card_numbers
+                )
+            )
+            if review_inputs is not None
+            else ()
+        )
         self.checks = {
             p.id: tuple(self.evidence.check(obs) for obs in _observations(p))
             for p in self.printings.values()
@@ -254,8 +274,10 @@ class _Projector:
             reasons.append("no_included_printing")
         if any(c.status != "matched" for c in used):
             reasons.append("mapping_evidence_unavailable")
-        if not self.evidence.provider.coverage(data.coverage_hash):
+        if not self.evidence.provider.coverage(data):
             reasons.append("missing_review_coverage")
+        if self.uncovered_jp_card_numbers:
+            reasons.append("review_scope_outdated")
         return (
             tuple(reasons),
             used,
@@ -340,5 +362,10 @@ def _project(
         projector.projection(record) for _, record in sorted(snapshot.records.items())
     )
     return PreviewPlan(
-        snapshot, regions, projections, MappingProxyType(projector.evidence.cards)
+        snapshot,
+        regions,
+        projections,
+        MappingProxyType(projector.evidence.cards),
+        projector.review_input_pin,
+        projector.uncovered_jp_card_numbers,
     )

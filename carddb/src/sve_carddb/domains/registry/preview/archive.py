@@ -13,10 +13,14 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.regions import Region
+    from sve_carddb.domains.registry.preview.review_inputs import RegistryReviewInputs
+    from sve_carddb.domains.registry.records import MappingReviewData
 
 
 class FrozenJP:
     """Pin current entries in one sealed batch and share verified page projections."""
+
+    review_inputs: RegistryReviewInputs | None = None
 
     def __init__(
         self,
@@ -36,7 +40,7 @@ class FrozenJP:
         self.batch_id = batch_id
 
     @staticmethod
-    def coverage(_coverage_hash: str) -> bool:
+    def coverage(_review: MappingReviewData) -> bool:
         """An HTML inventory hash is not the historic complete JSONL input hash."""
         return False
 
