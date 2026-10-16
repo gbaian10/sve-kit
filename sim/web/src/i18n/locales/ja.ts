@@ -163,6 +163,8 @@ export default {
     printedText: "印刷の表記",
     translationMissing: "この言語の訳はありません",
     copyText: "本文をコピー",
+    textCopied: "本文をコピーしました",
+    textCopyFailed: "本文をコピーできません。ブラウザーの権限を確認してください。",
     field: { name: "名前", effect: "効果", flavor: "フレーバーテキスト" },
     translationOrigin: { official: "公式訳", project: "プロジェクト訳", machine: "機械訳" },
     translationAuthority: {

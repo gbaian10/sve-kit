@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from "react"
 import { cn } from "./cn"
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost"
-type ButtonSize = "md" | "lg" | "icon"
+type ButtonSize = "sm" | "md" | "lg" | "icon"
 
 export interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   readonly variant?: ButtonVariant
@@ -23,6 +23,7 @@ const VARIANT: Record<ButtonVariant, string> = {
 }
 
 const SIZE: Record<ButtonSize, string> = {
+  sm: "h-9 px-3 text-13",
   md: "h-11 min-w-11 px-4 text-15",
   lg: "h-12 min-w-12 px-5 text-15",
   icon: "size-11",
