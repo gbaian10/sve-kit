@@ -969,8 +969,12 @@ include_execution 與 at_query cutoff，授予能力中的查詢不凍結為授�
 巢狀倍率、透過 alias 隱藏的巢狀倍率、predicate、未登錄組合與非正倍率均拒絕。
 Nat 常數葉及原 B11 接受域保持原意，沒有一般算式 parser。
 
-`ConditionSlot` 是 `resolved(predicate)` 或
-`pending(source_descriptor, source_span, raw_sha256, reason)`；span 為 owner 欄位 raw 座標，
+`ConditionSlot` 是本片段的 `resolved(predicate)`、
+`pending(source_descriptor, source_span, raw_sha256, reason)`，或整合入口的
+`linked(source:OccurrenceKey, condition)`。linked 指向同欄唯一 intro 的原始條件，
+其 condition 仍區分 resolved／pending；不把外片段的槽放進本 binding。
+完整欄位的 `PreparedField.verify` 重建該邊，局部驗證另確認來源等於 ChoiceContext 的來源。
+span 為 owner 欄位 raw 座標，
 raw_sha256 是該段 raw 文字的 SHA-256。reason 區分
 `missing_provider`（已核來源尚待 provider）、`unsealed_source` 與 `ambiguous_source`。
 pending 保存來源，不能作真假分支。`ModeCountRule` 保存 base／alternative 的原
@@ -1080,8 +1084,9 @@ A7 在參與來源片段保存 `ModeCountRule`。intro 的有限區域張數、�
 typed predicate 直接消費；條件 provider 的 scope 與 imports 沿原 projection 保留，
 不以字面值相同配對。
 
-其他片段的條件來源邊以 `choice.condition.source_edge.v1` 保留 span／hash 及
-missing_provider，等待跨片段 provider；不把另一片段的葉直接借進本 binding。
+單獨啟用此家族時，其他片段的條件來源邊以 `choice.condition.source_edge.v1`
+保留 span／hash 及 missing_provider。§11.11 的整合入口將它接成 linked，
+指向唯一 intro 的 OccurrenceKey 及原條件；未封條件仍是來源 pending。
 A11 六種入場表面與 A2 的本回合進化存在，在 provider 尚未合流時分別以
 `predicate.entry.provenance.v1`／`predicate.history.current_turn.v1` 標 missing_provider；
 其他條件（含相似但未封的入場或本回合寫法）保留 unsealed_source。
@@ -1126,8 +1131,11 @@ A4 的 `read.parameter.chosen_x.v1` 引用 `CapturedValue<Nat, declared_x>`，ca
 source port 的物件、receipt 與 binding ID 是由來源位置及 scope 建立的符號；
 它們不是 runtime 物件、對手隱藏資訊的固定身分或已執行的付款結果。
 同欄唯一、明示的追加費用來源可以供後行讀取該次追加費用的結果，並保存前行來源座標；
-其他能力／分支不能借用此 port。歷史、名稱種類數及名稱片段 selector 的跨家族 producer
-尚未提供時保留具名 pending，由組合入口接線，不以 runtime 缺口替來源填入數值。
+其他能力／分支不能借用此 port。歷史讀值由 §11.10 的 P2 producer 擁有，
+本家族不再重編或標記 history provider pending。名稱種類數消費 §11.7 的既有讀值，
+將 X 定義與使用點接到同一槽；缺唯一 provider 時保持具名 pending。
+X 在名稱片段 selector 外時，其定義可獨立辨識，selector 由 P3 擁有。
+不以 runtime 缺口替來源填入數值。
 
 ### 11.10 本回合歷史與單次事件來源的準備 producer
 
@@ -1171,3 +1179,44 @@ producer 的物件、世代與事件識別是由精確來源定位產生的符�
 EntryFact 的持久連接、Unknown、來源快照／LKI、授予能力持有者與查詢時點，
 仍須在 DSL schema／loader／runtime 的 lowering 驗收完成；缺證據不能自動回傳 true、false 或 0。
 局部 typed 辨識不提升整段 semantic pending 或中文的審閱資格。
+
+### 11.11 十一項來源家族的整合
+
+`four_layer_integrated.FAMILY` 是明示的整合家族，經
+`derive_preparation(..., families=(FAMILY,))` 啟用。它依來源依賴執行歷史、
+入場／打出來源、名稱、合計、讀值／支付 X，最後接選項 consumer；
+正式 v2、空 families 與 authored 載入流程不自動切換。
+整合 registry 沿各家族的閉域簽章，不另建 parser 或常數域。
+
+同一來源構造只由一個 provider 擁有：
+
+- 歷史子句內的同名除外及歷史讀值由 P2 擁有，P3／P1 讓位。
+- 名稱種類數由 P3 產生；P1 將同一能力內的 X 定義及使用 occurrence 接到該數值槽，
+  不重建另一個母體或多包一層讀值。
+- 合計由 P4 保存骨架，合計 selector 的名稱排除、不同名及雙特性使用 P3 的 typed predicate。
+  `aggregate.sum.deck.filtered_trait_card.original_cost.v1` 消費名稱排除，
+  `aggregate.sum.graveyard.filtered_kind.original_cost.v1` 消費雙特性，
+  `aggregate.sum.deck.distinct_filtered_kind.original_cost.v1` 同時消費雙特性與不同名。
+  這些仍使用 `quantity.aggregate.property_sum.v1`／`property_sum_value`；
+  predicate 保留自己的域、角色及 imports，不以合計 descriptor 的名詞形狀再編一次。
+- P5 消費 P2 的 A11／歷史條件；表向進化牌堆具名張數由 P5 直接使用既有 B13 葉。
+  其他片段的 mode rule 透過 linked 消費同一 intro 的條件；付款行也沿此來源邊，
+  producer 的自我 import 不視為另一條跨片段邊。未封存在條件仍 pending。
+
+`verify_claims` 在每個 provider 後確認已擁有的 descriptor 及原始 occurrence 保留且唯一；
+新增使用點可以延伸同一讀值的 occurrence，不能取代原 provider。
+相同來源 anchor 的重複構造會報錯；同片段的不同構造仍可組合。
+變換槽名時同步重映射 expression DAG 與既有 port 的 source_leaves，
+不能因槽名剛好仍存在而借到另一個值。
+
+`four_layer_ability` 共用能力標頭，包括出走時、ドライブ獲得時、アドバンス起動，
+進化／食事／憑依僅在接費用標頭時切開。整合 scope 依完整 raw 欄位的能力、
+授予能力與編號分支建立；本文、能力可使用、打出限制及模式數量保留 sequence scope。
+同一能力的 holder 共用精確來源符號，事件引用同步保留相同物件世代；
+授予能力仍有獨立 holder，不能合併為外層能力的物件。
+
+打出時的 optional cost 決定是 `CapturedValue<Bool,payment_complete>`，
+支付完成結果是 `ReceiptId<payment_complete>`；兩者的時點與型別維持分開。
+這些接線不執行付款、歷史、名稱規則或入場來源求值；lowering／runtime 仍須各自驗收。
+新中文 target 仍經相同 required 閉包與 annotation renderer；缺選詞保持具名問題，
+不以 Literal 或 optional 隱藏。正式切換及中文重對齊由後續流程處理。
