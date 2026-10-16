@@ -7,7 +7,7 @@ from threading import Event
 from time import monotonic
 from typing import TYPE_CHECKING
 
-from sve_carddb.export.read_api import ExportError, digest
+from sve_carddb.export.read_api import ExportError
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -40,23 +40,21 @@ class UploadPool:
     completed: int = 0
     stopped: Event = field(default_factory=Event)
 
-    def sync(self, objects: Iterable[UploadObject]) -> dict[str, str]:
-        """Returning is the phase barrier: every object has finished read-back."""
+    def sync(self, objects: Iterable[UploadObject]) -> None:
+        """Returning is the phase barrier: every admitted object has finished."""
         self._progress()
         with ThreadPoolExecutor(max_workers=self.jobs) as executor:
             try:
-                digests = self._run(executor, objects)
+                self._run(executor, objects)
             except BaseException:
                 self.stopped.set()
                 raise
         self._progress()
-        return digests
 
     def _run(
         self, executor: ThreadPoolExecutor, objects: Iterable[UploadObject]
-    ) -> dict[str, str]:
+    ) -> None:
         remaining = iter(objects)
-        digests: dict[str, str] = {}
         last = monotonic()
         last_count = self.completed
         failure: BaseException | None = None
@@ -65,7 +63,7 @@ class UploadPool:
         }
         while pending:
             done, pending = wait(pending, timeout=1, return_when=FIRST_COMPLETED)
-            error = self._collect(done, digests)
+            error = self._collect(done)
             if error is not None and failure is None:
                 failure = error
                 if self.progress is not None:
@@ -85,23 +83,16 @@ class UploadPool:
                 )
         if failure is not None:
             raise failure
-        return digests
 
-    def _collect(
-        self,
-        done: set[Future[tuple[str, int, str] | None]],
-        digests: dict[str, str],
-    ) -> BaseException | None:
+    def _collect(self, done: set[Future[int | None]]) -> BaseException | None:
         failure = None
         for future in done:
             error = future.exception()
             if error is not None:
                 failure = error
                 continue
-            result = future.result()
-            if result is not None:
-                key, written, checksum = result
-                digests[key] = checksum
+            written = future.result()
+            if written is not None:
                 self.written += written
                 self.completed += 1
         return failure
@@ -112,13 +103,11 @@ class UploadPool:
                 f"Upload: {self.completed}/{self.total} complete, {self.written} written"
             )
 
-    def _sync(self, item: UploadObject) -> tuple[str, int, str] | None:
+    def _sync(self, item: UploadObject) -> int | None:
         try:
             if self.stopped.is_set():
                 return None
-            raw = item.read()
-            written = self._write(item, raw)
-            return None if written is None else (item.key, written, digest(raw))
+            return self._write(item, item.read())
         except BaseException as error:
             self.stopped.set()
             if isinstance(error, ExportError):

@@ -42,15 +42,12 @@ class DelayedS3(httpx.BaseTransport):
     objects: dict[str, Stored] = field(default_factory=dict)
     requests: list[tuple[str, str]] = field(default_factory=list)
     lock: Lock = field(default_factory=Lock)
-    read_back: set[str] = field(default_factory=set)
-    image_keys: set[str] = field(default_factory=set)
     fail_key: str | None = None
     fault: str = "condition"
     block_reads: set[str] = field(default_factory=set)
     block_readback: str | None = None
     blocked: Event = field(default_factory=Event)
     release: Event = field(default_factory=Event)
-    other_images_done: Event = field(default_factory=Event)
     active: int = 0
     peak: int = 0
 
@@ -89,9 +86,6 @@ class DelayedS3(httpx.BaseTransport):
                     stream=httpx.ByteStream(b"corrupt readback"),
                     headers=existing.headers | {"etag": existing.etag},
                 )
-            self.read_back.add(key)
-            if self.image_keys - {self.block_readback} <= self.read_back:
-                self.other_images_done.set()
             return httpx.Response(
                 200,
                 stream=httpx.ByteStream(existing.raw),
