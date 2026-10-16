@@ -22,8 +22,7 @@ export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */
   readonly uiLanguage: UiLanguage | null
   readonly cardEdition: CardEdition
-  /** null follows the edition default until the user makes a choice. */
-  readonly showOtherEdition: boolean | null
+  readonly showOtherEdition: Readonly<Record<CardEdition, boolean>>
   readonly nameDisplay: TextDisplay
   readonly effectLanguage: TextDisplay
   readonly symbolLabels: boolean
@@ -39,7 +38,7 @@ export interface Prefs {
 export const DEFAULT_PREFS: Prefs = {
   uiLanguage: null,
   cardEdition: "jp",
-  showOtherEdition: null,
+  showOtherEdition: { jp: false, en: true },
   nameDisplay: "translated",
   effectLanguage: "both",
   symbolLabels: false,
@@ -65,12 +64,13 @@ const isNullableUiLanguage = (value: unknown): value is UiLanguage | null =>
 const isNullableAccent = (value: unknown): value is Accent | null =>
   value === null || isAccent(value)
 
-type Guards = { readonly [K in keyof Prefs]: (value: unknown) => value is Prefs[K] }
+type Guards = {
+  readonly [K in Exclude<keyof Prefs, "showOtherEdition">]: (value: unknown) => value is Prefs[K]
+}
 
 const guards: Guards = {
   uiLanguage: isNullableUiLanguage,
   cardEdition: isCardEdition,
-  showOtherEdition: (value): value is boolean | null => value === null || isBoolean(value),
   nameDisplay: isTextDisplay,
   effectLanguage: isTextDisplay,
   symbolLabels: isBoolean,
@@ -80,6 +80,19 @@ const guards: Guards = {
   banRegion: isCardEdition,
   gridDensity: isGridDensity,
   viewMode: isViewMode,
+}
+
+function comparisonPrefs(value: unknown): Prefs["showOtherEdition"] {
+  // A legacy explicit choice affected both editions; preserve it in both slots.
+  if (isBoolean(value)) return { jp: value, en: value }
+  const fields =
+    typeof value === "object" && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {}
+  return {
+    jp: isBoolean(fields["jp"]) ? fields["jp"] : DEFAULT_PREFS.showOtherEdition.jp,
+    en: isBoolean(fields["en"]) ? fields["en"] : DEFAULT_PREFS.showOtherEdition.en,
+  }
 }
 
 type StorageSource = Storage | (() => Storage) | undefined
@@ -98,7 +111,12 @@ function sanitize(raw: unknown): Prefs {
   const prefs: Record<string, unknown> = {}
   for (const key of Object.keys(DEFAULT_PREFS) as (keyof Prefs)[]) {
     const value = record[key]
-    prefs[key] = guards[key](value) ? value : DEFAULT_PREFS[key]
+    prefs[key] =
+      key === "showOtherEdition"
+        ? comparisonPrefs(value)
+        : guards[key](value)
+          ? value
+          : DEFAULT_PREFS[key]
   }
   return prefs as unknown as Prefs
 }
@@ -163,5 +181,5 @@ export function usePrefs(): Prefs {
 }
 
 export function showsOtherEdition(prefs: Prefs, edition: CardEdition): boolean {
-  return prefs.showOtherEdition ?? edition === "en"
+  return prefs.showOtherEdition[edition]
 }

@@ -19,10 +19,11 @@ import {
   stringValue,
 } from "../data"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import { DEFAULT_PREFS, prefsStore } from "../settings"
+import { DEFAULT_PREFS, prefsStore, showsOtherEdition, usePrefs } from "../settings"
 import { renderInRouter } from "../test-utils"
 import { memoryCache } from "../test-utils/cache"
 import { useOtherEdition } from "./other-edition"
+import { useRouteEdition } from "./snapshot"
 
 const state = vi.hoisted(() => ({ client: null as SnapshotClient | null }))
 vi.mock("../data", async (original) => ({
@@ -195,7 +196,7 @@ it("selects a shared art by identity, otherwise the region default, and detects 
 
 it("keeps the card when switching with comparison off, shows loading, and recovers from failure", async () => {
   const h = harness()
-  prefsStore.set({ showOtherEdition: false })
+  prefsStore.set({ showOtherEdition: { jp: false, en: false } })
   const { router } = await renderInRouter(<AccountMenuPanel />, {
     initialEntries: ["/cards/BP01-002"],
   })
@@ -235,7 +236,7 @@ it("opens the chosen edition's list from a card URL that names no card", async (
 
 it("opens another-region direct links even with comparison off", async () => {
   const h = harness()
-  prefsStore.set({ showOtherEdition: false })
+  prefsStore.set({ showOtherEdition: { jp: false, en: false } })
   const result = await locateCard(h.client, { namespace: "official", key: "BP01EN-002" })
   expect(result.printing.region).toBe("en")
 })
@@ -304,4 +305,44 @@ it("cancels an edition switch when navigating away and clears its loading indica
     await new Promise((resolve) => setTimeout(resolve, 0))
   })
   expect(router.state.location.pathname).toBe("/cards/BP01-003")
+})
+
+it("keeps comparison loading tied to each edition's own toggle", async () => {
+  const h = harness()
+  await h.client.load()
+  function Comparison() {
+    const edition = useRouteEdition()
+    const prefs = usePrefs()
+    const enabled = showsOtherEdition(prefs, edition)
+    const result = useOtherEdition(h.client, edition, enabled, true)
+    return (
+      <output aria-label="comparison">
+        {!enabled ? "off" : result.catalog ? "ready" : "loading"}
+      </output>
+    )
+  }
+  await renderInRouter(
+    <>
+      <AccountMenuPanel />
+      <Comparison />
+    </>,
+    { initialEntries: ["/cards"] },
+  )
+  expect(screen.getByLabelText("comparison")).toHaveTextContent("off")
+  expect(h.requests.filter((path) => enPaths.has(path))).toEqual([])
+  await userEvent.click(screen.getByRole("switch", { name: "顯示英版資料" }))
+  await waitFor(() => {
+    expect(screen.getByLabelText("comparison")).toHaveTextContent("ready")
+  })
+  await userEvent.click(screen.getByRole("radio", { name: "英版" }))
+  await waitFor(() => {
+    expect(screen.getByLabelText("comparison")).toHaveTextContent("ready")
+  })
+  await userEvent.click(screen.getByRole("switch", { name: "顯示日版資料" }))
+  expect(screen.getByLabelText("comparison")).toHaveTextContent("off")
+  await userEvent.click(screen.getByRole("radio", { name: "日版" }))
+  await waitFor(() => {
+    expect(screen.getByLabelText("comparison")).toHaveTextContent("ready")
+  })
+  expect(prefsStore.get().showOtherEdition).toEqual({ jp: true, en: false })
 })

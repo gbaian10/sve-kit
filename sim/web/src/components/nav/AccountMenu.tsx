@@ -205,7 +205,11 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           size="sm"
           label={t(`account.showOtherEdition.${edition}`)}
           checked={showsOtherEdition(prefs, edition)}
-          onChange={(showOtherEdition) => prefsStore.set({ showOtherEdition })}
+          onChange={(showOtherEdition) =>
+            prefsStore.set({
+              showOtherEdition: { ...prefs.showOtherEdition, [edition]: showOtherEdition },
+            })
+          }
         />
       </SettingRow>
       <SettingRow size="sm" label={t("account.nameDisplay")}>

@@ -171,12 +171,38 @@ describe("createPrefsStore", () => {
   })
 })
 
-it("keeps the edition defaults for old preferences and persists explicit comparison choices", () => {
-  localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, cardEdition: "en" }))
-  expect(showsOtherEdition(readPrefs(), "jp")).toBe(false)
-  expect(showsOtherEdition(readPrefs(), "en")).toBe(true)
-  writePrefs({ ...readPrefs(), showOtherEdition: false })
-  expect(showsOtherEdition(readPrefs(), "en")).toBe(false)
-  writePrefs({ ...readPrefs(), showOtherEdition: true })
-  expect(showsOtherEdition(readPrefs(), "jp")).toBe(true)
+it.each([true, false])(
+  "preserves a legacy shared comparison choice (%s) in both editions",
+  (value) => {
+    localStorage.setItem(
+      PREFS_KEY,
+      JSON.stringify({ v: 1, cardEdition: "en", showOtherEdition: value }),
+    )
+    const prefs = readPrefs()
+    expect(showsOtherEdition(prefs, "jp")).toBe(value)
+    expect(showsOtherEdition(prefs, "en")).toBe(value)
+    writePrefs(prefs)
+    expect(readPrefs().showOtherEdition).toEqual({ jp: value, en: value })
+  },
+)
+
+it.each([undefined, null])(
+  "uses the edition defaults when no comparison choice was made (%s)",
+  (value) => {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, showOtherEdition: value }))
+    expect(showsOtherEdition(readPrefs(), "jp")).toBe(false)
+    expect(showsOtherEdition(readPrefs(), "en")).toBe(true)
+  },
+)
+
+it("restores each edition's comparison choice independently", () => {
+  localStorage.setItem(
+    PREFS_KEY,
+    JSON.stringify({ v: 1, showOtherEdition: { jp: true, en: false } }),
+  )
+  const prefs = readPrefs()
+  expect(showsOtherEdition(prefs, "jp")).toBe(true)
+  expect(showsOtherEdition(prefs, "en")).toBe(false)
+  writePrefs(prefs)
+  expect(readPrefs().showOtherEdition).toEqual({ jp: true, en: false })
 })

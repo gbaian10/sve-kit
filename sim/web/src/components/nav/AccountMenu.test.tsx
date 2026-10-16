@@ -11,26 +11,24 @@ afterEach(() => {
 })
 
 describe("AccountMenuPanel", () => {
-  it("uses edition defaults and remembers an explicit comparison choice", async () => {
+  it("remembers comparison choices separately for the route's edition", async () => {
     const { router } = await renderInRouter(<AccountMenuPanel />, { initialEntries: ["/cards"] })
-    expect(screen.getByRole("switch", { name: "顯示英版資料" })).toHaveAttribute(
-      "aria-checked",
-      "false",
-    )
+    const jp = () => screen.getByRole("switch", { name: "顯示英版資料" })
+    const en = () => screen.getByRole("switch", { name: "顯示日版資料" })
+    expect(jp()).toHaveAttribute("aria-checked", "false")
+    await userEvent.click(jp())
+    expect(jp()).toHaveAttribute("aria-checked", "true")
     await userEvent.click(screen.getByRole("radio", { name: "英版" }))
     expect(router.state.location.search).toBe("?ed=en")
-    const toggle = screen.getByRole("switch", { name: "顯示日版資料" })
-    expect(toggle).toHaveAttribute("aria-checked", "true")
-    await userEvent.click(toggle)
-    expect(readPrefs().showOtherEdition).toBe(false)
+    expect(en()).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(en())
+    expect(readPrefs().showOtherEdition).toEqual({ jp: true, en: false })
     await userEvent.click(screen.getByRole("radio", { name: "日版" }))
-    await userEvent.click(screen.getByRole("switch", { name: "顯示英版資料" }))
-    expect(readPrefs().showOtherEdition).toBe(true)
+    expect(jp()).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(jp())
     await userEvent.click(screen.getByRole("radio", { name: "英版" }))
-    expect(screen.getByRole("switch", { name: "顯示日版資料" })).toHaveAttribute(
-      "aria-checked",
-      "true",
-    )
+    expect(en()).toHaveAttribute("aria-checked", "false")
+    expect(readPrefs().showOtherEdition).toEqual({ jp: false, en: false })
   })
 
   it.each([

@@ -7,7 +7,7 @@ import { useCardSnapshot } from "../../app/snapshot"
 import { ToastProvider } from "../../components/ui/Toast"
 import { stringValue } from "../../data"
 import { CardRouteError } from "../../domain/cardRoute"
-import { DEFAULT_PREFS, prefsStore } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, showsOtherEdition } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { CardView } from "./CardPage"
 
@@ -77,7 +77,10 @@ const state = vi.hoisted(() => ({
 }))
 vi.mock("../../app/other-edition", () => ({
   useOtherEdition: () => ({
-    catalog: state.comparisonReady && prefsStore.get().showOtherEdition ? {} : undefined,
+    catalog:
+      state.comparisonReady && showsOtherEdition(prefsStore.get(), state.crossRegion ? "en" : "jp")
+        ? {}
+        : undefined,
     retry: () => undefined,
   }),
 }))
@@ -568,13 +571,13 @@ describe("regional printing lists", () => {
     ).toEqual(["BP01-053 (傳說)", "EBD02-005 (傳說)", "BP01-SL09 (sl)", "PR-299 (pr)"])
     expect(within(jp).getByRole("link", { current: "page" })).toHaveTextContent("BP01-053 (傳說)")
     act(() => {
-      prefsStore.set({ showOtherEdition: true })
+      prefsStore.set({ showOtherEdition: { ...prefsStore.get().showOtherEdition, jp: true } })
     })
     const en = screen.getByRole("list", { name: "EN" })
     expect(within(en).getByRole("link")).toHaveAttribute("href", "/cards/BP01-053EN")
     expect(within(en).getByRole("link")).toHaveTextContent("BP01-053EN (傳說)")
     act(() => {
-      prefsStore.set({ showOtherEdition: false })
+      prefsStore.set({ showOtherEdition: { ...prefsStore.get().showOtherEdition, jp: false } })
     })
     expect(screen.queryByRole("list", { name: "EN" })).not.toBeInTheDocument()
     expect(screen.getByRole("list", { name: "JP" })).toBeInTheDocument()
