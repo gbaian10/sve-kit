@@ -133,6 +133,10 @@ AnnotationReference 保留共用契約的邏輯形狀，讓 annotation-v1 的 ha
 | `{kind:"vocabulary",key:[Code,Code]}` | vocabulary(kind,code)；顯示該標籤 | 缺任一複合鍵、錯 vocabulary 域；PA-06 |
 | `{kind:"card_name",term_id:ID}` | annotation_concept.id；category=card_name | 必整體卡名引用；不在名字內另套同字術語；PA-03／PA-06 |
 
+「整體卡名引用」指範圍覆蓋整個概念文字；EN 特例的名稱可用片段 card_name 概念作為葉。
+reference 指概念，不要求引用文字等於 authored choice；有效官方名改字後按實際輸出重建 ranges。
+整句翻譯的 authority 仍為 unofficial，既有公開 annotation 沒有逐引用的 official 來源欄位。
+
 `glossary`／`term_id` 是保留的引用拼法，**只解析到公開 annotation_concept**；不要求消費端存建置 glossary 表。
 概念 ID 沿既有概念識別，不能由顯示中文字重配；card_ids 只從已確認的概念到卡片關係投影。
 

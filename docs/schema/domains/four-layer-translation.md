@@ -323,6 +323,11 @@ normal face、type_code=spell（含法術代幣）及精確 owner/context 成立
 
 `Target={format:1,nodes:[Node]}`，nodes 為非空有序陣列，輸出依序串接；不支援任意運算式、正規式、HTML 或執行程式。
 Literal 的內容就是文字，不再解析 `{{slot}}`；既有譯文切換時轉成節點，不保留兩種模板解析器。
+card_name label 優先使用[完整名 term 的合格官方名](card-name-concepts.md#3-名稱-owner-的預設綁定)，沒有才用當前 glossary 選詞。
+有合格官方名的 card_name term 不接受具名 variant pin，建置拒絕；default pin 使用有效 label。
+官方 label 的 low_confidence 為名字政策 OR term 概念，不合併被替代且未使用的 choice 品質；
+binding／template／form 的品質仍照實傳播，整句 authority 仍為 unofficial。
+「整個名字是葉」指引用範圍覆蓋整個概念文字；EN 特例名稱可用片段 card_name 概念作為葉。
 
 | Node 完整欄位 | 型別／引用與限制 | 驗證者；失敗／案例 |
 | --- | --- | --- |

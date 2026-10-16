@@ -45,20 +45,22 @@ owner 為 face_revision.name 或已知 printing_face.name，field=name、ordinal
 有效 context_assignment 的 source_hash 等於該 owner 原文；concept_key 與選中 term.concept_key 相同。
 矛盾使建置失敗；同字異義要有理由的 variant，不能由 card_id 配出假語義分支。
 同字同概念共用 term／variant；新 owner 加入而產生歧義時重驗所有相關用途。
-直接名字可由合格數位規則供詞，不因尚無 glossary 概念而阻擋；效果內概念引用仍依自己的資格。
+直接名字可由合格數位規則供詞，不因尚無 glossary 概念而阻擋。
+效果內的 card_name 引用仍須先有有效概念；完整名 term 與卡面共用 exact 官方名資格，
+合格時即使沒有 glossary choice 也可供詞，否則沿用 authored 選詞。
+完整名只看 term 自己的凍結來源：`translation-jp-v1` 的 `/faces/N/name` 或
+`translation-sv1-v1` 的 `/data/cards/N/card_name`，且 source_span=null。
+其餘一律視為片段，沿用 authored 選詞；不靠 slug、持有者或引用上下文推斷。
 
 printed 只用自己已知名稱；unknown／omitted 不借 current，舊印刷名保留自己的 source_hash。
-表記／效果 pending 不整卡排除已知名字。選詞改字重算相依翻譯，沿 render-v2 內容鍵；
+表記／效果 pending 不整卡排除已知名字。選詞改字重算相依翻譯，沿 render-v3 內容鍵；
 context/use/selection 是建置產物，不寫回 authored，也不逐卡重新核可。
 
-## 4. 卡文中的卡名引用與選面
+## 4. 卡文中的卡名引用
 
-`{kind:card,id}` 的 id 是永久 card_id，預設名稱面固定為 front／ordinal=0 的有效面。
-不是第一個 SQL row、數位 normal／evolved 或當次來源恰好使用的面；一般進化前後仍是不同卡。
-引用須有有效卡片身分，依該區真正來源解析名稱，不能靠名字猜 card_id 或缺 JP 就猜 EN-only。
-明指背面／其他名稱時用 card_name 的 `{kind:term,id}`，不得在 card 參數偷加 face_id；
-schema 種類改變形成新模板 ID，重驗 raw span／引用及譯文。
-缺概念、歧義、目標退役或缺必要譯詞時整個效果 context 回原文；壞外鍵／來源 hash 是建置錯誤。
+引用使用 `{kind:card_name,term_id:ID}`，只指名稱概念，不從名字猜永久 card／face 或數位卡身分。
+純 term 引用不借任何 owner 的明示覆寫或 counterpart；完整名資格依 §3，片段不自動套用官方名。
+缺概念、歧義或缺必要譯詞時整個效果 context 回原文；壞外鍵／來源 hash 是建置錯誤。
 
 ## 5. 數位官方名稱不能從共用 context 借資格
 

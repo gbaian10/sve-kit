@@ -5,7 +5,10 @@
 
 ## 1. 名稱採用與關係分開
 
-只處理 JP 面自己的 face_revision.name／已知 printing_face.name，取繁中名稱。
+卡面處理 JP 面自己的 face_revision.name／已知 printing_face.name，取繁中名稱。
+JP 四層與 EN LeafRef 的完整名 card_name term 也套用相同的凍結 exact 資格及 excluded_names；
+完整名／片段依[卡名概念契約](card-name-concepts.md#3-名稱-owner-的預設綁定)的 term 來源形狀判定。
+引用不借 owner 的 name_overrides 或 counterpart，片段仍用 authored 選詞。
 SVE 與數位完整日文名稱逐字相同，不 trim、normalize、casefold 或刪字；hash 相同仍比 exact 字串。
 完整數位目錄中同名 ID／各實際 phase 的繁中名須非 null、非空、非純空白、通過最低文字檢查，
 且恰一個 exact 譯名；不能只挑合格的一筆。JA／繁中同字但全漢字仍可用。
@@ -95,7 +98,7 @@ reason 非空。排除在目錄找不到對應的日文名稱或卡對時，建�
 不重新播放舊核可／目錄歷史，不要求先把同一 PR 的程式 merge 才能寫資料。
 來源壞掉失敗，無合格候選回其他有效詞或原文並列清單；低信心譯文依翻譯契約直接顯示待校對。
 名字、glossary 概念、圖／語音與效果資格仍各自檢查，不能以新 origin 列舉取代它們。
-直接官方名字的 render-v2 dependency_key 只含所選 game、exact JA／繁中 hash 與取名 recipe 語義；
+直接官方名字的 render-v3 dependency_key 只含所選 game、exact JA／繁中 hash 與取名 recipe 語義；
 不含後補概念、owner、整批目錄或規則檔案 hash。補概念不讓普通名字整批換 ID；
 來源文字／選詞／取名語義改變則重算。只用名字不要求發布 digital_link／圖或整份數位目錄。
 
