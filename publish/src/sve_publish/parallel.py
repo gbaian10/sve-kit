@@ -119,31 +119,15 @@ class UploadPool:
             raise
 
     def _write(self, item: UploadObject, raw: bytes) -> int | None:
-        if item.image:
-            if self.stopped.is_set():
-                return None
-            self.store.put_image(item.key, raw)
-            return 1
-        existing = self.store.get(item.key)
-        if (
-            existing is not None
-            and existing.raw == raw
-            and existing.headers == item.headers
-        ):
-            return 0
-        if existing is not None:
-            raise ExportError("Immutable JSON object differs from the export")
-        # A PUT that passed this check before a failure still finishes and is read back.
+        # Reading local bytes can outlast another worker's failure; admitted PUTs finish.
         if self.stopped.is_set():
             return None
-        if not self.store.put(
-            item.key,
-            raw,
-            item.headers,
-            expected=None,
-        ):
-            raise ExportError("Conditional PUT failed; the object changed concurrently")
+        if item.image:
+            self.store.put_image(item.key, raw)
+            return 1
+        if self.store.put(item.key, raw, item.headers, expected=None):
+            return 1
         stored = self.store.get(item.key)
         if stored is None or stored.raw != raw or stored.headers != item.headers:
-            raise ExportError("Origin read-back differs from the export")
-        return 1
+            raise ExportError("Immutable JSON object differs from the export")
+        return 0

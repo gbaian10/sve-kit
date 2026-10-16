@@ -161,7 +161,8 @@ def test_partial_failure_keeps_old_index_and_rerun_uploads_the_rest(
     upload(store, loaded)
     rerun = puts(state, before)
     assert key in rerun
-    assert not {key for key in done if key.startswith("snapshots/")} & set(rerun)
+    assert {key for key in done if key.startswith("snapshots/")} <= set(rerun)
+    assert all(state.objects[m.key].raw == m.raw for m in loaded.members)
     assert rerun[-1] == INDEX
 
 

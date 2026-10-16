@@ -83,9 +83,27 @@ changes require an explicit retransmission/migration, even when hashes match.
 
 Snapshot upload requires every referenced image's exact version and byte length
 in the inventory. Missing/older rows require images upload; newer rows require a
-text rebuild with the current image index. No bitmap directory is needed. JSON
-objects retain GET comparison, conditional create-only PUT and read-back; immutable
-collisions stop. The snapshot command rechecks the inventory, then conditionally
+text rebuild with the current image index. No bitmap directory is needed. Snapshot
+upload reads the remote current/previous manifests, verifies their hash, schema
+and index identity, and trusts their declared JSON closures as already uploaded.
+Only new raw JSON and Brotli representations are sent, with conditional create-only
+PUTs. There is no per-file GET or read-back on a normal upload. A 412 collision
+downloads that one key: identical bytes and contractual headers count as completed;
+different content stops publication. An already-current export checks image readiness
+and returns without synchronizing JSON objects.
+
+Raw and `.br` keys are compared independently; an old raw-only descriptor does
+not imply its compressed sibling exists. Reused descriptors must agree on raw
+length and any declared Brotli length. A conflicting length stops before any PUT.
+The manifest's own optional `.br` has no descriptor, so it is always a create-only
+candidate when uploading that manifest, with the same collision recovery. The
+`changes_ref` descriptor is included; `changes.from` never recurses to a third version.
+Missing or damaged retained manifests stop publication. Objects deleted outside
+the tool are not repaired by this manifest-based trust model. Reused objects are
+not compared with the JSON header contract either: future JSON header changes
+require an explicit retransmission/migration, even when hashes match.
+
+The snapshot command rechecks the inventory, then conditionally
 commits `snapshots/versions/index.json` last and reads it back. First revision is 1;
 later versions retain the old current as previous. Reused versions with another
 manifest and chronologically older exports are refused.

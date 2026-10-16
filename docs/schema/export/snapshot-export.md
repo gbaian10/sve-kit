@@ -38,7 +38,7 @@ preview CLI 的 `export`／`export-offline` 用 `--brotli` 啟用；預設 `--no
 驗證不要求重現 producer 的壓縮 bytes，亦不取代 manifest 的長度／hash／閉包檢查。
 
 上傳讀回匯出根時保留既有 manifest／changes 的 raw、br 表示，
-重驗後直接使用，不呼叫 producer 重壓，因此不需提供 producer codec。遠端不可變物件
+重驗後直接使用，不呼叫 producer 重壓，因此不需提供 producer codec。撞到遠端既有不可變物件時
 比對確切 bytes，不因兩份 `.br` 解壓內容相同就允許換編碼覆寫。
 
 ## 固定分片與裝檔

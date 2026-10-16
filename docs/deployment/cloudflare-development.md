@@ -216,7 +216,7 @@ uv --directory publish run sve-publish snapshot upload \
 
 圖片上傳讀 `_publish/images.json`，只上傳新增或變動圖，不逐件 GET／HEAD／讀回。覆寫前先條件移除清單舊列，
 所有候選成功才登錄新列；同 bytes 升版只改清單。同版本不同 bytes、版本倒退與壞清單停止，首次沒有清單整批重傳。
-快照只核對遠端圖片的精確版本／bytes，仍比對與讀回 JSON，最後條件更新版本索引。
+快照只核對遠端圖片的精確版本／bytes，JSON 只 create-only 上傳 current／previous 快照清單以外的差集，最後條件更新版本索引。
 日常發布不做全量 CDN 讀取；圖片或快取規則變更時另由維護者驗收完整帶 v URL，不把 origin PUT 當 CDN freshness 證據。
 
 `_publish/images.json` 是桶內公開卡圖的成功紀錄，以 `application/json`、`no-store` 保存。
@@ -226,7 +226,7 @@ Dev Worker 白名單不放行 `/cdn-preview/_publish/images.json`，登入後仍
 ## 8. 執行成本、回收與恢復
 
 未變卡圖不讀本機檔、不逐圖網路請求，同輸入成功重跑零 PUT。快照讀清單一次並在提交前重驗，
-JSON 的逐檔比較與讀回仍存在。`--jobs` 預設 16，I/O timeout 30 秒，進度在 stderr、摘要在 stdout。
+JSON 一般成功不逐檔 GET 或讀回，只有 create-only 碰撞才下載該檔比對。`--jobs` 預設 16，I/O timeout 30 秒，進度在 stderr、摘要在 stdout。
 失敗先停止並用同一圖片描述及未變動輸出根重跑；清單缺列時快照會拒絕，已完成候選可能重傳。
 producer 的私有 `media-state.json` 與備份必須跨次保存，不由遠端清單重建歷史高水位。
 
