@@ -33,6 +33,23 @@ export default {
     view: { grid: "Images", table: "Table", list: "List" },
   },
   settings: {
+    storage: "Storage",
+    storageTotal: "Total site usage (estimate)",
+    storageImages: "Card image payload (estimate)",
+    storageData: "Card data and index payload (estimate)",
+    storageEstimating: "Estimating…",
+    storageUnavailable: "Unable to estimate",
+    storageMiB: "{{value}} MiB",
+    storageHint:
+      "Payload estimates count data only, not disk space. The browser may remove caches when space is low.",
+    storageRefresh: "Refresh estimates",
+    storageClear: "Clear caches",
+    storageCancel: "Cancel",
+    storageConfirm: "Clear and reload",
+    storageConfirmHint:
+      "Clear this app’s card images, card data and rebuildable indexes, then download them again. Display settings and recently viewed cards are kept. The browser’s HTTP cache is not cleared.",
+    storageClearFailed: "Cache clearing failed or is incomplete. Close other tabs and try again.",
+    storageCleared: "Caches cleared. Required data will download again.",
     title: "Account and settings",
     display: "Display",
     effectLanguage: "Effect text",

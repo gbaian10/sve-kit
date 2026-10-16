@@ -33,6 +33,24 @@ export default {
     view: { grid: "画像", table: "表", list: "リスト" },
   },
   settings: {
+    storage: "ストレージ",
+    storageTotal: "サイト全体の使用量（推定）",
+    storageImages: "カード画像のデータ量（推定）",
+    storageData: "カードデータ・索引のデータ量（推定）",
+    storageEstimating: "推定中…",
+    storageUnavailable: "推定できません",
+    storageMiB: "{{value}} MiB",
+    storageHint:
+      "データ量の推定はディスク使用量とは異なります。空き容量が不足するとブラウザーがキャッシュを削除する場合があります。",
+    storageRefresh: "再推定",
+    storageClear: "キャッシュを削除",
+    storageCancel: "キャンセル",
+    storageConfirm: "削除して再読み込み",
+    storageConfirmHint:
+      "このアプリのカード画像・カードデータ・再構築できる索引のキャッシュを削除し、再ダウンロードします。表示設定と最近見たカードは保持されます。ブラウザーの HTTP キャッシュは削除しません。",
+    storageClearFailed:
+      "キャッシュの削除に失敗したか、完了していません。他のタブを閉じて再試行してください。",
+    storageCleared: "キャッシュを削除しました。必要なデータを再ダウンロードします。",
     title: "アカウントと設定",
     display: "表示",
     effectLanguage: "効果テキスト",

@@ -1,5 +1,4 @@
-const CACHE = "sve-image-responses-v2"
-const MAX_IMAGES = 128
+export const IMAGE_CACHE = "sve-image-responses-v2"
 
 export function versionedImage(url: string): boolean {
   const value = new URL(url)
@@ -18,7 +17,7 @@ export async function cachedImage(
 ): Promise<Response> {
   let cache: Cache | undefined
   try {
-    cache = await storage.open(CACHE)
+    cache = await storage.open(IMAGE_CACHE)
     const hit = await cache.match(request)
     if (hit?.type === "opaque") await cache.delete(request)
     else if (hit) return hit
@@ -30,9 +29,13 @@ export async function cachedImage(
   if (cache && response.type !== "opaque" && response.ok) {
     try {
       await cache.put(request, response.clone())
-      const keys = await cache.keys()
-      for (const key of keys.slice(0, Math.max(0, keys.length - MAX_IMAGES)))
-        await cache.delete(key)
+      const version = BigInt(new URL(request.url).searchParams.get("v") ?? "0")
+      const keys = await cache.keys(request, { ignoreSearch: true })
+      for (const key of keys) {
+        if (!versionedImage(key.url)) continue
+        const older = BigInt(new URL(key.url).searchParams.get("v") ?? "0")
+        if (older < version) await cache.delete(key)
+      }
     } catch {
       // Storage is optional; failures must not replace a valid network response with an old URL.
     }

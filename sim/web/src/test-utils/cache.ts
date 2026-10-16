@@ -21,7 +21,18 @@ export function memoryCache(failWrites = false): CacheStorage {
             : url
           return Promise.resolve(cache.get(matched ?? "")?.clone())
         },
-        keys: () => Promise.resolve([...cache.keys()].map((url) => new Request(url))),
+        keys: (key?: string | Request, options?: CacheQueryOptions) =>
+          Promise.resolve(
+            [...cache.keys()]
+              .filter(
+                (url) =>
+                  key === undefined ||
+                  (options?.ignoreSearch
+                    ? url.split("?")[0] === urlOf(key).split("?")[0]
+                    : url === urlOf(key)),
+              )
+              .map((url) => new Request(url)),
+          ),
         delete: (key: string | Request) => Promise.resolve(cache.delete(urlOf(key))),
         put: (key: string | Request, response: Response) => {
           if (failWrites) return Promise.reject(new Error("quota"))

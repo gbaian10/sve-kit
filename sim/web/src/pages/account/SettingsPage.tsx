@@ -8,10 +8,11 @@ import { THEME_PREFS } from "../../domain/theme"
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
 import { CARD_EDITIONS, prefsStore, TEXT_DISPLAYS, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
+import { StorageSettings } from "./StorageSettings"
 
 const ROW = "min-h-14 border-b border-border py-2"
 
-// Design 11 without the account card (R1 has no sign-in): the display settings only.
+// R1 has no sign-in: settings stay local to this browser.
 export function SettingsPage() {
   const { t } = useTranslation()
   const prefs = usePrefs()
@@ -114,6 +115,7 @@ export function SettingsPage() {
           />
         </SettingRow>
       </section>
+      <StorageSettings />
     </>
   )
 }

@@ -16,7 +16,7 @@ const root = document.getElementById("root")
 if (!root) throw new Error("#root is missing from index.html")
 
 async function start(container: HTMLElement): Promise<void> {
-  // A cold start asked for from the dev badge clears local data before anything caches again.
+  // Requested clearing runs before the app starts downloading into caches again.
   await runRequestedColdStart()
   registerImageCache()
   // Decided before the shell mounts, so the first load never starts on the wrong root.
