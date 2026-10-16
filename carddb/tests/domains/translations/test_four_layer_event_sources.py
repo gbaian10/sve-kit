@@ -263,6 +263,41 @@ def test_granted_history_keeps_its_own_query_scope() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("raw", "scope"),
+    [
+        (
+            "下記から１つチョイスする。【1】７枚引く。【2】このターン、自分がスペルをプレイしていたなら、９枚引く。",
+            "p2.ability_0.mode_",
+        ),
+        (
+            "{ファンファーレ}これの{進化}コストを０にする。このターン、自分がスペルをプレイしていたなら、７枚引く。",
+            "p2.ability_0.body_condition",
+        ),
+    ],
+)
+def test_scope_follows_ability_heads_and_numbered_options(raw: str, scope: str) -> None:
+    prepared = derive_preparation(
+        raw, source(raw), event_classifier(), families=FAMILIES
+    )
+    expr = next(
+        v
+        for v in prepared.derived.recognized[0].values.values()
+        if isinstance(v, PredicateExpr)
+    )
+    assert expr.scope.startswith(scope)
+
+
+def test_x_definition_does_not_borrow_a_use_from_another_option() -> None:
+    _, _, binding = prepared_case(
+        "下記から１つチョイスする。【1】それにXダメージ。【2】Xは「このターン中に自分がプレイしたカードの枚数」である。"
+    )
+    name = next(
+        n for n, v in binding.values.items() if isinstance(v, ContextExpression)
+    )
+    assert len([o for o in binding.occurrences if o.slot == name]) == 1
+
+
 @pytest.mark.parametrize("mode", ["wrong_kind", "new_generation", "missing_fact"])
 def test_event_import_rejects_wrong_or_ambiguous_evidence(mode: str) -> None:
     prepared, frame, binding = prepared_case(

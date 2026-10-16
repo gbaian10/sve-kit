@@ -30,6 +30,8 @@ from sve_carddb.domains.translations.four_layer_context import (
     Parameter,
 )
 from sve_carddb.domains.translations.four_layer_event_preparation import (
+    ABILITY_HEAD,
+    OPTION_LABEL,
     context_port,
     interface,
     occurrence,
@@ -497,8 +499,7 @@ def _read_positions(text: str, match: re.Match[str]) -> tuple[Span, ...]:
             len(re.findall(r"Xは「", text)) == 1
             and uses
             and not re.search(
-                r"\{(?:起動|ファンファーレ|進化)\}|【(?:進化時|攻撃時|[0-9]+)】",
-                text[uses[0].end() : definition],
+                ABILITY_HEAD + "|" + OPTION_LABEL, text[uses[0].end() : definition]
             )
         ):
             positions.extend(Span(start=m.start(), end=m.end()) for m in uses)

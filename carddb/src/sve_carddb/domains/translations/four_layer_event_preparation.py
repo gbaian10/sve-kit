@@ -29,6 +29,13 @@ if TYPE_CHECKING:
     )
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
+# Canonical text normalizes option numbers to N; {進化} heads only an evolve cost line.
+ABILITY_HEAD = (
+    r"\{(?:起動|ファンファーレ|ラストワード)\}|\{進化\}(?=\{コスト)"
+    r"|【(?:攻撃時|進化時|超進化時)】"
+)
+OPTION_LABEL = r"【[0-9N]+】"
+
 
 def origins(part: SourcePart, span: Span) -> tuple[Span, ...]:
     """Retain raw coordinates across normalized source units."""
@@ -83,18 +90,13 @@ def source_scope(text: str, start: int, end: int, consumer: str) -> str:
             opened = stack.pop()
             if (
                 opened < start < end <= index
-                and re.match(r"「【(?:攻撃時|進化時)】", text[opened:])
+                and re.match("「(?:" + ABILITY_HEAD + ")", text[opened:])
                 and text[index:].startswith("」を持つ")
             ):
                 return f"p2.granted_{opened}.{consumer}"
-    heads = tuple(
-        re.finditer(
-            r"\{(?:起動|進化|ファンファーレ|ラストワード)\}|【(?:攻撃時|進化時)】",
-            text[:start],
-        )
-    )
+    heads = tuple(re.finditer(ABILITY_HEAD, text[:start]))
     ability = heads[-1].start() if heads else 0
-    modes = tuple(re.finditer(r"【[0-9]+】", text[ability:start]))
+    modes = tuple(re.finditer(OPTION_LABEL, text[ability:start]))
     branch = f".mode_{modes[-1].start()}" if modes else ""
     return f"p2.ability_{ability}{branch}.{consumer}"
 
