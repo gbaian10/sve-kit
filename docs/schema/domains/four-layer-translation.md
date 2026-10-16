@@ -1000,3 +1000,32 @@ verify 以相同 families 重新 derive。callback 只在原 projection 上補 s
 `ImportSignature.event_kind` 封閉事件 kind，`subject_import` 指向同一簽章中的單體 ObjectSet。
 共用邊界驗證事件與該主體的世代，Play 與 EnterField 不能互借。
 played_from 的來源辨識及 descriptor 由其來源家族負責，不加入 A11 五個 descriptor 的域。
+
+### 11.6 合計、合計約束與固定配對
+
+`four_layer_total_sources.FAMILY` 明示啟用 A8／A10 來源準備；預設準備入口不啟用。
+`four_layer_totals.DESCRIPTORS` 封閉其簽章，不擴張舊 B11、常數域或 DSL schema。
+本家族只登錄來源結構，whole-line 語義仍 pending，不提供 selector 或 DSL runtime 求值器。
+
+| 結構 | 來源與葉 | 降低界線 |
+| --- | --- | --- |
+| 兩組張數合計 | `quantity.aggregate.source_total.v1`／`aggregate_read_value`；兩個 `quantity.aggregate.source_count.v1` operand，各自保留 owner、zone、name／trait／kind／token；來源連接詞及有限偏移在 descriptor 分型 | BP06-035／036 的重疊計數保留 `overlapping_total`；不以 union／分別計數相加決定 frame 身分 |
+| 原費用／攻擊力合計 | `quantity.aggregate.property_sum.v1`／`property_sum_value`；descriptor 保存 property、區域或選取來源及有限 noun 簽章，原費用篩選數字與合計門檻分開 | 區分牌堆搜尋、墓場選取、已看牌集合、戰場及支付材料；來源限定文字保留，不藉此完成同名／不同名 runtime |
+| 合計比較 | `predicate.aggregate.selection_bound.v1`、`payment_bound.v1`、`condition_bound.v1`；各自對應 `aggregate_*_constraint`，接 property Sum 與 `aggregate_threshold:Nat`；ge／le／eq 分型 | 選取合法性、支付合法性、效果條件是不同位置；原選取張數仍沿 constant QuantitySpec，不改為任意公式 |
+| 互斥固定配對 | `quantity.group.disjoint_pair.v1`／`pair_count`；左右各有 owner、zone 及 name 或 trait＋kind 簽章 | 僅 CP03-022、BP19-040；兩組 Count 取 Min，每張最多使用一次，空組為零；不接受任意名稱、重疊集合、多組或最佳配對 |
+
+共用 owner／zone 或 noun 在原文只印一次時，兩 operand 指向同一來源葉，
+不因相等值誤合併不同位置。合計中的 Count 是來源 selector 的結構節點，
+沒有額外印刷數字；其 occurrence 為 omitted、`resolution_rule=aggregate.selector.count.v1`，
+但 required 仍為 true。主 target 必須經合計 expression 閉包呈現所有 operand，
+不能用 optional 或 Literal 隱藏缺引用。新葉與既有葉共享原始 provenance，
+expression 依賴經 transform 一起重映射，binding 與 `LeafSlot.expression` 必須一致。
+
+`aggregate.pair.named.v1` 固定兩個已核卡名概念；`aggregate.pair.kind.v1` 固定 mage 特性、
+follower／spell 兩個互斥種類。兩者都限制自己的墓場，不能以總張數除二。
+`disjoint_pair_count` 僅供有限契約驗證，拒絕同組重複及兩組交集，不負責解析或求值 DSL selector。
+
+`four_layer_totals.lowering` 另列來源 descriptor、operand 槽、具體 unresolved 原因及配對規則，
+`executable` 固定為 false。執行證據與去重策略不放進來源 frame；
+之後補證據不能反過來改動來源連接詞或常數含義。
+BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍不在接受域。
