@@ -51,7 +51,8 @@ EP、SEP 與稀有度縮寫不投影詞表。
 
 投影讀取 `glossary_translation` 已解析的文字，包含 authored 與 source choice；保留 choice 的 origin，
 低信心合併概念與 choice。官方選詞沿用 digital_official 權威，不升為 SVE 官方翻譯。
-凍結來源與 authored 來源紀錄保留在建置 DB 的 glossary 與 source_record，投影 ID 同時納入選詞來源識別；
+凍結來源與 authored 來源紀錄保留在建置 DB 的 glossary 與 source_record。投影 ID 由詞彙主體與選詞的概念、文字、品質、凍結來源推導，
+不含帶建置 revision 的 authored 來源紀錄，選詞未變時重建 ID 不變；
 公開快照沿用既有 vocabulary label 指標，不公開私人來源定位。重建時選詞改字即更新標籤譯文。
 
 ## 5. preview 與前端驗收

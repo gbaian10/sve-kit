@@ -534,9 +534,9 @@ def _counterpart_pointer(
 def _vocabulary_labels(
     source: Source, view: dict[str, list[Record]], texts: Texts
 ) -> None:
+    # Authored provenance embeds the build revision; an unchanged choice keeps its ID.
     choices = source.rows(
-        "glossary_translation",
-        "term_id,lang,text,source_id,authored_source_id,record_key,origin,low_confidence",
+        "glossary_translation", "term_id,lang,text,source_id,origin,low_confidence"
     )
     if not choices:
         return

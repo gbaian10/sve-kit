@@ -140,13 +140,17 @@ def test_resolved_authored_and_source_choices_keep_quality_and_update(
         "digital_official",
         True,
     )
-    source_choice = next(
-        r.values
-        for r in vocabulary_db.rows("glossary_translation")
-        if r.values["term_id"] == "term:trait.killer"
+    with vocabulary_db.transaction():
+        record = next(r.values for r in vocabulary_db.rows("source_record"))
+        vocabulary_db.insert("source_record", {**record, "id": "next_revision"})
+        vocabulary_db.update(
+            "glossary_translation",
+            {"term_id": "term:trait.elf", "lang": "zh-Hant"},
+            {"authored_source_id": "next_revision"},
+        )
+    assert (
+        projected(vocabulary_db).tables["translation"] == before.tables["translation"]
     )
-    assert source_choice["source_id"] == "source"
-    assert source_choice["authored_source_id"] == "source"
     with vocabulary_db.transaction():
         vocabulary_db.update(
             "glossary_translation",
