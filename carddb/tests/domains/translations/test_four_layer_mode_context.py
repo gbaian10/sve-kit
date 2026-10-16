@@ -1,0 +1,286 @@
+"""Mode preparation proves source reachability without implementing runtime history."""
+
+from dataclasses import replace
+from typing import TYPE_CHECKING, Literal
+
+import pytest
+
+from sve_carddb.contracts.four_layer import (
+    ChoiceContext,
+    Constant,
+    LeafRef,
+    LiteralNode,
+    PendingCondition,
+    PredicateExpr,
+    ResolvedCondition,
+    Target,
+)
+from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_context import verify_mode_count
+from sve_carddb.domains.translations.four_layer_expressions import (
+    ExpressionTargets,
+    PreparationRenderer,
+    verify_quantities,
+)
+from sve_carddb.domains.translations.four_layer_mode_context import FAMILY, mode_sources
+from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
+from sve_carddb.domains.translations.four_layer_render import (
+    BoundTarget,
+    Label,
+    Renderer,
+    SelectedTarget,
+)
+
+from .context_fixtures import contract_case
+from .test_four_layer_classification import source
+from .test_four_layer_n1 import n1_classifier
+
+if TYPE_CHECKING:
+    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
+
+_INTRO = "下記から1つチョイスする。"
+_CONDITION = "自分の墓場が8枚以上なら、代わりに2つまで。"
+_OPTIONS = "【1】仮甲。【2】仮乙。"
+
+
+def prepare(raw: str) -> PreparedField:
+    engine = n1_classifier()
+    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    for index, found in enumerate(prepared.derived.recognized):
+        assert not found.issues
+        prepared.verify(raw, engine, *prepared.bind(index))
+    return prepared
+
+
+def test_cross_line_choice_keeps_constants_and_exact_source_edges() -> None:
+    raw = _INTRO + _CONDITION + "\n" + _OPTIONS
+    prepared = prepare(raw)
+    (group,) = mode_sources(raw, prepared)
+    assert group.members == (0, 2)
+    (intro,) = prepared.mode_rules[0]
+    (options,) = prepared.mode_rules[2]
+    assert intro.base.mode == "exact"
+    assert isinstance(intro.base.expr, Constant)
+    assert intro.base.expr.value == 1
+    assert intro.alternative.mode == "up_to"
+    assert isinstance(intro.alternative.expr, Constant)
+    assert intro.alternative.expr.value == 2
+    assert isinstance(intro.condition, ResolvedCondition)
+    assert isinstance(options.condition, PendingCondition)
+    assert options.condition.source_span == group.condition
+    assert prepared.interfaces[0] == prepared.interfaces[2]
+    ordinary = derive_preparation(raw, source(raw), n1_classifier())
+    assert ordinary.mode_rules == ()
+    assert ordinary.derived != prepared.derived
+
+
+@pytest.mark.parametrize(
+    "condition",
+    [
+        "自分の場に仮の存在がいるなら、",
+        "これが墓場から場に出ていたなら、",
+        "このターン、自分の場のフォロワーが進化していたなら、",
+        "自分のエボルヴデッキの表向きの『仮場手札自分』が8枚以上なら、",
+    ],
+)
+def test_pending_conditions_retain_source_and_provider_distinction(
+    condition: str,
+) -> None:
+    raw = _INTRO + condition + "代わりに2つまで。\n" + _OPTIONS
+    prepared = prepare(raw)
+    (rule,) = prepared.mode_rules[0]
+    assert isinstance(rule.condition, PendingCondition)
+    assert (
+        raw[rule.condition.source_span.start : rule.condition.source_span.end]
+        == condition
+    )
+    assert rule.condition.reason == (
+        "unsealed_source" if "仮の存在" in condition else "missing_provider"
+    )
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        _OPTIONS,
+        _INTRO + _CONDITION + "\n【2】仮甲。【1】仮乙。",
+        _INTRO + _INTRO + _CONDITION + "\n" + _OPTIONS,
+        _INTRO + _CONDITION + "\n\n" + _OPTIONS,
+        _INTRO + _CONDITION + "\n{起動}" + _OPTIONS,
+        _INTRO + _CONDITION + "\n【1】仮甲。{ファンファーレ}【2】仮乙。",
+        "「" + _INTRO + _CONDITION + "\n" + _OPTIONS + "」を持つ。",
+        _INTRO + "代わりに好きな数まで。\n" + _OPTIONS,
+    ],
+)
+def test_neighboring_choice_shapes_are_not_admitted(raw: str) -> None:
+    prepared = derive_preparation(raw, source(raw), n1_classifier(), families=(FAMILY,))
+    assert mode_sources(raw, prepared) == ()
+    assert not any(prepared.mode_rules)
+
+
+def test_optional_payment_is_linked_only_to_the_adjacent_unique_producer() -> None:
+    raw = (
+        "これをプレイする際、コストを+7してよい。\n"
+        + _INTRO
+        + "コストを+7したなら、代わりに2つまで。\n"
+        + _OPTIONS
+    )
+    prepared = prepare(raw)
+    (group,) = mode_sources(raw, prepared)
+    assert group.cost is not None
+    assert group.members == (0, 2, 4)
+    interface = prepared.interfaces[2]
+    assert interface is not None
+    payment = next(p for p in interface.imports if p.name == "mode_payment")
+    assert payment.evidence is not None
+    assert payment.evidence.source.line_ordinal == 0
+    assert prepared.interfaces[0] is not None
+    assert payment in prepared.interfaces[0].exports
+    assert isinstance(prepared.mode_rules[2][0].condition, ResolvedCondition)
+    missing_raw = raw.replace("+7してよい", "+6してよい")
+    missing = derive_preparation(
+        missing_raw, source(missing_raw), n1_classifier(), families=(FAMILY,)
+    )
+    assert (
+        mode_sources(raw.replace("+7してよい", "+6してよい"), missing)[0].cost is None
+    )
+    assert isinstance(missing.mode_rules[2][0].condition, PendingCondition)
+
+
+def test_mode_history_carries_ability_instance_mode_and_turn_without_name_sharing() -> (
+    None
+):
+    raw = (
+        _INTRO
+        + "このターン、この能力でチョイスした選択肢はチョイスできない。"
+        + _OPTIONS
+    )
+    prepared = prepare(raw)
+    frame, binding = prepared.bind(0)
+    predicate = next(v for v in binding.values.values() if isinstance(v, PredicateExpr))
+    assert predicate.expression_id == "mode.unused_this_turn.v1"
+    port = next(p for p in frame.projection.imports if p.name == "mode_choice")
+    assert port.evidence is not None
+    context = port.evidence.value
+    assert isinstance(context, ChoiceContext)
+    assert context.modes == ("mode_1", "mode_2")
+    assert context != context.model_copy(
+        update={"ability_instance": "another-instance"}
+    )
+    assert context != context.model_copy(update={"turn": "another-turn"})
+    changed = port.model_copy(
+        update={
+            "evidence": port.evidence.model_copy(
+                update={
+                    "value": context.model_copy(
+                        update={"ability_instance": "regranted-instance"}
+                    )
+                }
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="construction"):
+        prepared.verify(
+            raw,
+            n1_classifier(),
+            frame.model_copy(
+                update={
+                    "projection": frame.projection.model_copy(
+                        update={"imports": (changed,)}
+                    )
+                }
+            ),
+            binding,
+        )
+
+
+@pytest.mark.parametrize("family", ["A1", "A2", "A11"])
+def test_mode_rule_accepts_the_sealed_typed_provider_contract(
+    family: Literal["A1", "A2", "A11"],
+) -> None:
+    prepared = prepare(_INTRO + _CONDITION + "\n" + _OPTIONS)
+    case = contract_case(family)
+    rule = prepared.mode_rules[0][0].model_copy(
+        update={
+            "condition": case.mode_rule.condition,
+            "choice_context": case.mode_rule.choice_context,
+            "scope": case.mode_rule.scope,
+        }
+    )
+    frame = case.item.frame.model_copy(update={"mode_rules": (rule,)})
+    verify_quantities(frame, case.item.binding, scopes={})
+    verify_mode_count(rule, frame, case.item.binding)
+    with pytest.raises(ValueError, match="scope"):
+        verify_mode_count(
+            rule.model_copy(update={"scope": "foreign_ability"}),
+            frame,
+            case.item.binding,
+        )
+
+
+def test_finite_condition_renders_its_required_operands_with_annotations() -> None:
+    prepared = prepare(_INTRO + _CONDITION + "\n" + _OPTIONS)
+    frame, binding = prepared.bind(0)
+    labels = {}
+    refs = Renderer({}, {}, {}).code_references
+    for ref, text in [
+        (refs["Player", "self"], "自己"),
+        (refs["ZoneSet", "graveyard"], "墓場"),
+    ]:
+        label = Label(ref, "zh-Hant", text, "project", False, True)
+        labels[canonical(ref.model_dump(mode="json")), "zh-Hant"] = label
+    renderer = Renderer(
+        labels, {}, {}, domains={**n1_classifier().domains, **prepared.registry.domains}
+    )
+    targets = ExpressionTargets(
+        {
+            ("choice.condition.zone.at_least.v1", "zh-Hant"): SelectedTarget(
+                Target(
+                    format=1,
+                    nodes=(
+                        LeafRef(kind="LeafRef", slot="owner"),
+                        LeafRef(kind="LeafRef", slot="zone"),
+                        LeafRef(kind="LeafRef", slot="threshold"),
+                        LiteralNode(kind="Literal", text="以上"),
+                    ),
+                )
+            )
+        },
+        registry=prepared.registry,
+    )
+    condition = next(s for s in frame.leaf_schema.slots if s.type == "PredicateExpr")
+    expression = binding.values[condition.name]
+    assert isinstance(expression, PredicateExpr)
+    operands = set(expression.leaves)
+    target = Target(
+        format=1,
+        nodes=tuple(
+            LeafRef(kind="LeafRef", slot=s.name)
+            for s in frame.leaf_schema.slots
+            if s.name not in operands
+        ),
+    )
+    item = BoundTarget(frame, binding, SelectedTarget(target))
+    prepared.verify(
+        _INTRO + _CONDITION + "\n" + _OPTIONS,
+        n1_classifier(),
+        frame,
+        binding,
+        target=target,
+    )
+    result = PreparationRenderer(renderer, targets).render(
+        "synthetic", "zh-Hant", (item,)
+    )
+    assert result.rendered is not None
+    assert "自己墓場至少8以上" in result.rendered.text
+    assert len(result.rendered.annotation.occurrences) == 2
+    missing = replace(
+        item,
+        selected=SelectedTarget(
+            Target(format=1, nodes=(LiteralNode(kind="Literal", text="仮"),))
+        ),
+    )
+    with pytest.raises(ValueError, match="required"):
+        PreparationRenderer(renderer, targets).render(
+            "synthetic", "zh-Hant", (missing,)
+        )
