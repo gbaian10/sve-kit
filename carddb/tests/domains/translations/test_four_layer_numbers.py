@@ -1,12 +1,40 @@
 """Complete numeric constructions prove roles without borrowing neighboring syntax."""
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec
-from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_classification import Classifier, Term
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 
-from .test_four_layer_classification import classifier, source
+from .test_four_layer_classification import classifier, source, type_vocabulary
+
+if TYPE_CHECKING:
+    from sve_carddb.contracts.four_layer import Frame, LeafSlot
+    from sve_carddb.contracts.source_binding import LeafOccurrence, SourceBinding
+
+
+def numeric_slots(frame: Frame) -> tuple[LeafSlot, ...]:
+    return tuple(
+        s
+        for s in frame.leaf_schema.slots
+        if s.type in {"Nat", "Ordinal", "QuantitySpec"}
+    )
+
+
+def numeric_occurrences(
+    frame: Frame, binding: SourceBinding
+) -> tuple[LeafOccurrence, ...]:
+    names = {s.name for s in numeric_slots(frame)}
+    return tuple(o for o in binding.occurrences if o.slot in names)
+
+
+def numeric_classifier(
+    terms: tuple[Term, ...] = (), extra: tuple[str, ...] = ()
+) -> Classifier:
+    return classifier(terms, extra, vocabulary=type_vocabulary())
 
 
 @pytest.mark.parametrize(
@@ -21,14 +49,13 @@ from .test_four_layer_classification import classifier, source
 def test_explicit_reveal_and_conjunction_contexts_prove_the_counted_set(
     raw: str,
 ) -> None:
-    engine = classifier(extra=("player_person_quantity",))
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(extra=("player_person_quantity",))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
     assert any(s.type == "QuantitySpec" for s in frame.leaf_schema.slots)
 
@@ -44,24 +71,23 @@ def test_explicit_reveal_and_conjunction_contexts_prove_the_counted_set(
     ],
 )
 def test_reveal_or_conjunction_cannot_inherit_an_unknown_set(raw: str) -> None:
-    engine = classifier(extra=("player_person_quantity",))
+    engine = numeric_classifier(extra=("player_person_quantity",))
     field = normalize_source(raw, source(raw))
     assert engine.recognize(raw, field.source, field.parts[0]).issues
 
 
 def test_explicit_counter_carrier_union_keeps_count_and_threshold_separate() -> None:
     raw = "仮。これか自分のEXエリアのカード２枚の情熱カウンターが３個以上なら、仮。"
-    engine = classifier(extra=("named_counter_threshold",))
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(extra=("named_counter_threshold",))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert [s.role for s in frame.leaf_schema.slots] == ["count", "threshold"]
-    assert [o.source_unit for o in binding.occurrences] == ["枚", "個"]
+    assert [s.role for s in numeric_slots(frame)] == ["count", "threshold"]
+    assert [o.source_unit for o in numeric_occurrences(frame, binding)] == ["枚", "個"]
 
 
 def test_named_union_inherits_only_the_complete_deck_look_source() -> None:
@@ -69,17 +95,18 @@ def test_named_union_inherits_only_the_complete_deck_look_source() -> None:
         "仮。自分のデッキの上X枚を見る。その中から、"
         "「これと同名を除く仮族・カード」と『仮名』それぞれ２枚まで公開して手札に加えてよい。"
     )
-    engine = classifier((Term("term:name.synthetic_union", "card_name", "仮名"),))
-    field = normalize_source(raw, source(raw))
-    part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
-    assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
+    engine = numeric_classifier(
+        (Term("term:name.synthetic_union", "card_name", "仮名"),)
     )
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
+    part = field.parts[0]
+    found = derived.recognized[part.ordinal]
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[-1].role == "selection_count"
-    assert binding.occurrences[-1].source_unit == "枚"
+    assert numeric_slots(frame)[-1].role == "selection_count"
+    assert numeric_occurrences(frame, binding)[-1].source_unit == "枚"
     bad = raw.replace("見る。", "不明する。")
     bad_field = normalize_source(bad, source(bad))
     assert engine.recognize(bad, bad_field.source, bad_field.parts[0]).issues
@@ -87,17 +114,16 @@ def test_named_union_inherits_only_the_complete_deck_look_source() -> None:
 
 def test_sum_constraint_keeps_the_explicit_amulet_trait_and_source_zone() -> None:
     raw = "仮。自分のデッキから土の印・アミュレットを元のコストの合計がX以下になるように２枚まで探し、EXエリアに置く。"
-    engine = classifier()
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[0].role == "selection_count"
-    assert binding.occurrences[0].source_unit == "枚"
+    assert numeric_slots(frame)[0].role == "selection_count"
+    assert numeric_occurrences(frame, binding)[0].source_unit == "枚"
 
 
 @pytest.mark.parametrize(
@@ -132,16 +158,15 @@ def test_sum_constraint_keeps_the_explicit_amulet_trait_and_source_zone() -> Non
 def test_complete_actions_and_event_predicates_prove_the_numeric_role(
     raw: str, role: str
 ) -> None:
-    engine = classifier(extra=("suffix_unit_items",))
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(extra=("suffix_unit_items",))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[0].role == role
+    assert numeric_slots(frame)[0].role == role
 
 
 @pytest.mark.parametrize(
@@ -154,7 +179,7 @@ def test_complete_actions_and_event_predicates_prove_the_numeric_role(
     ],
 )
 def test_incomplete_event_or_execution_cannot_supply_a_numeric_role(raw: str) -> None:
-    engine = classifier(extra=("suffix_unit_items",))
+    engine = numeric_classifier(extra=("suffix_unit_items",))
     field = normalize_source(raw, source(raw))
     assert engine.recognize(raw, field.source, field.parts[0]).issues
 
@@ -168,14 +193,13 @@ def test_named_creation_count_does_not_infer_card_kind(action: str) -> None:
     raw = f"仮。『仮名』{action}をEXエリアに置く。"
     if action.endswith("ずつ"):
         raw = raw.replace("ずつを", "ずつ")
-    engine = classifier(terms)
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(terms)
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
     assert all(s.type != "CardKind" for s in frame.leaf_schema.slots)
     assert all(s.role == "count" for s in frame.leaf_schema.slots if s.type == "Nat")
@@ -184,20 +208,19 @@ def test_named_creation_count_does_not_infer_card_kind(action: str) -> None:
 @pytest.mark.parametrize("unit", ["枚", "体"])
 def test_complete_ex_token_deployment_has_its_own_unit_rule(unit: str) -> None:
     raw = f"仮。自分のEXエリアの仮族・トークン・フォロワー２{unit}まで場に出す。"
-    engine = classifier()
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[0].role == "selection_count"
+    assert numeric_slots(frame)[0].role == "selection_count"
     assert binding.values["leaf_0"] == QuantitySpec(
         mode="up_to", expr=Constant(kind="constant", value=2)
     )
-    assert binding.occurrences[0].source_unit == unit
+    assert numeric_occurrences(frame, binding)[0].source_unit == unit
 
 
 @pytest.mark.parametrize(
@@ -209,7 +232,7 @@ def test_complete_ex_token_deployment_has_its_own_unit_rule(unit: str) -> None:
     ],
 )
 def test_other_actions_cannot_borrow_the_ex_deployment_unit(raw: str) -> None:
-    engine = classifier()
+    engine = numeric_classifier()
     field = normalize_source(raw, source(raw))
     found = engine.recognize(raw, field.source, field.parts[0])
     assert found.issues
@@ -224,16 +247,15 @@ def test_other_actions_cannot_borrow_the_ex_deployment_unit(raw: str) -> None:
     ],
 )
 def test_explicit_counted_np_connectors_preserve_source_evidence(raw: str) -> None:
-    engine = classifier()
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[0].role == "selection_count"
+    assert numeric_slots(frame)[0].role == "selection_count"
 
 
 @pytest.mark.parametrize("malformed", [False, True])
@@ -244,19 +266,20 @@ def test_counter_carrier_count_is_distinct_from_the_removed_counter_amount(
     raw = "仮。場の『仮器』２つのギガカウンター３個を取る:仮。"
     if malformed:
         raw = raw.replace("ギガ", "未知")
-    engine = classifier((term,), extra=("suffix_unit_items", "named_counter_remove"))
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(
+        (term,), extra=("suffix_unit_items", "named_counter_remove")
+    )
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     if malformed:
         assert found.issues
         with pytest.raises(ValueError, match="Unresolved source leaves"):
-            found.bind(field.source, part, normalizer_version="four-layer-jp-v1")
+            found.bind(field.source, part)
         return
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
     assert [s.role for s in frame.leaf_schema.slots if s.type == "Nat"] == [
         "count",
@@ -275,17 +298,16 @@ def test_counter_carrier_count_is_distinct_from_the_removed_counter_amount(
 )
 def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> None:
     raw = f"仮。{np}２{unit}か３{unit}なら、仮。"
-    engine = classifier()
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert [s.role for s in frame.leaf_schema.slots] == ["existence_count"] * 2
-    assert [o.source_unit for o in binding.occurrences] == [unit] * 2
+    assert [s.role for s in numeric_slots(frame)] == ["existence_count"] * 2
+    assert [o.source_unit for o in numeric_occurrences(frame, binding)] == [unit] * 2
 
 
 @pytest.mark.parametrize(
@@ -323,12 +345,12 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
     ],
 )
 def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> None:
-    engine = classifier()
+    engine = numeric_classifier()
     field = normalize_source(raw, source(raw))
     found = engine.recognize(raw, field.source, field.parts[0])
     assert found.issues
     with pytest.raises(ValueError, match="Unresolved source leaves"):
-        found.bind(field.source, field.parts[0], normalizer_version="four-layer-jp-v1")
+        found.bind(field.source, field.parts[0])
 
 
 @pytest.mark.parametrize(
@@ -439,7 +461,7 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
 def test_explicit_set_constraints_designations_and_ordinals(
     raw: str, role: str, unit: str
 ) -> None:
-    engine = classifier(
+    engine = numeric_classifier(
         extra=(
             "suffix_unit_items",
             "player_person_quantity",
@@ -448,16 +470,15 @@ def test_explicit_set_constraints_designations_and_ordinals(
             "named_counter_place",
         )
     )
-    field = normalize_source(raw, source(raw))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[-1].role == role
-    assert binding.occurrences[-1].source_unit == unit
+    assert numeric_slots(frame)[-1].role == role
+    assert numeric_occurrences(frame, binding)[-1].source_unit == unit
 
 
 @pytest.mark.parametrize(
@@ -496,16 +517,15 @@ def test_explicit_set_constraints_designations_and_ordinals(
     ],
 )
 def test_complete_event_counts_keep_the_written_set(raw: str, role: str) -> None:
-    engine = classifier()
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[-1].role == role
+    assert numeric_slots(frame)[-1].role == role
 
 
 @pytest.mark.parametrize("count", ["０", "２"])
@@ -514,20 +534,19 @@ def test_positioning_group_reminder_requires_a_positive_complete_divisor(
 ) -> None:
     reminder = f"（{count}体ずつ上か下か決める）"
     raw = "仮。" + reminder
-    engine = classifier()
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = next(p for p in field.parts if p.source_span.role == "reminder")
-    found = engine.recognize(raw, field.source, part, field=field)
+    found = derived.recognized[part.ordinal]
     if count == "０":
         assert found.issues
         return
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[0].role == "group_divisor"
-    assert binding.occurrences[0].source_unit == "体"
+    assert numeric_slots(frame)[0].role == "group_divisor"
+    assert numeric_occurrences(frame, binding)[0].source_unit == "体"
 
 
 @pytest.mark.parametrize(
@@ -542,14 +561,14 @@ def test_positioning_group_reminder_requires_a_positive_complete_divisor(
     ],
 )
 def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
-    engine = classifier(
+    engine = numeric_classifier(
         extra=("suffix_unit_items", "suffix_ordinal_times", "suffix_ordinal_turns")
     )
     field = normalize_source(raw, source(raw))
     found = engine.recognize(raw, field.source, field.parts[0])
     assert "n0_numeric_construction_unresolved" in found.issues
     with pytest.raises(ValueError, match="Unresolved source leaves"):
-        found.bind(field.source, field.parts[0], normalizer_version="four-layer-jp-v1")
+        found.bind(field.source, field.parts[0])
 
 
 @pytest.mark.parametrize(
@@ -557,7 +576,11 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
     [
         ("自分の手札のカード２枚を墓場に置く。", ["count"], ["枚"]),
         ("自分の手札のカード２枚を場に出してよい。", ["count"], ["枚"]),
-        ("自分のデッキからフォロワー２枚を探し、場に出す。", ["count"], ["枚"]),
+        (
+            "自分のデッキからフォロワー２枚を探し、場に出す。",
+            ["selection_count"],
+            ["枚"],
+        ),
         ("自分の手札のカード２枚を公開する。", ["count"], ["枚"]),
         ("仮。自分が手札２枚を捨てたとき、仮。", ["count"], ["枚"]),
         ("仮。手札２枚まで捨てる:仮。", ["selection_count"], ["枚"]),
@@ -652,23 +675,23 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
 def test_complete_movement_frequency_and_resource_recovery(
     raw: str, roles: list[str], units: list[str]
 ) -> None:
-    engine = classifier(extra=("suffix_recovery_amount", "player_person_quantity"))
-    field = normalize_source(raw, source(raw))
-    part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
-    assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
+    engine = numeric_classifier(
+        extra=("suffix_recovery_amount", "player_person_quantity")
     )
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
+    part = field.parts[0]
+    found = derived.recognized[part.ordinal]
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
     field.verify(
         raw,
         (frame,),
         (binding,),
         engine.domains,
-        normalizer_version="four-layer-jp-v1",
     )
-    assert [s.role for s in frame.leaf_schema.slots] == roles
-    assert [o.source_unit for o in binding.occurrences] == units
+    assert [s.role for s in numeric_slots(frame)] == roles
+    assert [o.source_unit for o in numeric_occurrences(frame, binding)] == units
 
 
 @pytest.mark.parametrize("family", ["食事", "憑依"])
@@ -682,25 +705,29 @@ def test_entry_reminder_numbers_require_the_entire_shared_limit_grammar(
     if malformed:
         reminder = reminder.replace("できる", "でき仮")
     raw = "仮。" + reminder
-    engine = classifier(extra=("suffix_unit_items",))
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(extra=("suffix_unit_items",))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = next(p for p in field.parts if p.source_span.role == "reminder")
-    found = engine.recognize(raw, field.source, part, field=field)
+    found = derived.recognized[part.ordinal]
     if malformed:
         assert "n0_numeric_construction_unresolved" in found.issues
         return
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert [s.role for s in frame.leaf_schema.slots] == [
+    assert [s.role for s in numeric_slots(frame)] == [
         "duration_count",
         "repeat_count",
         "group_divisor",
         "resource_amount",
     ]
-    assert [o.source_unit for o in binding.occurrences] == ["ターン", "回", "回", "つ"]
+    assert [o.source_unit for o in numeric_occurrences(frame, binding)] == [
+        "ターン",
+        "回",
+        "回",
+        "つ",
+    ]
     assert frame.semantic_variant.state == "pending"
 
 
@@ -725,21 +752,20 @@ def test_entry_reminder_numbers_require_the_entire_shared_limit_grammar(
 def test_compound_selections_prove_each_source_counted_set(
     raw: str, units: list[str | None]
 ) -> None:
-    engine = classifier(extra=("leader_person_quantity",))
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(extra=("leader_person_quantity",))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert [o.source_unit for o in binding.occurrences] == units
+    assert [o.source_unit for o in numeric_occurrences(frame, binding)] == units
 
 
 def test_compound_selection_cannot_hide_an_unknown_second_np() -> None:
     raw = "仮。相手のリーダー２人か不明なフォロワー３体を選ぶ。"
-    engine = classifier(extra=("leader_person_quantity",))
+    engine = numeric_classifier(extra=("leader_person_quantity",))
     field = normalize_source(raw, source(raw))
     assert engine.recognize(raw, field.source, field.parts[0]).issues
 
@@ -772,27 +798,25 @@ def test_malformed_movement_and_incomplete_frequency_cannot_bind(raw: str) -> No
     found = classifier().recognize(raw, field.source, field.parts[0])
     assert "n0_numeric_construction_unresolved" in found.issues
     with pytest.raises(ValueError, match="Unresolved source leaves"):
-        found.bind(field.source, field.parts[0], normalizer_version="four-layer-jp-v1")
+        found.bind(field.source, field.parts[0])
 
 
 def test_repeat_up_to_retains_mode_without_turning_recovery_into_repetition() -> None:
     raw = "これを２回まで行う。"
-    field = normalize_source(raw, source(raw))
-    engine = classifier()
-    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
-        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
-    )
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
+    frame, binding = derived.recognized[0].bind(field.source, field.parts[0])
     field.verify(
         raw,
         (frame,),
         (binding,),
         engine.domains,
-        normalizer_version="four-layer-jp-v1",
     )
     assert binding.values == {
         "leaf_0": QuantitySpec(mode="up_to", expr=Constant(kind="constant", value=2))
     }
-    assert frame.leaf_schema.slots[0].role == "repeat_count"
+    assert numeric_slots(frame)[0].role == "repeat_count"
 
 
 @pytest.mark.parametrize(
@@ -814,17 +838,16 @@ def test_repeat_up_to_retains_mode_without_turning_recovery_into_repetition() ->
 def test_resource_items_and_closed_counter_constructions(
     raw: str, roles: list[str], units: list[str]
 ) -> None:
-    engine = classifier(extra=("suffix_unit_items",))
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier(extra=("suffix_unit_items",))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert [s.role for s in frame.leaf_schema.slots] == roles
-    assert [o.source_unit for o in binding.occurrences] == units
+    assert [s.role for s in numeric_slots(frame)] == roles
+    assert [o.source_unit for o in numeric_occurrences(frame, binding)] == units
 
 
 @pytest.mark.parametrize(
@@ -839,24 +862,25 @@ def test_resource_items_and_closed_counter_constructions(
     ],
 )
 def test_unknown_counter_and_incomplete_resource_or_event_cannot_bind(raw: str) -> None:
-    engine = classifier(extra=("suffix_unit_items",))
+    engine = numeric_classifier(extra=("suffix_unit_items",))
     field = normalize_source(raw, source(raw))
     found = engine.recognize(raw, field.source, field.parts[0])
     assert "n0_numeric_construction_unresolved" in found.issues
     with pytest.raises(ValueError, match="Unresolved source leaves"):
-        found.bind(field.source, field.parts[0], normalizer_version="four-layer-jp-v1")
+        found.bind(field.source, field.parts[0])
 
 
 def test_created_name_count_preserves_its_unit_without_inferring_a_card_kind() -> None:
     raw = "仮。『仮生成物』２体を出す。"
-    engine = classifier((Term("term:created.synthetic", "card_name", "仮生成物"),))
-    field = normalize_source(raw, source(raw))
-    part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
-    assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
+    engine = numeric_classifier(
+        (Term("term:created.synthetic", "card_name", "仮生成物"),)
     )
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
+    part = field.parts[0]
+    found = derived.recognized[part.ordinal]
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
     assert frame.leaf_schema.slots[1].role == "count"
     assert binding.occurrences[1].source_unit == "体"
@@ -865,14 +889,13 @@ def test_created_name_count_preserves_its_unit_without_inferring_a_card_kind() -
 
 def test_full_existence_permission_does_not_lose_its_comparator_mode() -> None:
     raw = "仮。自分の墓場のフォロワー２枚以上なら使える。"
-    engine = classifier()
-    field = normalize_source(raw, source(raw))
+    engine = numeric_classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
     assert binding.values["leaf_0"] == QuantitySpec(
         mode="at_least", expr=Constant(kind="constant", value=2)
@@ -903,7 +926,7 @@ def test_choice_indices_need_one_complete_ordered_ability_scope(
     raw: str, *, valid: bool
 ) -> None:
     field = normalize_source(raw, source(raw))
-    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    engine = numeric_classifier(extra=("bracket_choice_index", "suffix_unit_items"))
     found = tuple(engine.recognize(raw, field.source, p) for p in field.parts)
     ordinals = tuple(
         (s, f.values[s.name])
@@ -926,16 +949,15 @@ def test_choice_replacement_uses_the_original_options_and_preserves_up_to(
     raw = (
         f"下記から１つチョイスする。仮なら、代わりに{count}つまで。【１】仮。【２】別。"
     )
-    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
-    field = normalize_source(raw, source(raw))
-    found = engine.recognize(raw, field.source, field.parts[0])
+    engine = numeric_classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
+    found = derived.recognized[0]
     if count == "３":
         assert found.issues
         return
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, field.parts[0])
     engine.verify(raw, field, field.parts[0], frame, binding)
     assert binding.values["leaf_1"] == QuantitySpec(
         mode="up_to", expr=Constant(kind="constant", value=int(count))
@@ -947,7 +969,7 @@ def test_distinct_explicit_abilities_have_independent_choice_scopes() -> None:
         "{ファンファーレ}下記から１つチョイスする。【１】仮。【２】別。"
         "{起動}下記から１つチョイスする。【１】他。【２】替。"
     )
-    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    engine = numeric_classifier(extra=("bracket_choice_index", "suffix_unit_items"))
     field = normalize_source(raw, source(raw))
     found = engine.recognize(raw, field.source, field.parts[0])
     assert not found.issues

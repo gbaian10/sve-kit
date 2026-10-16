@@ -144,6 +144,8 @@ class Recognized:
         """Unknown body semantics stay scoped to the exact occurrence, without macro eligibility."""
         if self.issues:
             raise ValueError("Unresolved source leaves cannot create an active binding")
+        if normalizer_version != VERSION:
+            raise ValueError("Unsupported four-layer normalizer version")
         occurrence = OccurrenceKey(
             owner=source.owner,
             field=source.field,
@@ -246,71 +248,14 @@ class Classifier:
             raise ValueError("Source part does not belong to the exact binding ordinal")
         if binding.source != field.source:
             raise ValueError("Binding borrows another exact owner field")
-        if frame.source.normalizer_version == "four-layer-jp-v2":
-            from sve_carddb.domains.translations.four_layer_derivation import (  # ruff: ignore[import-outside-top-level] -- defer the preparation dependency to its existing B boundary
-                derive_source,
-            )
+        if frame.source.normalizer_version != VERSION:
+            raise ValueError("Unsupported four-layer normalizer version")
+        from sve_carddb.domains.translations.four_layer_derivation import derive_source  # ruff: ignore[import-outside-top-level] -- defer the preparation dependency to its existing B boundary
 
-            derived = derive_source(raw, field.source, self, context=context)
-            if field != derived.field:
-                raise ValueError("Source field differs from current N1 normalization")
-            derived.verify(raw, self, frame, binding, context=context)
-            return
-        source = field.source
-        part.verify(
-            raw,
-            frame,
-            binding,
-            self.domains,
-            normalizer_version=frame.source.normalizer_version,
-        )
-        found = self.recognize(raw, source, part, context=context, field=field)
-        if found.issues:
-            raise ValueError("Unresolved source leaves cannot verify a binding")
-        expected = {
-            (span.start, span.end): (slot, found.values[slot.name])
-            for slot in found.schema.slots
-            for span in slot.occurrences
-        }
-        actual = {
-            (span.start, span.end): (slot, binding.values[slot.name])
-            for slot in frame.leaf_schema.slots
-            for span in slot.occurrences
-        }
-        if actual.keys() != expected.keys() or any(
-            (slot.type, slot.role, slot.domain, slot.required, value)
-            != (
-                expected[position][0].type,
-                expected[position][0].role,
-                expected[position][0].domain,
-                expected[position][0].required,
-                expected[position][1],
-            )
-            for position, (slot, value) in actual.items()
-        ):
-            raise ValueError(
-                "Leaf type, role or value differs from source classification"
-            )
-        expected_units = {
-            occurrence.canonical_spans: occurrence.source_unit
-            for occurrence in found.occurrences
-        }
-        if any(
-            occurrence.canonical_spans not in expected_units
-            or occurrence.source_unit != expected_units[occurrence.canonical_spans]
-            for occurrence in binding.occurrences
-        ):
-            raise ValueError("Leaf unit differs from the exact source construction")
-        expected_frame, _ = found.bind(
-            source, part, normalizer_version=frame.source.normalizer_version
-        )
-        if (
-            frame.semantic_variant != expected_frame.semantic_variant
-            or frame.projection != expected_frame.projection
-        ):
-            raise ValueError(
-                "Frame semantics differs from the complete source construction"
-            )
+        derived = derive_source(raw, field.source, self, context=context)
+        if field != derived.field:
+            raise ValueError("Source field differs from current N1 normalization")
+        derived.verify(raw, self, frame, binding, context=context)
 
     def recognize(
         self,

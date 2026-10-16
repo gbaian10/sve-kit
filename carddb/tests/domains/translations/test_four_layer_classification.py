@@ -13,11 +13,15 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.contracts.source_binding import ReferenceDomain
+from sve_carddb.domains.catalog.models import Term as VocabularyTerm
+from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
 from sve_carddb.domains.translations.four_layer_classification import (
     Classifier,
     SourceReferences,
     Term,
 )
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.recognition.rules import LEGACY_IDS, Rule, Rules
 
@@ -25,7 +29,6 @@ from .test_four_layer_normalizer import source as fixture_source
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceDescriptor
-    from sve_carddb.domains.text_observations.vocabulary import Vocabulary
     from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 
 
@@ -40,6 +43,26 @@ def source(raw: str, field: str = "effect") -> SourceDescriptor:
                 }
             )
         }
+    )
+
+
+def type_vocabulary() -> Vocabulary:
+    members = (
+        ("follower", "フォロワー"),
+        ("spell", "スペル"),
+        ("amulet", "アミュレット"),
+    )
+    return Vocabulary(
+        bindings=tuple(
+            Binding(region="jp", kind="type", code=code, raw=raw)
+            for code, raw in members
+        ),
+        terms=tuple(
+            VocabularyTerm(
+                kind="type", code=code, label=LocalizedText(lang="ja", text=raw)
+            )
+            for code, raw in members
+        ),
     )
 
 
@@ -114,14 +137,14 @@ def test_card_name_is_protected_before_numeric_and_phase_recognition() -> None:
     assert all(f.projection.projection_kind == "none" for f in frames[1:])
 
 
-def test_n0_cannot_split_one_leaf_into_occurrences_sharing_its_position() -> None:
+def test_split_leaf_occurrences_must_match_the_current_source_construction() -> None:
     term = Term("term:name.synthetic", "card_name", "仮名前")
     raw = "自分の手札の『仮名前』を２枚選ぶ。"
     field = normalize_source(raw, source(raw))
     engine = classifier((term,))
-    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
-        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
-    )
+    derived = derive_source(raw, field.source, engine)
+    field = derived.field
+    frame, binding = derived.bind(0)
     name = binding.occurrences[0]
     span = name.raw_spans[0]
     halves = (
@@ -139,8 +162,8 @@ def test_n0_cannot_split_one_leaf_into_occurrences_sharing_its_position() -> Non
         update={"occurrences": (*halves, *binding.occurrences[1:])}
     )
     split = split.model_copy(update={"id": "bind:" + hash_payload(split.payload())})
-    with pytest.raises(ValueError, match="sharing a canonical position"):
-        split.verify(frame, engine.domains)
+    with pytest.raises(ValueError, match="complete current source construction"):
+        engine.verify(raw, field, field.parts[0], frame, split)
 
 
 def test_leader_person_unit_survives_classification_and_binding_replay() -> None:
@@ -413,12 +436,17 @@ def test_explicit_ex_token_follower_keeps_entity_unit() -> None:
 def test_generic_ex_source_includes_tokens_without_claiming_their_absence() -> None:
     raw = "自分のEXエリアのフォロワー２枚を選ぶ。"
     field = normalize_source(raw, source(raw))
-    engine = classifier()
-    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
-        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
-    )
+    engine = classifier(vocabulary=type_vocabulary())
+    derived = derive_source(raw, field.source, engine)
+    field = derived.field
+    frame, binding = derived.bind(0)
     engine.verify(raw, field, field.parts[0], frame, binding)
-    assert binding.occurrences[0].source_unit == "枚"
+    selection = next(s for s in frame.leaf_schema.slots if s.role == "selection_count")
+    assert (
+        next(o for o in binding.occurrences if o.slot == selection.name).source_unit
+        == "枚"
+    )
+    assert not any(s.type == "TokenStatus" for s in frame.leaf_schema.slots)
 
 
 def test_battlefield_named_card_does_not_infer_kind_from_its_unit() -> None:
@@ -427,3 +455,25 @@ def test_battlefield_named_card_does_not_infer_kind_from_its_unit() -> None:
     field = normalize_source(raw, source(raw))
     found = classifier((name,)).recognize(raw, field.source, field.parts[0])
     assert found.issues == ("n0_numeric_construction_unresolved",)
+
+
+@pytest.mark.parametrize("version", ["four-layer-jp-v1", "four-layer-jp-v3", "unknown"])
+def test_classifier_rejects_unsupported_versions_at_bind_and_verify(
+    version: str,
+) -> None:
+    raw = "仮。"
+    engine = classifier()
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
+    part = field.parts[0]
+    found = derived.recognized[0]
+    with pytest.raises(ValueError, match="Unsupported four-layer normalizer version"):
+        found.bind(field.source, part, normalizer_version=version)
+    frame, binding = derived.bind(0)
+    stale = frame.model_copy(
+        update={
+            "source": frame.source.model_copy(update={"normalizer_version": version})
+        }
+    )
+    with pytest.raises(ValueError, match="Unsupported four-layer normalizer version"):
+        engine.verify(raw, field, part, stale, binding)

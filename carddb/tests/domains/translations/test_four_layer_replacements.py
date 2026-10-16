@@ -4,9 +4,11 @@ import pytest
 
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec
 from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 
 from .test_four_layer_classification import classifier, source
+from .test_four_layer_numbers import numeric_classifier
 
 
 @pytest.mark.parametrize(
@@ -45,19 +47,22 @@ def test_source_replacement_inherits_one_adjacent_complete_action(
     original: str, condition: str, replacement: str, role: str
 ) -> None:
     raw = "仮。" + original + condition + "代わりに" + replacement
-    engine = classifier(
+    engine = numeric_classifier(
         (Term("term:ability.necrocharge", "ability", "ネクロチャージ"),),
         extra=("keyword_threshold_necrocharge",),
     )
-    field = normalize_source(raw, source(raw))
+    derived = derive_source(raw, source(raw), engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[0]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    leaf = frame.leaf_schema.slots[-1]
+    leaf = tuple(
+        s
+        for s in frame.leaf_schema.slots
+        if s.type in {"Nat", "Ordinal", "QuantitySpec"}
+    )[-1]
     assert leaf.role == role
     assert binding.values[leaf.name] == (
         QuantitySpec(mode="up_to", expr=Constant(kind="constant", value=3))
