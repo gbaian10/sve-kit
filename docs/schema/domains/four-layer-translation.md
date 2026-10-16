@@ -1092,6 +1092,41 @@ A11 六種入場表面與 A2 的本回合進化存在，在 provider 尚未合�
 producer 時保持 pending；沒有猜測跨能力付款。這不代表已有付款執行證據，沿 R-0006
 驗打出成本與模式決定時序前，lowering 仍不可標為 executable。
 
+### 11.9 A1 讀值與 A4 宣告 X 的來源準備
+
+`four_layer_n2_reads.FAMILY` 必須由呼叫端明示加入 `families`；正式 v2 與預設準備入口
+不載入此 producer。家族自有簽章在 `four_layer_n2_read_descriptors`，沿
+`quantity.read.context.v1`／`read_value`；現時區域計數直接重用 B11 的
+`count_expression`，不重複登錄 descriptor，也不改既有角色或 domain 成員。
+同一讀值可用在傷害、回復、衍生物數量、能力值與費用位置，consumer 仍保存於來源骨架。
+
+來源只接受已封的區域計數、物件攻擊力／體力／原費用／有效費用、PP 最大值、指示物、
+處理結果、骰面、表向進化牌堆與原費用種類數。自身的即時讀值、選取快照、LKI、事件主體、
+receipt 固定結果及宣告參數各有 import 簽章，不能只因結果為數字而互換。
+處理結果張數引用 `ReceiptId<objects>`，取下指示物數引用 `ReceiptId<amount>`；
+兩者與 `payment_complete` 都不能互換。
+有名稱、特性、職業、關鍵字或指示物引用時，必須沿目前採用的來源概念；
+指示物種類的名稱維持來源骨架，引用沿既有通用指示物概念，與 §11.1 相同。
+沒有唯一 producer 或缺概念時不補 Literal、不挑第一個、不建立可用 binding。
+
+直接讀值與明示 X 定義使用相同 descriptor。定義與每次使用分別保存來源 occurrence；
+後續的 X 門檻也引用同一 X，門檻數字另存。來源 anchor 與 expression 的實參互斥，
+expression 結構、實參連接及能力／分支 scope 進入 leaf schema。
+一層常數倍率沿 §11.5；HalfUp 與已封的單一偏移各有有限 descriptor，不提供任意巢狀算式。
+授予能力另立能力 scope，其中的自身讀值指能力持有者；不把文字提供者當持有者。
+
+A4 的 `read.parameter.chosen_x.v1` 引用 `CapturedValue<Nat, declared_x>`，capture 為
+`play_parameter`。同一能力／分支的 PP、指示物及材料支付 X 與其效果共用一個宣告值；
+重複的 PP 費用仍保留每個 occurrence。付款完成是獨立的 `ReceiptId<payment_complete>`，
+不拿 receipt 實付總額替換 X。原骨架保留 exact／上限、資源種類與各 consumer 位置。
+付款合法性、零支付、取消與失敗路徑仍是 DSL lowering 的驗收事項。
+
+source port 的物件、receipt 與 binding ID 是由來源位置及 scope 建立的符號；
+它們不是 runtime 物件、對手隱藏資訊的固定身分或已執行的付款結果。
+同欄唯一、明示的追加費用來源可以供後行讀取該次追加費用的結果，並保存前行來源座標；
+其他能力／分支不能借用此 port。歷史、名稱種類數及名稱片段 selector 的跨家族 producer
+尚未提供時保留具名 pending，由組合入口接線，不以 runtime 缺口替來源填入數值。
+
 ### 11.10 本回合歷史與單次事件來源的準備 producer
 
 `four_layer_history.HISTORY_FAMILY` 與
