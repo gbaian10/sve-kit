@@ -17,16 +17,16 @@ from sve_carddb.contracts.four_layer import (
     Target,
 )
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_classification import Classifier, Term
+from sve_carddb.domains.translations.four_layer_derivation import (
+    DerivedField,
+    derive_source,
+)
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
-    PreparationRenderer,
     target_dependencies,
     verify_quantities,
-)
-from sve_carddb.domains.translations.four_layer_preparation import (
-    PreparedField,
-    derive_preparation,
 )
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
@@ -34,11 +34,12 @@ from sve_carddb.domains.translations.four_layer_render import (
     Renderer,
     SelectedTarget,
 )
-from sve_carddb.domains.translations.four_layer_total_sources import FAMILY
 from sve_carddb.domains.translations.four_layer_totals import (
     disjoint_pair_count,
     lowering,
 )
+
+from .expression_fixtures import expression_plan
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceBinding
@@ -60,9 +61,9 @@ def engine() -> Classifier:
     )
 
 
-def prepared(raw: str) -> tuple[PreparedField, Frame, SourceBinding]:
+def prepared(raw: str) -> tuple[DerivedField, Frame, SourceBinding]:
     parser = engine()
-    result = derive_preparation(raw, source(raw), parser, families=(FAMILY,))
+    result = derive_source(raw, source(raw), parser)
     frame, binding = result.bind(0)
     result.verify(raw, parser, frame, binding)
     return result, frame, binding
@@ -88,9 +89,8 @@ def test_bounds_keep_direction_threshold_property_and_position(
     assert isinstance(summed, ContextExpression)
     assert result.registry.result_measure(summed, binding) == "cost"
     assert binding.values[predicate.leaves[1]] == 7
-    before = derive_preparation(raw, source(raw), engine())
-    assert before.derived.recognized[0].schema != frame.leaf_schema
-    assert before.families == ()
+    before = analyze_source(raw, source(raw), engine())
+    assert before.recognized[0].schema != frame.leaf_schema
 
 
 def test_earlier_aggregate_keeps_later_sealed_count_actuals() -> None:
@@ -208,9 +208,9 @@ def test_pair_count_uses_minimum_with_empty_and_unequal_groups(
 )
 def test_unsealed_shapes_preserve_preparation_result(raw: str) -> None:
     parser = engine()
-    before = derive_preparation(raw, source(raw), parser)
-    after = derive_preparation(raw, source(raw), parser, families=(FAMILY,))
-    assert replace(after, families=()) == before
+    before = derive_source(raw, source(raw), parser)
+    after = derive_source(raw, source(raw), parser)
+    assert replace(after) == before
 
 
 def test_required_references_expand_with_normal_annotations_and_missing_labels_fail() -> (
@@ -253,14 +253,17 @@ def test_required_references_expand_with_normal_annotations_and_missing_labels_f
         labels[canonical(reference.model_dump(mode="json")), "zh-Hant"] = Label(
             reference, "zh-Hant", "測試區域", "project", False, False
         )
-    renderer = PreparationRenderer(
-        Renderer(
-            labels, Renderer({}, {}, {}).code_references, {}, domains=engine().domains
-        ),
-        ExpressionTargets(expression_targets, registry=result.registry),
+    renderer = Renderer(
+        labels, Renderer({}, {}, {}).code_references, {}, domains=engine().domains
     )
     item = BoundTarget(frame, binding, selected)
-    rendered = renderer.render("synthetic", "zh-Hant", (item,))
+    rendered = renderer.render(
+        "synthetic",
+        "zh-Hant",
+        expression_plan(
+            (item,), ExpressionTargets(expression_targets, registry=result.registry)
+        ),
+    )
     assert rendered.rendered is not None
     assert "測試名稱" in rendered.rendered.text
     assert rendered.rendered.annotation.occurrences
@@ -272,12 +275,15 @@ def test_required_references_expand_with_normal_annotations_and_missing_labels_f
             {},
             dependencies=target_dependencies(frame, binding, registry=result.registry),
         )
-    missing = PreparationRenderer(
-        Renderer(
-            {}, Renderer({}, {}, {}).code_references, {}, domains=engine().domains
+    missing = Renderer(
+        {}, Renderer({}, {}, {}).code_references, {}, domains=engine().domains
+    ).render(
+        "synthetic",
+        "zh-Hant",
+        expression_plan(
+            (item,), ExpressionTargets(expression_targets, registry=result.registry)
         ),
-        ExpressionTargets(expression_targets, registry=result.registry),
-    ).render("synthetic", "zh-Hant", (item,))
+    )
     assert missing.rendered is None
 
 
@@ -299,7 +305,7 @@ def test_missing_pair_name_remains_pending_without_literal_or_optional_operands(
     raw = (
         "自分の墓場の『未登録名』と『架空乙』各1枚1組につき、自分のデッキから2枚引く。"
     )
-    result = derive_preparation(raw, source(raw), engine(), families=(FAMILY,))
+    result = derive_source(raw, source(raw), engine())
     assert "missing_card_name_concept" in result.derived.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved"):
         result.bind(0)

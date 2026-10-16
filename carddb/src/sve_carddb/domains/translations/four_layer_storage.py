@@ -18,6 +18,7 @@ from sve_carddb.domains.translations.four_layer_authored import (
     TargetRecord,
     TargetVariantRecord,
 )
+from sve_carddb.domains.translations.four_layer_expressions import verify_target_shape
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_render import validate_form
 
@@ -39,6 +40,7 @@ def write_frame(
     if frame.source.normalizer_version != VERSION:
         raise ValueError("Unsupported stored normalizer version")
     values: dict[str, Value] = {
+        "mode_rules": Json([rule.model_dump(mode="json") for rule in frame.mode_rules]),
         "canonical_source": canonical_source,
         "interface_key": frame.projection.interface_key(frame.id),
         "authored_source_id": authored_source_id,
@@ -47,7 +49,13 @@ def write_frame(
         "low_confidence": record.low_confidence,
     }
     for key, value in frame.model_dump(mode="json").items():
-        if key in {"source", "semantic_variant", "leaf_schema", "projection"}:
+        if key in {
+            "source",
+            "semantic_variant",
+            "leaf_schema",
+            "projection",
+            "mode_rules",
+        }:
             values[key] = Json(value)
         elif isinstance(value, str):
             values[key] = value
@@ -97,7 +105,13 @@ def write_target(
         )
     if frame.source.source_lang == record.data.lang:
         raise ValueError("Stored target language must differ from source language")
-    record.data.target.verify(frame.leaf_schema, record.data.lang, forms)
+    verify_target_shape(
+        frame,
+        record.data.target,
+        record.data.expression_targets,
+        record.data.lang,
+        forms,
+    )
     db.insert(
         "template_translation",
         {
@@ -107,6 +121,12 @@ def write_target(
             if isinstance(record, TargetVariantRecord)
             else "default",
             "target": Json(record.data.target.model_dump(mode="json")),
+            "expression_targets": Json(
+                {
+                    key: target.model_dump(mode="json")
+                    for key, target in record.data.expression_targets.items()
+                }
+            ),
             "authored_source_id": authored_source_id,
             "record_key": record.record_key,
             "origin": record.origin,

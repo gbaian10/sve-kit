@@ -15,6 +15,7 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.contracts.source_binding import LeafOccurrence
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.translations.four_layer_analysis import SourceAnalysis
 from sve_carddb.domains.translations.four_layer_authored import (
     FrameRecord,
     TargetRecord,
@@ -68,16 +69,23 @@ def compiled_field(
         # Storage fixtures enter after compilation with their synthetic Nat/count role.
         field = normalize_source(text, binding.source)
         derived = DerivedField(
-            field,
-            (
-                Recognized(
-                    frame.leaf_schema, binding.values, binding.occurrences, (), False
+            SourceAnalysis(
+                field,
+                (
+                    Recognized(
+                        frame.leaf_schema,
+                        binding.values,
+                        binding.occurrences,
+                        (),
+                        False,
+                    ),
                 ),
+                ((),),
+                ((),),
+                field,
+                ((),),
             ),
-            ((),),
-            ((),),
-            field,
-            ((),),
+            (None,),
         )
     else:
         derived = derive_source(text, binding.source, engine)

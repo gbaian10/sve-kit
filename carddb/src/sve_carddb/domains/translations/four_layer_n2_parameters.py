@@ -21,11 +21,11 @@ from sve_carddb.domains.translations.recognition.provenance import merged
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceDescriptor
+    from sve_carddb.domains.translations.four_layer_analysis import SourceAnalysis
     from sve_carddb.domains.translations.four_layer_classification import (
         Classifier,
         Recognized,
     )
-    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
 _DIE_SIDES = 6
@@ -349,8 +349,8 @@ def _update(
 
 
 def prepare_parameters(
-    raw: str, derived: DerivedField, classifier: Classifier
-) -> DerivedField:
+    raw: str, derived: SourceAnalysis, classifier: Classifier
+) -> SourceAnalysis:
     """Apply only the sealed source shapes, preserving all unrelated N1 evidence."""
     if derived.field.source.field not in {"effect", "section"}:
         return derived

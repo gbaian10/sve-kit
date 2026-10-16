@@ -33,6 +33,7 @@ from sve_carddb.domains.translations.four_layer_context import (
     ImportSignature,
     Parameter,
 )
+from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_event_preparation import (
     context_port,
     interface,
@@ -43,14 +44,13 @@ from sve_carddb.domains.translations.four_layer_event_preparation import (
 )
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf, leaf
 from sve_carddb.domains.translations.four_layer_normalizer import SourceField
-from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import LeafType
     from sve_carddb.contracts.source_binding import TypedValue
     from sve_carddb.domains.translations.four_layer_classification import Classifier
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 _TURN = r"このターン(?:中に|、)"
@@ -757,10 +757,10 @@ class _HistorySources:
 
 def prepare_history(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     classifier: Classifier,
     context: CardContext | None,
-) -> PreparedField:
+) -> DerivedField:
     """Register source structure without claiming a runtime history evaluator exists."""
     del context
     derived = prepared.derived
@@ -811,7 +811,7 @@ def prepare_history(
     )
 
 
-HISTORY_FAMILY = PreparationFamily("current_turn_history", DESCRIPTORS, prepare_history)
+HISTORY_FAMILY = SourceFamily("current_turn_history", DESCRIPTORS, prepare_history)
 
 
 def name_filter_spans(text: str) -> tuple[tuple[int, int], ...]:

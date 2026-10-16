@@ -3,6 +3,7 @@
 import re
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
+from functools import cached_property
 from types import MappingProxyType
 from typing import TYPE_CHECKING, override
 
@@ -33,7 +34,6 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_n1_leaves import DOMAINS as N1_DOMAINS
 from sve_carddb.domains.translations.four_layer_normalizer import (
-    PREPARATION_VERSION,
     VERSION,
     SourcePart,
     normalize_source,
@@ -145,18 +145,6 @@ class Recognized:
         """Unknown body semantics stay scoped to the exact occurrence, without macro eligibility."""
         if normalizer_version != VERSION:
             raise ValueError("Unsupported four-layer normalizer version")
-        return self.bind_version(source, part, normalizer_version=normalizer_version)
-
-    def bind_version(
-        self,
-        source: SourceDescriptor,
-        part: SourcePart,
-        *,
-        normalizer_version: str,
-    ) -> tuple[Frame, SourceBinding]:
-        """Construct identity after the production or preparation entry selects its version."""
-        if normalizer_version not in {VERSION, PREPARATION_VERSION}:
-            raise ValueError("Unsupported four-layer normalizer version")
         if self.issues:
             raise ValueError("Unresolved source leaves cannot create an active binding")
         occurrence = OccurrenceKey(
@@ -180,7 +168,7 @@ class Recognized:
             source=Source(
                 source_lang="ja",
                 canonical_hash=digest(part.canonical_source.encode())[7:],
-                normalizer_version=normalizer_version,
+                normalizer_version=VERSION,
             ),
             role=part.source_span.role,
             semantic_variant=semantic,
@@ -531,14 +519,27 @@ class Classifier:
             max=None,
         )
 
-    @property
+    @cached_property
     def domains(self) -> Mapping[str, ClosedDomain]:
         """Catalog membership is checked at binding time and never enters a frame hash.
 
         Built once from the glossary and vocabulary given at construction, so neither
         may change afterwards.
         """
-        return self._domains
+        from sve_carddb.domains.translations.four_layer_context import DEFAULT_REGISTRY  # ruff: ignore[import-outside-top-level] -- source families depend on the classifier type
+        from sve_carddb.domains.translations.four_layer_expressions import (  # ruff: ignore[import-outside-top-level] -- source families depend on the classifier type
+            DOMAIN,
+            DOMAIN_CODE,
+        )
+        from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- source families depend on the classifier type
+
+        return MappingProxyType(
+            {
+                **self._domains,
+                DOMAIN_CODE: DOMAIN,
+                **DEFAULT_REGISTRY.extend(FAMILY.descriptors).domains,
+            }
+        )
 
     def _build_domains(self) -> dict[str, ClosedDomain]:
         result = {**DOMAINS, **N1_DOMAINS}

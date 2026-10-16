@@ -1,4 +1,4 @@
-"""Compose the sealed N2 providers without enabling them in production."""
+"""Compose the sealed providers used by the normal v3 source constructor."""
 
 from collections import Counter
 from dataclasses import replace
@@ -16,6 +16,7 @@ from sve_carddb.contracts.four_layer import (
     Scope,
     hash_payload,
 )
+from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_event_preparation import occurrence
 from sve_carddb.domains.translations.four_layer_history import HISTORY_FAMILY
 from sve_carddb.domains.translations.four_layer_mode_context import FAMILY as MODES
@@ -23,7 +24,6 @@ from sve_carddb.domains.translations.four_layer_mode_context import mode_sources
 from sve_carddb.domains.translations.four_layer_n2_read_sources import regions
 from sve_carddb.domains.translations.four_layer_n2_reads import FAMILY as READS
 from sve_carddb.domains.translations.four_layer_names import FAMILY as NAMES
-from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 from sve_carddb.domains.translations.four_layer_provenance import PROVENANCE_FAMILY
 from sve_carddb.domains.translations.four_layer_total_sources import FAMILY as TOTALS
 
@@ -36,14 +36,14 @@ if TYPE_CHECKING:
         Classifier,
         Recognized,
     )
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 PROVIDERS = (HISTORY_FAMILY, PROVENANCE_FAMILY, NAMES, TOTALS, READS, MODES)
 
 
 def _claims(
-    prepared: PreparedField,
+    prepared: DerivedField,
 ) -> Counter[tuple[int, str, tuple[tuple[int, int], ...]]]:
     return Counter(
         (
@@ -62,7 +62,7 @@ def _claims(
     )
 
 
-def verify_claims(before: PreparedField, after: PreparedField) -> None:
+def verify_claims(before: DerivedField, after: DerivedField) -> None:
     """A consumer may add uses, but cannot replace or duplicate another provider's node."""
     old, new = _claims(before), _claims(after)
     for (index, identifier, positions), count in old.items():
@@ -95,7 +95,7 @@ def _operands(values: Mapping[str, TypedValue], name: str, seen: set[str]) -> se
     return seen
 
 
-def verify_nesting(prepared: PreparedField) -> None:
+def verify_nesting(prepared: DerivedField) -> None:
     """A construction inside another node's source extent must be one of its operands."""
     # Descriptor IDs can encode literal text, so anchors alone miss a second encoding.
     for found in prepared.derived.recognized:
@@ -130,7 +130,7 @@ def verify_nesting(prepared: PreparedField) -> None:
                     )
 
 
-def _remap_ports(before: PreparedField, after: PreparedField) -> PreparedField:
+def _remap_ports(before: DerivedField, after: DerivedField) -> DerivedField:
     interfaces = list(after.interfaces)
     for i, (prior, found) in enumerate(
         zip(before.derived.recognized, after.derived.recognized, strict=True)
@@ -299,7 +299,7 @@ def _scoped_values(
     return values, names
 
 
-def _scopes(raw: str, prepared: PreparedField) -> PreparedField:
+def _scopes(raw: str, prepared: DerivedField) -> DerivedField:
     lexical = regions(raw)
     scopes = {
         r.id: Scope(
@@ -411,10 +411,10 @@ def _scopes(raw: str, prepared: PreparedField) -> PreparedField:
 
 def prepare_integrated(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     classifier: Classifier,
     context: CardContext | None,
-) -> PreparedField:
+) -> DerivedField:
     """Run real providers in dependency order and reject competing source ownership."""
     for family in PROVIDERS:
         updated = family.prepare(raw, prepared, classifier, context)
@@ -424,7 +424,7 @@ def prepare_integrated(
     return _link_conditions(raw, _scopes(raw, prepared))
 
 
-def _link_conditions(raw: str, prepared: PreparedField) -> PreparedField:
+def _link_conditions(raw: str, prepared: DerivedField) -> DerivedField:
     rules = list(prepared.mode_rules)
     for group in mode_sources(raw, prepared):
         if group.condition is None:
@@ -463,7 +463,7 @@ def _link_conditions(raw: str, prepared: PreparedField) -> PreparedField:
     return replace(prepared, mode_rules=tuple(rules))
 
 
-FAMILY = PreparationFamily(
+FAMILY = SourceFamily(
     "N2-integrated",
     tuple(d for family in PROVIDERS for d in family.descriptors),
     prepare_integrated,

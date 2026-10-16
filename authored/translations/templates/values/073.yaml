@@ -1,0 +1,1236 @@
+format: 3
+kind: translation_shard
+records:
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:95517c0c6c68c8dcfc0821136467ae365ec7ee1a4e16924dd82a5d0c9066ce98
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 到來時，給予敵方戰場上的全部從者等同於「
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 」的傷害。
+      expression_targets:
+        read.object.attack.v1:
+          format: 1
+          nodes:
+            - kind: Literal
+              text: 這張卡片的攻擊力
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:955ead15e5ef8f6e1f0f249aeb7e0efe5fd6d9c2dd962e4d2f4b5f0061040406
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: （放置到牌堆的衍生物移出遊戲）
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:959205484bb6fe76fb977fe2626bd8952b302a841287d8222fe64cf32ca8aaae
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 到來時，若
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 上有
+          - kind: Form
+            form_id: quantity.existence_count.value
+            args:
+              quantity:
+                slot: leaf_6
+          - kind: Literal
+            text: 張以上的其他
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: ，則給予敵方的全部主戰者
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 點傷害。自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_9
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:95941de08389bafe65180caa791362925b09b8849025addbeb717be1ab9cf171
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【單重驅動】
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:959fbded7a38196692c332345dd85813ffc2c8e406cbf13d9a9e315df6cbd725
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 從EX區使用這張卡片時，消費-
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:95a6379d47ddc5e4a4cc5a1798829e3f4d88403643067af6b0a6290647d24063
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}選擇自己的EX區中的任意數量的妖精・從者。其變身為『'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 』。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:95c54a4ea215c9b03a6e230ebf341603ae017673121ff55baaa3167b2a9e4e1c
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: （將指定的卡片從手牌捨棄，或從EX區放置到墓場，再將這張卡片從手牌放置到EX區，即可融合）
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:95d1dbcd90ed9e75778b998085f2918b1944bb68be5a8072dc9d74e0f4edb2e4
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 選擇敵方戰場上的
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 個原始消費
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 以下的從者。將其破壞。將
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 張卡片放置到
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:95f4af1e06f8af104509e2e41775f2ae428bae9a2a3286a4180dea4f8bc5a2f2
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}若自己的進化牌堆中有'
+          - kind: Form
+            form_id: quantity.existence_count.value
+            args:
+              quantity:
+                slot: leaf_1
+          - kind: Literal
+            text: 張以上正面朝上的進化從者，則這張卡片進化。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:95f5354e3a88cf1bfb9872b9a2e616ff42f5f66f28c82a6a2257ffdf2f9f872f
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 使用這張卡片時，使墓場中的
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 張Cute・卡片、
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 張Cool・卡片與
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 張Passion・卡片消失：消費-
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:9603b3ec6cb0506b273892e6b0d389116b71a907bc12a0468dee6df854ad3893
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片處於重置狀態，這張卡片就具有【
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 】【
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 】。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:961a7d7bf8428ddf32344793158a1c9d84d703817b6f9d10b84d6b2970a765f1
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}將'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 張『
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 』放置到
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:963bf94c3830d9e7aa63073aaf92dc0e3077416b5d6c31506ca4de118de77f53
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【進化時】自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96460c47b18f3a7eeb003e4be11a41bfa7bffcea2057bd31a9b4a16b96dcd209
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 使用這張卡片時，將戰場上的
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 個妖精・衍生物放置到
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: ，作為追加消費。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96556c54b46615a2ef46aa08222ea5176f1a6572e940101ab5fde95fe23cd8f4
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}抽'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 張卡片。若
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 上有『
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 』，則自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:966040c1cffa74677447b2a7acc1cfe71dee4416ad66a706f7a427a1fbee3503
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}【'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: ' '
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 】選擇敵方的
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 個從者。使其{
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: '}-'
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: /{
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: '}-'
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:966c8a367c6e03ef700bd199c885166846637636a02283b74894cc5e27cb9a24
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【進化時】查看
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 張卡片。可以從其中公開
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 張{
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: '}法術，並加入'
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 。可以將其中
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 張{
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: '}法術放置到'
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: Literal
+            text: 。將其餘卡片以任意順序放置到
+          - kind: LeafRef
+            slot: leaf_9
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:966f593bdded479fa988f69056ebe24f227d29568234f6b048dfdb554e21e966
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【進化時】選擇
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 上的
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。給予其
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 點傷害。自己的墓場中每有
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 張闇影聖騎士・卡片，再給予其
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 點傷害。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:9673686e71c831839de9d8b8e71f4daabe1da3a907594df9058e018bf2ed41ab
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【攻擊時】這張卡片{
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:967ea3e6df1f5d69dbc8c00d43aa0d2e2aa4ec212ff36f7769515038ac2b87d8
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}指定自己的'
+          - kind: Form
+            form_id: quantity.selection_count.value
+            args:
+              quantity:
+                slot: leaf_1
+          - kind: Literal
+            text: 張其他卡片。將其返回
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:968e3416fda4abd0c801b775b20d644d1ae414da3e37af7d275be9a36f363fa6
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}{消費'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}將手牌中的這張卡片放置到EX區：查看'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 張卡片。可以從其中公開
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 張機械・卡片，並加入
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:968f94e9dd2a5adadb699ba34e76510c6f13aa1c7c7c7104f23c43959bb88233
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}{消費'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}：選擇'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 上的
+          - kind: Form
+            form_id: quantity.selection_count.value
+            args:
+              quantity:
+                slot: leaf_5
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 。給予其
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 點傷害。自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96977459aa6cf68277e6f2bd46a0a8996fcea0ade14c8d15d443ca3ee8549c1e
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}自己的主戰者{'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。將
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 張卡片放置到
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96a4892ce6403676883892991f6ed7c271a51168a1340ba9e20db8c9d3cca61a
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}{消費'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}【'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: ' '
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 】：本回合，自己下一次使用原始消費
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 以下的灰姑娘・法術時，消費-
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 。
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 中有
+          - kind: Form
+            form_id: quantity.existence_count.value
+            args:
+              quantity:
+                slot: leaf_10
+          - kind: Literal
+            text: 張以上的
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_9
+          - kind: Literal
+            text: 時，才可以使用這個能力，並且在
+          - kind: LeafRef
+            slot: leaf_11
+          - kind: Literal
+            text: 回合中可以使用
+          - kind: LeafRef
+            slot: leaf_12
+          - kind: Literal
+            text: 次。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96aec656e2de441d5b738a2b9b2e3a622bc9fd499801a36aa5f9c75b4a593ded
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}將這張卡片{'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}：選擇'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 上的
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 。其具有【
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 】。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96caa8a03eff59403dad36a68e792af199d17dfd27c98e255e89cc7bafe372be
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}將'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 個其他西洋棋・從者放置到墓場：選擇敵方的
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 個從者。給予其
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 點傷害。本回合，無法使用這張卡片的{進化}以外的{
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: '}能力。'
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96d8c6b842f723be4e5fd085172e3c78abc15d55b147a006aa1c2b547f074db2
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}{消費'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}將這張卡片{'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: '}並放置到墓場：選擇自己的'
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 個童話・從者。其具有【
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 】【
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 】。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:96fc23972997a1e03fcfac30781c4aa9a969f3c8110bc38e0021f02feda3789c
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}自己的主戰者{'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:97015548a5aaf0add80476ee7696cf60511c928e6e6ca7f81b2ce9328ef4e351
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 到來時，自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:9701605f8e8570b6861efb2503280c9f88454f378f943b1edbe2ddf5f7407a96
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 使用這張卡片時，若
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: ，則消費-
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。
+      expression_targets:
+        history.evolve.field_follower.exists.v1:
+          format: 1
+          nodes:
+            - kind: Literal
+              text: 本回合
+            - kind: LeafRef
+              slot: owner
+            - kind: Literal
+              text: 戰場上的從者曾進化
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:9706003f9c2c72680ffe9d9f6cd6d9c5e1a1c79293537ab605c3af8de7b0c269
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}捨棄'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 中的
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 張
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: ：抽
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 張卡片。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:972284c9550de11e57c13a80bb11f51691fa6eefc61f9936f4120561ab0a587f
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 到來時，可以將
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 張卡片放置到
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:973c69b4cf36eaf5c03391c4f8707261213d41716d33a7539a811cde19caf9db
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 使用這張卡片時，消費-X。X為「
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 」。
+      expression_targets:
+        aggregate.count.kind.v1:
+          format: 1
+          nodes:
+            - kind: LeafRef
+              slot: owner
+            - kind: Literal
+              text: 的
+            - kind: LeafRef
+              slot: zone
+            - kind: Literal
+              text: 中的
+            - kind: LeafRef
+              slot: kind
+        aggregate.count.trait_card.v1:
+          format: 1
+          nodes:
+            - kind: LeafRef
+              slot: owner
+            - kind: Literal
+              text: 的
+            - kind: LeafRef
+              slot: zone
+            - kind: Literal
+              text: 中的
+            - kind: LeafRef
+              slot: trait
+            - kind: Literal
+              text: ・
+            - kind: LeafRef
+              slot: card
+        aggregate.total.ya.v1:
+          format: 1
+          nodes:
+            - kind: LeafRef
+              slot: left
+            - kind: Literal
+              text: 或
+            - kind: LeafRef
+              slot: right
+            - kind: Literal
+              text: 張數合計
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:9741eb0eeb4bdef1d5a03873ec84736bf8b315cc94a698635828241e26a022bc
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【進化時】選擇
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 上的
+          - kind: Form
+            form_id: quantity.selection_count.value
+            args:
+              quantity:
+                slot: leaf_3
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。給予其
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 點傷害。抽
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 張卡片。捨棄自己的
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 張手牌。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:97463a7a0c9f02dd8b96f1f6ea1fffe6efec4d5f8747a9675c7bb089755f2726
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}選擇'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 上的
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 。給予其
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 點傷害。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:97463fd5fbae02d76c59c4012bbd77a6d0058ce6602b91484675c8905dcfdd60
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 【進化時】抽
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 張卡片。將自己的
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 張手牌放置到
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:974c673a788e79635363e5afb3800b798695fd74546b5af0410958e2174262d0
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 『
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 』{
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: '{消費'
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: '}'
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:976b2b94501d4ec3554cf307095db76de430679beb2d3fc9c2b031e2e001375e
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: 『
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 』{
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: '{消費'
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: '}'
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:977488cd29ac8bbb6043bd4a68b61ded8e860f87d9bab3a037000cb83a06ca6e
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}{消費'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}：將自己的EX區中的這張卡片以橫置狀態召喚到'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 上。
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 中的
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: ・
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 數量為
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 張時，才可以使用這個能力。
+      expression_targets: {}
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:9784f7d51246df3bcd97622134bc9756ac34b269b6056d5c7470bdc1b2a8c5b1
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: （若不支付追加消費，則無法使用）
+      expression_targets: {}

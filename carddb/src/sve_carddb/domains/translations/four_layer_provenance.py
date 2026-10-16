@@ -23,6 +23,7 @@ from sve_carddb.domains.translations.four_layer_context import (
     ImportSignature,
     Parameter,
 )
+from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_event_preparation import (
     context_port,
     interface,
@@ -32,12 +33,11 @@ from sve_carddb.domains.translations.four_layer_event_preparation import (
 )
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf, leaf
 from sve_carddb.domains.translations.four_layer_normalizer import SourceField
-from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Classifier
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 _ENTRY = re.compile(
@@ -301,10 +301,10 @@ def _identifier(match: re.Match[str], *, play: bool, event_subject: bool) -> str
 
 def prepare_provenance(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     classifier: Classifier,
     context: CardContext | None,
-) -> PreparedField:
+) -> DerivedField:
     """Keep single-event entry facts separate from CurrentTurn and Play queries."""
     del context
     derived = prepared.derived
@@ -364,6 +364,6 @@ def prepare_provenance(
     )
 
 
-PROVENANCE_FAMILY = PreparationFamily(
+PROVENANCE_FAMILY = SourceFamily(
     "entry_and_play_provenance", DESCRIPTORS, prepare_provenance
 )

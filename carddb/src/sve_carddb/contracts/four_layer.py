@@ -699,6 +699,18 @@ class Target(RecordData):
             raise ValueError("Target format must be integer")
         return value
 
+    def referenced_slots(
+        self,
+        schema: LeafSchema,
+        lang: str,
+        forms: Mapping[tuple[str, str], FormDefinition],
+    ) -> set[str]:
+        """Validate node arguments before source-bound expression dependencies are available."""
+        slots = {slot.name: slot for slot in schema.slots}
+        return set().union(
+            *(_node_slots(node, slots, lang, forms) for node in self.nodes)
+        )
+
     def verify(
         self,
         schema: LeafSchema,
@@ -709,9 +721,7 @@ class Target(RecordData):
     ) -> None:
         """Required leaves cannot disappear inside literal wording or an opaque NP."""
         slots = {slot.name: slot for slot in schema.slots}
-        used = set().union(
-            *(_node_slots(node, slots, lang, forms) for node in self.nodes)
-        )
+        used = self.referenced_slots(schema, lang, forms)
         active: set[str] = set()
         visited: set[str] = set()
 

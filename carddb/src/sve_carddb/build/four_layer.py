@@ -1,6 +1,6 @@
 """Four-layer relational declarations and named JSON contracts for build boundaries."""
 
-from typing import Annotated, get_args
+from typing import Annotated
 
 from pydantic import ConfigDict, Field, JsonValue, TypeAdapter
 
@@ -60,6 +60,7 @@ FRAME_TABLES = (
             _json("semantic_variant", "FrameSemanticVariant"),
             _json("leaf_schema", "FrameLeafSchema"),
             _json("projection", "FrameProjection"),
+            _json("mode_rules", "FrameModeRules"),
             Column("canonical_source", Kind.TEXT),
             Column("content_hash", Kind.TEXT, pattern=HASH),
             Column("interface_key", Kind.TEXT, pattern=HASH),
@@ -76,6 +77,7 @@ FRAME_TABLES = (
             Column("lang", Kind.ID, pattern=LANG),
             Column("variant_key", Kind.ID, pattern=CODE),
             _json("target", "FrameTarget"),
+            _json("expression_targets", "FrameExpressionTargets"),
             *QUALITY,
         ),
         ("template_id", "lang", "variant_key"),
@@ -254,6 +256,8 @@ def schemas() -> dict[str, JsonValue]:
         ("FrameLeafSchema", LeafSchema),
         ("FrameProjection", Projection),
         ("FrameTarget", Target),
+        ("FrameExpressionTargets", dict[Code, Target]),
+        ("FrameModeRules", tuple[four_layer.ModeCountRule, ...]),
         ("FormSignature", tuple[Signature, ...]),
         ("FormCases", dict[Code, Annotated[tuple[FormPart, ...], Field(min_length=1)]]),
         ("BindingSource", SourceDescriptor),
@@ -276,15 +280,8 @@ def schemas() -> dict[str, JsonValue]:
             )
         )
         declarations[name] = parse(canonical(adapter.json_schema()))
-    # Preparation models must not widen the production SQLite boundary.
     source_properties = object_value(
         object_value(declarations["FrameSource"])["properties"]
     )
-    object_value(source_properties["normalizer_version"])["const"] = "four-layer-jp-v2"
-    projection = object_value(declarations["FrameProjection"])
-    port = object_value(object_value(projection["$defs"])["Port"])
-    port_type = object_value(object_value(port["properties"])["type"])
-    port_type["enum"] = [
-        name for name in get_args(four_layer.PortType) if name != "ChoiceContext"
-    ]
+    object_value(source_properties["normalizer_version"])["const"] = "four-layer-jp-v3"
     return declarations

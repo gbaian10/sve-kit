@@ -1,0 +1,3440 @@
+format: 3
+kind: translation_shard
+records:
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:806a4c9a1590f77ea0a1e27b75970112924cc12c9817f9a34233706f31e87397
+      source:
+        source_lang: ja
+        canonical_hash: 5d405ee4cbfd99298f1c49f14fc11dc692e42c67f422e4096d6908d48ae76ec2
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:3f195b8ff2348a468a08e332557a43aabf87e229fa02cb0d65e4a4ab1c275628
+          field: effect
+          ordinal:
+          source_hash: 89d6ac0f74fcd0b1e913c78a2ccabb94ea85428144c9cab07755045f672fa1e8
+          line_ordinal: 2
+          role: body
+          segments:
+            - start: 59
+              end: 78
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 10
+                end: 11
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 12
+                end: 13
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 806a4c9a1590f77ea0a1e27b75970112924cc12c9817f9a34233706f31e87397
+  - kind: sentence_template
+    data:
+      id: frame:806f8d3509e1290cc94e0d4d3a9da67f29d55977f041c647678389774d0c5d26
+      source:
+        source_lang: ja
+        canonical_hash: 2be89f05c9f7ae2af3533a979096ad5c6848efe9752165170da25285694308b9
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:e5d8a070dc6a5148335e7b480cbcc58afd4e8a0b05bf23aad013814b6b4418bd
+          field: effect
+          ordinal:
+          source_hash: c8bda03be238d2ab0e2414c1fe91f355ec530c43d3b8f52480d69f6d99086cba
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 54
+              end: 90
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 6
+                end: 7
+          - name: leaf_1
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 8
+                end: 9
+          - name: leaf_2
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 11
+                end: 19
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 806f8d3509e1290cc94e0d4d3a9da67f29d55977f041c647678389774d0c5d26
+  - kind: sentence_template
+    data:
+      id: frame:8077dcfa1da501ad7e826f902146ac3fa22997673fcb59be8555ec5cbcf02515
+      source:
+        source_lang: ja
+        canonical_hash: 6caad29f681642c4e98aee0ca474c6aa1f429c4169f93f0905808ccd91fdea61
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:11700c45b556ea0eba4aeacda92b0c83281fca8f42e6f2e2d0575593e5088202
+          field: effect
+          ordinal:
+          source_hash: 2c5802f39fa32d97e7b384b234683f53ccfa2a3488daf5acc487846e75afb88a
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 41
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 26
+                end: 27
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 8077dcfa1da501ad7e826f902146ac3fa22997673fcb59be8555ec5cbcf02515
+  - kind: sentence_template
+    data:
+      id: frame:8087efe1cc1b90d57d4012694947ade69f1741ad26b24e7b61f1f4456addcc00
+      source:
+        source_lang: ja
+        canonical_hash: fc0d55d16bbb0fe417e6b88d8463e81cf4401baf6c60c9a24a388a29db760ace
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:e083823fffd7c5e11f5248f10accb9bbf944d7af0f20b5f75a735e26f26bd9f7
+          field: effect
+          ordinal:
+          source_hash: 1f0f4a8c651822a58df0c3ce67b0db6a3903cd7fa9905c330523ad0097371e4f
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 23
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: keyword
+            domain:
+              values:
+                - concept.keyword.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 16
+                end: 18
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 8087efe1cc1b90d57d4012694947ade69f1741ad26b24e7b61f1f4456addcc00
+  - kind: sentence_template
+    data:
+      id: frame:808caa45a3ada597331ed91e65694acc70310fdc7fccc32101decf5e90d9d4d6
+      source:
+        source_lang: ja
+        canonical_hash: 724baa328603dde08af65469a1b02202138129bc215b1ed21533ec2844417f71
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:3410af2f3325f570eb7140a48eb214e7dc86f5617fd4eaba510ea4857393f793
+          field: effect
+          ordinal:
+          source_hash: ed5f7a3de2346a932464d642e02e9ee68a05f126d0ea7ee3c468c353a1524c17
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 37
+              end: 72
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: damage_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 31
+                end: 32
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 808caa45a3ada597331ed91e65694acc70310fdc7fccc32101decf5e90d9d4d6
+  - kind: sentence_template
+    data:
+      id: frame:809f2ed539339244be5446e0faaf2224daec581c5493e63a7a03ab491cb4593b
+      source:
+        source_lang: ja
+        canonical_hash: 254a4dbda81b0977c459a3851882e0d5b6a8baee0fb6f7d741ea1c17a588b9e6
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0154ecea512856ea55bd965a5b8ae5fe4f4ce1634d4b6739e7caf8737a30575b
+          field: effect
+          ordinal:
+          source_hash: 7deca8bc1e2b9bbb852f8e1582317e3f988ab2820de99afa73490d9c15f8a91f
+          line_ordinal: 3
+          role: body
+          segments:
+            - start: 76
+              end: 101
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 9
+                end: 12
+          - name: leaf_1
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 14
+                end: 15
+          - name: leaf_2
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 17
+                end: 19
+          - name: leaf_3
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 21
+                end: 22
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 809f2ed539339244be5446e0faaf2224daec581c5493e63a7a03ab491cb4593b
+  - kind: sentence_template
+    data:
+      id: frame:80be046ec50e1e0c88eb30ae7a72ab496e25bde82ba7ad84a0372311d20d52a7
+      source:
+        source_lang: ja
+        canonical_hash: 050c9cd5ccb01503ed4e6bc8491416396629e8b07c2754f56798e911cb26fe68
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:e86df38933aaed5ae81d320004b153484c482b36672a95277414a8152becb303
+          field: effect
+          ordinal:
+          source_hash: cb82fc298fa6a84c240303443606d416a5da0162bf090640ff672f6da83c192a
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 45
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Player
+            role: source_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 5
+                end: 13
+          - name: leaf_1
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 14
+                end: 22
+          - name: leaf_2
+            type: Nat
+            role: threshold
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 29
+                end: 30
+          - name: leaf_3
+            type: Concept
+            role: class_filter
+            domain:
+              values:
+                - vocabulary.class.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 34
+                end: 42
+          - name: leaf_4
+            type: CardKind
+            role: counted_kind
+            domain:
+              values:
+                - card_kind.selection.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 43
+                end: 51
+          - name: leaf_5
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 51
+                end: 52
+          - name: leaf_6
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.hand.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 57
+                end: 65
+          - name: leaf_7
+            type: Player
+            role: destination_owner
+            domain:
+              values:
+                - player.self.v1
+              min:
+              max:
+            required: false
+            occurrences: []
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 80be046ec50e1e0c88eb30ae7a72ab496e25bde82ba7ad84a0372311d20d52a7
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:80d930e80abeb3c1c8f788514466c0fd0b90e824b609bbe72d147cd3917a92d4
+      source:
+        source_lang: ja
+        canonical_hash: 3f9b8ddefa2651f0e8aaf065b904c3570ab364fda282d1b92fe34ddab249ec8e
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:83954da8e5651524a9a8847036b10a903a45730d2b92b3e3450ea0d3d29ddb90
+          field: effect
+          ordinal:
+          source_hash: 30f1f29f0e186ae1ceed250b6fb63e49b5c5fb6fa93ee6f2a68b3455dad7c209
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 20
+              end: 49
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 10
+                end: 11
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 12
+                end: 13
+          - name: leaf_3
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 15
+                end: 23
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 80d930e80abeb3c1c8f788514466c0fd0b90e824b609bbe72d147cd3917a92d4
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:80e901a367d5e5ec0166e1c2a552d31c659d4531f92f30631a6c046be326dfa9
+      source:
+        source_lang: ja
+        canonical_hash: e0069d49459cb358f3ac722f844ace4d4d84359d76750e86f2f869efa62bea46
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:73843f44439366c634411bd6e30a4792d72f12028b3825a5dbcb8ac868530d8e
+          field: effect
+          ordinal:
+          source_hash: 6cb3b4b8e06d7944fa35256e7638987ad08f42728c792e7f2c0cdf503daf400a
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 7
+              end: 62
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Player
+            role: source_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 0
+                end: 8
+          - name: leaf_1
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 9
+                end: 17
+          - name: leaf_2
+            type: CardKind
+            role: counted_kind
+            domain:
+              values:
+                - card_kind.follower.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 18
+                end: 26
+          - name: leaf_3
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 26
+                end: 27
+          - name: leaf_4
+            type: Nat
+            role: damage_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 35
+                end: 36
+          - name: leaf_5
+            type: Player
+            role: counted_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 41
+                end: 49
+          - name: leaf_6
+            type: ZoneSet
+            role: counted_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 50
+                end: 58
+          - name: leaf_7
+            type: Concept
+            role: trait
+            domain:
+              values:
+                - concept.trait.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 59
+                end: 67
+          - name: leaf_8
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 68
+                end: 76
+          - name: leaf_9
+            type: QuantitySpec
+            role: existence_count
+            domain:
+              values:
+                - quantity.existence_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 77
+                end: 78
+          - name: leaf_10
+            type: Nat
+            role: damage_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 88
+                end: 89
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 80e901a367d5e5ec0166e1c2a552d31c659d4531f92f30631a6c046be326dfa9
+  - kind: sentence_template
+    data:
+      id: frame:8113979848a142d54799639009d9cb938b2ada8c16c8ca88539cc98464d1b18f
+      source:
+        source_lang: ja
+        canonical_hash: d68b12d95ec2f4b20c73888114f6f7761c54029097a4e3ed50c2f4a87a3bf90a
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:037fe0bb27e777ec12968065666a9ceec2e093116bc2cadcc6800d4911620ada
+          field: effect
+          ordinal:
+          source_hash: 4b8638f43bebe863c11ba78f5de320e7963d71f2bf297e4933fe8996340e4090
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 21
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 16
+                end: 17
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 8113979848a142d54799639009d9cb938b2ada8c16c8ca88539cc98464d1b18f
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:8119e9e48155851561028743d15338e7712f435d0bd6fbccf6000d04469811de
+      source:
+        source_lang: ja
+        canonical_hash: 7b1b1902c1bdddce2065bcd54168b9461171c950a1322d8b9f456f7c0963e6db
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:aa326bd50a10e2e47658f7742765c2ba90f3983741d6fd33dc2ee3ceb2c6ae00
+          field: effect
+          ordinal:
+          source_hash: fc26bd54a1a53538738d83c8b196acf0d31b0c5ed4134f1b7f5842b9711d9c67
+          line_ordinal: 2
+          role: body
+          segments:
+            - start: 65
+              end: 133
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 3
+          - name: leaf_1
+            type: Nat
+            role: cost_value
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 8
+                end: 9
+          - name: leaf_2
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 32
+                end: 35
+          - name: leaf_3
+            type: QuantityExpr
+            role: read_value
+            domain:
+              values:
+                - quantity.read.context.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 37
+                end: 38
+              - start: 44
+                end: 45
+              - start: 48
+                end: 49
+            expression:
+              kind: context_expression
+              expression_id: read.result.removed_counter.v1
+              leaves:
+                - leaf_5
+              imports:
+                receipt: read_port_0
+              scope: read_ability_2
+          - name: leaf_4
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 40
+                end: 42
+          - name: leaf_5
+            type: Concept
+            role: read_counter
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 56
+                end: 61
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes:
+          - id: read_ability_0
+            parent:
+            kind: ability
+          - id: read_ability_1
+            parent:
+            kind: ability
+          - id: read_ability_1.body_condition
+            parent: read_ability_1
+            kind: sequence
+          - id: read_ability_2
+            parent:
+            kind: ability
+        imports:
+          - name: read_port_0
+            type: ReceiptId
+            source_role: read_receipt
+            scope: read_ability_2
+            evidence:
+              source:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:aa326bd50a10e2e47658f7742765c2ba90f3983741d6fd33dc2ee3ceb2c6ae00
+                field: effect
+                ordinal:
+                source_hash: fc26bd54a1a53538738d83c8b196acf0d31b0c5ed4134f1b7f5842b9711d9c67
+                line_ordinal: 2
+                role: body
+                segments:
+                  - start: 65
+                    end: 92
+              capture: receipt
+              value:
+                kind: ReceiptId
+                receipt_id: source-receipt:a465dc9eb9f82dca61cfa6a4c9aeb4239d9871059b0d7f39e1a623fbb1d9b101
+                result: amount
+              source_leaves: []
+        exports: []
+      content_hash: 8119e9e48155851561028743d15338e7712f435d0bd6fbccf6000d04469811de
+  - kind: sentence_template
+    data:
+      id: frame:8129aa165c682d75d22e39a899e346d2991945be67faa32b153943a172eae41e
+      source:
+        source_lang: ja
+        canonical_hash: 4024c6996584cc49364f93d472ed1caccb14971d5139f6e419070c9454ca7eca
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:3584ecf40a06baec9bb7dbd52b4317b6b1dcb316e37c2fdb0b66d0d70cbdd918
+          field: effect
+          ordinal:
+          source_hash: f96b36efe13663b1aabdec9c40aff47f4405203e878ea091088095a690e49eeb
+          line_ordinal: 2
+          role: body
+          segments:
+            - start: 25
+              end: 50
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 7
+          - name: leaf_1
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 17
+                end: 19
+          - name: leaf_2
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 21
+                end: 22
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 8129aa165c682d75d22e39a899e346d2991945be67faa32b153943a172eae41e
+  - kind: sentence_template
+    data:
+      id: frame:812c173a97c706146b8512e482bfce577f7448b68e821a3969ab21f5ad24d81c
+      source:
+        source_lang: ja
+        canonical_hash: 55d129a9ea71ca37f692c7405bad174a6b678a7e62e548f324025da93e479a1f
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:c21751fb6dbf5343aaffbca7ea00c99ba8ab3dcfb302de847e258505cff607d3
+          field: effect
+          ordinal:
+          source_hash: 2da9c6ea8525100f116a13d9a58b4de7e00b80dafc2c21a032d77e2cbd65f111
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 20
+              end: 86
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Player
+            role: phase_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 0
+                end: 8
+          - name: leaf_1
+            type: Phase
+            role: phase_trigger
+            domain:
+              values:
+                - phase.named.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 9
+                end: 17
+          - name: leaf_2
+            type: Player
+            role: source_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 23
+                end: 31
+          - name: leaf_3
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 32
+                end: 40
+          - name: leaf_4
+            type: CardKind
+            role: counted_kind
+            domain:
+              values:
+                - card_kind.follower.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 41
+                end: 49
+          - name: leaf_5
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 49
+                end: 50
+          - name: leaf_6
+            type: Player
+            role: counted_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 55
+                end: 63
+          - name: leaf_7
+            type: ZoneSet
+            role: counted_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 64
+                end: 72
+          - name: leaf_8
+            type: Concept
+            role: trait
+            domain:
+              values:
+                - concept.trait.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 73
+                end: 81
+          - name: leaf_9
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 82
+                end: 90
+          - name: leaf_10
+            type: QuantitySpec
+            role: existence_count
+            domain:
+              values:
+                - quantity.existence_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 91
+                end: 92
+          - name: leaf_11
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 102
+                end: 104
+          - name: leaf_12
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 106
+                end: 107
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 812c173a97c706146b8512e482bfce577f7448b68e821a3969ab21f5ad24d81c
+  - kind: sentence_template
+    data:
+      id: frame:81310c2be982ac27a5e73e869e4349654e319fa93d940ffb89900af95503e144
+      source:
+        source_lang: ja
+        canonical_hash: 95aeb61ffae88cba51c903635fbc66bab1bb5951b226517f40be4650a4f8a3cd
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:37f7f622447168f6d79a6fe58f5377657d5fa01b6c81a26061cd7d137d68cc8f
+          field: section
+          ordinal: 0
+          source_hash: ec1f88083dbfa885751ff4fbc90d8c89ca663ebbe245400037ec69b926d9628b
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 47
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 14
+                end: 16
+          - name: leaf_1
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 31
+                end: 34
+          - name: leaf_2
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 36
+                end: 37
+          - name: leaf_3
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 39
+                end: 41
+          - name: leaf_4
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 43
+                end: 44
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 81310c2be982ac27a5e73e869e4349654e319fa93d940ffb89900af95503e144
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:81364a9a75b2a44926bcec8890a7356a5d7c1dee875915ae99eabcf3b9c4eced
+      source:
+        source_lang: ja
+        canonical_hash: a265b432023aa7f9b92d2129228dd3d306bc4c36e332f94a5b6f38e14aa94510
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:5874d600ca4ab6240df2dd49d2811cf9dc86cc648ca35521f473761d06914bff
+          field: effect
+          ordinal:
+          source_hash: e6539aeb00147bc16afe27af8708e8949cf41a122f37869a7f6ec918ebcf8953
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 34
+              end: 73
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Player
+            role: source_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 5
+                end: 13
+          - name: leaf_1
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 14
+                end: 22
+          - name: leaf_2
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 25
+                end: 26
+          - name: leaf_3
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 27
+                end: 28
+          - name: leaf_4
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.hand.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 33
+                end: 41
+          - name: leaf_5
+            type: Player
+            role: destination_owner
+            domain:
+              values:
+                - player.self.v1
+              min:
+              max:
+            required: false
+            occurrences: []
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 81364a9a75b2a44926bcec8890a7356a5d7c1dee875915ae99eabcf3b9c4eced
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:8137a68b660dd71f0c68afa90db999c18cbb484f89cca1ce1a8b4e202da92645
+      source:
+        source_lang: ja
+        canonical_hash: d96055d35cc273b3c917cbe47f1334725782e26e1b5d952678e0ee7b5aedb3ae
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:2501f225e728ea0552859b6ec20f0a3ef6dfb1e903a08edd389bbe1f35509465
+          field: effect
+          ordinal:
+          source_hash: a2346834fae96ae1a6f50099027cdbd395e987309a1fe15184ef2c170a85498e
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 58
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: repeat_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 6
+                end: 7
+          - name: leaf_1
+            type: Nat
+            role: cost_value
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 14
+                end: 15
+          - name: name_4
+            type: PredicateExpr
+            role: name_relation
+            domain:
+              values:
+                - predicate.name.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 36
+                end: 41
+            expression:
+              kind: predicate
+              expression_id: name.relative.event_subject.equal.v1
+              leaves: []
+              imports:
+                objects: names_port_e5a0896458b69b6d
+              scope: read_ability_0
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 50
+                end: 51
+          - name: leaf_3
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 53
+                end: 61
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes:
+          - id: read_ability_0
+            parent:
+            kind: ability
+          - id: read_ability_1
+            parent:
+            kind: ability
+        imports:
+          - name: names_port_e5a0896458b69b6d
+            type: ObjectSet
+            source_role: name_source
+            scope: read_ability_0
+            evidence:
+              source:
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:2501f225e728ea0552859b6ec20f0a3ef6dfb1e903a08edd389bbe1f35509465
+                field: effect
+                ordinal:
+                source_hash: a2346834fae96ae1a6f50099027cdbd395e987309a1fe15184ef2c170a85498e
+                line_ordinal: 0
+                role: body
+                segments:
+                  - start: 0
+                    end: 58
+              capture: lki
+              value:
+                kind: ObjectSet
+                objects:
+                  - object_id: source:e5a0896458b69b6dd5083cbb508c3d5a6ab819aaa9a461e868ea10d9e451fad0
+                    generation: 0
+                origin: event_subject
+              source_leaves: []
+        exports: []
+      content_hash: 8137a68b660dd71f0c68afa90db999c18cbb484f89cca1ce1a8b4e202da92645
+  - kind: sentence_template
+    data:
+      id: frame:81455142295ce49996314d41ce8c2355b4a3071e8e2a4b44bf7b3dd12f7a5974
+      source:
+        source_lang: ja
+        canonical_hash: 6a4dd201564431605bf19bb8d5c973638f1fdf638c628fe920b791a12438311b
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:1a8a6c013dc0a87773fdd7258aec1c57a7eeb71348e7fe33ac701167a00aacd3
+          field: effect
+          ordinal:
+          source_hash: 661892c130b2054701919808211ef23ceac9782ec325ef08570d1e792a53ece0
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 24
+              end: 73
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 9
+                end: 11
+          - name: leaf_1
+            type: Nat
+            role: resource_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 29
+                end: 30
+          - name: leaf_2
+            type: Nat
+            role: resource_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 41
+                end: 42
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 81455142295ce49996314d41ce8c2355b4a3071e8e2a4b44bf7b3dd12f7a5974
+  - kind: sentence_template
+    data:
+      id: frame:818a4ce0932fd278fe027f19837b7aa75d956985366e94aef687b362e9e7eaa1
+      source:
+        source_lang: ja
+        canonical_hash: 2136dab64e0290a57212fd1b602fd7a870124b9e6c55f7a06f542f32576b8c74
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:4b4604a859d249025af651b2d769716c3bca40aa69e44e645bfe4f2b1e0f825a
+          field: effect
+          ordinal:
+          source_hash: 6bc006554379f002fa30206d7d54e27d64059eb66833e679412aa777374245f0
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 7
+              end: 33
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 18
+                end: 20
+          - name: leaf_2
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 22
+                end: 23
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 818a4ce0932fd278fe027f19837b7aa75d956985366e94aef687b362e9e7eaa1
+  - kind: sentence_template
+    data:
+      id: frame:818e7a7390aee2d7710c562666007142471c6f14c6eb7f85ecf548bda5a479c6
+      source:
+        source_lang: ja
+        canonical_hash: 739546e239fbb2d4ec960142b1c0a5af31e190d0404af0e1cec4793ef4da0d96
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:e7ca445e10e442f733f82dc619c416728f15d7143fe038a6c4b743e34d33ad54
+          field: effect
+          ordinal:
+          source_hash: 2959fd3e8705545a490d5db274650be02b8e5791597d7415c7293f0da7cec415
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 20
+              end: 46
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: Player
+            role: source_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 9
+                end: 17
+          - name: leaf_2
+            type: DeckPosition
+            role: source_position
+            domain:
+              values:
+                - deck_position.edge.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 18
+                end: 26
+          - name: leaf_3
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 26
+                end: 27
+          - name: leaf_4
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 29
+                end: 37
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 818e7a7390aee2d7710c562666007142471c6f14c6eb7f85ecf548bda5a479c6
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:819078f77904927c87a9c2a171aa2c35dba49d37057841241f5c8a756debe365
+      source:
+        source_lang: ja
+        canonical_hash: 3f9b8ddefa2651f0e8aaf065b904c3570ab364fda282d1b92fe34ddab249ec8e
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:6cc72111ca0f93b26c1f082bf3ebce5f29b46a804deed85594d4171ca24cbeac
+          field: effect
+          ordinal:
+          source_hash: 2d20a42dbf88000077c9de14ca4627e6374babcbb49c9692dcbcaf097ea59619
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 27
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 10
+                end: 11
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 12
+                end: 13
+          - name: leaf_3
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 15
+                end: 23
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 819078f77904927c87a9c2a171aa2c35dba49d37057841241f5c8a756debe365
+  - kind: sentence_template
+    data:
+      id: frame:8195507138a77a9d903b5f61f7a090ab443e79df70a67924887b3e30295c59d4
+      source:
+        source_lang: ja
+        canonical_hash: 5fa7b375aacf09ca08681843ddba8ef34fae6039128a478f7f48559102332c83
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:29229bbf066231a7c8d716ba41cb034219e1115fc4a8a570c85b65363985b15b
+          field: effect
+          ordinal:
+          source_hash: dad3f56d18c8d763f2f5c36454a7435ef5f1af92f66bd1d0ee866a9d76294c37
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 20
+              end: 55
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 10
+                end: 18
+          - name: leaf_2
+            type: Nat
+            role: threshold
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 19
+                end: 20
+          - name: leaf_3
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 31
+                end: 33
+          - name: leaf_4
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 35
+                end: 36
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 8195507138a77a9d903b5f61f7a090ab443e79df70a67924887b3e30295c59d4
+  - kind: sentence_template
+    data:
+      id: frame:81a794de5f07b2d26e2efcb30aefbed8208a83a6caa895bdad1da9589e556270
+      source:
+        source_lang: ja
+        canonical_hash: 602e7589fd69dd0403757c42f98a10454c9da4e444fb3c9826c17df274d38e75
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:cb59fb6f20b773d1d859a202c22d16c71d335824d8cafdafc5d8fd58f78dc95c
+          field: effect
+          ordinal:
+          source_hash: 5a371fdebd5e00131cb3f4f312cf2eda37511ac28d62d0741b5b44f8a2979678
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 14
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 9
+                end: 10
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 81a794de5f07b2d26e2efcb30aefbed8208a83a6caa895bdad1da9589e556270
+  - kind: sentence_template
+    data:
+      id: frame:81d57f606a1540685fd4878003758ff9943e0f9d637fca15449c02251d52d811
+      source:
+        source_lang: ja
+        canonical_hash: 5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:d91fc68aef112bca7fa13d286f0e73578f716f61ca8603acf4f63d720fedb68d
+          field: effect
+          ordinal:
+          source_hash: 09c70e2ea8c4fa348074c7864eaf4851cc8558f1c1cf2b8f1cb5323162a2e425
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 6
+      leaf_schema:
+        format: 2
+        slots: []
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 81d57f606a1540685fd4878003758ff9943e0f9d637fca15449c02251d52d811
+  - kind: sentence_template
+    data:
+      id: frame:81d79cd631c7f03033c51b437271217c927a349f6f15f6a29b2c853b3ecf9c9f
+      source:
+        source_lang: ja
+        canonical_hash: 86110709f4c1d79791e5811e0d70e9e6ef5a653f885d20412380b79b632a5a0d
+        normalizer_version: four-layer-jp-v3
+      role: reminder
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:e88ed588c50ddfab52b91337f6e7efe1f922f664ccd092766c6252359ba64bba
+          field: effect
+          ordinal:
+          source_hash: 0cba70489403e5d8fcd45127b339187f492086083b70c0524bd0ce6d48e4bf13
+          line_ordinal: 2
+          role: reminder
+          segments:
+            - start: 74
+              end: 104
+      leaf_schema:
+        format: 2
+        slots: []
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 81d79cd631c7f03033c51b437271217c927a349f6f15f6a29b2c853b3ecf9c9f
+  - kind: sentence_template
+    data:
+      id: frame:81ff081d6518f7c1c3b1c8d04d555d66194bf8ad6aeca8e2c5b3d2b1a685a1a9
+      source:
+        source_lang: ja
+        canonical_hash: aadf3784b74ae4ec19398f9699455f5b0dee2172c67c6e8102473b4ebf916976
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:7220b05123fa4854de0fc20cbc6c42468252794dbdf302dc1cd1b66803af1f2a
+          field: effect
+          ordinal:
+          source_hash: be2a34df037b7e25230538100f9c88649d2e3e138645b7662c517698ca9ef819
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 36
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 23
+                end: 25
+          - name: leaf_1
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 27
+                end: 28
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 31
+                end: 32
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 81ff081d6518f7c1c3b1c8d04d555d66194bf8ad6aeca8e2c5b3d2b1a685a1a9
+  - kind: sentence_template
+    data:
+      id: frame:82072b93661036ac0c569ed4a13489914f4d502c4d04abc847738376e74c43cf
+      source:
+        source_lang: ja
+        canonical_hash: ae0c30005f65900ff3f92826bea68b5802683cf832109347a198d95f6e7c696a
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:bb58e92941b427213ff01fc5f11224f3c67862448894156bf9c13dde414a3408
+          field: effect
+          ordinal:
+          source_hash: d340f3398a0641bb11fe968313aedeb07b25acdff1f24d17cad556c41a890d91
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 60
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: damage_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 9
+                end: 10
+          - name: leaf_1
+            type: Nat
+            role: damage_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 28
+                end: 29
+          - name: leaf_2
+            type: Nat
+            role: threshold
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 44
+                end: 45
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 82072b93661036ac0c569ed4a13489914f4d502c4d04abc847738376e74c43cf
+  - kind: sentence_template
+    data:
+      id: frame:821fcbd4d750fd42fa6b13b6f9bc7a1f94767ef80b675fe814c80a3406af3ce1
+      source:
+        source_lang: ja
+        canonical_hash: aa1b562141a6e01a70b6d05a4285e6c81de2c27f24776894fb0a39b46dd7b743
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:cb517dda4b1fd7f3d8953c10eb03d6aa60688dd829f629f976fbefe0127d3329
+          field: effect
+          ordinal:
+          source_hash: 661892c130b2054701919808211ef23ceac9782ec325ef08570d1e792a53ece0
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 23
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: resource_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 18
+                end: 19
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 821fcbd4d750fd42fa6b13b6f9bc7a1f94767ef80b675fe814c80a3406af3ce1
+  - kind: sentence_template
+    data:
+      id: frame:822497fe1498f0dc5d93e9f8724f20ac921e5610f7436916a19136446e244dc1
+      source:
+        source_lang: ja
+        canonical_hash: 96ccd3aad5106b187a3f176383d0d1dc12008862cb2629b2ff3a854ef3ff2024
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:6a99a45d4dfbf08fa81840cb584b6b444f7457a2f9a052ac5c38fc9a4c37c96d
+          field: effect
+          ordinal:
+          source_hash: e49a41a82570b86b165488224047989b7c1c81c367e6b04d6caa6825f56ee9d9
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 27
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 8
+                end: 9
+          - name: leaf_1
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 18
+                end: 21
+          - name: leaf_2
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 23
+                end: 24
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 822497fe1498f0dc5d93e9f8724f20ac921e5610f7436916a19136446e244dc1
+  - kind: sentence_template
+    data:
+      id: frame:8266e094936b3639adada7701add518bdb6cd9a6c144d6b343da18e7d1845fba
+      source:
+        source_lang: ja
+        canonical_hash: fd66debdafa4c048d1209a0f66f145108157fc7ab4f463c0b7a62df681e2ea3e
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:e72ae3cee3cc503ddd54a0f854965d5128f68edea1d07a7a723994811eecb91a
+          field: effect
+          ordinal:
+          source_hash: b0a6c7cb662a572d2d43637796968c5cff5a6efffb0b539c3355dead8433e401
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 20
+              end: 63
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: threshold
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 8
+                end: 9
+          - name: leaf_1
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 34
+                end: 37
+          - name: leaf_2
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 39
+                end: 40
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 8266e094936b3639adada7701add518bdb6cd9a6c144d6b343da18e7d1845fba
+  - kind: sentence_template
+    data:
+      id: frame:826c0d3ec81cd9cced99d0a8b7cc2d17acc57794c482779a31d1e7cb995c123d
+      source:
+        source_lang: ja
+        canonical_hash: ca5978e0017232dc07a7475182e8fd63f2339106fe1ff34005caac2f46f7f420
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:170d3ade4975bd00e37a6a7074cd29c6e196530df4c4a267f09d164558bad608
+          field: effect
+          ordinal:
+          source_hash: 7efab449d071c70cf31621b714b337242dafaad2872bde657b4c999a670d04bc
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 62
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 3
+          - name: leaf_1
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 5
+                end: 7
+          - name: leaf_2
+            type: Nat
+            role: cost_value
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 12
+                end: 13
+          - name: leaf_3
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 37
+                end: 38
+          - name: leaf_4
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 40
+                end: 48
+          - name: leaf_5
+            type: Nat
+            role: duration_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 57
+                end: 58
+          - name: leaf_6
+            type: Nat
+            role: repeat_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 62
+                end: 63
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 826c0d3ec81cd9cced99d0a8b7cc2d17acc57794c482779a31d1e7cb995c123d
+  - kind: sentence_template
+    data:
+      id: frame:826f31abccfdd945a1a345e39bbf0fccaf78d8a0c8290d9f8feb21b7471b2a15
+      source:
+        source_lang: ja
+        canonical_hash: ff62267532a61266c809b81bf192e83f9fe954ba8908e27e96b03d92c5a0d7ef
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:35b7cb83164c743e5beeafaca5831296d90b4ef1c6b9729fde4f15f1f7289d04
+          field: effect
+          ordinal:
+          source_hash: a3083326e86518cb3b694d47814ed0586f6f091cf172ab763e1496099896cde4
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 23
+              end: 76
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: Player
+            role: counted_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 9
+                end: 17
+          - name: leaf_2
+            type: ZoneSet
+            role: counted_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 18
+                end: 26
+          - name: leaf_3
+            type: Concept
+            role: trait
+            domain:
+              values:
+                - concept.trait.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 27
+                end: 35
+          - name: leaf_4
+            type: CardKind
+            role: counted_kind
+            domain:
+              values:
+                - card_kind.selection.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 36
+                end: 44
+          - name: leaf_5
+            type: QuantitySpec
+            role: existence_count
+            domain:
+              values:
+                - quantity.existence_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 45
+                end: 46
+          - name: leaf_6
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 56
+                end: 59
+          - name: leaf_7
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 61
+                end: 62
+          - name: leaf_8
+            type: Concept
+            role: keyword
+            domain:
+              values:
+                - concept.keyword.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 66
+                end: 68
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 826f31abccfdd945a1a345e39bbf0fccaf78d8a0c8290d9f8feb21b7471b2a15
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:827040e56cf04c08b13c979db9e1a42913e83e512e1cb863867784461ce67220
+      source:
+        source_lang: ja
+        canonical_hash: 5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:44733d2bb7f2874e68e395cc3c1dcddbfb11304ee9a8a1ac1492d48942a544b0
+          field: section
+          ordinal: 0
+          source_hash: 1a162b5b0f5a4813b62472f8b5aae6393bec0122f169399bef3bcacf89340ddd
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 29
+              end: 35
+      leaf_schema:
+        format: 2
+        slots: []
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 827040e56cf04c08b13c979db9e1a42913e83e512e1cb863867784461ce67220
+  - kind: sentence_template
+    data:
+      id: frame:827b5d9130a184acb1e8a18fea8c9df113c421016118379803d5831339efcfaa
+      source:
+        source_lang: ja
+        canonical_hash: f65dbe4983db31116e570785832a57f0ff1259ebcc52c10f3233934df29138f3
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:262d3348cdf9d3bb41840d79fca08649360234f506551ace540aaf9175b9ca33
+          field: effect
+          ordinal:
+          source_hash: 6b9067dc95761fe2cdebc41223808bbe88781e357057e5bfd90b17c6306e587e
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 5
+              end: 69
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 5
+                end: 13
+          - name: leaf_1
+            type: CardKind
+            role: counted_kind
+            domain:
+              values:
+                - card_kind.follower.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 16
+                end: 24
+          - name: leaf_2
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 24
+                end: 25
+          - name: leaf_3
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 33
+                end: 41
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 827b5d9130a184acb1e8a18fea8c9df113c421016118379803d5831339efcfaa
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:82a671ad0f16654f629f78bf856312c00b9c255ef33757090b6913d48b51e774
+      source:
+        source_lang: ja
+        canonical_hash: b39841b4505f4ffa8e877c216df831f8ea7e69269cbdad6035f2d2c205cc5249
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:236b706d32dfb45a156e8ddfa722b670482d18e68392792fa1fb7dfdc7b949c4
+          field: effect
+          ordinal:
+          source_hash: adc5eeb16cab1953512ece216df8393933d6fe5562a2e4777b20a6b1c29b1f92
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 55
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 3
+          - name: leaf_1
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 5
+                end: 7
+          - name: leaf_2
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 12
+                end: 15
+          - name: leaf_3
+            type: Player
+            role: source_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 17
+                end: 25
+          - name: leaf_4
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 26
+                end: 34
+          - name: leaf_5
+            type: CardKind
+            role: counted_kind
+            domain:
+              values:
+                - card_kind.follower.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 35
+                end: 43
+          - name: leaf_6
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 43
+                end: 44
+          - name: leaf_7
+            type: Player
+            role: read_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 55
+                end: 57
+          - name: leaf_8
+            type: QuantityExpr
+            role: count_expression
+            domain:
+              values:
+                - quantity.count_expression.current_zone.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 57
+                end: 58
+              - start: 60
+                end: 63
+          - name: leaf_9
+            type: ZoneSet
+            role: read_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 58
+                end: 60
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes:
+          - id: read_ability_0
+            parent:
+            kind: ability
+          - id: read_ability_1
+            parent:
+            kind: ability
+        imports: []
+        exports: []
+      content_hash: 82a671ad0f16654f629f78bf856312c00b9c255ef33757090b6913d48b51e774
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:82bfd0e4edcf4c04af49dd76749cbbc70bf2e47c369117c5d8a087a148b35195
+      source:
+        source_lang: ja
+        canonical_hash: 4e3cdefee34771927104a858c222741e8456c6a186effed8e27b97936c16250b
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0c4c7adb491c04094a9a0a34704b824ec7d54685eeb2f93d756550795382ef6b
+          field: effect
+          ordinal:
+          source_hash: 2aa1790227bb7f01913f3750cbb45218596b3033ad0973007d62583a3b33b96f
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 69
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: damage_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 19
+                end: 20
+          - name: leaf_1
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 26
+                end: 27
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 28
+                end: 29
+          - name: leaf_3
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 31
+                end: 39
+          - name: leaf_4
+            type: Nat
+            role: cost_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 64
+                end: 65
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 82bfd0e4edcf4c04af49dd76749cbbc70bf2e47c369117c5d8a087a148b35195
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:82c62e8f32236c9750c0ef826efa307d44f638c03a8c66cca3b897a38e0f4670
+      source:
+        source_lang: ja
+        canonical_hash: acbfd35e83ccf3a706c5e64d77005fac33ec69d24f711cabb3cb36e74549eea8
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:c0b5ce741d974c6b3debf07b88dd32606fbd1b578f7816af035e8c51b490b07d
+          field: effect
+          ordinal:
+          source_hash: 3b53fb73cbdef0b88c6a124ddd93cc64afb68f431983c65bac7a5f58cc460414
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 36
+              end: 83
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 3
+          - name: leaf_1
+            type: Nat
+            role: cost_value
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 8
+                end: 9
+          - name: leaf_2
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 14
+                end: 17
+          - name: leaf_3
+            type: Player
+            role: source_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 19
+                end: 27
+          - name: leaf_4
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 28
+                end: 36
+          - name: leaf_5
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 39
+                end: 40
+          - name: leaf_6
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 41
+                end: 42
+          - name: leaf_7
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 48
+                end: 56
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 82c62e8f32236c9750c0ef826efa307d44f638c03a8c66cca3b897a38e0f4670
+  - kind: sentence_template
+    data:
+      id: frame:82d7b98b754099159865113fda75781940467d4abfe7913293349b4a6315d604
+      source:
+        source_lang: ja
+        canonical_hash: ae588a833b0e7ecd8b3491c9b5736444169640a836e1a434447268002a995049
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:0747505c98288b3604690cec48ae255c07fff6d926b871598d7988cb5eac9166
+          field: effect
+          ordinal:
+          source_hash: fd16d77ac51a2b3fa4b421407cc95b102288cbf231a091d7fdfe36195c2b0b94
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 29
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: ZoneSet
+            role: source_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 5
+                end: 13
+          - name: leaf_1
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 14
+                end: 22
+          - name: leaf_2
+            type: QuantitySpec
+            role: selection_count
+            domain:
+              values:
+                - quantity.selection_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 22
+                end: 23
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 82d7b98b754099159865113fda75781940467d4abfe7913293349b4a6315d604
+  - kind: sentence_template
+    data:
+      id: frame:82da64c8587e4d8259b88f8742fce63d7de86cafa871285850ddb75712e7e101
+      source:
+        source_lang: ja
+        canonical_hash: ce2417a4368eb484cce7c34cdab8630d752797dbaaad080b55ba7cd1cb10df1e
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:d6f3e98c277823c1025ef47a172118071112c79517693599acdb00b55c0a1237
+          field: effect
+          ordinal:
+          source_hash: 16856320cbbe579dc147175a29f456a8f10f7a9668edd70c835b5a8e36236a27
+          line_ordinal: 2
+          role: body
+          segments:
+            - start: 31
+              end: 74
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 3
+          - name: leaf_1
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 10
+                end: 12
+          - name: leaf_2
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 14
+                end: 15
+          - name: leaf_3
+            type: Concept
+            role: keyword
+            domain:
+              values:
+                - concept.keyword.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 20
+                end: 22
+          - name: leaf_4
+            type: Nat
+            role: duration_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 32
+                end: 33
+          - name: leaf_5
+            type: Nat
+            role: repeat_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 37
+                end: 38
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 82da64c8587e4d8259b88f8742fce63d7de86cafa871285850ddb75712e7e101
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:82e3068a758836b73f2c562dca738dca0440d87928d5f135598f277c7fe8a2be
+      source:
+        source_lang: ja
+        canonical_hash: 51544bea670b910b9f423ed6a8e095f084104641d658ce21f3ed9f30bdb7b847
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:6c9c762106c8ef0ab150f2c8fd84cff25b1217508878d7543d3dadff37a66f38
+          field: section
+          ordinal: 0
+          source_hash: d6753ad080638f4a0da9edcfd34f899f645520d2bc8bbcb4b0392a0859d99619
+          line_ordinal: 1
+          role: body
+          segments:
+            - start: 19
+              end: 70
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 9
+                end: 11
+          - name: leaf_1
+            type: Nat
+            role: stat_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 13
+                end: 14
+          - name: leaf_2
+            type: Player
+            role: counted_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 17
+                end: 25
+          - name: leaf_3
+            type: ZoneSet
+            role: counted_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 26
+                end: 34
+          - name: leaf_4
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 36
+                end: 37
+          - name: leaf_5
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 47
+                end: 55
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 82e3068a758836b73f2c562dca738dca0440d87928d5f135598f277c7fe8a2be
+  - origin: machine
+    kind: sentence_template
+    data:
+      id: frame:82e6db364206c325ea2236d630d6db165c0b023aa00c17cca6f3a228784bce19
+      source:
+        source_lang: ja
+        canonical_hash: 83ab993f0932b30cd70d9f26df449d6973f3b71db6581d0e8dcfcfc0074c181f
+        normalizer_version: four-layer-jp-v3
+      role: body
+      semantic_variant:
+        state: pending
+        key:
+        scope:
+          owner:
+            kind: face_revision
+            revision_id: rev:v1:8de55612f31b02b7f5113f9229358c7f7db6b7df87689036336994239144b8cd
+          field: effect
+          ordinal:
+          source_hash: 104f54cbb973a11b599e2419ab539583cc90bf3168d983e40f16ac242f56fe89
+          line_ordinal: 0
+          role: body
+          segments:
+            - start: 0
+              end: 27
+      leaf_schema:
+        format: 2
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 8
+          - name: leaf_1
+            type: CardName
+            role: name_reference
+            domain:
+              values:
+                - card_name.any.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 10
+                end: 11
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 12
+                end: 13
+          - name: leaf_3
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 15
+                end: 23
+      projection:
+        projection_kind: pending
+        discriminator:
+        scopes: []
+        imports: []
+        exports: []
+      content_hash: 82e6db364206c325ea2236d630d6db165c0b023aa00c17cca6f3a228784bce19

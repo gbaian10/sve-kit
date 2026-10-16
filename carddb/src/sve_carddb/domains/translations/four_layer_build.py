@@ -359,7 +359,10 @@ def _populate(
             )
             if isinstance(record, TargetRecord):
                 selected[record.data.template_id, record.data.lang] = SelectedTarget(
-                    record.data.target, record.origin, record.low_confidence
+                    record.data.target,
+                    record.origin,
+                    record.low_confidence,
+                    expression_targets=record.data.expression_targets,
                 )
     return forms, selected, audit
 

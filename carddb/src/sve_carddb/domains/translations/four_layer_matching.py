@@ -11,7 +11,6 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical
-from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -40,15 +39,13 @@ def _key(frame: Frame) -> bytes:
             "role": frame.role,
             "semantic_variant": frame.semantic_variant.model_dump(mode="json"),
             "projection": frame.projection.model_dump(mode="json"),
+            "mode_rules": [r.model_dump(mode="json") for r in frame.mode_rules],
         }
     )
 
 
 class Frames:
-    def __init__(
-        self, frames: Iterable[Frame], *, normalizer_version: str = VERSION
-    ) -> None:
-        self.normalizer_version = normalizer_version
+    def __init__(self, frames: Iterable[Frame]) -> None:
         self.index: dict[bytes, list[Frame]] = {}
         identifiers = set()
         for frame in frames:
@@ -66,13 +63,11 @@ class Frames:
         field = derived.field
         part = field.parts[ordinal]
         recognized = derived.recognized[ordinal]
-        candidate_frame, _ = recognized.bind(
-            field.source, part, normalizer_version=self.normalizer_version
-        )
+        candidate_frame, _ = derived.bind(ordinal)
         candidates = self.index.get(_key(candidate_frame), ())
         matches = []
         for frame in candidates:
-            binding = bind_recognized(frame, field, part, recognized)
+            binding = bind_recognized(frame, field, part, recognized, mixed=True)
             if binding is not None:
                 matches.append(Matched(frame, binding))
         if len(matches) > 1:

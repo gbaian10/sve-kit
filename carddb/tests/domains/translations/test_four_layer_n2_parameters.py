@@ -17,13 +17,10 @@ from sve_carddb.core.json import canonical
 from sve_carddb.domains.catalog.models import Term as VocabularyTerm
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
-from sve_carddb.domains.translations.four_layer_expressions import (
-    ExpressionTargets,
-    PreparationRenderer,
-)
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
+from sve_carddb.domains.translations.four_layer_expressions import ExpressionTargets
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Form,
@@ -32,6 +29,7 @@ from sve_carddb.domains.translations.four_layer_render import (
     SelectedTarget,
 )
 
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import classifier, source
 
 if TYPE_CHECKING:
@@ -84,8 +82,8 @@ def test_payment_is_positive_and_omission_has_no_fabricated_span(
 ) -> None:
     raw = f"【土の秘術{suffix}】これは仮の効果を行う。"
     catalog = engine()
-    before = derive_source(raw, source(raw), catalog)
-    prepared = derive_preparation(raw, source(raw), catalog)
+    before = analyze_source(raw, source(raw), catalog)
+    prepared = derive_source(raw, source(raw), catalog)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, catalog, frame, binding)
     slots = {s.role: s for s in frame.leaf_schema.slots}
@@ -129,7 +127,7 @@ def test_payment_is_positive_and_omission_has_no_fabricated_span(
 
 def test_filter_in_payment_line_is_not_another_payment() -> None:
     raw = "【土の秘術】自分の手札の【土の秘術】を持つカード２枚を選ぶ。"
-    prepared = derive_preparation(raw, source(raw), engine())
+    prepared = derive_source(raw, source(raw), engine())
     assert [s.role for s in prepared.derived.recognized[0].schema.slots].count(
         "earth_rite_amount"
     ) == 1
@@ -141,7 +139,7 @@ def test_payment_composes_with_a_choice_interface_in_one_part() -> None:
         (Term("term:ability.earth_rite", "ability", "土の秘術"),),
         ("bracket_choice_index", "suffix_unit_items"),
     )
-    prepared = derive_preparation(raw, source(raw), catalog)
+    prepared = derive_source(raw, source(raw), catalog)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, catalog, frame, binding)
     assert "earth_rite_amount" in {s.role for s in frame.leaf_schema.slots}
@@ -161,7 +159,7 @@ def test_die_faces_keep_disjunction_and_interval_distinct(
 ) -> None:
     raw = "サイコロをふる。" + condition + "仮の効果を行う。"
     catalog = engine()
-    prepared = derive_preparation(raw, source(raw), catalog)
+    prepared = derive_source(raw, source(raw), catalog)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, catalog, frame, binding)
     slots = [s for s in frame.leaf_schema.slots if s.role.startswith("dice_")]
@@ -186,8 +184,8 @@ def test_die_faces_keep_disjunction_and_interval_distinct(
 )
 def test_neighboring_unsealed_sources_keep_complete_v2_evidence(raw: str) -> None:
     catalog = engine()
-    before = derive_source(raw, source(raw), catalog)
-    assert derive_preparation(raw, source(raw), catalog).derived == before
+    before = analyze_source(raw, source(raw), catalog)
+    assert derive_source(raw, source(raw), catalog).derived == before
 
 
 @pytest.mark.parametrize(
@@ -197,7 +195,7 @@ def test_only_complete_bare_headers_gain_declared_kind(kind: str, code: str) -> 
     raw = f"『仮の道具』{{仮クラス}}仮族・{kind}" + (
         "{コスト４}" if code == "equipment" else ""
     )
-    prepared = derive_preparation(raw, source(raw, "section"), engine())
+    prepared = derive_source(raw, source(raw, "section"), engine())
     ordinal = next(
         p.ordinal
         for p in prepared.derived.field.parts
@@ -224,7 +222,7 @@ def test_only_complete_bare_headers_gain_declared_kind(kind: str, code: str) -> 
 def test_assignment_stays_in_its_attached_reminder() -> None:
     raw = "仮の効果を行う。（このターン、これを{攻撃力}７/{体力}８のフォロワーにする）"
     catalog = engine()
-    prepared = derive_preparation(raw, source(raw), catalog)
+    prepared = derive_source(raw, source(raw), catalog)
     index = next(
         p.ordinal
         for p in prepared.derived.field.parts
@@ -247,7 +245,7 @@ def test_payment_form_uses_normal_labels_ranges_and_missing_label_fallback(
 
     raw = f"【土の秘術{suffix}】これは仮の効果を行う。"
     catalog = engine()
-    prepared = derive_preparation(raw, source(raw), catalog)
+    prepared = derive_source(raw, source(raw), catalog)
     frame, binding = prepared.bind(0)
     slots = {s.role: s.name for s in frame.leaf_schema.slots}
     form = FormDefinition.model_validate_json(
@@ -301,31 +299,24 @@ def test_payment_form_uses_normal_labels_ranges_and_missing_label_fallback(
             reference, "zh-Hant", "土之秘術", "project", False, True
         )
     }
-    renderer = PreparationRenderer(
-        Renderer(labels, {}, {}, domains=catalog.domains),
-        ExpressionTargets({}),
-        preparation_forms=forms,
+    renderer = Renderer(labels, {}, {**forms}, domains=catalog.domains)
+    rendered = renderer.render(
+        "ctx:synthetic", "zh-Hant", expression_plan((item,), ExpressionTargets({}))
     )
-    rendered = renderer.render("ctx:synthetic", "zh-Hant", (item,))
     assert rendered.rendered is not None
     assert rendered.rendered.text == ("【土之秘術 4】" if suffix else "【土之秘術 1】")
     assert rendered.rendered.annotation.occurrences[0].ranges == (Span(start=1, end=5),)
-    missing = PreparationRenderer(
-        Renderer({}, {}, {}, domains=catalog.domains),
-        ExpressionTargets({}),
-        preparation_forms=forms,
-    )
-    assert missing.render("ctx:synthetic", "zh-Hant", (item,)).issues == (
-        "missing_term_translation",
-    )
-    with pytest.raises(ValueError, match="Unknown"):
-        Renderer(labels, {}, forms)
+    missing = Renderer({}, {}, {**forms}, domains=catalog.domains)
+    assert missing.render(
+        "ctx:synthetic", "zh-Hant", expression_plan((item,), ExpressionTargets({}))
+    ).issues == ("missing_term_translation",)
+    assert Renderer(labels, {}, forms).forms == forms
 
 
 def test_interval_form_renders_only_bounds_and_rejects_hidden_arguments() -> None:
     raw = "サイコロをふる。２から５なら、仮の効果を行う。"
     catalog = engine()
-    prepared = derive_preparation(raw, source(raw), catalog)
+    prepared = derive_source(raw, source(raw), catalog)
     frame, binding = prepared.bind(0)
     slots = {s.role: s.name for s in frame.leaf_schema.slots}
     form = FormDefinition.model_validate_json(
@@ -349,19 +340,15 @@ def test_interval_form_renders_only_bounds_and_rejects_hidden_arguments() -> Non
         )
     )
     reference = GlossaryReference(kind="glossary", key="term:object.die")
-    renderer = PreparationRenderer(
-        Renderer(
-            {
-                (canonical(reference.model_dump(mode="json")), "zh-Hant"): Label(
-                    reference, "zh-Hant", "骰子", "project", False, False
-                )
-            },
-            {},
-            {},
-            domains=catalog.domains,
-        ),
-        ExpressionTargets({}),
-        preparation_forms={(form.id, form.lang): Form(form)},
+    renderer = Renderer(
+        {
+            (canonical(reference.model_dump(mode="json")), "zh-Hant"): Label(
+                reference, "zh-Hant", "骰子", "project", False, False
+            )
+        },
+        {},
+        {(form.id, form.lang): Form(form)},
+        domains=catalog.domains,
     )
     target = Target.model_validate_json(
         canonical(
@@ -387,16 +374,19 @@ def test_interval_form_renders_only_bounds_and_rejects_hidden_arguments() -> Non
     result = renderer.render(
         "ctx:synthetic",
         "zh-Hant",
-        (BoundTarget(frame, binding, SelectedTarget(target)),),
+        expression_plan(
+            (BoundTarget(frame, binding, SelectedTarget(target)),),
+            ExpressionTargets({}),
+        ),
     )
     assert result.rendered is not None
     assert result.rendered.text == "骰子2至5"
     assert len(result.rendered.annotation.occurrences) == 1
     with pytest.raises(ValueError, match="each typed argument"):
-        PreparationRenderer(
-            Renderer({}, {}, {}),
-            ExpressionTargets({}),
-            preparation_forms={
+        Renderer(
+            {},
+            {},
+            {
                 (form.id, form.lang): Form(
                     form.model_copy(update={"cases": {"default": ()}})
                 )
@@ -409,8 +399,8 @@ def test_die_parameters_preserve_the_printed_position_of_an_existing_omitted_own
 ):
     raw = "{起動}手札２枚を捨てる：サイコロをふる。２なら、仮の効果を行う。"
     catalog = engine()
-    before = derive_source(raw, source(raw), catalog).recognized[0]
-    prepared = derive_preparation(raw, source(raw), catalog)
+    before = analyze_source(raw, source(raw), catalog).recognized[0]
+    prepared = derive_source(raw, source(raw), catalog)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, catalog, frame, binding)
     old_roles = {s.name: s.role for s in before.schema.slots}

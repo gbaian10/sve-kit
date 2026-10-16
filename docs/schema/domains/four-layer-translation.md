@@ -60,7 +60,7 @@ glossary_choice_variant 與 translation_override 沿原欄位與來源規則；�
 | kind／路徑（相對 authored/translations） | 選擇鍵 | data 的完整形狀／差異 |
 | --- | --- | --- |
 | sentence_template；templates/definitions | id | §3 Frame authored 欄位；移除舊 normalized_hash、parameter_schema，改 source、leaf_schema |
-| template_translation；templates/values | template_id,lang | `{template_id:FrameID,lang:Lang,target:Target}`；text 改 target，A/B/C 驗引用與完整使用，FL-005 |
+| template_translation；templates/values | template_id,lang | `{template_id:FrameID,lang:Lang,target:Target,expression_targets:{Code:Target}}`；map 可省略為空；variant 另以 variant_key 選完整稿件，A/B/C 驗引用與完整使用，FL-005 |
 | template_translation_variant；templates/values | template_id,lang,variant_key | 上列加 `variant_key:Code`，不可 default；不是 semantic_variant，FL-001／FL-005 |
 | template_translation_candidate；templates/candidates | source_kind,candidate_id,lang | 保留未啟用的七欄草稿，依翻譯契約 §2.1；不能被 LeafRef／pin 引用，FL-029 |
 | translation_form；forms | id,lang | §5 FormDefinition；封閉文法表，不保存官方全文，FL-012 |
@@ -214,7 +214,7 @@ N0 原以全庫版本 `four-layer-jp-v1` 封版，該版已不再接受（見 §
 
 ### 4.2 N0 整段語義構造登錄
 
-N0 的 resolved key、來源 role、投影及能力作用域只由來源語義分類產生；B 以現行 v2 來源推導重放比對，不另設版本登錄。
+N0 的 resolved key、來源 role、投影及能力作用域只由來源語義分類產生；B 以現行 v3 來源推導重放比對，不另設版本登錄。
 未知 key、role／投影錯配或額外作用域均拒絕；未知完整語法維持 occurrence-scoped pending。
 
 | key | role | projection_kind | 獨立 ability scope 數 |
@@ -236,7 +236,7 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 
 ### 4.3 N1 正式來源登錄
 
-`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v2`；正式 compile、authored reader 與 DB reader 只接受 v2，不保留 v1 雙軌 reader。
+`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v3`；正式 compile、authored reader 與 DB reader 只接受 v3，不保留舊版 reader。
 N0 的來源構造與數值規則是 N1 明列的既有基礎；歷史對帳使用切換前已保存的 N0 建置資料，不從新 frame 反推舊版。
 此入口沿相同 source units、分段、catalog、數值規則及來源驗證邊界產葉，不另建來源驗證器。
 只擴充精確 face_revision／printing_face 的 effect／section 中 role=body 的部分；name、label、layout、reminder、token_header
@@ -262,7 +262,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用 N1。
+這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v3 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -378,7 +378,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 N1 v2。
+renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v3。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
 
 | ID | signature（name:type/role） | rule／cases |
@@ -548,7 +548,7 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 | 邏輯列／鍵 | 四層欄位、引用與差異 | 驗證者；失敗／案例 |
 | --- | --- | --- |
 | sentence_template；PK id | §3 Frame＋建置才有的 canonical_source:Text；source 描述拆欄或型別 Json；取代舊六欄 payload | B/C；hash／域錯配；FL-002／FL-004 |
-| template_translation；PK template_id,lang,variant_key | target:Target 取代 text；其餘品質欄保留；template_id FK、variant_key=default 表一般值 | A/B/C；壞 target；FL-005 |
+| template_translation；PK template_id,lang,variant_key | target:Target、expression_targets:{Code:Target}；其餘品質欄保留；template_id FK、variant_key=default 表一般值 | A/B/C；壞 target；FL-005 |
 | glossary_term、glossary_translation；鍵不變 | 基礎概念／選詞及 emphasis 保留；形式不把基礎名字複製成多份 translation | A/B/C；引用錯配；FL-013／FL-015 |
 | translation_form；PK id,lang | §5 FormDefinition＋人工來源／品質欄；rule 隨 renderer pin，signature／cases 有型別 | A/B/C；壞 form；FL-012 |
 | text_template_binding；PK id，UQ use_id,ordinal | §6 SourceBinding；use_id FK translation_use 取代 context_id，context 沿 use 取得；owner 不同即各驗來源 | B/C；錯 owner／錯面／同字串借用；FL-007／FL-028 |
@@ -562,6 +562,8 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 | translation_use_annotation；PK use_id | `{use_id:ID,annotation_set_id:ID}`；兩欄 FK，text 必等 use 的來源；沒有譯文也能存在 | B/C；JP offsets 套 EN；FL-023 |
 
 render_leaf_occurrence 的 node_path 以零起算子節點索引逐層定位；同 form 多個 Label 各有不同路徑。
+主 Target 與 expression map 共同參與資料序列化、選稿與 render dependency；固定字、實際展開的
+expression AST、label／Form、品質及 variant 改動皆重算。完整稿件不同不能僅因主 AST 相同而合併。
 source_ordinals 排序唯一；同葉值多處來源共同供一次呈現時可列多筆，輸出重複兩次時必有兩列。
 省略來源但經具名規則解析的葉仍有 omitted occurrence，因此不用假 source span。
 
@@ -765,14 +767,12 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。
 
-## 11. 隔離的 v3 準備接口
+## 11. v3 來源推導與 expression 呈現
 
-`four_layer_preparation.derive_preparation(raw, source, classifier)` 產生 `PreparedField`，
-由其 `bind` 建立 `four-layer-jp-v3` 身分，`verify` 從原始來源重新 derive，
-再驗完整 frame、binding、語義及接口。這是私人比較材料的入口；正式 workflow
-仍呼叫 `derive_source`，固定產生 `four-layer-jp-v2`。正式 classifier、authored
-與 SQLite 來源契約拒絕 v3 及未知版；v2 authored／SQLite 不接受 ChoiceContext port。
-準備入口在正式切換時移除，不是永久雙版執行設定。
+`four_layer_derivation.derive_source(raw, source, classifier)` 產生 `DerivedField`，
+由其 `bind` 建立 `four-layer-jp-v3` 身分；`verify` 從原始來源重新推導，
+再驗完整 frame、binding、語義及接口。正式 compile、classifier、authored 與
+SQLite 來源契約只接受 v3，沒有可選家族或舊版執行入口。
 
 此接口只在正式來源辨識上依序套用已封版的容量、具名參數與區域計數／SEP 規則，
 最後依最終葉建構常數選項接口；共用型別不授予其他來源句型。
@@ -784,7 +784,7 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 常數選項接口僅描述同一片段、同能力中已有唯一在前 intro、常數 choice_mode_count 與
 按印刷次序連續 1..K 的 choice_index。沿既有完整欄位的 choice 守衛，所有 intro／序號
 均須已具 typed 葉且無來源問題；跨片段、孤兒、歧義及缺卡名／數值前置者不加接口。
-`PreparedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v3 frame／binding
+`DerivedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v3 frame／binding
 並附接口，接口沿既有 `interface_key` 獨立驗證，不進 frame hash；`verify` 從原文重建後比對。
 `choice` 能力 scope 匯出
 `ChoiceContext/choice_mode_count`，依印刷序的 `choice_1`…`choice_K` branch scope
@@ -799,7 +799,7 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 具名種類保留字面，`term:object.counter` 以既有 `Concept/rule_term` 閉域引用，
 缺概念時保持 pending，缺語言選詞時沿既有 renderer 整欄 fallback。
 不新增具名指示物概念或 CounterNP／Form，不建立其他 holder、Stack 或歷史關係。
-這是 S，既有容量用途須經準備 bind／verify 後才能建立 target；正式 v2 辨識仍不變。
+容量用途須經正常來源 bind／verify 後才能建立 target。
 
 ### 11.2 有限 expression 與來源綁定
 
@@ -828,29 +828,40 @@ ID 為 `count.current_zone.<依序形參>.<固定限定>.<偏移>.v1`，沒有�
 只收此登錄內的 QuantityExpr，不放寬任何既有常數域。
 沒有任意運算式 parser、數值求值或負數截零。
 
-`ExpressionTargets` 依語言選取既有 Target，僅允許 Literal／LeafRef／Form。
+每個 authored frame Target（含 variant）保存自己的 `expression_targets:{expression_id:Target}`，
+語言沿用該句 Target 的 `lang`。`ExpressionTargets` 只從該欄實際選中的句子 Target 建立，
+pin 換 variant 時連同 expression 譯文一起換；沒有全域同 ID 的單一譯文。
+所有權單位是 `(template_id, lang, variant_key)`；每個 BoundTarget 分別查自己的 map，
+不先聯集同欄 map、不與 default 合併，也不跨語言借稿。
+同一 descriptor 在不同句子可以依指涉、區域、引號、單位或受修飾動詞保留不同呈現，
+不改 descriptor ID、來源語義或簽章。expression Target 僅允許 Literal／LeafRef／Form。
 Target 引用規則的形參；`Expression.leaves` 依序提供實際 frame 槽名，
 兩者不必同名。展開先驗型別、角色、閉域與完整必要參數，再代入實參。
-準備版主 Target 以任一節點引用 expression 槽時（LeafRef、Form、CountExpr，
+主 Target 以任一節點引用 expression 槽時（LeafRef、Form、CountExpr，
 或數量為 expression 的 CardNP／UnionNP），其實參也計入 required 使用閉包；
-未引用的 expression 不傳遞使用。expression 譯文仍必須呈現全部形參。
-`PreparedField.verify(..., target=..., lang=..., forms=...)` 對候選 authored target
-與準備 renderer 共用此規則；缺 expression 引用或實參值仍拒絕。
-正式 v2 的 Target 驗證、authored 載入及 renderer 不啟用此閉包。
-`PreparationRenderer` 沿既有 renderer 保留引用閉包、文字範圍、葉路徑、origin
-及低信心；缺語言 Target 仍整欄 fallback。未知 ID、錯參數、缺實參、循環皆拒絕。
+未引用的 expression 不傳遞使用。閉包沿 wrapper 及 import source leaves 遞迴，map key 必須
+恰為可達 descriptor 集合。expression 譯文仍必須呈現全部形參；只在 Form case 判斷讀值不算呈現。
+同句同 ID 多次呼叫都逐次驗實參並代入，不能只驗第一個 occurrence；這些呼叫共用一句內的一份稿。
+若需要兩種無法無損外提的稿件，明確報衝突，不取首份／末份，也不為中文改語義 ID。
+authored reader 對所有語言與未啟用 variant 先驗已可判定的 ID、節點、形參、引用及未用項目；
+依 binding 才能判定的來源值、scope 及閉包仍於所選 Target 一起進入正常 `Renderer`，
+再驗 required 閉包及實際用到的 expression 集合。缺 expression 譯文以
+`missing_expression_translation` 整欄 fallback；多帶未使用的 expression 譯文拒絕。
+未知 ID、錯參數、錯角色、跨 scope、缺實參、循環皆屬結構／來源錯誤，不降格為缺譯。
+引用閉包、文字範圍、葉路徑、origin
+及低信心沿正常 renderer 傳遞，expression 譯文沿用所屬句子 Target 的品質旗標。
 Bound 的 import 必須存在且型別正確，來源證明的使用 scope 只能看見本 scope
 或祖先 scope 的 import，不能借用同層另一 branch；此登錄域本身不放行 bound。
 
-共用 `bind_recognized` 的 mixed 映射僅由準備路徑啟用：omitted occurrence
+共用 `bind_recognized` 的 mixed 映射沿正常來源路徑啟用：omitted occurrence
 沿同一 recognized 槽的完整 explicit 簽章與實際位置對應，保留 resolution_rule，
 不按值尋找 antecedent；不能唯一定位就拒絕。純 omitted 槽仍按既有建構順序配對。
-正式 v2 保留原本對 explicit 槽之 omitted occurrence 的拒絕。
-共用映射可表達某種形狀，不等於來源已核准該省略關係；準備 verify 仍須重新 derive 證明。
+明示數字槽不得偽造成 omitted occurrence。
+共用映射可表達某種形狀，不等於來源已核准該省略關係；正常來源 verify 仍須重新推導證明。
 
-### 11.3 準備版的具名參數來源
+### 11.3 具名參數來源
 
-`four_layer_n2_parameters` 只在準備入口辨識 effect／section 中的下列形狀。
+`four_layer_n2_parameters` 在正常來源推導辨識 effect／section 中的下列形狀。
 來源位置由既有單位的 raw origins 連回完整 owner 欄位；原有葉、分支順序、
 正文／標頭／提醒分段及提醒依附保留。葉辨識成功不代表整個能力已有可執行語義。
 
@@ -869,8 +880,7 @@ raw／canonical spans 為空，`resolution_rule=earth_rite.omitted_amount.v1`；
 骰子的 `term:object.die` 引用只隨已辨識的上述點數條件產生，
 不全域抽取其他擲骰敘述，也不建立宣告、history、RNG 或未印刷的 else。
 
-`PreparationRenderer(..., preparation_forms=...)` 額外接受以下兩種有限 Form；
-正式 Renderer 與 authored 仍拒絕它們。Form 只有 default case，按下表順序各呈現
+正常 Renderer 與 authored 接受以下兩種有限 Form；Form 只有 default case，按下表順序各呈現
 一次 typed argument，其間可有 Literal；數字沿普通葉輸出，不產概念標註。
 
 | Form ID／rule | 依序形參與型別／角色 |
@@ -884,7 +894,7 @@ raw／canonical spans 為空，`resolution_rule=earth_rite.omitted_amount.v1`；
 
 ### 11.4 現時區域計數與明示 SEP 零值
 
-準備來源只接受同一本文片段內唯一明示的 `Xは「…」である。` 定義，
+來源只接受同一本文片段內唯一明示的 `Xは「…」である。` 定義，
 區域必須明示相對玩家及戰場、手牌、牌堆、墓場、EX 或消失區。
 限定須完整符合 §11.2 的有限 expression 簽章：單一特性、卡名、職業、種類、關鍵字、衍生物或排除自身；
 沒有明寫「卡片」就不增加 `read_card` 葉。
@@ -901,7 +911,7 @@ expression 依使用點讀取當下數量，不建立 captured receipt 或跨片
 重綁至不同 authored 槽名時，expression 實參也依來源位置同步重映射。
 缺必要卡名仍 pending，不能用 Literal 或 optional 略過。
 
-準備 renderer 沿用既有 `ExpressionTargets` 及正常 labels／Form，
+正常 renderer 沿用 `ExpressionTargets` 及正常 labels／Form，
 主 Target 可透過 expression 槽間接使用其 required 實參，無須再逐葉重複呈現；
 其他 required 葉仍須引用。expression 的形參必須完整呈現（§11.2）。
 來源的 whole-line semantic pending 不因局部計數成功而升格。
@@ -910,19 +920,18 @@ SEP 僅辨識明示「自己的 SEP 等於 0」的條件數字，沿用 `Nat/thr
 SEP、持有者、等值及條件作用域保持 canonical 字面，不增加 Concept、Player 葉或新資源語義。
 其他資源、非零值與比較不受本項擴張。
 
-### 11.5 準備版 context expression 與條件接口
+### 11.5 context expression 與條件接口
 
 `contracts.four_layer.ContextExpression` 是數值讀值，`PredicateExpr` 的結果為 Bool。
 兩者保存 `expression_id`、依簽章排序的 `leaves`、依形參命名的 `imports` 與 `scope`。
 `four_layer_context.DEFAULT_REGISTRY` 封閉登錄 descriptor 的結果型別、measure、來源家族、
 leaf／import 簽章、capture 與 IR bridge；renderer 的 expression target key 沿用 descriptor ID。
-這些是準備版來源契約，不代表 effects schema 或 runtime 已支援。
+這些是來源契約，不代表 effects schema 或 runtime 已支援。
 
 新葉的 `LeafSlot.expression` 必須與來源讀值結構一致；descriptor、實參連接與 source scope
 因此進入 leaf schema 及 frame 身分。`Frame.mode_rules` 保存模式數量規則，也進入 frame payload。
-沒有新結構時省略這兩個欄位，既有 v2／B11 的序列化與域成員維持原樣。
+沒有新結構時省略這兩個欄位，B11 的域成員維持原樣；SQLite 的 mode_rules 欄保存明示陣列。
 執行證據、runtime capability 與 unresolved lowering 另存，不放在 expression 或 mode rule。
-正式 v2 frame 拒絕這些新結構。
 
 每個新 import 必須指向 `Port.evidence`：精確 `OccurrenceKey`、capture、typed value，
 以及本 frame 的 `source_leaves`。引用必須同 owner／face／field／來源 hash，
@@ -931,7 +940,7 @@ ObjectSet 明分單體／集合及 holder、event subject、selection、direct a
 ReceiptId、CapturedValue、PlayerRef、ChoiceContext 與事件引用各有獨立型別。
 CapturedValue 的 Nat／Bool 與 measure 也必須符合簽章；ReceiptId 簽章必須宣告
 `receipt_result`（objects／amount／payment_complete），結果種類不同即拒絕。缺 provider 不補 false 或 0。
-準備階段的物件、事件與 receipt ID 是 producer 依來源位置給的符號參照，只用來證明
+來源推導的物件、事件與 receipt ID 是 producer 依來源位置給的符號參照，只用來證明
 同一 frame 內連到同一物件世代；不是 runtime 實例 ID，也不能用卡號、卡名或最近事件代替。
 
 入場域 `predicate.entry.provenance.v1` 的角色為 `entry_condition`，只登錄：
@@ -973,7 +982,7 @@ Nat 常數葉及原 B11 接受域保持原意，沒有一般算式 parser。
 `pending(source_descriptor, source_span, raw_sha256, reason)`，或整合入口的
 `linked(source:OccurrenceKey, condition)`。linked 指向同欄唯一 intro 的原始條件，
 其 condition 仍區分 resolved／pending；不把外片段的槽放進本 binding。
-完整欄位的 `PreparedField.verify` 重建該邊，局部驗證另確認來源等於 ChoiceContext 的來源。
+完整欄位的 `DerivedField.verify` 重建該邊，局部驗證另確認來源等於 ChoiceContext 的來源。
 span 為 owner 欄位 raw 座標，
 raw_sha256 是該段 raw 文字的 SHA-256。reason 區分
 `missing_provider`（已核來源尚待 provider）、`unsealed_source` 與 `ambiguous_source`。
@@ -983,17 +992,18 @@ exact／up_to 常數 QuantitySpec、ConditionSlot、ChoiceContext import 與 sco
 
 新 expression target 與 §11.2 相同，所有形參都必須呈現。import 的 source leaves
 依簽章順序展開成 `<import形參>.<零起算序號>` 形參，也必須呈現。
+它們保存在當次所選句子／variant 的 map，wrapper 與 import 閉包內每次呼叫皆用該份稿；
+同一 ID 跨句不同稿互不覆蓋，局部稿與主句共用品質及審閱單位。
 只有主 target 實際引用 expression 時，required 使用才遞迴傳到這些實參；
 遺漏值、錯型別、未知 descriptor、未呈現形參與循環均拒絕。
 正常 label、annotation、origin 與低信心資訊仍沿 renderer 傳遞。
 
-家族在各自模組宣告 `Descriptor` 與 `PreparationFamily`，以
-`derive_preparation(..., families=(...))` 明示組合；空 tuple 的預設入口不啟用新 producer。
-`PreparedField.registry` 合併各家族 descriptor，`ExpressionTargets(..., registry=...)`
-使用相同閉域。家族 callback 接收 raw、PreparedField、Classifier 與可選 CardContext，回傳更新的來源準備結果；
-verify 以相同 families 重新 derive。callback 只在原 projection 上補 scope、port 與 mode rule，
+家族在各自模組宣告 `Descriptor` 與 `SourceFamily`，由單一 `derive_source` 的整合流程組合。
+`DerivedField.registry` 與正常 renderer 使用同一組家族 descriptor 閉域。
+callback 接收 raw、DerivedField、Classifier 與可選 CardContext，回傳更新的來源結果；
+verify 從同一來源重建。callback 只在原 projection 上補 scope、port 與 mode rule，
 不改 projection_kind／discriminator；整行 semantic pending 不因 port 而升格。
-家族自用 descriptor 透過 `Registry.extend` 登錄，不得覆寫共同 ID。共用簽章若需修改，先回報協調者修訂契約。
+家族自用 descriptor 透過 `Registry.extend` 登錄，不得覆寫共同 ID。
 
 可重用的公開合成契約在 `carddb/tests/domains/translations/context_fixtures.py`：
 `contract_case("A1" | "A2" | "A3" | "A11")` 提供 BoundTarget、renderer、expression targets
@@ -1007,7 +1017,7 @@ played_from 的來源辨識及 descriptor 由其來源家族負責，不加入 A
 
 ### 11.6 合計、合計約束與固定配對
 
-`four_layer_total_sources.FAMILY` 明示啟用 A8／A10 來源準備；預設準備入口不啟用。
+`four_layer_total_sources.FAMILY` 由整合流程辨識 A8／A10 來源。
 `four_layer_totals.DESCRIPTORS` 封閉其簽章，不擴張舊 B11、常數域或 DSL schema。
 本家族只登錄來源結構，whole-line 語義仍 pending，不提供 selector 或 DSL runtime 求值器。
 
@@ -1036,7 +1046,7 @@ BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍�
 
 ### 11.7 名稱關係、名稱片段與雙特性
 
-`four_layer_names.FAMILY` 透過明示的 `families` 入口準備 A3、A5、A9。
+`four_layer_names.FAMILY` 由整合流程辨識 A3、A5、A9。
 名稱種類數沿共用 `name.distinct_count.objects.v1`，結果是 Nat；
 不同名選取使用 `name.selection.distinct.v1`，結果是 Bool。兩者不互換。
 相對名稱條件保存 holder／選取物件／處理結果來源，不以卡名顯示字猜接。
@@ -1054,9 +1064,9 @@ BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍�
 完整名稱、片段條件與合作名稱不因中文顯示字相同而合併。
 片段 OR 僅登錄單一、二、四、十個來源片段的有限簽章；不提供一般布林樹或名稱集合生成。
 特性條件只接受正文連續兩個已登錄特性及 kind；三個以上特性、token header、
-token 身分與兩個 selector 擇一保持原準備結果。
+token 身分與兩個 selector 擇一保持來源結果。
 
-import 的物件及 receipt 識別字是由精確來源定位建立的準備符號，不是對戰物件或結算結果。
+import 的物件及 receipt 識別字是由精確來源定位建立的符號，不是對戰物件或結算結果。
 holder 以同一能力的來源符號共用；離場事件主體使用 event_subject／LKI，不能冒充 selection。
 receipt 必須有同能力／分支內唯一的公開或消滅 producer；缺少或歧義時保留具名來源問題。
 特性與 kind 所需概念缺失時也保留 pending，不填入未登錄的必要引用。
@@ -1072,7 +1082,7 @@ intro、連續的 1..K 選項及數量替代子句；卡名、引用的能力與
 來源限制為同 owner／face／effect 或 section；不把整欄所有序號合併成一組。
 
 A6 的 `mode.unused_this_turn.v1` 是 `mode_reuse_condition:PredicateExpr`，匯入
-`ChoiceContext`，保存 AbilityInstance／Mode／Turn 的來源關係。準備階段的 ability 與
+`ChoiceContext`，保存 AbilityInstance／Mode／Turn 的來源關係。來源推導的 ability 與
 CurrentTurn 識別是待 lowering 的來源參數，沒有建立 runtime 使用紀錄。執行時必須
 以實際能力實例及回合取代，重新授予產生新能力實例；不得改成按卡名共用。
 
@@ -1098,10 +1108,9 @@ A11 六種入場表面與 A2 的本回合進化存在，在 provider 尚未合�
 producer 時保持 pending；沒有猜測跨能力付款。這不代表已有付款執行證據，沿 R-0006
 驗打出成本與模式決定時序前，lowering 仍不可標為 executable。
 
-### 11.9 A1 讀值與 A4 宣告 X 的來源準備
+### 11.9 A1 讀值與 A4 宣告 X 的來源
 
-`four_layer_n2_reads.FAMILY` 必須由呼叫端明示加入 `families`；正式 v2 與預設準備入口
-不載入此 producer。家族自有簽章在 `four_layer_n2_read_descriptors`，沿
+`four_layer_n2_reads.FAMILY` 由正常整合流程載入。家族自有簽章在 `four_layer_n2_read_descriptors`，沿
 `quantity.read.context.v1`／`read_value`；現時區域計數直接重用 B11 的
 `count_expression`，不重複登錄 descriptor，也不改既有角色或 domain 成員。
 同一讀值可用在傷害、回復、衍生物數量、能力值與費用位置，consumer 仍保存於來源骨架。
@@ -1138,12 +1147,12 @@ source port 的物件、receipt 與 binding ID 是由來源位置及 scope 建�
 X 在名稱片段 selector 外時，其定義可獨立辨識，selector 由 P3 擁有。
 不以 runtime 缺口替來源填入數值。
 
-### 11.10 本回合歷史與單次事件來源的準備 producer
+### 11.10 本回合歷史與單次事件來源 producer
 
 `four_layer_history.HISTORY_FAMILY` 與
-`four_layer_provenance.PROVENANCE_FAMILY` 必須經 §11.5 的 `families` 明示啟用。
+`four_layer_provenance.PROVENANCE_FAMILY` 由 §11.5 的整合流程啟用。
 前者登錄有限歷史事件及篩選簽章，後者是 A11 與 played_from 的來源辨識入口。
-預設準備路徑及正式 v2 不啟用這兩個家族，也不因此擴張舊 B11 或常數域。
+這兩個家族不擴張 B11 或常數域。
 
 歷史來源的 descriptor 區分事件、固定篩選形狀、aggregate 及 include_execution；
 玩家、特性與卡名等變動 operand 另有 required 葉，不從中文或相同數值推測。
@@ -1176,17 +1185,16 @@ played_from 另用 `play.self.from_zone.eq.v1`、
 producer 的物件、世代與事件識別是由精確來源定位產生的符號 handle，
 表達 runtime 必須提供的關係，並非證明遊戲中已發生該事件。
 一般 typed 邊界驗 kind、世代、scope、capture 及直接能力來源，
-準備 verify 另以相同來源重新 derive 逐項比對。
+正常來源 verify 以相同來源重新推導逐項比對。
 EntryFact 的持久連接、Unknown、來源快照／LKI、授予能力持有者與查詢時點，
 仍須在 DSL schema／loader／runtime 的 lowering 驗收完成；缺證據不能自動回傳 true、false 或 0。
 局部 typed 辨識不提升整段 semantic pending 或中文的審閱資格。
 
 ### 11.11 十一項來源家族的整合
 
-`four_layer_integrated.FAMILY` 是明示的整合家族，經
-`derive_preparation(..., families=(FAMILY,))` 啟用。它依來源依賴執行歷史、
+`four_layer_integrated.FAMILY` 由唯一正式入口 `derive_source` 啟用。它依來源依賴執行歷史、
 入場／打出來源、名稱、合計、讀值／支付 X，最後接選項 consumer；
-正式 v2、空 families 與 authored 載入流程不自動切換。
+authored 只載入正式 v3 定義與譯文，來源家族由來源推導決定。
 整合 registry 沿各家族的閉域簽章，不另建 parser 或常數域。
 
 同一來源構造只由一個 provider 擁有：

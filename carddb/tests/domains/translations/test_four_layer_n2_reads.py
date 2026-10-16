@@ -17,14 +17,11 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
-    PreparationRenderer,
     verify_quantities,
 )
-from sve_carddb.domains.translations.four_layer_n2_reads import FAMILY
-from sve_carddb.domains.translations.four_layer_names import FAMILY as NAMES
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Label,
@@ -32,6 +29,7 @@ from sve_carddb.domains.translations.four_layer_render import (
     SelectedTarget,
 )
 
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import classifier, source
 from .test_four_layer_n1 import n1_classifier
 from .test_four_layer_names import engine as names_engine
@@ -43,7 +41,7 @@ if TYPE_CHECKING:
 def test_current_read_uses_shared_source_quantity() -> None:
     raw = "相手にXダメージ。Xは「これの攻撃力」である。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     expr = next(v for v in binding.values.values() if isinstance(v, ContextExpression))
@@ -93,7 +91,7 @@ def test_current_read_uses_shared_source_quantity() -> None:
 )
 def test_sealed_surfaces_derive_and_verify(raw: str, identifier: str) -> None:
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     assert any(
@@ -133,8 +131,8 @@ def test_sealed_surfaces_derive_and_verify(raw: str, identifier: str) -> None:
 )
 def test_unsealed_consumers_and_sources_are_unchanged(raw: str) -> None:
     engine = n1_classifier()
-    baseline = derive_preparation(raw, source(raw), engine)
-    candidate = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    baseline = derive_source(raw, source(raw), engine)
+    candidate = derive_source(raw, source(raw), engine)
     assert candidate.derived == baseline.derived
     assert candidate.interfaces == baseline.interfaces
 
@@ -143,7 +141,7 @@ def test_declared_x_is_shared_and_rejects_receipt_or_wrong_capture() -> None:
 
     raw = "{コストX}{コストX}：相手にXダメージ。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     expr_name, expr = next(
         (n, v) for n, v in binding.values.items() if isinstance(v, ContextExpression)
@@ -265,7 +263,7 @@ def read_engine() -> Classifier:
 )
 def test_capture_and_measure_source_shapes(raw: str, identifier: str) -> None:
     engine = read_engine()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     assert any(
@@ -278,7 +276,7 @@ def test_scaling_renders_required_operands_and_annotations() -> None:
 
     raw = "それに「自分の場の仮族・フォロワーの数」の3倍のダメージ。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     expression_name = next(
         n
@@ -329,9 +327,7 @@ def test_scaling_renders_required_operands_and_annotations() -> None:
         },
         registry=prepared.registry,
     )
-    renderer = PreparationRenderer(
-        Renderer(labels, {}, {}, domains=base.domains), targets
-    )
+    renderer = Renderer(labels, {}, {}, domains=base.domains)
     selected = SelectedTarget(
         Target(
             format=1, nodes=(literal("造成"), ref(expression_name), literal("的傷害。"))
@@ -339,7 +335,9 @@ def test_scaling_renders_required_operands_and_annotations() -> None:
     )
     prepared.verify(raw, engine, frame, binding, target=selected.target)
     item = BoundTarget(frame, binding, selected)
-    result = renderer.render("ctx:synthetic", "zh-Hant", (item,))
+    result = renderer.render(
+        "ctx:synthetic", "zh-Hant", expression_plan((item,), targets)
+    )
     assert result.rendered is not None
     assert result.rendered.text == "造成自己的戰場上的測試族從者張數的3倍的傷害。"
     assert len(result.rendered.annotation.occurrences) == 4
@@ -351,16 +349,22 @@ def test_scaling_renders_required_operands_and_annotations() -> None:
             frame,
             binding,
             target=Target(format=1, nodes=(literal("固定字面"),)),
+            forms={},
         )
     renderer.labels.clear()
-    assert renderer.render("ctx:synthetic", "zh-Hant", (item,)).rendered is None
+    assert (
+        renderer.render(
+            "ctx:synthetic", "zh-Hant", expression_plan((item,), targets)
+        ).rendered
+        is None
+    )
 
 
 def test_non_single_selection_does_not_fabricate_an_object() -> None:
     raw = "自分の場のフォロワー2体を選ぶ。それにXダメージ。Xは「選んだフォロワーの攻撃力」である。"
     engine = n1_classifier()
-    before = derive_preparation(raw, source(raw), engine)
-    after = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    before = derive_source(raw, source(raw), engine)
+    after = derive_source(raw, source(raw), engine)
     assert after.derived == before.derived
     assert after.interfaces == before.interfaces
 
@@ -378,7 +382,7 @@ def test_both_result_read_branches_keep_independent_class_and_provider() -> None
         (*base_engine.rules.enabled(), "suffix_unit_items", "bracket_choice_index"),
         vocabulary=base_engine.references.vocabulary,
     )
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     reads = [
@@ -425,8 +429,8 @@ def test_mixed_payment_and_other_ability_x_stay_separate() -> None:
         "{ファンファーレ}これに仮カウンターX個を置く。Xは「自分のPP最大値」である。"
     )
     engine = read_engine()
-    before = derive_preparation(raw, source(raw), engine)
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    before = derive_source(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     declared = next(
@@ -441,7 +445,7 @@ def test_mixed_payment_and_other_ability_x_stay_separate() -> None:
 def test_card_receipt_rejects_other_results(result: str) -> None:
     raw = "自分のデッキの上3枚を墓場に置く。それに「これによって墓場に置いたスペルの枚数」と同じダメージ。"
     engine = read_engine()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     port = next(p for p in frame.projection.imports if p.type == "ReceiptId")
@@ -480,7 +484,7 @@ def test_card_receipt_rejects_other_results(result: str) -> None:
 def test_granted_read_uses_holder_in_its_own_ability_scope() -> None:
     raw = "それは「自分がカードを引いたとき、相手に「これの攻撃力の半分」と同じダメージ」を持つ。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     attack = next(
@@ -502,8 +506,8 @@ def test_granted_read_uses_holder_in_its_own_ability_scope() -> None:
 def test_missing_read_reference_preserves_pending_source() -> None:
     raw = "それに「自分の場の『未採用の仮名』の数」と同じダメージ。"
     engine = n1_classifier()
-    before = derive_preparation(raw, source(raw), engine)
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    before = derive_source(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     assert prepared.derived == before.derived
     assert "missing_card_name_concept" in prepared.derived.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved"):
@@ -518,8 +522,8 @@ def test_previous_line_extra_cost_requires_its_own_source(granted: bool) -> None
         + "\nそれに「これの追加コストとしてアクトした仮族・カードの枚数」の3倍のダメージ。"
     )
     engine = n1_classifier()
-    before = derive_preparation(raw, source(raw), engine)
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    before = derive_source(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     if granted:
         assert prepared.derived == before.derived
     else:
@@ -538,7 +542,7 @@ def test_previous_line_extra_cost_requires_its_own_source(granted: bool) -> None
 def test_context_player_operand_must_be_presented() -> None:
     raw = "X枚引く。Xは「自分のPP最大値」である。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     name = next(
         n for n, v in binding.values.items() if isinstance(v, ContextExpression)
@@ -561,14 +565,14 @@ def test_context_player_operand_must_be_presented() -> None:
         {("read.player.pp_maximum.v1", "zh-Hant"): SelectedTarget(expression)},
         registry=prepared.registry,
     )
-    renderer = PreparationRenderer(
-        Renderer(labels, {}, {}, domains=base.domains), targets
-    )
+    renderer = Renderer(labels, {}, {}, domains=base.domains)
     selected = SelectedTarget(
         Target(format=1, nodes=(LeafRef(kind="LeafRef", slot=name),))
     )
     result = renderer.render(
-        "ctx:synthetic", "zh-Hant", (BoundTarget(frame, binding, selected),)
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
     )
     assert result.rendered is not None
     assert result.rendered.text == "自己的PP最大值"
@@ -582,22 +586,20 @@ def test_context_player_operand_must_be_presented() -> None:
         registry=prepared.registry,
     )
     with pytest.raises(ValueError, match="required"):
-        PreparationRenderer(
-            Renderer(labels, {}, {}, domains=base.domains), missing
-        ).render("ctx:synthetic", "zh-Hant", (BoundTarget(frame, binding, selected),))
+        Renderer(labels, {}, {}, domains=base.domains).render(
+            "ctx:synthetic",
+            "zh-Hant",
+            expression_plan((BoundTarget(frame, binding, selected),), missing),
+        )
 
 
-@pytest.mark.parametrize(
-    "names_first", [True, False], ids=["names-first", "reads-first"]
-)
-def test_other_family_predicates_keep_their_operands(names_first: bool) -> None:
+def test_other_family_predicates_keep_their_operands() -> None:
     raw = (
         "自分のデッキから「カード名に『仮場手札自分』を含むフォロワー」1枚を探し、手札に加える。"
         "それに「自分の手札の枚数」と同じダメージ。"
     )
     engine = names_engine()
-    families = (NAMES, FAMILY) if names_first else (FAMILY, NAMES)
-    prepared = derive_preparation(raw, source(raw), engine, families=families)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     assert any(isinstance(v, PredicateExpr) for v in binding.values.values())
@@ -611,7 +613,7 @@ def test_current_zone_surfaces_reuse_b11_definition() -> None:
         "相手にXダメージ。Xは「自分の手札の枚数」である。",
         "それに「自分の手札の枚数」の3倍のダメージ。",
     ):
-        prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+        prepared = derive_source(raw, source(raw), engine)
         frame, binding = prepared.bind(0)
         prepared.verify(raw, engine, frame, binding)
         reads = [v for v in binding.values.values() if isinstance(v, Expression)]

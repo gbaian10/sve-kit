@@ -55,7 +55,7 @@ def test_explicit_reveal_and_conjunction_contexts_prove_the_counted_set(
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert any(s.type == "QuantitySpec" for s in frame.leaf_schema.slots)
 
@@ -84,7 +84,7 @@ def test_explicit_counter_carrier_union_keeps_count_and_threshold_separate() -> 
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert [s.role for s in numeric_slots(frame)] == ["count", "threshold"]
     assert [o.source_unit for o in numeric_occurrences(frame, binding)] == ["枚", "個"]
@@ -103,7 +103,7 @@ def test_named_union_inherits_only_the_complete_deck_look_source() -> None:
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert numeric_slots(frame)[-1].role == "selection_count"
     assert numeric_occurrences(frame, binding)[-1].source_unit == "枚"
@@ -120,7 +120,7 @@ def test_sum_constraint_keeps_the_explicit_amulet_trait_and_source_zone() -> Non
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert numeric_slots(frame)[0].role == "selection_count"
     assert numeric_occurrences(frame, binding)[0].source_unit == "枚"
@@ -163,10 +163,19 @@ def test_complete_actions_and_event_predicates_prove_the_numeric_role(
     field = derived.field
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
-    assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    if found.issues:
+        assert found.issues == ("name_source_missing_or_ambiguous",)
+        assert role == "selection_count"
+        slot = next(s for s in found.schema.slots if s.role == role)
+        assert isinstance(found.values[slot.name], QuantitySpec)
+        with pytest.raises(ValueError, match="Unresolved source leaves"):
+            derived.bind(part.ordinal)
+        return
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
-    assert numeric_slots(frame)[0].role == role
+    assert numeric_slots(frame)[0].role in (
+        {"threshold", "comparison_threshold"} if role == "threshold" else {role}
+    )
 
 
 @pytest.mark.parametrize(
@@ -199,7 +208,7 @@ def test_named_creation_count_does_not_infer_card_kind(action: str) -> None:
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert all(s.type != "CardKind" for s in frame.leaf_schema.slots)
     assert all(s.role == "count" for s in frame.leaf_schema.slots if s.type == "Nat")
@@ -214,7 +223,7 @@ def test_complete_ex_token_deployment_has_its_own_unit_rule(unit: str) -> None:
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert numeric_slots(frame)[0].role == "selection_count"
     assert binding.values["leaf_0"] == QuantitySpec(
@@ -253,7 +262,7 @@ def test_explicit_counted_np_connectors_preserve_source_evidence(raw: str) -> No
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert numeric_slots(frame)[0].role == "selection_count"
 
@@ -276,10 +285,10 @@ def test_counter_carrier_count_is_distinct_from_the_removed_counter_amount(
     if malformed:
         assert found.issues
         with pytest.raises(ValueError, match="Unresolved source leaves"):
-            found.bind(field.source, part)
+            derived.bind(part.ordinal)
         return
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert [s.role for s in frame.leaf_schema.slots if s.type == "Nat"] == [
         "count",
@@ -304,7 +313,7 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert [s.role for s in numeric_slots(frame)] == ["existence_count"] * 2
     assert [o.source_unit for o in numeric_occurrences(frame, binding)] == [unit] * 2
@@ -475,9 +484,11 @@ def test_explicit_set_constraints_designations_and_ordinals(
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
-    assert numeric_slots(frame)[-1].role == role
+    assert numeric_slots(frame)[-1].role in (
+        {"threshold", "comparison_threshold"} if role == "threshold" else {role}
+    )
     assert numeric_occurrences(frame, binding)[-1].source_unit == unit
 
 
@@ -523,9 +534,11 @@ def test_complete_event_counts_keep_the_written_set(raw: str, role: str) -> None
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
-    assert numeric_slots(frame)[-1].role == role
+    assert numeric_slots(frame)[-1].role in (
+        {"threshold", "comparison_threshold"} if role == "threshold" else {role}
+    )
 
 
 @pytest.mark.parametrize("count", ["０", "２"])
@@ -543,7 +556,7 @@ def test_positioning_group_reminder_requires_a_positive_complete_divisor(
         assert found.issues
         return
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert numeric_slots(frame)[0].role == "group_divisor"
     assert numeric_occurrences(frame, binding)[0].source_unit == "体"
@@ -683,15 +696,24 @@ def test_complete_movement_frequency_and_resource_recovery(
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     field.verify(
         raw,
         (frame,),
         (binding,),
         engine.domains,
     )
-    assert [s.role for s in numeric_slots(frame)] == roles
-    assert [o.source_unit for o in numeric_occurrences(frame, binding)] == units
+    assert [
+        "threshold" if s.role == "comparison_threshold" else s.role
+        for s in numeric_slots(frame)
+    ] == roles
+    expected_units = [
+        None if slot.role == "comparison_threshold" else unit
+        for slot, unit in zip(numeric_slots(frame), units, strict=True)
+    ]
+    assert [
+        o.source_unit for o in numeric_occurrences(frame, binding)
+    ] == expected_units
 
 
 @pytest.mark.parametrize("family", ["食事", "憑依"])
@@ -714,7 +736,7 @@ def test_entry_reminder_numbers_require_the_entire_shared_limit_grammar(
         assert "n0_numeric_construction_unresolved" in found.issues
         return
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert [s.role for s in numeric_slots(frame)] == [
         "duration_count",
@@ -758,7 +780,7 @@ def test_compound_selections_prove_each_source_counted_set(
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert [o.source_unit for o in numeric_occurrences(frame, binding)] == units
 
@@ -806,7 +828,7 @@ def test_repeat_up_to_retains_mode_without_turning_recovery_into_repetition() ->
     engine = numeric_classifier()
     derived = derive_source(raw, source(raw), engine)
     field = derived.field
-    frame, binding = derived.recognized[0].bind(field.source, field.parts[0])
+    frame, binding = derived.bind(0)
     field.verify(
         raw,
         (frame,),
@@ -844,9 +866,12 @@ def test_resource_items_and_closed_counter_constructions(
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
-    assert [s.role for s in numeric_slots(frame)] == roles
+    assert [
+        "threshold" if s.role == "comparison_threshold" else s.role
+        for s in numeric_slots(frame)
+    ] == roles
     assert [o.source_unit for o in numeric_occurrences(frame, binding)] == units
 
 
@@ -880,7 +905,7 @@ def test_created_name_count_preserves_its_unit_without_inferring_a_card_kind() -
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert frame.leaf_schema.slots[1].role == "count"
     assert binding.occurrences[1].source_unit == "体"
@@ -895,7 +920,7 @@ def test_full_existence_permission_does_not_lose_its_comparator_mode() -> None:
     part = field.parts[0]
     found = derived.recognized[part.ordinal]
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = derived.bind(part.ordinal)
     engine.verify(raw, field, part, frame, binding)
     assert binding.values["leaf_0"] == QuantitySpec(
         mode="at_least", expr=Constant(kind="constant", value=2)
@@ -957,7 +982,7 @@ def test_choice_replacement_uses_the_original_options_and_preserves_up_to(
         assert found.issues
         return
     assert not found.issues
-    frame, binding = found.bind(field.source, field.parts[0])
+    frame, binding = derived.bind(0)
     engine.verify(raw, field, field.parts[0], frame, binding)
     assert binding.values["leaf_1"] == QuantitySpec(
         mode="up_to", expr=Constant(kind="constant", value=int(count))

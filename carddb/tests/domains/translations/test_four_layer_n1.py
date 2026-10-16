@@ -154,7 +154,7 @@ def test_n1_s14_retains_modifier_and_outer_count(
     canonical = found.field.parts[0].canonical_source
     assert (modifier.replace("６", "N") if "６" in modifier else modifier) in canonical
     assert "以上なら" in canonical
-    assert "N1-SRC04.quantity" in found.registry_rows[0]
+    assert "N1-SRC04.quantity" in found.derived.registry_rows[0]
 
 
 @pytest.mark.parametrize(
@@ -307,7 +307,7 @@ def test_n1_unresolved_trait_shape_leaves_the_operand_to_n0(
     found = derive("自分の場の未登録・フォロワー７体を選ぶ。", engine)
     assert found.recognized[0].issues == ()
     assert "source_zone" not in roles(found)
-    assert "N1-SRC01.select" not in found.registry_rows[0]
+    assert "N1-SRC01.select" not in found.derived.registry_rows[0]
 
 
 def test_n1_direct_move_requires_a_registered_destination_verb(
@@ -521,7 +521,7 @@ def test_n1_matching_keeps_independent_empty_span_slots(engine: Classifier) -> N
     found = derive(raw, engine)
     frame, _ = found.bind(0)
     assert sum(not s.required for s in frame.leaf_schema.slots) == 2
-    matched = Frames((frame,), normalizer_version="four-layer-jp-v2").match(found, 0)
+    matched = Frames((frame,)).match(found, 0)
     assert matched is not None
     assert list(matched.binding.values.values()).count("self") == 3
 
@@ -732,7 +732,7 @@ def test_n1_remaining_inspected_cards_can_return_to_whole_deck(
     assert ("destination_owner" in roles(found)) is (remaining == "残り")
     if remaining == "残り":
         assert roles(found)["destination_owner"] == ["self"]
-        assert "N1-SRC07.return_inspected_deck.zone" in found.registry_rows[0]
+        assert "N1-SRC07.return_inspected_deck.zone" in found.derived.registry_rows[0]
 
 
 @pytest.mark.parametrize("token", ["【仮触発】", "【カード】", "【コンボ】"])
@@ -838,7 +838,7 @@ def test_n1_trigger_hand_discard_requires_the_cost_separator(
     found = derive(raw, engine)
     assert roles(found)["source_zone"] == [("hand",)]
     assert roles(found)["source_owner"] == ["self"]
-    assert "N1-SRC02.hand_cost" in found.registry_rows[0]
+    assert "N1-SRC02.hand_cost" in found.derived.registry_rows[0]
     for effect in (
         "手札７枚を捨てる。",
         ":手札７枚を捨てる。",

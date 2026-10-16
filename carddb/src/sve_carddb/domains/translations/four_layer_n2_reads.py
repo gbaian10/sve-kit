@@ -13,6 +13,7 @@ from sve_carddb.contracts.four_layer import (
     Projection,
     Scope,
 )
+from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.four_layer_n2_read_descriptors import DESCRIPTORS
@@ -21,7 +22,6 @@ from sve_carddb.domains.translations.four_layer_n2_read_sources import (
     regions,
 )
 from sve_carddb.domains.translations.four_layer_normalizer import SourceField
-from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 from sve_carddb.domains.translations.recognition.provenance import merged
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
         Classifier,
         Recognized,
     )
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 
@@ -158,10 +158,10 @@ def _rename(found: Recognized, leaves: list[Leaf], before: Recognized) -> Recogn
 
 def _prepare(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     classifier: Classifier,
     context: CardContext | None,
-) -> PreparedField:
+) -> DerivedField:
     del context
     derived = prepared.derived
     if derived.field.source.field not in {"effect", "section"} or not isinstance(
@@ -239,4 +239,4 @@ def _prepare(
     )
 
 
-FAMILY = PreparationFamily("A1_A4", DESCRIPTORS, _prepare)
+FAMILY = SourceFamily("A1_A4", DESCRIPTORS, _prepare)
