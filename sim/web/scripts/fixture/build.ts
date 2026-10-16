@@ -965,7 +965,7 @@ async function addCard(ctx: CardContext): Promise<void> {
       mapping_as_of: mapping === "confirmed_none" || mapping === "pending" ? "2026-09-01" : null,
       mapping_scope: mapping === "confirmed_none" ? "BP01EN" : null,
       default_printing_id: first?.id ?? null,
-      default_method: "earliest_general",
+      default_method: "lowest_rarity",
       deck_role:
         card.faces[0]?.type === "leader"
           ? "leader"
