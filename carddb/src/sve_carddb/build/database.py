@@ -13,7 +13,7 @@ from sve_carddb.build.t0_json import sorted_unique, symbol_valid
 from sve_carddb.build.validation import Rules, SQLValue, decode, encode, fullmatch
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping
+    from collections.abc import Generator, Mapping
     from pathlib import Path
 
     from sve_carddb.build.compiler import CompiledSchema
@@ -101,7 +101,7 @@ class Database:
             self.verify_alias_targets()
 
     @contextmanager
-    def transaction(self) -> Iterator[Database]:
+    def transaction(self) -> Generator[Database]:
         """Validate the complete graph before commit and roll back on any failure."""
         if self._connection.in_transaction:
             raise RuntimeError("Nested transactions are not supported")
@@ -333,7 +333,7 @@ class Database:
 
 
 @contextmanager
-def open_database(schema: CompiledSchema, path: Path) -> Iterator[Database]:
+def open_database(schema: CompiledSchema, path: Path) -> Generator[Database]:
     """Read a closed offline database without schema, WAL or journal writes."""
     if path.is_symlink() or not path.is_file():
         raise ValueError("Offline build must be an existing regular file")
@@ -357,7 +357,7 @@ def open_database(schema: CompiledSchema, path: Path) -> Iterator[Database]:
 @contextmanager
 def create_database(
     schema: CompiledSchema, path: Path | None = None
-) -> Iterator[Database]:
+) -> Generator[Database]:
     """Create a fresh build DB, or a private in-memory DB; never overwrite a file."""
     if path is not None:
         with path.open("xb"):

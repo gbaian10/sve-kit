@@ -17,7 +17,7 @@ from .build_db_t1_fixtures import populate as populate_t1
 from .build_db_t1b_fixtures import populate as populate_t1b
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
     from sve_carddb.build import CompiledSchema
 
@@ -28,7 +28,7 @@ class DatabaseTemplate:
     content: bytes
 
     @contextmanager
-    def copy(self) -> Iterator[Database]:
+    def copy(self) -> Generator[Database]:
         # The verified graph is shared as bytes; connection state and Rules never are.
         connection = sqlite3.connect(":memory:", isolation_level=None)
         try:

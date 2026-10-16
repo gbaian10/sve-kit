@@ -47,7 +47,7 @@ from sve_carddb.domains.translations.glossary.records import (
 from sve_carddb.domains.translations.models import AuthoredValue, Quality, SourceValue
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping
+    from collections.abc import Generator, Mapping
     from pathlib import Path
 
     from pydantic import JsonValue
@@ -573,7 +573,7 @@ def _pins(records: tuple[Record, ...], locations: Mapping[str, str]) -> None:
 
 
 @contextmanager
-def _located(record: Record, locations: Mapping[str, str]) -> Iterator[None]:
+def _located(record: Record, locations: Mapping[str, str]) -> Generator[None]:
     """Keep the original check's diagnostic tied to its editable authored record."""
     try:
         yield

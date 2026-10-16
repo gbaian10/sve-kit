@@ -25,7 +25,7 @@ from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 from .r2_sdk_fixtures import install_mock_sdk, mock_client
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
     from sve_carddb.export.preview import Roots
 
@@ -122,7 +122,7 @@ class DelayedS3(httpx.BaseTransport):
 
 
 @contextmanager
-def memory_store(fake: DelayedS3) -> Iterator[R2Store]:
+def memory_store(fake: DelayedS3) -> Generator[R2Store]:
     with httpx.Client(transport=fake, trust_env=False) as http:
         yield R2Store(
             ACCOUNT,
