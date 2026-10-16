@@ -228,6 +228,16 @@ def _labels_valid(
     )
 
 
+def _unique_intro(masked: str, intro: re.Match[str]) -> bool:
+    boundaries = tuple(re.finditer(r"\n\s*\n", masked)) + tuple(_HEAD.finditer(masked))
+    start = max((m.end() for m in boundaries if m.end() <= intro.start()), default=0)
+    end = min(
+        (m.start() for m in boundaries if m.start() > intro.start()),
+        default=len(masked),
+    )
+    return len(tuple(_INTRO.finditer(masked, start, end))) == 1
+
+
 def _mode_source(
     raw: str,
     masked: str,
@@ -240,6 +250,8 @@ def _mode_source(
     if len(intros) != 1:
         return None
     intro = intros[0]
+    if not _unique_intro(masked, intro):
+        return None
     end = line.end()
     cursor = index + 1
     while cursor < len(lines) and lines[cursor].start() == end + 1:

@@ -107,6 +107,16 @@ def test_pending_conditions_retain_source_and_provider_distinction(
         _OPTIONS,
         _INTRO + _CONDITION + "\n【2】仮甲。【1】仮乙。",
         _INTRO + _INTRO + _CONDITION + "\n" + _OPTIONS,
+        _INTRO + _CONDITION + "\n" + _INTRO + _CONDITION + "\n" + _OPTIONS,
+        _INTRO
+        + _CONDITION
+        + "\n"
+        + _OPTIONS
+        + "\n"
+        + _INTRO
+        + _CONDITION
+        + "\n"
+        + _OPTIONS,
         _INTRO + _CONDITION + "\n\n" + _OPTIONS,
         _INTRO + _CONDITION + "\n{起動}" + _OPTIONS,
         _INTRO + _CONDITION + "\n【1】仮甲。{ファンファーレ}【2】仮乙。",
@@ -340,3 +350,30 @@ def test_mode_family_preserves_existing_semantics_and_projection_kind() -> None:
     assert frame.projection.projection_kind == projection.projection_kind
     assert frame.projection.discriminator == projection.discriminator
     assert frame.semantic_variant.key == semantics.key
+
+
+def test_independent_ability_heads_keep_distinct_choice_contexts() -> None:
+    raw = (
+        "{ファンファーレ}"
+        + _INTRO
+        + _CONDITION
+        + "\n"
+        + _OPTIONS
+        + "\n{起動}"
+        + _INTRO
+        + _CONDITION
+        + "\n"
+        + _OPTIONS
+    )
+    prepared = prepare(raw)
+    groups = mode_sources(raw, prepared)
+    assert len(groups) == 2
+    first = prepared.interfaces[groups[0].members[0]]
+    second = prepared.interfaces[groups[1].members[0]]
+    assert first is not None
+    assert second is not None
+    first_context = next(p.evidence for p in first.imports if p.name == "mode_choice")
+    second_context = next(p.evidence for p in second.imports if p.name == "mode_choice")
+    assert first_context is not None
+    assert second_context is not None
+    assert first_context.value != second_context.value
