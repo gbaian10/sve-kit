@@ -10,10 +10,10 @@ from sve_carddb.export.read_api import INDEX, ExportError, load_export
 from typer.testing import CliRunner
 
 from sve_publish import gc
-from sve_publish.adapter import PUBLIC_PREFIXES, Stored
+from sve_publish.adapter import IMAGE_PREFIXES, SNAPSHOT_PREFIXES, Stored
 from sve_publish.cli import app
 from sve_publish.headers import IMAGE_HEADERS
-from sve_publish.publish import upload
+from sve_publish.inventory import INVENTORY
 
 from .r2_export_fixtures import export
 from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
@@ -22,6 +22,7 @@ from .r2_fixtures import ACCOUNT, BUCKET
 from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
 from .r2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
 from .r2_sdk_fixtures import install_mock_sdk
+from .test_r2_upload import upload
 
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
@@ -47,7 +48,7 @@ def three_versions(
         projection.tables["printing"][0]["rarity_raw"] = f"Synthetic rarity {step}"
         export(images, roots, step=step, projection=projection)
         loaded.append(load_export(roots.preview))
-        upload(store, loaded[-1], None)
+        upload(store, loaded[-1])
     return tuple(loaded)
 
 
@@ -63,15 +64,18 @@ def test_collects_only_objects_outside_current_previous_and_current_images(
     store, state, _ = remote
     first, second, third = three_versions(images, roots, store)
     state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
-    expected = sorted((keys(first) - keys(second) - keys(third)) | {STRAY})
+    expected = sorted(keys(first) - keys(second) - keys(third))
     assert expected
-    dry = gc.collect(store, PUBLIC_PREFIXES, execute=False)
+    dry = gc.collect(store, SNAPSHOT_PREFIXES, execute=False)
     assert dry == {"mode": "dry_run", "candidates": expected, "deleted": []}
     assert STRAY in state.objects
-    done = gc.collect(store, PUBLIC_PREFIXES, execute=True)
+    done = gc.collect(store, SNAPSHOT_PREFIXES, execute=True)
     assert done["deleted"] == expected
-    assert set(state.objects) == keys(second) | keys(third) | {INDEX}
-    assert gc.collect(store, PUBLIC_PREFIXES, execute=False)["candidates"] == []
+    assert STRAY in state.objects
+    images_done = gc.collect_images(store, IMAGE_PREFIXES, execute=True)
+    assert images_done["deleted"] == [STRAY]
+    assert set(state.objects) == keys(second) | keys(third) | {INDEX, INVENTORY}
+    assert gc.collect(store, SNAPSHOT_PREFIXES, execute=False)["candidates"] == []
 
 
 def test_namespace_limits_candidates(
@@ -82,7 +86,7 @@ def test_namespace_limits_candidates(
     store, state, _ = remote
     three_versions(images, roots, store)
     state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
-    result = gc.collect(store, frozenset({"images/card_s/"}), execute=True)
+    result = gc.collect_images(store, frozenset({"images/card_s/"}), execute=True)
     assert result["deleted"] == [STRAY]
     with pytest.raises(ExportError, match=r"^GC namespace is not explicitly public$"):
         gc.collect(store, frozenset({"snapshots/"}), execute=False)
@@ -96,7 +100,7 @@ def test_previous_images_are_collected_when_current_drops_them(
     store, state, _ = remote
     export(images, roots, step=0)
     previous = load_export(roots.preview)
-    upload(store, previous, None)
+    upload(store, previous)
     absent = deepcopy(images.projection)
     for row in absent.tables["printing_image"]:
         row["availability"] = "missing"
@@ -104,12 +108,12 @@ def test_previous_images_are_collected_when_current_drops_them(
     export(images, roots, step=1, projection=absent)
     current = load_export(roots.preview)
     assert not current.images
-    upload(store, current, None)
-    result = gc.collect(store, PUBLIC_PREFIXES, execute=True)
+    upload(store, current)
+    result = gc.collect_images(store, IMAGE_PREFIXES, execute=True)
     assert result["deleted"] == sorted(i.key for i in previous.images)
     assert set(state.objects) == {
         m.key for e in (previous, current) for m in e.members
-    } | {INDEX}
+    } | {INDEX, INVENTORY}
 
 
 def test_missing_retained_member_stops_before_deletion(
@@ -128,7 +132,7 @@ def test_missing_retained_member_stops_before_deletion(
     )
     del state.objects[missing]
     with pytest.raises(ExportError, match=r"^GC retained closure is incomplete$"):
-        gc.collect(store, PUBLIC_PREFIXES, execute=True)
+        gc.collect(store, SNAPSHOT_PREFIXES, execute=True)
     assert STRAY in state.objects
 
 
@@ -153,7 +157,7 @@ def test_index_change_stops_deletion(
 
     monkeypatch.setattr(store, "delete", delete_then_change)
     with pytest.raises(ExportError, match=r"^GC version index changed; run it again$"):
-        gc.collect(store, PUBLIC_PREFIXES, execute=True)
+        gc.collect_images(store, IMAGE_PREFIXES, execute=True)
     assert len([k for k in state.objects if k.startswith("images/card_s/99")]) == 1
 
 
@@ -169,10 +173,10 @@ def test_refuses_bucket_without_index_or_with_irregular_keys(
         message = "GC requires a published version index"
     else:
         three_versions(images, roots, store)
-        state.objects["images/card_s/stray.png"] = Stored(b"x", '"x"', IMAGE_HEADERS)
+        state.objects["snapshots/blobs/stray.png"] = Stored(b"x", '"x"', IMAGE_HEADERS)
         message = "GC inventory contains an irregular public key"
     with pytest.raises(ExportError, match="^" + message + "$"):
-        gc.collect(store, PUBLIC_PREFIXES, execute=True)
+        gc.collect(store, SNAPSHOT_PREFIXES, execute=True)
     assert not any(op == "DELETE" for op, _key, _ in state.operations)
 
 
@@ -195,7 +199,7 @@ def test_cli_dry_run_lists_and_execute_deletes(
     monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
     target = ["--account-id", ACCOUNT, "--bucket", BUCKET]
-    common = ["gc", "--namespace", "images/card_s/", *target]
+    common = ["images", "gc", "--namespace", "images/card_s/", *target]
     dry = CliRunner().invoke(app, common)
     assert dry.exit_code == 0, dry.output
     assert json.loads(dry.output)["candidates"] == [STRAY]

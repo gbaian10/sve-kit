@@ -16,9 +16,11 @@ from typer.testing import CliRunner
 from sve_publish import parallel
 from sve_publish.adapter import R2Store, Stored
 from sve_publish.cli import app
+from sve_publish.headers import INDEX_HEADERS
+from sve_publish.inventory import INVENTORY, inventory
 from sve_publish.publish import report, upload
 
-from .r2_export_fixtures import export
+from .r2_export_fixtures import export, image_description
 from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- synthetic corpus
 from .r2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- isolated export roots
 from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
@@ -142,6 +144,7 @@ def test_cli_jobs_16_is_faster_with_identical_writes_and_summary(
     timings = []
     for jobs in (1, 16):
         fake = DelayedS3()
+        ready(fake, roots)
         with monkeypatch.context() as patch:
             install_mock_sdk(patch, fake)
             patch.setenv("SVE_R2_ACCESS_KEY_ID", CREDENTIALS.access_key)
@@ -150,6 +153,7 @@ def test_cli_jobs_16_is_faster_with_identical_writes_and_summary(
             result = CliRunner().invoke(
                 app,
                 [
+                    "snapshot",
                     "upload",
                     "--export-dir",
                     str(roots.preview),
@@ -157,7 +161,6 @@ def test_cli_jobs_16_is_faster_with_identical_writes_and_summary(
                     ACCOUNT,
                     "--bucket",
                     BUCKET,
-                    "--skip-cdn-verify",
                     "--execute",
                     "--jobs",
                     str(jobs),
@@ -167,7 +170,7 @@ def test_cli_jobs_16_is_faster_with_identical_writes_and_summary(
         assert result.exit_code == 0, result.output
         summaries.append(json.loads(result.stdout))
         assert "Upload:" in result.stderr
-        assert f"{len(loaded.images) + len(loaded.members)}/" in result.stderr
+        assert f"{len(loaded.members)}/" in result.stderr
         objects.append({k: (v.raw, v.headers) for k, v in fake.objects.items()})
         assert fake.peak <= jobs
         if jobs > 1:
@@ -175,42 +178,22 @@ def test_cli_jobs_16_is_faster_with_identical_writes_and_summary(
         assert fake.requests[-2:] == [("PUT", INDEX), ("GET", INDEX)]
     assert summaries[0] == summaries[1]
     assert objects[0] == objects[1]
-    assert summaries[0]["written_files"] == len(loaded.images) + len(loaded.members)
+    assert summaries[0]["written_files"] == len(loaded.members)
     local = report(loaded)
     assert isinstance(local["image_bytes"], int)
     assert isinstance(local["json_bytes"], int)
-    assert sum(len(raw) for key, (raw, _) in objects[0].items() if key != INDEX) == (
-        local["image_bytes"] + local["json_bytes"]
+    assert (
+        sum(
+            len(raw)
+            for key, (raw, _) in objects[0].items()
+            if key not in {INDEX, INVENTORY}
+        )
+        == (local["json_bytes"])
     )
     assert timings[1] < timings[0] / 2
     print(  # ruff: ignore[print] -- record acceptance timings without object contents
         f"20 ms/request: jobs=1 {timings[0]:.3f}s; jobs=16 {timings[1]:.3f}s"
     )
-
-
-def test_json_waits_for_every_image_readback(
-    images: PublicImages, roots: Roots
-) -> None:
-    export(images, roots, step=0)
-    loaded = load_export(roots.preview)
-    fake = DelayedS3(
-        image_keys={item.key for item in loaded.images},
-        block_readback=loaded.images[0].key,
-    )
-    with memory_store(fake) as store, ThreadPoolExecutor(max_workers=1) as runner:
-        future = runner.submit(upload, store, loaded, None, jobs=16)
-        try:
-            assert fake.blocked.wait(5)
-            assert fake.other_images_done.wait(5)
-            assert not any(
-                method == "PUT" and key.startswith("snapshots/")
-                for method, key in fake.requests
-            )
-            assert not future.done()
-        finally:
-            fake.release.set()
-        result = future.result(timeout=10)
-    assert result["index"] == "updated"
 
 
 @pytest.mark.parametrize("failure", ["condition", "transport", "readback", "immutable"])
@@ -222,6 +205,7 @@ def test_failure_stops_waiting_writes_drains_and_rerun_only_fills_missing(
     failed = loaded.members[2]
     blocked_keys = {member.key for member in loaded.members[3:]}
     fake = DelayedS3(fail_key=failed.key, fault=failure, block_reads=blocked_keys)
+    ready(fake, roots)
     stopped = Event()
 
     def progress(line: str) -> None:
@@ -232,7 +216,7 @@ def test_failure_stops_waiting_writes_drains_and_rerun_only_fills_missing(
         fake.fail_key = None
         fake.objects[failed.key] = Stored(b"other", '"other"', {})
     with memory_store(fake) as store, ThreadPoolExecutor(max_workers=1) as runner:
-        future = runner.submit(upload, store, loaded, None, jobs=4, progress=progress)
+        future = runner.submit(upload, store, loaded, jobs=4, progress=progress)
         try:
             assert stopped.wait(10)
             assert fake.blocked.wait(5)
@@ -244,14 +228,14 @@ def test_failure_stops_waiting_writes_drains_and_rerun_only_fills_missing(
             future.result(timeout=10)
         assert not blocked_keys & fake.objects.keys()
         assert INDEX not in fake.objects
-        done = set(fake.objects)
+        done = set(fake.objects) - {INVENTORY}
         fake.fail_key = None
         fake.block_reads.clear()
         if failure == "immutable":
             del fake.objects[failed.key]
             done.remove(failed.key)
         before = len(fake.requests)
-        result = upload(store, loaded, None, jobs=16)
+        result = upload(store, loaded, jobs=16)
         new_writes = {key for method, key in fake.requests[before:] if method == "PUT"}
         assert not done & new_writes
         if failure in {"condition", "immutable"}:
@@ -266,7 +250,7 @@ def test_failure_stops_waiting_writes_drains_and_rerun_only_fills_missing(
 def test_invalid_jobs_are_rejected_before_export_or_credentials(
     images: PublicImages, roots: Roots, jobs: int
 ) -> None:
-    result = CliRunner().invoke(app, ["upload", "--jobs", str(jobs)])
+    result = CliRunner().invoke(app, ["snapshot", "upload", "--jobs", str(jobs)])
     assert result.exit_code != 0
     assert "--jobs" in result.output
     assert "range" in result.output
@@ -274,7 +258,7 @@ def test_invalid_jobs_are_rejected_before_export_or_credentials(
     fake = DelayedS3()
     with memory_store(fake) as store:
         with pytest.raises(ExportError, match="jobs must be at least 1"):
-            upload(store, load_export(roots.preview), None, jobs=jobs)
+            upload(store, load_export(roots.preview), jobs=jobs)
     assert fake.requests == []
 
 
@@ -284,7 +268,8 @@ def test_progress_keeps_reporting_while_an_object_waits_for_readback(
     monkeypatch.setattr(parallel, "PROGRESS_SECONDS", 0)
     export(images, roots, step=0)
     loaded = load_export(roots.preview)
-    fake = DelayedS3(delay=0, block_readback=loaded.images[0].key)
+    fake = DelayedS3(delay=0, block_readback=loaded.members[0].key)
+    ready(fake, roots)
     heartbeat = Event()
 
     def progress(line: str) -> None:
@@ -292,7 +277,7 @@ def test_progress_keeps_reporting_while_an_object_waits_for_readback(
             heartbeat.set()
 
     with memory_store(fake) as store, ThreadPoolExecutor(max_workers=1) as runner:
-        future = runner.submit(upload, store, loaded, None, jobs=1, progress=progress)
+        future = runner.submit(upload, store, loaded, jobs=1, progress=progress)
         try:
             assert fake.blocked.wait(5)
             assert heartbeat.wait(5)
@@ -300,3 +285,12 @@ def test_progress_keeps_reporting_while_an_object_waits_for_readback(
         finally:
             fake.release.set()
         assert future.result(timeout=10)["index"] == "updated"
+
+
+def ready(fake: DelayedS3, roots: Roots) -> None:
+    """The independent image stage has already recorded its successful uploads."""
+    fake.objects[INVENTORY] = Stored(
+        inventory(image_description(roots.preview).objects).content(),
+        '"ready-images"',
+        INDEX_HEADERS,
+    )

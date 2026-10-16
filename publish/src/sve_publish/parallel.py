@@ -25,7 +25,7 @@ class UploadObject:
     key: str
     read: Callable[[], bytes]
     headers: dict[str, str]
-    overwrite: bool
+    image: bool = False
 
 
 @dataclass
@@ -130,6 +130,11 @@ class UploadPool:
             raise
 
     def _write(self, item: UploadObject, raw: bytes) -> int | None:
+        if item.image:
+            if self.stopped.is_set():
+                return None
+            self.store.put_image(item.key, raw)
+            return 1
         existing = self.store.get(item.key)
         if (
             existing is not None
@@ -137,7 +142,7 @@ class UploadPool:
             and existing.headers == item.headers
         ):
             return 0
-        if existing is not None and not item.overwrite:
+        if existing is not None:
             raise ExportError("Immutable JSON object differs from the export")
         # A PUT that passed this check before a failure still finishes and is read back.
         if self.stopped.is_set():
@@ -146,7 +151,7 @@ class UploadPool:
             item.key,
             raw,
             item.headers,
-            expected=None if existing is None else existing.etag,
+            expected=None,
         ):
             raise ExportError("Conditional PUT failed; the object changed concurrently")
         stored = self.store.get(item.key)

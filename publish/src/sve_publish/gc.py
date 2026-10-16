@@ -17,7 +17,8 @@ from sve_carddb.export.read_api import (
     string,
 )
 
-from sve_publish.adapter import PUBLIC_PREFIXES
+from sve_publish.adapter import IMAGE_PREFIXES, SNAPSHOT_PREFIXES
+from sve_publish.inventory import INVENTORY, commit_inventory, inventory, read_inventory
 from sve_publish.publish import read_index
 
 if TYPE_CHECKING:
@@ -62,8 +63,6 @@ def retained(store: R2Store) -> tuple[Stored, set[str], set[str]]:
         path = string(entry["manifest_path"])
         required |= closure(path, manifest)
         optional.add(path + ".br")
-        if name == "current":
-            required |= _current_images(store, manifest)
     return remote, required, optional
 
 
@@ -71,7 +70,7 @@ def collect(
     store: R2Store, namespaces: frozenset[str], *, execute: bool
 ) -> dict[str, object]:
     """Recheck the index before each DELETE; never run while an upload is running."""
-    if not namespaces or not namespaces <= PUBLIC_PREFIXES:
+    if not namespaces or not namespaces <= SNAPSHOT_PREFIXES:
         raise ExportError("GC namespace is not explicitly public")
     try:
         remote, required, optional = retained(store)
@@ -80,9 +79,9 @@ def collect(
     except ValueError, TypeError, KeyError, SchemaError:
         raise ExportError("GC retained snapshot is invalid") from None
     listed: set[str] = set()
-    for prefix in PUBLIC_PREFIXES:
+    for prefix in SNAPSHOT_PREFIXES:
         listed.update(store.keys(prefix))
-    if any(not (JSON_KEY.fullmatch(key) or IMAGE_KEY.fullmatch(key)) for key in listed):
+    if any(not JSON_KEY.fullmatch(key) for key in listed):
         raise ExportError("GC inventory contains an irregular public key")
     if required - listed:
         raise ExportError("GC retained closure is incomplete")
@@ -93,6 +92,57 @@ def collect(
     )
     deleted: list[str] = []
     if execute:
+        for key in candidates:
+            if store.get(INDEX) != remote:
+                raise ExportError("GC version index changed; run it again")
+            store.delete(key)
+            deleted.append(key)
+    return {
+        "mode": "execute" if execute else "dry_run",
+        "candidates": candidates,
+        "deleted": deleted,
+    }
+
+
+def collect_images(  # ruff: ignore[complex-structure] -- retention checks and invalidation must all precede the first DELETE
+    store: R2Store, namespaces: frozenset[str], *, execute: bool
+) -> dict[str, object]:
+    """Invalidate claims before deleting; LIST also finds interrupted upload orphans."""
+    if not namespaces or not namespaces <= IMAGE_PREFIXES:
+        raise ExportError("GC namespace is not explicitly public")
+    remote = store.get(INDEX)
+    index = read_index(remote)
+    if index is None:
+        raise ExportError("GC requires a published version index")
+    try:
+        required = _current_images(
+            store, _manifest(store, object_value(index["current"]))
+        )
+    except ExportError:
+        raise
+    except ValueError, TypeError, KeyError, SchemaError:
+        raise ExportError("GC retained snapshot is invalid") from None
+    before = store.get(INVENTORY)
+    rows = read_inventory(before)
+    listed = {key for prefix in IMAGE_PREFIXES for key in store.keys(prefix)}
+    if any(not IMAGE_KEY.fullmatch(key) for key in listed):
+        raise ExportError("GC inventory contains an irregular public key")
+    if required - listed or required - {item.key for item in rows.objects}:
+        raise ExportError("GC retained images are incomplete; restore images first")
+    candidates = sorted(
+        key for key in listed - required if any(key.startswith(p) for p in namespaces)
+    )
+    kept = tuple(
+        item
+        for item in rows.objects
+        if item.key in required or not any(item.key.startswith(p) for p in namespaces)
+    )
+    deleted = []
+    if execute:
+        if store.get(INDEX) != remote:
+            raise ExportError("GC version index changed; run it again")
+        if kept != rows.objects:
+            commit_inventory(store, before, inventory(kept))
         for key in candidates:
             if store.get(INDEX) != remote:
                 raise ExportError("GC version index changed; run it again")

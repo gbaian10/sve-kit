@@ -21,13 +21,15 @@ from typer.testing import CliRunner
 
 from sve_publish.adapter import Stored
 from sve_publish.cli import app
-from sve_publish.freshness import CDNFreshness
 from sve_publish.headers import member_headers
-from sve_publish.publish import next_index, upload
+from sve_publish.images import upload_images
+from sve_publish.inventory import INVENTORY
+from sve_publish.publish import next_index
+from sve_publish.publish import upload as upload_snapshot
 from sve_publish.sdk import Credentials
 
 from .r2_export_fixtures import art_changed as art_changed  # ruff: ignore[useless-import-alias] -- module-scoped crop-change corpus
-from .r2_export_fixtures import export
+from .r2_export_fixtures import export, image_description
 from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
 from .r2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- per-test public and private roots
 from .r2_fixtures import ACCOUNT, BUCKET
@@ -38,24 +40,22 @@ from .r2_sdk_fixtures import install_mock_sdk
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
     from pathlib import Path
 
     from pydantic import JsonValue
     from sve_carddb.export.preview import Roots
+    from sve_carddb.export.read_api import Export
 
     from sve_publish.adapter import R2Store
 
     from .r2_fixtures import Loopback, ServerState
     from .synthetic_images import PublicImages
 
-CDN = "https://cdn.invalid/"
 
-
-@pytest.fixture
-def cdn(remote: tuple[R2Store, ServerState, Loopback]) -> Iterator[CDNFreshness]:
-    with httpx.Client(transport=remote[2], trust_env=False) as client:
-        yield CDNFreshness(CDN, client)
+def upload(store: R2Store, export: Export) -> dict[str, object]:
+    """Exercise the two separately invoked stages in integration scenarios."""
+    upload_images(store, image_description(export.root), export.root)
+    return upload_snapshot(store, export)
 
 
 def puts(state: ServerState, start: int = 0) -> list[str]:
@@ -70,7 +70,6 @@ def test_first_upload_selects_only_the_public_closure_and_writes_index_last(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
-    cdn: CDNFreshness,
 ) -> None:
     store, state, _ = remote
     export(images, roots, step=0)
@@ -83,11 +82,13 @@ def test_first_upload_selects_only_the_public_closure_and_writes_index_last(
     text.tables["printing"][0]["rarity_raw"] = "Synthetic second export"
     export(images, roots, step=1, projection=text)
     loaded = load_export(roots.preview)
-    result = upload(store, loaded, cdn)
+    result = upload(store, loaded)
     assert result["index"] == "updated"
-    assert result["cdn_verification"] == "verified"
+    assert result["cdn_verification"] == "not_checked"
     expected = (
-        {m.key for m in loaded.members} | {i.key for i in loaded.images} | {INDEX}
+        {m.key for m in loaded.members}
+        | {i.key for i in loaded.images}
+        | {INDEX, INVENTORY}
     )
     assert set(state.objects) == expected
     assert stale - expected - {POINTER}
@@ -125,14 +126,13 @@ def test_unchanged_rerun_makes_zero_puts(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
-    cdn: CDNFreshness,
 ) -> None:
     store, state, _ = remote
     export(images, roots, step=0)
-    upload(store, load_export(roots.preview), cdn)
+    upload(store, load_export(roots.preview))
     before = len(state.operations)
     index = state.objects[INDEX]
-    result = upload(store, load_export(roots.preview), None)
+    result = upload(store, load_export(roots.preview))
     assert puts(state, before) == []
     assert state.objects[INDEX] == index
     assert result["written_files"] == 0
@@ -155,17 +155,17 @@ def test_partial_failure_keeps_old_index_and_rerun_uploads_the_rest(
         else string(loaded.entry["manifest_path"])
     )
     state.fail_key = key
-    with pytest.raises(ExportError, match="no unconditional fallback"):
-        upload(store, loaded, None)
+    with pytest.raises(ExportError, match="PUT failed"):
+        upload(store, loaded)
     assert INDEX not in state.objects
     done = set(state.objects)
     assert done
     state.fail_key = None
     before = len(state.operations)
-    upload(store, loaded, None)
+    upload(store, loaded)
     rerun = puts(state, before)
     assert key in rerun
-    assert not done & set(rerun)
+    assert not {key for key in done if key.startswith("snapshots/")} & set(rerun)
     assert rerun[-1] == INDEX
 
 
@@ -174,16 +174,15 @@ def test_changed_art_gets_new_version_and_unchanged_card_keeps_it(
     art_changed: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
-    cdn: CDNFreshness,
 ) -> None:
     store, state, _ = remote
     export(images, roots, step=0)
     first = load_export(roots.preview)
-    upload(store, first, cdn)
+    upload(store, first)
     export(art_changed, roots, step=1, library=art_changed.library)
     second = load_export(roots.preview)
     before = len(state.operations)
-    upload(store, second, cdn)
+    upload(store, second)
     written = [k for k in puts(state, before) if k.startswith("images/")]
     assert written
     assert all(k.startswith("images/art_") for k in written)
@@ -199,29 +198,6 @@ def test_changed_art_gets_new_version_and_unchanged_card_keeps_it(
     assert index["previous"] == first.entry
 
 
-def test_failed_cdn_check_keeps_index_and_rerun_switches_it(
-    images: PublicImages,
-    roots: Roots,
-    remote: tuple[R2Store, ServerState, Loopback],
-    cdn: CDNFreshness,
-) -> None:
-    store, state, _ = remote
-    export(images, roots, step=0)
-    first = load_export(roots.preview)
-    upload(store, first, cdn)
-    text = deepcopy(images.projection)
-    text.tables["printing"][0]["rarity_raw"] = "Synthetic second export"
-    export(images, roots, step=1, projection=text)
-    second = load_export(roots.preview)
-    state.cdn_status = 404
-    with pytest.raises(ExportError, match=r"^CDN full-URL verification failed$"):
-        upload(store, second, cdn)
-    assert current(state) == first.entry
-    state.cdn_status = None
-    upload(store, second, cdn)
-    assert current(state) == second.entry
-
-
 def test_conflicting_immutable_json_is_never_overwritten(
     images: PublicImages, roots: Roots, remote: tuple[R2Store, ServerState, Loopback]
 ) -> None:
@@ -233,7 +209,7 @@ def test_conflicting_immutable_json_is_never_overwritten(
     with pytest.raises(
         ExportError, match=r"^Immutable JSON object differs from the export: "
     ):
-        upload(store, loaded, None)
+        upload(store, loaded)
     assert state.objects[member.key].raw == b"other"
     assert INDEX not in state.objects
 
@@ -246,7 +222,7 @@ def test_brotli_siblings_are_uploaded_as_exported(
     loaded = load_export(roots.preview)
     brotli = [m for m in loaded.members if m.key.endswith(".br")]
     assert any(m.key == string(loaded.entry["manifest_path"]) + ".br" for m in brotli)
-    upload(store, loaded, None)
+    upload(store, loaded)
     for member in brotli:
         assert (
             state.objects[member.key].raw == (roots.preview / member.key).read_bytes()
@@ -361,78 +337,9 @@ def _cli(
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
     result = CliRunner().invoke(
         app,
-        ["upload", *args, "--account-id", ACCOUNT, "--bucket", BUCKET],
+        ["snapshot", "upload", *args, "--account-id", ACCOUNT, "--bucket", BUCKET],
     )
     return result.exit_code, result.output
-
-
-def test_cli_execute_verifies_cdn_and_prints_no_secrets(
-    images: PublicImages,
-    roots: Roots,
-    server: tuple[ServerState, Loopback],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    state, transport = server
-    export(images, roots, step=0)
-    code, output = _cli(
-        monkeypatch,
-        transport,
-        "--export-dir",
-        str(roots.preview),
-        "--cdn-base-url",
-        CDN,
-        "--execute",
-    )
-    assert code == 0, output
-    result = json.loads(output.splitlines()[-1])
-    assert result["mode"] == "execute"
-    assert result["cdn_verification"] == "verified"
-    assert "synthetic-secret" not in output
-    assert "Signature=" not in output
-    assert any(h.get("host") == "cdn.invalid" for _m, _p, h in state.requests)
-    assert INDEX in state.objects
-
-
-def test_skip_cdn_still_reads_every_object_back_from_origin(
-    images: PublicImages,
-    roots: Roots,
-    server: tuple[ServerState, Loopback],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    state, transport = server
-    export(images, roots, step=0)
-    loaded = load_export(roots.preview)
-    code, output = _cli(
-        monkeypatch,
-        transport,
-        "--export-dir",
-        str(roots.preview),
-        "--execute",
-        "--skip-cdn-verify",
-    )
-    assert code == 0, output
-    assert json.loads(output.splitlines()[-1])["cdn_verification"] == "skipped"
-    assert "complete" in output
-    assert "written" in output
-    assert not any(h.get("host") == "cdn.invalid" for _m, _p, h in state.requests)
-    read = {p for m, p, _ in state.requests if m == "GET"}
-    for key in [m.key for m in loaded.members] + [i.key for i in loaded.images]:
-        assert f"/{BUCKET}/{key}" in read
-
-
-def test_execute_without_cdn_url_or_skip_is_refused_before_reading(
-    roots: Roots, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def forbidden() -> Credentials:
-        raise AssertionError("credentials read")
-
-    monkeypatch.setattr(Credentials, "environment", forbidden)
-    result = CliRunner().invoke(
-        app,
-        ["upload", "--export-dir", str(roots.preview), "--execute"],
-    )
-    assert result.exit_code != 0
-    assert "--skip-cdn-verify" in result.output
 
 
 def test_dry_run_reads_no_credentials_and_opens_no_client(
@@ -450,11 +357,10 @@ def test_dry_run_reads_no_credentials_and_opens_no_client(
     result = CliRunner().invoke(
         app,
         [
+            "snapshot",
             "upload",
             "--export-dir",
             str(roots.preview),
-            "--cdn-base-url",
-            CDN,
         ],
     )
     assert result.exit_code == 0, result.output
@@ -524,7 +430,7 @@ def test_pointer_failure_after_state_commit_preserves_safe_image_versions(
 
     store, state, _ = remote
     export(images, roots, step=0)
-    upload(store, load_export(roots.preview), None)
+    upload(store, load_export(roots.preview))
     original = writer.write_artifact
 
     def interrupted(
@@ -550,7 +456,7 @@ def test_pointer_failure_after_state_commit_preserves_safe_image_versions(
             (3 if retry_original else 2) if image.key.startswith("images/art_") else 1
         )
         assert image.url.endswith("?v=" + str(expected))
-    upload(store, loaded, None)
+    upload(store, loaded)
     assert current(state) == loaded.entry
 
 
@@ -562,10 +468,10 @@ def test_lost_index_put_response_reruns_without_another_revision(
     loaded = load_export(roots.preview)
     transport.lose_key = INDEX
     with pytest.raises(ExportError, match=r"^R2 transport or protocol failed$"):
-        upload(store, loaded, None)
+        upload(store, loaded)
     committed = state.objects[INDEX]
     before = len(state.operations)
-    result = upload(store, loaded, None)
+    result = upload(store, loaded)
     assert puts(state, before) == []
     assert state.objects[INDEX] == committed
     assert result["index_revision"] == 1
@@ -579,7 +485,7 @@ def test_index_cas_race_preserves_the_concurrent_index(
 ) -> None:
     store, state, _ = remote
     export(images, roots, step=0)
-    upload(store, load_export(roots.preview), None)
+    upload(store, load_export(roots.preview))
     original_index = state.objects[INDEX]
     export(images, roots, step=1)
     original = store.put
@@ -595,7 +501,7 @@ def test_index_cas_race_preserves_the_concurrent_index(
 
     monkeypatch.setattr(store, "put", raced)
     with pytest.raises(ExportError, match=r"^Version index conditional write failed$"):
-        upload(store, load_export(roots.preview), None)
+        upload(store, load_export(roots.preview))
     assert state.objects[INDEX].etag == '"concurrent"'
     assert state.objects[INDEX].raw == original_index.raw
 

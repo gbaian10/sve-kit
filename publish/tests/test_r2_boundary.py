@@ -46,6 +46,6 @@ def test_member_read_preserves_exact_bytes(tmp_path: Path) -> None:
 def test_r2_cli_has_only_current_publication_and_collection() -> None:
     runner = CliRunner()
     for command in ("upload", "gc"):
-        assert runner.invoke(app, [command, "--help"]).exit_code == 0
+        assert runner.invoke(app, ["snapshot", command, "--help"]).exit_code == 0
     result = runner.invoke(app, ["unsupported-command"])
     assert result.exit_code == 2

@@ -10,6 +10,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from botocore.parsers import ResponseParserError
 from sve_carddb.export.read_api import IMAGE_KEY, JSON_KEY, ExportError
 
+from sve_publish.headers import IMAGE_HEADERS
 from sve_publish.sdk import (
     BoundaryError,
     Credentials,
@@ -33,6 +34,8 @@ PUBLIC_PREFIXES = frozenset(
     {"snapshots/blobs/", "snapshots/manifests/"}
     | {"images/" + s + "/" for s in ("card_s", "card_m", "card_l", "art_s", "art_m")}
 )
+SNAPSHOT_PREFIXES = frozenset(p for p in PUBLIC_PREFIXES if p.startswith("snapshots/"))
+IMAGE_PREFIXES = PUBLIC_PREFIXES - SNAPSHOT_PREFIXES
 MAX_OBJECT = 128 * 1024 * 1024
 
 
@@ -127,6 +130,20 @@ class R2Store:
                     "R2 conditional PUT failed; no unconditional fallback"
                 ) from None
             return True
+
+    def put_image(self, key: str, raw: bytes) -> None:
+        """Overwrite only image keys after the inventory stopped advertising them."""
+        if not IMAGE_KEY.fullmatch(key):
+            raise ExportError("Image PUT requires a public WebP key")
+        with self._operation(key):
+            try:
+                self.client.put_object(
+                    **put_parameters(self.bucket, key, raw, IMAGE_HEADERS, image=True)
+                )
+            except ClientError:
+                raise ExportError(
+                    "R2 image PUT failed; rerun the same image input"
+                ) from None
 
     def delete(self, key: str) -> None:
         """GC alone deletes; R2 does not promise If-Match on DeleteObject."""

@@ -21,7 +21,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from botocore.httpsession import URLLib3Session
 from botocore.loaders import Loader
 from botocore.session import Session as CoreSession
-from sve_carddb.export.read_api import ExportError
+from sve_carddb.export.read_api import IMAGE_KEY, ExportError
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -362,7 +362,7 @@ def status(error: ClientError) -> int:
 
 
 def put_parameters(
-    bucket: str, key: str, raw: bytes, headers: dict[str, str]
+    bucket: str, key: str, raw: bytes, headers: dict[str, str], *, image: bool = False
 ) -> PutObjectRequestTypeDef:
     """Only supported metadata and one conditional write cross into the SDK."""
     validate_key(key)
@@ -384,6 +384,13 @@ def put_parameters(
         params["CacheControl"] = headers["cache-control"]
     if "content-encoding" in headers:
         params["ContentEncoding"] = headers["content-encoding"]
+    if image:
+        if (
+            not IMAGE_KEY.fullmatch(key)
+            or {"if-match", "if-none-match"} & headers.keys()
+        ):
+            raise BoundaryError("Unconditional PUT is restricted to public images")
+        return params
     if (
         "if-none-match" in headers
         and "if-match" not in headers

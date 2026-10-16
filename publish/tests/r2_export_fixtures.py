@@ -9,9 +9,11 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.export.image_upload import upload_description
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.preview.media_state import commit, reserve
+from sve_carddb.export.read_api import ImageUpload, digest, load_image_upload
 from sve_carddb.export.transport import Batch, export_snapshot
 from sve_carddb.images.variants import build_variants
 from sve_carddb.workflows.image_index import write_images
@@ -55,6 +57,11 @@ def export(
     )
     write_images(plan, roots, library or images.library, previous)
     commit(roots, plan.state)
+    description = upload_description(plan, "sha256:" + "a" * 64)
+    raw = description.content()
+    output = roots.preview / "image-upload"
+    output.mkdir(exist_ok=True)
+    (output / (digest(raw)[7:] + ".json")).write_bytes(raw)
     write_preview(
         snapshot,
         roots,
@@ -90,3 +97,11 @@ def art_changed(
                 path=new.path, width=new.width, height=new.height, bytes=new.bytes
             )
     return PublicImages(view, images.ownership, root / "library")
+
+
+def image_description(root: Path) -> ImageUpload:
+    """Use the latest successful synthetic producer handoff."""
+    return max(
+        (load_image_upload(path) for path in (root / "image-upload").glob("*.json")),
+        key=lambda item: item.revision,
+    )

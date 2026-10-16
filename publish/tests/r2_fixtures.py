@@ -243,9 +243,18 @@ class Loopback(httpx.BaseTransport):
         self.inner = httpx.HTTPTransport()
         self.lose_next_put = False
         self.lose_key: str | None = None
+        self.reject_put_key: str | None = None
+        self.reject_put_number = 0
+        self.selected_puts = 0
 
     @override
     def handle_request(self, request: httpx.Request) -> httpx.Response:
+        if request.method == "PUT" and request.url.path.endswith(
+            "/" + (self.reject_put_key or "\0")
+        ):
+            self.selected_puts += 1
+            if self.selected_puts == self.reject_put_number:
+                return httpx.Response(412, stream=httpx.ByteStream(b""))
         target = self.root + request.url.raw_path.decode()
         local = httpx.Request(
             request.method, target, headers=request.headers, content=request.content
