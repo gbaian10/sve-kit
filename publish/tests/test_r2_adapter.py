@@ -9,7 +9,6 @@ from sve_carddb.export.read_api import ExportError
 
 from sve_publish import adapter
 from sve_publish.adapter import R2Store, Stored
-from sve_publish.freshness import CDNFreshness, cdn_root
 
 from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
@@ -169,78 +168,6 @@ def test_inventory_xml_refuses_entities_unknown_root_and_malformed_bytes(
 ) -> None:
     with pytest.raises(ExportError, match=r"^" + message + "$"):
         inventory(xml, "snapshots/blobs/")
-
-
-@pytest.mark.parametrize(
-    "root",
-    [
-        "http://cdn.invalid/",
-        "https://user:pass@cdn.invalid/",
-        "https://cdn.invalid/?key=secret",
-        "https://cdn.invalid/#fragment",
-        "https://cdn.invalid",
-        "https://cdn.invalid:bad/",
-    ],
-)
-def test_cdn_root_rejects_secret_bearing_or_ambiguous_urls(root: str) -> None:
-    with pytest.raises(ExportError, match=r"^Explicit HTTPS CDN root required$"):
-        cdn_root(root)
-
-
-def test_cdn_full_query_is_preserved_without_auth_bypass_or_redirect(
-    server: tuple[ServerState, Loopback],
-) -> None:
-    state, transport = server
-    state.cdn = True
-    state.objects["images/card_s/1.webp"] = Stored(
-        b"image bytes", '"e"', {"content-type": "image/webp"}
-    )
-    with httpx.Client(
-        transport=transport,
-        trust_env=False,
-        auth=("synthetic-access", "synthetic-secret"),
-    ) as client:
-        cdn = CDNFreshness("https://cdn.invalid/", client)
-        for token in (1, 2):
-            assert (
-                cdn.get(f"https://cdn.invalid/images/card_s/1.webp?v={token}")
-                == b"image bytes"
-            )
-        state.status = 302
-        assert cdn.get("https://cdn.invalid/images/card_s/1.webp?v=3") is None
-    assert [path for _, path, _ in state.requests] == [
-        f"/images/card_s/1.webp?v={v}" for v in (1, 2, 3)
-    ]
-    assert all(
-        headers["accept-encoding"] == "identity" for _, _, headers in state.requests
-    )
-    assert all(
-        not ({"authorization", "cache-control", "pragma"} & headers.keys())
-        for _, _, headers in state.requests
-    )
-
-
-@pytest.mark.parametrize(
-    "url",
-    [
-        "https://foreign.invalid/images/card_s/1.webp?v=1",
-        "https://cdn.invalid/images/card_s/1.webp",
-        "https://cdn.invalid/images/card_s/1.webp?v=1#x",
-        "images/card_s/1.webp?v=1",
-    ],
-)
-def test_cdn_refuses_unpinned_or_queryless_urls(
-    server: tuple[ServerState, Loopback], url: str
-) -> None:
-    state, transport = server
-    with (
-        httpx.Client(transport=transport, trust_env=False) as client,
-        pytest.raises(
-            ExportError, match=r"^CDN URL is outside the pinned query-bearing root$"
-        ),
-    ):
-        CDNFreshness("https://cdn.invalid/", client).get(url)
-    assert state.requests == []
 
 
 @pytest.mark.parametrize("kind", ["missing-etag", "weak-etag", "overflow"])

@@ -1,4 +1,4 @@
-"""Upload of export-offline roots against the localhost S3/CDN server."""
+"""Upload of export-offline roots against the localhost S3 server."""
 
 import json
 from copy import deepcopy

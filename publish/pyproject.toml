@@ -7,7 +7,6 @@ requires-python = ">=3.14.7,<3.15"
 dependencies = [
     "sve-carddb",
     "boto3>=1.43.108",
-    "httpx>=0.28.1",
     "jsonschema>=4.26.0",
     "pydantic>=2.13.5",
     "typer>=0.27.2",
@@ -32,6 +31,7 @@ test = [
     "pytest-xdist>=3.8.0",
     "pytest-cov>=7.1.0",
     "pytest-asyncio>=1.4.0",
+    "httpx>=0.28.1",
 ]
 
 [tool.uv]
