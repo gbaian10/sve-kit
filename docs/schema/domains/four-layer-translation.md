@@ -831,3 +831,35 @@ Bound 的 import 必須存在且型別正確，來源證明的使用 scope 只�
 不按值尋找 antecedent；不能唯一定位就拒絕。純 omitted 槽仍按既有建構順序配對。
 正式 v2 保留原本對 explicit 槽之 omitted occurrence 的拒絕。
 共用映射可表達某種形狀，不等於來源已核准該省略關係；準備 verify 仍須重新 derive 證明。
+
+### 11.1 準備版的具名參數來源
+
+`four_layer_n2_parameters` 只在準備入口辨識 effect／section 中的下列形狀。
+來源位置由既有單位的 raw origins 連回完整 owner 欄位；原有葉、分支順序、
+正文／標頭／提醒分段及提醒依附保留。葉辨識成功不代表整個能力已有可執行語義。
+
+| 來源 | 葉與界限 | 保留的邊界 |
+| --- | --- | --- |
+| 土之秘術付款前綴 | `Concept/ability` 與 `Nat/earth_rite_amount`，1..安全整數 | 能力篩選與歷史支付不產付款量；其他能力參數不改 |
+| d6 擲骰或明示擲骰事件後的本文條件 | `Nat/dice_face`、`dice_lower_bound`、`dice_upper_bound`，1..6 | 單點、離散 OR、閉區間分開，區間下界不得大於上界；本文條件不移到事件過濾器 |
+| 完整衍生物標頭末端的裸紋章／裝備種類 | `CardKind/declared_kind`，既有 `card_kind.any.v1` | 正文與卡名子字串不取得種類資格，不擴大 selection kind 域 |
+| 已分段、指定本回合攻擊力／體力的從者提醒 | 兩個 `Nat/stat_value`，0..安全整數 | 設定值不當增減量，提醒的期間、stat 引用及依附不改 |
+
+付款量省略時，僅土之秘術具名規則給值 1；其 occurrence 為 omitted，
+raw／canonical spans 為空，`resolution_rule=earth_rite.omitted_amount.v1`。
+明示數字仍有自己的來源位置。不能因付款葉已辨識而解除同片段的其他數值阻擋。
+骰子的 `term:object.die` 引用只隨已辨識的上述點數條件產生，
+不全域抽取其他擲骰敘述，也不建立宣告、history、RNG 或未印刷的 else。
+
+`PreparationRenderer(..., preparation_forms=...)` 額外接受以下兩種有限 Form；
+正式 Renderer 與 authored 仍拒絕它們。Form 只有 default case，按下表順序各呈現
+一次 typed argument，其間可有 Literal；數字沿普通葉輸出，不產概念標註。
+
+| Form ID／rule | 依序形參與型別／角色 |
+| --- | --- |
+| `earth_rite.display`／`earth_rite.display.v1` | ability：Concept/ability；amount：Nat/earth_rite_amount |
+| `dice.interval`／`dice.interval.v1` | lower：Nat/dice_lower_bound；upper：Nat/dice_upper_bound |
+
+土之秘術沿 `term:ability.earth_rite` 的必要選詞，標註範圍僅含 label；
+括號與數字在範圍外。骰子區間 Form 只呈現上下界，不自行加入 die 引用。
+缺必要 label 沿既有整欄 fallback，不能用 Literal 或 optional 繞過。

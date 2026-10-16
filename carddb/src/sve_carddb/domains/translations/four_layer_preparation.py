@@ -9,6 +9,7 @@ from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import DOMAIN, DOMAIN_CODE
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
 from sve_carddb.domains.translations.four_layer_n2_counters import prepare_capacities
+from sve_carddb.domains.translations.four_layer_n2_parameters import prepare_parameters
 from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VERSION
 
 if TYPE_CHECKING:
@@ -90,8 +91,12 @@ def derive_preparation(
     context: CardContext | None = None,
 ) -> PreparedField:
     """Apply sealed source families only through the explicit preparation entry."""
-    derived = prepare_capacities(
-        raw, derive_source(raw, source, classifier, context=context), classifier
+    derived = prepare_parameters(
+        raw,
+        prepare_capacities(
+            raw, derive_source(raw, source, classifier, context=context), classifier
+        ),
+        classifier,
     )
     interfaces = tuple(
         constant_choice_interface(
