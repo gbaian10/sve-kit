@@ -21,7 +21,7 @@ from sve_publish.sdk import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
     from types_boto3_s3 import S3Client
     from types_boto3_s3.type_defs import (
@@ -68,7 +68,7 @@ class R2Store:
 
     @staticmethod
     @contextmanager
-    def _operation(key: str) -> Iterator[None]:
+    def _operation(key: str) -> Generator[None]:
         try:
             validate_key(key)
         except ExportError:

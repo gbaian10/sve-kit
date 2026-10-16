@@ -24,7 +24,7 @@ from botocore.session import Session as CoreSession
 from sve_carddb.export.read_api import ExportError
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Generator, Iterator
 
     from botocore.model import OperationModel
     from types_boto3_s3 import S3Client
@@ -245,7 +245,7 @@ def _open_client(
     credentials: Credentials,
     *,
     http_session: URLLib3Session | None = None,
-) -> Iterator[S3Client]:
+) -> Generator[S3Client]:
     """Open a typed S3 client without ambient AWS files, profiles or proxies."""
     validate_target(account, bucket)
     if os.environ.get("BOTOCORE_EXPERIMENTAL__PLUGINS", "DISABLED") not in {
@@ -308,7 +308,7 @@ def _open_client(
 
 
 @contextmanager
-def _quiet_sdk() -> Iterator[None]:
+def _quiet_sdk() -> Generator[None]:
     roots = ("botocore", "boto3", "urllib3")
     for root in roots:
         logging.getLogger(root)
@@ -337,7 +337,7 @@ def sdk_client(
     credentials: Credentials,
     *,
     http_session: URLLib3Session | None = None,
-) -> Iterator[S3Client]:
+) -> Generator[S3Client]:
     """Keep SDK debug logs and ambient AWS configuration outside the boundary."""
     with _quiet_sdk():
         try:
