@@ -24,6 +24,7 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.contracts.n0 import SAFE_INTEGER
+from sve_carddb.domains.translations.four_layer_ability import HEAD, OPTION_LABEL
 from sve_carddb.domains.translations.four_layer_expressions import (
     DEFINITIONS,
     DOMAIN_CODE,
@@ -56,10 +57,8 @@ _ZONES = {
 }
 _PAIR_SIZE = 2
 _KINDS = {"フォロワー": "follower", "アミュレット": "amulet", "スペル": "spell"}
-_HEAD = re.compile(
-    r"\{(?:ファンファーレ|起動|ラストワード)\}|【(?:進化時|攻撃時|超進化時)】"
-)
-_MODE = re.compile(r"【N】")
+
+_MODE = re.compile(OPTION_LABEL)
 _X = re.compile(r"(?<![A-Za-z0-9_])X(?![A-Za-z0-9_])")
 _QUOTE = re.compile(
     r"「(?P<operand>(?:[^「」]|「[^「」]*」)+)」(?:(?P<same>と同じ)|の(?P<factor>N)倍)"
@@ -110,7 +109,7 @@ def regions(text: str) -> tuple[Region, ...]:
                 grants.append((start + 1, i))
     heads = [
         m.start()
-        for m in _HEAD.finditer(text)
+        for m in HEAD.finditer(text)
         if not any(a <= m.start() < b for a, b in grants)
     ]
     starts = sorted({0, *heads})
@@ -794,20 +793,12 @@ class ReadSources:
                     positions,
                 )
             return None
-        pending = next(
-            (
-                reason
-                for token, reason in (
-                    ("このターン", "a1_pending_a2_history_provider"),
-                    ("カード名の種類数", "a1_pending_a3_distinct_name_provider"),
-                )
-                if token in operand
-            ),
-            None,
-        )
-        if pending is not None:
-            self.pending.add(pending)
-            return None
+        if "このターン" in operand or "カード名の種類数" in operand:
+            return (
+                None
+                if "このターン" in operand
+                else self._name_count(start, operand, positions)
+            )
         return (
             self._immediate(operand, start, positions)
             or self._counter(operand, start, positions)
@@ -816,6 +807,52 @@ class ReadSources:
             or self._object(operand, start, positions)
             or self._receipt(operand, start, positions)
         )
+
+    def _name_count(
+        self, start: int, operand: str, positions: tuple[Span, ...]
+    ) -> str | None:
+        covered = origins(self.original, Span(start=start, end=start + len(operand)))
+        providers = [
+            slot
+            for slot in self.found.schema.slots
+            if isinstance(value := self.found.values[slot.name], ContextExpression)
+            and value.expression_id == "name.distinct_count.objects.v1"
+            and any(
+                o.slot == slot.name
+                and o.raw_spans
+                and all(
+                    any(a.start <= b.start < b.end <= a.end for a in covered)
+                    for b in o.raw_spans
+                )
+                for o in self.found.occurrences
+            )
+        ]
+        if len(providers) != 1:
+            self.pending.add("a1_pending_a3_distinct_name_provider")
+            return None
+        slot = providers[0]
+        uses = tuple(o for o in self.found.occurrences if o.slot == slot.name)
+        groups = tuple(o.canonical_spans for o in uses)
+        extra = tuple(
+            project(self.original, self.current, p)
+            for p in positions
+            if p.end <= start or p.start >= start + len(operand)
+        )
+        groups = tuple(
+            sorted(dict.fromkeys((*groups, *extra)), key=lambda g: g[0].start)
+        )
+        self.leaves.append(
+            Leaf(
+                slot.model_copy(
+                    update={"occurrences": merged(tuple(s for g in groups for s in g))}
+                ),
+                self.found.values[slot.name],
+                groups,
+                "N2-A1",
+                abstract=False,
+            )
+        )
+        return slot.name
 
     def _special_zone(
         self, operand: str, start: int, positions: tuple[Span, ...]
@@ -1175,9 +1212,6 @@ class ReadSources:
                 *(Span(start=m.start(), end=m.end()) for m in uses),
                 Span(start=match.start(), end=match.start() + 1),
             )
-            if any("カード名に" in self._sentence(m.start()) for m in uses):
-                self.pending.add("a1_pending_a5_selector_provider")
-                continue
             result = self.read(match["operand"], match.start("operand"), positions)
             if result is not None:
                 for use in uses:

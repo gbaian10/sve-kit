@@ -16,6 +16,10 @@ from sve_carddb.contracts.four_layer import (
     Scope,
     Span,
 )
+from sve_carddb.domains.translations.four_layer_ability import (
+    ABILITY_HEAD,
+    OPTION_LABEL,
+)
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.recognition.provenance import merged
@@ -28,13 +32,6 @@ if TYPE_CHECKING:
         Recognized,
     )
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
-
-# Canonical text normalizes option numbers to N; {進化} heads only an evolve cost line.
-ABILITY_HEAD = (
-    r"\{(?:起動|ファンファーレ|ラストワード)\}|\{進化\}(?=\{コスト)"
-    r"|【(?:攻撃時|進化時|超進化時)】"
-)
-OPTION_LABEL = r"【[0-9N]+】"
 
 
 def origins(part: SourcePart, span: Span) -> tuple[Span, ...]:

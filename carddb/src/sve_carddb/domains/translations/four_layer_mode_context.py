@@ -31,6 +31,7 @@ from sve_carddb.contracts.four_layer import (
     VocabularyReference,
     hash_payload,
 )
+from sve_carddb.domains.translations.four_layer_ability import HEAD
 from sve_carddb.domains.translations.four_layer_context import (
     Descriptor,
     ImportSignature,
@@ -57,9 +58,7 @@ _INTRO = re.compile(r"下記から(?P<n>" + _DIGIT + r")つ(?P<limit>まで)?チ
 _LABEL = re.compile(r"【(" + _DIGIT + r")】")
 _ALTERNATIVE = re.compile(r"代わりに(?P<n>" + _DIGIT + r")つ(?P<limit>まで)?。$")
 _HISTORY = "このターン、この能力でチョイスした選択肢はチョイスできない。"
-_HEAD = re.compile(
-    r"\{(?:ファンファーレ|起動|ラストワード)\}|【(?:進化時|攻撃時|超進化時)】"
-)
+
 _COST = re.compile(r"これをプレイする際、コストを\+(?P<n>" + _DIGIT + r")してよい。$")
 # Only the sealed A11 and A2 surfaces may claim an approved provider is pending.
 _ENTRY_SURFACE = re.compile(
@@ -190,7 +189,7 @@ def _quantity(match: re.Match[str]) -> QuantitySpec:
 
 
 def _ability_bounds(masked: str, position: int) -> tuple[int, int]:
-    boundaries = tuple(re.finditer(r"\n\s*\n", masked)) + tuple(_HEAD.finditer(masked))
+    boundaries = tuple(re.finditer(r"\n\s*\n", masked)) + tuple(HEAD.finditer(masked))
     start = max((m.end() for m in boundaries if m.end() <= position), default=0)
     end = min(
         (m.start() for m in boundaries if m.start() > position), default=len(masked)
@@ -247,7 +246,7 @@ def _labels_valid(
         and 1 <= int(intro["n"]) <= len(labels)
         and not (
             _INTRO.search(masked, intro.end(), end)
-            or _HEAD.search(masked, intro.end(), end)
+            or HEAD.search(masked, intro.end(), end)
         )
         and not _LABEL.search(masked, line.start(), intro.start())
     )

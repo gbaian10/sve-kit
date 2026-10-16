@@ -27,12 +27,17 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.contracts.source_binding import LeafOccurrence, ReferenceDomain
+from sve_carddb.domains.translations.four_layer_ability import (
+    ABILITY_HEAD,
+    OPTION_LABEL,
+)
 from sve_carddb.domains.translations.four_layer_context import (
     DEFAULT_REGISTRY,
     Descriptor,
     ImportSignature,
     Parameter,
 )
+from sve_carddb.domains.translations.four_layer_history import name_filter_spans
 from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 from sve_carddb.domains.translations.recognition.provenance import merged
 
@@ -255,7 +260,7 @@ class _Builder:
         text = self.original.canonical_source[:position]
         heads = tuple(
             re.finditer(
-                r"\{(?:ファンファーレ|起動|ラストワード)\}|【(?:進化時|超進化時|攻撃時)】",
+                ABILITY_HEAD,
                 text,
             )
         )
@@ -504,6 +509,10 @@ def _traits(builder: _Builder, classifier: Classifier) -> None:
 def _names(builder: _Builder) -> None:
     text = builder.original.canonical_source
     for match in _RELATIVE.finditer(text):
+        if any(
+            a <= match.start() < match.end() <= b for a, b in name_filter_spans(text)
+        ):
+            continue
         span = Span(start=match.start(), end=match.end())
         holder = match[0].startswith("これ")
         receipt = match[0].startswith(("公開した", "消滅させた"))
@@ -519,7 +528,7 @@ def _names(builder: _Builder) -> None:
             )
             candidates = tuple(re.finditer(producer, prefix))
             if len(candidates) != 1 or re.search(
-                r"【[0-9N]+】|\{(?:ファンファーレ|起動|ラストワード)\}|【(?:進化時|超進化時|攻撃時)】",
+                OPTION_LABEL + "|" + ABILITY_HEAD,
                 prefix[candidates[0].end() :],
             ):
                 builder.issues.add("name_source_missing_or_ambiguous")

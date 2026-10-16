@@ -10,6 +10,7 @@ from sve_carddb.contracts.four_layer import (
     EventRef,
     Expression,
     GlossaryReference,
+    LinkedCondition,
     ObjectSetRef,
     Port,
     PredicateExpr,
@@ -707,13 +708,17 @@ def verify_mode_count(
     binding: SourceBinding,
 ) -> None:
     """Mode selection consumes a typed predicate or keeps an explicit source pending."""
-    typed_import(
+    choice = typed_import(
         frame,
         binding,
         rule.choice_context,
         rule.scope,
         ImportSignature("choice", "ChoiceContext", "play_parameter"),
     )
+    if isinstance(rule.condition, LinkedCondition) and (
+        choice.evidence is None or choice.evidence.source != rule.condition.source
+    ):
+        raise ValueError("Mode count condition links a different source ability")
     if isinstance(rule.condition, ResolvedCondition):
         predicate = binding.values.get(rule.condition.predicate)
         if (

@@ -22,6 +22,10 @@ from sve_carddb.contracts.four_layer import (
     VocabularyReference,
 )
 from sve_carddb.contracts.n0 import SAFE_INTEGER
+from sve_carddb.domains.translations.four_layer_ability import (
+    ABILITY_HEAD,
+    OPTION_LABEL,
+)
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf, leaf
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
@@ -87,6 +91,7 @@ class _Builder:
     classifier: Classifier
     scope: str
     leaves: list[Leaf]
+    predicates: tuple[tuple[str, str, tuple[Span, ...]], ...] = ()
 
     def add(
         self, name: str, type_: LeafType, domain: str, value: TypedValue, span: Span
@@ -235,7 +240,53 @@ class _Builder:
             qualifier = "distinct_names"
             start += len("「それぞれカード名が異なる")
             text = text[len("「それぞれカード名が異なる") : -1]
-        return self._simple_noun(start, text, qualifier)
+        return self._composed_noun(start, text, qualifier) or self._simple_noun(
+            start, text, qualifier
+        )
+
+    def _composed_noun(
+        self, start: int, text: str, qualifier: str
+    ) -> tuple[str, list[str]] | None:
+        predicate_start = start - (
+            len("「これと同名を除く")
+            if qualifier == "exclude_name"
+            else len("「それぞれカード名が異なる")
+            if qualifier
+            else 0
+        )
+        region = _origins(self.original, _span(predicate_start, start + len(text)))
+        available = {
+            identifier: name
+            for name, identifier, positions in self.predicates
+            if positions
+            and all(
+                any(a.start <= b.start < b.end <= a.end for a in region)
+                for b in positions
+            )
+        }
+        exclusion = available.get("name.relative.holder.not_equal.v1")
+        traits = available.get("traits.all2.v1")
+        distinct = available.get("name.selection.distinct.v1")
+        if qualifier == "exclude_name" and exclusion:
+            parsed = self._simple_noun(start, text, "")
+            return (
+                ("filtered_trait_card", [*parsed[1], exclusion])
+                if parsed and parsed[0] == "trait_card"
+                else None
+            )
+        if traits and (not qualifier or (qualifier == "distinct_names" and distinct)):
+            kind_start = start + text.rfind("・") + 1
+            atom = self._atom(
+                text[kind_start - start :], _span(kind_start, start + len(text))
+            )
+            if atom and atom[0] == "kind":
+                return (
+                    ("distinct_filtered_kind", [atom[1], traits, distinct])
+                    if distinct
+                    else ("filtered_kind", [atom[1], traits])
+                )
+            return None
+        return None
 
     def _simple_noun(
         self, start: int, text: str, qualifier: str
@@ -394,7 +445,7 @@ def _total_expression(
         )
     )
     if not uses or re.search(
-        r"\{(?:ファンファーレ|起動|ラストワード)\}|【(?:進化時|超進化時|攻撃時|N)】",
+        ABILITY_HEAD + "|" + OPTION_LABEL,
         text[uses[0].end : match.start()],
     ):
         return
@@ -769,7 +820,27 @@ def _apply(
     classifier: Classifier,
     scope: str,
 ) -> tuple[SourcePart, Recognized, tuple[str, ...]] | None:
-    builder = _Builder(raw, original, classifier, scope, [])
+    builder = _Builder(
+        raw,
+        original,
+        classifier,
+        scope,
+        [],
+        tuple(
+            (
+                slot.name,
+                value.expression_id,
+                tuple(
+                    s
+                    for o in found.occurrences
+                    if o.slot == slot.name
+                    for s in o.raw_spans
+                ),
+            )
+            for slot in found.schema.slots
+            if isinstance(value := found.values[slot.name], PredicateExpr)
+        ),
+    )
     _totals(builder)
     _properties(builder)
     _pairs(builder)
