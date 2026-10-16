@@ -17,6 +17,7 @@ from sve_carddb.contracts.four_layer import (
     Target,
 )
 from sve_carddb.contracts.source_binding import QuantityDomain
+from sve_carddb.domains.translations.four_layer_n2_forms import validate_parameter_form
 from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VERSION
 from sve_carddb.domains.translations.four_layer_render import (
     MissingValueError,
@@ -38,6 +39,7 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceBinding
     from sve_carddb.domains.translations.four_layer_render import (
         BoundTarget,
+        Form,
         Result,
         SelectedTarget,
     )
@@ -255,13 +257,24 @@ class ExpressionTargets:
 
 
 class PreparationRenderer(Renderer):
-    def __init__(self, renderer: Renderer, targets: ExpressionTargets) -> None:
+    def __init__(
+        self,
+        renderer: Renderer,
+        targets: ExpressionTargets,
+        *,
+        preparation_forms: Mapping[tuple[str, str], Form] | None = None,
+    ) -> None:
         super().__init__(
             renderer.labels,
             renderer.code_references,
             renderer.forms,
             domains=renderer.domains,
         )
+        for key, form in (preparation_forms or {}).items():
+            if key != (form.definition.id, form.definition.lang) or key in self.forms:
+                raise ValueError("Preparation form key conflicts with its identity")
+            validate_parameter_form(form.definition)
+            self.forms[key] = form
         self.expression_targets = targets
 
     @override
