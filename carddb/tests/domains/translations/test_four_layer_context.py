@@ -9,6 +9,7 @@ from sve_carddb.contracts.four_layer import (
     ContextExpression,
     Domain,
     EventRef,
+    Expression,
     GlossaryReference,
     LeafRef,
     LeafSchema,
@@ -21,14 +22,24 @@ from sve_carddb.contracts.four_layer import (
     Port,
     PortEvidence,
     PredicateExpr,
+    Projection,
+    ReceiptRef,
     Scope,
     Span,
     Target,
+    hash_payload,
 )
-from sve_carddb.contracts.source_binding import QuantityDomain, TypedValue, verify_value
+from sve_carddb.contracts.source_binding import (
+    LeafOccurrence,
+    QuantityDomain,
+    TypedValue,
+    verify_value,
+)
 from sve_carddb.domains.translations.four_layer_context import (
     DEFAULT_REGISTRY,
     Descriptor,
+    ImportSignature,
+    typed_import,
     verify_mode_count,
 )
 from sve_carddb.domains.translations.four_layer_expressions import (
@@ -44,8 +55,9 @@ from sve_carddb.domains.translations.four_layer_preparation import (
 )
 from sve_carddb.domains.translations.four_layer_render import SelectedTarget
 
-from .context_fixtures import contract_case
+from .context_fixtures import ContractCase, contract_case
 from .test_four_layer_classification import classifier, source
+from .test_four_layer_expressions import EXPRESSION_ID, sample
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Classifier
@@ -296,11 +308,48 @@ def test_required_closure_rejects_cycles_and_unknown_actuals() -> None:
             target.verify(schema, "zh-Hant", {}, dependencies=dependencies)
 
 
-@pytest.mark.parametrize("family", ["A1", "A2"])
+def _zone_count_case() -> ContractCase:
+    """Place a sealed B11 current-zone count beside the A1 contract."""
+    case = contract_case("A1")
+    base, _, targets = sample()
+    values: dict[str, TypedValue] = {
+        "count_owner": "self",
+        "count_zone": ("hand",),
+        "count": Expression(
+            kind="expression",
+            expression_id=EXPRESSION_ID,
+            leaves=("count_owner", "count_zone"),
+        ),
+    }
+    slots = tuple(
+        slot.model_copy(update={"name": name})
+        for name, slot in zip(values, base.frame.leaf_schema.slots, strict=True)
+    )
+    item = replace(
+        case.item,
+        frame=case.item.frame.model_copy(
+            update={
+                "leaf_schema": LeafSchema(
+                    format=2, slots=(*case.item.frame.leaf_schema.slots, *slots)
+                )
+            }
+        ),
+        binding=case.item.binding.model_copy(
+            update={"values": case.item.binding.values | values}
+        ),
+    )
+    return replace(
+        case,
+        item=item,
+        targets=ExpressionTargets(case.targets.targets | targets.targets),
+    )
+
+
+@pytest.mark.parametrize("family", ["A1", "A2", "B11"])
 def test_single_multiplier_is_shared_by_current_and_history_reads(
-    family: Literal["A1", "A2"],
+    family: Literal["A1", "A2", "B11"],
 ) -> None:
-    case = contract_case(family)
+    case = _zone_count_case() if family == "B11" else contract_case(family)
     item = case.item
     if family == "A2":
         history = item.binding.values["history"]
@@ -338,7 +387,7 @@ def test_single_multiplier_is_shared_by_current_and_history_reads(
                 case.targets.targets | {(history.expression_id, "zh-Hant"): selected}
             ),
         )
-    base_name = "read" if family == "A1" else "history"
+    base_name = {"A1": "read", "A2": "history", "B11": "count"}[family]
     scale = ContextExpression(
         kind="context_expression",
         expression_id="quantity.scale.once.v1",
@@ -419,6 +468,32 @@ def test_single_multiplier_is_shared_by_current_and_history_reads(
             }
         )
         with pytest.raises(ValueError, match=r"nested|type|role|domain"):
+            verify_quantities(
+                frame.model_copy(update={"leaf_schema": schema}),
+                binding.model_copy(update={"values": values}),
+                scopes={},
+            )
+    if family == "B11":
+        # A B11 offset already spends the single arithmetic layer.
+        schema = frame.leaf_schema.model_copy(
+            update={
+                "slots": (
+                    *slots,
+                    slots[-2].model_copy(
+                        update={"name": "offset", "role": "arithmetic_offset"}
+                    ),
+                )
+            }
+        )
+        values = binding.values | {
+            "count": Expression(
+                kind="expression",
+                expression_id="count.current_zone.owner.zone.subtract_offset.v1",
+                leaves=("count_owner", "count_zone", "offset"),
+            ),
+            "offset": 1,
+        }
+        with pytest.raises(ValueError, match="nested"):
             verify_quantities(
                 frame.model_copy(update={"leaf_schema": schema}),
                 binding.model_copy(update={"values": values}),
@@ -687,16 +762,119 @@ def test_source_structure_changes_identity_and_v2_rejects_preparation_values() -
         verify_value(old, read, {"quantity.read.context.v1": domain})
 
 
-def test_family_adapter_reconstructs_source_without_changing_shared_registration() -> (
+def test_receipt_imports_declare_their_result_kind() -> None:
+    receipt = ImportSignature("receipt", "ReceiptId", "receipt")
+    own = replace(
+        DEFAULT_REGISTRY.descriptors["read.receipt.amount.v1"],
+        id="synthetic.receipt.read.v1",
+        imports=(receipt,),
+    )
+    with pytest.raises(ValueError, match="result kind"):
+        DEFAULT_REGISTRY.extend((own,))
+    case = contract_case("A1")
+    frame, binding = case.item.frame, case.item.binding
+    port = Port(
+        name="receipt",
+        type="ReceiptId",
+        source_role="receipt",
+        scope="ability",
+        evidence=PortEvidence(
+            source=binding.occurrence_key(),
+            capture="receipt",
+            value=ReceiptRef(kind="ReceiptId", receipt_id="cost", result="objects"),
+        ),
+    )
+    frame = frame.model_copy(
+        update={
+            "projection": frame.projection.model_copy(
+                update={"imports": (*frame.projection.imports, port)}
+            )
+        }
+    )
+    typed_import(
+        frame, binding, "receipt", "ability", replace(receipt, receipt_result="objects")
+    )
+    with pytest.raises(ValueError, match="result kind"):
+        typed_import(
+            frame,
+            binding,
+            "receipt",
+            "ability",
+            replace(receipt, receipt_result="amount"),
+        )
+
+
+def test_family_adapter_adds_typed_structure_without_changing_shared_registration() -> (
     None
 ):
+    raw = "仮が手札から来ていたなら、カードを1枚引く。"
+    case = contract_case("A11")
+    schema = {s.name: s for s in case.item.frame.leaf_schema.slots}
+
     def prepare(
         _raw: str,
         prepared: PreparedField,
         _classifier: Classifier,
         _context: CardContext | None,
     ) -> PreparedField:
-        return prepared
+        derived = prepared.derived
+        part, found = derived.field.parts[0], derived.recognized[0]
+        start = part.canonical_source.index("手札")
+        key = prepared.bind(0)[1].occurrence_key()
+        zone = schema["from"].model_copy(
+            update={"occurrences": (Span(start=start, end=start + 2),)}
+        )
+        explicit = LeafOccurrence(
+            slot="from",
+            ordinal=0,
+            raw_spans=(Span(start=raw.index("手札"), end=raw.index("手札") + 2),),
+            canonical_spans=zone.occurrences,
+            source_unit=None,
+            source_presence="explicit",
+            resolution_rule=None,
+        )
+        omitted = explicit.model_copy(
+            update={
+                "slot": "condition",
+                "raw_spans": (),
+                "canonical_spans": (),
+                "source_presence": "omitted",
+                "resolution_rule": "entry.self.from_zone.eq.v1",
+            }
+        )
+        recognized = replace(
+            found,
+            schema=LeafSchema(
+                format=2,
+                slots=(
+                    zone,
+                    *found.schema.slots,
+                    schema["condition"].model_copy(update={"required": False}),
+                ),
+            ),
+            values={**found.values, **case.item.binding.values},
+            occurrences=(explicit, *found.occurrences, omitted),
+        )
+        ports = tuple(
+            p.model_copy(
+                update={"evidence": p.evidence.model_copy(update={"source": key})}
+            )
+            for p in case.item.frame.projection.imports
+            if p.evidence is not None
+        )
+        interface = Projection(
+            projection_kind="pending",
+            discriminator=None,
+            scopes=case.item.frame.projection.scopes,
+            imports=ports,
+            exports=(),
+        )
+        return replace(
+            prepared,
+            derived=replace(derived, recognized=(recognized,)),
+            interfaces=(interface,),
+            mode_rules=((case.mode_rule,),),
+        )
 
     own = Descriptor(
         "synthetic.family.read.v1",
@@ -710,11 +888,18 @@ def test_family_adapter_reconstructs_source_without_changing_shared_registration
         ("V.read",),
     )
     family = PreparationFamily("synthetic", (own,), prepare)
-    raw = "自分の手札のカード２枚を選ぶ。"
     engine = classifier()
     prepared = derive_preparation(raw, source(raw), engine, families=(family,))
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
+    assert frame.mode_rules == (case.mode_rule,)
+    assert replace(prepared, mode_rules=()).bind(0)[0].id != frame.id
+    forged = binding.model_copy(
+        update={"values": binding.values | {"from": ("graveyard",)}}
+    )
+    forged = forged.model_copy(update={"id": "bind:" + hash_payload(forged.payload())})
+    with pytest.raises(ValueError, match="differs"):
+        prepared.verify(raw, engine, frame, forged)
     assert own.id in prepared.registry.descriptors
     assert own.id not in DEFAULT_REGISTRY.descriptors
     with pytest.raises(ValueError, match="unique"):

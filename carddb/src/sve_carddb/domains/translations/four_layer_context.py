@@ -33,6 +33,9 @@ if TYPE_CHECKING:
         Projection,
     )
     from sve_carddb.contracts.source_binding import SourceBinding, TypedValue
+    from sve_carddb.domains.translations.four_layer_expressions import Definition
+
+_ALIAS = "read.quantity.v1"
 
 
 @dataclass(frozen=True)
@@ -56,6 +59,7 @@ class ImportSignature:
     measure: str | None = None
     event_kind: Literal["EnterField", "Play", "Damage"] | None = None
     subject_import: str | None = None
+    receipt_result: Literal["objects", "amount", "payment_complete"] | None = None
 
 
 @dataclass(frozen=True)
@@ -168,6 +172,8 @@ def typed_import(
             raise ValueError("Expression object has the wrong source role")
     if isinstance(value, EventRef) and value.event_kind != signature.event_kind:
         raise ValueError("Expression provider has the wrong event kind")
+    if isinstance(value, ReceiptRef) and value.result != signature.receipt_result:
+        raise ValueError("Expression receipt has the wrong result kind")
     if isinstance(value, CapturedValueRef) and (
         value.result_type != signature.result_type or value.measure != signature.measure
     ):
@@ -215,6 +221,8 @@ def _validate_imports(signatures: tuple[ImportSignature, ...]) -> None:
             raise ValueError("CapturedValue signature requires result type and measure")
         if signature.type == "EventRef" and signature.event_kind is None:
             raise ValueError("EventRef signature requires a closed event kind")
+        if signature.type == "ReceiptId" and signature.receipt_result is None:
+            raise ValueError("ReceiptId signature requires a closed result kind")
         if signature.subject_import is not None and (
             signature.type != "EventRef"
             or signature.subject_import not in imports
@@ -224,6 +232,13 @@ def _validate_imports(signatures: tuple[ImportSignature, ...]) -> None:
             raise ValueError(
                 "Event subject signature requires a single ObjectSet import"
             )
+
+
+def _zone_count(expr: Expression) -> Definition:
+    """Sealed B11 counts keep their own registry; an offset already uses the one arithmetic layer."""
+    from sve_carddb.domains.translations.four_layer_expressions import definition  # ruff: ignore[import-outside-top-level] -- the B11 registry module imports this one
+
+    return definition(expr)
 
 
 def _event_subjects(rule: Descriptor, ports: Mapping[str, Port]) -> None:
@@ -312,7 +327,7 @@ class Registry:
         _event_subjects(rule, ports)
         if rule.source_family == "A11":
             self._entry(ports)
-        self._verify_operands(rule, expr, binding, ports)
+        self._verify_operands(rule, expr, binding)
         return (
             *expr.leaves,
             *(
@@ -328,12 +343,17 @@ class Registry:
         rule: Descriptor,
         expr: ContextExpression | PredicateExpr,
         binding: SourceBinding,
-        ports: Mapping[str, Port],
     ) -> None:
-        if rule.id == "quantity.scale.once.v1":
+        # Family wrappers such as HalfUp share this check, so none can wrap another.
+        if rule.measure == "operand" and rule.id != _ALIAS:
             base = self.unwrapped(binding.values.get(expr.leaves[0]), binding)
-            if not self.definition(base).scalable:
+            if not (
+                _zone_count(base).operator is None
+                if isinstance(base, Expression)
+                else self.definition(base).scalable
+            ):
                 raise ValueError("Unregistered or nested constant multiplier")
+        if rule.id == "quantity.scale.once.v1":
             factor = binding.values.get(expr.leaves[1])
             if type(factor) is not int or factor < 1:
                 raise ValueError("Multiplier requires a positive Nat")
@@ -346,44 +366,39 @@ class Registry:
                 and self.definition(value).result_type != "Nat"
             ):
                 raise ValueError("Quantity condition cannot consume a predicate")
-        if rule.id == "read.receipt.amount.v1":
-            receipt = ports["receipt"].evidence
-            if (
-                receipt is None
-                or not isinstance(receipt.value, ReceiptRef)
-                or receipt.value.result != "amount"
-            ):
-                raise ValueError("Receipt read requires an amount result")
 
     def unwrapped(
         self, value: TypedValue | None, binding: SourceBinding
-    ) -> ContextExpression:
+    ) -> ContextExpression | Expression:
         """Aliases do not hide nested arithmetic or change a read's result measure."""
         visited: set[str] = set()
-        while (
-            isinstance(value, ContextExpression)
-            and value.expression_id == "read.quantity.v1"
-        ):
+        while isinstance(value, ContextExpression) and value.expression_id == _ALIAS:
             if not value.leaves or value.leaves[0] in visited:
                 raise ValueError("Cyclic or missing quantity alias")
             visited.add(value.leaves[0])
             value = binding.values.get(value.leaves[0])
-        if (
-            not isinstance(value, ContextExpression)
-            or value.expression_id not in self.descriptors
+        if isinstance(value, Expression) or (
+            isinstance(value, ContextExpression)
+            and value.expression_id in self.descriptors
         ):
-            raise ValueError("Unregistered constant multiplier operand")
-        return value
+            return value
+        raise ValueError("Unregistered constant multiplier operand")
 
     def result_measure(
         self, expr: ContextExpression | PredicateExpr, binding: SourceBinding
     ) -> str:
         """A consumer's damage/recovery position never changes the operand's dimension."""
         rule = self.definition(expr)
-        if rule.measure != "operand":
-            return rule.measure
-        base = self.unwrapped(binding.values.get(expr.leaves[0]), binding)
-        return self.definition(base).measure
+        seen: set[str] = set()
+        while rule.measure == "operand":
+            if expr.leaves[0] in seen:
+                raise ValueError("Cyclic quantity operand")
+            seen.add(expr.leaves[0])
+            base = self.unwrapped(binding.values.get(expr.leaves[0]), binding)
+            if isinstance(base, Expression):
+                return _zone_count(base).result_measure
+            expr, rule = base, self.definition(base)
+        return rule.measure
 
     @staticmethod
     def _visible_dependency(projection: Projection, source: str, use: str) -> None:
@@ -487,7 +502,7 @@ _READS = (
     _read(
         "read.receipt.amount.v1",
         "amount",
-        (ImportSignature("receipt", "ReceiptId", "receipt"),),
+        (ImportSignature("receipt", "ReceiptId", "receipt", receipt_result="amount"),),
     ),
     _read(
         "read.captured.dice.v1",
