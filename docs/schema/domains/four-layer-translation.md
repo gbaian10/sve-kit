@@ -1071,17 +1071,21 @@ A6 的 `mode.unused_this_turn.v1` 是 `mode_reuse_condition:PredicateExpr`，匯
 CurrentTurn 識別是待 lowering 的來源參數，沒有建立 runtime 使用紀錄。執行時必須
 以實際能力實例及回合取代，重新授予產生新能力實例；不得改成按卡名共用。
 
-A7 在參與來源片段保存 `ModeCountRule`。intro 的有限區域張數、關鍵字門檻及主戰者生命
-條件使用家族自有 descriptor，保留原有常數 QuantitySpec 的 exact／up_to／at_least
-含義；比較本身不擴張舊 B11 接受域。主戰者生命條件使用新角色 `mode_condition_owner`，
+A7 在參與來源片段保存 `ModeCountRule`。intro 的有限區域張數、表向進化牌堆具名張數、
+關鍵字門檻及主戰者生命條件使用家族自有 descriptor，以既有的 owner／zone／名稱／
+`existence_count` 葉作實參，保留原有常數 QuantitySpec 的 exact／up_to／at_least 含義；
+因此不另建 `comparison_threshold:Nat` 葉，也不改用 §11.5 的 `condition.quantity.*`。
+比較本身不擴張舊 B11 接受域。主戰者生命條件使用新角色 `mode_condition_owner`，
 不借用卡片集合的 `counted_owner`。已由其他家族產生、且 occurrence 落在該條件內的
-typed predicate 可直接消費；typed 數值讀取可接顯式張數下限。條件 provider 的 scope
-與 imports 沿原 projection 保留，不以字面值相同配對。
+typed predicate 直接消費；條件 provider 的 scope 與 imports 沿原 projection 保留，
+不以字面值相同配對。
 
 其他片段的條件來源邊以 `choice.condition.source_edge.v1` 保留 span／hash 及
 missing_provider，等待跨片段 provider；不把另一片段的葉直接借進本 binding。
-A1／A2／A11 尚未合流時分別保留已核 descriptor 與 missing_provider；未封存在條件
-保留 unsealed_source。這些都是來源候選，整合後須重產身分，不能直接當正式封版 ID。
+A11 六種入場表面與 A2 的本回合進化存在，在 provider 尚未合流時分別以
+`predicate.entry.provenance.v1`／`predicate.history.current_turn.v1` 標 missing_provider；
+其他條件（含相似但未封的入場或本回合寫法）保留 unsealed_source。
+這些都是來源候選，整合後須重產身分，不能直接當正式封版 ID。
 
 前行 optional cost 只在立即相鄰、唯一且額外費用數字一致時建立來源邊：producer
 匯出 `CapturedValue<Bool,payment_complete>`，數量條件匯入相同來源參數。缺少唯一

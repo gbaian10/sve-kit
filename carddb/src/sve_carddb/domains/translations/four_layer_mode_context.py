@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import (
     CapturedValueRef,
+    CardNameReference,
     ChoiceContext,
     Constant,
     ContextExpression,
@@ -60,6 +61,17 @@ _HEAD = re.compile(
     r"\{(?:ファンファーレ|起動|ラストワード)\}|【(?:進化時|攻撃時|超進化時)】"
 )
 _COST = re.compile(r"これをプレイする際、コストを\+(?P<n>" + _DIGIT + r")してよい。$")
+# Only the sealed A11 and A2 surfaces may claim an approved provider is pending.
+_ENTRY_SURFACE = re.compile(
+    r"(?:これが(?:手札以外から|手札から|墓場から|(?:ウマ娘・カードの)?能力によって)"
+    r"|それが墓場から)場に出ていたなら、"
+)
+_EVOLVED_SURFACE = "このターン、自分の場のフォロワーが進化していたなら、"
+_FACEUP = re.compile(
+    r"(?P<owner>自分|相手)の(?P<zone>エボルヴデッキ)の表向きの『(?P<name>[^』]+)』が(?P<n>"
+    + _DIGIT
+    + r")枚以上なら、"
+)
 _ROW = "N2-A6-A7.mode_context"
 _MIN_MODES = 2
 
@@ -85,6 +97,10 @@ _TRAIT = Parameter("trait", "Concept", "trait", "concept.trait.v1")
 _KIND = Parameter("kind", "CardKind", "counted_kind", "card_kind.selection.v1")
 _CARD = Parameter("card", "Concept", "rule_term", "concept.rule_term.v1")
 _BOUND = Parameter("threshold", "Nat", "threshold", "")
+_EVOLVE_ZONE = Parameter(
+    "zone", "ZoneSet", "counted_zone", "zone.single.v1", (("evolve_deck",),)
+)
+_NAME = Parameter("name", "CardName", "name_reference", "card_name.any.v1")
 _COUNT_BOUND = Parameter(
     "threshold",
     "QuantitySpec",
@@ -127,19 +143,7 @@ DESCRIPTORS = (
     _descriptor(
         "trait_follower.at_least", (_OWNER, _ZONE, _TRAIT, _KIND, _COUNT_BOUND)
     ),
-    _descriptor(
-        "quantity.at_least",
-        (
-            Parameter(
-                "value",
-                "QuantityExpr",
-                "read_value",
-                "",
-                alternate_roles=("count_expression", "history_read_value"),
-            ),
-            _COUNT_BOUND,
-        ),
-    ),
+    _descriptor("faceup_evolve.at_least", (_OWNER, _EVOLVE_ZONE, _NAME, _COUNT_BOUND)),
     _descriptor("life.at_most", (_LIFE_OWNER, _BOUND)),
     *(
         _descriptor("keyword." + name, (_BOUND,))
@@ -475,18 +479,16 @@ def _condition(
             "mode_condition",
         )
         return ResolvedCondition(state="resolved", predicate="mode_condition"), [item]
-    finite = _read_condition(raw, part, found, span, scope) or _finite_condition(
+    finite = _faceup_condition(raw, part, found, span, scope) or _finite_condition(
         raw, part, span, classifier, scope
     )
     if finite is not None:
         return finite
     descriptor, reason = "choice.condition.unsealed.v1", "unsealed_source"
-    if "場に出ていたなら" in text:
+    if _ENTRY_SURFACE.fullmatch(text):
         descriptor, reason = "predicate.entry.provenance.v1", "missing_provider"
-    elif text.startswith("このターン、"):
-        descriptor, reason = "history.evolve.exists.v1", "missing_provider"
-    elif "エボルヴデッキの表向き" in text:
-        descriptor, reason = "read.faceup_evolve.count.v1", "missing_provider"
+    elif text == _EVOLVED_SURFACE:
+        descriptor, reason = "predicate.history.current_turn.v1", "missing_provider"
     elif text.startswith("コストを+"):
         descriptor = "choice.condition.optional_cost.v1"
         reason = (
@@ -497,49 +499,55 @@ def _condition(
     return _pending(raw, span, descriptor, reason), []
 
 
-def _read_condition(
+def _faceup_condition(
     raw: str, part: SourcePart, found: Recognized, span: Span, scope: str
 ) -> tuple[ConditionSlot, list[Leaf]] | None:
-    providers = [
-        name
-        for name, value in found.values.items()
-        if isinstance(value, (ContextExpression, Expression))
-        and any(
-            o.slot == name
-            and o.raw_spans
-            and all(span.start <= s.start < s.end <= span.end for s in o.raw_spans)
-            for o in found.occurrences
+    """B11's sealed face-up evolve count keeps the recognized B13 leaves as operands."""
+    match = _FACEUP.fullmatch(raw, span.start, span.end)
+    if match is None:
+        return None
+    name = Span(start=match.start("name"), end=match.end("name"))
+    names = [
+        value
+        for o in found.occurrences
+        if o.raw_spans == (name,)
+        and isinstance(value := found.values[o.slot], CardNameReference)
+    ]
+    if len(names) != 1:
+        return _pending(raw, span, "choice.condition.name.v1", "missing_provider"), []
+    operands = [
+        _operand(
+            part,
+            "mode_" + parameter.name,
+            parameter,
+            value,
+            Span(start=match.start(group), end=match.end(group)),
+        )
+        for parameter, value, group in (
+            (_OWNER, "self" if match["owner"] == "自分" else "opponent", "owner"),
+            (_EVOLVE_ZONE, ("evolve_deck",), "zone"),
+            (_NAME, names[0], "name"),
+            (
+                _COUNT_BOUND,
+                QuantitySpec(
+                    mode="at_least",
+                    expr=Constant(kind="constant", value=int(match["n"])),
+                ),
+                "n",
+            ),
         )
     ]
-    match = re.search(
-        r"(?P<n>" + _DIGIT + r")枚以上なら、$", raw[span.start : span.end]
+    expr = PredicateExpr(
+        kind="predicate",
+        expression_id="choice.condition.faceup_evolve.at_least.v1",
+        leaves=tuple(o.slot.name for o in operands),
+        imports={},
+        scope=scope,
     )
-    if len(providers) != 1 or match is None:
-        return None
-    bound = _operand(
-        part,
-        "mode_threshold",
-        _COUNT_BOUND,
-        QuantitySpec(
-            mode="at_least", expr=Constant(kind="constant", value=int(match["n"]))
-        ),
-        Span(start=span.start + match.start("n"), end=span.start + match.end("n")),
-    )
-    predicate = _predicate(
-        part,
-        Span(start=span.end - 3, end=span.end),
-        PredicateExpr(
-            kind="predicate",
-            expression_id="choice.condition.quantity.at_least.v1",
-            leaves=(providers[0], "mode_threshold"),
-            imports={},
-            scope=scope,
-        ),
-        "mode_condition",
-    )
+    anchor = Span(start=span.end - 3, end=span.end)
     return ResolvedCondition(state="resolved", predicate="mode_condition"), [
-        bound,
-        predicate,
+        *operands,
+        _predicate(part, anchor, expr, "mode_condition"),
     ]
 
 
@@ -942,13 +950,18 @@ def _interface(
             exports.append(payment)
     return projection.model_copy(
         update={
-            "scopes": (
-                *projection.scopes,
-                *(
-                    (Scope(id=scope, parent=None, kind="ability"),)
-                    if scope not in {s.id for s in projection.scopes}
-                    else ()
-                ),
+            "scopes": tuple(
+                sorted(
+                    (
+                        *projection.scopes,
+                        *(
+                            (Scope(id=scope, parent=None, kind="ability"),)
+                            if scope not in {s.id for s in projection.scopes}
+                            else ()
+                        ),
+                    ),
+                    key=lambda s: s.id,
+                )
             ),
             "imports": tuple(
                 sorted((*projection.imports, *imports), key=lambda p: p.name)

@@ -14,6 +14,7 @@ from sve_carddb.contracts.four_layer import (
     PredicateExpr,
     Projection,
     ResolvedCondition,
+    Scope,
     Target,
 )
 from sve_carddb.core.json import canonical
@@ -77,16 +78,16 @@ def test_cross_line_choice_keeps_constants_and_exact_source_edges() -> None:
 
 
 @pytest.mark.parametrize(
-    "condition",
+    ("condition", "reason"),
     [
-        "自分の場に仮の存在がいるなら、",
-        "これが墓場から場に出ていたなら、",
-        "このターン、自分の場のフォロワーが進化していたなら、",
-        "自分のエボルヴデッキの表向きの『仮場手札自分』が8枚以上なら、",
+        ("自分の場に仮の存在がいるなら、", "unsealed_source"),
+        ("これが墓場から場に出ていたなら、", "missing_provider"),
+        ("このターン、自分の場のフォロワーが進化していたなら、", "missing_provider"),
+        ("このターン、相手のフォロワーが場に出ていたなら、", "unsealed_source"),
     ],
 )
 def test_pending_conditions_retain_source_and_provider_distinction(
-    condition: str,
+    condition: str, reason: str
 ) -> None:
     raw = _INTRO + condition + "代わりに2つまで。\n" + _OPTIONS
     prepared = prepare(raw)
@@ -96,9 +97,32 @@ def test_pending_conditions_retain_source_and_provider_distinction(
         raw[rule.condition.source_span.start : rule.condition.source_span.end]
         == condition
     )
-    assert rule.condition.reason == (
-        "unsealed_source" if "仮の存在" in condition else "missing_provider"
+    assert rule.condition.reason == reason
+
+
+def test_faceup_evolve_condition_reuses_the_counted_operands() -> None:
+    raw = (
+        _INTRO
+        + "自分のエボルヴデッキの表向きの『仮場手札自分』が8枚以上なら、代わりに2つまで。\n"
+        + _OPTIONS
     )
+    plain = derive_preparation(raw, source(raw), n1_classifier()).derived.recognized[0]
+    prepared = prepare(raw)
+    (rule,) = prepared.mode_rules[0]
+    assert isinstance(rule.condition, ResolvedCondition)
+    found = prepared.derived.recognized[0]
+    predicate = found.values[rule.condition.predicate]
+    assert isinstance(predicate, PredicateExpr)
+    assert predicate.expression_id == "choice.condition.faceup_evolve.at_least.v1"
+    before = [(s.role, plain.values[s.name]) for s in plain.schema.slots]
+    operands = [
+        (s.role, found.values[s.name])
+        for s in found.schema.slots
+        if s.name in predicate.leaves
+    ]
+    assert operands == before
+    roles = {role for role, _ in before}
+    assert sum(s.role in roles for s in found.schema.slots) == len(before)
 
 
 @pytest.mark.parametrize(
@@ -333,7 +357,7 @@ def test_mode_family_preserves_existing_semantics_and_projection_kind() -> None:
     projection = Projection(
         projection_kind="ability_body",
         discriminator="synthetic.existing.v1",
-        scopes=(),
+        scopes=(Scope(id="synthetic", parent=None, kind="ability"),),
         imports=(),
         exports=(),
     )
@@ -353,6 +377,7 @@ def test_mode_family_preserves_existing_semantics_and_projection_kind() -> None:
     assert frame.projection.projection_kind == projection.projection_kind
     assert frame.projection.discriminator == projection.discriminator
     assert frame.semantic_variant.key == semantics.key
+    assert Projection.model_validate(frame.projection.model_dump()) == frame.projection
 
 
 def test_independent_ability_heads_keep_distinct_choice_contexts() -> None:
