@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Annotated, Literal, Self, cast
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
-from sve_carddb.contracts.n0 import verify_frame
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData, Text, UInt
 
@@ -399,7 +398,6 @@ class Frame(RecordData):
 
     @model_validator(mode="after")
     def _identity(self) -> Self:
-        verify_frame(self)
         if self.id != "frame:" + self.content_hash:
             raise ValueError("Frame ID differs from full content hash")
         if (
@@ -426,7 +424,6 @@ class Frame(RecordData):
 
     def verify(self, canonical_source: str) -> None:
         """Validate reconstructed source before trusting authored content-addressed identity."""
-        verify_frame(self)
         if digest(canonical_source.encode())[7:] != self.source.canonical_hash:
             raise ValueError("Frame canonical source hash mismatch")
         if hash_payload(self.payload(canonical_source)) != self.content_hash:

@@ -26,7 +26,6 @@ from sve_carddb.contracts.four_layer import (
     disjoint,
     hash_payload,
 )
-from sve_carddb.contracts.n0 import VERSION as N0_VERSION
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData, UInt
 
@@ -378,21 +377,6 @@ class SourceBinding(RecordData):
         """Required leaves and every repeated source occurrence survive binding validation."""
         if self.frame_id != frame.id or self.source_span.role != frame.role:
             raise ValueError("Binding frame or source role mismatch")
-        if frame.source.normalizer_version == N0_VERSION and (
-            any(
-                occurrence.source_presence != "explicit"
-                for occurrence in self.occurrences
-            )
-            or any(
-                isinstance(value, QuantitySpec) and not isinstance(value.expr, Constant)
-                for value in self.values.values()
-            )
-        ):
-            raise ValueError("N0 requires explicit leaves and constant quantities")
-        if frame.source.normalizer_version == N0_VERSION and len(
-            {(o.slot, o.canonical_spans) for o in self.occurrences}
-        ) != len(self.occurrences):
-            raise ValueError("N0 has no registered union sharing a canonical position")
         if (
             frame.semantic_variant.scope is not None
             and frame.semantic_variant.scope != self.occurrence_key()

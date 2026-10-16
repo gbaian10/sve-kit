@@ -4,12 +4,13 @@ from dataclasses import replace
 
 import pytest
 
-from sve_carddb.contracts.four_layer import Frame
+from sve_carddb.contracts.four_layer import Frame, hash_payload
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.catalog.models import Term as VocabularyTerm
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
 from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
@@ -46,8 +47,14 @@ def test_class_filter_accepts_complete_direct_kind_constructions(
     vocabulary = Vocabulary(
         bindings=(
             Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
+            Binding(region="jp", kind="type", raw="フォロワー", code="follower"),
         ),
         terms=(
+            VocabularyTerm(
+                kind="type",
+                code="follower",
+                label=LocalizedText(lang="ja", text="フォロワー"),
+            ),
             VocabularyTerm(
                 kind="class",
                 code="synthetic",
@@ -56,14 +63,14 @@ def test_class_filter_accepts_complete_direct_kind_constructions(
         ),
     )
     engine = classifier(vocabulary=vocabulary)
+    derived = derive_source(raw, field.source, engine)
+    field = derived.field
     part = field.parts[0]
-    found = engine.recognize(raw, field.source, part)
+    found = derived.recognized[0]
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
-    assert frame.leaf_schema.slots[0].role == "class_filter"
+    assert any(s.role == "class_filter" for s in frame.leaf_schema.slots)
 
 
 def test_class_marker_without_a_complete_kind_filter_stays_unresolved() -> None:
@@ -118,15 +125,12 @@ def test_entry_families_have_distinct_semantics_and_independent_scopes(
     found = engine.recognize(
         raw, field.source, field.parts[0], context=context(raw), field=field
     )
-    frame, binding = found.bind(
-        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, field.parts[0])
     field.verify(
         raw,
         (frame,),
         (binding,),
         engine.domains,
-        normalizer_version="four-layer-jp-v1",
     )
     assert frame.semantic_variant.key == key
     assert frame.projection.projection_kind == "ability_body"
@@ -243,16 +247,16 @@ def test_pure_reminder_requires_registered_complete_grammar_and_matching_anchor(
 
 
 @pytest.mark.parametrize("mutation", ["key", "role", "projection", "scope"])
-def test_n0_cannot_publish_an_unregistered_or_mismatched_semantic_descriptor(
+def test_current_source_rejects_unregistered_or_mismatched_semantic_descriptor(
     mutation: str,
 ) -> None:
     raw = "{進化}{コスト９９}:これは進化する。"
-    field = normalize_source(raw, source(raw))
-    frame, _ = (
-        classifier()
-        .recognize(raw, field.source, field.parts[0], context=context(raw))
-        .bind(field.source, field.parts[0], normalizer_version="four-layer-jp-v1")
-    )
+    engine = classifier()
+    facts = context(raw)
+    derived = derive_source(raw, facts.source, engine, context=facts)
+    field = derived.field
+    part = field.parts[0]
+    frame, binding = derived.bind(0)
     data = frame.model_dump(mode="json")
     if mutation == "key":
         data["semantic_variant"]["key"] = "unregistered.v1"
@@ -263,8 +267,22 @@ def test_n0_cannot_publish_an_unregistered_or_mismatched_semantic_descriptor(
         data["projection"]["projection_kind"] = "card_field"
     else:
         data["projection"]["scopes"][0]["id"] = "other_scope"
-    with pytest.raises(ValueError, match="N0"):
-        Frame.model_validate_json(canonical(data))
+    changed = Frame.model_validate_json(canonical(data))
+    checksum = hash_payload(changed.payload(part.canonical_source))
+    changed = changed.model_copy(
+        update={"id": "frame:" + checksum, "content_hash": checksum}
+    )
+    binding = binding.model_copy(update={"frame_id": changed.id})
+    binding = binding.model_copy(
+        update={"id": "bind:" + hash_payload(binding.payload())}
+    )
+    message = (
+        "Binding differs from replayed exact source partition"
+        if mutation == "role"
+        else "N1 binding differs from the complete current source construction"
+    )
+    with pytest.raises(ValueError, match=message):
+        engine.verify(raw, field, part, changed, binding, context=facts)
 
 
 @pytest.mark.parametrize("missing", [None, "name", "trait", "class", "kind"])
@@ -302,12 +320,10 @@ def test_token_header_requires_every_declared_field_in_its_exact_catalog(
         assert found.issues
         assert found.semantics is None
         with pytest.raises(ValueError, match="Unresolved source leaves"):
-            found.bind(field.source, part, normalizer_version="four-layer-jp-v1")
+            found.bind(field.source, part)
         return
     assert not found.issues
-    frame, binding = found.bind(
-        field.source, part, normalizer_version="four-layer-jp-v1"
-    )
+    frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
     assert frame.semantic_variant.key == "token_header.v1"
     assert frame.projection.projection_kind == "card_field"

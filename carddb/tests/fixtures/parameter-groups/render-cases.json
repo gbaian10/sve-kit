@@ -1443,62 +1443,107 @@
   "cases": [
     {
       "group": "FL-036",
-      "id": "pg380_g07_n0",
-      "operation": "parameter_group_n0",
+      "id": "pg380_g07_source",
+      "operation": "parameter_group_source",
       "input": {
         "source": "検証。自分の手札の星紋・フォロワー31枚を選ぶ。その後、仮を公開してよい。",
         "class": false
       },
       "expected": {
-        "selection_unit": "枚"
+        "selection_unit": "枚",
+        "counted_kinds": [
+          {
+            "kind": "vocabulary",
+            "key": [
+              "type",
+              "follower"
+            ]
+          }
+        ]
       }
     },
     {
       "group": "FL-037",
-      "id": "pg380_g08_n0",
-      "operation": "parameter_group_n0",
+      "id": "pg380_g08_source",
+      "operation": "parameter_group_source",
       "input": {
         "source": "相手の場の星紋・フォロワー31体までを選ぶ。",
         "class": false
       },
       "expected": {
-        "selection_unit": "体"
+        "selection_unit": "体",
+        "counted_kinds": [
+          {
+            "kind": "vocabulary",
+            "key": [
+              "type",
+              "follower"
+            ]
+          }
+        ]
       }
     },
     {
       "group": "FL-038",
-      "id": "pg380_g09_n0",
-      "operation": "parameter_group_n0",
+      "id": "pg380_g09_source",
+      "operation": "parameter_group_source",
       "input": {
         "source": "自分のEXエリアの星紋・トークン・フォロワー31体を選ぶ。",
         "class": false
       },
       "expected": {
-        "selection_unit": "体"
+        "selection_unit": "体",
+        "counted_kinds": [
+          {
+            "kind": "vocabulary",
+            "key": [
+              "type",
+              "follower"
+            ]
+          }
+        ]
       }
     },
     {
       "group": "FL-038",
-      "id": "pg380_g09_class_n0",
-      "operation": "parameter_group_n0",
+      "id": "pg380_g09_class_source",
+      "operation": "parameter_group_source",
       "input": {
         "source": "自分の手札の{検査クラス}・フォロワー31枚を選ぶ。",
         "class": true
       },
       "expected": {
-        "selection_unit": "枚"
+        "selection_unit": "枚",
+        "counted_kinds": [
+          {
+            "kind": "vocabulary",
+            "key": [
+              "type",
+              "follower"
+            ]
+          }
+        ]
       }
     },
     {
       "group": "FL-039",
-      "id": "pg380_g10_n0",
-      "operation": "parameter_group_n0",
+      "id": "pg380_g10_source",
+      "operation": "parameter_group_source",
       "input": {
         "source": "自分の場かEXエリアの星紋・フォロワー31枚を選ぶ。",
         "class": false
       },
       "expected": {
-        "selection_unit": "枚"
+        "selection_unit": "枚",
+        "counted_kinds": [
+          {
+            "kind": "vocabulary",
+            "key": [
+              "type",
+              "follower"
+            ]
+          }
+        ]
       }
     },
     {

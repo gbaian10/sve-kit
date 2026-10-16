@@ -333,30 +333,17 @@ def test_existing_entry_semantics_and_leaf_values_survive_preparation() -> None:
     n0 = engine.recognize(raw, facts.source, field.parts[0], context=facts, field=field)
     derived = derive_source(raw, facts.source, engine, context=facts)
     assert derived.recognized[0] == n0
-    old_frame, old_binding = n0.bind(
-        facts.source, field.parts[0], normalizer_version="four-layer-jp-v1"
-    )
+    lexical_frame, lexical_binding = n0.bind(facts.source, field.parts[0])
     frame, binding = derived.bind(0)
-    assert frame.id != old_frame.id
-    assert frame.semantic_variant == old_frame.semantic_variant
-    assert frame.projection == old_frame.projection
-    assert binding.values == old_binding.values
-    assert binding.occurrences == old_binding.occurrences
-    assert binding.trace == old_binding.trace
+    assert frame == lexical_frame
+    assert binding == lexical_binding
 
 
-def test_production_reader_accepts_only_the_current_n1_frames() -> None:
+@pytest.mark.parametrize("version", ["four-layer-jp-v1", "four-layer-jp-v3", "unknown"])
+def test_production_reader_accepts_only_the_current_n1_frames(version: str) -> None:
     raw = "{クイック}"
     facts = context(raw)
     engine = classifier((QUICK,), ("braced_ability_reference",))
-    field = normalize_source(raw, facts.source)
-    n0 = engine.recognize(raw, facts.source, field.parts[0], context=facts, field=field)
-    old_frame, _ = n0.bind(
-        facts.source, field.parts[0], normalizer_version="four-layer-jp-v1"
-    )
-    assert old_frame.source.normalizer_version == "four-layer-jp-v1"
-    assert old_frame.semantic_variant.state == "pending"
-    assert old_frame.leaf_schema.slots[0].role == "ability"
     frame, _ = derive_source(raw, facts.source, engine, context=facts).bind(0)
     payload = canonical(
         {
@@ -371,6 +358,11 @@ def test_production_reader_accepts_only_the_current_n1_frames() -> None:
         (("translations/templates/definitions/000.yaml", payload, payload),)
     )
     assert any(r.data == frame for r in loaded.records)
+    old_frame = frame.model_copy(
+        update={
+            "source": frame.source.model_copy(update={"normalizer_version": version})
+        }
+    )
     old_payload = canonical(
         {
             "format": 3,

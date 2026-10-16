@@ -1,4 +1,4 @@
-"""Render-only NP vectors and separate regressions for the frozen N0 producer."""
+"""Render-only NP vectors and current source derivation regressions."""
 
 from copy import deepcopy
 from dataclasses import replace
@@ -31,7 +31,8 @@ from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.domains.catalog.models import Term as VocabularyTerm
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
-from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
+from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Form,
@@ -166,38 +167,40 @@ def rendered(item: BoundTarget, selected: Renderer) -> Rendered:
 def test_parameter_group_case(case: dict[str, JsonValue]) -> None:
     value = object_value(case["input"])
     expected = object_value(case["expected"])
-    if case["operation"] == "parameter_group_n0":
+    if case["operation"] == "parameter_group_source":
         raw = string(value["source"])
-        field = normalize_source(raw, source(raw))
-        vocabulary = None
+        members = [("type", "follower", "フォロワー")]
         if value["class"]:
-            vocabulary = Vocabulary(
-                bindings=(
-                    Binding(region="jp", kind="class", raw="検査クラス", code="probe"),
-                ),
-                terms=(
-                    VocabularyTerm(
-                        kind="class",
-                        code="probe",
-                        label=LocalizedText(lang="ja", text="検査クラス"),
-                    ),
-                ),
-            )
-        selected = classifier(vocabulary=vocabulary)
-        part = field.parts[0]
-        found = selected.recognize(raw, field.source, part, field=field)
-        assert not found.issues
-        definition, binding = found.bind(
-            field.source, part, normalizer_version="four-layer-jp-v1"
+            members.append(("class", "probe", "検査クラス"))
+        vocabulary = Vocabulary(
+            bindings=tuple(
+                Binding(region="jp", kind=kind, code=code, raw=raw)
+                for kind, code, raw in members
+            ),
+            terms=tuple(
+                VocabularyTerm(
+                    kind=kind, code=code, label=LocalizedText(lang="ja", text=raw)
+                )
+                for kind, code, raw in members
+            ),
         )
-        selected.verify(raw, field, part, definition, binding)
-        assert any(
-            o.source_unit == expected["selection_unit"] for o in binding.occurrences
+        selected = classifier(
+            (Term("term:trait.synthetic", "trait", "星紋"),), vocabulary=vocabulary
         )
-        assert not any(
-            s.type == "CardKind" and s.role == "counted_kind"
+        derived = derive_source(raw, source(raw), selected)
+        definition, binding = derived.bind(0)
+        selected.verify(raw, derived.field, derived.field.parts[0], definition, binding)
+        selection = next(
+            s for s in definition.leaf_schema.slots if s.role == "selection_count"
+        )
+        assert [
+            o.source_unit for o in binding.occurrences if o.slot == selection.name
+        ] == [expected["selection_unit"]]
+        assert [
+            binding.model_dump(mode="json")["values"][s.name]
             for s in definition.leaf_schema.slots
-        )
+            if s.type == "CardKind" and s.role == "counted_kind"
+        ] == expected["counted_kinds"]
         return
     fixture = object_value(object_value(DATA["fixtures"])[string(value["fixture"])])
     item = render_item(fixture)
