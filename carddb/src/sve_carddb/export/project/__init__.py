@@ -188,7 +188,7 @@ def project(
     public_prints = {row["id"] for row in view["printing"]}
     defaults = {
         (item.card_id, item.region): item
-        for item in select_defaults(db, general_evidence=decisions.general_evidence)
+        for item in select_defaults(db)
         if item.printing_id in public_prints
     }
     region_views(source, view, dates, defaults)

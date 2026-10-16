@@ -1,15 +1,10 @@
 """User-approved exact rarity classification; this does not adopt processing facts."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.domains.routes.defaults import GeneralEvidence
-
-if TYPE_CHECKING:
-    from sve_carddb.build import Database
 
 _GENERAL = {
     "jp": ("BR", "GR", "LG", "SR"),
@@ -86,18 +81,6 @@ class RarityWhitelist:
         if raw in _EXCLUDED[region] or raw in _NON_GENERAL[region]:
             return False
         return None
-
-    def evidence(self, db: Database) -> dict[str, GeneralEvidence]:
-        """Classify source raw labels while frame and stamp remain unknown."""
-        evidence = {}
-        for row in db.rows("printing"):
-            raw = row.values["rarity_raw"]
-            if raw is not None and not isinstance(raw, str):
-                raise ValueError("Printing rarity raw must be text or unknown")
-            evidence[str(row.values["id"])] = GeneralEvidence(
-                general_rarity=self.classify(str(row.values["region"]), raw),
-            )
-        return evidence
 
 
 APPROVED_GENERAL_RARITIES = RarityWhitelist(jp=_GENERAL["jp"], en=_GENERAL["en"])

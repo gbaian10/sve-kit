@@ -35,46 +35,26 @@ entries only; it does not claim the first-publication compatibility gate.
 ## Default printing
 
 `select_defaults(db)` returns typed `(card_id, region, printing_id, method)` rows
-for snapshot RegionView construction, without changing any printing URL or
-owner. Confirmed same-card/same-region overrides take priority. For each remaining
-group, general candidates in the card's `home_set_id` take priority, then the
-minimum known exact-day inclusion date, then stable printing ID. When there is no
-general candidate, all display rows in that group use known-date-first ordering
-and the stable ID, with `method=fallback`.
+for snapshot RegionView construction, without changing printing URLs or owners.
+Confirmed same-card/same-region overrides take priority. Remaining printings sort
+by normalized vocabulary rarity (`registry.rarity.RARITY_ORDER`), then the earliest
+known exact-day product release of their permanent `printing.home_set_id` in that
+region, then raw card number and stable printing ID. Reprint inclusion dates and
+`card.home_set_id` do not change this ordering.
 
-`GeneralEvidence` supplies explicit classification facts for a printing. No
-rarity, frame or stamp code list is invented here. Without a classifier's facts,
-the default is fallback. Callers must provide adopted classification evidence
-from their pinned inputs before using this optional argument in a real build;
-bare facts are not an authored loader, review envelope or release gate.
-Known premium, signed, stamped or special-frame candidates are excluded from the
-general pool. Unknown processing can remain a candidate but cannot prove it is
-ordinary. `earliest_general` requires complete inclusion dates and ordinary
-processing for the general pool, and no unclassified eligible competitor;
-otherwise the method is `candidate_general`.
+Known rarity codes sort before unknown/uncoded rarity. The method is
+`lowest_rarity` when every candidate has a ranked code,
+`candidate_lowest_rarity` when an unknown competitor remains, or `fallback` when
+all candidates have unknown rarity. Missing home release dates sort after known
+dates; month/year precision is never promoted to a day. These methods identify
+selection policy, without claiming ordinary processing or complete release dates.
+Premium, signed, frame and stamp facts do not add selection criteria. The caller
+supplies the intended publication subset as build rows.
 
-Each effective inclusion date is its override, or the product date when
-`printing_product.first_available_precision` is NULL (no override). Only day
-precision supplies a sortable date. An explicit month/year/unknown override
-blocks inheritance even when the product has a full date; a non-day product date
-also remains unknown. Dates are checked against the product's region, and no
-first-of-month date is invented. Card-number order and another region's date do
-not substitute for evidence. No inclusion rows means unknown dates even when
-unrelated dated products exist. The caller supplies the intended display/publication
-subset as build rows; this module does not infer a separate publication policy.
-The inheritance rule follows build-db §3.2 and snapshot-format §8.
-
-[Catalog-route adoption §7](../../../../../docs/schema/domains/catalog-route-adoption.md#7-預設版次與一般版分類)
-defines the approved general-rarity policy and the evidence required for ordinary
-processing. The classifier supplies that policy from pinned authored/configuration
-inputs; this package does not hardcode its whitelist. Unknown frame or stamp
-evidence remains unknown. Known general rarity with incomplete processing can
-yield `candidate_general`; missing general-rarity evidence yields `fallback`.
-The contract also defines adopted route/default override envelopes in §2–§5.
-Their loaders and freshness checks must validate those inputs before supplying DB
-overrides; accepting supplied rows here does not implement the adoption loader.
-Passing route validation and this selector does not enable the complete routes,
-products or release capabilities; their readiness flags remain unchanged.
+The adopted override envelopes and their freshness checks remain defined by
+[catalog-route adoption](../../../../../docs/schema/domains/catalog-route-adoption.md).
+This selector does not implement the override adoption loader or enable complete
+routes, products or release capabilities.
 
 Run the independent synthetic counterexamples with:
 
