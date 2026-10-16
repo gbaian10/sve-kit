@@ -124,26 +124,17 @@ class UploadPool:
                 return None
             self.store.put_image(item.key, raw)
             return 1
-        existing = self.store.get(item.key)
-        if (
-            existing is not None
-            and existing.raw == raw
-            and existing.headers == item.headers
-        ):
-            return 0
-        if existing is not None:
-            raise ExportError("Immutable JSON object differs from the export")
-        # A PUT that passed this check before a failure still finishes and is read back.
+        # An admitted PUT can still finish after another worker fails.
         if self.stopped.is_set():
             return None
-        if not self.store.put(
+        if self.store.put(
             item.key,
             raw,
             item.headers,
             expected=None,
         ):
-            raise ExportError("Conditional PUT failed; the object changed concurrently")
+            return 1
         stored = self.store.get(item.key)
         if stored is None or stored.raw != raw or stored.headers != item.headers:
-            raise ExportError("Origin read-back differs from the export")
-        return 1
+            raise ExportError("Immutable JSON object differs from the export")
+        return 0

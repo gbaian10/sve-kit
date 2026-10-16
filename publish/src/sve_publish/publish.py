@@ -1,4 +1,4 @@
-"""Upload one verified export: changed objects only, read back, CDN, index last."""
+"""Upload the manifest difference of a verified export, committing its index last."""
 
 from functools import partial
 from typing import TYPE_CHECKING
@@ -17,6 +17,7 @@ from sve_carddb.export.read_api import read_index as read_index_bytes
 from sve_publish.headers import INDEX_HEADERS, member_headers
 from sve_publish.inventory import INVENTORY, require_images
 from sve_publish.parallel import UploadObject, UploadPool
+from sve_publish.snapshot_diff import missing_members
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -86,13 +87,15 @@ def upload(
     if jobs < 1:
         raise ExportError("Upload jobs must be at least 1")
     remote = store.get(INDEX)
-    index = next_index(read_index(remote), export.entry)
+    before = read_index(remote)
+    index = next_index(before, export.entry)
     images = store.get(INVENTORY)
     require_images(images, export.images)
-    pool = UploadPool(store, jobs, len(export.members), progress)
+    members = () if index is None else missing_members(store, before, export.members)
+    pool = UploadPool(store, jobs, len(members), progress)
     pool.sync(
         UploadObject(member.key, partial(bytes, member.raw), member_headers(member))
-        for member in export.members
+        for member in members
     )
     if store.get(INVENTORY) != images:
         raise ExportError("Image inventory changed during snapshot upload")
