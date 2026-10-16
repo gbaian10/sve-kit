@@ -792,7 +792,6 @@ def _updated(
         (),
         replace(
             found,
-            semantics=None,
             issues=_issues(raw, prepared, index, kept, classifier),
         ),
         separate_occurrences=True,
@@ -849,8 +848,17 @@ def _interface(
     occurrence: OccurrenceKey,
     choice: ChoiceContext,
 ) -> Projection:
-    projection = prepared.interfaces[index] or Projection(
-        projection_kind="pending", discriminator=None, scopes=(), imports=(), exports=()
+    found = prepared.derived.recognized[index]
+    projection = (
+        prepared.interfaces[index]
+        or (found.semantics.projection if found.semantics is not None else None)
+        or Projection(
+            projection_kind="pending",
+            discriminator=None,
+            scopes=(),
+            imports=(),
+            exports=(),
+        )
     )
     imports = [
         Port(

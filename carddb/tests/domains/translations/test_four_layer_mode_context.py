@@ -12,6 +12,7 @@ from sve_carddb.contracts.four_layer import (
     LiteralNode,
     PendingCondition,
     PredicateExpr,
+    Projection,
     ResolvedCondition,
     Target,
 )
@@ -30,6 +31,7 @@ from sve_carddb.domains.translations.four_layer_render import (
     Renderer,
     SelectedTarget,
 )
+from sve_carddb.domains.translations.four_layer_semantics import Classified
 
 from .context_fixtures import contract_case
 from .test_four_layer_classification import source
@@ -310,3 +312,31 @@ def test_leader_life_condition_does_not_borrow_a_card_set_owner_role() -> None:
     )
     with pytest.raises(ValueError, match="role"):
         verify_quantities(changed, binding, scopes={}, registry=prepared.registry)
+
+
+def test_mode_family_preserves_existing_semantics_and_projection_kind() -> None:
+    raw = _INTRO + _CONDITION + "\n" + _OPTIONS
+    original = derive_preparation(raw, source(raw), n1_classifier())
+    projection = Projection(
+        projection_kind="ability_body",
+        discriminator="synthetic.existing.v1",
+        scopes=(),
+        imports=(),
+        exports=(),
+    )
+    semantics = Classified("synthetic.existing.v1", projection)
+    original = replace(
+        original,
+        derived=replace(
+            original.derived,
+            recognized=(
+                replace(original.derived.recognized[0], semantics=semantics),
+                *original.derived.recognized[1:],
+            ),
+        ),
+    )
+    prepared = FAMILY.prepare(raw, original, n1_classifier(), None)
+    frame, _ = prepared.bind(0)
+    assert frame.projection.projection_kind == projection.projection_kind
+    assert frame.projection.discriminator == projection.discriminator
+    assert frame.semantic_variant.key == semantics.key
