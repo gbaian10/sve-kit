@@ -25,10 +25,11 @@ services:
       # Completed stages must survive the wrapper or container stopping.
       SVE_STAGE_LOG: ${EXPORT_RUN_DIR:?}/stages.tsv
       SVE_PROFILE_FIELD_STRIDE: ${SVE_PROFILE_FIELD_STRIDE:-}
-    # Same paths inside and out keep recipe paths valid; code, authored data and sources are read-only.
+    # Same paths inside and out keep recipe paths valid; code, authored data, sources and review inputs are read-only.
     volumes:
       - ${SVE_REPO:?}:${SVE_REPO:?}:ro
       - ${SVE_ARCHIVE:?}:${SVE_ARCHIVE:?}:ro
+      - ${SVE_REGISTRY_REVIEW_INPUTS:?}:${SVE_REGISTRY_REVIEW_INPUTS:?}:ro
       - ${EXPORT_RUN_DIR:?}:${EXPORT_RUN_DIR:?}
       - ${SVE_EXPORT_DIR:?}:${SVE_EXPORT_DIR:?}
       - ${SVE_CARDDB_PRIVATE_DIR:?}:${SVE_CARDDB_PRIVATE_DIR:?}

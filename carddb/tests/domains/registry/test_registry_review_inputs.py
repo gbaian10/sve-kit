@@ -139,25 +139,27 @@ def test_bad_pin_aborts_the_entire_offline_build(
         ("target_region", "en"),
         ("coverage_scope", "Partial Japanese scope"),
         ("as_of", "2026-10-01"),
+        ("coverage_hash", "sha256:" + "0" * 64),
     ],
 )
-def test_review_region_scope_and_date_must_match(
+def test_review_region_scope_date_and_hash_must_match(
     pinned_registry: tuple[Path, FrozenRegions, ReviewInputPin],
     field: str,
     value: JsonValue,
 ) -> None:
     root, provider, pin = pinned_registry
-    review_inputs = RegistryReviewInputs(pin)
+    regions = FrozenRegions(
+        jp=provider.jp, en=provider.en, review_inputs=RegistryReviewInputs(pin)
+    )
     plan = plan_preview(root, provider, regions=("en", "jp"))
     review = next(
         r.data
         for r in plan.snapshot.records.values()
         if isinstance(r.data, MappingReviewData)
     )
+    assert regions.coverage(review)
     changed = MappingReviewData.model_validate(review.model_dump() | {field: value})
-    assert not FrozenRegions(
-        jp=provider.jp, en=provider.en, review_inputs=review_inputs
-    ).coverage(changed)
+    assert not regions.coverage(changed)
 
 
 @pytest.mark.parametrize("pinned_registry", [("BP02-071",)], indirect=True)
