@@ -73,7 +73,9 @@ export function StorageSettings() {
       <p className="mt-3 text-13 text-text-3">{t("settings.storageHint")}</p>
       {clearResult && (
         <p role="status" className="mt-3 text-14">
-          {t(clearResult === "failed" ? "settings.storageClearFailed" : "settings.storageCleared")}
+          {clearResult === "failed"
+            ? t("settings.storageClearFailed")
+            : t("settings.storageCleared")}
         </p>
       )}
       <div className="mt-3 flex flex-wrap gap-2">
