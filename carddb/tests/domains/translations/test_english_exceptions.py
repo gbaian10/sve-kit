@@ -53,9 +53,10 @@ def english(  # ruff: ignore[too-many-locals] -- seal two independent real EN pa
         ("SYN-01", "Invented effect."),
         ("SYN-02", "Other invented effect."),
     ):
-        raw = page("en", f'<div class="detail">{text}</div>').replace(
-            b"SYN-01", number.encode()
-        )
+        raw = page(
+            "en",
+            f'<div class="detail">{text}</div><div class="speech">Invented flavor.</div>',
+        ).replace(b"SYN-01", number.encode())
         resource = replace(
             _resource(card_url(number), f"raw/{number}.html", raw, Kind.CARD),
             region=SourceRegion.EN,
@@ -119,6 +120,7 @@ def english(  # ruff: ignore[too-many-locals] -- seal two independent real EN pa
                 raw_text = faces[0]["text"]
                 assert isinstance(raw_text, str)
                 unit = texts.intern(LocalizedText(lang="en", text=raw_text))
+                flavor = texts.intern(LocalizedText(lang="en", text="Invented flavor."))
                 number = "SYN-01" if index == 0 else "SYN-02"
                 printing = f"printing:{index}"
                 db.insert(
@@ -137,6 +139,7 @@ def english(  # ruff: ignore[too-many-locals] -- seal two independent real EN pa
                     | {
                         "printing_id": printing,
                         "printed_effect_unit_id": unit,
+                        "flavor_unit_id": flavor,
                         "source_id": source.id,
                     },
                 )
@@ -163,6 +166,64 @@ def english(  # ruff: ignore[too-many-locals] -- seal two independent real EN pa
 def inputs(values: list[JsonValue]) -> Inputs:
     raw = canonical({"format": 3, "kind": "translation_shard", "records": values})
     return from_files((("translations/overrides/english/000.yaml", raw, raw),))
+
+
+@pytest.mark.parametrize("wrong_source", [False, True])
+def test_english_flavor_selects_only_its_complete_frozen_source(
+    english: tuple[Database, Sources, tuple[SourceDescriptor, ...]],
+    wrong_source: bool,
+) -> None:
+    db, sources, descriptors = english
+    source = descriptor(
+        db,
+        sources,
+        OwnerField(owner=descriptors[0].owner, field="flavor", ordinal=None),
+        descriptors[0].source_ref.batch_id,
+        lang="en",
+    )
+    if wrong_source:
+        source = source.model_copy(
+            update={
+                "source_ref": source.source_ref.model_copy(
+                    update={
+                        "source_version_id": descriptors[1].source_ref.source_version_id
+                    }
+                )
+            }
+        )
+    values = records(source, "card", "face")
+    target = values[0]
+    assert isinstance(target, dict)
+    assert isinstance(target["data"], dict)
+    target["data"]["nodes"] = [{"kind": "Literal", "text": "合成風味😀。"}]
+    authored = inputs(values)
+    with db.transaction():
+        report = apply(
+            db,
+            authored,
+            sources,
+            {record.record_key: "source" for record in authored.records},
+        )
+    assert report is not None
+    assert (
+        db.select("text_unit", ("text",), where={"id": source.source_unit_id})[
+            0
+        ].values["text"]
+        == "Invented flavor."
+    )
+    if wrong_source:
+        assert report["translated"] == 0
+        assert report["original"] == 1
+        assert report["fallback_reasons"] == {"english_source_mismatch": 1}
+        assert db.rows("translation_selection") == ()
+        return
+    assert report["translated"] == 1
+    assert report["fallback_reasons"] == {}
+    translation = db.rows("translation")[0].values
+    assert translation["text"] == "合成風味😀。"
+    assert translation["origin"] == "machine"
+    assert translation["low_confidence"] is True
+    assert db.rows("translation_use_annotation") == ()
 
 
 @pytest.mark.parametrize(
