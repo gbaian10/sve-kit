@@ -173,7 +173,7 @@ ZoneKind 本身不是完整目的 ZoneRef；後者還要持有者。union 的分
 
 ### 4.1 N0 產生登錄
 
-N0 使用全庫版本 `four-layer-jp-v1`。一般契約保留未來型別，N0 authored／來源分類只接受下列封閉組合，
+N0 原以全庫版本 `four-layer-jp-v1` 封版，該版已不再接受（見 §4.3）。一般契約保留未來型別，N0 來源分類只產生下列封閉組合，
 不產 Player、ZoneSet、Phase、Stat、TokenStatus、獨立 QuantityExpr、跨 frame port 或 omitted occurrence。
 所有 N0 槽 required=true、有 explicit 位置。未知整行可保留合法葉及 occurrence-scoped pending；必要葉未解則不能建立 active binding。
 
@@ -214,7 +214,7 @@ N0 使用全庫版本 `four-layer-jp-v1`。一般契約保留未來型別，N0 a
 
 ### 4.2 N0 整段語義構造登錄
 
-N0 的 resolved key、來源 role、投影及能力作用域由 `contracts/n0.py` 封閉登錄。
+N0 的 resolved key、來源 role、投影及能力作用域只由來源語義分類產生；B 以現行 v2 來源推導重放比對，不另設版本登錄。
 未知 key、role／投影錯配或額外作用域均拒絕；未知完整語法維持 occurrence-scoped pending。
 
 | key | role | projection_kind | 獨立 ability scope 數 |
@@ -419,7 +419,7 @@ A 案省略 owner 不選用時不提供 args.owner，不產所有格形式或選
 ZoneSet 多成員按 canonical 排序顯示，每成員有自己的概念範圍；空簽章 separator 不讀值、不計入必要引用。
 這些呈現改動不新增來源葉或放寬來源單位守衛；v3 使 dependency_key 與相依 tr: 更新，不改來源 frame／binding。
 固定案例見 [參數群組渲染案例](../../../carddb/tests/fixtures/parameter-groups/render-cases.json)。
-案例的 `parameter_group_render` 只驗 renderer 的隔離 typed fixture；`parameter_group_n0` 另從合成日文驗正常來源分類。
+案例的 `parameter_group_render` 只驗 renderer 的隔離 typed fixture；`parameter_group_source` 另從合成日文經現行來源推導驗選取單位與 counted_kind。
 N1 正文依 §4.3 的封閉來源構造提供 CardNP 的 counted_kind／ZoneSet／Player／TokenStatus 葉；仍只允許同一來源 operand、已涵蓋的修飾與角色，不以 generic renderer 案例擴大來源範圍。
 
 ### 5.1 原文單位與中文量詞是兩張表
