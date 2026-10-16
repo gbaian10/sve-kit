@@ -4,6 +4,7 @@ export {
   type AnnotatedText,
   type AnnotatedTextResolver,
   createAnnotatedTextResolver,
+  peekAnnotatedTextResolver,
   type SelectedText,
   sharedAnnotatedTextResolver,
 } from "./annotated-text"

@@ -6,6 +6,7 @@ import type { CardSummary, ImageIndex } from "../../data"
 import type { DisplayedText } from "../../domain/nameDisplay"
 import { cn } from "../ui/cn"
 import { CardPlaceholder } from "./CardPlaceholder"
+import { shownSources } from "./image-loading"
 
 /**
  * `identify`: the image stands alone, alt names the card; `redundant`: the same text is next to it,
@@ -31,8 +32,6 @@ export interface CardImageProps {
 }
 
 // A fixed slot prevents layout shifts while the image downloads or remains unavailable.
-const shownSources = new Set<string>()
-
 export function CardImage(props: CardImageProps) {
   return props.translate ? (
     <ImageContent {...props} t={props.translate} />

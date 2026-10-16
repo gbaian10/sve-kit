@@ -17,6 +17,7 @@ import {
   loadImagePage,
   objectValue,
   parseJson,
+  peekAnnotatedTextResolver,
   type QueryFailure,
   retainedImageIndex,
   type SearchChannel,
@@ -910,23 +911,6 @@ function afterPaint(task: () => void): () => void {
   }
 }
 
-// Bootstrap indexing can delay a tap's next paint; render only existing resolvers and initialize
-// new ones after paint or during idle time.
-const createdResolvers = new WeakSet<LoadedSnapshot>()
-
-function existingResolver(
-  client: SnapshotClient,
-  snapshot: LoadedSnapshot | null,
-): AnnotatedTextResolver | null {
-  return snapshot && createdResolvers.has(snapshot) ? sharedAnnotatedTextResolver(client) : null
-}
-
-function createResolver(client: SnapshotClient, snapshot: LoadedSnapshot): AnnotatedTextResolver {
-  const resolver = sharedAnnotatedTextResolver(client)
-  createdResolvers.add(snapshot)
-  return resolver
-}
-
 // A changed exact owner or edition must never display the previous identity's text.
 export function useAnnotatedText(
   client: SnapshotClient,
@@ -946,7 +930,7 @@ export function useAnnotatedText(
     readonly error?: TextFailure
   }>()
   // A text resolved earlier for this snapshot renders final on the first pass.
-  const peeked = (sharedResolver ?? existingResolver(client, snapshot))?.peek(
+  const peeked = (sharedResolver ?? peekAnnotatedTextResolver(client))?.peek(
     { owner, field, ordinal: null },
     language,
   )
@@ -959,10 +943,10 @@ export function useAnnotatedText(
       field: stringValue(currentField),
       ordinal: null,
     }
-    const existing = sharedResolver ?? existingResolver(client, snapshot)
+    const existing = sharedResolver ?? peekAnnotatedTextResolver(client)
     if (existing?.peek(pointer, stringValue(currentLanguage)) !== undefined) return
     const cancel = afterPaint(() => {
-      const resolver = sharedResolver ?? createResolver(client, snapshot)
+      const resolver = sharedResolver ?? sharedAnnotatedTextResolver(client)
       void resolver.resolve(pointer, stringValue(currentLanguage)).then(
         (value) => {
           if (active) setLoaded({ snapshot, identity, value })
@@ -1025,12 +1009,22 @@ export function useAnnotatedText(
 }
 
 export function useNeighbours(query: SearchQuery | null, target: string | null, maxItems?: number) {
-  const identity = JSON.stringify([query, target, maxItems])
+  const identity = JSON.stringify([query, maxItems])
   const { channel } = useWorkerChannel(identity)
   useEffect(() => {
-    if (query && target) channel.neighbours(query, target, maxItems)
+    if (!query || !target) return
+    const current = channel.getStatus().result
+    if (
+      current.phase === "complete" &&
+      current.page.items.some((item) => item.key === target || item.printingId === target)
+    )
+      return
+    channel.neighbours(query, target, maxItems)
   }, [channel, query, target, maxItems])
-  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  const state = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  return state.result.phase === "pending" && state.previous
+    ? { ...state, result: state.previous }
+    : state
 }
 
 export function useAbilityPreview(

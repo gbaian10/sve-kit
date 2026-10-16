@@ -253,6 +253,7 @@ export default {
     specialProducts: "Decks and special products",
   },
   cardPage: {
+    switchingCard: "Switching card…",
     switchingEdition: "Loading the other edition…",
     otherEditionFailed: "Couldn't load the other edition.",
     notCollected: {

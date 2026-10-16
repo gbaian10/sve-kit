@@ -725,14 +725,10 @@ export class SearchIndex {
         (query.state.unit === "card" &&
           this.pool.get(this.cards.id[this.printings.card[p] ?? 0] ?? 0) === target),
     )
-    const offset = Math.max(0, position - 1)
     return {
       total: matches.length,
-      offset,
-      items:
-        position < 0
-          ? []
-          : matches.slice(offset, position + 2).map((p) => this.item(p, query.state)),
+      offset: 0,
+      items: position < 0 ? [] : matches.map((p) => this.item(p, query.state)),
     }
   }
 

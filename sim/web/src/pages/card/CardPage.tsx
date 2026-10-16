@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
+import { type CardContent, prepareCardContent } from "../../app/card-content"
 import { useDialogHistory } from "../../app/dialog-history"
 import { LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
 import { useOtherEdition } from "../../app/other-edition"
@@ -19,6 +20,7 @@ import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
 import { CLASS_ICON } from "../../components/card/classIcons"
 import { StatLine } from "../../components/card/StatLine"
+import { useTextLanguage } from "../../components/card/text-language"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
 import { Badge } from "../../components/ui/Badge"
 import { Button } from "../../components/ui/Button"
@@ -31,7 +33,7 @@ import {
   type CardSummary,
   type Catalog,
   faceBasics,
-  loadFaceCandidates,
+  type ImageIndex,
   locateCard,
   type LocatedCard,
   nameOf,
@@ -57,6 +59,8 @@ const ICON_BUTTON =
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
 const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
 const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
+// Each prepared card keeps its own catalog and text closure (several MB), so only nearby cards stay.
+const PREPARED_CARDS = 4
 
 export function CardPage() {
   const { cardNo, intId } = useParams()
@@ -64,16 +68,29 @@ export function CardPage() {
   const edition = useRouteEdition()
   const location = useLocation()
   const [attempt, setAttempt] = useState(0)
-  const inputKey = `${cardNo === undefined ? "provisional" : "official"}/${cardNo ?? intId ?? ""}`
+  const language = useTextLanguage()
+  const [prepared, setPrepared] = useState(() => new Map<string, CardContent>())
+  const routeKey = JSON.stringify((location.state as { route?: unknown } | null)?.route ?? null)
+  const inputKey = JSON.stringify([
+    client.base,
+    client.snapshot()?.manifestHash,
+    edition,
+    language,
+    routeKey,
+    attempt,
+    cardNo === undefined ? "provisional" : "official",
+    cardNo ?? intId ?? "",
+  ])
+  const cached = prepared.get(inputKey)
   const [located, setLocated] = useState<{
     key: string
-    value?: LocatedCard
+    value?: CardContent
     error?: unknown
   } | null>(null)
+  if (cached && located?.key !== inputKey) setLocated({ key: inputKey, value: cached })
   const manifestHash = client.snapshot()?.manifestHash
-  const routeKey = JSON.stringify((location.state as { route?: unknown } | null)?.route ?? null)
   useEffect(() => {
-    if (!manifestHash) return
+    if (!manifestHash || cached) return
     let active = true
     const hint = JSON.parse(routeKey) as {
       cardId: string
@@ -82,14 +99,24 @@ export function CardPage() {
       printingOwner: string
       region: Region
     } | null
-    void locateCard(client, {
+    const loading = locateCard(client, {
       namespace: cardNo === undefined ? "provisional" : "official",
       key: cardNo ?? intId ?? "",
       edition,
       ...(hint ? { hint: { ...hint, id: hint.printingId } } : {}),
-    }).then(
+    }).then((value) => prepareCardContent(client, value, language, IMAGE_SIZES))
+    void loading.then(
       (value) => {
-        if (active) setLocated({ key: inputKey, value })
+        if (active) {
+          // A failed image index stays uncached so returning to the card retries it.
+          if (!value.images.failed)
+            setPrepared((previous) => {
+              const next = new Map(previous).set(inputKey, value)
+              if (next.size > PREPARED_CARDS) next.delete(next.keys().next().value ?? "")
+              return next
+            })
+          setLocated({ key: inputKey, value })
+        }
       },
       (error: unknown) => {
         if (active) setLocated({ key: inputKey, error })
@@ -98,18 +125,35 @@ export function CardPage() {
     return () => {
       active = false
     }
-  }, [client, manifestHash, inputKey, cardNo, intId, routeKey, attempt, edition])
-  const result = located?.key === inputKey ? located : null
+  }, [client, manifestHash, inputKey, cardNo, intId, routeKey, attempt, edition, language, cached])
+  const current = cached !== undefined || located?.key === inputKey
+  const result = cached
+    ? { key: inputKey, value: cached }
+    : current ||
+        (located?.value?.snapshot.manifestHash === manifestHash &&
+          located?.value?.client.base === client.base)
+      ? located
+      : null
+  const pending = !current
+  const [pendingHint, setPendingHint] = useState<string | null>(null)
+  useEffect(() => {
+    if (!pending) return
+    const timer = setTimeout(() => {
+      setPendingHint(inputKey)
+    }, 200)
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [pending, inputKey])
   const catalog = result?.value?.catalog ?? null
   const routeError = result?.error
   const resolved = result?.value?.printing
-  const pageClient = useMemo(() => {
-    const value = result?.value
-    return value ? { ...client, snapshot: () => value.snapshot } : client
-  }, [client, result?.value])
   return (
     <CardView
-      client={pageClient}
+      client={result?.value?.client ?? client}
+      preparedImages={result?.value?.images}
+      pending={pending}
+      showPending={pendingHint === inputKey}
       status={status}
       catalog={catalog}
       resolved={resolved}
@@ -130,6 +174,9 @@ export function CardView({
   resolved,
   routeError,
   onRetry,
+  pending = false,
+  showPending = pending,
+  preparedImages,
 }: {
   readonly client: SnapshotClient
   readonly status: SnapshotStatus
@@ -137,12 +184,16 @@ export function CardView({
   readonly resolved: LocatedCard["printing"] | undefined
   readonly onRetry?: () => void
   readonly routeError?: unknown
+  readonly pending?: boolean
+  readonly showPending?: boolean
+  readonly preparedImages?: ImageIndex | undefined
 }) {
   const { t } = useTranslation()
   const { cardNo, intId } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const images = useImageIndex(client, catalog !== null)
+  const observedImages = useImageIndex(client, catalog !== null && preparedImages === undefined)
+  const images = preparedImages ?? observedImages
   const prefs = usePrefs()
   const cardEdition = resolved?.region ?? prefs.cardEdition
   const searchReadiness = useSearchReadiness(cardEdition)
@@ -197,6 +248,7 @@ export function CardView({
   const [printingAttempt, setPrintingAttempt] = useState(0)
   const [printingCatalog, setPrintingCatalog] = useState<{
     source: Catalog
+    cardId: string
     other: Catalog | undefined
     value: Catalog
     error?: unknown
@@ -205,25 +257,29 @@ export function CardView({
     const snapshot = other.snapshot ?? client.snapshot()
     if (!snapshot || !catalog || !cardId) return
     let active = true
-    void loadFaceCandidates(client, snapshot, cardId, region)
-      .then((loaded) =>
-        cardPrintings(client, loaded, cardId, other.snapshot ? ["jp", "en"] : [region]),
-      )
-      .then(
-        (value) => {
-          if (active) setPrintingCatalog({ source: catalog, other: other.catalog, value })
-        },
-        (error: unknown) => {
-          if (active)
-            setPrintingCatalog({ source: catalog, other: other.catalog, value: catalog, error })
-        },
-      )
+    void cardPrintings(client, snapshot, cardId, other.snapshot ? ["jp", "en"] : [region]).then(
+      (value) => {
+        if (active) setPrintingCatalog({ source: catalog, cardId, other: other.catalog, value })
+      },
+      (error: unknown) => {
+        if (active)
+          setPrintingCatalog({
+            source: catalog,
+            cardId,
+            other: other.catalog,
+            value: catalog,
+            error,
+          })
+      },
+    )
     return () => {
       active = false
     }
   }, [client, catalog, cardId, region, other.snapshot, other.catalog, printingAttempt])
   const completePrintings =
-    printingCatalog?.source === catalog && printingCatalog.other === other.catalog
+    printingCatalog?.source === catalog &&
+    printingCatalog.cardId === cardId &&
+    printingCatalog.other === other.catalog
       ? printingCatalog
       : undefined
   const printings = cardId
@@ -244,7 +300,11 @@ export function CardView({
     () => ({ state: parseQuery(new URLSearchParams(background ?? "")), edition: cardEdition }),
     [background, cardEdition],
   )
-  const neighbourTarget = typeof entry?.["resultKey"] === "string" ? entry["resultKey"] : printingId
+  const hint = entry?.["route"] as { printingId?: string } | undefined
+  const neighbourTarget =
+    typeof entry?.["resultKey"] === "string"
+      ? entry["resultKey"]
+      : (hint?.printingId ?? (pending ? null : printingId))
   const neighbours = useNeighbours(
     fromList ? neighbourQuery : null,
     fromList ? neighbourTarget : null,
@@ -266,9 +326,9 @@ export function CardView({
       : `${printingPath(summary)}/${encodeURIComponent(summary.name.original.text)}`
     : null
   useEffect(() => {
-    if (canonical && location.pathname !== canonical)
+    if (!pending && canonical && location.pathname !== canonical)
       void navigate(canonical, { replace: true, state: location.state as unknown })
-  }, [canonical, summary?.cardNoState, location.pathname, location.state, navigate])
+  }, [pending, canonical, summary?.cardNoState, location.pathname, location.state, navigate])
   const open = (target: NonNullable<typeof previous>) => {
     void navigate(printingPath(target.summary), {
       replace: true,
@@ -343,7 +403,7 @@ export function CardView({
       </>
     )
   }
-  const faceCatalog = completePrintings?.value ?? catalog
+  const faceCatalog = catalog
   const views = faces.map((face, ordinal) => {
     const faceId = face["id"] as string
     const wording = faceCatalog?.index.wording(faceId, region)
@@ -371,7 +431,15 @@ export function CardView({
   })
   const zoomedView = views.find((view) => view.faceId === zoomed)
   return (
-    <article className="mx-auto w-full max-w-270">
+    <article aria-busy={pending} className="relative mx-auto w-full max-w-270">
+      {pending && showPending && catalog && (
+        <p
+          role="status"
+          className="pointer-events-none absolute top-13 right-0 z-10 rounded-control bg-surface-2 px-3 py-1 text-13 text-text-2 shadow"
+        >
+          {t("cardPage.switchingCard")}
+        </p>
+      )}
       <StatusStrip readiness={readiness} />
       {/* Top row (design 06): back 44, set tag 28, number centred in Plex 600 15px, copy link 44. */}
       <div className="flex h-13 items-center gap-1">
@@ -405,7 +473,7 @@ export function CardView({
           </RouterLink>
         )}
         <h1 className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
-          {cardNo ?? intId}
+          {resolved?.cardNo ?? cardNo ?? intId}
         </h1>
         <button
           type="button"
@@ -418,7 +486,19 @@ export function CardView({
         </button>
       </div>
       {/* Phone and tablet: the large image first, then the text; desktop: a sticky image column. */}
-      <div className="lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10">
+      <div
+        className="lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10"
+        onClickCapture={(event) => {
+          if (
+            pending &&
+            event.target instanceof Element &&
+            !event.target.closest("[data-card-navigation]")
+          ) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+        }}
+      >
         <div className="mt-1 flex flex-col items-center gap-3 lg:sticky lg:top-4 lg:self-start">
           {views.map(
             ({ faceId, faceSummary, name }) =>
@@ -427,6 +507,7 @@ export function CardView({
                 <button
                   key={faceId}
                   type="button"
+                  disabled={pending}
                   aria-label={t("cardPage.zoom", { name: name.primary.text })}
                   onClick={() => {
                     setZoomed(faceId)
@@ -508,6 +589,7 @@ export function CardView({
                       (neighbours.result.phase !== "complete" || position >= 0) && (
                         <div className="mt-2 flex gap-2">
                           <Button
+                            data-card-navigation
                             className="h-10 gap-1 px-3 text-14"
                             disabled={previous === undefined}
                             onClick={() => {
@@ -518,6 +600,7 @@ export function CardView({
                             {t("cardPage.previous")}
                           </Button>
                           <Button
+                            data-card-navigation
                             className="h-10 gap-1 px-3 text-14"
                             disabled={next === undefined}
                             onClick={() => {
@@ -628,7 +711,7 @@ export function CardView({
         </div>
       </div>
       <Dialog
-        open={zoomedView !== undefined}
+        open={!pending && zoomedView !== undefined}
         onClose={closeZoom}
         title={zoomedView?.name?.primary.text ?? ""}
         variant="center"
