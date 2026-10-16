@@ -253,6 +253,17 @@ vi.mock("../../app/snapshot", () => {
                 : state.available
                   ? { id: "rev:synthetic", name_unit_id: "t:synthetic" }
                   : undefined,
+          revision: (id: string) => ({
+            id,
+            name_unit_id: "t:synthetic",
+            translations: [],
+            class_code: "royal",
+            type_code: "follower",
+            traits: ["synthetic"],
+            cost: 3,
+            attack: 4,
+            defense: 5,
+          }),
           translation: () => ({ text_unit_id: "t:back-translated", low_confidence: true }),
           vocabulary: (kind: string, code: string) =>
             kind === "rarity" && code === "lg"
@@ -324,6 +335,24 @@ describe("original card titles", () => {
       ).not.toBeInTheDocument()
     },
   )
+})
+
+it("shows the shared type line and stats without a display revision", async () => {
+  state.originalName = true
+  state.doubleFace = true
+  await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+    initialEntries: ["/cards/BP-SYNTHETIC"],
+    language: "zh-TW",
+  })
+  expect(screen.getAllByText(/royal.*follower/)[0]).toBeVisible()
+  expect(screen.getAllByText("synthetic")[0]).toBeVisible()
+  for (const [label, value] of [
+    ["消費", "3"],
+    ["攻擊力", "4"],
+    ["生命值", "5"],
+  ] as const) {
+    expect(screen.getAllByText(label)[0]?.parentElement).toHaveTextContent(value)
+  }
 })
 
 describe("plain wording on the card page", () => {

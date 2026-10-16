@@ -8,7 +8,7 @@ export {
   sharedAnnotatedTextResolver,
 } from "./annotated-text"
 export { locateCard, type LocatedCard } from "./card-route"
-export { type CardSummary, type Catalog, catalogOf } from "./catalog"
+export { type CardSummary, type Catalog, catalogOf, nameOf } from "./catalog"
 export {
   createSnapshotClient,
   type LoadedSnapshot,
@@ -16,6 +16,7 @@ export {
   type SnapshotStatus,
 } from "./client"
 export { cardPrintings, editionPrinting, locateEdition } from "./edition"
+export { faceBasics, loadFaceCandidates } from "./face-basics"
 export type { Row } from "./format-v3/decode"
 export { SnapshotError } from "./format-v3/errors"
 export {

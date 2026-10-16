@@ -6,6 +6,10 @@ import { DEFAULT_QUERY } from "../domain/query/model"
 import { catalogOf, createCatalog } from "./catalog"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
+import { faceBasics } from "./face-basics"
+import type { Row } from "./format-v3/decode"
+import { BootstrapColumns } from "./search/bootstrap"
+import { SearchIndex } from "./search/index"
 
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
@@ -124,6 +128,16 @@ describe("pending display in the list", () => {
                         : null,
                       basis: available ? "latest_known_release" : "candidates",
                     },
+                    common_name: available
+                      ? null
+                      : {
+                          name_unit_id:
+                            catalog.index.currentRevision("f:bp01-001", "jp")?.["name_unit_id"] ??
+                            "",
+                          translations:
+                            catalog.index.currentRevision("f:bp01-001", "jp")?.["translations"] ??
+                            [],
+                        },
                     candidates: [],
                     undated_printing_ids: ["p:bp01-001"],
                   },
@@ -140,8 +154,16 @@ describe("pending display in the list", () => {
     ])
     const summary = pending.summary("p:bp01-001")
     expect(summary).toBeDefined()
-    expect(summary?.name.original.text).toBe(available ? "試作の見習い兵" : "BP01-001")
+    expect(summary?.name.original.text).toBe("試作の見習い兵")
     expect(summary?.cost).toBe(available ? 1 : null)
+    expect(summary?.name.translations["zh-Hant"]).toBe("試作見習兵")
+    expect(pending.suggest("試作の見習い兵", "jp", 5)[0]?.cardId).toBe("c:bp01-001")
+    const columns = new BootstrapColumns()
+    columns.ingest(revised.bootstrap)
+    columns.seal()
+    const worker = new SearchIndex(columns, "jp")
+    expect(worker.suggest("試作見習兵").items[0]?.summary.name).toEqual(summary?.name)
+    expect(worker.recent(["p:bp01-001"])[0]?.summary?.name).toEqual(summary?.name)
     expect(summary?.wordingPending).toBe(true)
     expect(summary?.name.original.lang).toBe("ja")
     expect(pending.index.wording("f:bp01-001", "en")).toBeUndefined()
@@ -213,5 +235,97 @@ describe("current name translations", () => {
     expect(current.entries.find((entry) => entry.cardId === "c:bp01-001")?.names).toEqual(
       catalog.entries.find((entry) => entry.cardId === "c:bp01-001")?.names,
     )
+  })
+})
+
+describe("pending card basic fields", () => {
+  const original = catalog.index.currentRevision("f:bp01-001", "jp")
+  if (!original) throw new Error("missing synthetic revision")
+  const candidates = (rows: Row[], refs: Row[]) => {
+    return createCatalog({
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.flatMap((row) => {
+          if (row["id"] === original["id"]) return rows
+          if (row["id"] !== "f:bp01-001" || fragment.value["region"] !== "jp") return [row]
+          return [
+            {
+              ...row,
+              current: [],
+              wording: [
+                {
+                  region: "jp",
+                  display: { revision_id: null, basis: "candidates" },
+                  common_name: null,
+                  candidates: refs,
+                },
+              ],
+            },
+          ]
+        }),
+      })),
+    }).index
+  }
+  const one: Row = {
+    ...original,
+    id: "r:one",
+    cost: 3,
+    attack: 4,
+    defense: 5,
+    traits: ["synthetic"],
+  }
+  const two: Row = { ...one, id: "r:two" }
+  it("shows agreed fields while keeping wording pending", () => {
+    const index = candidates(
+      [one, two],
+      [
+        { printing_id: "p:a", revision_id: "r:one" },
+        { printing_id: "p:b", revision_id: "r:two" },
+      ],
+    )
+    expect(faceBasics(index, "f:bp01-001", "jp", "p:b").values).toMatchObject({
+      class_code: "royal",
+      type_code: "follower",
+      traits: ["synthetic"],
+      cost: 3,
+      attack: 4,
+      defense: 5,
+    })
+    expect(index.currentRevision("f:bp01-001", "jp")).toBeUndefined()
+    expect(index.displayRevision("f:bp01-001", "jp")).toBeUndefined()
+  })
+  it("locates the exact printing when candidate stats differ", () => {
+    const index = candidates(
+      [one, { ...two, cost: 8 }],
+      [
+        { printing_id: "p:a", revision_id: "r:one" },
+        { printing_id: "p:b", revision_id: "r:two" },
+      ],
+    )
+    expect(faceBasics(index, "f:bp01-001", "jp", "p:b").values["cost"]).toBe(8)
+  })
+  it("keeps conflicting observations of one printing unresolved", () => {
+    const index = candidates(
+      [one, { ...two, cost: 8 }],
+      [
+        { printing_id: "p:b", revision_id: "r:one" },
+        { printing_id: "p:b", revision_id: "r:two" },
+      ],
+    )
+    const basics = faceBasics(index, "f:bp01-001", "jp", "p:b")
+    expect(basics.values["cost"]).toBeUndefined()
+    expect(basics.values["attack"]).toBe(4)
+    expect(basics.revision).toBeUndefined()
+  })
+  it("does not infer agreement from partially loaded candidates", () => {
+    const index = candidates(
+      [one],
+      [
+        { printing_id: "p:a", revision_id: "r:one" },
+        { printing_id: "p:b", revision_id: "r:unloaded" },
+      ],
+    )
+    expect(faceBasics(index, "f:bp01-001", "jp", "p:b").values).toEqual({})
   })
 })

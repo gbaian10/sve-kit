@@ -73,7 +73,7 @@ function translationText(index: CardIndex, translationId: string): string | unde
   return unit ? stringValue(unit["text"]) : undefined
 }
 
-function nameOf(
+export function nameOf(
   index: CardIndex,
   revision: Row,
   field: "name" | "label" = "name",
@@ -151,8 +151,9 @@ export function* catalogCards(
       const code = revision?.["class_code"]
       if (typeof code === "string") classCode = code
       const printing = index.printing(typeof printingId === "string" ? printingId : "")
-      const name = revision
-        ? nameOf(index, revision)
+      const nameRow = revision ?? (pending?.["common_name"] as Row | null | undefined)
+      const name = nameRow
+        ? nameOf(index, nameRow)
         : printing
           ? {
               original: {

@@ -30,8 +30,11 @@ import {
   cardPrintings,
   type CardSummary,
   type Catalog,
+  faceBasics,
+  loadFaceCandidates,
   locateCard,
   type LocatedCard,
+  nameOf,
   type Row,
   type SnapshotClient,
   type SnapshotStatus,
@@ -39,9 +42,9 @@ import {
 } from "../../data"
 import { CardRouteError, printingPath } from "../../domain/cardRoute"
 import { classStyle } from "../../domain/classes"
-import { displayName, type NameSource, UI_TEXT_LANG } from "../../domain/nameDisplay"
+import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { parseQuery } from "../../domain/query/codec"
-import type { Region, TextLang } from "../../domain/search"
+import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { showsOtherEdition, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -54,41 +57,6 @@ const ICON_BUTTON =
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
 const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
 const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
-
-// Catalog summaries only cover front faces; each back face needs its own selected name.
-function backFaceName(
-  index: Catalog["index"],
-  revision: Row | undefined,
-  summary: CardSummary,
-): NameSource {
-  const unit = revision ? index.textUnit(stringValue(revision["name_unit_id"])) : undefined
-  if (!unit)
-    return {
-      original: { lang: summary.region === "jp" ? "ja" : "en", text: summary.cardNo },
-      translations: {},
-    }
-  const translations: NameSource["translations"] = {}
-  const translationQuality: NonNullable<NameSource["translationQuality"]> = {}
-  for (const entry of revision?.["translations"] as Row[]) {
-    if (entry["field"] !== "name") continue
-    const target = stringValue(entry["target_lang"]) as TextLang
-    const translation = index.translation(stringValue(entry["translation_id"]))
-    const translatedUnit = translation
-      ? index.textUnit(stringValue(translation["text_unit_id"]))
-      : undefined
-    if (!translatedUnit) continue
-    translations[target] = stringValue(translatedUnit["text"])
-    translationQuality[target] = {
-      lowConfidence: translation?.["low_confidence"] === true,
-      jpSource: entry["basis"] === "jp_source",
-    }
-  }
-  return {
-    original: { lang: stringValue(unit["lang"]) as TextLang, text: stringValue(unit["text"]) },
-    translations,
-    translationQuality,
-  }
-}
 
 export function CardPage() {
   const { cardNo, intId } = useParams()
@@ -237,15 +205,19 @@ export function CardView({
     const snapshot = other.snapshot ?? client.snapshot()
     if (!snapshot || !catalog || !cardId) return
     let active = true
-    void cardPrintings(client, snapshot, cardId, other.snapshot ? ["jp", "en"] : [region]).then(
-      (value) => {
-        if (active) setPrintingCatalog({ source: catalog, other: other.catalog, value })
-      },
-      (error: unknown) => {
-        if (active)
-          setPrintingCatalog({ source: catalog, other: other.catalog, value: catalog, error })
-      },
-    )
+    void loadFaceCandidates(client, snapshot, cardId, region)
+      .then((loaded) =>
+        cardPrintings(client, loaded, cardId, other.snapshot ? ["jp", "en"] : [region]),
+      )
+      .then(
+        (value) => {
+          if (active) setPrintingCatalog({ source: catalog, other: other.catalog, value })
+        },
+        (error: unknown) => {
+          if (active)
+            setPrintingCatalog({ source: catalog, other: other.catalog, value: catalog, error })
+        },
+      )
     return () => {
       active = false
     }
@@ -334,9 +306,11 @@ export function CardView({
   const label = (kind: VocabularyKind, code: string) =>
     index ? vocabularyLabel(index, kind, code, textLang) : code
   const joiner = t("cardPage.separator")
-  const metaLine = (classCode: string | null, typeCode: string | null) =>
+  const metaLine = (classCode: string | null | undefined, typeCode: string | null) =>
     [
-      classCode === null ? t("search.neutral") : label("class", classCode),
+      ...(classCode === undefined
+        ? []
+        : [classCode === null ? t("search.neutral") : label("class", classCode)]),
       ...(typeCode === null ? [] : [label("type", typeCode)]),
     ].join(joiner)
   const traitLabels = (codes: readonly string[]) =>
@@ -369,10 +343,14 @@ export function CardView({
       </>
     )
   }
+  const faceCatalog = completePrintings?.value ?? catalog
   const views = faces.map((face, ordinal) => {
     const faceId = face["id"] as string
-    const wording = catalog?.index.wording(faceId, region)
-    const revision = catalog?.index.displayRevision(faceId, region)
+    const wording = faceCatalog?.index.wording(faceId, region)
+    const revision = faceCatalog?.index.displayRevision(faceId, region)
+    const nameRow = revision ?? (wording?.["common_name"] as Row | null | undefined)
+    const backName =
+      ordinal > 0 && nameRow && faceCatalog ? nameOf(faceCatalog.index, nameRow) : undefined
     const faceSummary: CardSummary | undefined =
       summary &&
       (ordinal === 0
@@ -380,7 +358,10 @@ export function CardView({
         : {
             ...summary,
             faceId,
-            name: catalog ? backFaceName(catalog.index, revision, summary) : summary.name,
+            name: backName ?? {
+              original: { lang: region === "jp" ? "ja" : "en", text: summary.cardNo },
+              translations: {},
+            },
             wordingPending: wording !== undefined,
           })
     const name = faceSummary
@@ -469,19 +450,23 @@ export function CardView({
         </div>
         <div className="mt-4 min-w-0 lg:mt-1">
           {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
-            // A pending display still has the shown printing's own original name.
-            const ownNameRevision = ((wording?.["candidates"] ?? []) as Row[]).find(
-              (candidate) => candidate["printing_id"] === printingId,
-            )?.["revision_id"]
-            const nameRevisionId = revision?.["id"] ?? ownNameRevision
+            const basics =
+              faceCatalog && printingId
+                ? faceBasics(faceCatalog.index, faceId, region, printingId)
+                : undefined
+            const nameRevisionId = basics?.revision?.["id"]
+            const values = basics?.values
             const classCode =
-              typeof revision?.["class_code"] === "string" ? revision["class_code"] : null
-            const typeCode =
-              typeof revision?.["type_code"] === "string" ? revision["type_code"] : null
-            const traits = traitLabels((revision?.["traits"] ?? []) as string[])
-            const cost = typeof revision?.["cost"] === "number" ? revision["cost"] : null
-            const attack = typeof revision?.["attack"] === "number" ? revision["attack"] : null
-            const defense = typeof revision?.["defense"] === "number" ? revision["defense"] : null
+              typeof values?.["class_code"] === "string"
+                ? values["class_code"]
+                : values?.["class_code"] === null
+                  ? null
+                  : undefined
+            const typeCode = typeof values?.["type_code"] === "string" ? values["type_code"] : null
+            const traits = traitLabels((values?.["traits"] ?? []) as string[])
+            const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
+            const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
+            const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
             return (
               <section
                 key={faceId}
@@ -502,15 +487,20 @@ export function CardView({
                     ) : (
                       <PlainNameHeading name={name} />
                     )}
-                    {/* No revision (wording pending) means class and type are unknown, not neutral. */}
-                    {revision && (
+                    {(classCode !== undefined || typeCode !== null || traits !== "") && (
                       <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-13 text-text-2">
-                        <img src={CLASS_ICON[classStyle(classCode)]} alt="" className="size-4.5" />
+                        {classCode !== undefined && (
+                          <img
+                            src={CLASS_ICON[classStyle(classCode)]}
+                            alt=""
+                            className="size-4.5"
+                          />
+                        )}
                         <span>{metaLine(classCode, typeCode)}</span>
                         {traits !== "" && <span className="text-text-3">{traits}</span>}
                       </p>
                     )}
-                    {revision && (
+                    {(cost !== null || attack !== null || defense !== null) && (
                       <StatLine className="mt-1" cost={cost} attack={attack} defense={defense} />
                     )}
                     {fromList &&
