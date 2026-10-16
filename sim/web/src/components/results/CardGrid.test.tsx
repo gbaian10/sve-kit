@@ -2,6 +2,7 @@ import { act, screen } from "@testing-library/react"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
+import type { ImageIndex } from "../../data"
 import { renderInRouter, renderRoutes } from "../../test-utils"
 import { CardGrid, type GridCell } from "./CardGrid"
 
@@ -45,6 +46,41 @@ describe("visible wording label in card results", () => {
     await renderInRouter(<CardGrid cells={[cell(false)]} images={undefined} onOpen={vi.fn()} />)
     expect(screen.queryByText("卡文未定")).not.toBeInTheDocument()
   })
+})
+
+it("offers each grid card only its largest available image candidate", async () => {
+  const largestFiles: ImageIndex = {
+    asset: () => ({ availability: "available", publication_state: "approved" }),
+    cardImage: (printingId) => {
+      const file =
+        printingId === "p:small"
+          ? { size: "card_m", width: 320, height: 447 }
+          : { size: "card_l", width: 459, height: 641 }
+      const path = `/cdn/images/${file.size}/synthetic.webp?v=1`
+      return {
+        src: path,
+        srcSet: `/cdn/images/card_s/synthetic.webp?v=1 128w, /cdn/images/card_m/synthetic.webp?v=1 320w, /cdn/images/card_l/synthetic.webp?v=1 459w`,
+        width: file.width,
+        height: file.height,
+      }
+    },
+  }
+  const small = cell(false)
+  const large = cell(false)
+  await renderInRouter(
+    <CardGrid
+      cells={[
+        { ...large, key: "large", summary: { ...large.summary, printingId: "p:large" } },
+        { ...small, key: "small", summary: { ...small.summary, printingId: "p:small" } },
+      ]}
+      images={largestFiles}
+      onOpen={vi.fn()}
+    />,
+  )
+
+  const [largeImage, smallImage] = document.querySelectorAll("img[srcset]")
+  expect(largeImage?.getAttribute("srcset")).toBe("/cdn/images/card_l/synthetic.webp?v=1 459w")
+  expect(smallImage?.getAttribute("srcset")).toBe("/cdn/images/card_m/synthetic.webp?v=1 320w")
 })
 
 describe("visible current translation quality", () => {

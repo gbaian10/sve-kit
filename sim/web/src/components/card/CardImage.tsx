@@ -12,6 +12,7 @@ import { CardPlaceholder } from "./CardPlaceholder"
  * so alt is empty; `decorative`: no meaning at all.
  */
 type ImageAlt = "identify" | "redundant" | "decorative"
+type CandidatePolicy = "responsive" | "largest"
 
 export interface CardImageProps {
   readonly summary: CardSummary
@@ -21,6 +22,8 @@ export interface CardImageProps {
   readonly alt: ImageAlt
   /** The `sizes` attribute for this slot, chosen by the layout that places the image. */
   readonly sizes: string
+  /** Choose from every available size, or offer only the largest available file. */
+  readonly candidatePolicy?: CandidatePolicy
   /** Must set the width (`w-full`, `w-8`); the height follows the 63:88 ratio. */
   readonly className: string
   /** Lists share their translator instead of subscribing once per image. */
@@ -49,6 +52,7 @@ function ImageContent({
   images,
   alt,
   sizes,
+  candidatePolicy = "responsive",
   className,
   t,
 }: CardImageProps & { readonly t: TFunction }) {
@@ -112,7 +116,11 @@ function ImageContent({
           <img
             key={source.src}
             src={source.src}
-            srcSet={source.srcSet}
+            srcSet={
+              candidatePolicy === "largest"
+                ? `${source.src} ${String(source.width)}w`
+                : source.srcSet
+            }
             sizes={sizes}
             width={source.width}
             height={source.height}
