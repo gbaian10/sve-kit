@@ -3,11 +3,9 @@
 import re
 import stat
 from dataclasses import dataclass
-from io import BytesIO
 from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
-from PIL import Image
 
 from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.contracts.snapshot import validate
@@ -109,38 +107,17 @@ class Member:
 class ImageFile:
     key: str
     url: str
-    width: int
-    height: int
     bytes: int
 
 
 @dataclass(frozen=True, repr=False)
 class Export:
-    """One manifest's JSON bytes in memory; images are re-read and checked per use."""
+    """One manifest's JSON bytes in memory; images are requirements, never read here."""
 
     root: Path
     entry: dict[str, JsonValue]
     members: tuple[Member, ...]
     images: tuple[ImageFile, ...]
-    image_root: Path | None = None
-
-    def image(self, item: ImageFile) -> bytes:
-        """Re-read actual image bytes before every upload use."""
-        raw = read_member(
-            self.root if self.image_root is None else self.image_root, item.key
-        )
-        if len(raw) != item.bytes:
-            raise ExportError("Export image differs from its manifest metadata")
-        try:
-            with Image.open(BytesIO(raw)) as decoded:
-                if decoded.format != "WEBP" or decoded.size != (
-                    item.width,
-                    item.height,
-                ):
-                    raise ExportError("Export image differs from its manifest metadata")
-        except OSError:
-            raise ExportError("Export image is not a readable WebP") from None
-        return raw
 
 
 def directory(root: Path) -> None:
@@ -192,31 +169,23 @@ def image_files(tables: dict[str, list[Row]]) -> tuple[ImageFile, ...]:
             if key in result or not IMAGE_KEY.fullmatch(key):
                 raise ExportError("Duplicate or invalid permanent image key")
             result[key] = ImageFile(
-                key,
-                url,
-                integer(variant["width"]),
-                integer(variant["height"]),
-                integer(sizes[string(row["image_id"]), size]["bytes"]),
+                key, url, integer(sizes[string(row["image_id"]), size]["bytes"])
             )
     return tuple(result[k] for k in sorted(result))
 
 
-def load_export(
-    root: Path, *, image_root: Path | None = None, verify_images: bool = True
-) -> Export:
-    """Validate the pointer's whole public closure before credentials or HTTP."""
+def load_export(root: Path) -> Export:
+    """Validate the pointer's whole public JSON closure before credentials or HTTP."""
     directory(root)
-    if image_root is not None:
-        directory(image_root)
     try:
-        return _load(root, image_root, verify_images=verify_images)
+        return _load(root)
     except ExportError:
         raise
     except ValueError, OSError, KeyError, TypeError, SchemaError:
         raise ExportError("Export validation failed") from None
 
 
-def _load(root: Path, image_root: Path | None, *, verify_images: bool) -> Export:
+def _load(root: Path) -> Export:
     path, raw, manifest = _manifest(root)
     members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
@@ -231,18 +200,13 @@ def _load(root: Path, image_root: Path | None, *, verify_images: bool) -> Export
     unique = {m.key: m for m in members}
     if set(unique) - {path + ".br"} != closure(path, manifest):
         raise ExportError("Export members differ from the manifest closure")
-    export = Export(
+    return Export(
         root,
         {k: manifest[k] for k in _ENTRY}
         | {"manifest_path": path, "manifest_sha256": digest(raw)},
         tuple(unique[k] for k in sorted(unique)),
         image_files(tables),
-        image_root,
     )
-    if verify_images:
-        for item in export.images:
-            export.image(item)
-    return export
 
 
 def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:

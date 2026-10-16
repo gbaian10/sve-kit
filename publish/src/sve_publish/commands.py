@@ -28,7 +28,7 @@ def upload_command(
     """Dry-run validates the export without credentials or network access."""
     export_dir = required_root(export_dir, "--export-dir", "SVE_EXPORT_DIR")
     try:
-        export = load_export(export_dir, verify_images=False)
+        export = load_export(export_dir)
         result = report(export)
         if execute:
             result = _execute(export, account_id, bucket, jobs)

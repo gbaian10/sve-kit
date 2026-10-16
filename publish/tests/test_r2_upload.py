@@ -40,8 +40,6 @@ from .r2_sdk_fixtures import install_mock_sdk
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from pydantic import JsonValue
     from sve_carddb.export.preview import Roots
     from sve_carddb.export.read_api import Export
@@ -256,20 +254,15 @@ def test_index_refuses_reused_or_older_versions() -> None:
         next_index(index, older)
 
 
-@pytest.mark.parametrize("target", ["blob", "image", "pointer"])
+@pytest.mark.parametrize("target", ["blob", "pointer"])
 def test_tampered_export_is_rejected_before_any_request(
     images: PublicImages, roots: Roots, target: str
 ) -> None:
     export(images, roots, step=0)
     loaded = load_export(roots.preview)
-    if target == "blob":
-        path = roots.preview / loaded.members[0].key
-    elif target == "image":
-        path = roots.preview / loaded.images[0].key
-    else:
-        path = roots.preview / POINTER
+    path = roots.preview / (loaded.members[0].key if target == "blob" else POINTER)
     raw = path.read_bytes()
-    path.write_bytes(raw[:-1] if target == "image" else raw[:-1] + b"!")
+    path.write_bytes(raw[:-1] + b"!")
     with pytest.raises(ExportError):
         load_export(roots.preview)
 
@@ -504,21 +497,3 @@ def test_index_cas_race_preserves_the_concurrent_index(
         upload(store, load_export(roots.preview))
     assert state.objects[INDEX].etag == '"concurrent"'
     assert state.objects[INDEX].raw == original_index.raw
-
-
-def test_upload_reads_images_from_explicit_separate_root(
-    images: PublicImages, roots: Roots, tmp_path: Path
-) -> None:
-    import shutil  # ruff: ignore[import-outside-top-level] -- split the synthetic producer's image and text outputs
-
-    export(images, roots, step=0)
-    original = load_export(roots.preview)
-    image_root = tmp_path / "display-images"
-    image_root.mkdir()
-    shutil.move(str(roots.preview / "images"), image_root / "images")
-    separate = load_export(roots.preview, image_root=image_root)
-    assert separate.members == original.members
-    assert separate.images == original.images
-    assert all(separate.image(item) for item in separate.images)
-    with pytest.raises(ExportError):
-        load_export(roots.preview)

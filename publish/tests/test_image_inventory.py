@@ -2,6 +2,7 @@
 
 import json
 import shutil
+from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -91,7 +92,7 @@ def test_snapshot_needs_no_bitmap_root_and_reads_no_remote_image(
     upload_images(store, image_description(roots.preview), roots.preview)
     shutil.rmtree(roots.preview / "images")
     no_bitmaps(monkeypatch)
-    loaded = load_export(roots.preview, verify_images=False)
+    loaded = load_export(roots.preview)
     start = len(state.operations)
     assert upload(store, loaded)["index"] == "updated"
     assert not any(key.startswith("images/") for _, key, _ in state.operations[start:])
@@ -137,9 +138,7 @@ def test_snapshot_refuses_missing_or_inexact_image_claims(
             }
         )
         upload_images(store, description, roots.preview)
-        loaded = load_export(roots.preview, verify_images=False)
-        from dataclasses import replace  # ruff: ignore[import-outside-top-level] -- use an otherwise verified snapshot with a later image requirement
-
+        loaded = load_export(roots.preview)
         loaded = replace(
             loaded, images=tuple(replace(i, url=i.key + "?v=3") for i in loaded.images)
         )
@@ -152,7 +151,7 @@ def test_snapshot_refuses_missing_or_inexact_image_claims(
         state.objects[INVENTORY] = Stored(
             inventory(rows).content(), '"test"', INDEX_HEADERS
         )
-        loaded = load_export(roots.preview, verify_images=False)
+        loaded = load_export(roots.preview)
     with pytest.raises(
         ExportError, match=r"Images are not ready|older images|bytes differ"
     ):
@@ -198,14 +197,11 @@ def test_failed_overwrite_leaves_no_false_ready_claim_and_same_input_recovers(
             for row in read_inventory(state.objects[INVENTORY]).objects
         )
         with pytest.raises(ExportError, match="not ready"):
-            upload(store, load_export(roots.preview, verify_images=False))
+            upload(store, load_export(roots.preview))
     state.fail_key = None
     upload_images(store, description, roots.preview)
     assert read_inventory(state.objects[INVENTORY]).objects == description.objects
-    assert (
-        upload(store, load_export(roots.preview, verify_images=False))["index"]
-        == "updated"
-    )
+    assert upload(store, load_export(roots.preview))["index"] == "updated"
 
 
 def test_version_only_change_writes_no_image_and_preserves_unrelated_rows(
@@ -312,7 +308,7 @@ def test_image_gc_removes_claim_before_failed_delete_and_finds_orphans_on_rerun(
     export(images, roots, step=0)
     description = image_description(roots.preview)
     upload_images(store, description, roots.preview)
-    upload(store, load_export(roots.preview, verify_images=False))
+    upload(store, load_export(roots.preview))
     stray = description.objects[0].model_copy(update={"key": "images/card_s/999.webp"})
     state.objects[stray.key] = Stored(b"stray", '"stray"', {})
     state.objects[INVENTORY] = Stored(
@@ -336,7 +332,7 @@ def test_snapshot_gc_never_reads_or_lists_images_or_inventory(
     store, state, _ = remote
     export(images, roots, step=0)
     upload_images(store, image_description(roots.preview), roots.preview)
-    upload(store, load_export(roots.preview, verify_images=False))
+    upload(store, load_export(roots.preview))
     state.objects[INVENTORY] = Stored(b"damaged", '"bad"', {})
     for item in image_description(roots.preview).objects:
         del state.objects[item.key]
@@ -398,7 +394,7 @@ def test_image_gc_refuses_incomplete_retention_and_failed_invalidation(
     export(images, roots, step=0)
     description = image_description(roots.preview)
     upload_images(store, description, roots.preview)
-    upload(store, load_export(roots.preview, verify_images=False))
+    upload(store, load_export(roots.preview))
     first = description.objects[0]
     stray = first.model_copy(update={"key": "images/card_s/999.webp"})
     state.objects[stray.key] = Stored(b"stray", '"stray"', {})
