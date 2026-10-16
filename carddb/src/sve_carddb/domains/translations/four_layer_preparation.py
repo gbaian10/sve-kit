@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class PreparedField:
     derived: DerivedField
-    interfaces: tuple[Projection | None, ...] = ()
+    interfaces: tuple[Projection | None, ...]
 
     def bind(self, ordinal: int) -> tuple[Frame, SourceBinding]:
         """Build preparation identities from the independently derived source evidence."""
@@ -31,7 +31,7 @@ class PreparedField:
             self.derived.field.parts[ordinal],
             normalizer_version=PREPARATION_VERSION,
         )
-        interface = self.interfaces[ordinal] if self.interfaces else None
+        interface = self.interfaces[ordinal]
         if interface is not None:
             frame = frame.model_copy(update={"projection": interface})
         return frame, binding

@@ -773,7 +773,7 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 `ChoiceContext` 僅是 PortType，Port 仍只有 name、type、source_role、scope，
 不是 LeafType。選項的來源連接必須另由完整來源重建，型別本身不授予可執行資格。
 
-B05 僅描述同一片段、同能力中已有唯一在前 intro、常數 choice_mode_count 與
+常數選項接口僅描述同一片段、同能力中已有唯一在前 intro、常數 choice_mode_count 與
 按印刷次序連續 1..K 的 choice_index。沿既有完整欄位的 choice 守衛，所有 intro／序號
 均須已具 typed 葉且無來源問題；跨片段、孤兒、歧義及缺卡名／數值前置者不加接口。
 `PreparedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v3 frame／binding
@@ -785,7 +785,7 @@ B05 僅描述同一片段、同能力中已有唯一在前 intro、常數 choice
 值、位置與 target 形狀保持不變，原 pending 語義仍 pending；這是 I，不能當嚴格 V 搬移。
 不新增 bound mode、跨行或選項歷史關係。
 
-B01 僅接受完整的本物件具名指示物容量句：明示「これに」、具名種類、
+指示物容量僅接受本物件具名指示物的完整容量句：明示「これに」、具名種類、
 「カウンターは」、常數與「個まで置ける。」。容量為 `Nat/counter_capacity`，
 0..9007199254740991，沿數字的精確 raw occurrence，不是 counter_amount 或 threshold。
 具名種類保留字面，`term:object.counter` 以既有 `Concept/rule_term` 閉域引用，
