@@ -135,6 +135,19 @@ def test_filter_in_payment_line_is_not_another_payment() -> None:
     ) == 1
 
 
+def test_payment_composes_with_a_choice_interface_in_one_part() -> None:
+    raw = "【土の秘術】下記から１つチョイスする。【１】仮。【２】別。"
+    catalog = classifier(
+        (Term("term:ability.earth_rite", "ability", "土の秘術"),),
+        ("bracket_choice_index", "suffix_unit_items"),
+    )
+    prepared = derive_preparation(raw, source(raw), catalog)
+    frame, binding = prepared.bind(0)
+    prepared.verify(raw, catalog, frame, binding)
+    assert "earth_rite_amount" in {s.role for s in frame.leaf_schema.slots}
+    assert [p.scope for p in frame.projection.imports] == ["choice_1", "choice_2"]
+
+
 @pytest.mark.parametrize(
     ("condition", "roles", "values"),
     [
