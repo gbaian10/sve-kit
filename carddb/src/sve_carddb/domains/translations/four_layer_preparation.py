@@ -3,13 +3,16 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner
+from sve_carddb.domains.translations.four_layer_choices import constant_choice_interface
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import DOMAIN, DOMAIN_CODE
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
+from sve_carddb.domains.translations.four_layer_n2_counters import prepare_capacities
 from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VERSION
 
 if TYPE_CHECKING:
-    from sve_carddb.contracts.four_layer import Frame, Target
+    from sve_carddb.contracts.four_layer import Frame, Projection, Target
     from sve_carddb.contracts.source_binding import SourceBinding, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import Classifier
     from sve_carddb.domains.translations.four_layer_derivation import DerivedField
@@ -19,14 +22,19 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class PreparedField:
     derived: DerivedField
+    interfaces: tuple[Projection | None, ...] = ()
 
     def bind(self, ordinal: int) -> tuple[Frame, SourceBinding]:
         """Build preparation identities from the independently derived source evidence."""
-        return self.derived.recognized[ordinal].bind_version(
+        frame, binding = self.derived.recognized[ordinal].bind_version(
             self.derived.field.source,
             self.derived.field.parts[ordinal],
             normalizer_version=PREPARATION_VERSION,
         )
+        interface = self.interfaces[ordinal] if self.interfaces else None
+        if interface is not None:
+            frame = frame.model_copy(update={"projection": interface})
+        return frame, binding
 
     def verify(
         self,
@@ -81,5 +89,23 @@ def derive_preparation(
     *,
     context: CardContext | None = None,
 ) -> PreparedField:
-    """Prepare v3 without changing production derivation or enabling new source families."""
-    return PreparedField(derive_source(raw, source, classifier, context=context))
+    """Apply sealed source families only through the explicit preparation entry."""
+    derived = prepare_capacities(
+        raw, derive_source(raw, source, classifier, context=context), classifier
+    )
+    interfaces = tuple(
+        constant_choice_interface(
+            raw, part, found, classifier.candidate(raw, original).slots
+        )
+        if part.source_span.role == "body"
+        and not found.issues
+        and {"choice_mode_count", "choice_index"}
+        <= {slot.role for slot in found.schema.slots}
+        and source.field in {"effect", "section"}
+        and isinstance(source.owner, (FaceRevisionOwner, PrintingFaceOwner))
+        else None
+        for part, original, found in zip(
+            derived.field.parts, derived.original.parts, derived.recognized, strict=True
+        )
+    )
+    return PreparedField(derived, interfaces)
