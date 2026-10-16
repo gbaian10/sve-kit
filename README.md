@@ -70,8 +70,10 @@ and digital modules have dedicated subpackages. Pure parsers and build
 infrastructure remain independent of authored domain loaders.
 
 R2 upload and remote collection live in the separate [publish project](publish/README.md),
-using `sve-publish upload` and `sve-publish gc`. Upload defaults to an offline dry-run;
-formal release gates remain unimplemented (#34).
+using `sve-publish images upload` / `sve-publish images gc` for card images and
+`sve-publish snapshot upload` / `sve-publish snapshot gc` for snapshot JSON.
+Both upload commands default to an offline dry-run; formal release gates remain
+unimplemented (#34).
 
 The authoritative game server (`sim/server/`) is planned and does not exist yet.
 The engine, scenario runner, and web client already exist; their presence does
