@@ -176,9 +176,9 @@ candidates_hash=H(candidates)。每次重建完整集合並驗各成員的當前
 集合增減、目標被移到別卡／別區或不再可展示才需重新採納；不能省略競爭者或以 caller 自選清單驗過。
 Decklog 不可用不等於不可展示；同一版次的無關來源修訂不改候選集合，也不使覆寫失效。
 
-不保存 selection_basis 或重複的 scope_hash，不將 selector_version、一般版 policy_hash 或程式版號當 freshness 條件。
+不保存 selection_basis 或重複的 scope_hash，不將 selector_version 或程式版號當 freshness 條件。
 人工選擇是「此卡此區預設這一版」，與機械 selector 怎麼算分開。
-一般版清單核可、selector 修正、無關卡包新增都不要求重簽。preview 轉正式時重驗同卡同區集合與目標可展示性，
+selector 修正或無關卡包新增都不要求重簽。preview 轉正式時重驗同卡同區集合與目標可展示性，
 集合相同即可沿用；若本卡新增候選則 stale，不只因展示範圍的名稱改變就失效。
 人工 override 可以選特殊版，不必偽造「一般」證據；投影 method=override，不標 lowest_rarity。
 
