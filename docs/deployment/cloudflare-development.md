@@ -53,7 +53,7 @@ Custom domain、r2.dev 停用後的回應與實際入口保護，仍需維護者
 ## 3. 維護者建立單桶 token 與本機 shell
 
 1. 在 R2 token 管理入口選 Object Read & Write，只包含開發桶，不選全部 bucket／帳號管理。
-   讀取權限用來驗回 bytes／hash／metadata。控制台權限項目與限制能力未驗證，需維護者實測。
+   讀取權限用來取得控制清單、JSON 與回收清單。控制台權限項目與限制能力未驗證，需維護者實測。
 2. 保存產生的 S3 access key ID 與 secret access key；與 account ID、Wrangler 部署登入分開。
    工具不使用 Cloudflare Bearer token，也不讀 AWS profile 或秘密檔。
 3. key pair 只留本人本機，不進 git、CI、shell 設定檔、`mise.local.toml`、前端或分享記錄。
@@ -183,78 +183,61 @@ SPA 設定未找到靜態檔案回 index.html；維護者登入後用
 及 [從 Pages 遷移](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/)。
 本文不依賴 Pages project、Pages Functions 或 pages.dev 別名。
 
-## 6. 快照 2.0 的離線對帳
+## 6. 分開的卡圖與快照離線對帳
 
-R2 只收快照 2.0。上傳來源就是 `snapshot export-offline` 的公開匯出根（`--preview-dir`）：
-命令讀 `snapshots/preview/current.json`，只選該清單引用的公開 JSON 與卡圖，
-不讀私有目錄（`--private-dir` 的 inputs、reports、媒體狀態）、建置 bundle、圖片庫或配方快取。
-不另做凍結包，也沒有帳本、checkpoint 或預留號。資料版號仍是 `preview-…`，
-寫進開發桶 index 的是開發用 entry，不是正式發布；正式發布仍待 #34 的閘門。
-詳細流程見 [R2 2.0 上傳](../../publish/README.md)。
-
-`EXPORT_DIR` 由維護者填入剛完成的匯出根，不寫入 repo。
+先成功執行 `sve-carddb images build-index`，取得公開圖片根與 stdout `image_upload`；文字匯出釘住同批的私有圖片索引。
+`IMAGE_UPLOAD` 指向公開 `image-upload/<sha256>.json`，`IMAGE_DIR` 為圖片根，`EXPORT_DIR` 為文字匯出根，均由維護者填入。
+卡圖描述只含公開 key、事件版本、SHA-256、bytes 與 producer 身分；不把私有圖片索引或媒體狀態上傳。
 
 ```bash
-uv --directory carddb sync --locked
-uv --directory publish run sve-publish upload \
+uv --directory publish run sve-publish images upload \
+  --image-upload "$IMAGE_UPLOAD" --image-dir "$IMAGE_DIR" --dry-run
+uv --directory publish run sve-publish snapshot upload \
   --export-dir "$EXPORT_DIR" --dry-run
 ```
 
-dry-run 在本機驗證指標、清單 hash、Schema、每個分片的 hash／長度、`.br` 解碼、
-reader 重接所需的引用閉包，以及每張卡圖的 bytes、WebP 格式與尺寸，再列出 JSON／卡圖的檔數與 bytes。
-`.br` 沒有獨立 hash，解碼核對其內容等於已驗證的 raw bytes，不重壓；`.br` 使用 lockfile 的 Python `brotli`。
-離線數字是本機候選，遠端已有多少未知。dry-run 不讀憑證、不建立 HTTP client、不寫任何檔案。
+兩種 dry-run 都完全離線，不讀憑證、不開網路、不讀 bitmap。卡圖只驗描述；快照照常驗 pointer、manifest、
+JSON hash／大小／Schema、br 解碼、reader join 與引用閉包，列出圖片需求，但不宣稱遠端已備妥。
+`--export-dir` 可讀 `SVE_EXPORT_DIR`；完整操作見 [publish](../../publish/README.md)。
 
 ## 7. 當次授權與上傳
 
 所有真實 Cloudflare 請求都由維護者當次同意後親手執行，agent 與 CI 不代跑。
-核對目標桶、當次 key pair 與離線數字後，使用同一個匯出根：
+核對目標桶、當次 key pair 與離線數字後，依序執行；僅文字更新可省圖片步驟：
 
 ```bash
-uv --directory publish run sve-publish upload \
+uv --directory publish run sve-publish images upload \
+  --image-upload "$IMAGE_UPLOAD" --image-dir "$IMAGE_DIR" \
+  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" --jobs 16 --execute
+uv --directory publish run sve-publish snapshot upload \
   --export-dir "$EXPORT_DIR" \
-  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
-  --jobs 16 --skip-cdn-verify --execute
+  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" --jobs 16 --execute
 ```
 
-上傳依序做：
+圖片上傳讀 `_publish/images.json`，只上傳新增或變動圖，不逐件 GET／HEAD／讀回。覆寫前先條件移除清單舊列，
+所有候選成功才登錄新列；同 bytes 升版只改清單。同版本不同 bytes、版本倒退與壞清單停止，首次沒有清單整批重傳。
+快照只核對遠端圖片的精確版本／bytes，仍比對與讀回 JSON，最後條件更新版本索引。
+日常發布不做全量 CDN 讀取；圖片或快取規則變更時另由維護者驗收完整帶 v URL，不把 origin PUT 當 CDN freshness 證據。
 
-1. 讀遠端 `snapshots/versions/index.json`，決定新的 index：首次 revision=1、previous=null；
-   之後 revision 加一，previous 是原本的 current。已是 current 就不改 index；
-   同一 data_version 換了清單、或比 current 舊的匯出，直接拒絕。
-2. 先卡圖、後 JSON，各階段以有上限的工作池並行處理物件；卡圖全部讀回完成才開始 JSON。
-   每個物件先 GET 遠端：bytes 與標頭都相同就算已讀回；否則條件 PUT
-   （新 key 用 `If-None-Match: *`，覆寫卡圖用 `If-Match`），再 GET 一次比對。
-   內容定址 JSON 已存在但不同時停止，不覆寫。
-3. CDN 驗證：每個帶 `?v=` 的卡圖完整 URL 各做兩次普通 GET。開發環境在 Access 之後，
-   加 `--skip-cdn-verify` 略過這一步、改以瀏覽器檢查；來源端讀回照常執行，輸出會標示已略過。
-4. 確認 index 沒被改動後，以條件寫入更新 index，再讀回確認。
+`_publish/images.json` 是桶內公開卡圖的成功紀錄，以 `application/json`、`no-store` 保存。
+Dev Worker 白名單不放行 `/cdn-preview/_publish/images.json`，登入後仍須 404；publisher 由 S3 讀寫。
+正式環境若採 R2 自訂網域直出，接受此清單可匿名讀取，底線前綴不構成權限隔離。
 
-`--jobs N` 設定工作池上限，預設 16、最小 1；`--jobs 1` 為循序處理。
-條件或傳輸失敗就停止接納新寫入，等待已接納的操作完成後回報失敗物件，
-不退回無條件 PUT，也不重送寫入；此時不更新 index。
-已通過停止檢查的 PUT 仍可能寫入並完成讀回，之後檢查到停止的物件不再進入 PUT；失敗不會回滾已完成物件。
-修正原因後重跑同一個命令，只會補傳缺少或不同的檔案。沒有變動的重跑不會發出任何 PUT。
-GC 為另外執行的 `sve-publish gc`，不在上傳後自動刪除，也不要在上傳期間執行。
+## 8. 執行成本、回收與恢復
 
-## 8. 執行成本與恢復
+未變卡圖不讀本機檔、不逐圖網路請求，同輸入成功重跑零 PUT。快照讀清單一次並在提交前重驗，
+JSON 的逐檔比較與讀回仍存在。`--jobs` 預設 16，I/O timeout 30 秒，進度在 stderr、摘要在 stdout。
+失敗先停止並用同一圖片描述及未變動輸出根重跑；清單缺列時快照會拒絕，已完成候選可能重傳。
+producer 的私有 `media-state.json` 與備份必須跨次保存，不由遠端清單重建歷史高水位。
 
-一般上傳每個卡圖與 JSON 各一次 GET；有變動的檔案另加一次 PUT 與一次讀回 GET。
-不略過 CDN 驗證時，每個卡圖 URL 再加兩次 CDN GET。實際網路、計費、Access 與快取行為
-須另行實測，不能把離線檢查當作部署驗收。
+圖片建置、上傳與 GC 都不能並行。固定順序是圖片成功 → 快照成功 → 視需要 GC，兩次上傳間不要回收。
+`sve-publish snapshot gc` 僅列舉／刪除 JSON，保留 current＋previous；
+`sve-publish images gc` 只處理五種卡圖 prefix，保留 current，刪前先移除清單列，亦以 LIST 找中斷孤兒。
+兩者 dry-run 都會連遠端、需要憑證，詳細恢復與限制見 publish。
 
-每段 I/O timeout 為 30 秒，沒有全程期限。失敗時直接重跑同一個匯出根即可；
-匯出若在覆寫卡圖途中中斷，匯出根不會留下指標，須先重跑匯出再上傳。
-`--private-dir` 的 `media-state.json` 記錄卡圖版本的高水位與最新比較狀態，
-請隨既有備份保存；遺失後版本會從 1 重來，可能撞到已被快取的舊 URL。
-GC 的保留規則與執行方式見上述上傳文件。
-
-執行進度寫到 stderr，每完成 100 個物件或約 5 秒顯示完成數／總數與寫入數，
-各階段開始與結束也會回報；stdout 維持最後一份 JSON 摘要，dry-run 不增加進度輸出。
-首次上傳時數萬張卡圖都是新物件，每個都要 GET、條件 PUT 與讀回 GET，
-循序處理可能耗時數小時；預設 16 個 worker 可重疊等待網路回應的時間，
-實際時間仍受頻寬、延遲、R2 限流與本機驗證影響，不能保證 16 倍加速，需由維護者實測。
-離線對帳發生在工作池開始前；未略過的 CDN 驗證仍循序執行，`--jobs` 不加速該步驟。
+維護者的 dev 演練應記錄首次接管與同輸入重跑的耗時／PUT 數、無圖片掛載的文字上傳、
+少量合成圖覆寫／GC 中斷後的同輸入恢復、清單條件寫、登入後控制 key 404、
+未登入 Access 拒絕，以及 query 分離與 browser／SW。離線測試不代替實際部署驗收。
 
 ## 9. 每個入口的未登入驗法與預期結果
 

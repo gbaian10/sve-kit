@@ -1,4 +1,4 @@
-"""Loopback-only S3/CDN server with real HTTP and independent SigV4 checking."""
+"""Loopback-only S3 server with real HTTP and independent SigV4 checking."""
 
 import hashlib
 import hmac
@@ -38,9 +38,7 @@ class ServerState:
     fail_put: int | None = None
     fail_key: str | None = None
     delete_status: int | None = None
-    cdn_status: int | None = None
     page_size: int = 2
-    cdn: bool = False
     error_body: bytes = b"synthetic-secret synthetic-access Signature=DO-NOT-LOG"
 
 
@@ -135,14 +133,10 @@ class Handler(BaseHTTPRequestHandler):
                     {k: v for k, v in headers.items() if k != "authorization"},
                 )
             )
-            cdn_request = state.cdn or self.headers.get("Host") == "cdn.invalid"
-            if not cdn_request and headers.get(
-                "authorization"
-            ) != reference_authorization(self.command, self.path, headers, raw):
+            if headers.get("authorization") != reference_authorization(
+                self.command, self.path, headers, raw
+            ):
                 self.respond(403, state.error_body)
-                return
-            if cdn_request and state.cdn_status is not None:
-                self.respond(state.cdn_status, state.error_body)
                 return
             if state.status is not None:
                 self.respond(
@@ -152,11 +146,7 @@ class Handler(BaseHTTPRequestHandler):
                 )
                 return
             split = urlsplit(self.path)
-            key = (
-                unquote(split.path).removeprefix("/" + BUCKET + "/")
-                if not cdn_request
-                else split.path.lstrip("/")
-            )
+            key = unquote(split.path).removeprefix("/" + BUCKET + "/")
             if self.command == "GET" and "list-type" in parse_qs(split.query):
                 self.listing(parse_qs(split.query))
                 return
@@ -243,9 +233,18 @@ class Loopback(httpx.BaseTransport):
         self.inner = httpx.HTTPTransport()
         self.lose_next_put = False
         self.lose_key: str | None = None
+        self.reject_put_key: str | None = None
+        self.reject_put_number = 0
+        self.selected_puts = 0
 
     @override
     def handle_request(self, request: httpx.Request) -> httpx.Response:
+        if request.method == "PUT" and request.url.path.endswith(
+            "/" + (self.reject_put_key or "\0")
+        ):
+            self.selected_puts += 1
+            if self.selected_puts == self.reject_put_number:
+                return httpx.Response(412, stream=httpx.ByteStream(b""))
         target = self.root + request.url.raw_path.decode()
         local = httpx.Request(
             request.method, target, headers=request.headers, content=request.content

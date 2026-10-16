@@ -228,8 +228,10 @@ jobs:
           UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/publish-wheel-env" uv sync --project ./publish --locked --no-default-groups --no-install-project --no-install-package sve-carddb
           uv pip install --no-deps --python "${RUNNER_TEMP}/publish-wheel-env/bin/python" "${RUNNER_TEMP}"/carddb-wheel/*.whl "${RUNNER_TEMP}"/publish-wheel/*.whl
           "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" --help > /dev/null
-          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" upload --help > /dev/null
-          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" gc --help > /dev/null
+          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" images upload --help > /dev/null
+          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" images gc --help > /dev/null
+          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" snapshot upload --help > /dev/null
+          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" snapshot gc --help > /dev/null
       - name: pytest (coverage gate for the explicit test scope)
         id: tests
         env:

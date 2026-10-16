@@ -3,11 +3,9 @@
 import re
 import stat
 from dataclasses import dataclass
-from io import BytesIO
 from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
-from PIL import Image
 
 from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.contracts.snapshot import validate
@@ -20,6 +18,12 @@ from sve_carddb.core.json import (
     object_value,
     parse,
     string,
+)
+from sve_carddb.export.image_upload import (
+    IMAGE_KEY,
+    ImageInventory,
+    ImageObject,
+    ImageUpload,
 )
 from sve_carddb.export.media_urls import display_url
 from sve_carddb.export.publication import require_preview
@@ -41,6 +45,9 @@ __all__ = [
     "Export",
     "ExportError",
     "ImageFile",
+    "ImageInventory",
+    "ImageObject",
+    "ImageUpload",
     "Member",
     "array",
     "canonical",
@@ -51,8 +58,10 @@ __all__ = [
     "image_files",
     "integer",
     "load_export",
+    "load_image_upload",
     "object_value",
     "parse",
+    "read_image_inventory",
     "read_index",
     "read_member",
     "retained_manifest",
@@ -63,9 +72,6 @@ __all__ = [
 POINTER = "snapshots/preview/current.json"
 INDEX = "snapshots/versions/index.json"
 JSON_KEY = re.compile(r"snapshots/(?:blobs|manifests)/[0-9a-f]{64}\.json(?:\.br)?\Z")
-IMAGE_KEY = re.compile(
-    r"images/(?:card_[sml]|art_[sm])/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp\Z"
-)
 _ENTRY = (
     "data_version",
     "published_at",
@@ -101,38 +107,17 @@ class Member:
 class ImageFile:
     key: str
     url: str
-    width: int
-    height: int
     bytes: int
 
 
 @dataclass(frozen=True, repr=False)
 class Export:
-    """One manifest's JSON bytes in memory; images are re-read and checked per use."""
+    """One manifest's JSON bytes in memory; images are requirements, never read here."""
 
     root: Path
     entry: dict[str, JsonValue]
     members: tuple[Member, ...]
     images: tuple[ImageFile, ...]
-    image_root: Path | None = None
-
-    def image(self, item: ImageFile) -> bytes:
-        """Re-read actual image bytes before every upload use."""
-        raw = read_member(
-            self.root if self.image_root is None else self.image_root, item.key
-        )
-        if len(raw) != item.bytes:
-            raise ExportError("Export image differs from its manifest metadata")
-        try:
-            with Image.open(BytesIO(raw)) as decoded:
-                if decoded.format != "WEBP" or decoded.size != (
-                    item.width,
-                    item.height,
-                ):
-                    raise ExportError("Export image differs from its manifest metadata")
-        except OSError:
-            raise ExportError("Export image is not a readable WebP") from None
-        return raw
 
 
 def directory(root: Path) -> None:
@@ -184,29 +169,23 @@ def image_files(tables: dict[str, list[Row]]) -> tuple[ImageFile, ...]:
             if key in result or not IMAGE_KEY.fullmatch(key):
                 raise ExportError("Duplicate or invalid permanent image key")
             result[key] = ImageFile(
-                key,
-                url,
-                integer(variant["width"]),
-                integer(variant["height"]),
-                integer(sizes[string(row["image_id"]), size]["bytes"]),
+                key, url, integer(sizes[string(row["image_id"]), size]["bytes"])
             )
     return tuple(result[k] for k in sorted(result))
 
 
-def load_export(root: Path, *, image_root: Path | None = None) -> Export:
-    """Validate the pointer's whole public closure before credentials or HTTP."""
+def load_export(root: Path) -> Export:
+    """Validate the pointer's whole public JSON closure before credentials or HTTP."""
     directory(root)
-    if image_root is not None:
-        directory(image_root)
     try:
-        return _load(root, image_root)
+        return _load(root)
     except ExportError:
         raise
     except ValueError, OSError, KeyError, TypeError, SchemaError:
         raise ExportError("Export validation failed") from None
 
 
-def _load(root: Path, image_root: Path | None) -> Export:
+def _load(root: Path) -> Export:
     path, raw, manifest = _manifest(root)
     members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
@@ -221,17 +200,13 @@ def _load(root: Path, image_root: Path | None) -> Export:
     unique = {m.key: m for m in members}
     if set(unique) - {path + ".br"} != closure(path, manifest):
         raise ExportError("Export members differ from the manifest closure")
-    export = Export(
+    return Export(
         root,
         {k: manifest[k] for k in _ENTRY}
         | {"manifest_path": path, "manifest_sha256": digest(raw)},
         tuple(unique[k] for k in sorted(unique)),
         image_files(tables),
-        image_root,
     )
-    for item in export.images:
-        export.image(item)
-    return export
 
 
 def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
@@ -324,3 +299,27 @@ def current_image_keys(
 ) -> set[str]:
     """Images follow current only; callers supply verified retained payload bytes."""
     return {item.key for item in image_files(read_snapshot(manifest, payloads))}
+
+
+def load_image_upload(path: Path) -> ImageUpload:
+    """Read a content-addressed producer description without opening any bitmap."""
+    try:
+        directory(path.parent)
+        raw = read_member(path.parent, path.name)
+        result = ImageUpload.model_validate_json(raw)
+    except ValueError, OSError:
+        raise ExportError("Invalid image upload description") from None
+    if raw != result.content() or path.name != digest(raw)[7:] + ".json":
+        raise ExportError("Invalid image upload description")
+    return result
+
+
+def read_image_inventory(raw: bytes) -> ImageInventory:
+    """Reject damaged or unknown control metadata instead of treating it as empty."""
+    try:
+        result = ImageInventory.model_validate_json(raw)
+    except ValueError:
+        raise ExportError("Invalid image upload inventory") from None
+    if raw != result.content():
+        raise ExportError("Invalid image upload inventory")
+    return result

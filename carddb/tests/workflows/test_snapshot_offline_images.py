@@ -8,10 +8,11 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.core.json import array, digest, object_value, parse
+from sve_carddb.core.json import array, digest, object_value, parse, string
 from sve_carddb.domains.products import OfficialProducts, ProductIdentities
 from sve_carddb.export.image_index import MEDIA_TABLES, ImageIndex, ImagePin
 from sve_carddb.export.media import prepare_media
+from sve_carddb.export.read_api import load_image_upload
 from sve_carddb.images.assets import ImageBuild, PreviewRoots, build_regional_assets
 from sve_carddb.images.crops import load_image_crops
 from sve_carddb.images.variants import DEFAULT_RECIPE
@@ -285,6 +286,7 @@ def test_independent_image_cli_requires_initial_state_and_reuses_versions(
     assert first.exit_code == 0, repr(first.exception)
     index = next((private / "image-index").glob("*.json"))
     before = index.read_bytes()
+    assert_upload_report(output, before, first.stdout, tmp_path)
     assert_crop_report(private, index, first.stdout, tmp_path)
     report_before = (private / "image-report.json").read_bytes()
     forbid_bitmap_reads(
@@ -307,3 +309,21 @@ def test_independent_image_cli_requires_initial_state_and_reuses_versions(
     first = runner.invoke(app, [*arguments, "--initial"])
     assert first.exit_code != 0
     assert "--initial requires an absent media-state.json" in str(first.exception)
+
+
+def assert_upload_report(
+    output: Path, index_bytes: bytes, stdout: str, tmp_path: Path
+) -> None:
+    description_path = Path(
+        string(object_value(parse(stdout.encode()))["image_upload"])
+    )
+    description = load_image_upload(description_path)
+    assert description.image_index_sha256 == digest(index_bytes)
+    assert description.revision == 1
+    assert len(description.objects) == len(list(output.rglob("*.webp")))
+    for item in description.objects:
+        raw = (output / item.key).read_bytes()
+        assert digest(raw) == item.sha256
+        assert len(raw) == item.bytes
+        assert item.version == 1
+    assert str(tmp_path) not in description.content().decode()

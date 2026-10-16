@@ -7,7 +7,6 @@ from sve_carddb.export.read_api import (
     INDEX,
     ExportError,
     canonical,
-    digest,
     integer,
     object_value,
     string,
@@ -15,7 +14,8 @@ from sve_carddb.export.read_api import (
 )
 from sve_carddb.export.read_api import read_index as read_index_bytes
 
-from sve_publish.headers import IMAGE_HEADERS, INDEX_HEADERS, member_headers
+from sve_publish.headers import INDEX_HEADERS, member_headers
+from sve_publish.inventory import INVENTORY, require_images
 from sve_publish.parallel import UploadObject, UploadPool
 
 if TYPE_CHECKING:
@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from sve_carddb.export.read_api import Export
 
     from sve_publish.adapter import R2Store, Stored
-    from sve_publish.freshness import CDNFreshness
 
 
 def read_index(remote: Stored | None) -> dict[str, JsonValue] | None:
@@ -79,7 +78,6 @@ def _instant(value: JsonValue) -> tuple[str, str]:
 def upload(
     store: R2Store,
     export: Export,
-    cdn: CDNFreshness | None,
     *,
     jobs: int = 16,
     progress: Callable[[str], None] | None = None,
@@ -89,19 +87,15 @@ def upload(
         raise ExportError("Upload jobs must be at least 1")
     remote = store.get(INDEX)
     index = next_index(read_index(remote), export.entry)
-    pool = UploadPool(store, jobs, len(export.images) + len(export.members), progress)
-    digests = pool.sync(
-        UploadObject(item.key, partial(export.image, item), IMAGE_HEADERS, True)
-        for item in export.images
-    )
+    images = store.get(INVENTORY)
+    require_images(images, export.images)
+    pool = UploadPool(store, jobs, len(export.members), progress)
     pool.sync(
-        UploadObject(
-            member.key, partial(bytes, member.raw), member_headers(member), False
-        )
+        UploadObject(member.key, partial(bytes, member.raw), member_headers(member))
         for member in export.members
     )
-    if cdn is not None:
-        _verify_cdn(cdn, export, digests)
+    if store.get(INVENTORY) != images:
+        raise ExportError("Image inventory changed during snapshot upload")
     if index is not None:
         _commit(store, remote, index)
     final = read_index(store.get(INDEX))
@@ -110,20 +104,11 @@ def upload(
     return {
         "mode": "execute",
         "written_files": pool.written,
-        "unchanged_files": len(export.images) + len(export.members) - pool.written,
+        "unchanged_files": len(export.members) - pool.written,
         "index": "unchanged" if index is None else "updated",
         "index_revision": final["revision"],
-        "cdn_verification": "skipped" if cdn is None else "verified",
+        "cdn_verification": "not_checked",
     }
-
-
-def _verify_cdn(cdn: CDNFreshness, export: Export, digests: dict[str, str]) -> None:
-    for item in export.images:
-        # A second ordinary GET checks what the first one left in the cache.
-        for _ in range(2):
-            raw = cdn.get(cdn.root + item.url)
-            if raw is None or digest(raw) != digests[item.key]:
-                raise ExportError("CDN full-URL verification failed")
 
 
 def _commit(store: R2Store, remote: Stored | None, index: dict[str, JsonValue]) -> None:

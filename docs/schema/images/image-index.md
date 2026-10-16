@@ -51,5 +51,15 @@ uv --directory carddb run sve-carddb images build-index --inputs /private/inputs
 並核對公開狀態、五尺寸及版本 metadata；校正核對精確的區域／URL／hash／來源 pin，不重驗圖本體。
 索引與校正來源 pins 只留在私人建置環境，不放公開根、git 或測試 artifact。
 
-上傳維持全量圖片比對；`sve-publish upload --image-dir /private/display-images` 明確指定圖片根，
-公開 JSON 根仍由 `--export-dir` 指定。文字匯出與圖片根的版本必須來自同一次成功圖片建置。
+`sve-publish images upload` 使用成功圖片描述與 `--image-dir` 的固定 key 圖片根，只比對清單並驗讀變動候選。
+`sve-publish snapshot upload --export-dir` 只讀公開 JSON 根與遠端清單；文字匯出與圖片根須使用相符的成功圖片索引。
+
+## 公開上傳交接
+
+`images build-index` 在圖片與私有版本狀態成功後，另寫公開 `image-upload/<sha256>.json`，stdout 的 `image_upload` 指向該檔。
+格式為 `sve-image-upload-v1`，包含 `image_index_sha256`、producer `revision` 與按 key 排序的 `objects`；
+每列只有公開 `key`、所屬 card/art 事件 `version`、`sha256`、`bytes`。逐檔 hash 直接取自已驗產圖資料，
+不以 media-state 的群組指紋代替，也不為交接重讀未變圖片。不含來源證據、URL 或私人路徑。
+只有成功建置的描述與未變動圖片根可交給 `sve-publish images upload`；
+公開 reader `load_image_upload` 驗內容定址與欄位，publisher 不讀私有索引或版本狀態。
+遠端清單與失敗恢復見 [publish](../../../publish/README.md)。

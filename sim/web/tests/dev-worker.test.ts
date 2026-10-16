@@ -97,6 +97,20 @@ afterEach(() => {
 })
 
 describe("development Worker", () => {
+  it.each(["GET", "HEAD"])("refuses the publication inventory via %s", async (method) => {
+    const f = fixture()
+    const response = await worker.fetch(
+      request("/cdn-preview/_publish/images.json", { method }),
+      f.env,
+      f.ctx,
+    )
+    expect(response.status).toBe(404)
+    expect(f.get).not.toHaveBeenCalled()
+    expect(f.head).not.toHaveBeenCalled()
+    expect(f.assets).not.toHaveBeenCalled()
+    expect(edgeCache.match).not.toHaveBeenCalled()
+  })
+
   it.each([
     BLOB,
     `${BLOB}.br`,

@@ -29,6 +29,7 @@ from sve_carddb.export.image_index import (
     ImageIndex,
     ImagePin,
 )
+from sve_carddb.export.image_upload import upload_description
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.media_urls import image_path
 from sve_carddb.export.preview import Roots
@@ -400,11 +401,15 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         private=True,
     )
     commit(roots, plan.state)
+    upload = upload_description(plan, digest(content)).content()
+    upload_path = "image-upload/" + digest(upload)[7:] + ".json"
+    preview.write_artifact(roots, upload_path, upload, immutable=True)
     typer.echo(
         canonical(
             {
                 "image_index": str(roots.destination(path, private=True)),
                 "written_images": written,
+                "image_upload": str(roots.destination(upload_path)),
                 "crops": {
                     "applied_source_images": diagnostics["applied_source_images"],
                     **{

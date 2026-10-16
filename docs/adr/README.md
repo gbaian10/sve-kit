@@ -28,3 +28,4 @@
 | [ADR-0014](0014-translation-validation.md) | 翻譯以當前值檢查取代核可帳本 |
 | [ADR-0015](0015-upload-from-export.md) | 上傳直接讀取匯出閉包 |
 | [ADR-0016](0016-four-layer-translation.md) | 翻譯與 DSL 共用四層來源綁定 |
+| [ADR-0017](0017-trust-image-inventory.md) | 卡圖上傳與快照分開並信任成功清單 |

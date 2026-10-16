@@ -7,7 +7,6 @@ import pytest
 from sve_carddb.export.read_api import ExportError
 
 from sve_publish.adapter import R2Store
-from sve_publish.freshness import CDNFreshness
 
 from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
@@ -77,20 +76,3 @@ def test_public_put_refuses_noncontractual_metadata(
         )
     assert KEY not in state.objects
     assert not any(op[1] == KEY for op in state.operations)
-
-
-def test_cdn_encoded_bytes_are_not_an_identity_image() -> None:
-    def handle(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(
-            200,
-            headers={"content-encoding": "gzip"},
-            stream=httpx.ByteStream(b"synthetic encoded bytes"),
-        )
-
-    with httpx.Client(transport=httpx.MockTransport(handle)) as client:
-        assert (
-            CDNFreshness("https://cdn.invalid/", client).get(
-                "https://cdn.invalid/images/card_s/1.webp?v=1"
-            )
-            is None
-        )

@@ -15,7 +15,16 @@ if TYPE_CHECKING:
     from sve_carddb.export.read_api import Export
 
 
-@pytest.mark.parametrize("command", [[], ["upload"], ["gc"]])
+@pytest.mark.parametrize(
+    "command",
+    [
+        [],
+        ["snapshot", "upload"],
+        ["snapshot", "gc"],
+        ["images", "upload"],
+        ["images", "gc"],
+    ],
+)
 def test_help_needs_no_output_roots(command: list[str]) -> None:
     assert CliRunner().invoke(app, [*command, "--help"]).exit_code == 0
 
@@ -24,7 +33,7 @@ def test_help_needs_no_output_roots(command: list[str]) -> None:
     "source", ["missing", "empty-env", "relative-env", "empty-cli", "relative-cli"]
 )
 def test_upload_rejects_invalid_root(source: str, tmp_path: Path) -> None:
-    arguments = ["upload"]
+    arguments = ["snapshot", "upload"]
     env = {}
     if source.endswith("env"):
         env["SVE_EXPORT_DIR"] = "" if source == "empty-env" else "relative"
@@ -47,14 +56,13 @@ def test_upload_root_precedence(
 ) -> None:
     selected: list[Path] = []
 
-    def capture(root: Path, *, image_root: Path | None) -> Export:
-        assert image_root is None
+    def capture(root: Path) -> Export:
         selected.append(root)
         raise ExportError("synthetic stop before reading")
 
     monkeypatch.setattr(commands, "load_export", capture)
     root = tmp_path / "export"
-    arguments = ["upload"]
+    arguments = ["snapshot", "upload"]
     if source != "env":
         arguments.extend(["--export-dir", str(root)])
     env = (
