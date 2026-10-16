@@ -1029,3 +1029,32 @@ follower／spell 兩個互斥種類。兩者都限制自己的墓場，不能以
 `executable` 固定為 false。執行證據與去重策略不放進來源 frame；
 之後補證據不能反過來改動來源連接詞或常數含義。
 BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍不在接受域。
+
+### 11.7 名稱關係、名稱片段與雙特性
+
+`four_layer_names.FAMILY` 透過明示的 `families` 入口準備 A3、A5、A9。
+名稱種類數沿共用 `name.distinct_count.objects.v1`，結果是 Nat；
+不同名選取使用 `name.selection.distinct.v1`，結果是 Bool。兩者不互換。
+相對名稱條件保存 holder／選取物件／處理結果來源，不以卡名顯示字猜接。
+公開來源入口、required 閉包與正常 renderer 使用相同的家族 registry。
+
+| 來源結構 | 新域／角色 | 實參與來源 |
+| --- | --- | --- |
+| 與本物件不同名、與選取物件或處理結果同名 | `predicate.name.relative.v1`／`name_relation` | ObjectSet 或 ReceiptId import，保存精確來源及 capture |
+| 選取的卡片各有不同名稱 | `predicate.selection.distinct_name.v1`／`selection_name_constraint` | ObjectSet import，與名稱種類數讀值分型 |
+| 名稱包含片段或有限片段 OR | `predicate.name.contains.v1`／`name_contains_filter` | 必要 CardName 引用，角色 `name_fragment`；沿既有 `card_name.any.v1` 詞條來源，不另建片段清冊 |
+| 正文兩個特性同時成立 | `predicate.traits.all2.v1`／`trait_conjunction` | `filter_trait_left`、`filter_trait_right` 各自沿 `concept.trait.v1`；kind 保留獨立引用，已辨識的 kind 葉沿用原角色 |
+
+片段來源以原始引用位置還原，不能把正規化後的名稱 placeholder 當字典查找鍵。
+完整名稱、片段條件與合作名稱不因中文顯示字相同而合併。
+片段 OR 僅登錄單一、二、四、十個來源片段的有限簽章；不提供一般布林樹或名稱集合生成。
+特性條件只接受正文連續兩個已登錄特性及 kind；三個以上特性、token header、
+token 身分與兩個 selector 擇一保持原準備結果。
+
+import 的物件及 receipt 識別字是由精確來源定位建立的準備符號，不是對戰物件或結算結果。
+holder 以同一能力的來源符號共用；離場事件主體使用 event_subject／LKI，不能冒充 selection。
+receipt 必須有同能力／分支內唯一的公開或消滅 producer；缺少或歧義時保留具名來源問題。
+特性與 kind 所需概念缺失時也保留 pending，不填入未登錄的必要引用。
+這些結構不執行名稱比對，也不授予 DSL 可執行資格。
+同名生成保留 PredicateExpr 關係，交由 emission 骨架消費；Bool 不能傳給 token 名稱參數。
+多規則名稱的唯一化或選名仍屬 unresolved lowering，不取任意第一個名稱。
