@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routeState } from "../../app/listEntryState"
 import { ToastProvider } from "../../components/ui/Toast"
-import { type CardSummary, createSnapshotClient, type SnapshotClient } from "../../data"
+import { type CardSummary, catalogOf, createSnapshotClient, type SnapshotClient } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
@@ -37,7 +37,7 @@ vi.mock("../../app/snapshot", async (original) => ({
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
 
-async function setup() {
+async function setup(pendingCandidate = false) {
   const source = createSnapshotClient("https://cdn.test", {
     cacheStorage: memoryCache(),
     fetch: (url) => {
@@ -48,25 +48,71 @@ async function setup() {
     },
   })
   await source.load()
+  let snapshot = source.snapshot()
+  if (!snapshot) throw new Error("missing synthetic snapshot")
+  const historyKey = [...snapshot.files].find(
+    ([, file]) => file["purpose"] === "history" && file["region"] === "jp",
+  )?.[0]
+  if (!historyKey) throw new Error("missing synthetic history")
+  if (pendingCandidate) {
+    const history = await source.fragments(historyKey)
+    const revision = history
+      .flatMap((part) => (part.table === "face_revision" ? part.rows : []))
+      .find((row) => row["face_id"] === "f:bp01-021")
+    if (!revision) throw new Error("missing historical synthetic revision")
+    snapshot = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((part) => ({
+        ...part,
+        rows: part.rows.map((row) =>
+          part.table === "face" && row["id"] === "f:bp01-021"
+            ? {
+                ...row,
+                current: [],
+                wording: [
+                  {
+                    region: "jp",
+                    state: "pending",
+                    display: { revision_id: null, basis: "candidates" },
+                    candidates: [
+                      { printing_id: "p:bp01-021", revision_id: revision["id"] ?? null },
+                    ],
+                    undated_printing_ids: [],
+                    common_name: null,
+                  },
+                ],
+              }
+            : row,
+        ),
+      })),
+    }
+  }
   let hold: Promise<void> | undefined
+  let historyHold: Promise<void> | undefined
+  let historyFailure = false
+  const pinnedSnapshot = snapshot
   state.client = {
     ...source,
+    snapshot: () => pinnedSnapshot,
     fragments: async (key) => {
       const pending = hold
       hold = undefined
       await pending
+      if (pendingCandidate && key === historyKey) {
+        await historyHold
+        if (historyFailure) throw new Error("synthetic candidate history unavailable")
+      }
       return source.fragments(key)
     },
   }
-  const { catalogOf } = await import("../../data")
-  const snapshot = source.snapshot()
-  if (!snapshot) throw new Error("missing synthetic snapshot")
   const catalog = catalogOf(snapshot)
-  state.order = ["p:bp01-001", "p:bp01-002", "p:bp01-003"].map((id) => {
-    const summary = catalog.summary(id)
-    if (!summary) throw new Error("missing synthetic card")
-    return summary
-  })
+  state.order = ["p:bp01-001", pendingCandidate ? "p:bp01-021" : "p:bp01-002", "p:bp01-003"].map(
+    (id) => {
+      const summary = catalog.summary(id)
+      if (!summary) throw new Error("missing synthetic card")
+      return summary
+    },
+  )
   const first = state.order[0]
   if (!first) throw new Error("missing first card")
   const rendered = await renderRoutes(
@@ -99,6 +145,16 @@ async function setup() {
   )
   return {
     ...rendered,
+    holdHistory: () => {
+      let release: () => void = () => undefined
+      historyHold = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      return release
+    },
+    failHistory: (failed: boolean) => {
+      historyFailure = failed
+    },
     holdNextRead: () => {
       let release: () => void = () => undefined
       hold = new Promise<void>((resolve) => {
@@ -179,5 +235,31 @@ describe("card navigation commits", () => {
       await h.router.navigate("/cards/BP01-003")
     })
     await screen.findByRole("heading", { name: "試作號令" })
+  })
+
+  it("commits pending-card history, type and stats with its name and text", async () => {
+    const h = await setup(true)
+    const release = h.holdHistory()
+    await userEvent.click(screen.getByRole("button", { name: "下一張" }))
+    expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
+    expect(screen.getByText("消費").parentElement).toHaveTextContent("1")
+    act(release)
+    await screen.findByRole("heading", { name: "試作魔導士" })
+    expect(screen.getByText("消費").parentElement).toHaveTextContent("4")
+    expect(screen.getByText("攻擊力").parentElement).toHaveTextContent("3")
+    expect(screen.getByText("生命值").parentElement).toHaveTextContent("3")
+    expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
+  })
+
+  it("reports failed candidate history as a target failure and retries the target", async () => {
+    const h = await setup(true)
+    h.failHistory(true)
+    await userEvent.click(screen.getByRole("button", { name: "下一張" }))
+    await screen.findByRole("heading", { name: "無法定位卡片" })
+    expect(screen.queryByText("另一版次載入失敗")).not.toBeInTheDocument()
+    h.failHistory(false)
+    await userEvent.click(screen.getByRole("button", { name: "重試" }))
+    await screen.findByRole("heading", { name: "試作魔導士" })
+    expect(screen.getByText("消費").parentElement).toHaveTextContent("4")
   })
 })

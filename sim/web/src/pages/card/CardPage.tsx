@@ -33,7 +33,6 @@ import {
   type CardSummary,
   type Catalog,
   faceBasics,
-  loadFaceCandidates,
   type ImageIndex,
   locateCard,
   type LocatedCard,
@@ -245,6 +244,7 @@ export function CardView({
   const [printingAttempt, setPrintingAttempt] = useState(0)
   const [printingCatalog, setPrintingCatalog] = useState<{
     source: Catalog
+    cardId: string
     other: Catalog | undefined
     value: Catalog
     error?: unknown
@@ -253,25 +253,29 @@ export function CardView({
     const snapshot = other.snapshot ?? client.snapshot()
     if (!snapshot || !catalog || !cardId) return
     let active = true
-    void loadFaceCandidates(client, snapshot, cardId, region)
-      .then((loaded) =>
-        cardPrintings(client, loaded, cardId, other.snapshot ? ["jp", "en"] : [region]),
-      )
-      .then(
-        (value) => {
-          if (active) setPrintingCatalog({ source: catalog, other: other.catalog, value })
-        },
-        (error: unknown) => {
-          if (active)
-            setPrintingCatalog({ source: catalog, other: other.catalog, value: catalog, error })
-        },
-      )
+    void cardPrintings(client, snapshot, cardId, other.snapshot ? ["jp", "en"] : [region]).then(
+      (value) => {
+        if (active) setPrintingCatalog({ source: catalog, cardId, other: other.catalog, value })
+      },
+      (error: unknown) => {
+        if (active)
+          setPrintingCatalog({
+            source: catalog,
+            cardId,
+            other: other.catalog,
+            value: catalog,
+            error,
+          })
+      },
+    )
     return () => {
       active = false
     }
   }, [client, catalog, cardId, region, other.snapshot, other.catalog, printingAttempt])
   const completePrintings =
-    printingCatalog?.source === catalog && printingCatalog.other === other.catalog
+    printingCatalog?.source === catalog &&
+    printingCatalog.cardId === cardId &&
+    printingCatalog.other === other.catalog
       ? printingCatalog
       : undefined
   const printings = cardId
@@ -395,7 +399,7 @@ export function CardView({
       </>
     )
   }
-  const faceCatalog = completePrintings?.value ?? catalog
+  const faceCatalog = catalog
   const views = faces.map((face, ordinal) => {
     const faceId = face["id"] as string
     const wording = faceCatalog?.index.wording(faceId, region)

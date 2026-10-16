@@ -1,7 +1,10 @@
 import { prepareImage } from "../components/card/image-loading"
 import {
+  catalogOf,
+  faceBasics,
   type ImageIndex,
   type JsonObject,
+  loadFaceCandidates,
   loadImagePage,
   type LocatedCard,
   type Row,
@@ -22,8 +25,16 @@ export async function prepareCardContent(
   language: string,
   sizes: string,
 ): Promise<CardContent> {
-  const pinned = { ...client, snapshot: () => located.snapshot }
-  const { catalog, printing } = located
+  const initial = { ...client, snapshot: () => located.snapshot }
+  const { printing } = located
+  const snapshot = await loadFaceCandidates(
+    initial,
+    located.snapshot,
+    printing.cardId,
+    printing.region,
+  )
+  const pinned = { ...client, snapshot: () => snapshot }
+  const catalog = catalogOf(snapshot)
   const resolver = sharedAnnotatedTextResolver(pinned)
   const pointers = new Map<string, JsonObject>()
   const add = (owner: JsonObject, field: string) => {
@@ -36,7 +47,7 @@ export async function prepareCardContent(
     const wording = catalog.index.wording(faceId, printing.region)
     const candidates = (wording?.["candidates"] ?? []) as Row[]
     const own = candidates.filter((candidate) => candidate["printing_id"] === printing.id)
-    const nameId = revision?.["id"] ?? own[0]?.["revision_id"]
+    const nameId = faceBasics(catalog.index, faceId, printing.region, printing.id).revision?.["id"]
     if (typeof nameId === "string") add({ kind: "face_revision", id: nameId }, "name")
     const effects = new Set<string>()
     if (revision) effects.add(stringValue(revision["id"]))
@@ -69,5 +80,5 @@ export async function prepareCardContent(
       return source ? prepareImage(source, sizes) : Promise.resolve()
     }),
   )
-  return { ...located, client: pinned, images }
+  return { ...located, snapshot, catalog, client: pinned, images }
 }
