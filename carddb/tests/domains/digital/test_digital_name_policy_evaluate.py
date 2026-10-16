@@ -25,6 +25,9 @@ from sve_carddb.domains.digital.name_policies.evaluate import (
     rule_links,
 )
 from sve_carddb.domains.digital.name_policies.records import LinkPolicy
+from sve_carddb.domains.digital.name_policies.references import reference_names
+from sve_carddb.domains.translations.inputs import Snapshot
+from sve_carddb.domains.translations.names.resolve import Names
 
 from ...support.digital_link_import_fixtures import catalogue_fixture
 from ...support.digital_name_policy_fixtures import (
@@ -487,3 +490,51 @@ def test_catalogue_rejects_duplicate_id_even_when_rows_equal(
         ValueError, match=r"^Digital catalogue repeats an ID within a page$"
     ):
         complete_inventory(sources, review_context(sources), "sv1")
+
+
+@pytest.mark.parametrize("shape", ["jp_whole", "sv1_whole", "text_span"])
+def test_reference_qualification_uses_term_source_shape_not_slug(
+    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue], shape: str
+) -> None:
+    ref = baseline.owner().name_ref
+    assert ref is not None
+    if shape == "sv1_whole":
+        ref = ref.model_copy(
+            update={
+                "parser": "translation-sv1-v1",
+                "locator": "/data/cards/0/card_name",
+            }
+        )
+    elif shape == "text_span":
+        ref = ref.model_copy(update={"locator": "/faces/0/text"})
+    raw = canonical(
+        {
+            "format": 3,
+            "kind": "translation_shard",
+            "records": [
+                {
+                    "kind": "glossary_term",
+                    "data": {
+                        "id": "term:name.synthetic_fragment",
+                        "category": "card_name",
+                        "concept_key": "name.synthetic_fragment",
+                        "source_ref": ref.model_dump(mode="json"),
+                        "source_span": {"start": 0, "end": 14}
+                        if shape == "text_span"
+                        else None,
+                        "authored_source_ja": None,
+                    },
+                }
+            ],
+        }
+    )
+    replay = Names(
+        Snapshot((("translations/glossary/concepts/001.yaml", raw, raw),)),
+        (("term:name.synthetic_fragment", "Synthetic card"),),
+    )
+    names = reference_names(replay, catalogues[0], low_confidence=True)
+    if shape == "text_span":
+        assert names == {}
+    else:
+        assert names["term:name.synthetic_fragment"].text == "合成測試名"
+        assert names["term:name.synthetic_fragment"].low_confidence

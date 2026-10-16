@@ -10,7 +10,7 @@ from sve_carddb.contracts.four_layer import (
     VocabularyReference,
 )
 from sve_carddb.core.json import canonical
-from sve_carddb.domains.translations.four_layer_labels import labels
+from sve_carddb.domains.translations.four_layer_labels import ReferenceName, labels
 
 from .test_four_layer_storage import compiled as compiled  # ruff: ignore[useless-import-alias] -- shared actual SQLite fixture
 from .test_four_layer_storage import stored as stored  # ruff: ignore[useless-import-alias] -- shared adopted parent rows
@@ -143,3 +143,47 @@ def test_vocabulary_label_requires_a_selection_or_the_requested_source_language(
     with db.transaction():
         db.update("vocabulary", {"kind": "type", "code": "follower"}, {"active": False})
     assert key not in labels(db, "zh-Hant")
+
+
+@pytest.mark.parametrize("term_low", [False, True])
+def test_official_reference_ignores_unused_choice_quality_but_keeps_term_quality(
+    stored: tuple[Database, Frame, SourceBinding], term_low: bool
+) -> None:
+    db, _, _ = stored
+    identifier = "term:name.synthetic"
+    with db.transaction():
+        db.insert(
+            "glossary_term",
+            {
+                "id": identifier,
+                "category": "card_name",
+                "concept_key": "name.synthetic",
+                "source_ja": "自編名稱",
+                "emphasis": None,
+                "authored_source_id": "source",
+                "record_key": "synthetic-term",
+                "origin": "project",
+                "low_confidence": term_low,
+            },
+        )
+        db.insert(
+            "glossary_translation",
+            {
+                "term_id": identifier,
+                "lang": "zh-Hant",
+                "text": "舊合成詞",
+                "source_id": None,
+                "authored_source_id": "source",
+                "record_key": "synthetic-choice",
+                "origin": "machine",
+                "low_confidence": True,
+            },
+        )
+    ref = CardNameReference(kind="card_name", term_id=identifier)
+    label = labels(db, "zh-Hant", {identifier: ReferenceName("新合成官名😀", False)})[
+        canonical(ref.model_dump(mode="json")), "zh-Hant"
+    ]
+    assert label.text == "新合成官名😀"
+    assert label.origin == "official"
+    assert label.low_confidence is term_low
+    assert label.bold is True

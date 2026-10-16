@@ -15,6 +15,7 @@ from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.digital.name_policies.application import Inputs, populate
 from sve_carddb.domains.digital.name_policies.projection import materialize, prepare
 from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.domains.translations.four_layer_labels import labels
 from sve_carddb.domains.translations.four_layer_storage import read_annotation
 from sve_carddb.domains.translations.glossary.importer import populate_glossary
 from sve_carddb.domains.translations.glossary.records import (
@@ -49,7 +50,7 @@ def base_case(tmp_path_factory: pytest.TempPathFactory) -> ApplicationCase:
     return application_case(tmp_path_factory.mktemp("current-names"))
 
 
-def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture composes policy, glossary, publication and schema inputs
+def current_case(  # ruff: ignore[too-many-locals,too-many-arguments] -- one synthetic fixture composes policy, glossary, publication and schema inputs
     case: ApplicationCase,
     root: Path,
     *,
@@ -57,6 +58,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
     ambiguous: bool = False,
     choice_text: str | None = None,
     override: bool = False,
+    frozen_source: bool = False,
 ) -> ApplicationCase:
     shutil.copytree(case.fixture.root, root)
     base = root / "authored/digital/policies"
@@ -96,8 +98,17 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
     (base / "names.yaml").write_bytes(canonical(policy))
     values: list[dict[str, JsonValue]] = []
     for identifier in ["name.test", "name.other"] if ambiguous else ["name.test"]:
-        values.append(  # ruff: ignore[manual-list-comprehension] -- synthetic source construction keeps each concept identifier explicit
-            TermRecord.model_validate_json(canonical(name_term(identifier))).model_dump(
+        raw = name_term(identifier)
+        if frozen_source:
+            ref = case.fixture.owner().name_ref
+            assert ref is not None
+            object_value(raw["data"]).update(
+                source_ref=ref.model_dump(mode="json"),
+                authored_source_ja=None,
+                missing_source_reason=None,
+            )
+        values.append(
+            TermRecord.model_validate_json(canonical(raw)).model_dump(
                 round_trip=True, mode="json"
             )
         )
@@ -141,7 +152,12 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
                         db.insert(table.name, dict(row.values))
         database = DatabaseTemplate(schema, db._connection.serialize())
     originals = tuple(
-        (r.data.id, str(r.data.authored_source_ja))
+        (
+            r.data.id,
+            case.sources().text(r.data.source_ref)[1]
+            if r.data.source_ref is not None
+            else str(r.data.authored_source_ja),
+        )
         for r in snapshot.current_records()
         if isinstance(r, TermRecord)
     )
@@ -371,3 +387,39 @@ def test_current_variant_cannot_select_two_concepts(
             prepare_names(
                 snapshot, dict(case.replay.originals), inputs, case.sources(), db
             )
+
+
+@pytest.mark.parametrize("mode", ["no_choice", "excluded", "override"])
+def test_reference_name_uses_same_frozen_rule_without_owner_exceptions(
+    base_case: ApplicationCase, tmp_path: Path, mode: str
+) -> None:
+    case = current_case(
+        base_case,
+        tmp_path / "repo",
+        frozen_source=True,
+        excluded=mode == "excluded",
+        override=mode == "override",
+        choice_text="自編後備詞" if mode != "no_choice" else None,
+    )
+    with case.database.copy() as db, db.transaction():
+        result = populate(
+            db, case.inputs, case.texts, sources=case.sources(), replay=case.replay
+        )
+        ref = CardNameReference(kind="card_name", term_id="term:name.test")
+        label = labels(db, "zh-Hant", result.reference_names)[
+            canonical(ref.model_dump(mode="json")), "zh-Hant"
+        ]
+        if mode == "excluded":
+            assert result.reference_names == {}
+            assert label.text == "自編後備詞"
+            assert label.origin == "machine"
+            assert label.low_confidence
+        else:
+            assert label.text == "合成測試名"
+            assert label.origin == "official"
+            assert label.low_confidence is False
+            assert label.bold is True
+        displayed = db.rows("translation")[0].values["text"]
+        assert displayed == (
+            "自編後備詞" if mode in {"excluded", "override"} else label.text
+        )

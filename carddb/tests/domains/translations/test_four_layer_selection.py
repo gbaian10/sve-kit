@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import Json
-from sve_carddb.contracts.four_layer import GlossaryReference, Target
+from sve_carddb.contracts.four_layer import CardNameReference, GlossaryReference, Target
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.translations.four_layer_authored import (
     ChoiceVariantRecord,
@@ -20,6 +20,7 @@ from sve_carddb.domains.translations.four_layer_authored import (
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_fields import render_field
+from sve_carddb.domains.translations.four_layer_labels import ReferenceName
 from sve_carddb.domains.translations.four_layer_matching import Frames, Matched
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
@@ -326,3 +327,59 @@ def test_term_pin_and_named_glossary_wording_use_the_exact_source_reference(  # 
             controls(unavailable).prepare_labels(
                 db, engine, make_fixture(tmp_path / "missing").sources()
             )
+
+
+@pytest.mark.parametrize("variant", ["default", "alternative"])
+def test_official_card_name_accepts_default_pin_and_rejects_named_pin(
+    variant: str,
+) -> None:
+    term = Term("term:name.synthetic", "card_name", "仮名")
+    raw = "『仮名』を仮。"
+    normalized = normalize_source(raw, source(raw))
+    engine = classifier((term,))
+    frame, binding = engine.recognize(raw, normalized.source, normalized.parts[0]).bind(
+        normalized.source, normalized.parts[0]
+    )
+    field = CompiledField(
+        CardSource(binding.source, raw, "card", "face", "source"),
+        derive_source(raw, normalized.source, engine),
+        (Matched(frame, binding),),
+        (False,),
+        (),
+    )
+    ref = CardNameReference(kind="card_name", term_id=term.id)
+    label = Label(ref, "zh-Hant", "合成官名😀", "official", False, True)
+    renderer = Renderer(
+        {(canonical(ref.model_dump(mode="json")), "zh-Hant"): label},
+        {},
+        {},
+        domains=engine.domains,
+    )
+    record = override(
+        binding,
+        "pin",
+        [],
+        [{"term_id": term.id, "lang": "zh-Hant", "variant_key": variant}],
+    )
+    selected = Controls(
+        Inputs((), (record,)), {term.id: ReferenceName(label.text, False)}
+    )
+    if variant == "alternative":
+        with pytest.raises(
+            ValueError, match="Official card-name reference forbids a named variant pin"
+        ):
+            selected.select(field, renderer, {}, "zh-Hant")
+    else:
+        result = selected.select(field, renderer, {}, "zh-Hant")
+        target = Target.model_validate_json(
+            canonical({"format": 1, "nodes": [{"kind": "LeafRef", "slot": "leaf_0"}]})
+        )
+        rendered = result.renderer.render(
+            "context:synthetic",
+            "zh-Hant",
+            (BoundTarget(frame, binding, SelectedTarget(target)),),
+        )
+        assert rendered.rendered is not None
+        assert rendered.rendered.text == label.text
+        assert rendered.rendered.origin == "project"
+        assert rendered.rendered.annotation.occurrences[0].reference == ref

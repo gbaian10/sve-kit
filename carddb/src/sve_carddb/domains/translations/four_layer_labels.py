@@ -1,5 +1,6 @@
 """Select exact presentation dependencies from the already adopted build tables."""
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.contracts.four_layer import (
@@ -12,6 +13,8 @@ from sve_carddb.domains.translations.four_layer_render import Label
 from sve_carddb.domains.translations.four_layer_storage import payload
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from pydantic import JsonValue
 
     from sve_carddb.build import Database
@@ -33,7 +36,17 @@ def _emphasis(value: JsonValue) -> bool | None:
     raise TypeError("Selected rule-term emphasis must be a nullable boolean")
 
 
-def labels(db: Database, lang: str) -> dict[tuple[bytes, str], Label]:
+@dataclass(frozen=True)
+class ReferenceName:
+    text: str
+    low_confidence: bool
+
+
+def labels(
+    db: Database,
+    lang: str,
+    reference_names: Mapping[str, ReferenceName] | None = None,
+) -> dict[tuple[bytes, str], Label]:
     """Glossary categories set bold independently of spelling, frequency and translation quality."""
     terms = {
         string(value["id"]): value
@@ -60,6 +73,18 @@ def labels(db: Database, lang: str) -> dict[tuple[bytes, str], Label]:
             _emphasis(term["emphasis"]) if term["category"] == "rule_term" else True,
         )
         result[canonical(reference.model_dump(mode="json")), lang] = selected
+    if lang == "zh-Hant":
+        for identifier, name in (reference_names or {}).items():
+            term = terms[identifier]
+            reference = CardNameReference(kind="card_name", term_id=identifier)
+            result[canonical(reference.model_dump(mode="json")), lang] = Label(
+                reference,
+                lang,
+                name.text,
+                "official",
+                name.low_confidence or bool(term["low_confidence"]),
+                True,
+            )
     selected_vocabulary = _vocabulary(db, lang)
     units = {
         string(value["id"]): value

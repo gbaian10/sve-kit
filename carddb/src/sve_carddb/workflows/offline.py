@@ -561,6 +561,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                         jp.card_batch,
                         inputs.revision,
                         LANG,
+                        {} if name_result is None else name_result.reference_names,
                     ),
                 )
             )
