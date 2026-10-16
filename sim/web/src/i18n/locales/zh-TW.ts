@@ -32,11 +32,11 @@ const zhTW = {
   },
   settings: {
     advanced: "進階設定",
-    prefetchPrintings: "預先下載所有版次",
-    prefetchPrintingsHint:
+    preloadPrintings: "預先下載所有版次",
+    preloadPrintingsHint:
       "目前卡首圖就緒後下載其他版次；是否包含另一語言依顯示英版／日版資料設定。",
-    prefetchNeighbours: "預先下載上一張／下一張",
-    prefetchNeighboursHint:
+    preloadNeighbours: "預先下載上一張／下一張",
+    preloadNeighboursHint:
       "先準備鄰卡的文字與卡圖，減少換卡等待。會增加下載量；瀏覽器可能移除快取。",
 
     storage: "儲存空間",

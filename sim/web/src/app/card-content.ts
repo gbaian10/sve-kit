@@ -19,14 +19,15 @@ export interface CardContent extends LocatedCard {
   readonly images: ImageIndex
 }
 
-/** Resolve the next page's basic text before replacing the page currently on screen. */
+/** Resolve basic text before the page commit; preloads yield between preparation steps. */
 export async function prepareCardContent(
   client: SnapshotClient,
   located: LocatedCard,
   language: string,
   sizes: string,
-  signal?: AbortSignal,
+  preloadSignal?: AbortSignal,
 ): Promise<CardContent> {
+  if (preloadSignal) await yieldCardPreload(preloadSignal)
   const pinned = { ...client, snapshot: () => located.snapshot }
   const { printing } = located
   const snapshot = await loadFaceCandidates(
@@ -35,9 +36,12 @@ export async function prepareCardContent(
     printing.cardId,
     printing.region,
   )
+  if (preloadSignal) await yieldCardPreload(preloadSignal)
   const catalog = catalogOf(snapshot)
+  if (preloadSignal) await yieldCardPreload(preloadSignal)
   // Candidate metadata extends the catalog; the resolver loads its own full text closure.
   const resolver = sharedAnnotatedTextResolver(pinned)
+  if (preloadSignal) await yieldCardPreload(preloadSignal)
   const pointers = new Map<string, JsonObject>()
   const add = (owner: JsonObject, field: string) => {
     const pointer = { owner, field, ordinal: null }
@@ -83,12 +87,12 @@ export async function prepareCardContent(
   ])
   const prepareFace = ({ printingId, faceId }: { printingId: string; faceId: string }) => {
     const source = images.cardImage(printingId, faceId)
-    return source ? prepareImage(source, sizes, signal) : Promise.resolve()
+    return source ? prepareImage(source, sizes, preloadSignal) : Promise.resolve()
   }
-  if (signal) {
+  if (preloadSignal) {
     for (const face of faces) await prepareFace(face)
   } else await Promise.all(faces.map(prepareFace))
-  signal?.throwIfAborted()
+  preloadSignal?.throwIfAborted()
   return { ...located, catalog, client: pinned, images }
 }
 
@@ -116,4 +120,12 @@ export function cardContentKey(
         ]
       : null,
   ])
+}
+
+/** Cached fragments still need a task boundary so input can cancel the next expensive step. */
+export async function yieldCardPreload(preloadSignal: AbortSignal): Promise<void> {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, 0)
+  })
+  preloadSignal.throwIfAborted()
 }

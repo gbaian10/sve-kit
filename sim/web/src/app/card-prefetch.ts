@@ -1,7 +1,7 @@
 import PQueue from "p-queue"
 
 import { type CardRouteInput, type CardSummary, locateCard, type SnapshotClient } from "../data"
-import { type CardContent, prepareCardContent } from "./card-content"
+import { type CardContent, prepareCardContent, yieldCardPreload } from "./card-content"
 
 // Both sources share a budget; each card reads its fragments and images sequentially.
 const queue = new PQueue({ concurrency: 2 })
@@ -50,7 +50,7 @@ export async function prefetchCards(
         queue
           .add(
             async () => {
-              signal.throwIfAborted()
+              await yieldCardPreload(signal)
               let snapshot = client.snapshot()
               if (!snapshot) return
               const hash = snapshot.manifestHash
@@ -68,13 +68,10 @@ export async function prefetchCards(
                 load: () => Promise.resolve(),
                 selectRegion: () => Promise.resolve(),
                 fragments: async (key) => {
-                  if (preparing) signal.throwIfAborted()
-                  const result = preparing
-                    ? await reads.add(() => client.fragments(key, { signal, background: true }), {
-                        signal,
-                      })
-                    : await client.fragments(key)
-                  if (preparing) signal.throwIfAborted()
+                  if (!preparing) return client.fragments(key)
+                  signal.throwIfAborted()
+                  const result = await reads.add(() => client.fragments(key, signal), { signal })
+                  await yieldCardPreload(signal)
                   return result
                 },
               }

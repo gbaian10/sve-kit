@@ -106,9 +106,9 @@ export function CardPage() {
   useEffect(() => {
     if (!manifestHash || cached) return
     let active = true
-    const loading = locateCard(client, input).then((value) =>
-      prepareCardContent(client, value, language, IMAGE_SIZES),
-    )
+    const loading = locateCard(client, input).then((value) => {
+      return prepareCardContent(client, value, language, IMAGE_SIZES)
+    })
     void loading.then(
       (value) => {
         if (active) {
@@ -373,19 +373,32 @@ export function CardView({
   const next = fromList ? neighbour(1) : undefined
   const [readyImage, setReadyImage] = useState<string | null>(null)
   const imageKey = JSON.stringify([client.base, client.snapshot()?.manifestHash, printingId])
+  const prefetchAbort = useRef<AbortController | null>(null)
+  const navigationFrom = useRef<string | null>(null)
+  const beginNavigation = useCallback(() => {
+    navigationFrom.current = imageKey
+    prefetchAbort.current?.abort()
+  }, [imageKey])
+  // A transition can render the old page again before committing its new target.
+  useEffect(() => {
+    if (!pending && navigationFrom.current !== imageKey) {
+      navigationFrom.current = null
+    }
+  }, [pending, imageKey])
   const imageReady = useCallback(() => {
     setReadyImage(imageKey)
   }, [imageKey])
   const previousSummary = previous?.summary
   const nextSummary = next?.summary
   useEffect(() => {
-    if (pending || readyImage !== imageKey || !onPrefetch) return
+    if (pending || navigationFrom.current === imageKey || readyImage !== imageKey || !onPrefetch)
+      return
     const targets: PrefetchTarget[] = []
-    if (prefs.prefetchNeighbours) {
+    if (prefs.preloadNeighbours) {
       for (const summary of [previousSummary, nextSummary])
         if (summary) targets.push({ summary, neighbour: true })
     }
-    if (prefs.prefetchPrintings && completePrintings && !completePrintings.error) {
+    if (prefs.preloadPrintings && completePrintings && !completePrintings.error) {
       for (const row of completePrintings.value.index.printingsOf(cardId ?? "")) {
         if (row["region"] !== region && !(showOther && other.catalog)) continue
         const summary = completePrintings.value.summary(stringValue(row["id"]))
@@ -394,6 +407,7 @@ export function CardView({
       }
     }
     const abort = new AbortController()
+    prefetchAbort.current = abort
     void onPrefetch(targets, abort.signal)
     return () => {
       abort.abort()
@@ -403,8 +417,8 @@ export function CardView({
     readyImage,
     imageKey,
     onPrefetch,
-    prefs.prefetchNeighbours,
-    prefs.prefetchPrintings,
+    prefs.preloadNeighbours,
+    prefs.preloadPrintings,
     previousSummary,
     nextSummary,
     completePrintings,
@@ -424,6 +438,7 @@ export function CardView({
       void navigate(canonical, { replace: true, state: location.state as unknown })
   }, [pending, canonical, summary?.cardNoState, location.pathname, location.state, navigate])
   const open = (target: NonNullable<typeof previous>) => {
+    if (target.summary.printingId !== printingId) beginNavigation()
     void navigate(printingPath(target.summary), {
       replace: true,
       state: { ...entry, resultKey: target.key, ...routeState(target.summary) },
@@ -443,8 +458,40 @@ export function CardView({
       else return
       event.preventDefault()
     }
+    const onLink = (event: MouseEvent) => {
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null
+      if (
+        !(link instanceof HTMLAnchorElement) ||
+        link.target === "_blank" ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return
+      const target = new URL(link.href)
+      if (summary && target.pathname === printingPath(summary) && target.search === location.search)
+        return
+      if (
+        target.origin === window.location.origin &&
+        (target.pathname !== location.pathname || target.search !== location.search)
+      )
+        beginNavigation()
+    }
+    document.addEventListener("click", onLink, true)
+    const onPopState = () => {
+      if (
+        window.location.pathname !== location.pathname ||
+        window.location.search !== location.search
+      )
+        beginNavigation()
+    }
+    window.addEventListener("popstate", onPopState)
     window.addEventListener("keydown", onKeyDown)
     return () => {
+      document.removeEventListener("click", onLink, true)
+      window.removeEventListener("popstate", onPopState)
       window.removeEventListener("keydown", onKeyDown)
     }
   })

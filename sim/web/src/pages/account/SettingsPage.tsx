@@ -121,24 +121,24 @@ export function SettingsPage() {
         </h2>
         <SettingRow
           className={ROW}
-          label={t("settings.prefetchPrintings")}
-          hint={t("settings.prefetchPrintingsHint")}
+          label={t("settings.preloadPrintings")}
+          hint={t("settings.preloadPrintingsHint")}
         >
           <Switch
-            label={t("settings.prefetchPrintings")}
-            checked={prefs.prefetchPrintings}
-            onChange={(prefetchPrintings) => prefsStore.set({ prefetchPrintings })}
+            label={t("settings.preloadPrintings")}
+            checked={prefs.preloadPrintings}
+            onChange={(preloadPrintings) => prefsStore.set({ preloadPrintings })}
           />
         </SettingRow>
         <SettingRow
           className={ROW}
-          label={t("settings.prefetchNeighbours")}
-          hint={t("settings.prefetchNeighboursHint")}
+          label={t("settings.preloadNeighbours")}
+          hint={t("settings.preloadNeighboursHint")}
         >
           <Switch
-            label={t("settings.prefetchNeighbours")}
-            checked={prefs.prefetchNeighbours}
-            onChange={(prefetchNeighbours) => prefsStore.set({ prefetchNeighbours })}
+            label={t("settings.preloadNeighbours")}
+            checked={prefs.preloadNeighbours}
+            onChange={(preloadNeighbours) => prefsStore.set({ preloadNeighbours })}
           />
         </SettingRow>
       </section>

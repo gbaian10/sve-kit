@@ -34,11 +34,11 @@ export default {
   },
   settings: {
     advanced: "詳細設定",
-    prefetchPrintings: "すべての版を先読み",
-    prefetchPrintingsHint:
+    preloadPrintings: "すべての版を先読み",
+    preloadPrintingsHint:
       "表示中のカード画像が準備できてから他の版を読み込みます。別言語の版は英語版／日本語版データの表示設定に従います。",
-    prefetchNeighbours: "前後のカードを先読み",
-    prefetchNeighboursHint:
+    preloadNeighbours: "前後のカードを先読み",
+    preloadNeighboursHint:
       "前後のカードのテキストと画像を準備して切り替えの待ち時間を減らします。通信量が増え、キャッシュはブラウザーに削除される場合があります。",
 
     storage: "ストレージ",

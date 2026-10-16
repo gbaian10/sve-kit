@@ -75,7 +75,7 @@ it("starts preloading disabled and remembers both advanced switches", async () =
     expect(screen.getByRole("switch", { name })).toHaveAttribute("aria-checked", "false")
     await userEvent.click(screen.getByRole("switch", { name }))
   }
-  expect(readPrefs()).toMatchObject({ prefetchPrintings: true, prefetchNeighbours: true })
+  expect(readPrefs()).toMatchObject({ preloadPrintings: true, preloadNeighbours: true })
   view.unmount()
   prefsStore.reload()
   await renderInRouter(<SettingsPage />)

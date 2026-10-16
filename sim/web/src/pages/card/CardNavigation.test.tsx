@@ -3,13 +3,20 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { prepareCardContent } from "../../app/card-content"
 import { routeState } from "../../app/listEntryState"
 import { ToastProvider } from "../../components/ui/Toast"
-import { type CardSummary, catalogOf, createSnapshotClient, type SnapshotClient } from "../../data"
+import {
+  type CardSummary,
+  catalogOf,
+  createSnapshotClient,
+  locateCard,
+  type SnapshotClient,
+} from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
-import { CardPage } from "./CardPage"
+import { CardPage, CardView } from "./CardPage"
 
 const state = vi.hoisted(() => ({
   client: null as SnapshotClient | null,
@@ -38,7 +45,7 @@ vi.mock("../../app/snapshot", async (original) => ({
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
 
 let sequence = 0
-async function setup(pendingCandidate = false) {
+async function setup(pendingCandidate = false, blockBackground = false) {
   const base = `https://navigation-${String(sequence++)}.test`
   const source = createSnapshotClient(base, {
     cacheStorage: memoryCache(),
@@ -94,12 +101,22 @@ async function setup(pendingCandidate = false) {
   let historyFailure = false
   let failedPurposes = new Set<string>()
   const backgroundReads: string[] = []
+  const backgroundSignals: AbortSignal[] = []
+  let releaseBackground: () => void = () => undefined
+  const backgroundHold = new Promise<void>((resolve) => {
+    releaseBackground = resolve
+  })
   const pinnedSnapshot = snapshot
   state.client = {
     ...source,
     snapshot: () => pinnedSnapshot,
-    fragments: async (key, request) => {
-      if (request?.background) backgroundReads.push(key)
+    fragments: async (key, backgroundSignal) => {
+      if (backgroundSignal) {
+        backgroundReads.push(key)
+        backgroundSignals.push(backgroundSignal)
+        if (blockBackground) await backgroundHold
+        backgroundSignal.throwIfAborted()
+      }
       const pending = hold
       hold = undefined
       await pending
@@ -110,7 +127,7 @@ async function setup(pendingCandidate = false) {
       const purpose = pinnedSnapshot.files.get(key)?.["purpose"]
       if (typeof purpose === "string" && failedPurposes.has(purpose))
         throw new Error("synthetic read failure")
-      return source.fragments(key, request)
+      return source.fragments(key, backgroundSignal)
     },
   }
   const catalog = catalogOf(snapshot)
@@ -154,6 +171,8 @@ async function setup(pendingCandidate = false) {
   return {
     ...rendered,
     backgroundReads,
+    backgroundSignals,
+    releaseBackground,
     holdHistory: () => {
       let release: () => void = () => undefined
       historyHold = new Promise<void>((resolve) => {
@@ -299,7 +318,7 @@ describe("card navigation commits", () => {
 })
 
 it("waits for the current image before preparing a neighbour, then switches with its full prepared content", async () => {
-  prefsStore.set({ prefetchNeighbours: true })
+  prefsStore.set({ preloadNeighbours: true })
   let release: () => void = () => undefined
   const currentDecode = new Promise<void>((resolve) => {
     release = resolve
@@ -335,7 +354,7 @@ it("waits for the current image before preparing a neighbour, then switches with
 })
 
 it("discards a neighbour still preparing when the switch is turned off", async () => {
-  prefsStore.set({ prefetchNeighbours: true })
+  prefsStore.set({ preloadNeighbours: true })
   let release: () => void = () => undefined
   const neighbourDecode = new Promise<void>((resolve) => {
     release = resolve
@@ -351,7 +370,7 @@ it("discards a neighbour still preparing when the switch is turned off", async (
     expect(decode).toHaveBeenCalledTimes(2)
   })
   act(() => {
-    prefsStore.set({ prefetchNeighbours: false })
+    prefsStore.set({ preloadNeighbours: false })
   })
   await act(async () => {
     release()
@@ -361,4 +380,105 @@ it("discards a neighbour still preparing when the switch is turned off", async (
   await userEvent.click(screen.getByRole("button", { name: "下一張" }))
   await screen.findByRole("heading", { name: "試作隊長" })
   expect(await screen.findByText("卡圖資訊載入失敗")).toBeInTheDocument()
+})
+
+it.each(["button", "keyboard"])(
+  "cancels background work at %s navigation intent until the target commits",
+  async (action) => {
+    prefsStore.set({ preloadNeighbours: true, preloadPrintings: true })
+    const h = await setup(false, true)
+    try {
+      await waitFor(() => {
+        expect(h.backgroundSignals.length).toBeGreaterThan(0)
+      })
+      const releaseTarget = h.holdNextRead()
+      const observed: boolean[] = []
+      const unsubscribe = h.router.subscribe((router) => {
+        if (router.location.pathname !== "/cards/BP01-002" || observed.length) return
+        observed.push(h.backgroundSignals.every((signal) => signal.aborted))
+        state.order = state.order.map((summary) => ({ ...summary }))
+        prefsStore.set({ theme: "light" })
+      })
+      if (action === "button") fireEvent.click(screen.getByRole("button", { name: "下一張" }))
+      else fireEvent.keyDown(window, { key: "ArrowRight" })
+      expect(observed).toEqual([true])
+      expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
+      expect(h.backgroundSignals.every((signal) => signal.aborted)).toBe(true)
+      act(releaseTarget)
+      await screen.findByRole("heading", { name: "試作隊長" })
+      h.releaseBackground()
+      await waitFor(() => {
+        expect(h.backgroundSignals.some((signal) => !signal.aborted)).toBe(true)
+      })
+      unsubscribe()
+    } finally {
+      h.releaseBackground()
+    }
+  },
+)
+
+it("keeps the retained card paused when router context changes before the new content arrives", async () => {
+  const client = createSnapshotClient("https://retained.test", {
+    cacheStorage: memoryCache(),
+    fetch: (url) => {
+      const bytes = built.files.get(url.slice("https://retained.test/".length))
+      return Promise.resolve(
+        bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
+      )
+    },
+  })
+  await client.load()
+  const content = await prepareCardContent(
+    client,
+    await locateCard(client, { namespace: "official", key: "BP01-001", edition: "jp" }),
+    "zh-Hant",
+    "340px",
+  )
+  state.order = ["p:bp01-001", "p:bp01-002"].map((id) => {
+    const summary = content.catalog.summary(id)
+    if (!summary) throw new Error("missing synthetic neighbour")
+    return summary
+  })
+  prefsStore.set({ preloadNeighbours: true })
+  const signals: AbortSignal[] = []
+  const first = state.order[0]
+  if (!first) throw new Error("missing first synthetic card")
+  const h = await renderRoutes(
+    [
+      {
+        path: "/cards/:cardNo/:slug?",
+        element: (
+          <ToastProvider>
+            <CardView
+              client={content.client}
+              catalog={content.catalog}
+              status={{ state: "ready", dataVersion: content.snapshot.dataVersion }}
+              resolved={content.printing}
+              preparedImages={content.images}
+              onPrefetch={(_, signal) => {
+                signals.push(signal)
+                return Promise.resolve()
+              }}
+            />
+          </ToastProvider>
+        ),
+      },
+    ],
+    {
+      initialEntries: [
+        {
+          pathname: "/cards/BP01-001",
+          state: { background: "", resultKey: first.printingId, ...routeState(first) },
+        },
+      ],
+    },
+  )
+  await waitFor(() => {
+    expect(signals.length).toBeGreaterThan(0)
+  })
+  const initialEntry = h.router.state.location.key
+  fireEvent.click(screen.getByRole("button", { name: "下一張" }))
+  expect(h.router.state.location.key).not.toBe(initialEntry)
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-001")
+  expect(signals.every((signal) => signal.aborted)).toBe(true)
 })

@@ -1270,7 +1270,7 @@ it("cancels a background reader without cancelling a visible reader of the same 
   await client.load()
   hold = true
   const abort = new AbortController()
-  const background = client.fragments(revisionKey, { signal: abort.signal, background: true })
+  const background = client.fragments(revisionKey, abort.signal)
   const rejected = expect(background).rejects.toThrow()
   await vi.waitFor(() => {
     expect(priorities).toEqual(["low"])
@@ -1297,10 +1297,26 @@ it("does not refresh the active snapshot when a background detail is unavailable
   const before = client.snapshot()
   const requests = served.requests.length
   unavailable = true
-  await expect(
-    client.fragments(revisionKey, { signal: new AbortController().signal, background: true }),
-  ).rejects.toThrow()
+  await expect(client.fragments(revisionKey, new AbortController().signal)).rejects.toThrow()
   expect(client.snapshot()).toBe(before)
   expect(client.status().state).toBe("ready")
   expect(served.requests).toHaveLength(requests)
+})
+
+it("keeps comparison catalog requests at their original browser priority", async () => {
+  const served = serve("/cdn")
+  const priorities: (RequestPriority | undefined)[] = []
+  let comparison = false
+  const client = createSnapshotClient("/cdn", {
+    cacheStorage: memoryCache(),
+    fetch: (url, init) => {
+      if (comparison) priorities.push(init?.priority)
+      return served.fetcher(url, init)
+    },
+  })
+  await client.load()
+  comparison = true
+  await client.catalog?.("en", new AbortController().signal)
+  expect(priorities.length).toBeGreaterThan(0)
+  expect(priorities.every((priority) => priority === undefined)).toBe(true)
 })

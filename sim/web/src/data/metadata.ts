@@ -219,7 +219,7 @@ export class MetadataBytes {
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const candidate = await fetchBytes(priority ? this.fetcher : this.backgroundFetch, path, {
           signal: activeSignal,
-          ...(!priority ? { priority: "low" as const } : {}),
+          ...(signal ? { priority: "low" as const } : {}),
         })
         if (await valid(candidate)) {
           bytes = candidate
