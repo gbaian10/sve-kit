@@ -8,6 +8,7 @@ import pytest
 from sve_carddb.contracts.four_layer import (
     CardNameReference,
     ContextExpression,
+    Expression,
     Frame,
     LeafRef,
     LiteralNode,
@@ -90,6 +91,14 @@ def test_bounds_keep_direction_threshold_property_and_position(
     before = derive_preparation(raw, source(raw), engine())
     assert before.derived.recognized[0].schema != frame.leaf_schema
     assert before.families == ()
+
+
+def test_earlier_aggregate_keeps_later_sealed_count_actuals() -> None:
+    _, _, binding = prepared(
+        "自分の場の合成甲・カードの元のコストの合計が7以上なら、それにXダメージ。Xは「自分の手札の枚数」である。"
+    )
+    count = next(v for v in binding.values.values() if isinstance(v, Expression))
+    assert [binding.values[n] for n in count.leaves] == ["self", ("hand",)]
 
 
 def test_attack_sum_keeps_original_cost_filter_separate_from_bound() -> None:

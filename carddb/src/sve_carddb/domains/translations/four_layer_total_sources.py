@@ -9,6 +9,7 @@ from sve_carddb.contracts.four_layer import (
     Constant,
     ContextExpression,
     Domain,
+    Expression,
     FaceRevisionOwner,
     GlossaryReference,
     LeafSlot,
@@ -791,7 +792,7 @@ def _apply(
         name: value.model_copy(
             update={"leaves": tuple(names.get(n, n) for n in value.leaves)}
         )
-        if isinstance(value, (ContextExpression, PredicateExpr))
+        if isinstance(value, (Expression, ContextExpression, PredicateExpr))
         else value
         for name, value in result.values.items()
     }
