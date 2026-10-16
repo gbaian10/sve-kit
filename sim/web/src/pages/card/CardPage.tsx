@@ -5,6 +5,7 @@ import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-r
 
 import { useDialogHistory } from "../../app/dialog-history"
 import { LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
+import { useOtherEdition } from "../../app/other-edition"
 import {
   type SearchReadiness,
   useCardSnapshot,
@@ -26,6 +27,7 @@ import { Dialog } from "../../components/ui/Dialog"
 import { Link } from "../../components/ui/Link"
 import { useToast } from "../../components/ui/toast-context"
 import {
+  cardPrintings,
   type CardSummary,
   type Catalog,
   locateCard,
@@ -41,7 +43,7 @@ import { displayName, type NameSource, UI_TEXT_LANG } from "../../domain/nameDis
 import { parseQuery } from "../../domain/query/codec"
 import type { Region, TextLang } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
-import { usePrefs } from "../../settings"
+import { showsOtherEdition, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
@@ -215,7 +217,48 @@ export function CardView({
   const card = printing ? catalog?.index.card(stringValue(printing["card_id"])) : undefined
   const family = card ? catalog?.index.family(stringValue(card["home_set_id"])) : undefined
   const setCode = family ? stringValue(family["public_code"]) : undefined
-  const printings = card ? (catalog?.index.printingsOf(stringValue(card["id"])) ?? []) : []
+  const showOther = showsOtherEdition(prefs, region)
+  const other = useOtherEdition(
+    client,
+    region,
+    showOther,
+    catalog !== null && searchReadiness.phase === "ready" && !searchReadiness.updating,
+    client.snapshot()?.manifestHash,
+  )
+  const cardId = typeof card?.["id"] === "string" ? card["id"] : undefined
+  const [printingAttempt, setPrintingAttempt] = useState(0)
+  const [printingCatalog, setPrintingCatalog] = useState<{
+    source: Catalog
+    other: Catalog | undefined
+    value: Catalog
+    error?: unknown
+  }>()
+  useEffect(() => {
+    const snapshot = other.snapshot ?? client.snapshot()
+    if (!snapshot || !catalog || !cardId) return
+    let active = true
+    void cardPrintings(client, snapshot, cardId, other.snapshot ? ["jp", "en"] : [region]).then(
+      (value) => {
+        if (active) setPrintingCatalog({ source: catalog, other: other.catalog, value })
+      },
+      (error: unknown) => {
+        if (active)
+          setPrintingCatalog({ source: catalog, other: other.catalog, value: catalog, error })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [client, catalog, cardId, region, other.snapshot, other.catalog, printingAttempt])
+  const completePrintings =
+    printingCatalog?.source === catalog && printingCatalog.other === other.catalog
+      ? printingCatalog
+      : undefined
+  const printings = cardId
+    ? ((completePrintings?.value ?? catalog)?.index.printingsOf(cardId) ?? []).filter(
+        (row) => row["region"] === region || (showOther && other.catalog),
+      )
+    : []
   // Opened from a list: back pops to it and previous/next walk that list; opened directly: back
   // is a link to the search page and previous/next walk the snapshot order.
   const entry =
@@ -515,7 +558,25 @@ export function CardView({
               </section>
             )
           })}
-          {printings.length > 1 && (
+          {showOther && !other.catalog && !other.error && (
+            <p role="status" className="mt-6 text-13 text-text-2">
+              {t("cardPage.switchingEdition")}
+            </p>
+          )}
+          {(other.error !== undefined || completePrintings?.error !== undefined) && (
+            <div role="alert" className="mt-6 text-13 text-text-2">
+              {t("cardPage.routeFailedHint")}
+              <Button
+                onClick={() => {
+                  other.retry()
+                  setPrintingAttempt((value) => value + 1)
+                }}
+              >
+                {t("status.retry")}
+              </Button>
+            </div>
+          )}
+          {printings.length > 0 && (
             <section className="mt-6" aria-label={t("cardPage.printings")}>
               <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
               {printingGroups(printings).map(
@@ -537,7 +598,7 @@ export function CardView({
                         })
                         const rarity =
                           typeof row["rarity_code"] === "string"
-                            ? row["rarity_code"].toUpperCase()
+                            ? label("rarity", row["rarity_code"])
                             : row["rarity_raw"]
                         return (
                           <li key={id}>

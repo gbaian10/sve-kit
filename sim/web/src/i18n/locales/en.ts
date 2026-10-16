@@ -14,6 +14,7 @@ export default {
     logoAlt: "sve-kit",
   },
   account: {
+    showOtherEdition: { jp: "Show English edition data", en: "Show Japanese edition data" },
     notSignedIn: "Not signed in",
     cardEdition: "Card edition",
     nameDisplay: "Card names",
@@ -233,6 +234,11 @@ export default {
     specialProducts: "Decks and special products",
   },
   cardPage: {
+    switchingEdition: "Loading the other edition…",
+    notCollected: {
+      jp: "This card is not yet available in the Japanese edition",
+      en: "This card is not yet available in the English edition",
+    },
     needsUpdate: "Card data needs updating",
     routeFailed: "Unable to locate card",
     routeFailedHint: "Card data is incomplete or failed to load. Update the data and try again.",

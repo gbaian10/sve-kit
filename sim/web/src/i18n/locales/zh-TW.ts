@@ -12,6 +12,7 @@ const zhTW = {
     logoAlt: "sve-kit",
   },
   account: {
+    showOtherEdition: { jp: "顯示英版資料", en: "顯示日版資料" },
     notSignedIn: "尚未登入",
     cardEdition: "卡片版本",
     nameDisplay: "卡名顯示",
@@ -221,6 +222,8 @@ const zhTW = {
     specialProducts: "預組與特別商品",
   },
   cardPage: {
+    switchingEdition: "正在載入另一版本資料…",
+    notCollected: { jp: "日版尚未收錄這張卡", en: "英版尚未收錄這張卡" },
     needsUpdate: "卡表需要更新",
     routeFailed: "無法定位卡片",
     routeFailedHint: "卡片資料不完整或載入失敗，請更新資料後重試。",

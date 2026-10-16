@@ -55,6 +55,7 @@ const state = vi.hoisted(() => ({
   available: false,
   current: false,
   crossRegion: false,
+  comparisonReady: false,
   doubleFace: false,
   order: null as { key: string; printingId: string }[] | null,
   multiplePrintings: false,
@@ -74,9 +75,16 @@ const state = vi.hoisted(() => ({
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
 }))
+vi.mock("../../app/other-edition", () => ({
+  useOtherEdition: () => ({
+    catalog: state.comparisonReady && prefsStore.get().showOtherEdition ? {} : undefined,
+    retry: () => undefined,
+  }),
+}))
 vi.mock("../../app/snapshot", () => {
   const printing = () => ({
     id: "p:synthetic",
+    card_no: "BP-SYNTHETIC",
     home_set_id: "BP-SYNTHETIC",
     card_id: "c:synthetic",
     region: state.crossRegion ? "en" : "jp",
@@ -226,15 +234,20 @@ vi.mock("../../app/snapshot", () => {
                 ? { id: "rev:synthetic", name_unit_id: "t:synthetic" }
                 : undefined,
           translation: () => ({ text_unit_id: "t:back-translated", low_confidence: true }),
-          vocabulary: () => undefined,
+          vocabulary: (kind: string, code: string) =>
+            kind === "rarity" && code === "lg"
+              ? { label_unit_id: "t:rarity", translations: [] }
+              : undefined,
           textUnit: (id: string) => ({
             lang: "ja",
             text:
-              id === "t:back"
-                ? "Synthetic back"
-                : id === "t:back-translated"
-                  ? "合成背面譯名"
-                  : "Synthetic presentation name",
+              id === "t:rarity"
+                ? "傳說"
+                : id === "t:back"
+                  ? "Synthetic back"
+                  : id === "t:back-translated"
+                    ? "合成背面譯名"
+                    : "Synthetic presentation name",
           }),
           printing: (id: string) => {
             const undated = state.undated.find((printing) => printing.id === id)
@@ -261,6 +274,7 @@ beforeEach(() => {
   ]
   state.current = false
   state.crossRegion = false
+  state.comparisonReady = false
   state.doubleFace = false
   state.order = null
   state.undated = [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }]
@@ -498,7 +512,8 @@ describe("returning from printing changes", () => {
 })
 
 describe("regional printing lists", () => {
-  it("renders JP and EN lists in rarity order with their normalized labels", async () => {
+  it("hides the other region and uses vocabulary labels for printing rarities", async () => {
+    state.comparisonReady = true
     state.printingRows = [
       {
         id: "p:promo",
@@ -545,18 +560,24 @@ describe("regional printing lists", () => {
       initialEntries: ["/cards/BP01-053"],
     })
     const jp = screen.getByRole("list", { name: "JP" })
-    const en = screen.getByRole("list", { name: "EN" })
+    expect(screen.queryByRole("list", { name: "EN" })).not.toBeInTheDocument()
     expect(
       within(jp)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["BP01-053 (LG)", "EBD02-005 (LG)", "BP01-SL09 (SL)", "PR-299 (PR)"])
-    expect(
-      within(en)
-        .getAllByRole("link")
-        .map((link) => link.textContent),
-    ).toEqual(["BP01-053EN (LG)"])
-    expect(within(jp).getByRole("link", { current: "page" })).toHaveTextContent("BP01-053 (LG)")
+    ).toEqual(["BP01-053 (傳說)", "EBD02-005 (傳說)", "BP01-SL09 (sl)", "PR-299 (pr)"])
+    expect(within(jp).getByRole("link", { current: "page" })).toHaveTextContent("BP01-053 (傳說)")
+    act(() => {
+      prefsStore.set({ showOtherEdition: true })
+    })
+    const en = screen.getByRole("list", { name: "EN" })
+    expect(within(en).getByRole("link")).toHaveAttribute("href", "/cards/BP01-053EN")
+    expect(within(en).getByRole("link")).toHaveTextContent("BP01-053EN (傳說)")
+    act(() => {
+      prefsStore.set({ showOtherEdition: false })
+    })
+    expect(screen.queryByRole("list", { name: "EN" })).not.toBeInTheDocument()
+    expect(screen.getByRole("list", { name: "JP" })).toBeInTheDocument()
   })
 })
 

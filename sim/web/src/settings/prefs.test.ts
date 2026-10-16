@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { createPrefsStore, DEFAULT_PREFS, PREFS_KEY, readPrefs, writePrefs } from "./prefs"
+import {
+  createPrefsStore,
+  DEFAULT_PREFS,
+  PREFS_KEY,
+  readPrefs,
+  showsOtherEdition,
+  writePrefs,
+} from "./prefs"
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -162,4 +169,14 @@ describe("createPrefsStore", () => {
     expect(localStorage.getItem(PREFS_KEY)).toBeNull()
     expect(createPrefsStore(() => storage).get().cardEdition).toBe("en")
   })
+})
+
+it("keeps the edition defaults for old preferences and persists explicit comparison choices", () => {
+  localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, cardEdition: "en" }))
+  expect(showsOtherEdition(readPrefs(), "jp")).toBe(false)
+  expect(showsOtherEdition(readPrefs(), "en")).toBe(true)
+  writePrefs({ ...readPrefs(), showOtherEdition: false })
+  expect(showsOtherEdition(readPrefs(), "en")).toBe(false)
+  writePrefs({ ...readPrefs(), showOtherEdition: true })
+  expect(showsOtherEdition(readPrefs(), "jp")).toBe(true)
 })

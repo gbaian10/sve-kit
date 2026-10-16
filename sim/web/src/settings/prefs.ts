@@ -22,6 +22,8 @@ export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */
   readonly uiLanguage: UiLanguage | null
   readonly cardEdition: CardEdition
+  /** null follows the edition default until the user makes a choice. */
+  readonly showOtherEdition: boolean | null
   readonly nameDisplay: TextDisplay
   readonly effectLanguage: TextDisplay
   readonly symbolLabels: boolean
@@ -37,6 +39,7 @@ export interface Prefs {
 export const DEFAULT_PREFS: Prefs = {
   uiLanguage: null,
   cardEdition: "jp",
+  showOtherEdition: null,
   nameDisplay: "translated",
   effectLanguage: "both",
   symbolLabels: false,
@@ -67,6 +70,7 @@ type Guards = { readonly [K in keyof Prefs]: (value: unknown) => value is Prefs[
 const guards: Guards = {
   uiLanguage: isNullableUiLanguage,
   cardEdition: isCardEdition,
+  showOtherEdition: (value): value is boolean | null => value === null || isBoolean(value),
   nameDisplay: isTextDisplay,
   effectLanguage: isTextDisplay,
   symbolLabels: isBoolean,
@@ -156,4 +160,8 @@ export const prefsStore: PrefsStore = createPrefsStore()
 
 export function usePrefs(): Prefs {
   return useSyncExternalStore(prefsStore.subscribe, prefsStore.get, prefsStore.get)
+}
+
+export function showsOtherEdition(prefs: Prefs, edition: CardEdition): boolean {
+  return prefs.showOtherEdition ?? edition === "en"
 }

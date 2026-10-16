@@ -91,6 +91,8 @@ export interface SnapshotClient {
   readonly setRegion?: (region: "jp" | "en") => void
   readonly selectRegion?: (region: "jp" | "en") => Promise<void>
   readonly snapshot: () => LoadedSnapshot | null
+  /** Loads another catalog without changing the active region or its readiness. */
+  readonly catalog?: (region: "jp" | "en", signal: AbortSignal) => Promise<LoadedSnapshot>
   /** A text, history or images file, decoded and joined onto its bootstrap base; cached LRU. */
   readonly fragments: (fileKey: string) => Promise<readonly Fragment[]>
   readonly metadataStatus: () => MetadataProgress
@@ -149,6 +151,7 @@ export function createSnapshotClient(
   // drops a promise other callers are waiting on.
   let details = new Map<string, readonly Fragment[]>()
   let inflight = new Map<string, Promise<readonly Fragment[]>>()
+  const catalogs = new Map<string, LoadedSnapshot>()
 
   const set = (next: SnapshotStatus) => {
     status = next
@@ -162,9 +165,14 @@ export function createSnapshotClient(
     sha256: string,
     bytes?: number,
     signal?: AbortSignal,
+    background = false,
   ): Promise<Uint8Array> => {
     for (let attempt = 0; ; attempt += 1) {
-      const data = await fetchBytes(fetcher, url(path), signal ? { signal } : undefined)
+      const data = await fetchBytes(
+        background ? requests.background : fetcher,
+        url(path),
+        signal ? { signal } : undefined,
+      )
       if ((await transferDigest(data)) === sha256 && (bytes === undefined || data.length === bytes))
         return data
       if (attempt === 1)
@@ -324,7 +332,9 @@ export function createSnapshotClient(
       matchEntry(chosen, previous.manifest)
       return { snapshot: previous, downloaded: false }
     }
-    const restored = await restore(stringValue(chosen["manifest_sha256"]), selectedRegion)
+    const restored =
+      catalogs.get(`${stringValue(chosen["manifest_sha256"])}/${selectedRegion}`) ??
+      (await restore(stringValue(chosen["manifest_sha256"]), selectedRegion))
     if (restored) {
       matchEntry(chosen, restored.manifest)
       return { snapshot: { ...restored, entrySource: source }, downloaded: false }
@@ -412,6 +422,9 @@ export function createSnapshotClient(
       }
     }
     catalogOf(candidate)
+    for (const [key, cached] of catalogs)
+      if (cached.manifestHash !== candidate.manifestHash) catalogs.delete(key)
+    catalogs.set(`${candidate.manifestHash}/${candidate.region ?? region}`, candidate)
     metadata?.dispose()
     detailAbort.abort()
     decode.cancel()
@@ -710,6 +723,72 @@ export function createSnapshotClient(
     return pending
   }
 
+  const catalog = async (
+    selectedRegion: "jp" | "en",
+    signal: AbortSignal,
+  ): Promise<LoadedSnapshot> => {
+    await (startup ?? pending)
+    signal.throwIfAborted()
+    const snapshot = loaded
+    // Lists hold a compact Worker index, so comparison must not download the selected catalog
+    // again merely to obtain its manifest on the main thread.
+    if (!snapshot) {
+      const comparison = createSnapshotClient(base, {
+        ...options,
+        region: selectedRegion,
+        fetch: (url, init) =>
+          requests.background(url, {
+            ...init,
+            signal: init?.signal ? AbortSignal.any([signal, init.signal]) : signal,
+          }),
+      })
+      await comparison.load()
+      signal.throwIfAborted()
+      const candidate = comparison.snapshot()
+      if (!candidate) throw new SnapshotError("payload-set", "comparison catalog failed")
+      catalogs.set(`${candidate.manifestHash}/${selectedRegion}`, candidate)
+      return candidate
+    }
+    const key = `${snapshot.manifestHash}/${selectedRegion}`
+    const cached = catalogs.get(key)
+    if (cached) return cached
+    const present = new Set(snapshot.bootstrap.map((fragment) => fragment.file))
+    const version = stringValue(snapshot.manifest["format_version"])
+    const parts = await Promise.all(
+      catalogKeys(snapshot.files, selectedRegion)
+        .filter((key) => !present.has(key) && snapshot.files.get(key)?.["purpose"] !== "config")
+        .map(async (key) => {
+          signal.throwIfAborted()
+          const file = snapshot.files.get(key)
+          if (!file) throw new SnapshotError("payload-set", "missing catalog file")
+          const bytes = await fetchVerified(
+            stringValue(file["path"]),
+            stringValue(file["sha256"]),
+            integerValue(file["bytes"]),
+            signal,
+            true,
+          )
+          signal.throwIfAborted()
+          const result = await decode({ kind: "file", file, bytes, version })
+          if (result.kind !== "fragments")
+            throw new SnapshotError("shape", "expected catalog fragments")
+          return result.fragments
+        }),
+    )
+    signal.throwIfAborted()
+    if (loaded?.manifestHash !== snapshot.manifestHash) throw new Error("snapshot replaced")
+    const candidate = {
+      ...snapshot,
+      region: selectedRegion,
+      printingReady: false,
+      bootstrap: [...snapshot.bootstrap, ...parts.flat()],
+    }
+    validateCatalog(candidate.bootstrap)
+    catalogOf(candidate)
+    catalogs.set(key, candidate)
+    return candidate
+  }
+
   return {
     base,
     status: () => status,
@@ -743,6 +822,7 @@ export function createSnapshotClient(
       if (loaded && region === next && loaded.region !== next) await reload()
     },
     snapshot: () => loaded,
+    catalog,
     fragments,
     metadataStatus: () =>
       metadata?.status() ?? { state: "idle", done: 0, total: 0, persistent: false },

@@ -15,6 +15,7 @@ export {
   type SnapshotClient,
   type SnapshotStatus,
 } from "./client"
+export { cardPrintings, editionPrinting, locateEdition } from "./edition"
 export type { Row } from "./format-v3/decode"
 export { SnapshotError } from "./format-v3/errors"
 export {

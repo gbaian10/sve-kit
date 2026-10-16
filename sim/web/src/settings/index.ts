@@ -4,6 +4,7 @@ export {
   DEFAULT_PREFS,
   prefsStore,
   readPrefs,
+  showsOtherEdition,
   TEXT_DISPLAYS,
   usePrefs,
 } from "./prefs"
