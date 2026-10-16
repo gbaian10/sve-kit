@@ -179,6 +179,7 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
 def test_two_traits_are_independent_operands() -> None:
     raw = "自分のデッキから仮族・仮別族・フォロワー7枚を探す。"
     classifier = engine()
+    before = derive_preparation(raw, source(raw), classifier).derived.recognized[0]
     prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
     frame, binding = prepared.bind(0)
     prepared.verify(raw, classifier, frame, binding)
@@ -188,10 +189,9 @@ def test_two_traits_are_independent_operands() -> None:
         GlossaryReference(kind="glossary", key="term:trait.synthetic"),
         GlossaryReference(kind="glossary", key="term:trait.other"),
     )
-    assert any(
-        s.type == "CardKind" and s.name not in expr.leaves
-        for s in frame.leaf_schema.slots
-    )
+    kind = next(s for s in frame.leaf_schema.slots if s.type == "CardKind")
+    assert kind.name not in expr.leaves
+    assert kind == next(s for s in before.schema.slots if s.name == kind.name)
 
 
 @pytest.mark.parametrize(

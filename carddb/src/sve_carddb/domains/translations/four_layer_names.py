@@ -193,14 +193,19 @@ class _Builder:
         value: TypedValue,
         span: Span,
         *,
-        expression: ContextExpression | PredicateExpr | None = None,
+        operand: bool = True,
     ) -> str | None:
+        expression = (
+            value if isinstance(value, (ContextExpression, PredicateExpr)) else None
+        )
         positions = self.positions(span)
         for i, slot in enumerate(self.slots):
             if slot.occurrences == positions:
                 if self.values[slot.name] != value:
                     return None
-                self.slots[i] = slot.model_copy(update={"role": role})
+                # Classifier forms require a recognized kind to keep its counted role.
+                if operand:
+                    self.slots[i] = slot.model_copy(update={"role": role})
                 return slot.name
         occupied = tuple(s for slot in self.slots for s in slot.occurrences)
         positions = merged(
@@ -295,7 +300,6 @@ class _Builder:
             rule.domain,
             expr,
             span,
-            expression=expr,
         )
 
     def port(
@@ -362,7 +366,6 @@ class _Builder:
 def _reference(
     builder: _Builder,
     classifier: Classifier,
-    spelling: str,
     category: str,
     role: str,
     span: Span,
@@ -404,7 +407,6 @@ def _fragments(builder: _Builder, classifier: Classifier) -> None:
             leaf = _reference(
                 builder,
                 classifier,
-                name[1],
                 "card_name",
                 "name_fragment",
                 Span(start=start, end=start + len(name[1])),
@@ -438,15 +440,12 @@ def _traits(builder: _Builder, classifier: Classifier) -> None:
     )
     for match in pattern.finditer(text):
         # Token identity and either-selector syntax have different source semantics.
-        if text[match.end() :].startswith("・") or (
-            match.start() and text[match.start() - 1] == "・"
-        ):
+        if text[match.end() :].startswith("・"):
             continue
         leaves = tuple(
             _reference(
                 builder,
                 classifier,
-                match[group],
                 "trait",
                 role,
                 Span(start=match.start(group), end=match.end(group)),
@@ -472,6 +471,7 @@ def _traits(builder: _Builder, classifier: Classifier) -> None:
                     "concept.rule_term.v1",
                     GlossaryReference(kind="glossary", key="term:object.card"),
                     kind_span,
+                    operand=False,
                 )
             else:
                 code = {
@@ -492,6 +492,7 @@ def _traits(builder: _Builder, classifier: Classifier) -> None:
                     "card_kind.any.v1",
                     reference,
                     kind_span,
+                    operand=False,
                 )
             builder.expression(
                 "traits.all2.v1",

@@ -1043,7 +1043,7 @@ BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍�
 | 與本物件不同名、與選取物件或處理結果同名 | `predicate.name.relative.v1`／`name_relation` | ObjectSet 或 ReceiptId import，保存精確來源及 capture |
 | 選取的卡片各有不同名稱 | `predicate.selection.distinct_name.v1`／`selection_name_constraint` | ObjectSet import，與名稱種類數讀值分型 |
 | 名稱包含片段或有限片段 OR | `predicate.name.contains.v1`／`name_contains_filter` | 必要 CardName 引用，角色 `name_fragment`；沿既有 `card_name.any.v1` 詞條來源，不另建片段清冊 |
-| 正文兩個特性同時成立 | `predicate.traits.all2.v1`／`trait_conjunction` | `filter_trait_left`、`filter_trait_right` 各自沿 `concept.trait.v1`，kind 保留獨立引用 |
+| 正文兩個特性同時成立 | `predicate.traits.all2.v1`／`trait_conjunction` | `filter_trait_left`、`filter_trait_right` 各自沿 `concept.trait.v1`；kind 保留獨立引用，已辨識的 kind 葉沿用原角色 |
 
 片段來源以原始引用位置還原，不能把正規化後的名稱 placeholder 當字典查找鍵。
 完整名稱、片段條件與合作名稱不因中文顯示字相同而合併。
