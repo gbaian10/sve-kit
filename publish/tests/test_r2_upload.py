@@ -32,10 +32,8 @@ from .r2_export_fixtures import art_changed as art_changed  # ruff: ignore[usele
 from .r2_export_fixtures import export, image_description
 from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
 from .r2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- per-test public and private roots
-from .r2_fixtures import ACCOUNT, BUCKET
 from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
 from .r2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
-from .r2_sdk_fixtures import install_mock_sdk
 
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
@@ -314,25 +312,6 @@ def test_manifest_filename_must_match_its_content_hash(
         ExportError, match=r"^Manifest differs from the preview pointer$"
     ):
         load_export(roots.preview)
-
-
-def _cli(
-    monkeypatch: pytest.MonkeyPatch, transport: Loopback, *args: str
-) -> tuple[int, str]:
-    real_client = httpx.Client
-
-    def factory(**_kwargs: object) -> httpx.Client:
-        return real_client(transport=transport, trust_env=False, follow_redirects=False)
-
-    install_mock_sdk(monkeypatch, transport)
-    monkeypatch.setattr(httpx, "Client", factory)
-    monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
-    monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
-    result = CliRunner().invoke(
-        app,
-        ["snapshot", "upload", *args, "--account-id", ACCOUNT, "--bucket", BUCKET],
-    )
-    return result.exit_code, result.output
 
 
 def test_dry_run_reads_no_credentials_and_opens_no_client(
