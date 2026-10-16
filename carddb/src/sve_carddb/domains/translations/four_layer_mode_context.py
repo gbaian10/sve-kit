@@ -79,6 +79,7 @@ def _descriptor(name: str, parameters: tuple[Parameter, ...] = ()) -> Descriptor
 
 
 _OWNER = Parameter("owner", "Player", "counted_owner", "player.relative.v1")
+_LIFE_OWNER = Parameter("owner", "Player", "mode_condition_owner", "player.relative.v1")
 _ZONE = Parameter("zone", "ZoneSet", "counted_zone", "zone.single.v1")
 _TRAIT = Parameter("trait", "Concept", "trait", "concept.trait.v1")
 _KIND = Parameter("kind", "CardKind", "counted_kind", "card_kind.selection.v1")
@@ -139,7 +140,7 @@ DESCRIPTORS = (
             _COUNT_BOUND,
         ),
     ),
-    _descriptor("life.at_most", (_OWNER, _BOUND)),
+    _descriptor("life.at_most", (_LIFE_OWNER, _BOUND)),
     *(
         _descriptor("keyword." + name, (_BOUND,))
         for name in ("necrocharge", "spell_chain")
@@ -555,7 +556,7 @@ def _finite_condition(
             argument(
                 "owner",
                 "Player",
-                "counted_owner",
+                "mode_condition_owner" if life else "counted_owner",
                 "player.relative.v1",
                 "self" if selected["owner"] == "自分" else "opponent",
                 "owner",

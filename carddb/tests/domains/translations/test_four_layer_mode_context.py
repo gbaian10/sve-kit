@@ -284,3 +284,29 @@ def test_finite_condition_renders_its_required_operands_with_annotations() -> No
         PreparationRenderer(renderer, targets).render(
             "synthetic", "zh-Hant", (missing,)
         )
+
+
+def test_leader_life_condition_does_not_borrow_a_card_set_owner_role() -> None:
+    prepared = prepare(
+        _INTRO + "相手のリーダーの体力が8以下なら、代わりに2つまで。\n" + _OPTIONS
+    )
+    frame, binding = prepared.bind(0)
+    owner = next(slot for slot in frame.leaf_schema.slots if slot.type == "Player")
+    assert owner.role == "mode_condition_owner"
+    assert binding.values[owner.name] == "opponent"
+    changed = frame.model_copy(
+        update={
+            "leaf_schema": frame.leaf_schema.model_copy(
+                update={
+                    "slots": tuple(
+                        slot.model_copy(update={"role": "counted_owner"})
+                        if slot.name == owner.name
+                        else slot
+                        for slot in frame.leaf_schema.slots
+                    )
+                }
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="role"):
+        verify_quantities(changed, binding, scopes={}, registry=prepared.registry)
