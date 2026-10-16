@@ -36,6 +36,25 @@ Catalog／Vocabulary 記憶體物件由此推導，不是另一份權威。
 
 缺有效繁中選詞時，模板的整個 context 回原文並報 `missing_term_translation`；UI fallback 不套用卡文。標籤翻譯選用投影屬 #53，必須驗有效 catalog 主體與當前選詞，不由相同字串或裸 FK 借用其他概念的翻譯。
 
+### 4.1 詞表選詞投影
+
+匯出時由 `export/project/translations.py` 將已解析的當前詞表選詞投影為 vocabulary 的 `label` 翻譯，
+沿用普通翻譯與文字閉包。此時 catalog 與 glossary 均已建好，無須在 catalog 匯入時提前解析詞表，
+也不讓前端另讀 authored 或推導概念對應。
+
+族群只接存在且 category 為 trait 的 `term:trait.<code>`；`cutthroat` 明示對應 `term:trait.killer`
+（既有 raw mapping 的「キラー」）。`new_year` 尚無對應選詞，保持缺譯；不更動 code。
+特殊標記 token 與 `term:object.token` 同指衍生物，可共用選詞。
+作品沒有同概念的既有選詞；evolve／advance 標記不借用 evolve_marker／advance_marker 物件名。
+這些缺項維持原有非空退回，不以相近字串猜譯文。卡種 leader 仍由 vocabulary 的 `value.translations` 提供「主戰者」。
+EP、SEP 與稀有度縮寫不投影詞表。
+
+投影讀取 `glossary_translation` 已解析的文字，包含 authored 與 source choice；保留 choice 的 origin，
+低信心合併概念與 choice。官方選詞沿用 digital_official 權威，不升為 SVE 官方翻譯。
+凍結來源與 authored 來源紀錄保留在建置 DB 的 glossary 與 source_record。投影 ID 由詞彙主體與選詞的概念、文字、品質、凍結來源推導，
+不含帶建置 revision 的 authored 來源紀錄，選詞未變時重建 ID 不變；
+公開快照沿用既有 vocabulary label 指標，不公開私人來源定位。重建時選詞改字即更新標籤譯文。
+
 ## 5. preview 與前端驗收
 
 以有效採納推導的 JP／EN 映射重建 preview，保留舊版，逐項列出保留 code、暫碼替換、新增標記及未覆蓋原值，重驗 class/type/special_kind 引用閉包。其餘 preview 詞彙不能因本次職業／卡種採納而自動升為正式資料。

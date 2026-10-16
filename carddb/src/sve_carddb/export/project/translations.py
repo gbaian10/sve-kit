@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.json import array, digest, object_value, string
+from sve_carddb.core.json import array, canonical, digest, object_value, string
 from sve_carddb.export.project.source import Record, Source, pick
 
 if TYPE_CHECKING:
@@ -488,6 +488,7 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
                     use, binding, checks_by_use.get(binding.source_use_id, ())
                 ),
             )
+    _vocabulary_labels(source, view, texts)
     used = {
         string(object_value(raw)["translation_id"])
         for owner in owners.values()
@@ -528,3 +529,84 @@ def _counterpart_pointer(
         "field": use["field"],
         "ordinal": use["ordinal"],
     }
+
+
+def _vocabulary_labels(
+    source: Source, view: dict[str, list[Record]], texts: Texts
+) -> None:
+    # Authored provenance embeds the build revision; an unchanged choice keeps its ID.
+    choices = source.rows(
+        "glossary_translation", "term_id,lang,text,source_id,origin,low_confidence"
+    )
+    if not choices:
+        return
+    terms = source.index("glossary_term", "id,category,low_confidence")
+    by_term = {(string(r["term_id"]), string(r["lang"])): r for r in choices}
+    for owner in view["vocabulary"]:
+        kind, code = string(owner["kind"]), string(owner["code"])
+        if not owner["active"]:
+            continue
+        if kind == "trait":
+            concept = "term:trait." + {"cutthroat": "killer"}.get(code, code)
+            if concept not in terms or terms[concept]["category"] != "trait":
+                continue
+        elif (kind, code) == ("special_kind", "token"):
+            concept = "term:object.token"
+        else:
+            continue
+        choice = by_term.get((concept, "zh-Hant"))
+        if choice is None:
+            continue
+        low = bool(choice["low_confidence"] or terms[concept]["low_confidence"])
+        identifier = (
+            "tr:"
+            + digest(
+                canonical(
+                    {
+                        "recipe": "vocabulary-glossary-v1",
+                        "kind": kind,
+                        "code": code,
+                        "source_unit_id": owner["label_unit_id"],
+                        "choice": choice,
+                        "low_confidence": low,
+                    }
+                )
+            )[7:]
+        )
+        view["translation"].append(
+            {
+                "id": identifier,
+                "target_lang": "zh-Hant",
+                "origin": choice["origin"],
+                "authority": "digital_official"
+                if choice["origin"] == "official"
+                else "unofficial",
+                "low_confidence": low,
+                "source_unit_id": owner["label_unit_id"],
+                "text_unit_id": texts.intern("zh-Hant", string(choice["text"])),
+                "annotation_set_id": None,
+            }
+        )
+        bindings = array(owner["translations"])
+        bindings[:] = [
+            raw for raw in bindings if object_value(raw)["target_lang"] != "zh-Hant"
+        ]
+        bindings.append(
+            {
+                "field": "label",
+                "ordinal": None,
+                "target_lang": "zh-Hant",
+                "translation_id": identifier,
+                "basis": "own_source",
+                "source": {
+                    "owner": {
+                        "kind": "vocabulary",
+                        "vocabulary_kind": kind,
+                        "code": code,
+                    },
+                    "field": "label",
+                    "ordinal": None,
+                },
+                "counterpart": None,
+            }
+        )
