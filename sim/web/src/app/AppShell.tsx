@@ -6,9 +6,12 @@ import { Footer } from "../components/nav/Footer"
 import { SideRail } from "../components/nav/SideRail"
 import { TopBar } from "../components/nav/TopBar"
 import { ToastProvider } from "../components/ui/Toast"
+import { snapshotClient } from "../data"
+import { showsOtherEdition, usePrefs } from "../settings"
 import { DevBadge } from "./DevBadge"
 import { useUiLanguageSync } from "./language"
-import { useActiveSnapshot } from "./snapshot"
+import { useOtherEdition } from "./other-edition"
+import { useActiveSnapshot, useRouteEdition, useSearchReadiness } from "./snapshot"
 import { SnapshotNotice } from "./SnapshotNotice"
 import { useThemeAttributes } from "./theme-attributes"
 
@@ -26,7 +29,17 @@ export function AppShell() {
   const { t } = useTranslation()
   useThemeAttributes()
   useUiLanguageSync()
-  const { client, status } = useActiveSnapshot()
+  const { client, status, root } = useActiveSnapshot()
+  const edition = useRouteEdition()
+  const prefs = usePrefs()
+  const readiness = useSearchReadiness(edition)
+  useOtherEdition(
+    snapshotClient(root),
+    edition,
+    showsOtherEdition(prefs, edition),
+    readiness.phase === "ready" && readiness.edition === edition && !readiness.updating,
+    readiness.manifestHash,
+  )
   return (
     <ToastProvider>
       <div className="flex min-h-dvh flex-col pb-21 lg:pb-0 lg:pl-18 xl:pl-50 phone-landscape:pb-0 phone-landscape:pl-16">

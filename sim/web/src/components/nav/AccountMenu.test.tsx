@@ -11,16 +11,36 @@ afterEach(() => {
 })
 
 describe("AccountMenuPanel", () => {
-  it("opens the chosen edition's list when switching from a fixed card printing", async () => {
-    const { router } = await renderInRouter(<AccountMenuPanel />, {
-      initialEntries: ["/cards/BP01-002"],
-    })
+  it("remembers comparison choices separately for the route's edition", async () => {
+    const { router } = await renderInRouter(<AccountMenuPanel />, { initialEntries: ["/cards"] })
+    const jp = () => screen.getByRole("switch", { name: "顯示英版資料" })
+    const en = () => screen.getByRole("switch", { name: "顯示日版資料" })
+    expect(jp()).toHaveAttribute("aria-checked", "false")
+    await userEvent.click(jp())
+    await userEvent.click(jp())
+    expect(readPrefs().showOtherEdition).toEqual({ jp: false, en: true })
+    await userEvent.click(jp())
+    expect(jp()).toHaveAttribute("aria-checked", "true")
     await userEvent.click(screen.getByRole("radio", { name: "英版" }))
-    expect(router.state.location.pathname).toBe("/cards")
     expect(router.state.location.search).toBe("?ed=en")
-    expect(screen.getByRole("radio", { name: "英版" })).toHaveAttribute("aria-checked", "true")
+    expect(en()).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(en())
+    expect(readPrefs().showOtherEdition).toEqual({ jp: true, en: false })
     await userEvent.click(screen.getByRole("radio", { name: "日版" }))
-    expect(router.state.location.search).toBe("")
+    expect(jp()).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(jp())
+    await userEvent.click(screen.getByRole("radio", { name: "英版" }))
+    expect(en()).toHaveAttribute("aria-checked", "false")
+    expect(readPrefs().showOtherEdition).toEqual({ jp: false, en: false })
+  })
+
+  it.each([
+    ["zh-TW", "顯示英版資料"],
+    ["ja", "英語版のデータを表示"],
+    ["en", "Show English edition data"],
+  ] as const)("labels the comparison switch in %s", async (language, label) => {
+    await renderInRouter(<AccountMenuPanel />, { language })
+    expect(screen.getByRole("switch", { name: label })).toBeInTheDocument()
   })
 
   it("writes every choice to the preferences", async () => {

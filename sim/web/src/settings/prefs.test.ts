@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { createPrefsStore, DEFAULT_PREFS, PREFS_KEY, readPrefs, writePrefs } from "./prefs"
+import {
+  createPrefsStore,
+  DEFAULT_PREFS,
+  PREFS_KEY,
+  readPrefs,
+  showsOtherEdition,
+  writePrefs,
+} from "./prefs"
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -162,4 +169,25 @@ describe("createPrefsStore", () => {
     expect(localStorage.getItem(PREFS_KEY)).toBeNull()
     expect(createPrefsStore(() => storage).get().cardEdition).toBe("en")
   })
+})
+
+it.each([undefined, null, true, { jp: true }])(
+  "uses the edition defaults without a complete comparison choice (%s)",
+  (value) => {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, showOtherEdition: value }))
+    expect(showsOtherEdition(readPrefs(), "jp")).toBe(false)
+    expect(showsOtherEdition(readPrefs(), "en")).toBe(true)
+  },
+)
+
+it("restores each edition's comparison choice independently", () => {
+  localStorage.setItem(
+    PREFS_KEY,
+    JSON.stringify({ v: 1, showOtherEdition: { jp: true, en: false } }),
+  )
+  const prefs = readPrefs()
+  expect(showsOtherEdition(prefs, "jp")).toBe(true)
+  expect(showsOtherEdition(prefs, "en")).toBe(false)
+  writePrefs(prefs)
+  expect(readPrefs().showOtherEdition).toEqual({ jp: true, en: false })
 })

@@ -14,6 +14,7 @@ export default {
     logoAlt: "sve-kit",
   },
   account: {
+    showOtherEdition: { jp: "英語版のデータを表示", en: "日本語版のデータを表示" },
     notSignedIn: "未ログイン",
     cardEdition: "カードの版",
     nameDisplay: "カード名の表示",
@@ -229,6 +230,9 @@ export default {
     specialProducts: "構築済みデッキ・特別商品",
   },
   cardPage: {
+    switchingEdition: "別のバージョンを読み込み中…",
+    otherEditionFailed: "別のバージョンを読み込めませんでした。",
+    notCollected: { jp: "このカードは日本語版に未収録です", en: "このカードは英語版に未収録です" },
     needsUpdate: "カードデータの更新が必要です",
     routeFailed: "カードを読み込めません",
     routeFailedHint: "カードデータが不完全か、読み込みに失敗しました。更新して再試行してください。",

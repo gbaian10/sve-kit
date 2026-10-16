@@ -619,6 +619,40 @@ describe("createSnapshotClient: verified snapshot records", () => {
     }
   })
 
+  it("stores a comparison catalog once it becomes the selected edition", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    await original.catalog?.("en", new AbortController().signal)
+    await original.selectRegion?.("en")
+    await expect
+      .poll(
+        async () => {
+          const cache = await namespace(storage)
+          const urls = (await cache.keys()).map((request) => request.url)
+          return (
+            urls.some((url) => url.includes("/snapshot-en/")) &&
+            urls.some((url) => url.includes("/adopted-index-en/"))
+          )
+        },
+        { timeout: 10_000 },
+      )
+      .toBe(true)
+    const served = serve(base)
+    const restored = createSnapshotClient(base, {
+      fetch: served.fetcher,
+      cacheStorage: storage,
+      region: "en",
+    })
+    await restored.load()
+    expect(served.requests).toEqual([INDEX])
+    expect(restored.snapshot()?.region).toBe("en")
+  })
+
   it("restores the same manifest without fetching or decoding the manifest and startup files", async () => {
     const storage = memoryCache()
     const original = createSnapshotClient(base, {

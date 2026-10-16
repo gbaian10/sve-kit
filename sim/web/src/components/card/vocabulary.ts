@@ -4,7 +4,7 @@ import type { TextLang } from "../../domain/search"
 type CardIndex = Catalog["index"]
 
 // Match Catalog.classLabel's fallback without exposing private data-layer helpers.
-export type VocabularyKind = "class" | "type" | "trait"
+export type VocabularyKind = "class" | "type" | "trait" | "rarity"
 
 export function vocabularyLabel(
   index: CardIndex,
