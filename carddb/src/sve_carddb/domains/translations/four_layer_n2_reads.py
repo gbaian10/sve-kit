@@ -8,6 +8,7 @@ from sve_carddb.contracts.four_layer import (
     Expression,
     FaceRevisionOwner,
     LeafSchema,
+    PredicateExpr,
     PrintingFaceOwner,
     Projection,
     Scope,
@@ -114,9 +115,10 @@ def _issues(builder: ReadSources, leaves: list[Leaf]) -> tuple[str, ...]:
 
 def _rename(found: Recognized, leaves: list[Leaf], before: Recognized) -> Recognized:
     names = {item.slot.name: f"leaf_{i}" for i, item in enumerate(leaves)}
+    # Predicates retained from an earlier family name their operands by slot too.
     values = {
         name: value.model_copy(update={"leaves": tuple(names[n] for n in value.leaves)})
-        if isinstance(value, (Expression, ContextExpression))
+        if isinstance(value, (Expression, ContextExpression, PredicateExpr))
         else value
         for name, value in found.values.items()
     }
@@ -124,7 +126,7 @@ def _rename(found: Recognized, leaves: list[Leaf], before: Recognized) -> Recogn
         format=2,
         slots=tuple(
             slot.model_copy(update={"expression": values[slot.name]})
-            if isinstance(values[slot.name], ContextExpression)
+            if isinstance(values[slot.name], (ContextExpression, PredicateExpr))
             else slot
             for slot in found.schema.slots
         ),

@@ -10,6 +10,7 @@ from sve_carddb.contracts.four_layer import (
     GlossaryReference,
     LeafRef,
     LiteralNode,
+    PredicateExpr,
     ReceiptRef,
     Target,
     VocabularyReference,
@@ -22,6 +23,7 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     verify_quantities,
 )
 from sve_carddb.domains.translations.four_layer_n2_reads import FAMILY
+from sve_carddb.domains.translations.four_layer_names import FAMILY as NAMES
 from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
@@ -32,6 +34,7 @@ from sve_carddb.domains.translations.four_layer_render import (
 
 from .test_four_layer_classification import classifier, source
 from .test_four_layer_n1 import n1_classifier
+from .test_four_layer_names import engine as names_engine
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Classifier
@@ -582,6 +585,23 @@ def test_context_player_operand_must_be_presented() -> None:
         PreparationRenderer(
             Renderer(labels, {}, {}, domains=base.domains), missing
         ).render("ctx:synthetic", "zh-Hant", (BoundTarget(frame, binding, selected),))
+
+
+@pytest.mark.parametrize(
+    "names_first", [True, False], ids=["names-first", "reads-first"]
+)
+def test_other_family_predicates_keep_their_operands(names_first: bool) -> None:
+    raw = (
+        "自分のデッキから「カード名に『仮場手札自分』を含むフォロワー」1枚を探し、手札に加える。"
+        "それに「自分の手札の枚数」と同じダメージ。"
+    )
+    engine = names_engine()
+    families = (NAMES, FAMILY) if names_first else (FAMILY, NAMES)
+    prepared = derive_preparation(raw, source(raw), engine, families=families)
+    frame, binding = prepared.bind(0)
+    prepared.verify(raw, engine, frame, binding)
+    assert any(isinstance(v, PredicateExpr) for v in binding.values.values())
+    assert any(isinstance(v, Expression) for v in binding.values.values())
 
 
 def test_current_zone_surfaces_reuse_b11_definition() -> None:
