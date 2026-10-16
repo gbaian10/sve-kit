@@ -254,7 +254,7 @@ workflow steps and does not depend on local mise configuration.
 | Variable | Purpose | Reader | Required / default |
 | --- | --- | --- | --- |
 | `SVE_DATA_DIR` | Latest source cache and manifest | carddb crawler and manifest commands | Required for live-data commands; no default; pytest replaces it with a temporary root |
-| `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), publish `upload` (`--export-dir`), Web `/cdn` | Export/upload require CLI or env; no default; Web uses synthetic fixture when unset or empty |
+| `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), publish `snapshot upload` (`--export-dir`), Web `/cdn` | Export/snapshot upload require CLI or env; no default; Web uses synthetic fixture when unset or empty |
 | `SVE_CARDDB_PRIVATE_DIR` | Text inputs and reports | carddb `snapshot export-offline` (`--private-dir`) | CLI or env required; no default; recipe and `--bundle-dir` remain explicit |
 | `SVE_PREVIEW_DIR` | Optional second local snapshot root | Web `/cdn-preview` | Optional; no default; unset or empty leaves the root unconfigured; exporter uses `SVE_EXPORT_DIR` |
 | `SVE_ARCHIVE_ROOT` | Immutable source store | carddb archive operations | Required when using archive configuration; no default |

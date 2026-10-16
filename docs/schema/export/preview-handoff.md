@@ -3,7 +3,7 @@
 preview 供隔離開發使用，匯出器產出 4.0.0。圖片投影依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
 與 [傳輸 §5.4](snapshot-transport.md#54-卡包-media-與-id-圖片)：從建置 hash path
 產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
-圖片流程獨立維護私有圖片索引、版本狀態與快取；文字匯出只產出 JSON。`sve-publish upload` 讀公開 JSON 根與明確指定的圖片根，
+圖片流程獨立維護私有圖片索引、版本狀態與快取；文字匯出只產出 JSON。`sve-publish snapshot upload` 讀公開 JSON 根與遠端卡圖上傳清單，
 在開發桶的 current／previous 索引寫入 `preview-` entry；這不是正式發布，不能把 preview 改名升格。
 
 preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`data_version` 必須有
@@ -76,11 +76,12 @@ Docker wrapper 固定寫入執行目錄的 `stages.tsv`，中斷仍保留已完�
 lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行檔 hash。
 不再提供 `--brotli-command` 或呼叫外部 encoder，亦不需準備系統 libbrotli。
 
-`sve-publish upload` 原樣上傳清單所列的 raw／br，不重壓；選檔、標頭與 CDN 驗證見
+`sve-publish snapshot upload` 原樣上傳清單所列的 raw／br，不重壓；選檔、標頭與分開的 CDN 驗收見
 [R2 上傳](../../../publish/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 圖片 producer 寫固定 ID key，文字匯出只寫公開影像 metadata 及快照 JSON，完全不複製或驗讀 bitmap。
-預覽服務與上傳需另外接入成功圖片建置的圖片根；上傳使用 `--image-dir` 指定，仍全量核對圖片。
+預覽服務與 `sve-publish images upload` 另外接入成功圖片建置的圖片根；卡圖上傳使用 `--image-upload` 與 `--image-dir`，只讀變動候選。
+快照上傳不需要圖片根，引用圖片的版本與大小須精確符合遠端卡圖上傳清單。
 
 清單存於 `snapshots/manifests/<sha256>.json`。所有不可變成員驗證／寫入後才原子更新
 `snapshots/preview/current.json`，內含 `manifest_path,manifest_sha256`。

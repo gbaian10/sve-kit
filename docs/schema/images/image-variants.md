@@ -64,12 +64,13 @@ binding／指紋／版本。每次圖片建置先 reserve H+1，失敗也消耗�
 
 上傳流程（[R2 上傳](../../../publish/README.md)）：
 
-1. 只選 preview 指標所指清單的引用閉包與其卡圖；私有目錄、建置 bundle 與圖片庫不上傳。
-2. 卡圖缺少或不同時才寫：新 key create-only，既有 key 以 If-Match 條件覆寫；JSON／manifest 不可覆寫，不同即停止。
-   每個檔案寫入後都從 origin 讀回比對 bytes 與標頭，未寫入的檔案以比較時的讀取為準。
-3. 以普通 CDN GET 核對所有帶 v 的卡圖完整 URL（含同組 bytes 未變而 URL 已換者）；開發環境可明示略過，origin 讀回照常。
-4. 確認索引未被改動後，最後條件切 current／previous 索引。失敗不發布半套 current，重跑只補傳缺少或不同的檔案。
-5. 回收另行執行，按 current 圖片集合與 current＋previous 的 JSON 閉包清理其餘 key。
+1. 圖片成功產出公開卡圖上傳描述；卡圖上傳讀桶內 `_publish/images.json`，只對新增／變動候選讀本機檔案、驗 SHA-256 與 bytes，再普通 PUT。未變圖不讀檔、不 GET／HEAD／讀回。
+2. 覆寫或只換版本前，先以清單 ETag 條件寫移除受影響的舊列；全部候選成功才條件登錄新列。同版本不同內容或版本倒退拒絕；同 bytes 升版只更新清單。無可信清單時整批重傳，不由 LIST 推定成功。
+3. 快照上傳只讀公開 JSON 與遠端卡圖上傳清單，要求每個引用 key 的版本及 bytes 精確相等。JSON 仍比對、create-only 寫入並讀回；確認清單未改動後，最後條件切版本索引。
+4. 日常上傳不再全量 CDN GET。卡圖或快取設定改動時由維護者驗收受影響的帶 v URL；成功清單只代表 origin 已完成，不證明 CDN／瀏覽器新鮮度。
+5. 卡圖與快照各自回收；圖只留 current，JSON 留 current＋previous。刪圖前先條件移除清單列，失敗留下無列孤兒，重跑 LIST 回收。
+
+產圖、兩種上傳與兩種 GC 必須依序執行，固定順序為圖片成功 → 快照成功 → 選擇性 GC。中斷先用同一上傳描述與未變動圖片根重跑，不支援中斷後換舊批次；清單不是版本狀態備份。信任前提與取捨見 [ADR-0017](../../adr/0017-trust-image-inventory.md)。
 
 同一組多尺寸覆寫並非跨物件原子交易；舊快照在寫入途中可能看到新舊尺寸混合，新快照只在全組就緒後發布。
 previous 的舊 v 冷讀拿到目前 bytes 可接受，metadata 不重寫，也不要求 origin 同時符合兩版圖片 hash。
