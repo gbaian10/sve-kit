@@ -240,6 +240,7 @@ const zhTW = {
     specialProducts: "預組與特別商品",
   },
   cardPage: {
+    switchingCard: "切換卡片中…",
     switchingEdition: "正在載入另一版本資料…",
     otherEditionFailed: "另一版本資料載入失敗。",
     notCollected: { jp: "日版尚未收錄這張卡", en: "英版尚未收錄這張卡" },

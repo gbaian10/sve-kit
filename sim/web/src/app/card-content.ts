@@ -1,0 +1,72 @@
+import { prepareImage } from "../components/card/image-loading"
+import {
+  type ImageIndex,
+  type JsonObject,
+  loadImagePage,
+  type LocatedCard,
+  type Row,
+  sharedAnnotatedTextResolver,
+  type SnapshotClient,
+  stringValue,
+} from "../data"
+
+export interface CardContent extends LocatedCard {
+  readonly client: SnapshotClient
+  readonly images: ImageIndex
+}
+
+/** Resolve the next page's basic text before replacing the page currently on screen. */
+export async function prepareCardContent(
+  client: SnapshotClient,
+  located: LocatedCard,
+  language: string,
+  sizes: string,
+): Promise<CardContent> {
+  const pinned = { ...client, snapshot: () => located.snapshot }
+  const { catalog, printing } = located
+  const resolver = sharedAnnotatedTextResolver(pinned)
+  const pointers = new Map<string, JsonObject>()
+  const add = (owner: JsonObject, field: string) => {
+    const pointer = { owner, field, ordinal: null }
+    pointers.set(JSON.stringify(pointer), pointer)
+  }
+  const faces = catalog.index.facesOf(printing.cardId).map((face) => {
+    const faceId = stringValue(face["id"])
+    const revision = catalog.index.displayRevision(faceId, printing.region)
+    const wording = catalog.index.wording(faceId, printing.region)
+    const candidates = (wording?.["candidates"] ?? []) as Row[]
+    const own = candidates.filter((candidate) => candidate["printing_id"] === printing.id)
+    const nameId = revision?.["id"] ?? own[0]?.["revision_id"]
+    if (typeof nameId === "string") add({ kind: "face_revision", id: nameId }, "name")
+    const effects = new Set<string>()
+    if (revision) effects.add(stringValue(revision["id"]))
+    const visible = revision
+      ? own
+      : candidates.filter(
+          (candidate) => candidate["printing_id"] === printing.id || candidates.length === 1,
+        )
+    for (const candidate of visible) {
+      if (typeof candidate["revision_id"] === "string") effects.add(candidate["revision_id"])
+    }
+    for (const id of effects) add({ kind: "face_revision", id }, "effect")
+    const owner = { kind: "printing_face", id: printing.id, face_id: faceId }
+    for (const field of ["name", "effect", "flavor"]) add(owner, field)
+    return { printingId: printing.id, faceId }
+  })
+  const [images] = await Promise.all([
+    loadImagePage(pinned, faces).catch((): ImageIndex => ({
+      cardImage: () => undefined,
+      asset: () => undefined,
+      known: () => true,
+      failed: true,
+    })),
+    Promise.all([...pointers.values()].map((pointer) => resolver.resolve(pointer, language))),
+  ])
+  await Promise.all(
+    faces.map(({ printingId, faceId }) => {
+      const source = images.cardImage(printingId, faceId)
+      return source ? prepareImage(source, sizes) : Promise.resolve()
+    }),
+  )
+  return { ...located, client: pinned, images }
+}

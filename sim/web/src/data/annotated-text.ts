@@ -405,6 +405,13 @@ class PageClosure {
 
 const shared = new WeakMap<LoadedSnapshot, AnnotatedTextResolver>()
 
+export function peekAnnotatedTextResolver(
+  client: SnapshotClient,
+): AnnotatedTextResolver | undefined {
+  const snapshot = client.snapshot()
+  return snapshot ? shared.get(snapshot) : undefined
+}
+
 // Share bootstrap indexing across previews and reopened card pages for the same snapshot.
 export function sharedAnnotatedTextResolver(client: SnapshotClient): AnnotatedTextResolver {
   const snapshot = client.snapshot()

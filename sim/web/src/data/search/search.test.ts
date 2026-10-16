@@ -1652,7 +1652,7 @@ it("keeps two printings of one card as separate numbered items after index resto
 })
 
 it.each(["jp", "en"] as const)(
-  "returns only the current card and its neighbours in %s, capped at the originating pages",
+  "retains the navigation order in %s, capped at the originating pages",
   async (edition) => {
     const h = harness()
     h.session.load(base, edition, "preview")
@@ -1666,10 +1666,10 @@ it.each(["jp", "en"] as const)(
     if (!target) throw new Error("missing neighbour target")
     h.channel.neighbours({ ...query, edition }, target.key)
     await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
-    expect(h.status().result).toMatchObject({ page: { offset: 3, items: items.slice(3, 6) } })
+    expect(h.status().result).toMatchObject({ page: { offset: 0, items } })
     h.channel.neighbours({ ...query, edition }, target.key, 5)
     await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
-    expect(h.status().result).toMatchObject({ page: { total: 5, items: items.slice(3, 5) } })
+    expect(h.status().result).toMatchObject({ page: { total: 5, items: items.slice(0, 5) } })
     h.session.dispose()
   },
 )

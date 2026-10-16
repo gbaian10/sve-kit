@@ -250,6 +250,7 @@ export default {
     specialProducts: "構築済みデッキ・特別商品",
   },
   cardPage: {
+    switchingCard: "カードを切り替え中…",
     switchingEdition: "別のバージョンを読み込み中…",
     otherEditionFailed: "別のバージョンを読み込めませんでした。",
     notCollected: { jp: "このカードは日本語版に未収録です", en: "このカードは英語版に未収録です" },
