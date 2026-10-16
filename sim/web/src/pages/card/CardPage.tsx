@@ -106,9 +106,9 @@ export function CardPage() {
   useEffect(() => {
     if (!manifestHash || cached) return
     let active = true
-    const loading = locateCard(client, input).then((value) => {
-      return prepareCardContent(client, value, language, IMAGE_SIZES)
-    })
+    const loading = locateCard(client, input).then((value) =>
+      prepareCardContent(client, value, language, IMAGE_SIZES),
+    )
     void loading.then(
       (value) => {
         if (active) {
