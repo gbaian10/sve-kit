@@ -185,6 +185,29 @@ def _quantity(match: re.Match[str]) -> QuantitySpec:
     )
 
 
+def _ability_bounds(masked: str, position: int) -> tuple[int, int]:
+    boundaries = tuple(re.finditer(r"\n\s*\n", masked)) + tuple(_HEAD.finditer(masked))
+    start = max((m.end() for m in boundaries if m.end() <= position), default=0)
+    end = min(
+        (m.start() for m in boundaries if m.start() > position), default=len(masked)
+    )
+    return start, end
+
+
+def _cost_candidates(raw: str, position: int, condition: Span) -> tuple[Span, ...]:
+    amount = re.search(_DIGIT, raw[condition.start : condition.end])
+    if amount is None:
+        return ()
+    masked = _mask(raw)
+    start, _ = _ability_bounds(masked, position)
+    return tuple(
+        Span(start=line.start(), end=line.end())
+        for line in re.compile(r"[^\n]+").finditer(masked, start, position)
+        if (payment := _COST.fullmatch(line[0])) is not None
+        and int(payment["n"]) == int(amount[0])
+    )
+
+
 def _optional_cost(
     raw: str, condition: Span | None, lines: tuple[re.Match[str], ...], index: int
 ) -> Span | None:
@@ -196,16 +219,14 @@ def _optional_cost(
         )
     ):
         return None
+    candidates = _cost_candidates(raw, condition.start, condition)
     previous = lines[index - 1]
-    payment = _COST.fullmatch(raw[previous.start() : previous.end()])
-    amount = re.search(_DIGIT, raw[condition.start : condition.end])
     if (
-        payment
-        and amount
-        and int(payment["n"]) == int(amount[0])
+        len(candidates) == 1
+        and candidates[0] == Span(start=previous.start(), end=previous.end())
         and previous.end() + 1 == lines[index].start()
     ):
-        return Span(start=previous.start(), end=previous.end())
+        return candidates[0]
     return None
 
 
@@ -229,12 +250,7 @@ def _labels_valid(
 
 
 def _unique_intro(masked: str, intro: re.Match[str]) -> bool:
-    boundaries = tuple(re.finditer(r"\n\s*\n", masked)) + tuple(_HEAD.finditer(masked))
-    start = max((m.end() for m in boundaries if m.end() <= intro.start()), default=0)
-    end = min(
-        (m.start() for m in boundaries if m.start() > intro.start()),
-        default=len(masked),
-    )
+    start, end = _ability_bounds(masked, intro.start())
     return len(tuple(_INTRO.finditer(masked, start, end))) == 1
 
 
@@ -264,7 +280,7 @@ def _mode_source(
         return None
     prefix = raw[intro.end() : labels[0].start()].rstrip()
     alternative = _ALTERNATIVE.search(prefix)
-    history = prefix.find(_HISTORY)
+    history = masked[intro.end() : labels[0].start()].find(_HISTORY)
     if not ((labels[0].start() > line.end() and alternative) or history >= 0):
         return None
     if alternative and not 1 <= int(alternative["n"]) <= len(labels):
@@ -472,7 +488,12 @@ def _condition(
     elif "エボルヴデッキの表向き" in text:
         descriptor, reason = "read.faceup_evolve.count.v1", "missing_provider"
     elif text.startswith("コストを+"):
-        descriptor, reason = "choice.condition.optional_cost.v1", "missing_provider"
+        descriptor = "choice.condition.optional_cost.v1"
+        reason = (
+            "ambiguous_source"
+            if len(_cost_candidates(raw, group.intro.start, span)) > 1
+            else "missing_provider"
+        )
     return _pending(raw, span, descriptor, reason), []
 
 

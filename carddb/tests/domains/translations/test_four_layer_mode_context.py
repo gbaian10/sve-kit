@@ -122,6 +122,9 @@ def test_pending_conditions_retain_source_and_provider_distinction(
         _INTRO + _CONDITION + "\n【1】仮甲。{ファンファーレ}【2】仮乙。",
         "「" + _INTRO + _CONDITION + "\n" + _OPTIONS + "」を持つ。",
         _INTRO + "代わりに好きな数まで。\n" + _OPTIONS,
+        _INTRO
+        + "「このターン、この能力でチョイスした選択肢はチョイスできない。」"
+        + _OPTIONS,
     ],
 )
 def test_neighboring_choice_shapes_are_not_admitted(raw: str) -> None:
@@ -377,3 +380,30 @@ def test_independent_ability_heads_keep_distinct_choice_contexts() -> None:
     assert first_context is not None
     assert second_context is not None
     assert first_context.value != second_context.value
+
+
+@pytest.mark.parametrize(
+    ("prefix", "reason"),
+    [
+        (
+            "これをプレイする際、コストを+7してよい。\nこれをプレイする際、コストを+7してよい。\n",
+            "ambiguous_source",
+        ),
+        (
+            "「仮の規則\nこれをプレイする際、コストを+7してよい。\n」",
+            "missing_provider",
+        ),
+    ],
+)
+def test_optional_cost_cannot_borrow_an_ambiguous_or_quoted_producer(
+    prefix: str, reason: str
+) -> None:
+    raw = prefix + _INTRO + "コストを+7したなら、代わりに2つまで。\n" + _OPTIONS
+    prepared = derive_preparation(raw, source(raw), n1_classifier(), families=(FAMILY,))
+    (group,) = mode_sources(raw, prepared)
+    assert group.cost is None
+    rules = [rule for rs in prepared.mode_rules for rule in rs]
+    assert any(
+        isinstance(rule.condition, PendingCondition) and rule.condition.reason == reason
+        for rule in rules
+    )
