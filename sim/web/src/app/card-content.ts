@@ -72,7 +72,12 @@ export async function prepareCardContent(
       known: () => true,
       failed: true,
     })),
-    Promise.all([...pointers.values()].map((pointer) => resolver.resolve(pointer, language))),
+    // A text that cannot load shows its own error after the commit; the card itself was located.
+    Promise.all(
+      [...pointers.values()].map((pointer) =>
+        resolver.resolve(pointer, language).catch(() => null),
+      ),
+    ),
   ])
   await Promise.all(
     faces.map(({ printingId, faceId }) => {

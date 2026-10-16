@@ -90,6 +90,7 @@ async function setup(pendingCandidate = false) {
   let hold: Promise<void> | undefined
   let historyHold: Promise<void> | undefined
   let historyFailure = false
+  let failedPurposes = new Set<string>()
   const pinnedSnapshot = snapshot
   state.client = {
     ...source,
@@ -102,6 +103,9 @@ async function setup(pendingCandidate = false) {
         await historyHold
         if (historyFailure) throw new Error("synthetic candidate history unavailable")
       }
+      const purpose = pinnedSnapshot.files.get(key)?.["purpose"]
+      if (typeof purpose === "string" && failedPurposes.has(purpose))
+        throw new Error("synthetic read failure")
       return source.fragments(key)
     },
   }
@@ -154,6 +158,9 @@ async function setup(pendingCandidate = false) {
     },
     failHistory: (failed: boolean) => {
       historyFailure = failed
+    },
+    failReads: (purposes: readonly string[]) => {
+      failedPurposes = new Set(purposes)
     },
     holdNextRead: () => {
       let release: () => void = () => undefined
@@ -235,6 +242,26 @@ describe("card navigation commits", () => {
       await h.router.navigate("/cards/BP01-003")
     })
     await screen.findByRole("heading", { name: "試作號令" })
+  })
+
+  it("commits a located card whose text and image cannot load, then retries them", async () => {
+    const user = userEvent.setup()
+    const h = await setup()
+    h.failReads(["detail", "images"])
+    await user.click(screen.getByRole("button", { name: "下一張" }))
+    await screen.findByRole("heading", { name: "試作隊長" })
+    expect(screen.queryByRole("heading", { name: "無法定位卡片" })).not.toBeInTheDocument()
+    expect(screen.getByText("卡圖資訊載入失敗")).toBeInTheDocument()
+    expect((await screen.findAllByText("文字載入失敗，請稍後再試。")).length).toBeGreaterThan(0)
+    h.failReads([])
+    await user.click(screen.getByRole("button", { name: "上一張" }))
+    await screen.findByRole("heading", { name: "試作見習兵" })
+    await user.click(screen.getByRole("button", { name: "下一張" }))
+    await screen.findByRole("heading", { name: "試作隊長" })
+    await waitFor(() => {
+      expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
+    })
+    expect(screen.queryByText("文字載入失敗，請稍後再試。")).not.toBeInTheDocument()
   })
 
   it("commits pending-card history, type and stats with its name and text", async () => {

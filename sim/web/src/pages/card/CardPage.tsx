@@ -59,6 +59,8 @@ const ICON_BUTTON =
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
 const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
 const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
+// Each prepared card keeps its own catalog and text closure (several MB), so only nearby cards stay.
+const PREPARED_CARDS = 4
 
 export function CardPage() {
   const { cardNo, intId } = useParams()
@@ -106,11 +108,13 @@ export function CardPage() {
     void loading.then(
       (value) => {
         if (active) {
-          setPrepared((previous) => {
-            const next = new Map(previous).set(inputKey, value)
-            if (next.size > 16) next.delete(next.keys().next().value ?? "")
-            return next
-          })
+          // A failed image index stays uncached so returning to the card retries it.
+          if (!value.images.failed)
+            setPrepared((previous) => {
+              const next = new Map(previous).set(inputKey, value)
+              if (next.size > PREPARED_CARDS) next.delete(next.keys().next().value ?? "")
+              return next
+            })
           setLocated({ key: inputKey, value })
         }
       },

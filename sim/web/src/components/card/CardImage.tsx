@@ -32,7 +32,6 @@ export interface CardImageProps {
 }
 
 // A fixed slot prevents layout shifts while the image downloads or remains unavailable.
-
 export function CardImage(props: CardImageProps) {
   return props.translate ? (
     <ImageContent {...props} t={props.translate} />
