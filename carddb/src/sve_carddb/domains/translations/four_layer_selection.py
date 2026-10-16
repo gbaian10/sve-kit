@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database
     from sve_carddb.domains.translations.four_layer_authored import Inputs
     from sve_carddb.domains.translations.four_layer_classification import Classifier
+    from sve_carddb.domains.translations.four_layer_labels import ReferenceName
     from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
     from sve_carddb.domains.translations.sources import Sources
 
@@ -40,7 +41,10 @@ class Selection:
 
 
 class Controls:
-    def __init__(self, inputs: Inputs) -> None:
+    def __init__(
+        self, inputs: Inputs, reference_names: Mapping[str, ReferenceName] | None = None
+    ) -> None:
+        self.official_card_names = frozenset(reference_names or {})
         self.frames = {
             r.data.id: r.data for r in inputs.records if isinstance(r, FrameRecord)
         }
@@ -235,6 +239,10 @@ class Controls:
                     )
                 value = candidates[0]
             else:
+                if lang == "zh-Hant" and term_pin.term_id in self.official_card_names:
+                    raise ValueError(
+                        f"Official card-name reference forbids a named variant pin: term_id={term_pin.term_id}"
+                    )
                 value = self.variant_labels[
                     term_pin.term_id, lang, term_pin.variant_key
                 ]

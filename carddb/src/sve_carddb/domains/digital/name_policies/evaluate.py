@@ -167,9 +167,18 @@ def owner_text(
     return OwnerEvidence(owner, text, (use,), sources.context_hash(review.context))
 
 
-def name_result(evidence: OwnerEvidence, frozen: Catalogue) -> NamePolicyResult:
-    """Pure eligibility after owner evidence validation; this is never human review."""
-    owner, text, owner_uses = evidence.owner, evidence.text, evidence.uses
+@dataclass(frozen=True)
+class NameEligibility:
+    source_name_hash: str | None
+    status: Literal["eligible", "untranslated", "excluded", "unknown"]
+    condition: str
+    game: str | None
+    text: str | None
+    refs: tuple[SourceRef, ...]
+
+
+def exact_name_result(text: str | None, frozen: Catalogue) -> NameEligibility:
+    """Apply the same frozen exact-name rule independently of owner-local selection."""
     if frozen.purpose != "names":
         raise ValueError("Browsing policy cannot supply an official name")
     status: Literal["eligible", "untranslated", "excluded", "unknown"] = "untranslated"
@@ -216,17 +225,23 @@ def name_result(evidence: OwnerEvidence, frozen: Catalogue) -> NamePolicyResult:
                 )
             # A present but ineligible first-generation name cannot borrow svwb.
             break
+    return NameEligibility(checksum, status, condition, game, translated, refs)
+
+
+def name_result(evidence: OwnerEvidence, frozen: Catalogue) -> NamePolicyResult:
+    """Pure eligibility after owner evidence validation; this is never human review."""
+    outcome = exact_name_result(evidence.text, frozen)
     return NamePolicyResult(
-        owner,
+        evidence.owner,
         evidence.context_hash,
         frozen.policy_hash,
-        checksum,
-        status,
-        condition,
-        game,
-        translated,
-        refs,
-        (*frozen.uses, *owner_uses),
+        outcome.source_name_hash,
+        outcome.status,
+        outcome.condition,
+        outcome.game,
+        outcome.text,
+        outcome.refs,
+        (*frozen.uses, *evidence.uses),
     )
 
 

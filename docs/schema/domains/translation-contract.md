@@ -80,7 +80,7 @@ owner／field／ordinal 的組合及來源雜湊由本次有效身分與原文�
 counterpart 仍須兩側精確原文及有效同卡／面關係。
 
 translation_override 的 pin 以 templates=`[{template_id,lang,variant_key}]`、
-terms=`[{term_id,lang,variant_key}]` 指明可重用的當前譯文／選詞；variant_key=default 指一般 record，
+terms=`[{term_id,lang,variant_key}]` 指明可重用的當前譯文／選詞；variant_key=default 指一般 record（card_name 則取當次有效 label），
 其餘指對應的 template_translation_variant／glossary_choice_variant。suppress/default 時兩陣列為空。
 模板／語言／term 必須與該 context 的實際依賴一致，不允許加入與來源無關的選詞或逐卡自由全文。
 

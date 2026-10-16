@@ -13,6 +13,7 @@ from sve_carddb.domains.digital.name_policies.application import _counterparts
 from sve_carddb.domains.digital.name_policies.catalogue import catalogue
 from sve_carddb.domains.digital.name_policies.evaluate import name_result, owner_text
 from sve_carddb.domains.digital.name_policies.owners import publication_owners
+from sve_carddb.domains.digital.name_policies.references import reference_names
 from sve_carddb.domains.digital.name_policies.results import Result
 from sve_carddb.domains.translations.four_layer_render import RENDERER_VERSION
 from sve_carddb.domains.translations.glossary.evidence import validate_choice
@@ -23,6 +24,8 @@ from sve_carddb.domains.translations.names.counterparts import first_counterpart
 from sve_carddb.domains.translations.names.sources import name_source
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from pydantic import JsonValue
 
     from sve_carddb.build import Database, Value
@@ -31,6 +34,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.digital.name_policies.application import Inputs
     from sve_carddb.domains.digital.name_policies.loader import Snapshot
     from sve_carddb.domains.text_observations.plan import TextPlan
+    from sve_carddb.domains.translations.four_layer_labels import ReferenceName
     from sve_carddb.domains.translations.names.counterparts import NameCandidate
     from sve_carddb.domains.translations.names.resolve import Names
     from sve_carddb.domains.translations.names.sources import NameSource
@@ -62,6 +66,7 @@ class Plan:
     snapshot: Snapshot
     owners: tuple[Selected, ...]
     uses: tuple[SourceUse, ...]
+    reference_names: Mapping[str, ReferenceName]
 
     def report(self) -> dict[str, JsonValue]:
         """Diagnostics contain IDs and counts; never official card text or private events."""
@@ -268,7 +273,12 @@ def prepare(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals
                 annotation_term,
             )
         )
-    return Plan(snapshot, tuple(owners), uses_sorted(sources.uses))
+    return Plan(
+        snapshot,
+        tuple(owners),
+        uses_sorted(sources.uses),
+        reference_names(replay, frozen, low_confidence=policy.low_confidence),
+    )
 
 
 def populate(
@@ -366,7 +376,12 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
         bindings.append(
             DisplayBinding(use, destination, "zh-Hant", "own_source", translation)
         )
-    return Result(input_record(build, plan.uses), tuple(bindings), plan.report())
+    return Result(
+        input_record(build, plan.uses),
+        tuple(bindings),
+        plan.report(),
+        plan.reference_names,
+    )
 
 
 def materialize(

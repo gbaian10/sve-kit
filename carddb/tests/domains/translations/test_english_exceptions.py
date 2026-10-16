@@ -13,13 +13,14 @@ from sve_carddb.contracts.four_layer import (
     OwnerField,
     PrintingFaceOwner,
 )
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, object_value
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.english_exceptions import apply
 from sve_carddb.domains.translations.four_layer_authored import from_files
+from sve_carddb.domains.translations.four_layer_labels import ReferenceName
 from sve_carddb.domains.translations.four_layer_sources import descriptor
 from sve_carddb.domains.translations.four_layer_storage import read_annotation
 from sve_carddb.domains.translations.sources import Sources
@@ -30,6 +31,7 @@ from sve_carddb.parse.pages.official_en import card_url
 
 from ...ingest.test_source_archive import _put, _resource, _store
 from ...support.build_db_fixtures import rows
+from ...support.translation_fixtures import name_term
 from ...workflows.test_snapshot_offline_english import records
 from ..text_observations.test_effect_presence import page
 
@@ -479,3 +481,70 @@ def test_identical_source_and_semantics_share_one_target_across_exact_owners(
     assert {row.values["text"] for row in db.rows("translation")} == {"合成規則😀。"}
     if not current:
         assert report["fallback_reasons"] == {"english_source_not_current": 1}
+
+
+@pytest.mark.parametrize("target_low", [False, True])
+def test_english_leaf_uses_official_name_and_preserves_target_quality(
+    english: tuple[Database, Sources, tuple[SourceDescriptor, ...]], target_low: bool
+) -> None:
+    db, sources, descriptors = english
+    values = records(descriptors[0], "card", "face")
+    target = object_value(values[0])
+    target.update(origin="project", low_confidence=target_low)
+    object_value(values[1]).update(origin="project", low_confidence=False)
+    data = object_value(target["data"])
+    data["references"] = {
+        "name": {"kind": "card_name", "term_id": "term:name.synthetic"}
+    }
+    data["nodes"] = [
+        {"kind": "Literal", "text": "😀"},
+        {"kind": "LeafRef", "slot": "name"},
+        {"kind": "Literal", "text": "／舊合成詞"},
+    ]
+    raw = canonical(
+        {"format": 3, "kind": "translation_shard", "records": [name_term()]}
+    )
+    english_raw = canonical(
+        {"format": 3, "kind": "translation_shard", "records": values}
+    )
+    authored = from_files(
+        (
+            ("translations/overrides/english/000.yaml", english_raw, english_raw),
+            ("translations/glossary/concepts/001.yaml", raw, raw),
+        )
+    )
+    with db.transaction():
+        db.insert(
+            "glossary_term",
+            {
+                "id": "term:name.synthetic",
+                "category": "card_name",
+                "concept_key": "name.synthetic",
+                "source_ja": "Synthetic name",
+                "emphasis": None,
+                "authored_source_id": "source",
+                "record_key": "synthetic-term",
+                "origin": "project",
+                "low_confidence": False,
+            },
+        )
+        report = apply(
+            db,
+            authored,
+            sources,
+            {r.record_key: "source" for r in authored.records},
+            {"term:name.synthetic": ReferenceName("合成新官名😀", False)},
+        )
+    assert report is not None
+    assert report["translated"] == 1
+    translation = db.rows("translation")[0].values
+    assert translation["text"] == "😀合成新官名😀／舊合成詞"
+    assert translation["origin"] == "project"
+    assert translation["authority"] == "unofficial"
+    assert translation["low_confidence"] is target_low
+    annotation = read_annotation(
+        db, str(db.rows("translation_annotation")[0].values["annotation_set_id"])
+    )
+    assert annotation.occurrences[0].ranges[0].start == 1
+    assert annotation.occurrences[0].ranges[0].end == 7
+    assert annotation.occurrences[0].bold is True

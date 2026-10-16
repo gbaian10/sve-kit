@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database
     from sve_carddb.domains.translations.four_layer_authored import Inputs
+    from sve_carddb.domains.translations.four_layer_labels import ReferenceName
     from sve_carddb.domains.translations.four_layer_render import Label
     from sve_carddb.domains.translations.four_layer_sources import CardSource
     from sve_carddb.domains.translations.sources import Sources
@@ -270,7 +271,11 @@ def _source(
 
 
 def apply(
-    db: Database, inputs: Inputs, sources: Sources, audit: Mapping[str, str]
+    db: Database,
+    inputs: Inputs,
+    sources: Sources,
+    audit: Mapping[str, str],
+    reference_names: Mapping[str, ReferenceName] | None = None,
 ) -> dict[str, JsonValue] | None:
     """Stale sources and unresolved identities retain the complete English original."""
     targets = {
@@ -281,7 +286,7 @@ def apply(
         return None
     for target in targets.values():
         _references(db, target)
-    selected = labels(db, "zh-Hant")
+    selected = labels(db, "zh-Hant", reference_names)
     reasons: Counter[str] = Counter()
     translated = low = 0
     for use in uses:

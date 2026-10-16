@@ -46,12 +46,13 @@ from sve_carddb.domains.translations.four_layer_storage import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Mapping
 
     from sve_carddb.build import Database
     from sve_carddb.domains.text_observations.vocabulary import Vocabulary
     from sve_carddb.domains.translations.four_layer_authored import Inputs
     from sve_carddb.domains.translations.four_layer_classification import Classifier
+    from sve_carddb.domains.translations.four_layer_labels import ReferenceName
     from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
     from sve_carddb.domains.translations.inputs import Snapshot
     from sve_carddb.domains.translations.recognition.rules import Rules
@@ -205,6 +206,7 @@ class Settings:
     batch_id: str
     authored_revision: str
     lang: str
+    reference_names: Mapping[str, ReferenceName] = dataclass_field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -370,11 +372,14 @@ def apply(
     classifier = prepare_classifier(
         db, snapshot, settings.sources, settings.vocabulary, settings.rules
     )
-    controls = Controls(inputs)
+    controls = Controls(inputs, settings.reference_names)
     plan = _compile(db, frames, classifier, settings, controls)
     forms, selected, audit = _populate(db, inputs, plan, settings)
     renderer = Renderer(
-        labels(db, settings.lang), {}, forms, domains=classifier.domains
+        labels(db, settings.lang, settings.reference_names),
+        {},
+        forms,
+        domains=classifier.domains,
     )
     controls.prepare_labels(db, classifier, settings.sources)
     translated = low = 0
@@ -425,5 +430,5 @@ def apply(
             )
         ),
         tuple(value for _, value in sorted(plan.details.items())),
-        apply_english(db, inputs, settings.sources, audit),
+        apply_english(db, inputs, settings.sources, audit, settings.reference_names),
     )
