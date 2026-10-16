@@ -15,7 +15,7 @@ from sve_carddb.build.database import open_database
 from sve_carddb.build.t0 import compile_t0
 from sve_carddb.contracts.snapshot import tables
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
-from sve_carddb.domains.routes.defaults import GeneralEvidence, select_defaults
+from sve_carddb.domains.routes.defaults import select_defaults
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.export.project import (
     Decisions,
@@ -700,35 +700,20 @@ def test_unresolved_regional_rules_divergence_keeps_manual_reason(db: Database) 
     assert support["automatic"] is False
 
 
-def test_default_general_evidence_and_date_uncertainty_are_separate(
+def test_default_uses_normalized_rarity_without_processing_evidence(
     db: Database,
 ) -> None:
     with db.transaction():
         db.delete("default_printing_override", {"card_id": "card", "region": "jp"})
-    chosen = replace(
-        decisions(), general_evidence={"printing": GeneralEvidence(True, True, False)}
-    )
-    result = projected(db, chosen)
+        db.insert(
+            "vocabulary",
+            dict(db.rows("vocabulary")[0].values) | {"kind": "rarity", "code": "lg"},
+        )
+        db.update("printing", {"id": "printing"}, {"rarity_code": "lg"})
+    result = projected(db)
     assert (
         object_value(array(one(result, "card", "card")["regions"])[1])["default_method"]
-        == "candidate_general"
-    )
-    with db.transaction():
-        db.update(
-            "product",
-            {"id": "product"},
-            {"date_precision": "day", "released_on": "2026-09-29"},
-        )
-        db.update("printing", {"id": "printing"}, {"premium": False})
-        db.update(
-            "printing_face",
-            {"printing_id": "printing", "face_id": "face"},
-            {"signed": False, "embellishment_state": "confirmed"},
-        )
-    result = projected(db, chosen)
-    assert (
-        object_value(array(one(result, "card", "card")["regions"])[1])["default_method"]
-        == "earliest_general"
+        == "lowest_rarity"
     )
 
 

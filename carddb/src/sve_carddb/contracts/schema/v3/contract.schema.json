@@ -402,8 +402,8 @@
               "enum": [
                 "override",
                 "fallback",
-                "earliest_general",
-                "candidate_general"
+                "lowest_rarity",
+                "candidate_lowest_rarity"
               ]
             },
             {
@@ -500,8 +500,8 @@
             "enum": [
               "override",
               "fallback",
-              "earliest_general",
-              "candidate_general"
+              "lowest_rarity",
+              "candidate_lowest_rarity"
             ]
           }
         },
@@ -14280,8 +14280,8 @@
                   "enum": [
                     "override",
                     "fallback",
-                    "earliest_general",
-                    "candidate_general"
+                    "lowest_rarity",
+                    "candidate_lowest_rarity"
                   ]
                 }
               },

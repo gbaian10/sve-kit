@@ -176,11 +176,11 @@ candidates_hash=H(candidates)。每次重建完整集合並驗各成員的當前
 集合增減、目標被移到別卡／別區或不再可展示才需重新採納；不能省略競爭者或以 caller 自選清單驗過。
 Decklog 不可用不等於不可展示；同一版次的無關來源修訂不改候選集合，也不使覆寫失效。
 
-不保存 selection_basis 或重複的 scope_hash，不將 selector_version、一般版 policy_hash 或程式版號當 freshness 條件。
+不保存 selection_basis 或重複的 scope_hash，不將 selector_version 或程式版號當 freshness 條件。
 人工選擇是「此卡此區預設這一版」，與機械 selector 怎麼算分開。
-一般版清單核可、selector 修正、無關卡包新增都不要求重簽。preview 轉正式時重驗同卡同區集合與目標可展示性，
+selector 修正或無關卡包新增都不要求重簽。preview 轉正式時重驗同卡同區集合與目標可展示性，
 集合相同即可沿用；若本卡新增候選則 stale，不只因展示範圍的名稱改變就失效。
-人工 override 可以選特殊版，不必偽造「一般」證據；投影 method=override，不標 earliest_general。
+人工 override 可以選特殊版，不必偽造「一般」證據；投影 method=override，不標 lowest_rarity。
 
 一般唯一 official 路由仍自動推導，不能為每卡造冗餘 route 決定。
 同號 route 發布後，若修訂／撤回將改 route 的 printing 目標，必須在
@@ -217,64 +217,31 @@ concept_evidence 以 name/tooltip/copy_pattern 為鍵；origin 為整筆來源�
 不增 glossary_term、公開 owner 或 FieldTranslation enum；缺譯回原記號，低信心沿翻譯呈現，
 來源損壞仍失敗。locale 文案改字不需新增 symbol 定義的核可；記號定義直接使用同一個 current 入口。
 
-## 7. 預設版次與一般版分類
+## 7. 預設版次與稀有度
 
-build-db §15 已有順序：同卡同區 → 當前有效 override → card.home_set 內的一般候選 →
-最早可信 inclusion 日期 → 穩定 ID；無一般候選則從可展示版次以已知日期優先、固定 ID 選 fallback。
-下述日期、展示集合與完整性是既有語意的技術細化；稀有度分類已核可，不改選取先後或宣稱加工證據已齊。
+維護者 2026-10-16 於 #666 決定代表卡先用最低稀有度，取代一般版分類證據選取器。
+同卡同區內 confirmed override 優先，其餘依 normalized vocabulary code 的稀有度順序，
+再依永久 `printing.home_set_id` 在該區的最早完整商品發售日，最後原始卡號與 printing ID 升序。
+發售日由 `product_family_member` 所屬同區 product 的 `released_on/date_precision=day` 取得；
+不採再錄 inclusion 覆寫、不優先 `card.home_set_id`，也不借另一區的日期。
+未知日期排已知之後，month/year 不補成某日。
 
-**使用者 2026-10-01 核可（P1：一般版稀有度白名單）**：一般稀有度限 BR、SR、GR、LG，
-英版原標籤 Bronze、Silver、Gold、Legendary 分別採相同分類。以下完整列出盤點的 27 個 exact 原始標籤之分類，
-不是已配發的 vocabulary code，也不是日英卡片身分對應。
+稀有度配置權威為 [registry.rarity](../../../carddb/src/sve_carddb/domains/registry/rarity.py)，
+順序為 BR、SR、GR、LG、SL、UR、SP、SSP、PR，兩區原標籤正規化後共用 code。
+原值與 premium 仍保留；未知原值、純 premium 與「-」不捏造 code，排已知稀有度之後。
+其中純 premium 已知不是普通版，再排在「-」與未知原值之後，避免 token 等卡改選 premium 版。
+已知稀有度內不另依 premium／signed／stamp／frame 篩選或排序，也不從卡號字串猜稀有度。
 
-| 分類 | JP 原始標籤 | EN 原始標籤 | 一般版候選 |
-| --- | --- | --- | --- |
-| 一般稀有度 | BR、SR、GR、LG | Bronze、Silver、Gold、Legendary | 可進候選池，仍須同卡同區、home_set 及加工條件適用 |
-| 含 premium 的複合標籤 | BR・プレミアム、SR・プレミアム、GR・プレミアム | Bronze / Premium、Silver / Premium、Gold / Premium | 排除；即使拆出一般 rarity，premium=true 仍優先排除 |
-| 純 premium | プレミアム | Premium | 排除；rarity=null、premium=true，不捏造基礎 rarity |
-| 特殊稀有度 | SL、SP、SSP、UR | Super Legendary、Special、Super Special、Ultimate | 排除 |
-| PR／Promo | PR | Promo | 不列入一般稀有度白名單 |
-| 未標稀有度 | - | - | 不列入白名單；token、領袖等不因「-」自動成為一般版 |
-
-所有含 プレミアム／Premium 的版次均排除一般候選，不能只保留拆出的 BR／SR／GR 來繞過 premium。
-只有 PR／Promo／「-」等非白名單版次的卡仍有預設版次，method=fallback；不因此隱藏卡片，
-也不宣稱 PR／Promo 在實物上全部有特殊加工。raw 原樣保留；依 #555，稀有度原值→穩定 code 的對照由程式提供的配置
-（[rarity.py](../../../carddb/src/sve_carddb/domains/registry/rarity.py)）登錄，不經 authored 詞彙採納。
-日後若改走 authored 採納，須先移除程式對照，以免 `vocabulary(kind,code)` 主鍵衝突。
-新標籤／未核對的映射保持未知，不從卡號推分類。
-
-**卡框與標誌不在本次核可範圍**，依既有技術設計處理：要證實一般版，仍須 premium=false、
-全部面 signed=false、已採納普通 frame 及無 stamp 的證據。任一面已知特殊即排除一般候選；
-null／unreviewed／缺面維持未知，不以 variant_key=standard 代替普通框證據，也不預配 frame/stamp code。
-已知一般 rarity、尚無已知特殊加工但 frame/stamp 等缺證據者，可留候選池並標 candidate_general，
-不能因這次核可直接升成 earliest_general；沒有一般 rarity 候選才走 fallback。
-
-無 stamp 不能由 printing_stamp 空表推導。建議分類事實交後續加工採納契約，至少釘
-`printing_id,face_id,frame_code,signed,stamp_state,stamp_ids,image_ref,decision_ref`，
-stamp_state 為 none/present/unknown，none 需該面已完整檢查且 stamp_ids=[]，present 需完整有效 stamp_ids。
-premium 的來源／解析 recipe 亦必可驗；各面與版次完整受審才可供 classifier。
-這是**所需證據的提案，不是新增可寫入 authored 的第三入口**；未完成其正式 loader 前保持未知，不能用裸 GeneralEvidence 布林假冒採納。
-加工審查沿 build-db §3.3 的 sampled/confirmed 門檻並保留抽查標示，不自行提高為全筆 confirmed。
-分類規則的核可與各面加工事實的採納分開；未完成事實採納時維持未知。
-
-日期依 [build-db §3.2](../build/build-db.md#32-商品與發行)：每筆同區 printing_product 的有效日期，
-在 first_available_precision=null（沒有覆寫）時沿該 product 的 released_on/date_precision；
-有覆寫則以 first_available_on/first_available_precision 為準。只有有效精度為 day 才有完整日期。
-覆寫為 month/year/unknown 時不得回退商品 day，也不得補成某日；商品自身不是 day 時同樣未知。
-必須先有可驗的同區收錄關係才能沿商品日期，不從 owner、抓取日或卡號順序猜收錄。
-printing 取其全部可信 inclusion 的最早已知有效日；任何可能更早的收錄日期未知，仍不能聲稱最早已證實。
-固定 ID tie-break 採 printing.id 原字串升序，不以建置插入次序排序。
-
-| method | 既有規則的技術細化 |
+| method | 選取依據 |
 | --- | --- |
-| override | 有效的當前覆寫，目標在本次展示集合 |
-| earliest_general | 存在 home_set 一般候選，全部可能競爭者的分類與有效收錄日期完整；依最早日期、固定 ID 選出 |
-| candidate_general | home_set 有已知一般 rarity 且未有證據排除的一般候選，但加工或有效日期不齊；仍依已知日期、固定 ID 選，不稱「最早」 |
-| fallback | home_set 無上述一般候選，從本次可展示集合按已知日期、固定 ID 選取；全無版次則不造 default |
+| override | 有效的當前覆寫，目標在同卡同區展示集合 |
+| lowest_rarity | 所有候選都有已知稀有度，依稀有度、home set 發售日、卡號、ID 選取 |
+| candidate_lowest_rarity | 有已知稀有度候選，但另有未知稀有度競爭者；先從已知者選取 |
+| fallback | 全部候選稀有度未知，純 premium 排後，再依 home set 發售日、卡號、ID 選取；無版次不造 default |
 
-未知分類者即使暫未選中，仍會阻止 earliest_general；不能只檢查勝出的版次。
-只有未知 rarity 而沒有可辨識的一般候選時使用 fallback；已知一般 rarity 但加工未知可為 candidate_general。
-不新增「加工更完整者優先於較早日期者」的排序。政策 pins 與所缺證據須進建置報告；後補證據可改卡片預設，永久 URL 不變。
+method 記錄排序政策，不證明普通加工或發售日完整。2026-10-01 核可的一般稀有度白名單
+只服務舊選取器，已由本決定取代。加工事實的採納與未知狀態維持原契約，不能由空 stamp 表、
+variant_key=standard 或本次選中的 default 推論普通加工。
 
 **展示集合技術契約**：selector 接收由既有公開投影規則產生並釘住的完整同區 printing 閉包，
 包括 unlisted/provisional 與 Decklog unavailable，只要原有發布／投影閘門允許展示；不能由 selector 另作資格黑名單。
@@ -334,7 +301,7 @@ P4 繁中介面缺翻譯時先日文、再英文，只影響介面詞彙標籤�
 | 搜尋與記號 | 保留 canonical 優先、多義結果與原記號退回；有限參數、placeholder、完整 token 與 uint 範圍檢查 |
 | 構築名稱 | 保留 exact 名稱、地區與面身分；同名群組不合併 card，未知名稱不能自行猜定 |
 | route／default | 保留完整同卡同區候選與永久 URL 邊界；錯候選、目標或已發布路由改動不得繞過身分修復 |
-| 一般版 selector | premium、signed、frame、stamp、日期與競爭者未知時按 §7 降級，不冒稱 earliest_general |
+| 預設版次 selector | 依 §7 的 vocabulary 稀有度、永久 home set 發售順序與卡號選取，未知稀有度保留 method 區別 |
 | 建置交易 | 任一來源或映射驗證失敗整批回滾；未接 offline 的 kind 明確拒絕 |
 
 正式凍結來源匯出與合成測試分開報告；合成成功不等於來源與授權已由維護者確認。

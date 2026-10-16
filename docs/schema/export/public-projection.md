@@ -41,7 +41,7 @@ logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Sche
 | `printing.faces` | `printing_face` 加 section、stamp、觀測、翻譯、更正；按永久 face ordinal | 未知印刷原文維持 null/unknown；觀測不填回 printed 欄 |
 | `printing_product.available_on/date_precision/date_raw` | 三個 `first_available_*` 覆寫欄 | null precision 沿 product；unknown 明示未知；month/year 不補一日 |
 | `printing_product.first_inclusion_state`、debut | 同卡同區全部 inclusion 的有效日期 | 任一可能更早日期不明就 unknown，不把空 inclusion 宣稱 first |
-| 預設版次 | 直接使用 `routes.defaults.select_defaults` 的版次 ID／method；分類證據承接 `GeneralEvidence` | 依路由採納契約驗 override、home、一般版加工、競爭版次與日期；本投影不另寫選取算法 |
+| 預設版次 | 直接使用 `routes.defaults.select_defaults` 的版次 ID／method | 依路由採納契約驗 override，按 vocabulary 稀有度、永久 home set 發售順序及卡號選取；本投影不另寫選取算法 |
 | `card.regions.deck_role` | confirmed override，否則依同卡同區 current 的已識別 type／special kind 推導 | 未確認 override 不採用；未知代碼、沒有 current 或多面角色衝突為 null |
 | `art.review_level/regions/artists`、`artist` | registry 插畫固定 `confirmed`；此次地區的現行 `printing_face` 使用關係、`art_artist` | 無現行用途的舊 art 與只被舊 art 引用的 artist 不出貨；被排除 art 的 nullable 引用留 null |
 | `traits/titles/special_kinds/sections` | `face_trait/title/special_kind/text_section`、`printing_text_section` | ID/code 集合穩定排序；段落保留 ordinal；未有資料為 [] |
@@ -88,8 +88,6 @@ logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Sche
   [§7.2](../domains/translation-contract.md#72-逐-owner-的顯示選用)；翻譯選用不解除 DSL 區域限制。
 - `related_regions`：reskin 在各輸出地區的已驗證 eligibility。
 - `active_scopes`：ruling revision 的已驗證現行有效文字單元；projector 不猜部分取代的切段。
-- `general_evidence`：printing ID → 路由建置器的 `GeneralEvidence`，原樣傳給唯一的預設版次選取器；
-  不由卡號、字串猜加工，不把未知分類補成已確認一般版。
 
 投影沿 4.0.0 機器契約檢查 `face.wording`、PrintingFace.observations、annotation 與來源指標的完整欄序及閉包。
 `Projection` 仍須經 `export_snapshot` 的 reader 驗證，才能作為完整候選快照；

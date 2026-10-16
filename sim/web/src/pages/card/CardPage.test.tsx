@@ -71,6 +71,7 @@ const state = vi.hoisted(() => ({
       }[]
     | null,
   translated: false,
+  originalName: false,
   candidates: [] as { printing_id: string; revision_id: string | null }[],
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
@@ -95,39 +96,46 @@ vi.mock("../../app/snapshot", () => {
   })
   return {
     useImageIndex: () => undefined,
-    // The exact-owner name never resolves here, so the heading shows the catalog stand-in.
+    // Most cases leave the exact name pending to exercise the catalog stand-in.
     useAnnotatedText: (_client: unknown, owner: { kind: string; id: string }, field: string) => ({
       readiness: {
-        basic: field === "effect" ? "ready" : "pending",
+        basic: field === "effect" || state.originalName ? "ready" : "pending",
         source: "none",
         annotations: "none",
       },
       value:
-        owner.kind === "face_revision" && field === "effect"
+        field === "name" && state.originalName && owner.id === "rev:other"
           ? {
-              original: {
-                unit: {
-                  text:
-                    owner.id === "rev:other"
-                      ? "Synthetic older effect"
-                      : "Synthetic selected effect",
-                  lang: "ja",
-                },
-                annotation: null,
-              },
-              ...(state.translated
-                ? {
-                    translated: {
-                      unit: { text: "合成新版譯文", lang: "zh-Hant" },
-                      annotation: null,
-                    },
-                  }
-                : {}),
+              original: { unit: { text: "Synthetic original name", lang: "ja" }, annotation: null },
               concepts: [],
               explanations: [],
               cards: [],
             }
-          : null,
+          : owner.kind === "face_revision" && field === "effect"
+            ? {
+                original: {
+                  unit: {
+                    text:
+                      owner.id === "rev:other"
+                        ? "Synthetic older effect"
+                        : "Synthetic selected effect",
+                    lang: "ja",
+                  },
+                  annotation: null,
+                },
+                ...(state.translated
+                  ? {
+                      translated: {
+                        unit: { text: "合成新版譯文", lang: "zh-Hant" },
+                        annotation: null,
+                      },
+                    }
+                  : {}),
+                concepts: [],
+                explanations: [],
+                cards: [],
+              }
+            : null,
     }),
     useSearchReadiness: () => ({
       phase: "ready",
@@ -178,7 +186,14 @@ vi.mock("../../app/snapshot", () => {
                 cardNo: "BP-SYNTHETIC",
                 region: "jp",
                 classCode: null,
-                name: { original: { lang: "ja", text: "Synthetic front" }, translations: {} },
+                // A pending card's catalog name is the card-number stand-in.
+                name: {
+                  original: {
+                    lang: "ja",
+                    text: state.originalName ? "BP-SYNTHETIC" : "Synthetic front",
+                  },
+                  translations: {},
+                },
                 cost: 1,
                 attack: 1,
                 defense: 1,
@@ -216,26 +231,28 @@ vi.mock("../../app/snapshot", () => {
             }
           },
           displayRevision: (face: string) =>
-            state.doubleFace
-              ? {
-                  id: face === "f:back" ? "rev:back" : "rev:front",
-                  name_unit_id: face === "f:back" ? "t:back" : "t:front",
-                  cost: 2,
-                  translations:
-                    face === "f:back"
-                      ? [
-                          {
-                            field: "name",
-                            target_lang: "zh-Hant",
-                            translation_id: "tr:back",
-                            basis: "jp_source",
-                          },
-                        ]
-                      : [],
-                }
-              : state.available
-                ? { id: "rev:synthetic", name_unit_id: "t:synthetic" }
-                : undefined,
+            state.originalName
+              ? undefined
+              : state.doubleFace
+                ? {
+                    id: face === "f:back" ? "rev:back" : "rev:front",
+                    name_unit_id: face === "f:back" ? "t:back" : "t:front",
+                    cost: 2,
+                    translations:
+                      face === "f:back"
+                        ? [
+                            {
+                              field: "name",
+                              target_lang: "zh-Hant",
+                              translation_id: "tr:back",
+                              basis: "jp_source",
+                            },
+                          ]
+                        : [],
+                  }
+                : state.available
+                  ? { id: "rev:synthetic", name_unit_id: "t:synthetic" }
+                  : undefined,
           translation: () => ({ text_unit_id: "t:back-translated", low_confidence: true }),
           vocabulary: (kind: string, code: string) =>
             kind === "rarity" && code === "lg"
@@ -267,6 +284,7 @@ vi.mock("../../app/snapshot", () => {
 })
 
 beforeEach(() => {
+  state.originalName = false
   state.available = false
   state.multiplePrintings = false
   state.printingRows = null
@@ -286,6 +304,26 @@ beforeEach(() => {
 
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
+})
+
+describe("original card titles", () => {
+  it.each(["zh-TW", "ja", "en"] as const)(
+    "shows the original name when no translation or display revision exists in %s",
+    async (language) => {
+      state.originalName = true
+      state.doubleFace = true
+      await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+        initialEntries: ["/cards/BP-SYNTHETIC"],
+        language,
+      })
+      expect(
+        screen.getAllByRole("heading", { level: 2, name: "Synthetic original name" })[0],
+      ).toHaveAttribute("lang", "ja")
+      expect(
+        screen.queryByRole("heading", { level: 2, name: "BP-SYNTHETIC" }),
+      ).not.toBeInTheDocument()
+    },
+  )
 })
 
 describe("plain wording on the card page", () => {

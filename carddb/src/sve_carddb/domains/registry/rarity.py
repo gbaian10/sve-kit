@@ -39,6 +39,9 @@ _UNCODED: dict[str, dict[str, bool | None]] = {
 }
 _JP_LABELS = {code: label for label, code in _LABELS["jp"].items()}
 
+# Vocabulary tiers follow the approved card-face order, independent of card numbers.
+RARITY_ORDER = tuple(_JP_LABELS)
+
 
 def normalize(region: str, raw: str) -> tuple[str | None, bool | None] | None:
     """None marks an unrecognized spelling, which never acquires a guessed tier."""

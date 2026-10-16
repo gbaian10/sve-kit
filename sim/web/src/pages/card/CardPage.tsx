@@ -469,6 +469,11 @@ export function CardView({
         </div>
         <div className="mt-4 min-w-0 lg:mt-1">
           {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
+            // A pending display still has the shown printing's own original name.
+            const ownNameRevision = ((wording?.["candidates"] ?? []) as Row[]).find(
+              (candidate) => candidate["printing_id"] === printingId,
+            )?.["revision_id"]
+            const nameRevisionId = revision?.["id"] ?? ownNameRevision
             const classCode =
               typeof revision?.["class_code"] === "string" ? revision["class_code"] : null
             const typeCode =
@@ -486,12 +491,12 @@ export function CardView({
                 {faceSummary && name && (
                   <div className="flex flex-col gap-1.5">
                     {ordinal > 0 && <Badge className="self-start">{t("cardPage.backFace")}</Badge>}
-                    {revision ? (
+                    {typeof nameRevisionId === "string" ? (
                       <CardNameHeading
                         client={client}
                         edition={region}
                         resolver={null}
-                        owner={{ kind: "face_revision", id: stringValue(revision["id"]) }}
+                        owner={{ kind: "face_revision", id: nameRevisionId }}
                         fallback={name}
                       />
                     ) : (

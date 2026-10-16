@@ -270,7 +270,7 @@ route/default 純推導；authored 只寫 alias、variant `route_override`、`de
 
 詞彙／語言採[format 2 當前入口](catalog-route-adoption.md#41-詞彙與語言)，保留 code 與映射檢查、移除收據。
 搜尋別名、記號定義、特殊構築名稱及路由覆寫仍用原入口，永久 alias／改號走 §12。
-一般版稀有度白名單與繁中缺譯先日文再英文不變；翻譯標籤及記號文案走 §6。
+預設版次採[最低稀有度規則](catalog-route-adoption.md#7-預設版次與稀有度)；繁中缺譯仍先日文再英文，翻譯標籤及記號文案走 §6。
 
 公開的 text_symbol／ruling hints 使用 [傳輸契約 §3.2 的 ParameterSchema](../export/snapshot-transport.md#32-公開參數宣告)，不把建置模板的參數或引用直接投影為公開物件。
 

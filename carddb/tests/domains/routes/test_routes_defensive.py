@@ -7,13 +7,12 @@ import pytest
 from sve_carddb.build import Row, create_database
 from sve_carddb.build.t0 import compile_t0
 from sve_carddb.domains.routes import build_index, derive_routes, populate_routes
-from sve_carddb.domains.routes.defaults import _inclusion_date, select_defaults
+from sve_carddb.domains.routes.defaults import select_defaults
 
-from ...support.build_db_fixtures import rows
 from ...support.routes_fixtures import base, printing
 
 if TYPE_CHECKING:
-    from sve_carddb.build import Database, Value
+    from sve_carddb.build import Database
 
 
 def replace_table(
@@ -95,52 +94,3 @@ def test_defensive_orphan_default_override_when_upstream_fk_validation_is_broken
         )
         with pytest.raises(ValueError, match="no card/region printing"):
             select_defaults(db)
-
-
-@pytest.mark.parametrize("precision", ["month", "year", "unknown"])
-def test_defensive_non_day_precision_wins_over_present_date(precision: str) -> None:
-    values = rows()
-    inclusion = Row(
-        "printing_product",
-        values["printing_product"]
-        | {"first_available_on": "2019-01-01", "first_available_precision": precision},
-    )
-    product = Row(
-        "product",
-        values["product"] | {"released_on": "2010-01-01", "date_precision": "day"},
-    )
-    assert _inclusion_date(inclusion, product) is None
-
-
-@pytest.mark.parametrize("invalid_date", ["2019-02-30", "2019-13-01", "not-a-date"])
-@pytest.mark.parametrize("inherited", [False, True])
-def test_defensive_effective_date_requires_a_valid_calendar_day(
-    invalid_date: str, inherited: bool
-) -> None:
-    values = rows()
-    inclusion = Row(
-        "printing_product",
-        values["printing_product"]
-        | {
-            "first_available_on": None if inherited else invalid_date,
-            "first_available_precision": None if inherited else "day",
-        },
-    )
-    product = Row(
-        "product",
-        values["product"] | {"released_on": invalid_date, "date_precision": "day"},
-    )
-    with pytest.raises(ValueError, match=r"day|month|Invalid isoformat"):
-        _inclusion_date(inclusion, product)
-
-
-def test_defensive_effective_date_rejects_non_text_storage() -> None:
-    values = rows()
-    inclusion: dict[str, Value] = values["printing_product"] | {
-        "first_available_on": 2019,
-        "first_available_precision": "day",
-    }
-    with pytest.raises(TypeError, match="Expected inclusion date"):
-        _inclusion_date(
-            Row("printing_product", inclusion), Row("product", values["product"])
-        )

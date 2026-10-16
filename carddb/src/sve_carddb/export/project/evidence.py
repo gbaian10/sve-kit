@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from pydantic import BaseModel
 
     from sve_carddb.domains.card_extras.importer import CardExtrasRestriction
-    from sve_carddb.domains.routes.defaults import GeneralEvidence
     from sve_carddb.domains.translations.names.bindings import DisplayBinding
     from sve_carddb.export.project.source import Record
 
@@ -43,7 +42,6 @@ class Decisions:
     related_regions: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     active_scopes: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     aligned_regions: frozenset[tuple[str, str]] = frozenset()
-    general_evidence: Mapping[str, GeneralEvidence] = field(default_factory=dict)
     supplemental_restrictions: tuple[CardExtrasRestriction, ...] = ()
 
     def with_text_views(
