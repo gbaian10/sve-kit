@@ -4,7 +4,11 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.contracts.four_layer import Port, Projection, Scope
+
 if TYPE_CHECKING:
+    from sve_carddb.domains.translations.four_layer_classification import Recognized
+    from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
     from sve_carddb.domains.translations.recognition.models import Hint
 
 _INTRO = re.compile(
@@ -93,3 +97,101 @@ def choice_alternative(raw: str, hint: Hint) -> bool:
         )
         or (last_label <= span.start < scope.end and keyword_replacement)
     ) and (re.match(r"^つまで[。:：]", raw[span.end : scope.end]) is not None)
+
+
+def constant_choice_interface(
+    raw: str,
+    part: SourcePart,
+    found: Recognized,
+    hints: tuple[Hint, ...],
+) -> Projection | None:
+    """Describe only N1-proven choices entirely contained in this source part."""
+    if found.issues or part.source_span.role != "body":
+        return None
+    intros = tuple(h for h in hints if h.type == "uint" and choice_quantity(raw, h))
+    if len(intros) != 1:
+        return None
+    scope = _scope(raw, intros[0])
+    assert scope is not None
+    positions = (
+        (scope.intro.start("count"), scope.intro.end("count"), "choice_mode_count"),
+        *(
+            (
+                scope.intro.end() + label.start(1),
+                scope.intro.end() + label.end(1),
+                "choice_index",
+            )
+            for label in scope.labels
+        ),
+    )
+    slots = {slot.name: slot for slot in found.schema.slots}
+    for start, end, role in positions:
+        if not any(
+            slots[o.slot].role == role
+            and len(o.raw_spans) == 1
+            and o.raw_spans[0].start == start
+            and o.raw_spans[0].end == end
+            for o in found.occurrences
+        ):
+            return None
+    # Pending whole-line semantics must stay pending; the port grants no execution status.
+    projection = (
+        found.semantics.projection
+        if found.semantics is not None
+        else Projection(
+            projection_kind="pending",
+            discriminator=None,
+            scopes=(),
+            imports=(),
+            exports=(),
+        )
+    )
+    branches = tuple(f"choice_{index}" for index in range(1, len(scope.labels) + 1))
+    return Projection(
+        projection_kind=projection.projection_kind,
+        discriminator=projection.discriminator,
+        scopes=tuple(
+            sorted(
+                (
+                    *projection.scopes,
+                    Scope(id="choice", parent=None, kind="ability"),
+                    *(
+                        Scope(id=name, parent="choice", kind="branch")
+                        for name in branches
+                    ),
+                ),
+                key=lambda s: s.id,
+            )
+        ),
+        imports=tuple(
+            sorted(
+                (
+                    *projection.imports,
+                    *(
+                        Port(
+                            name=name,
+                            type="ChoiceContext",
+                            source_role="choice_index",
+                            scope=name,
+                        )
+                        for name in branches
+                    ),
+                ),
+                key=lambda p: p.name,
+            )
+        ),
+        exports=tuple(
+            sorted(
+                (
+                    *projection.exports,
+                    Port(
+                        name="choice",
+                        type="ChoiceContext",
+                        source_role="choice_mode_count",
+                        scope="choice",
+                    ),
+                ),
+                key=lambda p: p.name,
+            )
+        ),
+    )
