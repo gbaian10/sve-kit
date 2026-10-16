@@ -180,25 +180,21 @@ def test_raw_and_brotli_are_independent_representations(
     )
 
 
-@pytest.mark.parametrize("collision", ["equal", "bytes", "headers", "missing"])
+# Differing bytes and a 412 without an object are covered by the upload and parallel tests.
+@pytest.mark.parametrize("same_headers", [True, False])
 def test_only_a_create_only_collision_is_downloaded(
-    images: PublicImages, roots: Roots, collision: str
+    images: PublicImages, roots: Roots, *, same_headers: bool
 ) -> None:
     export(images, roots, step=0, brotli=python_brotli())
     loaded = load_export(roots.preview)
     member = loaded.members[0]
     fake = DelayedS3(delay=0)
     ready(fake, roots)
-    if collision == "missing":
-        fake.fail_key = member.key
-    else:
-        fake.objects[member.key] = Stored(
-            b"other" if collision == "bytes" else member.raw,
-            '"orphan"',
-            {} if collision == "headers" else member_headers(member),
-        )
+    fake.objects[member.key] = Stored(
+        member.raw, '"orphan"', member_headers(member) if same_headers else {}
+    )
     with memory_store(fake) as store:
-        if collision == "equal":
+        if same_headers:
             assert upload(store, loaded)["unchanged_files"] == 1
         else:
             with pytest.raises(ExportError, match="Immutable JSON"):

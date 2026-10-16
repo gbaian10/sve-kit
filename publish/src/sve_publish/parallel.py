@@ -119,20 +119,13 @@ class UploadPool:
             raise
 
     def _write(self, item: UploadObject, raw: bytes) -> int | None:
-        if item.image:
-            if self.stopped.is_set():
-                return None
-            self.store.put_image(item.key, raw)
-            return 1
-        # An admitted PUT can still finish after another worker fails.
+        # Reading local bytes can outlast another worker's failure; admitted PUTs finish.
         if self.stopped.is_set():
             return None
-        if self.store.put(
-            item.key,
-            raw,
-            item.headers,
-            expected=None,
-        ):
+        if item.image:
+            self.store.put_image(item.key, raw)
+            return 1
+        if self.store.put(item.key, raw, item.headers, expected=None):
             return 1
         stored = self.store.get(item.key)
         if stored is None or stored.raw != raw or stored.headers != item.headers:

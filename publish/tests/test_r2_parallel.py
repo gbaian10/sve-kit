@@ -170,7 +170,7 @@ def test_progress_keeps_reporting_while_an_object_waits_for_put(
     monkeypatch.setattr(parallel, "PROGRESS_SECONDS", 0)
     export(images, roots, step=0)
     loaded = load_export(roots.preview)
-    fake = DelayedS3(delay=0, block_write=loaded.members[0].key)
+    fake = DelayedS3(delay=0, block_writes={loaded.members[0].key})
     ready(fake, roots)
     heartbeat = Event()
 

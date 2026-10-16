@@ -31,7 +31,6 @@ class DelayedS3(httpx.BaseTransport):
     fail_key: str | None = None
     fault: str = "condition"
     block_writes: set[str] = field(default_factory=set)
-    block_write: str | None = None
     blocked: Event = field(default_factory=Event)
     release: Event = field(default_factory=Event)
     active: int = 0
@@ -48,9 +47,7 @@ class DelayedS3(httpx.BaseTransport):
             existing = self.objects.get(key)
         try:
             sleep(self.delay)
-            if method == "PUT" and (
-                key in self.block_writes or key == self.block_write
-            ):
+            if method == "PUT" and key in self.block_writes:
                 self.blocked.set()
                 assert self.release.wait(10), "test did not release held write"
             with self.lock:
