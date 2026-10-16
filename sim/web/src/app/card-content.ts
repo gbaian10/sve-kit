@@ -25,16 +25,16 @@ export async function prepareCardContent(
   language: string,
   sizes: string,
 ): Promise<CardContent> {
-  const initial = { ...client, snapshot: () => located.snapshot }
+  const pinned = { ...client, snapshot: () => located.snapshot }
   const { printing } = located
   const snapshot = await loadFaceCandidates(
-    initial,
+    pinned,
     located.snapshot,
     printing.cardId,
     printing.region,
   )
-  const pinned = { ...client, snapshot: () => snapshot }
   const catalog = catalogOf(snapshot)
+  // Candidate metadata extends the catalog; the resolver loads its own full text closure.
   const resolver = sharedAnnotatedTextResolver(pinned)
   const pointers = new Map<string, JsonObject>()
   const add = (owner: JsonObject, field: string) => {
@@ -80,5 +80,5 @@ export async function prepareCardContent(
       return source ? prepareImage(source, sizes) : Promise.resolve()
     }),
   )
-  return { ...located, snapshot, catalog, client: pinned, images }
+  return { ...located, catalog, client: pinned, images }
 }
