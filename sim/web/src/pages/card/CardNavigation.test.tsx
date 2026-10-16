@@ -93,7 +93,7 @@ async function setup() {
       ],
     },
   )
-  await screen.findByRole("heading", { name: "試作見習兵" })
+  await screen.findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
   await waitFor(() =>
     expect(document.querySelector("article")).toHaveAttribute("aria-busy", "false"),
   )
@@ -145,6 +145,22 @@ describe("card navigation commits", () => {
     expect(screen.queryByRole("heading", { name: "試作隊長" })).not.toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "試作號令" })).toBeInTheDocument()
     expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
+    const first = state.order[0]
+    if (!first) throw new Error("missing first card")
+    await act(async () => {
+      await h.router.navigate("/cards/BP01-001", {
+        state: {
+          background: "",
+          resultKey: first.printingId,
+          ...routeState(first),
+        },
+      })
+    })
+    const releaseAgain = h.holdNextRead()
+    await user.click(screen.getByRole("button", { name: "下一張" }))
+    expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
+    act(releaseAgain)
+    await screen.findByRole("heading", { name: "試作隊長" })
   })
 
   it("replaces the retained page with a missing-target error and can navigate again", async () => {

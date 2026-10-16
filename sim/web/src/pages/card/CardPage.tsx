@@ -1,5 +1,5 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, Link2 } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
@@ -68,7 +68,7 @@ export function CardPage() {
   const location = useLocation()
   const [attempt, setAttempt] = useState(0)
   const language = useTextLanguage()
-  const prepared = useRef(new Map<string, CardContent>())
+  const [prepared, setPrepared] = useState(() => new Map<string, CardContent>())
   const routeKey = JSON.stringify((location.state as { route?: unknown } | null)?.route ?? null)
   const inputKey = JSON.stringify([
     client.base,
@@ -80,14 +80,16 @@ export function CardPage() {
     cardNo === undefined ? "provisional" : "official",
     cardNo ?? intId ?? "",
   ])
+  const cached = prepared.get(inputKey)
   const [located, setLocated] = useState<{
     key: string
     value?: CardContent
     error?: unknown
   } | null>(null)
+  if (cached && located?.key !== inputKey) setLocated({ key: inputKey, value: cached })
   const manifestHash = client.snapshot()?.manifestHash
   useEffect(() => {
-    if (!manifestHash) return
+    if (!manifestHash || cached) return
     let active = true
     const hint = JSON.parse(routeKey) as {
       cardId: string
@@ -96,21 +98,20 @@ export function CardPage() {
       printingOwner: string
       region: Region
     } | null
-    const cached = prepared.current.get(inputKey)
-    const loading = cached
-      ? Promise.resolve(cached)
-      : locateCard(client, {
-          namespace: cardNo === undefined ? "provisional" : "official",
-          key: cardNo ?? intId ?? "",
-          edition,
-          ...(hint ? { hint: { ...hint, id: hint.printingId } } : {}),
-        }).then((value) => prepareCardContent(client, value, language, IMAGE_SIZES))
+    const loading = locateCard(client, {
+      namespace: cardNo === undefined ? "provisional" : "official",
+      key: cardNo ?? intId ?? "",
+      edition,
+      ...(hint ? { hint: { ...hint, id: hint.printingId } } : {}),
+    }).then((value) => prepareCardContent(client, value, language, IMAGE_SIZES))
     void loading.then(
       (value) => {
         if (active) {
-          prepared.current.set(inputKey, value)
-          if (prepared.current.size > 16)
-            prepared.current.delete(prepared.current.keys().next().value ?? "")
+          setPrepared((previous) => {
+            const next = new Map(previous).set(inputKey, value)
+            if (next.size > 16) next.delete(next.keys().next().value ?? "")
+            return next
+          })
           setLocated({ key: inputKey, value })
         }
       },
@@ -121,12 +122,13 @@ export function CardPage() {
     return () => {
       active = false
     }
-  }, [client, manifestHash, inputKey, cardNo, intId, routeKey, attempt, edition, language])
-  const current = located?.key === inputKey
-  const result =
-    current ||
-    (located?.value?.snapshot.manifestHash === manifestHash &&
-      located?.value?.client.base === client.base)
+  }, [client, manifestHash, inputKey, cardNo, intId, routeKey, attempt, edition, language, cached])
+  const current = cached !== undefined || located?.key === inputKey
+  const result = cached
+    ? { key: inputKey, value: cached }
+    : current ||
+        (located?.value?.snapshot.manifestHash === manifestHash &&
+          located?.value?.client.base === client.base)
       ? located
       : null
   const pending = !current
