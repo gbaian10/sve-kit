@@ -72,6 +72,7 @@ function project(table: string, row: Row): Row {
       region: wording["region"] ?? null,
       state: wording["state"] ?? null,
       display: wording["display"] ?? null,
+      common_name: wording["common_name"] ?? null,
     }))
   return projected
 }
@@ -243,6 +244,7 @@ export class BootstrapColumns {
         throw new Error("printingByCardNo is unavailable in search staging")
       },
       currentRevision,
+      revision: (id) => get("face_revision", id),
       wording,
       displayRevision: (faceId, region) => {
         const current = currentRevision(faceId, region)

@@ -2742,6 +2742,96 @@
         }
       ]
     },
+    "CommonNameTranslation": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "name"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/Lang"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "jp_source",
+            "official_counterpart"
+          ]
+        }
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5,
+      "x-columns": [
+        "field",
+        "ordinal",
+        "target_lang",
+        "translation_id",
+        "basis"
+      ],
+      "x-types": [
+        {
+          "enum": [
+            "name"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "jp_source",
+            "official_counterpart"
+          ]
+        }
+      ]
+    },
+    "CommonName": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommonNameTranslation"
+          }
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2,
+      "x-columns": [
+        "name_unit_id",
+        "translations"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "array": {
+            "ref": "CommonNameTranslation"
+          }
+        }
+      ]
+    },
     "WordingView": {
       "type": "array",
       "prefixItems": [
@@ -2769,17 +2859,28 @@
             "$ref": "#/$defs/ID"
           },
           "uniqueItems": true
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CommonName"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 6,
+      "maxItems": 6,
       "x-columns": [
         "region",
         "state",
         "display",
         "candidates",
-        "undated_printing_ids"
+        "undated_printing_ids",
+        "common_name"
       ],
       "x-types": [
         {
@@ -2801,6 +2902,11 @@
         {
           "array": {
             "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "ref": "CommonName"
           }
         }
       ]
@@ -15200,6 +15306,60 @@
             ]
           }
         },
+        "CommonNameTranslation": {
+          "const": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              }
+            ]
+          }
+        },
+        "CommonName": {
+          "const": {
+            "columns": [
+              "name_unit_id",
+              "translations"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "array": {
+                  "ref": "CommonNameTranslation"
+                }
+              }
+            ]
+          }
+        },
         "WordingView": {
           "const": {
             "columns": [
@@ -15207,7 +15367,8 @@
               "state",
               "display",
               "candidates",
-              "undated_printing_ids"
+              "undated_printing_ids",
+              "common_name"
             ],
             "items": [
               {
@@ -15229,6 +15390,11 @@
               {
                 "array": {
                   "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "ref": "CommonName"
                 }
               }
             ]

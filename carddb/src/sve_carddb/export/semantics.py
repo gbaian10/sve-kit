@@ -10,6 +10,7 @@ from sve_carddb.contracts.profiles import profile
 from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.buckets import bucket
+from sve_carddb.export.common_names import common_name
 from sve_carddb.export.name_annotations import whole_name
 from sve_carddb.export.reader_annotations import validate_annotations
 from sve_carddb.export.text_owners import row_owners
@@ -608,6 +609,8 @@ def _wording(view: View) -> None:
                 blocks.get(string(face["card_id"]), {}),
             )
             _wording_candidates(face, wording, physical, dates, revisions)
+            if wording["common_name"] != common_name(wording, revisions):
+                raise ValueError("Pending common name differs from candidates")
 
 
 def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> None:

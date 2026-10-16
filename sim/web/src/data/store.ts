@@ -3,7 +3,7 @@ import type { Row } from "./format-v3/decode"
 import { integerValue, stringValue } from "./format-v3/json"
 import { mergedRows } from "./format-v3/reader"
 
-/** Bootstrap-only lookups every page needs; detail rows are fetched through the client. */
+/** Lookups over loaded catalog and page fragments; absent detail remains unavailable. */
 export interface CardIndex {
   readonly cards: readonly Row[]
   readonly families: readonly Row[]
@@ -15,6 +15,7 @@ export interface CardIndex {
   readonly printingByCardNo: (region: string, cardNo: string) => Row | undefined
   /** The bootstrap columns of the current revision for one face in one region. */
   readonly currentRevision: (faceId: string, region: string) => Row | undefined
+  readonly revision: (id: string) => Row | undefined
   /** Current takes precedence; a pending display is only a presentation value. */
   readonly displayRevision: (faceId: string, region: string) => Row | undefined
   readonly wording: (faceId: string, region: string) => Row | undefined
@@ -113,6 +114,7 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
     printingsOf: (cardId) => printingsByCard.get(cardId) ?? [],
     printingByCardNo: (region, cardNo) => printingByNo.get(`${region}\u0000${cardNo}`),
     currentRevision,
+    revision: (id) => revisionMap.get(id),
     wording,
     displayRevision: (faceId, region) => {
       const current = currentRevision(faceId, region)
