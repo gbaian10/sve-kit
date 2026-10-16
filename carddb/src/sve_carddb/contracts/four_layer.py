@@ -537,11 +537,18 @@ class Target(RecordData):
         schema: LeafSchema,
         lang: str,
         forms: Mapping[tuple[str, str], FormDefinition],
+        *,
+        dependencies: Mapping[str, tuple[str, ...]] | None = None,
     ) -> None:
         """Required leaves cannot disappear inside literal wording or an opaque NP."""
         slots = {slot.name: slot for slot in schema.slots}
         used = set().union(
             *(_node_slots(node, slots, lang, forms) for node in self.nodes)
+        )
+        used.update(
+            actual
+            for name in tuple(used)
+            for actual in (dependencies or {}).get(name, ())
         )
         if any(slot.required and slot.name not in used for slot in schema.slots):
             raise ValueError("Target must use every required leaf")

@@ -831,6 +831,11 @@ ID 為 `count.current_zone.<依序形參>.<固定限定>.<偏移>.v1`，沒有�
 `ExpressionTargets` 依語言選取既有 Target，僅允許 Literal／LeafRef／Form。
 Target 引用規則的形參；`Expression.leaves` 依序提供實際 frame 槽名，
 兩者不必同名。展開先驗型別、角色、閉域與完整必要參數，再代入實參。
+準備版主 Target 引用 expression 槽（LeafRef、Form 或 CountExpr）時，其實參也計入
+required 使用閉包；未引用的 expression 不傳遞使用。expression 譯文仍必須呈現全部形參。
+`PreparedField.verify(..., target=..., lang=..., forms=...)` 對候選 authored target
+與準備 renderer 共用此規則；缺 expression 引用或實參值仍拒絕。
+正式 v2 的 Target 驗證、authored 載入及 renderer 不啟用此閉包。
 `PreparationRenderer` 沿既有 renderer 保留引用閉包、文字範圍、葉路徑、origin
 及低信心；缺語言 Target 仍整欄 fallback。未知 ID、錯參數、缺實參、循環皆拒絕。
 Bound 的 import 必須存在且型別正確，來源證明的使用 scope 只能看見本 scope
@@ -896,7 +901,8 @@ expression 依使用點讀取當下數量，不建立 captured receipt 或跨片
 缺必要卡名仍 pending，不能用 Literal 或 optional 略過。
 
 準備 renderer 沿用既有 `ExpressionTargets` 及正常 labels／Form，
-主 Target 仍須引用每個 required 葉；expression 的形參也必須完整呈現。
+主 Target 可透過 expression 槽間接使用其 required 實參，無須再逐葉重複呈現；
+其他 required 葉仍須引用。expression 的形參必須完整呈現（§11.2）。
 來源的 whole-line semantic pending 不因局部計數成功而升格。
 
 SEP 僅辨識明示「自己的 SEP 等於 0」的條件數字，沿用 `Nat/threshold` 的零下界。

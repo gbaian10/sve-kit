@@ -9,6 +9,7 @@ from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import (
     DOMAIN,
     DOMAIN_CODE,
+    target_dependencies,
     verify_quantities,
 )
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
@@ -18,7 +19,14 @@ from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VE
 from sve_carddb.domains.translations.four_layer_reads import prepare_reads
 
 if TYPE_CHECKING:
-    from sve_carddb.contracts.four_layer import Frame, Projection, Target
+    from collections.abc import Mapping
+
+    from sve_carddb.contracts.four_layer import (
+        FormDefinition,
+        Frame,
+        Projection,
+        Target,
+    )
     from sve_carddb.contracts.source_binding import SourceBinding, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_classification import Classifier
     from sve_carddb.domains.translations.four_layer_derivation import DerivedField
@@ -42,7 +50,7 @@ class PreparedField:
             frame = frame.model_copy(update={"projection": interface})
         return frame, binding
 
-    def verify(
+    def verify(  # ruff: ignore[too-many-arguments] -- optional authored targets need their own language and forms
         self,
         raw: str,
         classifier: Classifier,
@@ -51,6 +59,8 @@ class PreparedField:
         *,
         context: CardContext | None = None,
         target: Target | None = None,
+        lang: str = "zh-Hant",
+        forms: Mapping[tuple[str, str], FormDefinition] | None = None,
     ) -> None:
         """Reconstruct exact source evidence; a version label never proves v3 validity."""
         if frame.source.normalizer_version != PREPARATION_VERSION:
@@ -86,6 +96,12 @@ class PreparedField:
             )
         verify_quantities(frame, binding, scopes={})
         if target is not None:
+            target.verify(
+                frame.leaf_schema,
+                lang,
+                forms or {},
+                dependencies=target_dependencies(frame, binding),
+            )
             self.derived.verify_target(binding, target)
 
 

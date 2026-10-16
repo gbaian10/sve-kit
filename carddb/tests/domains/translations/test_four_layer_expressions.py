@@ -95,11 +95,7 @@ def sample() -> tuple[BoundTarget, Renderer, ExpressionTargets]:
     )
     target = Target(
         format=1,
-        nodes=(
-            LeafRef(kind="LeafRef", slot="src_owner"),
-            LeafRef(kind="LeafRef", slot="src_zone"),
-            LeafRef(kind="LeafRef", slot="count"),
-        ),
+        nodes=(LeafRef(kind="LeafRef", slot="count"),),
     )
     item = BoundTarget(frame, binding, SelectedTarget(target))
     refs = Renderer({}, {}, {}).code_references
@@ -139,7 +135,7 @@ def test_expression_formals_bind_different_actual_names_and_propagate_render_evi
     prepared = PreparationRenderer(renderer, targets)
     result = prepared.render("ctx:synthetic", "zh-Hant", (item,))
     assert result.rendered is not None
-    assert result.rendered.text == "自己手牌自己的手牌張數"
+    assert result.rendered.text == "自己的手牌張數"
     assert result.rendered.low_confidence
     assert result.rendered.origin == "machine"
     assert {leaf.slot for leaf in result.rendered.leaves} == {
@@ -148,14 +144,13 @@ def test_expression_formals_bind_different_actual_names_and_propagate_render_evi
         "count",
     }
     assert any(
-        leaf.node_path == (2, 0) and leaf.slot == "src_owner"
+        leaf.node_path == (0, 0) and leaf.slot == "src_owner"
         for leaf in result.rendered.leaves
     )
-    assert len(result.rendered.annotation.occurrences) == 4
+    assert len(result.rendered.annotation.occurrences) == 2
     assert prepared.required_references(item, "zh-Hant")
-    assert renderer.render("ctx:synthetic", "zh-Hant", (item,)).issues == (
-        "unsupported_quantity_presentation",
-    )
+    with pytest.raises(ValueError, match="required"):
+        renderer.render("ctx:synthetic", "zh-Hant", (item,))
     missing = PreparationRenderer(renderer, ExpressionTargets({})).render(
         "ctx:synthetic", "zh-Hant", (item,)
     )
