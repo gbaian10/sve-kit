@@ -7,6 +7,7 @@ import pytest
 
 from sve_carddb.build import Capability, Column, Kind, compile_schema, create_database
 from sve_carddb.build.registry import Registry
+from sve_carddb.build.t1 import REGISTRY
 from sve_carddb.build.translation_evidence import TABLES
 from sve_carddb.core.json import array, object_value, parse
 
@@ -31,8 +32,20 @@ def vocabulary_db() -> Iterator[Database]:
         else t
         for t in base.tables
     ) + tuple(t for t in TABLES if t.name == "glossary_translation")
+    defined = {t.name for t in tables}
+    reserved = tuple(
+        Capability(
+            capability.name,
+            tuple(name for name in capability.tables if name not in defined),
+            implemented=False,
+        )
+        for capability in REGISTRY.capabilities
+        if any(name not in defined for name in capability.tables)
+    )
     compiled = compile_schema(
-        Registry(tables, (Capability("synthetic", tuple(t.name for t in tables)),)),
+        Registry(
+            tables, (Capability("synthetic", tuple(t.name for t in tables)), *reserved)
+        ),
         ("synthetic",),
         {name: parse(value.encode()) for name, value in base.json_schemas},
     )
