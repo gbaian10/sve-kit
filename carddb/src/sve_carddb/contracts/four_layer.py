@@ -483,8 +483,16 @@ class PendingCondition(RecordData):
     reason: Literal["missing_provider", "unsealed_source", "ambiguous_source"]
 
 
+class LinkedCondition(RecordData):
+    state: Literal["linked"]
+    source: OccurrenceKey
+    condition: Annotated[
+        ResolvedCondition | PendingCondition, Field(discriminator="state")
+    ]
+
+
 ConditionSlot = Annotated[
-    ResolvedCondition | PendingCondition, Field(discriminator="state")
+    ResolvedCondition | PendingCondition | LinkedCondition, Field(discriminator="state")
 ]
 
 

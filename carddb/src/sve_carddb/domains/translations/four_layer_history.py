@@ -22,6 +22,10 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.contracts.n0 import SAFE_INTEGER
+from sve_carddb.domains.translations.four_layer_ability import (
+    ABILITY_HEAD,
+    OPTION_LABEL,
+)
 from sve_carddb.domains.translations.four_layer_context import (
     DEFAULT_REGISTRY,
     Descriptor,
@@ -30,8 +34,6 @@ from sve_carddb.domains.translations.four_layer_context import (
     Parameter,
 )
 from sve_carddb.domains.translations.four_layer_event_preparation import (
-    ABILITY_HEAD,
-    OPTION_LABEL,
     context_port,
     interface,
     occurrence,
@@ -810,3 +812,13 @@ def prepare_history(
 
 
 HISTORY_FAMILY = PreparationFamily("current_turn_history", DESCRIPTORS, prepare_history)
+
+
+def name_filter_spans(text: str) -> tuple[tuple[int, int], ...]:
+    """The historical query owns filters on past event subjects, including their names."""
+    return tuple(
+        (match.start(), match.end())
+        for form in _FORMS
+        if "exclude_same_name" in form.key
+        for match in re.finditer(form.pattern, text)
+    )

@@ -52,6 +52,9 @@ NOUNS = {
     "exclude_name": ("trait", "card"),
     "distinct_names": ("trait_left", "trait_right", "kind"),
     "name": ("name",),
+    "filtered_trait_card": ("trait", "card"),
+    "filtered_kind": ("kind",),
+    "distinct_filtered_kind": ("kind",),
 }
 
 
@@ -149,6 +152,46 @@ _SUM = tuple(
     )
     for origin, shape, prop in _SUM_SHAPES
 )
+_COMPOSED_SUM = tuple(
+    _descriptor(
+        sum_id(origin, shape, "original_cost"),
+        "quantity.aggregate.property_sum.v1",
+        "property_sum_value",
+        "cost",
+        (
+            *(operand(p) for p in ("owner", "zone", *NOUNS[shape])),
+            *(
+                Parameter(name, "PredicateExpr", role, domain)
+                for name, role, domain in predicates
+            ),
+        ),
+        bridge=("X.aggregate.Sum", "V.cost", "S.filter"),
+    )
+    for origin, shape, predicates in (
+        (
+            "deck",
+            "filtered_trait_card",
+            (("name", "name_relation", "predicate.name.relative.v1"),),
+        ),
+        (
+            "graveyard",
+            "filtered_kind",
+            (("traits", "trait_conjunction", "predicate.traits.all2.v1"),),
+        ),
+        (
+            "deck",
+            "distinct_filtered_kind",
+            (
+                ("traits", "trait_conjunction", "predicate.traits.all2.v1"),
+                (
+                    "distinct",
+                    "selection_name_constraint",
+                    "predicate.selection.distinct_name.v1",
+                ),
+            ),
+        ),
+    )
+)
 _TOTAL = tuple(
     _descriptor(
         f"aggregate.total.{link}{suffix}.v1",
@@ -232,7 +275,7 @@ _PAIR = tuple(
     )
     for shape in ("named", "kind")
 )
-DESCRIPTORS = (*_COUNT, *_SUM, *_TOTAL, *_BOUND, *_PAIR)
+DESCRIPTORS = (*_COUNT, *_SUM, *_COMPOSED_SUM, *_TOTAL, *_BOUND, *_PAIR)
 
 
 @dataclass(frozen=True)
