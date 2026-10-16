@@ -691,8 +691,10 @@ class ReadSources:
                 provider = self._provider(pattern, consumer)
             if provider is None:
                 return None, capture
+            # Returning or moving the object is a zone change just like destruction.
             if re.search(
-                r"それを(?:破壊|消滅|墓場)", self._text[provider.end : consumer]
+                r"それを(?:破壊|消滅|墓場|手札に戻|デッキ|EXエリアに置)",
+                self._text[provider.end : consumer],
             ):
                 capture = "lki"
         return provider, capture

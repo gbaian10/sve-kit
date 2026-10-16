@@ -1103,6 +1103,7 @@ producer 時保持 pending；沒有猜測跨能力付款。這不代表已有付
 來源只接受已封的區域計數、物件攻擊力／體力／原費用／有效費用、PP 最大值、指示物、
 處理結果、骰面、表向進化牌堆與原費用種類數。自身的即時讀值、選取快照、LKI、事件主體、
 receipt 固定結果及宣告參數各有 import 簽章，不能只因結果為數字而互換。
+選取的物件在讀值前被破壞、消滅，或移到墓場、手牌、牌堆、EX 區時，讀值改用 LKI。
 處理結果張數引用 `ReceiptId<objects>`，取下指示物數引用 `ReceiptId<amount>`；
 兩者與 `payment_complete` 都不能互換。
 有名稱、特性、職業、關鍵字或指示物引用時，必須沿目前採用的來源概念；
@@ -1110,8 +1111,9 @@ receipt 固定結果及宣告參數各有 import 簽章，不能只因結果為�
 沒有唯一 producer 或缺概念時不補 Literal、不挑第一個、不建立可用 binding。
 
 直接讀值與明示 X 定義使用相同 descriptor。定義與每次使用分別保存來源 occurrence；
-後續的 X 門檻也引用同一 X，門檻數字另存。來源 anchor 與 expression 的實參互斥，
-expression 結構、實參連接及能力／分支 scope 進入 leaf schema。
+後續的 X 門檻也引用同一 X，門檻數字另存為 `Nat/comparison_threshold`；
+`「…」と同じだけ-Nする` 的每單位減少量是 `Nat/cost_reduction_unit`。
+來源 anchor 與 expression 的實參互斥，expression 結構、實參連接及能力／分支 scope 進入 leaf schema。
 一層常數倍率沿 §11.5；HalfUp 與已封的單一偏移各有有限 descriptor，不提供任意巢狀算式。
 授予能力另立能力 scope，其中的自身讀值指能力持有者；不把文字提供者當持有者。
 

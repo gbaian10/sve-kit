@@ -217,6 +217,22 @@ def read_engine() -> Classifier:
             "自分の場のフォロワー1体を選ぶ。それを破壊する。それにXダメージ。Xは「選んだフォロワーの攻撃力」である。",
             "read.lki.attack.v1",
         ),
+        (
+            "相手のフォロワー1体を選ぶ。それを手札に戻す。自分のリーダーは{体力}+Xする。Xは「選んだフォロワーの元のコスト」である。",
+            "read.lki.original_cost.v1",
+        ),
+        (
+            "自分の場のフォロワー1体を選ぶ。それにXダメージ。Xは「それの体力-1」である。",
+            "read.offset.subtract.v1",
+        ),
+        (
+            "自分の場のフォロワー1体と相手の場のフォロワー1体を選ぶ。前者に「後者の攻撃力」と同じダメージ。",
+            "read.selected.attack.v1",
+        ),
+        (
+            "これのコストは「自分の手札の枚数」と同じだけ-1する。",
+            "count.current_zone.owner.zone.v1",
+        ),
         ("それに「これの攻撃力の半分」と同じダメージ。", "read.half_up.v1"),
         (
             "これは{攻撃力}+Xする。Xは「これの攻撃力」である。Xが7以上なら、3枚引く。",
@@ -235,6 +251,10 @@ def read_engine() -> Classifier:
         "faceup-name",
         "distinct-cost",
         "lki",
+        "returned-lki",
+        "offset",
+        "ordered-pair",
+        "per-unit-reduction",
         "half-up",
         "later-x",
         "result-count",
