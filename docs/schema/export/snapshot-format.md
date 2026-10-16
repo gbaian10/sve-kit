@@ -87,7 +87,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RegionView | `region, release_state:released/unknown/announced/not_released_confirmed, mapping_state:unmapped/pending/confirmed/confirmed_none, availability_override_as_of?, mapping_as_of?, mapping_scope?, default_printing_id?, default_method?, deck_role?, debut_product_ids:[id], debut_state:known/unknown`；來自建置資料庫推導，無法判最早時 unknown |
 | PrintingFace | `face_id, art_id?, frame_code?, signed?, embellishment_state, printed_name_unit_id?, printed_effect_unit_id?, flavor_unit_id?, printed_text_state, observations:[ObservedText], sections:[Section], stamps:[{stamp_id,position?,color?}], translations:[FieldTranslation], corrections:[Correction], name_concept_id?`；不帶 `card_id/credit_raw/source` |
-| WordingView | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id]`；暫顯不等於 current，見 §2.3 |
+| WordingView | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id], common_name:CommonName?`；暫顯不等於 current，見 §2.3 |
 | ObservedText | `revision_id?, state:available/missing_effect/correction_conflict, source_url`；同版次觀測，不等於 printed，見 §2.3 |
 | Section | `ordinal, text_unit_id, kind` |
 | FieldTranslation | `field:name/effect/flavor/question/answer/section/label/action_label, ordinal?, target_lang, translation_id, basis:own_source/jp_source/official_counterpart, source:PublicTextPointer, counterpart:PublicTextPointer?`；逐 card/face/region 選用，不能只以共享文字單元判同語義 |
@@ -190,7 +190,7 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 **使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單。公開形狀、Schema／types／golden 與 reader 依 [snapshot-contract](snapshot-contract.md) 同步維護，4.0 新增欄位仍以公開 annotation 契約為準。
 
 - `PrintingFace.observations` 是 `{revision_id?,state,source_url}` 陣列；state=`available/missing_effect/correction_conflict`。available 必有同 face、同 printing.region 的公開 revision；missing_effect 的 revision_id=null，表示原觀測主文未知且無法建 revision；correction_conflict 可有原觀測 revision 或 null，只供帶警告查閱，不能作可信暫顯。source_url 是該 printing 的原始來源 URL，不出 source ID、hash 或決定。完整三欄 exact 相同才去重；按來源 URL／狀態／revision ID 的固定字串序儲存**不表示年代**。
-- `face.wording` 是稀疏陣列，只對表記未定的公開 face-region 各出一項，恰有 `{region,state,display,candidates,undated_printing_ids}`。state 固定 `pending`；display 恰有 `{revision_id?,basis}`，basis=`current/latest_known_release/candidates`。candidates 是 `{printing_id,revision_id?}` 陣列，恰列仍需核對的候選版次／revision，去重並按 printing_id／revision_id 固定排序，null 為尚無可表示 revision；undated_printing_ids 列無可信完整日精度收錄日的候選版次，去重排序。這些 ID 排序僅供穩定序列化，UI 的年代由日期證據顯示，不能用 ID 補順序。
+- `face.wording` 是稀疏陣列，只對表記未定的公開 face-region 各出一項，恰有 `{region,state,display,candidates,undated_printing_ids,common_name}`。state 固定 `pending`；display 恰有 `{revision_id?,basis}`，basis=`current/latest_known_release/candidates`。candidates 是 `{printing_id,revision_id?}` 陣列，恰列仍需核對的候選版次／revision，去重並按 printing_id／revision_id 固定排序，null 為尚無可表示 revision；undated_printing_ids 列無可信完整日精度收錄日的候選版次，去重排序。這些 ID 排序僅供穩定序列化，UI 的年代由日期證據顯示，不能用 ID 補順序。
 - 已有有效 current 且無待核對候選的 face-region 為 settled，省略該 region 的 wording 項目，不複製 current 的 display；所有 region 均 settled 時 `wording=[]`，固定 tuple 欄位仍保留。reader 由同 region 有 current 且無 wording 項推得 settled；沒有 current 不能藉省略項目冒充 settled。pending 保留所有待核對候選，即使 display 能選出暫顯值也不能省略；其中每項須能連回同一 printing face 的 observations，非 null revision 必同 face／region。undated_printing_ids 必為 candidates 的 printing 子集，與可信日期判別一致。
 
 producer 按下列規則計算 pending 的 display，reader 不自行推論 current：
@@ -206,9 +206,11 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 分片時，稀疏的 `face.wording` 隨 face 進啟動包，帶未定狀態、暫顯／候選 revision 引用及未知日期版次 ID；PrintingFace.observations 進 printing 詳情。`current_ref` 為所有 face.current.revision_id 的去重集合；`display_ref` 為 current_ref 加上 pending wording.display 非 null revision ID 的聯集，**不加入其餘 candidates**。每個 pending face-region 最多一筆 display revision，其 §3.1 輕量投影、名稱及可用名稱翻譯的文字閉包均進 bootstrap，讓整區基本目錄完成後可使用暫顯卡名／數值；其餘欄位仍走 detail。這只是顯示分割，不建立 current 或採納。
 
+無 display 時，`wording.common_name` 是全候選名稱一致的輕量投影 `{name_unit_id, translations}`；其他情況為 null。所有候選都須有非 null revision 且同一名稱單元，不能跳過未知候選。翻譯只保留每個候選都選用的相同 target_lang／translation_id／basis，投影為 `CommonNameTranslation`（field 固定 name，不宣稱某個 revision 已採納）。名稱與翻譯文字閉包隨 face 進基本目錄，不帶候選完整 revision 或正文，也不建立 current／display。共同名稱只有匯出端一處推導，完整 reader 核對同一規則。
+
 不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿局部字典及固定共用譯文檔的強依賴閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
 
-開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡在基本目錄使用其名稱與數值，標表記未定；沒有唯一 display 時保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display 名稱，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
+開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡在基本目錄使用其名稱與數值，標表記未定；沒有唯一 display 時優先使用共同名稱與可用名稱翻譯，沒有共同名稱才保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值；卡頁若需本版次值，須精確定位 printing，且多個不同觀測不能任取其中之一，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display／共同名稱與可用名稱翻譯，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
 
 須以當次日英、所有卡片及實際可用名稱翻譯閉包量基本目錄冷載，包含完整 manifest／config、暫顯 revision、稀疏 wording 引用及必要實體檔；候選按需增量另報。依 [size-budget](size-budget.md)，Brotli 2 MiB 是分界，略超報精確差額，明顯超出才交維護者；共用／混區檔整檔計入，不能以尚未下載候選宣稱進階索引完整。
 
@@ -216,7 +218,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 穩定 owner 是資料分片規則，與商品收錄分開：card/revision/support 跟 `card.home_set_id`；printing 跟第一次配發的 `printing.home_set_id`；再錄新 printing 到新 owner，舊列不搬。`printing_product` 新關係跟 printing owner，可引用舊 card，不能複製舊 card。QA／CR 依固定 ID bucket；字典按檔局部出貨，JP 來源繁中正文譯文固定放來源 JP owner 家族的共用譯文檔，不依後續 EN 引用搬動。各 family 過大時依已固定 ID bucket 拆子片，快照清單決定檔案；翻譯/勘誤只更動涉及的片。
 
-基本目錄是所選區全部卡片／面、current／暫顯名稱與可用名稱翻譯、基本數值、卡號定位及基本 facet／字典的完整集合。首頁先顯示，之後背景下載所選 jp／en 基本目錄；整區驗畢且索引完成才開放搜尋。下載中可打字並顯示「資料下載中」，完成後自動搜尋一次，不顯示部分結果。稀有度、異圖與完整印刷資料在基本目錄之後背景補齊；未備妥的進階條件明示載入中，使用時須等完整用途閉包。另一區只在切換或對照時下載；效果全文、Q&A／裁定、商品收錄、引擎支援與歷史按需，不要求首訪三語全量或 PWA 整庫預取。所有連線使用同一政策，不做省流量模式。直接連結單卡可先讀其精確閉包，但不代表整區搜尋 ready。
+基本目錄是所選區全部卡片／面、current／暫顯／共同名稱與可用名稱翻譯、基本數值、卡號定位及基本 facet／字典的完整集合。首頁先顯示，之後背景下載所選 jp／en 基本目錄；整區驗畢且索引完成才開放搜尋。下載中可打字並顯示「資料下載中」，完成後自動搜尋一次，不顯示部分結果。稀有度、異圖與完整印刷資料在基本目錄之後背景補齊；未備妥的進階條件明示載入中，使用時須等完整用途閉包。另一區只在切換或對照時下載；效果全文、Q&A／裁定、商品收錄、引擎支援與歷史按需，不要求首訪三語全量或 PWA 整庫預取。所有連線使用同一政策，不做省流量模式。直接連結單卡可先讀其精確閉包，但不代表整區搜尋 ready。
 
 **下載完成不等於全部常駐 JS heap。** Worker 逐檔解壓、驗證、解析及建立緊湊索引，主執行緒只取必要 view／結果 ID；詳情以 LRU 釋放，不把全庫物件傳回主端。全文搜尋先取得所選區該用途全部效果閉包，再回完整結果，不只掃已載入卡。持久 bytes 與衍生索引均可快取；IndexedDB 依根目錄、manifest hash、reader／normalizer 隔離，不能形成第二真值。儲存被拒時可重建記憶體索引並如實標示可用範圍。
 

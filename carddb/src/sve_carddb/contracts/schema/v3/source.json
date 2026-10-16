@@ -78,6 +78,8 @@
     "card",
     "WordingDisplay",
     "WordingCandidate",
+    "CommonNameTranslation",
+    "CommonName",
     "WordingView",
     "ObservedText",
     "face",
@@ -11033,6 +11035,23 @@
               "scalar": "ID"
             }
           }
+        },
+        "common_name": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/CommonName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "ref": "CommonName"
+            }
+          }
         }
       },
       "constraints": {}
@@ -11969,6 +11988,89 @@
         }
       },
       "constraints": {}
+    },
+    "CommonNameTranslation": {
+      "fields": {
+        "field": {
+          "schema": {
+            "const": "name"
+          },
+          "descriptor": {
+            "enum": [
+              "name"
+            ]
+          }
+        },
+        "ordinal": {
+          "schema": {
+            "type": "null"
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "UInt"
+            }
+          }
+        },
+        "target_lang": {
+          "schema": {
+            "$ref": "#/$defs/Lang"
+          },
+          "descriptor": {
+            "scalar": "Lang"
+          }
+        },
+        "translation_id": {
+          "schema": {
+            "$ref": "#/$defs/ID"
+          },
+          "descriptor": {
+            "scalar": "ID"
+          }
+        },
+        "basis": {
+          "schema": {
+            "enum": [
+              "own_source",
+              "jp_source",
+              "official_counterpart"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "own_source",
+              "jp_source",
+              "official_counterpart"
+            ]
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "CommonName": {
+      "fields": {
+        "name_unit_id": {
+          "schema": {
+            "$ref": "#/$defs/ID"
+          },
+          "descriptor": {
+            "scalar": "ID"
+          }
+        },
+        "translations": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/CommonNameTranslation"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "ref": "CommonNameTranslation"
+            }
+          }
+        }
+      },
+      "constraints": {}
     }
   },
   "nested": [
@@ -11999,6 +12101,8 @@
     "PrintingFaceDetail",
     "WordingDisplay",
     "WordingCandidate",
+    "CommonNameTranslation",
+    "CommonName",
     "WordingView",
     "ObservedText",
     "ImageDisplayVariant",

@@ -110,9 +110,11 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | 出現位置 | 型別名 | columns（依序） |
 | --- | --- | --- |
 | face.current | Current | region, revision_id, basis |
-| face.wording | WordingView | region, state, display, candidates, undated_printing_ids |
+| face.wording | WordingView | region, state, display, candidates, undated_printing_ids, common_name |
 | WordingView.display | WordingDisplay | revision_id, basis |
 | WordingView.candidates | WordingCandidate | printing_id, revision_id |
+| WordingView.common_name | CommonName | name_unit_id, translations |
+| CommonName.translations | CommonNameTranslation | field, ordinal, target_lang, translation_id, basis |
 | PrintingFace.observations | ObservedText | revision_id, state, source_url |
 | art.artists | ArtArtist | artist_id, role |
 | PrintingFace.stamps | PrintingStamp | stamp_id, position, color |
@@ -455,3 +457,9 @@ translation.annotation_kind=none 且 annotation_set_id=null 才表示空集合�
 正式容量依 [size-budget](size-budget.md#40-annotation-與-jp-來源的計帳)。基本目錄裝檔與量法須同步 exporter／reader 後驗收，不能以其他配置或桌面數字證明手機通過。
 
 4.0.0 候選的共用描述與整名省略已由 producer／Python reader 同步替換；每個容器 types 精確包含所用巢狀型別的固定描述閉包；root row 描述只存在於固定 schema，拒絕缺少、多餘或改寫的 descriptor。base FileRef、fragment 身分與 row_counts 不因 descriptor 合併而改變；row_counts 計 wire 實際列，完整 logical view 含虛擬集合。最終基本目錄分區配置另依固定配置修訂，不由本次瘦身自動搬 owner。
+
+## 未定卡文的共同名稱
+
+`WordingView` 的欄序為 `region,state,display,candidates,undated_printing_ids,common_name`。
+`common_name` 為 nullable `CommonName`：`name_unit_id,translations`；其 `CommonNameTranslation` 欄序是 `field,ordinal,target_lang,translation_id,basis`，field 固定 name、ordinal 固定 null。
+推導及退回依 [快照格式 §2.3](snapshot-format.md#23-表記未定的公開呈現)，名稱與可用名稱翻譯的必要字典隨 face 進 catalog，其他候選依舊走 history；catalog 不依賴 history。

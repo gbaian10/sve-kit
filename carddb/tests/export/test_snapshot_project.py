@@ -443,7 +443,23 @@ def test_pending_display_is_not_current_and_adds_manual_block(db: Database) -> N
         db.delete("face_current", {"face_id": "face", "region": "jp"})
     result = projected(db, replace(decisions(), wording={"face": (pending(),)}))
     assert one(result, "face")["current"] == []
-    assert one(result, "face")["wording"] == [pending()]
+    assert one(result, "face")["wording"] == [
+        pending()
+        | {
+            "common_name": {
+                "name_unit_id": TEXT,
+                "translations": [
+                    {
+                        "field": "name",
+                        "ordinal": None,
+                        "target_lang": "zh-Hant",
+                        "translation_id": "translation",
+                        "basis": "own_source",
+                    }
+                ],
+            }
+        }
+    ]
     assert "wording_pending" in array(
         effective_support(one(result, "card_engine_support", "card"), "jp")["reasons"]
     )
@@ -1860,7 +1876,7 @@ def test_native_missing_effect_without_database_observation_is_preserved(
     )
     result = projected(db, chosen)
     assert one(result, "face")["current"] == []
-    assert one(result, "face")["wording"] == [wording]
+    assert one(result, "face")["wording"] == [wording | {"common_name": None}]
     assert object_value(array(one(result, "printing")["faces"])[0])["observations"] == [
         observed
     ]

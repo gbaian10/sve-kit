@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import array, canonical, object_value, string
+from sve_carddb.export.common_names import common_name
 
 if TYPE_CHECKING:
     from sve_carddb.export.project.evidence import Decisions
@@ -71,6 +72,11 @@ def observations(
             if row["region"] in selected_regions
         ]
     validate_wording(view)
+    revisions = {string(row["id"]): row for row in view["face_revision"]}
+    for face in view["face"]:
+        for raw in array(face["wording"]):
+            wording = object_value(raw)
+            wording["common_name"] = common_name(wording, revisions)
 
 
 def _candidates(
