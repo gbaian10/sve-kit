@@ -279,16 +279,21 @@ records:
           text: 芙琳蒂
   - origin: machine
     low_confidence: true
-    note: 卡名新譯：稱號「肆虐的創造主」為本輪新譯；角色名沿已採納的 term:name.berufometto_name_fragment「貝爾弗梅特」
+    note: 卡名新譯：稱號「肆虐的創造主」為本輪新譯；角色名以 LeafRef 引用已採納的 term:name.berufometto_name_fragment「貝爾弗特」，隨片段選詞更新；整名仍為機器新譯
     kind: english_exception_target
     data:
       id: english.name.9916e569da7e44c09be54b25
       source_hash: 9916e569da7e44c09be54b259138ac138a263898bdb79d70a8a180395036d363
       lang: zh-Hant
-      references: {}
+      references:
+        name.berufometto_name_fragment:
+          kind: card_name
+          term_id: term:name.berufometto_name_fragment
       nodes:
         - kind: Literal
-          text: 肆虐的創造主‧貝爾弗梅特
+          text: 肆虐的創造主‧
+        - kind: LeafRef
+          slot: name.berufometto_name_fragment
   - origin: machine
     kind: english_exception_target
     data:
