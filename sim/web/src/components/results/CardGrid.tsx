@@ -48,6 +48,7 @@ export function NameNotices({
 
 // Design: 2 columns under 600 (gap 14×12), 4 up to 999, 5–6 on desktop; each cell is the image
 // plus one truncated 13px name line ("both" adds the translation in small type).
+// Grid results prefer the largest available file so desktop card pages can reuse it.
 const GRID_SIZES =
   "(min-width: 1440px) 200px, (min-width: 1000px) 20vw, (min-width: 600px) 25vw, 50vw"
 
@@ -92,6 +93,7 @@ const CardCell = memo(function CardCell({
         images={images}
         alt="redundant"
         sizes={GRID_SIZES}
+        candidatePolicy="largest"
         className="w-full"
         translate={labels.t}
       />
