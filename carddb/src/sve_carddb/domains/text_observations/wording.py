@@ -58,13 +58,14 @@ class WordingView(RecordData):
     undated_printing_ids: tuple[Text, ...]
 
     def wire(self) -> list[JsonValue]:
-        """Serialize with the format's fixed nested tuple order."""
+        """Name selections are resolved later by the export projection."""
         return [
             self.region,
             self.state,
             [self.display.revision_id, self.display.basis],
             [[c.printing_id, c.revision_id] for c in self.candidates],
             list[JsonValue](self.undated_printing_ids),
+            None,
         ]
 
 
