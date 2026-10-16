@@ -199,7 +199,9 @@ describe("card navigation commits", () => {
     expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
     fireEvent.keyDown(window, { key: "ArrowRight" })
     await screen.findByRole("heading", { name: "試作號令" })
-    expect(h.router.state.location.pathname).toContain("/cards/BP01-003/")
+    await waitFor(() => {
+      expect(h.router.state.location.pathname).toContain("/cards/BP01-003/")
+    })
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-003")
     await act(async () => {
       releaseB()
