@@ -6,11 +6,16 @@ from typing import TYPE_CHECKING
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner
 from sve_carddb.domains.translations.four_layer_choices import constant_choice_interface
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
-from sve_carddb.domains.translations.four_layer_expressions import DOMAIN, DOMAIN_CODE
+from sve_carddb.domains.translations.four_layer_expressions import (
+    DOMAIN,
+    DOMAIN_CODE,
+    verify_quantities,
+)
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
 from sve_carddb.domains.translations.four_layer_n2_counters import prepare_capacities
 from sve_carddb.domains.translations.four_layer_n2_parameters import prepare_parameters
 from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VERSION
+from sve_carddb.domains.translations.four_layer_reads import prepare_reads
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import Frame, Projection, Target
@@ -79,6 +84,7 @@ class PreparedField:
             raise ValueError(
                 "Preparation binding differs from exact source construction"
             )
+        verify_quantities(frame, binding, scopes={})
         if target is not None:
             self.derived.verify_target(binding, target)
 
@@ -91,13 +97,10 @@ def derive_preparation(
     context: CardContext | None = None,
 ) -> PreparedField:
     """Apply sealed source families only through the explicit preparation entry."""
-    derived = prepare_parameters(
-        raw,
-        prepare_capacities(
-            raw, derive_source(raw, source, classifier, context=context), classifier
-        ),
-        classifier,
-    )
+    derived = derive_source(raw, source, classifier, context=context)
+    derived = prepare_capacities(raw, derived, classifier)
+    derived = prepare_parameters(raw, derived, classifier)
+    derived = prepare_reads(raw, derived, classifier)
     interfaces = tuple(
         constant_choice_interface(
             raw, part, found, classifier.candidate(raw, original).slots
