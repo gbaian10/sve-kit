@@ -77,6 +77,7 @@ def _relation(
                 if holder
                 else "selection",
                 cardinality=None if receipt else "many" if distinct else "one",
+                receipt_result="objects" if receipt else None,
                 origin=None
                 if receipt
                 else "event_subject"
