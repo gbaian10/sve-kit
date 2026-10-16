@@ -33,6 +33,7 @@ LeafType = Literal[
     "TokenStatus",
     "QuantitySpec",
     "QuantityExpr",
+    "PredicateExpr",
     "LiteralLayout",
 ]
 PortType = Literal[
@@ -42,6 +43,7 @@ PortType = Literal[
     "CapturedValue",
     "QuantityExpr",
     "ChoiceContext",
+    "EventRef",
 ]
 
 
@@ -107,6 +109,27 @@ class Domain(RecordData):
         return self
 
 
+class ContextExpression(RecordData):
+    kind: Literal["context_expression"]
+    expression_id: Code
+    leaves: tuple[Code, ...]
+    imports: dict[Code, Code]
+    scope: Code
+
+
+class PredicateExpr(RecordData):
+    kind: Literal["predicate"]
+    expression_id: Code
+    leaves: tuple[Code, ...]
+    imports: dict[Code, Code]
+    scope: Code
+
+
+PreparationExpression = Annotated[
+    ContextExpression | PredicateExpr, Field(discriminator="kind")
+]
+
+
 class LeafSlot(RecordData):
     name: Code
     type: LeafType
@@ -114,6 +137,9 @@ class LeafSlot(RecordData):
     domain: Domain
     required: bool
     occurrences: tuple[Span, ...]
+    expression: PreparationExpression | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
 
     @model_validator(mode="after")
     def _typed(self) -> Self:
@@ -210,7 +236,9 @@ class Expression(RecordData):
     leaves: Annotated[tuple[Code, ...], Field(min_length=1)]
 
 
-QuantityExpr = Annotated[Constant | Bound | Expression, Field(discriminator="kind")]
+QuantityExpr = Annotated[
+    Constant | Bound | Expression | ContextExpression, Field(discriminator="kind")
+]
 
 
 class QuantitySpec(RecordData):
@@ -235,6 +263,9 @@ class Port(RecordData):
     type: PortType
     source_role: Code
     scope: Code
+    evidence: PortEvidence | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
 
 
 class Projection(RecordData):
@@ -371,6 +402,110 @@ class OccurrenceKey(OwnerField):
     segments: Annotated[tuple[Span, ...], Field(min_length=1)]
 
 
+CaptureTime = Literal[
+    "live", "selection", "lki", "receipt", "at_event", "current_turn", "play_parameter"
+]
+
+
+class ObjectGeneration(RecordData):
+    object_id: Id
+    generation: UInt
+
+
+class ObjectSetRef(RecordData):
+    kind: Literal["ObjectSet"]
+    objects: tuple[ObjectGeneration, ...]
+    origin: Literal["holder", "event_subject", "selection", "direct_ability_source"]
+
+
+class PlayerRef(RecordData):
+    kind: Literal["PlayerRef"]
+    player: Code
+
+
+class ReceiptRef(RecordData):
+    kind: Literal["ReceiptId"]
+    receipt_id: Id
+    result: Literal["objects", "amount", "payment_complete"]
+
+
+class CapturedValueRef(RecordData):
+    kind: Literal["CapturedValue"]
+    binding_id: Id
+    result_type: Literal["Nat", "Bool"]
+    measure: Code
+
+
+class ChoiceContext(RecordData):
+    kind: Literal["ChoiceContext"]
+    ability_instance: Id
+    turn: Id
+    modes: Annotated[tuple[Code, ...], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def _unique(self) -> Self:
+        if len(set(self.modes)) != len(self.modes):
+            raise ValueError("ChoiceContext modes must be unique")
+        return self
+
+
+class EventRef(RecordData):
+    kind: Literal["EventRef"]
+    event_kind: Literal["EnterField", "Play", "Damage"]
+    event_id: Id
+    subject: ObjectGeneration
+    direct_ability_source: ObjectGeneration | None = None
+
+
+PortValue = Annotated[
+    ObjectSetRef | PlayerRef | ReceiptRef | CapturedValueRef | ChoiceContext | EventRef,
+    Field(discriminator="kind"),
+]
+
+
+class PortEvidence(RecordData):
+    source: OccurrenceKey
+    capture: CaptureTime
+    value: PortValue
+    source_leaves: tuple[Code, ...] = ()
+
+
+class ResolvedCondition(RecordData):
+    state: Literal["resolved"]
+    predicate: Code
+
+
+class PendingCondition(RecordData):
+    state: Literal["pending"]
+    source_descriptor: Code
+    source_span: Span
+    raw_sha256: Hash
+    reason: Literal["missing_provider", "unsealed_source", "ambiguous_source"]
+
+
+ConditionSlot = Annotated[
+    ResolvedCondition | PendingCondition, Field(discriminator="state")
+]
+
+
+class ModeCountRule(RecordData):
+    base: QuantitySpec
+    alternative: QuantitySpec
+    condition: ConditionSlot
+    choice_context: Code
+    scope: Code
+
+    @model_validator(mode="after")
+    def _constant(self) -> Self:
+        if any(
+            quantity.mode not in {"exact", "up_to"}
+            or not isinstance(quantity.expr, Constant)
+            for quantity in (self.base, self.alternative)
+        ):
+            raise ValueError("Mode counts require exact/up_to constant quantities")
+        return self
+
+
 class SemanticVariant(RecordData):
     state: Literal["resolved", "pending"]
     key: Code | None
@@ -400,9 +535,24 @@ class Frame(RecordData):
     leaf_schema: LeafSchema
     projection: Projection
     content_hash: Hash
+    mode_rules: tuple[ModeCountRule, ...] = Field(
+        default=(), exclude_if=lambda value: not value
+    )
 
     @model_validator(mode="after")
     def _identity(self) -> Self:
+        if self.source.normalizer_version != "four-layer-jp-v3" and (
+            self.mode_rules
+            or any(
+                s.type == "PredicateExpr" or s.expression is not None
+                for s in self.leaf_schema.slots
+            )
+            or any(
+                p.type == "EventRef" or p.evidence is not None
+                for p in (*self.projection.imports, *self.projection.exports)
+            )
+        ):
+            raise ValueError("Preparation structure requires a v3 frame")
         if self.id != "frame:" + self.content_hash:
             raise ValueError("Frame ID differs from full content hash")
         if (
@@ -415,6 +565,15 @@ class Frame(RecordData):
     def payload(self, canonical_source: str) -> dict[str, object]:
         """Exclude optional rendering choices and interface description from frame identity."""
         return {
+            **(
+                {
+                    "mode_rules": [
+                        rule.model_dump(mode="json") for rule in self.mode_rules
+                    ]
+                }
+                if self.mode_rules
+                else {}
+            ),
             "recipe": "frame-v1",
             "source_lang": self.source.source_lang,
             "canonical_source": canonical_source,
@@ -545,11 +704,24 @@ class Target(RecordData):
         used = set().union(
             *(_node_slots(node, slots, lang, forms) for node in self.nodes)
         )
-        used.update(
-            actual
-            for name in tuple(used)
-            for actual in (dependencies or {}).get(name, ())
-        )
+        active: set[str] = set()
+        visited: set[str] = set()
+
+        def visit(name: str) -> None:
+            _leaf(slots, name)
+            if name in active:
+                raise ValueError("Cyclic target dependencies")
+            if name in visited:
+                return
+            active.add(name)
+            for actual in (dependencies or {}).get(name, ()):
+                visit(actual)
+                used.add(actual)
+            active.remove(name)
+            visited.add(name)
+
+        for name in tuple(used):
+            visit(name)
         if any(slot.required and slot.name not in used for slot in schema.slots):
             raise ValueError("Target must use every required leaf")
 
@@ -785,3 +957,7 @@ class FormDefinition(RecordData):
                 raise ValueError("Form leaf role disagrees with signature")
             used.add(slot.name)
         return used
+
+
+Port.model_rebuild()
+Projection.model_rebuild()

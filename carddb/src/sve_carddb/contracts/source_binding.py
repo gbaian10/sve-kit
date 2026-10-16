@@ -11,12 +11,14 @@ from sve_carddb.contracts.four_layer import (
     CardNameReference,
     Code,
     Constant,
+    ContextExpression,
     Expression,
     GlossaryReference,
     Hash,
     Id,
     OccurrenceKey,
     OwnerField,
+    PredicateExpr,
     QuantityExpr,
     QuantitySpec,
     Reference,
@@ -35,7 +37,14 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import Frame, LeafSlot
 
 TypedValue = (
-    UInt | bool | str | Reference | tuple[Code, ...] | QuantitySpec | QuantityExpr
+    UInt
+    | bool
+    | str
+    | Reference
+    | tuple[Code, ...]
+    | QuantitySpec
+    | QuantityExpr
+    | PredicateExpr
 )
 
 
@@ -81,6 +90,11 @@ class QuantityDomain(RecordData):
     imports: tuple[Code, ...]
     expressions: tuple[Code, ...]
     constant_only: bool = False
+
+
+class PreparationDomain(RecordData):
+    type: Literal["QuantityExpr", "PredicateExpr"]
+    expressions: Annotated[tuple[Code, ...], Field(min_length=1)]
 
 
 class ReferenceDomain(RecordData):
@@ -135,7 +149,14 @@ class LayoutDomain(RecordData):
     type: Literal["LiteralLayout"]
 
 
-ClosedDomain = CodeDomain | ZoneDomain | QuantityDomain | ReferenceDomain | LayoutDomain
+ClosedDomain = (
+    CodeDomain
+    | ZoneDomain
+    | QuantityDomain
+    | PreparationDomain
+    | ReferenceDomain
+    | LayoutDomain
+)
 
 
 class SourceReference(RecordData):
@@ -310,6 +331,13 @@ def _registered_value(domain: ClosedDomain, value: TypedValue) -> None:
     elif isinstance(domain, CodeDomain):
         if not isinstance(value, str) or value not in domain.codes:
             raise ValueError("Code is outside its named source domain")
+    elif isinstance(domain, PreparationDomain):
+        expected = ContextExpression if domain.type == "QuantityExpr" else PredicateExpr
+        if (
+            not isinstance(value, expected)
+            or value.expression_id not in domain.expressions
+        ):
+            raise ValueError("Expression is outside its preparation domain")
     elif isinstance(domain, QuantityDomain):
         _quantity_value(domain, value)
     elif isinstance(domain, ReferenceDomain):
@@ -328,6 +356,11 @@ def _quantity_value(domain: QuantityDomain, value: TypedValue) -> None:
         if not isinstance(value, (Bound, Constant, Expression)):
             raise ValueError("QuantityExpr leaf has the wrong value shape")
         expr = value
+    if isinstance(expr, ContextExpression) and domain.type in {
+        "QuantitySpec",
+        "QuantityExpr",
+    }:
+        raise ValueError("Context expression requires a preparation domain")
     if domain.constant_only and not isinstance(expr, Constant):
         raise ValueError("Quantity domain requires a constant expression")
     if isinstance(expr, Bound) and expr.import_ not in domain.imports:

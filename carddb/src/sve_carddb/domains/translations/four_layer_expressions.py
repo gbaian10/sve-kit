@@ -6,17 +6,25 @@ from typing import TYPE_CHECKING, override
 
 from sve_carddb.contracts.four_layer import (
     Bound,
+    ContextExpression,
     Expression,
     FormNode,
     LeafRef,
     LeafSchema,
     LiteralNode,
+    PredicateExpr,
     QuantitySpec,
     Signature,
     SlotRef,
     Target,
 )
 from sve_carddb.contracts.source_binding import QuantityDomain
+from sve_carddb.domains.translations.four_layer_context import (
+    DEFAULT_REGISTRY,
+    Registry,
+    verify_mode_count,
+    visible,
+)
 from sve_carddb.domains.translations.four_layer_n2_forms import validate_parameter_form
 from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VERSION
 from sve_carddb.domains.translations.four_layer_render import (
@@ -25,7 +33,7 @@ from sve_carddb.domains.translations.four_layer_render import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
 
     from sve_carddb.contracts.four_layer import (
         FormDefinition,
@@ -154,22 +162,18 @@ def definition(expr: Expression) -> Definition:
 
 def verify_import(projection: Projection, name: str, scope: str) -> None:
     """A source-proven use sees only its own scope and ancestors, never a sibling branch."""
-    parents = {item.id: item.parent for item in projection.scopes}
-    if scope not in parents:
-        raise ValueError("Expression use has an unknown source scope")
     port = next((port for port in projection.imports if port.name == name), None)
     if port is None or port.type not in {"QuantityExpr", "CapturedValue"}:
         raise ValueError("Expression has a missing or mistyped import")
-    current: str | None = scope
-    while current is not None:
-        if current == port.scope:
-            return
-        current = parents[current]
-    raise ValueError("Expression import crosses a source branch")
+    visible(projection, port, scope)
 
 
 def verify_quantities(
-    frame: Frame, binding: SourceBinding, *, scopes: Mapping[str, str]
+    frame: Frame,
+    binding: SourceBinding,
+    *,
+    scopes: Mapping[str, str],
+    registry: Registry = DEFAULT_REGISTRY,
 ) -> None:
     """Check dependencies before expansion; source reconstruction supplies use scopes."""
     visited: set[str] = set()
@@ -184,24 +188,48 @@ def verify_quantities(
             raise ValueError("Expression refers to a missing actual value")
         active.add(name)
         value = binding.values[name]
-        expr = value.expr if isinstance(value, QuantitySpec) else value
-        if isinstance(expr, Expression):
-            for operand in expr.leaves:
-                visit(operand)
-            definition(expr).arguments(expr, frame.leaf_schema)
-        elif isinstance(expr, Bound):
-            if name not in scopes:
-                raise ValueError("Bound expression lacks a source-proven use scope")
-            verify_import(frame.projection, expr.import_, scopes[name])
+        slot = next((s for s in frame.leaf_schema.slots if s.name == name), None)
+        if (
+            slot is not None
+            and slot.expression is not None
+            and value != slot.expression
+        ):
+            raise ValueError("Expression value differs from its source structure")
+        _verify_expression(frame, binding, name, scopes, registry, visit)
         active.remove(name)
         visited.add(name)
 
     for name in binding.values:
         visit(name)
+    for rule in frame.mode_rules:
+        verify_mode_count(rule, frame, binding)
+
+
+def _verify_expression(
+    frame: Frame,
+    binding: SourceBinding,
+    name: str,
+    scopes: Mapping[str, str],
+    registry: Registry,
+    visit: Callable[[str], None],
+) -> None:
+    value = binding.values[name]
+    expr = value.expr if isinstance(value, QuantitySpec) else value
+    if isinstance(expr, Expression):
+        for operand in expr.leaves:
+            visit(operand)
+        definition(expr).arguments(expr, frame.leaf_schema)
+    elif isinstance(expr, (ContextExpression, PredicateExpr)):
+        for operand in registry.verify(frame, binding, name, expr):
+            visit(operand)
+    elif isinstance(expr, Bound):
+        if name not in scopes:
+            raise ValueError("Bound expression lacks a source-proven use scope")
+        verify_import(frame.projection, expr.import_, scopes[name])
 
 
 def target_dependencies(
-    frame: Frame, binding: SourceBinding
+    frame: Frame, binding: SourceBinding, *, registry: Registry = DEFAULT_REGISTRY
 ) -> dict[str, tuple[str, ...]]:
     """Only preparation targets inherit usage through source-bound expression actuals."""
     if frame.source.normalizer_version != PREPARATION_VERSION:
@@ -211,24 +239,69 @@ def target_dependencies(
         expr = value.expr if isinstance(value, QuantitySpec) else value
         if isinstance(expr, Expression):
             dependencies[name] = expr.leaves
+        elif isinstance(expr, (ContextExpression, PredicateExpr)):
+            dependencies[name] = registry.verify(frame, binding, name, expr)
     return dependencies
 
 
 class ExpressionTargets:
-    def __init__(self, targets: Mapping[tuple[str, str], SelectedTarget]) -> None:
+    def __init__(
+        self,
+        targets: Mapping[tuple[str, str], SelectedTarget],
+        *,
+        registry: Registry = DEFAULT_REGISTRY,
+    ) -> None:
         self.targets = dict(targets)
-        if any(key[0] not in DEFINITIONS for key in self.targets):
+        self.registry = registry
+        if any(
+            key[0] not in DEFINITIONS and key[0] not in registry.descriptors
+            for key in self.targets
+        ):
             raise ValueError("Target selects an unknown preparation expression")
+
+    def import_arguments(
+        self,
+        expr: ContextExpression | PredicateExpr,
+        schema: LeafSchema,
+        frame: Frame | None,
+        binding: SourceBinding | None,
+    ) -> dict[str, LeafSlot]:
+        """Imported source leaves remain required, typed presentation formals."""
+        if frame is None or binding is None:
+            raise ValueError("Context presentation requires source-bound imports")
+        arguments = {}
+        for signature in self.registry.definition(expr).imports:
+            port = next(
+                p
+                for p in frame.projection.imports
+                if p.name == expr.imports[signature.name]
+            )
+            if port.evidence is None:
+                raise ValueError("Context presentation lacks assigned provider")
+            for index, name in enumerate(port.evidence.source_leaves):
+                arguments[f"{signature.name}.{index}"] = next(
+                    s for s in schema.slots if s.name == name
+                )
+        return arguments
 
     def expand(
         self,
-        expr: Expression,
+        expr: Expression | ContextExpression | PredicateExpr,
         schema: LeafSchema,
         lang: str,
         forms: Mapping[tuple[str, str], FormDefinition],
+        *,
+        frame: Frame | None = None,
+        binding: SourceBinding | None = None,
     ) -> SelectedTarget:
         """Use normal Target validation on formals, then substitute actual slot names."""
-        arguments = definition(expr).arguments(expr, schema)
+        arguments = (
+            definition(expr).arguments(expr, schema)
+            if isinstance(expr, Expression)
+            else self.registry.definition(expr).arguments(expr, schema)
+        )
+        if isinstance(expr, (ContextExpression, PredicateExpr)):
+            arguments.update(self.import_arguments(expr, schema, frame, binding))
         selected = self.targets.get((expr.expression_id, lang))
         if selected is None:
             raise MissingValueError("missing_expression_translation")
@@ -293,7 +366,10 @@ class PreparationRenderer(Renderer):
 
     @override
     def expression_target(
-        self, item: BoundTarget, expr: Expression, lang: str
+        self,
+        item: BoundTarget,
+        expr: Expression | ContextExpression | PredicateExpr,
+        lang: str,
     ) -> SelectedTarget:
         """Keep preparation expression selections outside production renderer inputs."""
         return self.expression_targets.expand(
@@ -301,6 +377,8 @@ class PreparationRenderer(Renderer):
             item.frame.leaf_schema,
             lang,
             {key: form.definition for key, form in self.forms.items()},
+            frame=item.frame,
+            binding=item.binding,
         )
 
     @override
@@ -316,7 +394,9 @@ class PreparationRenderer(Renderer):
             item.frame.leaf_schema,
             lang,
             forms,
-            dependencies=target_dependencies(item.frame, item.binding),
+            dependencies=target_dependencies(
+                item.frame, item.binding, registry=self.expression_targets.registry
+            ),
         )
 
     @override
@@ -324,11 +404,14 @@ class PreparationRenderer(Renderer):
         """Expression operands contribute their normal required reference closure."""
         value = item.binding.values.get(name)
         expr = value.expr if isinstance(value, QuantitySpec) else value
-        if isinstance(expr, Expression):
-            definition(expr).arguments(expr, item.frame.leaf_schema)
-            references = super().references
+        if isinstance(expr, (Expression, ContextExpression, PredicateExpr)):
+            dependencies = target_dependencies(
+                item.frame, item.binding, registry=self.expression_targets.registry
+            )
             return tuple(
-                ref for actual in expr.leaves for ref in references(item, actual)
+                ref
+                for actual in dependencies.get(name, ())
+                for ref in self.references(item, actual)
             )
         return super().references(item, name)
 
@@ -340,5 +423,10 @@ class PreparationRenderer(Renderer):
         for item in plan:
             if item.frame.source.normalizer_version != PREPARATION_VERSION:
                 raise ValueError("Preparation rendering requires a v3 frame")
-            verify_quantities(item.frame, item.binding, scopes={})
+            verify_quantities(
+                item.frame,
+                item.binding,
+                scopes={},
+                registry=self.expression_targets.registry,
+            )
         return super().render(context_id, lang, plan)
