@@ -29,7 +29,7 @@ target 的 id 是 Code，lang 固定 zh-Hant，source_hash 是不帶前綴的完
 nodes 是非空陣列，只接受既有 `{kind: Literal,text}` 與 `{kind: LeafRef,slot}`。
 每個已宣告引用都必須被使用，LeafRef 不可指不存在的 slot；可重複使用。
 Literal 保留原樣，不自動替換其中卡名。LeafRef 使用與 JP 四層相同的有效卡名規則，其他引用使用當前選詞；沒有可用詞時整欄退回 EN。
-名稱 target 可由 Literal 與片段 card_name LeafRef 組成；引用範圍須覆蓋該片段概念的完整文字。
+名稱 target 可由 Literal 與片段 card_name LeafRef 組成；「整體」引用範圍指須覆蓋該片段概念的完整文字，不要求覆蓋整個名稱欄。
 target 位置由渲染節點依 Unicode code point 產生，沿既有 AnnotationSet 檢查與公開 reader；
 不接受人工填入譯文 offsets。
 
