@@ -42,13 +42,16 @@ known exact-day product release of their permanent `printing.home_set_id` in tha
 region, then raw card number and stable printing ID. Reprint inclusion dates and
 `card.home_set_id` do not change this ordering.
 
-Known rarity codes sort before unknown/uncoded rarity. The method is
+Known rarity codes sort before unknown/uncoded rarity, and among uncoded
+printings a bare premium label sorts last because it is known not to be the plain
+printing. The method is
 `lowest_rarity` when every candidate has a ranked code,
 `candidate_lowest_rarity` when an unknown competitor remains, or `fallback` when
 all candidates have unknown rarity. Missing home release dates sort after known
 dates; month/year precision is never promoted to a day. These methods identify
 selection policy, without claiming ordinary processing or complete release dates.
-Premium, signed, frame and stamp facts do not add selection criteria. The caller
+Within a ranked rarity, premium, signed, frame and stamp facts do not add
+selection criteria. The caller
 supplies the intended publication subset as build rows.
 
 The adopted override envelopes and their freshness checks remain defined by

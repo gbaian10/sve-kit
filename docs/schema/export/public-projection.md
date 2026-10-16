@@ -88,7 +88,6 @@ logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Sche
   [§7.2](../domains/translation-contract.md#72-逐-owner-的顯示選用)；翻譯選用不解除 DSL 區域限制。
 - `related_regions`：reskin 在各輸出地區的已驗證 eligibility。
 - `active_scopes`：ruling revision 的已驗證現行有效文字單元；projector 不猜部分取代的切段。
-  不由卡號、字串猜加工，不把未知分類補成已確認一般版。
 
 投影沿 4.0.0 機器契約檢查 `face.wording`、PrintingFace.observations、annotation 與來源指標的完整欄序及閉包。
 `Projection` 仍須經 `export_snapshot` 的 reader 驗證，才能作為完整候選快照；

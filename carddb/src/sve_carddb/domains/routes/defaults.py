@@ -2,7 +2,6 @@
 
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import date
 from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.domains.registry.rarity import RARITY_ORDER
@@ -28,7 +27,6 @@ def _home_dates(db: Database) -> dict[tuple[str, str], str]:
         if product.values["date_precision"] != "day":
             continue
         day = text(product, "released_on")
-        date.fromisoformat(day)
         key = text(member, "family_id"), text(product, "region")
         dates[key] = min(dates.get(key, day), day)
     return dates
@@ -48,9 +46,14 @@ def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
     if overrides.keys() - groups.keys():
         raise ValueError("Default override has no card/region printing")
 
+    unknown = len(ranks)
+
     def rank(row: Row) -> int:
         code = row.values["rarity_code"]
-        return ranks.get(code, len(ranks)) if isinstance(code, str) else len(ranks)
+        if isinstance(code, str) and code in ranks:
+            return ranks[code]
+        # A bare premium label has no tier but is known not to be the plain printing.
+        return unknown + 1 if row.values["premium"] is True else unknown
 
     def order(row: Row) -> tuple[int, bool, str, str, str]:
         day = home_dates.get((text(row, "home_set_id"), text(row, "region")))
@@ -71,9 +74,9 @@ def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
         selected_row = min(candidates, key=order)
         method: Literal["lowest_rarity", "candidate_lowest_rarity", "fallback"] = (
             "fallback"
-            if rank(selected_row) == len(ranks)
+            if rank(selected_row) >= unknown
             else "candidate_lowest_rarity"
-            if any(rank(item) == len(ranks) for item in candidates)
+            if any(rank(item) >= unknown for item in candidates)
             else "lowest_rarity"
         )
         result.append(DefaultPrinting(*key, text(selected_row, "id"), method))

@@ -168,6 +168,24 @@ def test_unknown_rarity_keeps_uncertainty_and_never_uses_raw_number_guess() -> N
         assert (result.printing_id, result.method) == ("unknown", "fallback")
 
 
+@pytest.mark.parametrize(
+    ("region", "premium"), [("jp", "プレミアム"), ("en", "Premium")]
+)
+def test_bare_premium_sorts_after_an_unranked_plain_printing(
+    region: str, premium: str
+) -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            printing(
+                db, "premium", "SYN-P01", region=region, changes={"rarity_raw": premium}
+            )
+            printing(db, "plain", "SYN-T01", region=region, changes={"rarity_raw": "-"})
+            populate(db)
+        result = select_defaults(db)[0]
+        assert (result.printing_id, result.method) == ("plain", "fallback")
+
+
 def test_groups_are_scoped_to_card_and_region() -> None:
     with create_database(compile_t0()) as db:
         values = base(db)

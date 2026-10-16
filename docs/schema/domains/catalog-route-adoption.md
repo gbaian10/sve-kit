@@ -229,17 +229,18 @@ concept_evidence 以 name/tooltip/copy_pattern 為鍵；origin 為整筆來源�
 稀有度配置權威為 [registry.rarity](../../../carddb/src/sve_carddb/domains/registry/rarity.py)，
 順序為 BR、SR、GR、LG、SL、UR、SP、SSP、PR，兩區原標籤正規化後共用 code。
 原值與 premium 仍保留；未知原值、純 premium 與「-」不捏造 code，排已知稀有度之後。
-同稀有度不另依 premium／signed／stamp／frame 篩選或排序，也不從卡號字串猜稀有度。
+其中純 premium 已知不是普通版，再排在「-」與未知原值之後，避免 token 等卡改選 premium 版。
+已知稀有度內不另依 premium／signed／stamp／frame 篩選或排序，也不從卡號字串猜稀有度。
 
 | method | 選取依據 |
 | --- | --- |
 | override | 有效的當前覆寫，目標在同卡同區展示集合 |
 | lowest_rarity | 所有候選都有已知稀有度，依稀有度、home set 發售日、卡號、ID 選取 |
 | candidate_lowest_rarity | 有已知稀有度候選，但另有未知稀有度競爭者；先從已知者選取 |
-| fallback | 全部候選稀有度未知，依 home set 發售日、卡號、ID 選取；無版次不造 default |
+| fallback | 全部候選稀有度未知，純 premium 排後，再依 home set 發售日、卡號、ID 選取；無版次不造 default |
 
 method 記錄排序政策，不證明普通加工或發售日完整。2026-10-01 核可的一般稀有度白名單
-仍是分類配置；不再作預設版次的候選閘門。加工事實的採納與未知狀態維持原契約，不能由空 stamp 表、
+只服務舊選取器，已由本決定取代。加工事實的採納與未知狀態維持原契約，不能由空 stamp 表、
 variant_key=standard 或本次選中的 default 推論普通加工。
 
 **展示集合技術契約**：selector 接收由既有公開投影規則產生並釘住的完整同區 printing 閉包，
