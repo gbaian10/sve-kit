@@ -171,23 +171,8 @@ describe("createPrefsStore", () => {
   })
 })
 
-it.each([true, false])(
-  "preserves a legacy shared comparison choice (%s) in both editions",
-  (value) => {
-    localStorage.setItem(
-      PREFS_KEY,
-      JSON.stringify({ v: 1, cardEdition: "en", showOtherEdition: value }),
-    )
-    const prefs = readPrefs()
-    expect(showsOtherEdition(prefs, "jp")).toBe(value)
-    expect(showsOtherEdition(prefs, "en")).toBe(value)
-    writePrefs(prefs)
-    expect(readPrefs().showOtherEdition).toEqual({ jp: value, en: value })
-  },
-)
-
-it.each([undefined, null])(
-  "uses the edition defaults when no comparison choice was made (%s)",
+it.each([undefined, null, true, { jp: true }])(
+  "uses the edition defaults without a complete comparison choice (%s)",
   (value) => {
     localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, showOtherEdition: value }))
     expect(showsOtherEdition(readPrefs(), "jp")).toBe(false)

@@ -63,14 +63,17 @@ const isNullableUiLanguage = (value: unknown): value is UiLanguage | null =>
   value === null || isUiLanguage(value)
 const isNullableAccent = (value: unknown): value is Accent | null =>
   value === null || isAccent(value)
+const isEditionSwitches = (value: unknown): value is Readonly<Record<CardEdition, boolean>> =>
+  typeof value === "object" &&
+  value !== null &&
+  CARD_EDITIONS.every((edition) => isBoolean((value as Record<string, unknown>)[edition]))
 
-type Guards = {
-  readonly [K in Exclude<keyof Prefs, "showOtherEdition">]: (value: unknown) => value is Prefs[K]
-}
+type Guards = { readonly [K in keyof Prefs]: (value: unknown) => value is Prefs[K] }
 
 const guards: Guards = {
   uiLanguage: isNullableUiLanguage,
   cardEdition: isCardEdition,
+  showOtherEdition: isEditionSwitches,
   nameDisplay: isTextDisplay,
   effectLanguage: isTextDisplay,
   symbolLabels: isBoolean,
@@ -80,19 +83,6 @@ const guards: Guards = {
   banRegion: isCardEdition,
   gridDensity: isGridDensity,
   viewMode: isViewMode,
-}
-
-function comparisonPrefs(value: unknown): Prefs["showOtherEdition"] {
-  // A legacy explicit choice affected both editions; preserve it in both slots.
-  if (isBoolean(value)) return { jp: value, en: value }
-  const fields =
-    typeof value === "object" && value !== null && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {}
-  return {
-    jp: isBoolean(fields["jp"]) ? fields["jp"] : DEFAULT_PREFS.showOtherEdition.jp,
-    en: isBoolean(fields["en"]) ? fields["en"] : DEFAULT_PREFS.showOtherEdition.en,
-  }
 }
 
 type StorageSource = Storage | (() => Storage) | undefined
@@ -111,12 +101,7 @@ function sanitize(raw: unknown): Prefs {
   const prefs: Record<string, unknown> = {}
   for (const key of Object.keys(DEFAULT_PREFS) as (keyof Prefs)[]) {
     const value = record[key]
-    prefs[key] =
-      key === "showOtherEdition"
-        ? comparisonPrefs(value)
-        : guards[key](value)
-          ? value
-          : DEFAULT_PREFS[key]
+    prefs[key] = guards[key](value) ? value : DEFAULT_PREFS[key]
   }
   return prefs as unknown as Prefs
 }
