@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { CardSummary, ImageIndex } from "../../data"
@@ -27,6 +27,7 @@ export interface CardImageProps {
   readonly candidatePolicy?: CandidatePolicy
   /** Must set the width (`w-full`, `w-8`); the height follows the 63:88 ratio. */
   readonly className: string
+  readonly onReady?: (() => void) | undefined
   /** Lists share their translator instead of subscribing once per image. */
   readonly translate?: TFunction
 }
@@ -53,6 +54,7 @@ function ImageContent({
   sizes,
   candidatePolicy = "responsive",
   className,
+  onReady,
   t,
 }: CardImageProps & { readonly t: TFunction }) {
   const [loaded, setLoaded] = useState("")
@@ -82,6 +84,9 @@ function ImageContent({
   // A source this session already showed is in the browser cache: a remounted slot (switching
   // views, returning to a list) paints it at once instead of the placeholder until onLoad.
   const isLoaded = source !== undefined && (loaded === source.src || shownSources.has(source.src))
+  useEffect(() => {
+    if (!loading && (!showImage || isLoaded)) onReady?.()
+  }, [loading, showImage, isLoaded, onReady])
   const stateLabel = tag ?? (showImage && !isLoaded ? t("card.imageDownloading") : undefined)
   // A landscape card keeps its real proportions inside the portrait slot instead of being cropped.
   const landscape = source !== undefined && source.width > source.height

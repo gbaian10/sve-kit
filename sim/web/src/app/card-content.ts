@@ -1,5 +1,6 @@
 import { prepareImage } from "../components/card/image-loading"
 import {
+  type CardRouteInput,
   catalogOf,
   faceBasics,
   type ImageIndex,
@@ -24,6 +25,7 @@ export async function prepareCardContent(
   located: LocatedCard,
   language: string,
   sizes: string,
+  signal?: AbortSignal,
 ): Promise<CardContent> {
   const pinned = { ...client, snapshot: () => located.snapshot }
   const { printing } = located
@@ -79,11 +81,39 @@ export async function prepareCardContent(
       ),
     ),
   ])
-  await Promise.all(
-    faces.map(({ printingId, faceId }) => {
-      const source = images.cardImage(printingId, faceId)
-      return source ? prepareImage(source, sizes) : Promise.resolve()
-    }),
-  )
+  const prepareFace = ({ printingId, faceId }: { printingId: string; faceId: string }) => {
+    const source = images.cardImage(printingId, faceId)
+    return source ? prepareImage(source, sizes, signal) : Promise.resolve()
+  }
+  if (signal) {
+    for (const face of faces) await prepareFace(face)
+  } else await Promise.all(faces.map(prepareFace))
+  signal?.throwIfAborted()
   return { ...located, catalog, client: pinned, images }
+}
+
+export function cardContentKey(
+  client: SnapshotClient,
+  input: CardRouteInput,
+  language: string,
+  attempt: number,
+): string {
+  return JSON.stringify([
+    client.base,
+    client.snapshot()?.manifestHash,
+    input.edition,
+    language,
+    attempt,
+    input.namespace,
+    input.key,
+    input.hint
+      ? [
+          input.hint.id,
+          input.hint.cardId,
+          input.hint.cardOwner,
+          input.hint.printingOwner,
+          input.hint.region,
+        ]
+      : null,
+  ])
 }

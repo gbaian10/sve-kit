@@ -37,11 +37,13 @@ vi.mock("../../app/snapshot", async (original) => ({
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
 
+let sequence = 0
 async function setup(pendingCandidate = false) {
-  const source = createSnapshotClient("https://cdn.test", {
+  const base = `https://navigation-${String(sequence++)}.test`
+  const source = createSnapshotClient(base, {
     cacheStorage: memoryCache(),
     fetch: (url) => {
-      const bytes = built.files.get(url.slice("https://cdn.test/".length))
+      const bytes = built.files.get(url.slice(base.length + 1))
       return Promise.resolve(
         bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
       )
@@ -91,11 +93,13 @@ async function setup(pendingCandidate = false) {
   let historyHold: Promise<void> | undefined
   let historyFailure = false
   let failedPurposes = new Set<string>()
+  const backgroundReads: string[] = []
   const pinnedSnapshot = snapshot
   state.client = {
     ...source,
     snapshot: () => pinnedSnapshot,
-    fragments: async (key) => {
+    fragments: async (key, request) => {
+      if (request?.background) backgroundReads.push(key)
       const pending = hold
       hold = undefined
       await pending
@@ -106,7 +110,7 @@ async function setup(pendingCandidate = false) {
       const purpose = pinnedSnapshot.files.get(key)?.["purpose"]
       if (typeof purpose === "string" && failedPurposes.has(purpose))
         throw new Error("synthetic read failure")
-      return source.fragments(key)
+      return source.fragments(key, request)
     },
   }
   const catalog = catalogOf(snapshot)
@@ -149,6 +153,7 @@ async function setup(pendingCandidate = false) {
   )
   return {
     ...rendered,
+    backgroundReads,
     holdHistory: () => {
       let release: () => void = () => undefined
       historyHold = new Promise<void>((resolve) => {
@@ -291,4 +296,69 @@ describe("card navigation commits", () => {
     await screen.findByRole("heading", { name: "試作魔導士" })
     expect(screen.getByText("消費").parentElement).toHaveTextContent("4")
   })
+})
+
+it("waits for the current image before preparing a neighbour, then switches with its full prepared content", async () => {
+  prefsStore.set({ prefetchNeighbours: true })
+  let release: () => void = () => undefined
+  const currentDecode = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const decode = vi
+    .fn()
+    .mockImplementationOnce(() => currentDecode)
+    .mockResolvedValue(undefined)
+  Object.defineProperty(HTMLImageElement.prototype, "decode", { configurable: true, value: decode })
+  const h = await setup()
+  expect(h.backgroundReads).toHaveLength(0)
+  await act(async () => {
+    release()
+    await currentDecode
+    const image = document.querySelector("article img[decoding]")
+    if (!image) throw new Error("missing first card image")
+    fireEvent.load(image)
+  })
+  await waitFor(() => {
+    expect(h.backgroundReads.length).toBeGreaterThan(0)
+  })
+  await waitFor(() => {
+    expect(decode).toHaveBeenCalledTimes(2)
+  })
+  await act(async () => {
+    await Promise.resolve()
+  })
+  h.failReads(["print", "detail", "images", "history"])
+  await userEvent.click(screen.getByRole("button", { name: "下一張" }))
+  await screen.findByRole("heading", { name: "試作隊長" })
+  expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
+  expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
+})
+
+it("discards a neighbour still preparing when the switch is turned off", async () => {
+  prefsStore.set({ prefetchNeighbours: true })
+  let release: () => void = () => undefined
+  const neighbourDecode = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const decode = vi
+    .fn()
+    .mockResolvedValueOnce(undefined)
+    .mockImplementationOnce(() => neighbourDecode)
+    .mockResolvedValue(undefined)
+  Object.defineProperty(HTMLImageElement.prototype, "decode", { configurable: true, value: decode })
+  const h = await setup()
+  await waitFor(() => {
+    expect(decode).toHaveBeenCalledTimes(2)
+  })
+  act(() => {
+    prefsStore.set({ prefetchNeighbours: false })
+  })
+  await act(async () => {
+    release()
+    await neighbourDecode
+  })
+  h.failReads(["print", "detail", "images", "history"])
+  await userEvent.click(screen.getByRole("button", { name: "下一張" }))
+  await screen.findByRole("heading", { name: "試作隊長" })
+  expect(await screen.findByText("卡圖資訊載入失敗")).toBeInTheDocument()
 })

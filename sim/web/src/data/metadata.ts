@@ -114,8 +114,17 @@ export class MetadataBytes {
     this.changed()
   }
 
-  read(key: string, priority = true): Promise<Uint8Array> {
+  read(key: string, priority = true, signal?: AbortSignal): Promise<Uint8Array> {
     if (this.disposed) return Promise.reject(new Error("snapshot replaced"))
+    if (signal) {
+      signal = AbortSignal.any([this.abort.signal, signal])
+      const file = this.files.get(key)
+      if (!file) return Promise.reject(new SnapshotError("payload-set", "unknown image file"))
+      return this.queue.add(() => this.obtain(key, file, priority, signal), {
+        signal,
+        priority: priority ? 1 : 0,
+      })
+    }
     const memory = this.memory.get(key)
     if (memory) return Promise.resolve(memory)
     const existing = this.pending.get(key)
@@ -176,7 +185,15 @@ export class MetadataBytes {
     if (this.pending.get(job.key) === job) this.pending.delete(job.key)
   }
 
-  private async obtain(key: string, file: JsonObject, priority: boolean): Promise<Uint8Array> {
+  private async obtain(
+    key: string,
+    file: JsonObject,
+    priority: boolean,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array> {
+    const activeSignal = signal ? AbortSignal.any([this.abort.signal, signal]) : this.abort.signal
+    if (!this.active()) throw new Error("snapshot replaced")
+    activeSignal.throwIfAborted()
     const path = `${this.base}/${stringValue(file["path"])}`
     const hash = stringValue(file["sha256"])
     const valid = async (bytes: Uint8Array) =>
@@ -201,7 +218,8 @@ export class MetadataBytes {
         throw new Error("persistent cache required for background fetch")
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const candidate = await fetchBytes(priority ? this.fetcher : this.backgroundFetch, path, {
-          signal: this.abort.signal,
+          signal: activeSignal,
+          ...(!priority ? { priority: "low" as const } : {}),
         })
         if (await valid(candidate)) {
           bytes = candidate
@@ -211,6 +229,7 @@ export class MetadataBytes {
       if (!bytes)
         throw new SnapshotError("blob-integrity", "image metadata hash/length mismatch after retry")
       if (this.disposed) throw new Error("snapshot replaced")
+      activeSignal.throwIfAborted()
       if (cache) {
         try {
           try {
@@ -233,6 +252,7 @@ export class MetadataBytes {
       }
     }
     if (this.disposed) throw new Error("snapshot replaced")
+    activeSignal.throwIfAborted()
     // CacheStorage owns persistent bytes; keep a bounded RAM fallback only when it fails.
     if (!this.progress.persistent && priority) this.memory.set(key, bytes)
     this.verified.add(key)

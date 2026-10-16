@@ -1251,3 +1251,56 @@ describe("createSnapshotClient: verified snapshot records", () => {
     expect(client.snapshot()).toBe(snapshot)
   })
 })
+
+it("cancels a background reader without cancelling a visible reader of the same file", async () => {
+  const served = serve("/cdn")
+  const gate = Promise.withResolvers<undefined>()
+  const priorities: (RequestPriority | undefined)[] = []
+  let hold = false
+  const client = createSnapshotClient("/cdn", {
+    cacheStorage: memoryCache(),
+    fetch: async (url, init) => {
+      if (hold) {
+        priorities.push(init?.priority)
+        await gate.promise
+      }
+      return served.fetcher(url, init)
+    },
+  })
+  await client.load()
+  hold = true
+  const abort = new AbortController()
+  const background = client.fragments(revisionKey, { signal: abort.signal, background: true })
+  const rejected = expect(background).rejects.toThrow()
+  await vi.waitFor(() => {
+    expect(priorities).toEqual(["low"])
+  })
+  const visible = client.fragments(revisionKey)
+  abort.abort()
+  gate.resolve(undefined)
+  await rejected
+  expect((await visible).length).toBeGreaterThan(0)
+  expect(client.status().state).toBe("ready")
+})
+
+it("does not refresh the active snapshot when a background detail is unavailable", async () => {
+  const served = serve("/cdn")
+  let unavailable = false
+  const client = createSnapshotClient("/cdn", {
+    cacheStorage: memoryCache(),
+    fetch: (url, init) =>
+      unavailable
+        ? Promise.resolve(new Response(null, { status: 404 }))
+        : served.fetcher(url, init),
+  })
+  await client.load()
+  const before = client.snapshot()
+  const requests = served.requests.length
+  unavailable = true
+  await expect(
+    client.fragments(revisionKey, { signal: new AbortController().signal, background: true }),
+  ).rejects.toThrow()
+  expect(client.snapshot()).toBe(before)
+  expect(client.status().state).toBe("ready")
+  expect(served.requests).toHaveLength(requests)
+})
