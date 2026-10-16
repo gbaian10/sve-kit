@@ -54,4 +54,5 @@ export {
   type SearchStatus,
 } from "./search/session"
 export { type CompleteView, type ViewFace, viewImages } from "./search/view"
+export { clearManagedCaches, estimateStorage, type StorageEstimate } from "./storage"
 export { textRuns } from "./text-runs"

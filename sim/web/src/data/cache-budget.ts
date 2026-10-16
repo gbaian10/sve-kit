@@ -3,6 +3,26 @@ export const VIEW_BUDGET = 2 * MIB
 const ROOT_BUDGET = 64 * MIB
 const ORIGIN_BUDGET = 128 * MIB
 
+export function isDataCache(name: string): boolean {
+  return /^sve-(search-|snapshot:|images-)/u.test(name)
+}
+
+/** Counts declared payload bytes without trimming or materializing decoded data. */
+export async function dataCacheBytes(storage: CacheStorage): Promise<number> {
+  let total = 0
+  for (const name of (await storage.keys()).filter(isDataCache)) {
+    const cache = await storage.open(name)
+    for (const key of await cache.keys()) {
+      const response = await cache.match(key)
+      const size = response?.headers.get("x-sve-bytes")
+      if (size == null || size.trim() === "" || !Number.isFinite(Number(size)) || Number(size) < 0)
+        throw new Error("Data payload size unavailable")
+      total += Number(size)
+    }
+  }
+  return total
+}
+
 /** Automatic data caches share one budget; bitmap and user-managed offline stores have their own. */
 export async function trimDataCaches(
   storage: CacheStorage,
@@ -17,9 +37,7 @@ export async function trimDataCaches(
 /** A quota retry reuses the same inventory before and after inserting its replacement. */
 export async function readDataCacheBudget(storage: CacheStorage, root: string) {
   const encoded = encodeURIComponent(root)
-  const names = (await storage.keys()).filter((name) =>
-    /^sve-(search-|snapshot:|images-)/u.test(name),
-  )
+  const names = (await storage.keys()).filter(isDataCache)
   const entries: {
     cache: Cache
     url: string

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { expect, it } from "vitest"
+import { expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
 import { cachedImage, versionedImage } from "./image-cache"
@@ -55,7 +55,6 @@ it("matches the complete versioned URL: old cached bytes never satisfy a new v o
   expect(await (await cachedImage(request(1), storage, network)).text()).toBe("A")
   bytes = "B"
   expect(await (await cachedImage(request(2), storage, network)).text()).toBe("B")
-  expect(await (await cachedImage(request(1), storage, network)).text()).toBe("A")
   expect(urls).toHaveLength(2)
   failed = true
   await expect(cachedImage(request(3), storage, network)).rejects.toThrow("offline")
@@ -72,32 +71,78 @@ it("does not cache negative responses, and tolerates storage failure without an 
   const failed = memoryCache(true)
   expect((await cachedImage(request, failed, fetcher)).status).toBe(200)
 })
-it("bounds the response cache across versions and keeps roots apart", async () => {
+it("keeps more than 128 image URLs available offline", async () => {
   const storage = memoryCache()
   for (let i = 1; i <= 130; i += 1)
     await cachedImage(
-      new Request(`https://cdn.test/images/card_m/1.webp?v=${String(i)}`),
+      new Request(`https://cdn.test/images/card_m/${String(i)}.webp?v=1`),
       storage,
       () => Promise.resolve(new Response(String(i))),
     )
-  const cache = await storage.open("sve-image-responses-v2")
-  const keys = await cache.keys()
-  expect(keys).toHaveLength(128)
-  expect(keys.some((r) => r.url.endsWith("?v=1"))).toBe(false)
-  let read = false
+  const offline: typeof fetch = () => Promise.reject(new TypeError("offline"))
   expect(
     await (
-      await cachedImage(
-        new Request("https://preview.test/images/card_m/1.webp?v=130"),
-        storage,
-        () => {
-          read = true
-          return Promise.resolve(new Response("preview"))
-        },
+      await cachedImage(new Request("https://cdn.test/images/card_m/1.webp?v=1"), storage, offline)
+    ).text(),
+  ).toBe("1")
+  expect(await (await storage.open("sve-image-responses-v2")).keys()).toHaveLength(130)
+})
+
+it("removes older versions only for the same origin and pathname after a successful write", async () => {
+  const storage = memoryCache()
+  const base = "https://cdn.test/images/card_m/1.webp"
+  const unchanged = [
+    "https://preview.test/images/card_m/1.webp?v=1",
+    "https://cdn.test/images/card_l/1.webp?v=1",
+    "https://cdn.test/images/card_m/1-f2.webp?v=1",
+    "https://cdn.test/other/images/card_m/1.webp?v=1",
+  ]
+  const network: typeof fetch = () => Promise.resolve(new Response("synthetic"))
+  for (const url of [...unchanged, `${base}?v=9`, `${base}?v=10`])
+    await cachedImage(new Request(url), storage, network)
+  const cache = await storage.open("sve-image-responses-v2")
+  expect((await cache.keys()).map((r) => r.url).sort()).toEqual(
+    [...unchanged, `${base}?v=10`].sort(),
+  )
+})
+
+it("a late older response cannot remove the newer cached version", async () => {
+  const storage = memoryCache()
+  const request = (v: number) => new Request(`https://cdn.test/images/card_m/1.webp?v=${String(v)}`)
+  let release!: (response: Response) => void
+  const pending = cachedImage(
+    request(1),
+    storage,
+    () =>
+      new Promise((resolve) => {
+        release = resolve
+      }),
+  )
+  await vi.waitFor(() => {
+    expect(release).toBeDefined()
+  })
+  await cachedImage(request(2), storage, () => Promise.resolve(new Response("new")))
+  release(new Response("old"))
+  expect(await (await pending).text()).toBe("old")
+  const offline: typeof fetch = () => Promise.reject(new Error("offline"))
+  expect(await (await cachedImage(request(2), storage, offline)).text()).toBe("new")
+})
+
+it("preserves the previous image and returns the network response when the replacement write fails", async () => {
+  const storage = memoryCache()
+  const url = "https://cdn.test/images/card_m/1.webp"
+  await cachedImage(new Request(`${url}?v=1`), storage, () => Promise.resolve(new Response("old")))
+  const cache = await storage.open("sve-image-responses-v2")
+  vi.spyOn(cache, "put").mockRejectedValue(new Error("quota"))
+  vi.spyOn(storage, "open").mockResolvedValue(cache)
+  expect(
+    await (
+      await cachedImage(new Request(`${url}?v=2`), storage, () =>
+        Promise.resolve(new Response("new")),
       )
     ).text(),
-  ).toBe("preview")
-  expect(read).toBe(true)
+  ).toBe("new")
+  expect(await (await cache.match(`${url}?v=1`))?.text()).toBe("old")
 })
 it("intercepts only exact Bq GET URL shapes, keeping unversioned or duplicate query variants out", () => {
   expect(versionedImage("https://cdn.test/images/card_l/1-f7.webp?v=9")).toBe(true)
