@@ -909,3 +909,86 @@ expression 依使用點讀取當下數量，不建立 captured receipt 或跨片
 SEP 僅辨識明示「自己的 SEP 等於 0」的條件數字，沿用 `Nat/threshold` 的零下界。
 SEP、持有者、等值及條件作用域保持 canonical 字面，不增加 Concept、Player 葉或新資源語義。
 其他資源、非零值與比較不受本項擴張。
+
+### 11.5 準備版 context expression 與條件接口
+
+`contracts.four_layer.ContextExpression` 是數值讀值，`PredicateExpr` 的結果為 Bool。
+兩者保存 `expression_id`、依簽章排序的 `leaves`、依形參命名的 `imports` 與 `scope`。
+`four_layer_context.DEFAULT_REGISTRY` 封閉登錄 descriptor 的結果型別、measure、來源家族、
+leaf／import 簽章、capture 與 IR bridge；renderer 的 expression target key 沿用 descriptor ID。
+這些是準備版來源契約，不代表 effects schema 或 runtime 已支援。
+
+新葉的 `LeafSlot.expression` 必須與來源讀值結構一致；descriptor、實參連接與 source scope
+因此進入 leaf schema 及 frame 身分。`Frame.mode_rules` 保存模式數量規則，也進入 frame payload。
+沒有新結構時省略這兩個欄位，既有 v2／B11 的序列化與域成員維持原樣。
+執行證據、runtime capability 與 unresolved lowering 另存，不放在 expression 或 mode rule。
+正式 v2 frame 拒絕這些新結構。
+
+每個新 import 必須指向 `Port.evidence`：精確 `OccurrenceKey`、capture、typed value，
+以及本 frame 的 `source_leaves`。引用必須同 owner／face／field／來源 hash，
+同一 ability 的當前 scope 或祖先可見；不能從相鄰分支或其他 ability 借值。
+ObjectSet 明分單體／集合及 holder、event subject、selection、direct ability source；
+ReceiptId、CapturedValue、PlayerRef、ChoiceContext 與事件引用各有獨立型別。
+CapturedValue 的 Nat／Bool 與 measure 也必須符合簽章；缺 provider 不補 false 或 0。
+
+入場域 `predicate.entry.provenance.v1` 的角色為 `entry_condition`，只登錄：
+
+| descriptor | 實參 | imports |
+| --- | --- | --- |
+| `entry.self.from_zone.eq.v1` | `entry_from_zone`：hand／graveyard | holder 單體、`EventRef<EnterField>` |
+| `entry.self.from_zone.ne.v1` | `entry_from_zone`：僅 hand | 同上 |
+| `entry.event_subject.from_zone.eq.v1` | `entry_from_zone`：僅 graveyard | event subject 單體、該入場事件 |
+| `entry.self.method.ability.v1` | 無；固定 AbilityPut | holder 單體、入場事件 |
+| `entry.self.method.ability_source_trait.v1` | `entry_source_trait`：僅已登錄 umamusume | holder、入場事件、直接能力來源卡片的事件快照／LKI |
+
+zone／trait 葉沿舊域，以 descriptor 限制組合。事件與 subject 必須是同一物件世代；
+能力來源特性還須連到事件的直接來源，不能用持有者、自身特性或更早祖先代替。
+事件不存在、kind 錯誤、Unknown 來源都不能成為 Bool 結果。
+自身入場事實與 CurrentTurn 歷史分型，不能以歷史有無事件代替自身入場。
+
+共用讀值域是 `quantity.read.context.v1`（`read_value`）、
+`quantity.history.current_turn.v1`（`history_read_value`）、
+`quantity.count.distinct_name.v1`（`distinct_name_count`）；歷史 Exists 另用
+`predicate.history.current_turn.v1`（`history_condition`）。
+CountFacts、CountSubjects、Sum、Exists 的結果量綱獨立；HistorySignature 明示 CurrentTurn、
+include_execution 與 at_query cutoff，授予能力中的查詢不凍結為授予時的數字。
+`read.quantity.v1` 接受這些已型別化的讀值，供 A1 共用使用槽；
+`condition.quantity.at_least.v1`／`condition.quantity.equal.v1` 接讀值與
+`comparison_threshold:Nat`，供 A7 消費。B11 的既有 QuantityExpr 也能接比較條件，
+其舊 descriptor、參數順序與域不擴張。讀值用於傷害、回復或其他 frame 位置時，
+不改變讀值本身的 measure，也不按 consumer 新造域。
+
+`quantity.scale.once.v1` 是 A1／A2 共用的一層常數倍率：`value:QuantityExpr` 與
+`factor:Nat/constant_multiplier`。基底必須是 registry 明列 scalable 的讀值；
+巢狀倍率、透過 alias 隱藏的巢狀倍率、predicate、未登錄組合與非正倍率均拒絕。
+Nat 常數葉及原 B11 接受域保持原意，沒有一般算式 parser。
+
+`ConditionSlot` 是 `resolved(predicate)` 或
+`pending(source_descriptor, source_span, raw_sha256, reason)`；reason 區分
+`missing_provider`（已核來源尚待 provider）、`unsealed_source` 與 `ambiguous_source`。
+pending 保存來源，不能作真假分支。`ModeCountRule` 保存 base／alternative 的原
+exact／up_to 常數 QuantitySpec、ConditionSlot、ChoiceContext import 與 scope；
+模式數量判斷不能跨 ability／branch 借條件。
+
+新 expression target 與 §11.2 相同，所有形參都必須呈現。import 的 source leaves
+依簽章順序展開成 `<import形參>.<零起算序號>` 形參，也必須呈現。
+只有主 target 實際引用 expression 時，required 使用才遞迴傳到這些實參；
+遺漏值、錯型別、未知 descriptor、未呈現形參與循環均拒絕。
+正常 label、annotation、origin 與低信心資訊仍沿 renderer 傳遞。
+
+家族在各自模組宣告 `Descriptor` 與 `PreparationFamily`，以
+`derive_preparation(..., families=(...))` 明示組合；空 tuple 的預設入口不啟用新 producer。
+`PreparedField.registry` 合併各家族 descriptor，`ExpressionTargets(..., registry=...)`
+使用相同閉域。家族 callback 接收 raw、PreparedField、Classifier 與可選 CardContext，回傳更新的來源準備結果；
+verify 以相同 families 重新 derive。家族自用 descriptor 透過 `Registry.extend` 登錄，
+不得覆寫共同 ID。共用簽章若需修改，先回報協調者修訂契約。
+
+可重用的公開合成契約在 `carddb/tests/domains/translations/context_fixtures.py`：
+`contract_case("A1" | "A2" | "A3" | "A11")` 提供 BoundTarget、renderer、expression targets
+與 ModeCountRule，分別驗 A1→A7、A2→A1／A7、A3→A1、A11→A7。
+這些 fixture 只驗 typed 接線，不辨識官方來源，不提升 runtime 可執行狀態。
+
+事件引用亦可明示 `EventRef<Play>`，供獨立的 played_from 家族登錄；
+`ImportSignature.event_kind` 封閉事件 kind，`subject_import` 指向同一簽章中的單體 ObjectSet。
+共用邊界驗證事件與該主體的世代，Play 與 EnterField 不能互借。
+played_from 的來源辨識及 descriptor 由其來源家族負責，不加入 A11 五個 descriptor 的域。
