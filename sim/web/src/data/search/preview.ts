@@ -13,6 +13,8 @@ import type { SearchBlobs } from "./blobs"
 import type { SearchIndex } from "./index"
 import type { AbilityPreview } from "./messages"
 
+type DecodedFiles = Map<string, Promise<readonly Fragment[]>>
+
 /** Only the selected face's display effect is returned; annotations remain a card-page purpose. */
 export class PreviewReader {
   private readonly locate: ReturnType<typeof createLocator>
@@ -35,13 +37,14 @@ export class PreviewReader {
     table: string,
     id: string,
     signal: AbortSignal,
+    decoded: DecodedFiles,
     owner: JsonObject,
     entity: string,
     partition: "bootstrap" | "detail" = "detail",
   ): Promise<{ row: JsonObject; file: string } | undefined> {
     const key = this.locate({ table, owner, entityKey: [entity], region: this.region, partition })
     if (!key) return undefined
-    const fragments = await this.fragments(key, signal)
+    const fragments = await this.fragments(key, signal, decoded)
     signal.throwIfAborted()
     const row = fragments
       .filter((fragment) => fragment.table === table)
@@ -54,6 +57,7 @@ export class PreviewReader {
     id: string,
     origin: string,
     signal: AbortSignal,
+    decoded: DecodedFiles,
   ): Promise<JsonObject | undefined> {
     let result: JsonObject | undefined
     const pending = [origin]
@@ -62,7 +66,7 @@ export class PreviewReader {
       const key = pending.pop()
       if (key === undefined || visited.has(key)) continue
       visited.add(key)
-      for (const fragment of await this.fragments(key, signal))
+      for (const fragment of await this.fragments(key, signal, decoded))
         if (fragment.table === table)
           for (const row of fragment.rows)
             if (row["id"] === id) {
@@ -75,25 +79,29 @@ export class PreviewReader {
     }
     return result
   }
-  private async fragments(key: string, signal: AbortSignal): Promise<readonly Fragment[]> {
+  private async fragments(
+    key: string,
+    signal: AbortSignal,
+    decoded: DecodedFiles,
+  ): Promise<readonly Fragment[]> {
     const file = this.files.get(key)
     if (!file || integerValue(file["bytes"]) > 12 * 1024 * 1024)
       throw new Error("preview file exceeds budget")
-    let pending = this.running.get(key)
+    let pending = decoded.get(key) ?? this.running.get(key)
     if (!pending) {
       pending = this.blobs
         .read(file, signal)
         .then(async (bytes) => {
-          const decoded = decodeMessage({ kind: "file", bytes, file, version: this.version })
-          if (decoded.kind !== "fragments") throw new Error("preview file shape")
+          const result = decodeMessage({ kind: "file", bytes, file, version: this.version })
+          if (result.kind !== "fragments") throw new Error("preview file shape")
           return Promise.all(
-            decoded.fragments.map(async (fragment) => {
+            result.fragments.map(async (fragment) => {
               if (fragment.table !== "face_revision" || fragment.value["base"] === null)
                 return fragment
               const ref = objectValue(fragment.value["base"])
               const base = findBase(
                 fragment,
-                await this.fragments(stringValue(objectValue(ref["file"])["key"]), signal),
+                await this.fragments(stringValue(objectValue(ref["file"])["key"]), signal, decoded),
               )
               return { ...fragment, rows: joinDetail(fragment, base, new Map()) }
             }),
@@ -102,6 +110,7 @@ export class PreviewReader {
         .finally(() => this.running.delete(key))
       this.running.set(key, pending)
     }
+    decoded.set(key, pending)
     return pending
   }
   async resolve(
@@ -118,8 +127,18 @@ export class PreviewReader {
     const target = index.imageTargets([printingId]).find((face) => face.faceId === faceId)
     if (!summary || !target) throw new Error("preview face is not in this edition")
     this.region = summary.region
+    // Keep decoded files only for this preview, including both dictionary lookups.
+    const decoded: DecodedFiles = new Map()
     const owner = homeSetOwner(target.owner)
-    const locatedFace = await this.row("face", faceId, signal, owner, summary.cardId, "bootstrap")
+    const locatedFace = await this.row(
+      "face",
+      faceId,
+      signal,
+      decoded,
+      owner,
+      summary.cardId,
+      "bootstrap",
+    )
     const face = locatedFace?.row
     if (!face) throw new Error("preview face missing")
     const current = arrayValue(face["current"])
@@ -133,7 +152,14 @@ export class PreviewReader {
       (wording ? objectValue(wording["display"])["revision_id"] : undefined)
     let value: AbilityPreview | null = null
     if (typeof revisionId === "string") {
-      const located = await this.row("face_revision", revisionId, signal, owner, summary.cardId)
+      const located = await this.row(
+        "face_revision",
+        revisionId,
+        signal,
+        decoded,
+        owner,
+        summary.cardId,
+      )
       if (!located) throw new Error("preview revision missing")
       const revision = located.row
       let unitId = revision["effect_unit_id"]
@@ -152,12 +178,13 @@ export class PreviewReader {
             stringValue(selection["translation_id"]),
             located.file,
             signal,
+            decoded,
           )
           if (!translation) throw new Error("preview translation missing")
           unitId = translation["text_unit_id"]
         }
         if (typeof unitId !== "string") throw new Error("preview text pointer missing")
-        const unit = await this.dictionary("text_unit", unitId, located.file, signal)
+        const unit = await this.dictionary("text_unit", unitId, located.file, signal, decoded)
         if (!unit) throw new Error("preview text missing")
         value = { text: stringValue(unit["text"]), language: stringValue(unit["lang"]) }
       }

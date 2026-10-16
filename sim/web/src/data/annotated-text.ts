@@ -211,12 +211,18 @@ class PageClosure {
       for (const item of value) this.indexSelections(item, file)
     } else if (value !== null && typeof value === "object") {
       if ("translation_id" in value && "source" in value) {
+        // Names use the catalog witness rather than source_refs.
+        if (value["field"] === "name") return
         const identity = canonicalText(value)
         const files = this.selectionFiles.get(identity) ?? new Set<string>()
         files.add(file)
         this.selectionFiles.set(identity, files)
       }
-      for (const item of Object.values(value)) this.indexSelections(item, file)
+      // Selections belong to rows or printing faces in the fixed schema.
+      for (const field of ["translations", "faces"]) {
+        const nested = value[field]
+        if (nested !== undefined) this.indexSelections(nested, file)
+      }
     }
   }
 
