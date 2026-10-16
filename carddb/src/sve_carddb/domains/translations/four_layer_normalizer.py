@@ -135,6 +135,11 @@ class SourcePart:
                     "TokenStatus",
                     "CardKind",
                     "Concept",
+                    *(
+                        {"QuantityExpr"}
+                        if frame.source.normalizer_version == PREPARATION_VERSION
+                        else set()
+                    ),
                 }
                 if unit.transformation == "leaf"
                 else None

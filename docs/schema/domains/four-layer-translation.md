@@ -769,9 +769,12 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 與 SQLite 來源契約拒絕 v3 及未知版；v2 authored／SQLite 不接受 ChoiceContext port。
 準備入口在正式切換時移除，不是永久雙版執行設定。
 
-此接口只在正式來源辨識上套用下述已封版的家族規則，不因登錄共用型別就接受其他來源句型。
+此接口只在正式來源辨識上依序套用已封版的容量、具名參數與區域計數／SEP 規則，
+最後依最終葉建構常數選項接口；共用型別不授予其他來源句型。
 `ChoiceContext` 僅是 PortType，Port 仍只有 name、type、source_role、scope，
 不是 LeafType。選項的來源連接必須另由完整來源重建，型別本身不授予可執行資格。
+
+### 11.1 常數選項接口與指示物容量
 
 常數選項接口僅描述同一片段、同能力中已有唯一在前 intro、常數 choice_mode_count 與
 按印刷次序連續 1..K 的 choice_index。沿既有完整欄位的 choice 守衛，所有 intro／序號
@@ -792,6 +795,8 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 缺概念時保持 pending，缺語言選詞時沿既有 renderer 整欄 fallback。
 不新增具名指示物概念或 CounterNP／Form，不建立其他 holder、Stack 或歷史關係。
 這是 S，既有容量用途須經準備 bind／verify 後才能建立 target；正式 v2 辨識仍不變。
+
+### 11.2 有限 expression 與來源綁定
 
 `four_layer_expressions.DEFINITIONS` 是封閉的 expression 登錄。
 結果 measure 為 `card_count`，read_structure 為 `current_zone_count`，
@@ -832,7 +837,7 @@ Bound 的 import 必須存在且型別正確，來源證明的使用 scope 只�
 正式 v2 保留原本對 explicit 槽之 omitted occurrence 的拒絕。
 共用映射可表達某種形狀，不等於來源已核准該省略關係；準備 verify 仍須重新 derive 證明。
 
-### 11.1 準備版的具名參數來源
+### 11.3 準備版的具名參數來源
 
 `four_layer_n2_parameters` 只在準備入口辨識 effect／section 中的下列形狀。
 來源位置由既有單位的 raw origins 連回完整 owner 欄位；原有葉、分支順序、
@@ -865,3 +870,30 @@ raw／canonical spans 為空，`resolution_rule=earth_rite.omitted_amount.v1`；
 土之秘術沿 `term:ability.earth_rite` 的必要選詞，標註範圍僅含 label；
 括號與數字在範圍外。骰子區間 Form 只呈現上下界，不自行加入 die 引用。
 缺必要 label 沿既有整欄 fallback，不能用 Literal 或 optional 繞過。
+
+### 11.4 現時區域計數與明示 SEP 零值
+
+準備來源只接受同一本文片段內唯一明示的 `Xは「…」である。` 定義，
+區域必須明示相對玩家及戰場、手牌、牌堆、墓場、EX 或消失區。
+限定須完整符合 §11.2 的有限 expression 簽章：單一特性、卡名、職業、種類、關鍵字、衍生物或排除自身；
+沒有明寫「卡片」就不增加 `read_card` 葉。
+定義與使用點共同決定是否接受，僅辨識傷害、回復／能力值增減、費用降低、
+原費用上界、抽牌與具名從者出場的既定使用形狀。
+指示物 X、分配傷害、支付 X、紋章計數、不明持有者或區域、表向進化牌堆、
+引號讀值、歷史與跨能力／跨片段連接均不因此取得新的來源結構。
+
+通過來源檢查的定義與每個 X 使用點連至同一 `QuantityExpr/count_expression` 槽，
+每個 occurrence 保持獨立的原文及 canonical 範圍與印刷順序。
+expression 依使用點讀取當下數量，不建立 captured receipt 或跨片段 Bound。
+明示加減僅使用登錄的三種偏移形狀，幅度是 `Nat/arithmetic_offset`；
+運算方向由 descriptor 保留，結果不轉為 Nat 或截零。
+重綁至不同 authored 槽名時，expression 實參也依來源位置同步重映射。
+缺必要卡名仍 pending，不能用 Literal 或 optional 略過。
+
+準備 renderer 沿用既有 `ExpressionTargets` 及正常 labels／Form，
+主 Target 仍須引用每個 required 葉；expression 的形參也必須完整呈現。
+來源的 whole-line semantic pending 不因局部計數成功而升格。
+
+SEP 僅辨識明示「自己的 SEP 等於 0」的條件數字，沿用 `Nat/threshold` 的零下界。
+SEP、持有者、等值及條件作用域保持 canonical 字面，不增加 Concept、Player 葉或新資源語義。
+其他資源、非零值與比較不受本項擴張。

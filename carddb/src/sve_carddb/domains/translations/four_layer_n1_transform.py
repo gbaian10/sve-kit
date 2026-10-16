@@ -92,18 +92,25 @@ def _patches(
     leaves: list[Leaf],
     operands: tuple[Operand, ...],
     names: Mapping[int, str],
+    *,
+    separate_occurrences: bool,
 ) -> Patches:
     patches: Patches = {}
     for item in leaves:
         if not item.abstract or not item.positions:
             continue
         spans = tuple(span for group in item.positions for span in group)
-        marker = tuple(
-            Unit(char, _origins(part, spans), "leaf")
-            for char in "{" + names[id(item)] + "}"
-        )
-        for span in spans:
-            patches[span.start] = span.end, marker
+        for group in item.positions:
+            marker = tuple(
+                Unit(
+                    char,
+                    _origins(part, group if separate_occurrences else spans),
+                    "leaf",
+                )
+                for char in "{" + names[id(item)] + "}"
+            )
+            for span in group:
+                patches[span.start] = span.end, marker
     for operand in operands:
         if operand.row.startswith("N1-SRC10"):
             _union_patch(part, operand, patches)
@@ -180,6 +187,8 @@ def transform(
     leaves: list[Leaf],
     operands: tuple[Operand, ...],
     base: Recognized,
+    *,
+    separate_occurrences: bool = False,
 ) -> tuple[SourcePart, Recognized, tuple[str, ...]]:
     """Leaf markers are typed transformations, never recognized from literal source bytes."""
     leaves.sort(
@@ -190,7 +199,12 @@ def transform(
         )
     )
     names = {id(item): f"leaf_{index}" for index, item in enumerate(leaves)}
-    units = _units(part, _patches(part, leaves, operands, names))
+    units = _units(
+        part,
+        _patches(
+            part, leaves, operands, names, separate_occurrences=separate_occurrences
+        ),
+    )
     transformed = replace(
         part,
         units=units,

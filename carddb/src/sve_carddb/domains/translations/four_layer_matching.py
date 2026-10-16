@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.four_layer import hash_payload
+from sve_carddb.contracts.four_layer import Expression, hash_payload
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
@@ -133,6 +133,10 @@ def bind_recognized(
             return None
         name = mapped.pop()
         value = recognized.values[occurrence.slot]
+        if mixed and isinstance(value, Expression):
+            value = value.model_copy(
+                update={"leaves": tuple(omitted_names[n] for n in value.leaves)}
+            )
         if name in values and values[name] != value:
             return None
         values[name] = value
@@ -166,9 +170,13 @@ def _mixed_names(
         names = {actual[span.start, span.end].name for span in slot.occurrences}
         if len(names) == 1:
             omitted_names[slot.name] = names.pop()
-        elif any(
+        elif isinstance(recognized.values[slot.name], Expression) or any(
             o.slot == slot.name and o.source_presence == "omitted"
             for o in recognized.occurrences
         ):
             return False
-    return True
+    return all(
+        not isinstance(value, Expression)
+        or all(name in omitted_names for name in value.leaves)
+        for value in recognized.values.values()
+    )
