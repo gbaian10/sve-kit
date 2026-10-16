@@ -1091,3 +1091,45 @@ A11 六種入場表面與 A2 的本回合進化存在，在 provider 尚未合�
 匯出 `CapturedValue<Bool,payment_complete>`，數量條件匯入相同來源參數。缺少唯一
 producer 時保持 pending；沒有猜測跨能力付款。這不代表已有付款執行證據，沿 R-0006
 驗打出成本與模式決定時序前，lowering 仍不可標為 executable。
+
+### 11.10 本回合歷史與單次事件來源的準備 producer
+
+`four_layer_history.HISTORY_FAMILY` 與
+`four_layer_provenance.PROVENANCE_FAMILY` 必須經 §11.5 的 `families` 明示啟用。
+前者登錄有限歷史事件及篩選簽章，後者是 A11 與 played_from 的來源辨識入口。
+預設準備路徑及正式 v2 不啟用這兩個家族，也不因此擴張舊 B11 或常數域。
+
+歷史來源的 descriptor 區分事件、固定篩選形狀、aggregate 及 include_execution；
+玩家、特性與卡名等變動 operand 另有 required 葉，不從中文或相同數值推測。
+玩家 import 分 actor、subject_owner 與 resource_owner；物件或生命資源的擁有者不等於造成事件的行動者。
+打出張數使用 CountSubjects，攻擊／UB／生命增減的次數使用 CountFacts，
+生命增加量及土之秘術取走的指示物數使用 Sum，單純是否發生使用 Exists。
+生命減少次數不等於減少點數。雙事件條件保存兩個 Exists 再 And；
+兩類卡片的打出張數則是另一個有限篩選簽章，不能互代。
+所有查詢使用 CurrentTurn／at_query；明示排除這次執行時才關閉 include_execution。
+同片段唯一 X 定義及使用點保存各自 occurrence；一層倍率沿共用 wrapper，不改量綱。
+
+來源 scope 保存本文、能力可使用限制、打出限制或模式數量的位置。
+授予能力內的歷史使用獨立能力 scope，供未來能力執行時查詢，不能 capture 為授予時的數字。
+同片段兼具未來誘發與歷史條件時，只辨識回溯子句，不把期間誘發或下一次事件當成歷史。
+全體從者進墓場的計數不加上原文沒有的玩家限制；自身增益及排除持有者／同名的篩選另需 holder import。
+
+A11 沿 §11.5 五個 descriptor，保留本文、能力可使用、模式數量及事件本文四種位置。
+事件主體條件必須有唯一、同片段的已辨識入場誘發來源；缺少時保存 typed 結構與
+`missing_unique_entry_event_provider`，拒絕 active binding。
+條件的原文位置保持在其子句內，不能吸收前面的傷害或提前改成 trigger filter。
+直接來源特性沿 required `entry_source_trait`，不能以進場卡自身特性代替。
+
+played_from 另用 `play.self.from_zone.eq.v1`、
+`predicate.play.provenance.v1`／`played_from_condition`，
+`played_from_zone` 沿 `zone.single.v1`，本版僅 EX／手牌。
+其 imports 是 holder 單體與 `EventRef<Play>`，不使用 EnterField 或 A11 descriptor。
+能力要求打出與能力直接放場仍是不同來源；非手牌也不等於 AbilityPut。
+
+producer 的物件、世代與事件識別是由精確來源定位產生的符號 handle，
+表達 runtime 必須提供的關係，並非證明遊戲中已發生該事件。
+一般 typed 邊界驗 kind、世代、scope、capture 及直接能力來源，
+準備 verify 另以相同來源重新 derive 逐項比對。
+EntryFact 的持久連接、Unknown、來源快照／LKI、授予能力持有者與查詢時點，
+仍須在 DSL schema／loader／runtime 的 lowering 驗收完成；缺證據不能自動回傳 true、false 或 0。
+局部 typed 辨識不提升整段 semantic pending 或中文的審閱資格。
