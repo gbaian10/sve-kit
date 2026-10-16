@@ -40,10 +40,11 @@ export async function prepareCardContent(
     if (typeof nameId === "string") add({ kind: "face_revision", id: nameId }, "name")
     const effects = new Set<string>()
     if (revision) effects.add(stringValue(revision["id"]))
+    const candidateRevisions = new Set(candidates.map((candidate) => candidate["revision_id"]))
     const visible = revision
       ? own
       : candidates.filter(
-          (candidate) => candidate["printing_id"] === printing.id || candidates.length === 1,
+          (candidate) => candidate["printing_id"] === printing.id || candidateRevisions.size === 1,
         )
     for (const candidate of visible) {
       if (typeof candidate["revision_id"] === "string") effects.add(candidate["revision_id"])
