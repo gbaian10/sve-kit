@@ -515,6 +515,7 @@ class _HistorySources:
     additions: list[Leaf] = field(default_factory=list)
     ports: list[Port] = field(default_factory=list)
     scopes: list[str] = field(default_factory=list)
+    issues: set[str] = field(default_factory=set)
 
     def player(self, match: re.Match[str], name: str, scope: str, role: str) -> str:
         port_name = name + "_" + role
@@ -542,6 +543,7 @@ class _HistorySources:
             for p in form.operands
         ]
         if any(o is None for o in operands):
+            self.issues.add("missing_history_operand")
             return
         selected = [o for o in operands if o is not None]
         text = self.part.canonical_source
@@ -689,6 +691,7 @@ class _HistorySources:
             for p in ("owner", "trait", "trait_right")
         ]
         if any(o is None for o in operands):
+            self.issues.add("missing_history_operand")
             return
         selected = [o for o in operands if o is not None]
         self.additions.extend(selected)
@@ -786,6 +789,12 @@ def prepare_history(
             )
             interfaces[index] = interface(
                 interfaces[index], tuple(found.scopes), tuple(found.ports)
+            )
+        if found.issues:
+            recognized[index] = replace(
+                recognized[index],
+                issues=tuple(sorted({*recognized[index].issues, *found.issues})),
+                semantics=None,
             )
     return replace(
         prepared,

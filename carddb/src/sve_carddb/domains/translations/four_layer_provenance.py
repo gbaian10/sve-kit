@@ -218,6 +218,7 @@ class _ProvenanceSources:
             return
         operand = self.operand(match, prefix, play=play)
         if not play and match["trait"] and operand is None:
+            self.issues.add("missing_entry_source_trait")
             return
         scope = source_scope(
             self.part.canonical_source,
@@ -342,13 +343,14 @@ def prepare_provenance(
                 found.additions,
                 classifier,
             )
-            if found.issues:
-                recognized[index] = replace(
-                    recognized[index],
-                    issues=tuple(sorted({*recognized[index].issues, *found.issues})),
-                )
             interfaces[index] = interface(
                 interfaces[index], tuple(found.scopes), tuple(found.ports)
+            )
+        if found.issues:
+            recognized[index] = replace(
+                recognized[index],
+                issues=tuple(sorted({*recognized[index].issues, *found.issues})),
+                semantics=None,
             )
     return replace(
         prepared,

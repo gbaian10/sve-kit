@@ -456,3 +456,29 @@ def test_event_subject_without_unique_enter_trigger_stays_pending() -> None:
     )
     with pytest.raises(ValueError, match="Unresolved"):
         prepared.bind(0)
+
+
+@pytest.mark.parametrize(
+    ("raw", "reason"),
+    [
+        (
+            "これがウマ娘・カードの能力によって場に出ていたなら、７枚引く。",
+            "missing_entry_source_trait",
+        ),
+        (
+            "このターン、自分のEXエリアの『未登録仮名』が消滅していたなら、７枚引く。",
+            "missing_history_operand",
+        ),
+        (
+            "このターン、自分の場の未登録仮族・フォロワーが７回以上攻撃していたなら、９枚引く。",
+            "missing_history_operand",
+        ),
+    ],
+)
+def test_missing_required_concepts_never_fall_back_to_active_literal_bindings(
+    raw: str, reason: str
+) -> None:
+    prepared = derive_preparation(raw, source(raw), n1_classifier(), families=FAMILIES)
+    assert reason in prepared.derived.recognized[0].issues
+    with pytest.raises(ValueError, match="Unresolved"):
+        prepared.bind(0)
