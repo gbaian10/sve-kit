@@ -151,14 +151,15 @@ current's verified payloads to derive image references, retains current images
 only, and uses paginated LIST to find unretained images including upload orphans.
 It refuses missing retained objects/claims, conditionally removes candidate claims
 **before DELETE**. Both collectors reread the version index before each batch of
-at most 1,000 objects and stop if it changed. After an interruption, rerun the same
+at most 100 objects and stop if it changed. The batch limit accounts for R2
+processing speed and the 30-second read timeout. After an interruption, rerun the same
 GC command: remaining candidates, including unadvertised image orphans, are listed
 again. Neither collector deletes
 `_publish/images.json`, source history or local evidence. `changes.from` never
 retains a third snapshot. `--namespace` accepts only that command's exact prefixes.
 
 Progress uses plain text on stderr: `GC: 1458 candidates`, then
-`GC: 1000/1458 deleted` after each successful batch. Dry-run prints only the
+`GC: 100/1458 deleted` after each successful batch. Dry-run prints only the
 candidate count there; stdout remains the final JSON for piping to `jq`.
 If a batch response reports object errors, GC stops with the failed count;
 inspect the failure and rerun to collect the remaining objects.

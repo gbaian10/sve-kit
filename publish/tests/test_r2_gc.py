@@ -10,7 +10,12 @@ from sve_carddb.export.read_api import INDEX, ExportError, load_export
 from typer.testing import CliRunner
 
 from sve_publish import gc
-from sve_publish.adapter import IMAGE_PREFIXES, SNAPSHOT_PREFIXES, Stored
+from sve_publish.adapter import (
+    IMAGE_PREFIXES,
+    MAX_DELETE_BATCH,
+    SNAPSHOT_PREFIXES,
+    Stored,
+)
 from sve_publish.cli import app
 from sve_publish.headers import IMAGE_HEADERS
 from sve_publish.inventory import INVENTORY
@@ -155,7 +160,7 @@ def test_batches_delete_and_stop_if_index_changes(
         f"snapshots/blobs/{number:064x}.json"
         if kind == "snapshot"
         else f"images/card_s/{10000 + number}.webp"
-        for number in range(2500)
+        for number in range(MAX_DELETE_BATCH * 2 + MAX_DELETE_BATCH // 2)
     }
     state.objects.update({key: Stored(b"stray", '"stray"', {}) for key in keys})
     candidates = collector(store, namespaces, execute=False)["candidates"]
@@ -169,26 +174,29 @@ def test_batches_delete_and_stop_if_index_changes(
             ExportError, match=r"^GC version index changed; run it again$"
         ):
             collector(store, namespaces, execute=True, progress=progress.append)
-        deleted = candidates[:1000]
-        assert [len(batch) for batch in state.delete_batches] == [1000]
+        deleted = candidates[:MAX_DELETE_BATCH]
+        assert [len(batch) for batch in state.delete_batches] == [MAX_DELETE_BATCH]
         assert progress == [
             f"GC: {len(candidates)} candidates",
-            f"GC: 1000/{len(candidates)} deleted",
+            f"GC: {MAX_DELETE_BATCH}/{len(candidates)} deleted",
         ]
     else:
         result = collector(store, namespaces, execute=True, progress=progress.append)
         deleted = candidates
         assert result["deleted"] == candidates
         assert [len(batch) for batch in state.delete_batches] == [
-            1000,
-            1000,
-            len(candidates) - 2000,
+            len(batch)
+            for batch in (
+                candidates[start : start + MAX_DELETE_BATCH]
+                for start in range(0, len(candidates), MAX_DELETE_BATCH)
+            )
         ]
         assert progress == [
             f"GC: {len(candidates)} candidates",
-            f"GC: 1000/{len(candidates)} deleted",
-            f"GC: 2000/{len(candidates)} deleted",
-            f"GC: {len(candidates)}/{len(candidates)} deleted",
+            *(
+                f"GC: {min(start + MAX_DELETE_BATCH, len(candidates))}/{len(candidates)} deleted"
+                for start in range(0, len(candidates), MAX_DELETE_BATCH)
+            ),
         ]
     assert set(state.objects) == before - set(deleted)
     state.index_after_delete = None

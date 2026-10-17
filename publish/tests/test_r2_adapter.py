@@ -8,7 +8,7 @@ import pytest
 from sve_carddb.export.read_api import ExportError
 
 from sve_publish import adapter
-from sve_publish.adapter import R2Store, Stored
+from sve_publish.adapter import MAX_DELETE_BATCH, R2Store, Stored
 
 from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
@@ -304,12 +304,12 @@ def test_delete_removes_one_public_object_without_condition(
     assert state.operations == [("DELETE", KEY, None)]
 
 
-@pytest.mark.parametrize("count", [0, 1001])
+@pytest.mark.parametrize("count", [0, MAX_DELETE_BATCH + 1])
 def test_delete_refuses_invalid_batch_size_before_http(
     remote: tuple[R2Store, ServerState, Loopback], count: int
 ) -> None:
     store, state, _ = remote
-    with pytest.raises(ExportError, match="requires 1 to 1000 keys"):
+    with pytest.raises(ExportError, match=f"requires 1 to {MAX_DELETE_BATCH} keys"):
         store.delete_many([KEY] * count)
     assert state.requests == []
 
