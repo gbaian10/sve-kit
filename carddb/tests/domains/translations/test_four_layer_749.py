@@ -567,7 +567,7 @@ def _labels(
     [
         ("pool", "Remainder refers to another pool"),
         ("receipt", "Pool requires its same-operation receipt export"),
-        ("capture", "capture"),
+        ("capture", "Expression provider has incompatible source or capture"),
         ("pair", "Pool export/import pair differs in identity or evidence"),
         ("actor", "Capacity placement requires one live source actor"),
     ],
