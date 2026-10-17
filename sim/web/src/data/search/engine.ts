@@ -1,5 +1,6 @@
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
+import { catalogWork } from "../catalog-timing"
 import { fetchBytes, type Fetcher } from "../cdn"
 import { decodeMessage } from "../format-v3/decode-message"
 import { SnapshotError } from "../format-v3/errors"
@@ -709,7 +710,8 @@ export class SearchEngine {
           throw new SnapshotError("shape", "unexpected basic catalog payload")
         parseMs += performance.now() - mark
         mark = performance.now()
-        if (result.kind === "fragments") bootstrap.ingest(result.fragments)
+        if (result.kind === "fragments")
+          catalogWork("ingest", () => bootstrap?.ingest(result.fragments))
         buildMs += performance.now() - mark
         if (ordinal === 0) firstFileMs = performance.now() - start
         for (const owner of ownersOf(file)) {
@@ -722,9 +724,13 @@ export class SearchEngine {
       if (!config) throw new SnapshotError("config-programs-count", "config missing")
       mark = performance.now()
       this.emit({ kind: "stage", generation: request.generation, step: "search" })
-      bootstrap.seal()
+      catalogWork("seal", () => bootstrap?.seal())
       const stagingAllocation = bootstrap.allocation()
-      let index = new SearchIndex(bootstrap, request.edition)
+      const sealedBootstrap = bootstrap
+      let index = catalogWork(
+        "SearchIndex",
+        () => new SearchIndex(sealedBootstrap, request.edition),
+      )
       buildMs += performance.now() - mark
       signal.throwIfAborted()
       const background = bootstrap
@@ -807,9 +813,18 @@ export class SearchEngine {
         )
         signal.throwIfAborted()
         if (this.active === active) {
-          for (const part of parts) if (part.kind === "fragments") background.ingest(part.fragments)
-          background.seal()
-          index = new SearchIndex(background, request.edition)
+          for (const part of parts)
+            if (part.kind === "fragments")
+              catalogWork("background:ingest", () => {
+                background.ingest(part.fragments)
+              })
+          catalogWork("background:seal", () => {
+            background.seal()
+          })
+          index = catalogWork(
+            "background:SearchIndex",
+            () => new SearchIndex(background, request.edition),
+          )
           active.index = index
           active.memory.clear()
           active.building.clear()

@@ -1,3 +1,4 @@
+import { catalogWork } from "../catalog-timing"
 import { type JsonObject, objectValue, parseJson } from "./json"
 import { type Fragment, readContainer, readManifest } from "./reader"
 
@@ -20,6 +21,15 @@ export type DecodeResult =
 
 /** Decodes published bytes after their caller has verified the content hash. */
 export function decodeMessage(request: DecodeRequest): DecodeResult {
+  const background =
+    request.kind === "file" &&
+    (request.file["purpose"] === "print" || request.file["purpose"] === "product")
+  return catalogWork(`${background ? "background:" : ""}decode:${request.kind}`, () =>
+    decode(request),
+  )
+}
+
+function decode(request: DecodeRequest): DecodeResult {
   if (request.kind === "manifest")
     return { kind: "manifest", ...readManifest(parseJson(request.bytes)) }
   const value = objectValue(parseJson(request.bytes))

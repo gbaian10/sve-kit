@@ -403,3 +403,143 @@ Added once pages exist:
 Production builds include `third-party-licenses.md` from Vite's dependency license reporting.
 The dependency report includes lru-cache's BlueOak-1.0.0 terms and the MIT notices for p-queue,
 p-timeout and eventemitter3; these third-party terms are not replaced by the project license.
+
+## Catalog performance benchmark
+
+`bun run bench:catalog` is a manual development tool for
+[#670](https://github.com/gbaian10/sve-kit/issues/670). Let the machine become idle
+before collecting a baseline. Keep the browser version, source revision, CPU
+quota, input manifests, sampling interval and settling interval identical when
+comparing changes. This is not a required CI check.
+
+Install dependencies with `bun install` and the matching browser with
+`bunx playwright install chromium`. Linux with a working systemd user manager
+and cgroup CPU/memory controllers is required. The tool starts its entire process
+tree (build, preview, controller and Chromium including Workers) in a systemd
+user scope with `CPUQuota=200%`, `MemoryMax=3G` and process nice level 9. These are
+resource caps, not a mobile CPU simulation; competing processes still affect
+results. A systemd failure stops the run rather than silently running uncapped.
+Use `--cpu-quota` and `--memory-max` to change these settings.
+
+Pass two **public export roots**, each containing
+`snapshots/versions/index.json` and its referenced manifests and blobs. For
+preview exports with `snapshots/preview/current.json`, add `--entry preview`
+to use the existing preview reader on both sides. All path
+arguments must be literal absolute paths; use a report file outside the source
+and export roots. The old and new manifests must differ for update scenarios.
+The tool reads inputs without modifying them and builds into a temporary
+directory. Preview binds only `127.0.0.1:5791` and fails if the port is occupied;
+it closes its own server and browser on completion or failure.
+
+```bash
+bun run bench:catalog \
+  --old /absolute/old-public \
+  --new /absolute/new-public \
+  --out /absolute/reports/catalog-before.json
+```
+
+The default scenarios are `cold-jp,cold-en,update-jp,update-en`, each repeated
+three times. Use `--runs 1`, or individual `--cold-jp-runs`, `--cold-en-runs`,
+`--update-jp-runs`, `--update-en-runs` overrides. `--scenarios cold-jp,update-jp`
+selects a subset. Run `bun run bench:catalog --help` for all options.
+
+This builds a dedicated HTML entry with the same Vite production configuration
+and production data modules, then runs Vite **preview**, never a dev server. The
+entry concurrently drives the existing main `createSnapshotClient` and search
+`SearchSession` loaders, as the card detail route does. It does not mount React,
+render cards, load details or load image bitmaps. It isolates catalog costs; UI
+rendering and device acceptance require separate measurements. The benchmark
+entry and controller are not included in the normal application build.
+
+Each repetition uses a fresh browser context, empty CacheStorage and no HTTP
+cache (Playwright routing disables it). The Chromium process, preview server,
+OS file cache and server compression cache are shared across repetitions; this
+is a browser-cold load, not a machine-cold or CDN/network test. Cold loads use
+the new snapshot. Updates first load the old snapshot, wait for the search
+Worker's printing supplement, then change the served snapshot at the **same
+origin and base path** and call `client.reload()` and `session.load()` on the
+existing instances. Both old active catalogs stay alive during replacement.
+Both loaders must adopt the same new manifest. Each run waits for the background
+printing index and another `--settle-ms 2000` before taking its final sample.
+A load or background completion timeout is three minutes; failures do not count
+as successful samples.
+
+For a quick tool check without real card data:
+
+```bash
+bun run bench:catalog --smoke --runs 1 --out /absolute/reports/catalog-smoke.json
+```
+
+Smoke mode copies the committed synthetic fixture into temporary roots and
+changes only the new manifest's data version and pointer revision. Its update
+exercises replacement with cached unchanged payloads. It checks tool wiring and
+report shape; its values cannot be extrapolated to a full catalog. Use actual
+different releases for a baseline.
+
+### Measurements and interpretation
+
+Permanent User Timing measures use the `sve:catalog:` prefix. `decode:manifest`
+and `decode:file` include JSON.parse and reader validation after verified bytes
+are available. The main loader decodes in its own dedicated decoder Worker;
+the search Worker decodes its own copy. `ingest`, `seal`, `SearchIndex`, main
+`validate` and main `catalogOf` measure synchronous work. `catalogOf` records
+only cache misses. `background:*` measures printing supplements separately.
+Updates reuse the same stage names in a separate report window. Marks and
+measures are cleared immediately after observation is queued, so normal use
+does not accumulate timeline entries. Record a DevTools Performance trace to
+inspect them; `getEntriesByType('measure')` after loading will not retain them.
+
+The report separates main, decoder Worker and search Worker stage totals.
+Raw entries also retain each Worker identity, start time and duration. The
+benchmark build prepends an observer to each production Worker bundle, queues
+early entries until CDP attaches, and then streams entries to the controller.
+This retains first-manifest timings and measurements from Workers that later
+exit. The observer prelude is absent from normal application builds. Main Long Tasks
+strictly greater than 50 ms are recorded throughout loading and the settling
+window, including background work. Their count and per-run longest duration
+are in JSON; the table shows the worst task across all repetitions so one slow
+run cannot disappear behind a median. This observes the dedicated entry's main
+thread, not React rendering or a whole-application performance trace.
+
+The table references the
+[mobile parsing and memory budgets](../../docs/schema/export/size-budget.md#手機記憶體與解析):
+1000 ms cumulative basic work, 50 ms main tasks, 80 MiB **update** peak and
+48 MiB steady state. `OVER` marks observed exceedances. Other numeric columns
+are medians of per-run totals/maxima, rather than medians of individual fragments.
+Background work remains visible but is excluded from basic work totals. These
+stage totals omit uninstrumented orchestration, hashing, browser decompression
+and structured cloning; they are an effective-work lower bound, not a full
+acceptance result. Wall time includes both loaders reaching basic readiness,
+fetch/cache operations and waits; it is not CPU time. Resource Timing durations
+and transferred/decoded sizes are also saved (durations may overlap; do not
+subtract their sum from wall time to infer scheduling wait).
+
+Memory is sampled every `--sample-ms 50` via
+[CDP Runtime.getHeapUsage](https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-getHeapUsage):
+`usedSize + backingStorageSize` for the page and **all dedicated Workers**.
+Backing storage includes ArrayBuffers and external strings; TypedArray backing
+buffers are not added again. Each round sums current isolate samples, not each
+isolate's independently observed maximum. JSON retains per-isolate values,
+round start times, round durations (`spanMs`) and completeness. Rounds interrupted
+by Worker creation/exit or failed replies are marked incomplete and excluded
+from summaries. Update samples include the old active data before replacement.
+
+CDP replies across isolates are not atomic and can be delayed by busy JS, so
+short peaks may be missed and sampling skew can overstate a concurrent sum.
+Check `maxSampleSpanMs` and raw rounds before interpreting a peak. No forced GC
+is run. Gross memory includes the small harness and observer overhead, without
+subtracting an app estimate; the final sample is not proof of GC-stable steady
+state. The proxy excludes browser native/decompression/process memory and does
+not replace device measurement or exact simultaneous peak analysis. The `*`
+marker means only that the observed proxy is within a referenced limit; it is
+not a mobile budget pass. CPU quota, observer/CDP overhead and background work
+can also affect wall time.
+
+The tool writes the selected `--out` JSON file after each completed repetition,
+then a sibling `.txt` table after all scenarios. The JSON contains conditions,
+Git revision/dirty status, reader build ID, browser version, old/new manifest
+hashes, per-scenario medians and raw measures/tasks/memory rounds. An interrupted
+run may leave a partial JSON; inspect scenario counts before comparison. Output
+contains metadata and performance values, not card wording. Keep reports outside
+the repository. Compare matching `summaries` fields between before/after JSON,
+and retain raw samples to investigate outliers.

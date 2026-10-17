@@ -1,5 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": ["tests/lint-fixtures/**"],
-  "ignoreDependencies": ["@fontsource/ibm-plex-sans"]
+  "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
+  "entry": ["bench/driver.ts"],
+  "ignoreBinaries": ["systemd-run"]
 }

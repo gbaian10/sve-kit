@@ -14,6 +14,7 @@ import {
   type Suggestion,
   type TextLang,
 } from "../domain/search"
+import { catalogWork } from "./catalog-timing"
 import type { LoadedSnapshot } from "./client"
 import type { Row } from "./format-v3/decode"
 import { integerValue, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
@@ -327,7 +328,7 @@ const catalogs = new WeakMap<LoadedSnapshot, Catalog>()
 export function catalogOf(snapshot: LoadedSnapshot): Catalog {
   let catalog = catalogs.get(snapshot)
   if (!catalog) {
-    catalog = createCatalog(snapshot)
+    catalog = catalogWork("catalogOf", () => createCatalog(snapshot))
     catalogs.set(snapshot, catalog)
   }
   return catalog
