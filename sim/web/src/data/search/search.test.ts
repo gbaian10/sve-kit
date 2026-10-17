@@ -2249,7 +2249,7 @@ it("filters official PR by each printing's appearance, independently of printed 
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
-  const styles = ["bronze", "silver", "gold", "red", "pastel", "rainbow", "none", "unknown"]
+  const styles = ["br", "sr", "gr", "lg", "sl", "sp", "none", "unknown"]
   const expected = new Map<string, string[]>()
   let position = 0
   const columns = new BootstrapColumns()
@@ -2294,8 +2294,8 @@ it("filters official PR by each printing's appearance, independently of printed 
         ),
       ).toBe(true)
     }
-    expect(search(["pr:bronze", "pr:gold"]).total).toBe(
-      (expected.get("bronze")?.length ?? 0) + (expected.get("gold")?.length ?? 0),
+    expect(search(["pr:br", "pr:gr"]).total).toBe(
+      (expected.get("br")?.length ?? 0) + (expected.get("gr")?.length ?? 0),
     )
     expect(index.options.prBadgeStyles).toContain("unknown")
     expect(index.options.rarityCounts["pr"]).toBe([...expected.values()].flat().length)
@@ -2303,9 +2303,7 @@ it("filters official PR by each printing's appearance, independently of printed 
       expect(index.options.rarityCounts[`pr:${style}`] ?? 0).toBe(
         (expected.get(style) ?? []).length,
       )
-    expect(search(["sp", "pr:bronze"]).total).toBe(
-      search(["sp"]).total + search(["pr:bronze"]).total,
-    )
+    expect(search(["sp", "pr:br"]).total).toBe(search(["sp"]).total + search(["pr:br"]).total)
   }
 })
 
@@ -2364,7 +2362,7 @@ it("retains badge, Premium and raw dash metadata in compact and restored search 
                     ...row,
                     rarity_code: "pr",
                     premium: true,
-                    rarity_badge: { style: "gold", text: "GR" },
+                    rarity_badge: { style: "gr", text: "GR" },
                   }
                 : row["id"] === "p:bp01-020"
                   ? {
@@ -2387,7 +2385,7 @@ it("retains badge, Premium and raw dash metadata in compact and restored search 
     expect(page.items.find((item) => item.printingId === "p:bp01-001")?.summary).toMatchObject({
       rarityCode: "pr",
       premium: true,
-      rarityBadge: { style: "gold", text: "GR" },
+      rarityBadge: { style: "gr", text: "GR" },
     })
     expect(page.items.find((item) => item.printingId === "p:bp01-020")?.summary).toMatchObject({
       rarityCode: "-",
@@ -2470,5 +2468,163 @@ it("unions unrated printings with official rarities without confusing absent PR 
     expect(ids(["pr:none"])).toContain("p:bp01-001")
     expect(ids(["pr:none", "unrated"]).sort()).toEqual([...ids(["pr:none"]), ...unrated].sort())
     expect(index.options.rarityCounts["unrated"]).toBe(unrated.length)
+  }
+})
+
+it("filters leader frames per printing, intersects rarity and restores the index", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const expected: { id: string; frame: string; rarity: string }[] = []
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        if (fragment.table === "face_revision") return { ...row, type_code: "leader" }
+        if (fragment.table !== "printing" || row["region"] !== "jp") return row
+        const frame = expected.length % 2 ? "white" : "gold"
+        const rarity = expected.length % 3 ? "br" : "pr"
+        expected.push({ id: stringValue(row["id"]), frame, rarity })
+        return { ...row, leader_name_frame: frame, rarity_code: rarity }
+      }),
+    })),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const search = (types: readonly string[], rarities: readonly string[] = []) =>
+      index.search({ ...query, state: { ...DEFAULT_QUERY, types, rarities }, limit: 100 })
+    expect(search(["leader"]).total).toBe(expected.length)
+    expect(search(["leader:gold", "leader:white"]).total).toBe(expected.length)
+    expect(
+      search(["leader:gold"])
+        .items.map((item) => item.printingId)
+        .sort(),
+    ).toEqual(
+      expected
+        .filter((item) => item.frame === "gold")
+        .map((item) => item.id)
+        .sort(),
+    )
+    expect(
+      search(["leader:white"], ["pr"])
+        .items.map((item) => item.printingId)
+        .sort(),
+    ).toEqual(
+      expected
+        .filter((item) => item.frame === "white" && item.rarity === "pr")
+        .map((item) => item.id)
+        .sort(),
+    )
+    expect(search(["follower"]).total).toBe(0)
+    expect(index.options.types.map((type) => type.code)).toEqual(["leader"])
+    expect(index.options.typeCounts["leader:gold"]).toBe(
+      expected.filter((item) => item.frame === "gold").length,
+    )
+  }
+})
+
+it("selects Token by special kind and unions it with followers after index restore", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  // The shared fixture predates Token being a special kind.
+  const bootstrap = snapshot.bootstrap.map((fragment) =>
+    fragment.table === "face_revision"
+      ? {
+          ...fragment,
+          rows: fragment.rows.map((row) =>
+            row["type_code"] === "token" ? { ...row, type_code: "follower" } : row,
+          ),
+        }
+      : fragment,
+  )
+  const revisions = bootstrap
+    .filter((fragment) => fragment.table === "face_revision")
+    .flatMap((fragment) => fragment.rows)
+  const follower = revisions.find((row) => row["type_code"] === "follower")
+  if (!follower) throw new Error("missing follower")
+  const tokenFaces = new Set(
+    revisions
+      .filter(
+        (row) =>
+          ["spell", "amulet"].includes(stringValue(row["type_code"])) ||
+          row["face_id"] === follower["face_id"],
+      )
+      .map((row) => stringValue(row["face_id"])),
+  )
+  const followerFaces = new Set(
+    revisions
+      .filter((row) => row["type_code"] === "follower")
+      .map((row) => stringValue(row["face_id"])),
+  )
+  const spellFaces = new Set(
+    revisions
+      .filter((row) => row["type_code"] === "spell")
+      .map((row) => stringValue(row["face_id"])),
+  )
+  const basic = new BootstrapColumns()
+  basic.ingest(bootstrap)
+  basic.seal()
+  const originals = new SearchIndex(basic, "jp").search({
+    ...query,
+    state: DEFAULT_QUERY,
+    limit: 1000,
+  }).items
+  const expectedTokens = originals
+    .filter((item) => tokenFaces.has(item.summary?.faceId ?? ""))
+    .map((item) => item.printingId)
+    .sort()
+  const expectedSpells = originals
+    .filter((item) => spellFaces.has(item.summary?.faceId ?? ""))
+    .map((item) => item.printingId)
+    .sort()
+  const expectedFollowers = originals
+    .filter((item) => followerFaces.has(item.summary?.faceId ?? ""))
+    .map((item) => item.printingId)
+    .sort()
+  expect(expectedTokens.length).toBeGreaterThan(0)
+  expect(expectedTokens.some((id) => expectedFollowers.includes(id))).toBe(true)
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        if (fragment.table === "face_revision")
+          return {
+            ...row,
+            special_kinds: tokenFaces.has(stringValue(row["face_id"])) ? ["token"] : [],
+          }
+        if (fragment.table === "vocabulary" && row["kind"] === "type" && row["code"] === "token")
+          return { ...row, kind: "special_kind" }
+        return row
+      }),
+    })),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const ids = (types: readonly string[]) =>
+      index
+        .search({ ...query, state: { ...DEFAULT_QUERY, types }, limit: 1000 })
+        .items.map((item) => item.printingId)
+        .sort()
+    expect(ids(["token"])).toEqual(expectedTokens)
+    expect(ids(["token:spell"])).toEqual(expectedSpells)
+    expect(ids(["token:follower", "token:spell", "token:amulet"])).toEqual(expectedTokens)
+    expect(ids(["follower", "token:spell"])).toEqual(
+      [...new Set([...expectedFollowers, ...expectedSpells])].sort(),
+    )
+    expect(ids(["follower"])).toEqual(expectedFollowers)
+    expect(ids(["follower", "token"])).toEqual(
+      [...new Set([...expectedFollowers, ...expectedTokens])].sort(),
+    )
+    expect(index.options.typeCounts["token"]).toBe(expectedTokens.length)
+    expect(index.options.types.find((type) => type.code === "token")?.kind).toBe("special_kind")
   }
 })

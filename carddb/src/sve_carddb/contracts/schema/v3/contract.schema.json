@@ -967,12 +967,12 @@
           "properties": {
             "style": {
               "enum": [
-                "bronze",
-                "silver",
-                "gold",
-                "red",
-                "pastel",
-                "rainbow"
+                "br",
+                "sr",
+                "gr",
+                "lg",
+                "sl",
+                "sp"
               ]
             },
             "text": {
@@ -3325,11 +3325,18 @@
           "items": {
             "$ref": "#/$defs/PrintingFace"
           }
+        },
+        {
+          "enum": [
+            "gold",
+            "white",
+            null
+          ]
         }
       ],
       "items": false,
-      "minItems": 21,
-      "maxItems": 21,
+      "minItems": 22,
+      "maxItems": 22,
       "x-columns": [
         "id",
         "card_id",
@@ -3351,7 +3358,8 @@
         "decklog_verification",
         "decklog_source_url",
         "decklog_checked_on",
-        "faces"
+        "faces",
+        "leader_name_frame"
       ],
       "x-types": [
         {
@@ -3452,6 +3460,14 @@
           "array": {
             "ref": "PrintingFace"
           }
+        },
+        {
+          "nullable": {
+            "enum": [
+              "gold",
+              "white"
+            ]
+          }
         }
       ],
       "x-primary-key": [
@@ -3483,6 +3499,7 @@
               },
               {},
               {},
+              {},
               {}
             ]
           },
@@ -3512,6 +3529,7 @@
               {
                 "$ref": "#/$defs/Date"
               },
+              {},
               {}
             ]
           },
@@ -3539,6 +3557,7 @@
               {
                 "type": "null"
               },
+              {},
               {}
             ]
           }
@@ -3554,6 +3573,7 @@
               {
                 "const": "official"
               },
+              {},
               {},
               {},
               {},
@@ -3595,6 +3615,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -3611,6 +3632,7 @@
               {
                 "minItems": 1
               },
+              {},
               {},
               {},
               {},
@@ -8439,11 +8461,18 @@
           "items": {
             "$ref": "#/$defs/PrintingFaceBootstrap"
           }
+        },
+        {
+          "enum": [
+            "gold",
+            "white",
+            null
+          ]
         }
       ],
       "items": false,
-      "minItems": 21,
-      "maxItems": 21,
+      "minItems": 22,
+      "maxItems": 22,
       "x-columns": [
         "id",
         "card_id",
@@ -8465,7 +8494,8 @@
         "decklog_verification",
         "decklog_source_url",
         "decklog_checked_on",
-        "faces"
+        "faces",
+        "leader_name_frame"
       ],
       "x-types": [
         {
@@ -8566,6 +8596,14 @@
           "array": {
             "ref": "PrintingFaceBootstrap"
           }
+        },
+        {
+          "nullable": {
+            "enum": [
+              "gold",
+              "white"
+            ]
+          }
         }
       ],
       "allOf": [
@@ -8592,6 +8630,7 @@
               {
                 "const": "verified"
               },
+              {},
               {},
               {},
               {}
@@ -8623,6 +8662,7 @@
               {
                 "$ref": "#/$defs/Date"
               },
+              {},
               {}
             ]
           },
@@ -8650,6 +8690,7 @@
               {
                 "type": "null"
               },
+              {},
               {}
             ]
           }
@@ -8665,6 +8706,7 @@
               {
                 "const": "official"
               },
+              {},
               {},
               {},
               {},
@@ -8706,6 +8748,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -8722,6 +8765,7 @@
               {
                 "minItems": 1
               },
+              {},
               {},
               {},
               {},
@@ -17502,7 +17546,8 @@
                         "decklog_verification",
                         "decklog_source_url",
                         "decklog_checked_on",
-                        "faces"
+                        "faces",
+                        "leader_name_frame"
                       ]
                     },
                     "maxItems": 0
@@ -19679,7 +19724,8 @@
                         "decklog_verification",
                         "decklog_source_url",
                         "decklog_checked_on",
-                        "faces"
+                        "faces",
+                        "leader_name_frame"
                       ]
                     },
                     "minItems": 1,
@@ -21898,7 +21944,8 @@
                         "decklog_verification",
                         "decklog_source_url",
                         "decklog_checked_on",
-                        "faces"
+                        "faces",
+                        "leader_name_frame"
                       ]
                     },
                     "maxItems": 0

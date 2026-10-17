@@ -13,7 +13,7 @@ describe("accessible rarity badges", () => {
     "describes the official rarity in %s even when the face says PR",
     async (language, label) => {
       await renderInRouter(
-        <RarityBadges region="jp" rarityCode="sp" rarityBadge={{ style: "rainbow", text: "PR" }} />,
+        <RarityBadges region="jp" rarityCode="sp" rarityBadge={{ style: "sp", text: "PR" }} />,
         { language },
       )
       expect(screen.getByRole("img", { name: label })).toHaveAttribute("title", label)
@@ -92,7 +92,7 @@ it.each([
       <RarityBadges
         region="en"
         rarityCode="pr"
-        rarityBadge={{ style: "bronze", text: "BR" }}
+        rarityBadge={{ style: "br", text: "BR" }}
         rarity={{
           original: { lang: "en", text: "Promo" },
           translations: { "zh-Hant": "宣傳", ja: "プロモ" },

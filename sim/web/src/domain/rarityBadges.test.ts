@@ -26,20 +26,24 @@ describe("rarity badge selection", () => {
     ).toEqual([])
   })
 
-  it.each(["bronze", "silver", "gold", "red", "pastel", "rainbow"] as const)(
-    "shows a confirmed %s PR",
-    (style) => {
-      expect(
-        selectRarityBadges({ ...base, rarityCode: "pr", rarityBadge: { style, text: "PR" } }),
-      ).toEqual([`pr-${style}`])
-    },
-  )
+  it.each([
+    ["br", "pr-bronze"],
+    ["sr", "pr-silver"],
+    ["gr", "pr-gold"],
+    ["lg", "pr-red"],
+    ["sl", "pr-pastel"],
+    ["sp", "pr-rainbow"],
+  ] as const)("shows a confirmed %s PR", (style, asset) => {
+    expect(
+      selectRarityBadges({ ...base, rarityCode: "pr", rarityBadge: { style, text: "PR" } }),
+    ).toEqual([asset])
+  })
 
   it.each([
-    ["bronze", "BR", "br"],
-    ["silver", "SR", "sr"],
-    ["gold", "GR", "gr"],
-    ["bronze", "B", "br-en"],
+    ["br", "BR", "br"],
+    ["sr", "SR", "sr"],
+    ["gr", "GR", "gr"],
+    ["br", "B", "br-en"],
   ] as const)(
     "uses explicit %s/%s letters on an early PR instead of inferring from region",
     (style, text, expected) => {
@@ -59,7 +63,7 @@ describe("rarity badge selection", () => {
     const input = {
       ...base,
       rarityCode: "sp",
-      rarityBadge: { style: "rainbow" as const, text: "PR" },
+      rarityBadge: { style: "sp" as const, text: "PR" },
     }
     expect(selectRarityBadges(Object.freeze(input))).toEqual(["pr-rainbow"])
     expect(input.rarityCode).toBe("sp")
@@ -72,7 +76,7 @@ describe("rarity badge selection", () => {
         selectRarityBadges({
           ...base,
           rarityCode,
-          rarityBadge: { style: "silver", text: "SR" },
+          rarityBadge: { style: "sr", text: "SR" },
         }),
       ).toEqual(["sr"])
     },
@@ -105,7 +109,7 @@ describe("rarity badge selection", () => {
       selectRarityBadges({
         ...base,
         rarityCode: "pr",
-        rarityBadge: { style: "bronze", text: "UNKNOWN" },
+        rarityBadge: { style: "br", text: "UNKNOWN" },
       }),
     ).toEqual([])
     expect(selectRarityBadges({ ...base, rarityCode: "future" })).toEqual([])

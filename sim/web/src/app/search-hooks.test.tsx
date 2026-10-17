@@ -16,7 +16,7 @@ import { prefsStore } from "../settings"
 import {
   useAbilityPreview,
   useListView,
-  useRarityOptions,
+  usePrintingOptions,
   useSearch,
   useSearchReadiness,
   useSetOptions,
@@ -128,7 +128,15 @@ function answerViews(
             summary: undefined,
           })),
         },
-        options: { classes, sets: [], rarities: [], prBadgeStyles: [], rarityCounts: {} },
+        options: {
+          types: [],
+          typeCounts: {},
+          classes,
+          sets: [],
+          rarities: [],
+          prBadgeStyles: [],
+          rarityCounts: {},
+        },
         faces: [],
       },
     })
@@ -554,10 +562,10 @@ it("prefetches nearby result slots only and retains faces until the snapshot cha
   expect(screen.getByTestId("known")).toBeEmptyDOMElement()
 })
 
-it("keeps PR appearance options pending independently of the basic set and class view", () => {
+it("keeps rarity and type lists pending independently of the basic set and class view", () => {
   const { result } = renderHook(() => ({
     classes: useSetOptions().classes,
-    options: useRarityOptions(),
+    options: usePrintingOptions(),
   }))
   ready()
   const requests = fake.requests.filter((request) => request.kind === "view")
@@ -573,7 +581,15 @@ it("keeps PR appearance options pending independently of the basic set and class
       view: {
         query: request.query,
         page: { total: 0, offset: 0, items: [] },
-        options: { classes: [], sets: [], rarities: [], prBadgeStyles, rarityCounts: { pr: 2 } },
+        options: {
+          types: [],
+          typeCounts: { leader: 2, "leader:gold": 2 },
+          classes: [],
+          sets: [],
+          rarities: [],
+          prBadgeStyles,
+          rarityCounts: { pr: 2 },
+        },
         faces: [],
       },
     })
@@ -581,6 +597,9 @@ it("keeps PR appearance options pending independently of the basic set and class
   answer(basic, [])
   expect(result.current.classes).toEqual([])
   expect(result.current.options).toBeUndefined()
-  answer(rarity, ["bronze", "unknown"])
-  expect(result.current.options).toEqual({ styles: ["bronze", "unknown"], counts: { pr: 2 } })
+  answer(rarity, ["br", "unknown"])
+  expect(result.current.options).toEqual({
+    rarity: { styles: ["br", "unknown"], counts: { pr: 2 } },
+    type: { types: [], typeCounts: { leader: 2, "leader:gold": 2 } },
+  })
 })

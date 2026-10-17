@@ -62,11 +62,19 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 
 [#476](https://github.com/gbaian10/sve-kit/issues/476) 使用新封套及路徑重建私人 source-record ID／provenance，Rust authored／settings／schemas fingerprints 亦如實重算。舊私人 provenance、序列化背景與回放指紋不相容，不保留舊 reader。各種 exact／canonical authored source hash 包含封套；raw 來源 hash、record-level 語義 hash 與公開匯出契約不因此改變。公開 323 JSON、媒體及 token 必須逐 byte 同值。
 
+### 主戰者卡名框
+
+`catalog/leader-name-frames.yaml` 是單一可修改檔，封套為 `format: 1`、
+`kind: printing_leader_name_frames`、`records`。每筆以 `printing_id` 唯一定位，
+另填 `region`、`card_no` 供人讀與核對，`leader_name_frame` 僅接受 `gold`／`white`。
+loader 拒絕重複、未知 printing、地區／卡號不符及非主戰者版次；未登錄者與非主戰者保持 null。
+資料是經確認的版次外觀，不從稀有度或卡號推算，也不重新分類卡片類型。
+
 ### 卡面標籤外觀
 
 `catalog/rarity-badges.yaml` 是可修改的單一檔案，封套為 `format: 1`、`kind: printing_rarity_badges`、`records`。
 每列以 `printing_id` 為鍵，必填審閱標註 `region`（jp／en）、`card_no`，以及
-`style`（bronze／silver／gold／red／pastel／rainbow／none）。非 none 必填卡面原樣 `text`；none 必須省略 text。
+`style`（br／sr／gr／lg／sl／sp／none）。非 none 必填卡面原樣 `text`；none 必須省略 text。
 未知欄位、未知 style、YAML 重複鍵、重複 printing_id 與不存在的版次都使建置失敗；
 region／card_no 僅供審閱，不作識別鍵。沒有記錄表示待確認，不表示無標籤。
 外觀不綁圖片 hash，不改寫官方稀有度；雙面卡需一起看兩面後登錄一筆。
@@ -78,7 +86,7 @@ records:
   - printing_id: p:synthetic
     region: jp
     card_no: SYN-001
-    style: bronze
+    style: br
     text: BR
 ```
 

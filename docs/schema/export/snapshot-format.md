@@ -39,7 +39,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `card` | `id, layout, identity_state, home_set_id, faces:[face_id], regions:[RegionView]` | 每卡一格、各區預設入口、發行/對照狀態 |
 | `face` | `id, card_id, ordinal, side, current:[{region,revision_id,basis}], wording:[WordingView]` | 雙面切換，兩面算同一實物 |
-| `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_badge?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace]` | 每版次一格、版本區、分享碼解碼、圖像定位 |
+| `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_badge?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace], leader_name_frame:gold/white?` | 每版次一格、版本區、分享碼解碼、圖像定位 |
 | `product_family` | `id, code, public_code, kind, name_unit_id, translations:[FieldTranslation]` | /sets 與 set 搜尋 |
 | `product` | `id, family_ids:[ID], region, product_code?, name_unit_id, product_type?, released_on?, date_precision, date_raw?, translations:[FieldTranslation]` | 單卡頁補充的商品名稱與日期 |
 | `printing_product` | `printing_id, product_id, available_on?, date_precision?, date_raw?, inclusion_kind, note_unit_id?, first_inclusion_state` | 複合 `PK(printing_id,product_id)`；單卡頁列出 PR／再錄收錄；初收錄（首次／再錄）篩選 |
@@ -152,18 +152,34 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 Web 的 `rarity` 篩選取聯集，使用官方 `rarity_code` 歸類；保留 token `unrated` 表示官方代碼為 null 或「-」，與 PR 外觀 `pr:none`（官方仍是 pr）不同。
 PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none`、`unknown`）；子項目僅列該地區有資料的外觀。
 計數按該地區版次計算，不隨目前文字或其他篩選條件縮減；官方 pr 的外觀子項目互斥且完整，加總等於父項目。
-例如 `rarity=sp,pr:bronze,unrated` 同時包含官方 SP、官方 PR 的銅色外觀，以及無分類版次；圖牌仍依卡面外觀顯示。
+例如 `rarity=sp,pr:br,unrated` 同時包含官方 SP、官方 PR 的 BR 標籤外觀，以及無分類版次；圖牌仍依卡面外觀顯示。
 
 `printing.rarity_badge` 是與 `rarity_code` 一同載入的可空物件：`null` 表示待確認；
-`{style: "none"}` 表示已確認無標籤；其他 style 為 `bronze / silver / gold / red / pastel / rainbow`，
+`{style: "none"}` 表示已確認無標籤；其他 style 為 `br / sr / gr / lg / sl / sp`，
 必須帶 `text` 原樣印字（例如 `PR` 或 `BR`）。每版次一筆，雙面標註時一起確認；
 不由同名卡、另一地區或卡號前綴推導。採物件讓「無資料」和「無標籤」各自有明確表示，且 style／text 同屬一筆外觀。
 
 稀有度篩選 `pr` 只依官方 `rarity_code=pr`，包含全部 PR 外觀與待確認版次；
-子選項 `pr:bronze / pr:silver / pr:gold / pr:red / pr:pastel / pr:rainbow / pr:none` 同時要求
-**同一版次**的官方 pr 與對應 style。早期印 BR 的銅色 PR 仍屬 PR（銅）。
+子選項 `pr:br / pr:sr / pr:gr / pr:lg / pr:sl / pr:sp / pr:none` 同時要求
+**同一版次**的官方 pr 與對應 style。早期印 BR 的 PR 仍屬 PR（BR）；六種外觀子項的三語標籤皆由 style 大寫產生。
 `pr:unknown` 只包含外觀為 null 的官方 PR；該區沒有這類版次時不顯示子選項。
 多選稀有度時為聯集，其他版次條件仍需同一版次滿足；排序與預設版次照官方代碼，外觀全空時原有行為不變。
+
+### 主戰者卡名框篩選
+
+`printing.leader_name_frame` 是 required nullable 欄，值為 `gold`／`white`／null，
+非主戰者與未確認版次為 null；位於 printing/bootstrap tuple 尾端。
+查卡的 `types` facet 依目前卡面類型匹配版次：`leader` 選全部主戰者，
+`leader:gold`／`leader:white` 選各卡名框，`leader:unknown` 保留未確認主戰者；
+同 facet 取聯集，與職業、稀有度、卡包等 facet 取交集。
+選項只列目前地區存在的類型與卡名框，主戰者父項全選子項、部分選取顯示半選；
+類型清單在 printing 背景閉包完成後開放，與稀有度相同。`type` URL 參數保存這些穩定代碼，語言切換不改選取。
+類型清單採兩欄：第一組為從者／法術、護符／Token；其後依序為主戰者（含卡名框子項）、EP／SEP。
+Token 為父項，子項依序為有資料的從者／法術／護符／紋章／裝備；紋章及裝備僅列於 Token 下。
+父項全選全部 Token，子項部分選取時父項半選；`type=token:spell` 等子項同時要求 Token 標記及指定類型。
+`type=token` 表示同一面的 `special_kinds` 含 `token`，標籤取 `vocabulary(kind=special_kind,code=token)`；
+不新增 type_code。與其他類型取聯集，例如從者加 Token 包含全部從者及全部 Token，重疊版次只計一次。
+候選 4.0.0 依 §4 與 snapshot-contract 同步修訂 Schema、golden 與 reader，不另升版。
 
 ### 2.1 獨立影像清單與 DSL 附件
 

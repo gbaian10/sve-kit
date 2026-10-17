@@ -920,6 +920,7 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
       variant_key: printing.variant,
       rarity_code: printing.rarity,
       rarity_badge: null,
+      leader_name_frame: null,
       rarity_raw:
         printing.rarity === null
           ? ""

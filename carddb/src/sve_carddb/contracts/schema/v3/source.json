@@ -2847,12 +2847,12 @@
           "properties": {
             "style": {
               "enum": [
-                "bronze",
-                "silver",
-                "gold",
-                "red",
-                "pastel",
-                "rainbow"
+                "br",
+                "sr",
+                "gr",
+                "lg",
+                "sl",
+                "sp"
               ]
             },
             "text": {
@@ -5497,6 +5497,23 @@
               "ref": "PrintingFace"
             }
           }
+        },
+        "leader_name_frame": {
+          "schema": {
+            "enum": [
+              "gold",
+              "white",
+              null
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "enum": [
+                "gold",
+                "white"
+              ]
+            }
+          }
         }
       },
       "constraints": {
@@ -5529,6 +5546,7 @@
                 },
                 {},
                 {},
+                {},
                 {}
               ]
             },
@@ -5558,6 +5576,7 @@
                 {
                   "$ref": "#/$defs/Date"
                 },
+                {},
                 {}
               ]
             },
@@ -5585,6 +5604,7 @@
                 {
                   "type": "null"
                 },
+                {},
                 {}
               ]
             }
@@ -5600,6 +5620,7 @@
                 {
                   "const": "official"
                 },
+                {},
                 {},
                 {},
                 {},
@@ -5641,6 +5662,7 @@
                 {},
                 {},
                 {},
+                {},
                 {}
               ]
             },
@@ -5657,6 +5679,7 @@
                 {
                   "minItems": 1
                 },
+                {},
                 {},
                 {},
                 {},
@@ -9459,6 +9482,9 @@
               "ref": "PrintingFaceBootstrap"
             }
           }
+        },
+        "leader_name_frame": {
+          "from": "printing"
         }
       },
       "constraints": {
@@ -9486,6 +9512,7 @@
                 {
                   "const": "verified"
                 },
+                {},
                 {},
                 {},
                 {}
@@ -9517,6 +9544,7 @@
                 {
                   "$ref": "#/$defs/Date"
                 },
+                {},
                 {}
               ]
             },
@@ -9544,6 +9572,7 @@
                 {
                   "type": "null"
                 },
+                {},
                 {}
               ]
             }
@@ -9559,6 +9588,7 @@
                 {
                   "const": "official"
                 },
+                {},
                 {},
                 {},
                 {},
@@ -9600,6 +9630,7 @@
                 {},
                 {},
                 {},
+                {},
                 {}
               ]
             },
@@ -9616,6 +9647,7 @@
                 {
                   "minItems": 1
                 },
+                {},
                 {},
                 {},
                 {},

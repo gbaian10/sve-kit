@@ -10,7 +10,7 @@ JSON files are indented for review; manifest hashes and sizes describe
 canonical-json-v1 bytes. Load each payload through its manifest key and path.
 The golden must rejoin from individual files to `expected-logical.json`.
 
-The golden carries a bronze badge with printed BR on one printing and a badge explicitly absent on the other; schema cases cover all badge styles and reject missing text, unknown styles and extra fields. Official rarity remains independent.
+The golden carries a BR-style badge with printed BR on one printing and a badge explicitly absent on the other; schema cases cover all badge styles and reject missing text, unknown styles and extra fields. Official rarity remains independent.
 
 The golden has permanent printing identities 1/2, front/back ordinals 0/1,
 separate card/art versions 7/11, and two available printing bindings sharing one

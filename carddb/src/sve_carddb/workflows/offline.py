@@ -32,6 +32,10 @@ from sve_carddb.domains.products import (
 )
 from sve_carddb.domains.products.models import Date
 from sve_carddb.domains.registry.badges import load_badges, populate_badges
+from sve_carddb.domains.registry.leader_frames import (
+    load_leader_frames,
+    populate_leader_frames,
+)
 from sve_carddb.domains.registry.preview import (
     FrozenEN,
     FrozenJP,
@@ -476,6 +480,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     configuration |= observations.configuration(vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, configuration)
     badges = load_badges(authored_root(inputs.repo))
+    leader_frames = load_leader_frames(authored_root(inputs.repo))
     flavor = load_flavor(authored_root(inputs.repo))
     templates = _templates(adoptions)
     translation_sources = TranslationSources(
@@ -534,6 +539,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             name_sources = translation_sources.stage(context)
             added = populate_planned_card_extras(db, extras, build=context)
             missing_badges = populate_badges(db, badges)
+            populate_leader_frames(db, leader_frames)
             if names is not None:
                 replay = _current_names(adoptions, context, stores, db, name_sources)
                 assert replay is not None
