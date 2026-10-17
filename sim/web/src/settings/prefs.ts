@@ -53,6 +53,7 @@ export interface Prefs {
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
   readonly listWidths: ListWidths
+  readonly listMobileWidths: ListWidths
   readonly listVisibility: ListVisibility
   readonly listOrder: readonly ListColumn[]
 }
@@ -76,6 +77,7 @@ export const DEFAULT_PREFS: Prefs = {
   gridDensity: 2,
   viewMode: "grid",
   listWidths: {},
+  listMobileWidths: {},
   listVisibility: DEFAULT_LIST_VISIBILITY,
   listOrder: LIST_COLUMNS,
 }
@@ -128,6 +130,7 @@ const sanitizers: Sanitizers = {
   gridDensity: withDefault(isGridDensity, DEFAULT_PREFS.gridDensity),
   viewMode: withDefault(isViewMode, DEFAULT_PREFS.viewMode),
   listWidths: withDefault(isListWidths, DEFAULT_PREFS.listWidths),
+  listMobileWidths: withDefault(isListWidths, DEFAULT_PREFS.listMobileWidths),
   listVisibility: withDefault(isListVisibility, DEFAULT_PREFS.listVisibility),
   listOrder: sanitizeListOrder,
 }

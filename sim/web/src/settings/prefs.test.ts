@@ -198,10 +198,12 @@ it("persists list columns and widths, rejecting settings without an identity col
   const store = createPrefsStore()
   store.set({
     listWidths: { name: 280 },
+    listMobileWidths: { number: 160 },
     listVisibility: { ...DEFAULT_PREFS.listVisibility, rarity: false },
   })
   expect(createPrefsStore().get()).toMatchObject({
     listWidths: { name: 280 },
+    listMobileWidths: { number: 160 },
     listVisibility: { rarity: false },
   })
   localStorage.setItem(

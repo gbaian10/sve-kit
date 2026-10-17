@@ -124,6 +124,7 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
   })
   prefsStore.set({
     listWidths: { name: 280 },
+    listMobileWidths: { number: 160 },
     listVisibility: { ...DEFAULT_PREFS.listVisibility, rarity: false },
   })
   await renderInRouter(<SettingsPage />)
