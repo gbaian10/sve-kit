@@ -185,6 +185,7 @@ Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
 `compile_t0()` uses version 1; the optional T1 registry uses version 10, including
 its T0-only selection. Version 9 removes the obsolete image tables; image
 metadata and size configuration belong to the image index and public contract.
+Version 10 adds `face_wording` for wording classifications and shared bases.
 The
 version identifies the declaration generation; the selected capability closure
 determines the actual table set. It is independent

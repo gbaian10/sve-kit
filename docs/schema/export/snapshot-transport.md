@@ -232,8 +232,8 @@ printing/bootstrap.faces 使用 PrintingFaceBootstrap，detail.faces 使用 Prin
 
 row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。detail 按 row_index 排序，每個 base row 必須且只能有一列 detail，包含文字未知／空陣列的卡，不能藉缺列改變 unknown 語意。printing detail 每列須恰有與 bootstrap 相同的 faces 集合，從 base 的 face_id 連回 face.ordinal 來定位。join 以 base 還原 id／face_id，不輸出 row_index／face_ordinal；translations 按 `(field,ordinal,target_lang)` 合併並拒絕同鍵重複，合併後依該鍵排序（null ordinal 在數字前）。
 
-`current_ref` 是所有 face.current.revision_id 的去重集合；`display_ref` 依 snapshot-format §2.3
-加上全部 wording.display 與 candidates 的非 null revision ID。這些版本的名稱／數值放入 bootstrap，
+`current_ref` 是所有 face.current.revision_id 的去重集合；`display_ref` 依 snapshot-format §2.3，
+為 current_ref 加上全部 wording.display 與 candidates 非 null revision ID 的聯集。這些版本的名稱／數值放入 bootstrap，
 效果等其他欄位放入 detail，讓沒有唯一依據的版次仍可顯示自己的卡名與數值。
 集合外的歷史版本用 history 完整列，role=text、base=null，按需載入。
 同一 revision 不可同時兩邊出現；current、display 或候選改變時重算分割，永久 ID 不變。

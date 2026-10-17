@@ -318,7 +318,7 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 ### 9.2 當前翻譯投影
 
 §9.1 的既有 DDL 透過 `build.t1.compile_build()` 編譯。
-建置 DB 版本為 9；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
+建置 DB 版本為 10；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
 無譯名時仍保留原文用途。名稱內不再抽術語，不能把缺概念的名字造為 CardName 引用。
 [翻譯契約](../domains/translation-contract.md)已描述四層目標行為，具體差異依 §9.3；typed frame、target 與 binding 已接入正式建置。
 模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
