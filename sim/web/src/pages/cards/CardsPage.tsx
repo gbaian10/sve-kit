@@ -1,6 +1,8 @@
 import {
   type KeyboardEvent,
   useCallback,
+  useEffect,
+  useEffectEvent,
   useId,
   useLayoutEffect,
   useMemo,
@@ -126,6 +128,7 @@ export function CardsPage() {
     readonly text: string
     readonly index: number
   } | null>(null)
+  const armed = useRef<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listId = useId()
   const debounced = useDebouncedValue(input, DEBOUNCE_MS)
@@ -279,7 +282,37 @@ export function CardsPage() {
     inputRef.current?.blur()
     commit({ ...DEFAULT_QUERY, text: typed })
   }
+  const activate = (index: number) => {
+    if (index >= 0) openSuggestion(index)
+    else if (typed !== "" && suggestTotal === 1) openSuggestion(0)
+    else {
+      setFocused(false)
+      inputRef.current?.blur()
+      commit({ ...query, text: typed })
+    }
+  }
+  const openArmed = useEffectEvent(() => {
+    if (suggestionResult.phase === "error" || totalState.result.phase === "error") {
+      armed.current = null
+      return
+    }
+    if (
+      armed.current !== typed ||
+      stale ||
+      totalState.result.phase !== "complete" ||
+      totalState.lastInput?.state.text !== typed ||
+      totalState.lastInput.edition !== edition
+    )
+      return
+    armed.current = null
+    activate(-1)
+  })
+  useEffect(() => {
+    openArmed()
+  }, [typed, stale, totalState])
+
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.nativeEvent.isComposing) return
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       if (rows.length === 0) return
       event.preventDefault()
@@ -289,6 +322,7 @@ export function CardsPage() {
       return
     }
     if (event.key === "Escape") {
+      armed.current = null
       if (focused) {
         event.preventDefault()
         setFocused(false)
@@ -297,18 +331,21 @@ export function CardsPage() {
     }
     if (event.key !== "Enter") return
     event.preventDefault()
-    // Enter opens the highlighted (else first) suggestion once the list has caught up with the text.
-    if (input !== "" && rows.length > 0 && debounced === input) {
-      openSuggestion(active === -1 ? 0 : active)
-      return
-    }
-    if (input === "" && active >= 0) {
+    if (active >= 0 && !stale) {
       openSuggestion(active)
       return
     }
-    setFocused(false)
-    inputRef.current?.blur()
-    commit({ ...query, text: input })
+    if (
+      typed !== "" &&
+      (stale ||
+        totalState.result.phase !== "complete" ||
+        totalState.lastInput?.state.text !== typed ||
+        totalState.lastInput.edition !== edition)
+    ) {
+      armed.current = typed
+      return
+    }
+    activate(active)
   }
   const openCell = useCallback((cell: GridCell): CardEntryState => {
     const current = openContextRef.current
@@ -407,6 +444,7 @@ export function CardsPage() {
         <SearchBar
           value={input}
           onChange={(value) => {
+            armed.current = null
             setInput(value)
             setFocused(true)
           }}
@@ -415,6 +453,7 @@ export function CardsPage() {
             setFocused(true)
           }}
           onBlur={() => {
+            armed.current = null
             setFocused(false)
           }}
           inputRef={inputRef}
