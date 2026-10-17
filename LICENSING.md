@@ -19,6 +19,7 @@ project documentation uses Apache-2.0 as shown below.
 | `docs/`, README files at any level, `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, and project-owned legal documentation | Apache-2.0 | Real-card examples, official excerpts and source quotations, including those in `docs/dsl/` and `docs/sim/` |
 | Other repository-root configuration files, including dotfiles and lockfiles | Apache-2.0 | Third-party notices and material retain their own terms |
 | `tests/rules-scenarios/questions/` | Apache-2.0 | `evidence[].quote` and any other official or third-party source wording are quotations, not licensed by the project |
+| `sim/web/src/assets/rarity/`, except README files | Apache-2.0 for our drawings | The imitated official rarity-label designs; glyph outlines retain OFL-1.1 terms, see `OFL.txt` in that directory |
 | `sim/web/src/assets/official/` image files, including `logo/head-left.png` | No project license | All official images, including cropped derivatives; the directory README follows the documentation row |
 | `LICENSE`, `LICENSES/` | The supplied standard texts and exclusion notice identify their own terms and scope | These texts do not override the exclusions above |
 
@@ -117,7 +118,9 @@ handled separately, with revocation or rotation first.
 Third-party software, fonts, and general-purpose icons retain their own terms.
 Distributions must carry the notices required for components actually included.
 In particular, Lucide includes ISC and Feather MIT notices, and IBM Plex Sans
-uses OFL-1.1. Root NOTICE is not a substitute for a release's dependency notices.
+uses OFL-1.1. The rarity badges contain glyph outlines from Liberation Serif
+Bold 2.1.5 under OFL-1.1; their font copyright and license are in
+`sim/web/src/assets/rarity/OFL.txt`. Root NOTICE is not a substitute for a release's dependency notices.
 
 Snapshots, images and audio do not acquire the license of the program that
 exports them. They may include official and third-party content; no project
