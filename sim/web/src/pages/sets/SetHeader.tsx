@@ -77,10 +77,10 @@ export function SetHeader({
       </h1>
       <p role="status" className="text-13 text-text-2 tabular-nums">
         {counts
-          ? t("home.pack.cards", { value: new Intl.NumberFormat(locale).format(counts.cards) })
+          ? t("sets.cards", { value: new Intl.NumberFormat(locale).format(counts.cards) })
           : counted.result.phase === "error"
-            ? t("home.pack.countsUnavailable")
-            : t("home.pack.countsPending")}
+            ? t("sets.countsUnavailable")
+            : t("sets.countsPending")}
       </p>
     </header>
   )

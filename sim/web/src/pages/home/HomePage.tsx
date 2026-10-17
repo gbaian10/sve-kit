@@ -1,12 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import {
-  useRecentSummaries,
-  useSearchReadiness,
-  useSetCounts,
-  useSetReleases,
-} from "../../app/snapshot"
+import { useRecentSummaries, useSearchReadiness, useSetReleases } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import type { SuggestRow } from "../../components/search/SuggestList"
 import type { CardSummary } from "../../data"
@@ -16,7 +11,6 @@ import { currentUiLanguage } from "../../i18n"
 import { usePrefs, useRecent } from "../../settings"
 import { RECENT_SET_LIMIT, type SetEntry } from "./home-model"
 import { HomeSearch } from "./HomeSearch"
-import { NewPackBanner, type PackCountState } from "./NewPackBanner"
 import { OfficialNews } from "./OfficialNews"
 import { RecentCards } from "./RecentCards"
 import { SetEntries } from "./SetEntries"
@@ -60,22 +54,6 @@ export function HomePage() {
       releasedOn: set.releasedOn,
     }))
   }, [releases, edition, textLang])
-  const pack = sets?.[0]
-  const packCode = pack?.code
-  const packCount = useSetCounts(packCode, edition, "zh-Hant")
-  const counts = useMemo<PackCountState>(() => {
-    const { lastInput, result } = packCount
-    if (result.phase === "error") return { phase: "error" }
-    if (
-      result.phase !== "complete" ||
-      !result.counts ||
-      lastInput === null ||
-      lastInput.state.sets[0] !== packCode ||
-      lastInput.edition !== edition
-    )
-      return { phase: "pending" }
-    return { phase: "complete", counts: result.counts }
-  }, [packCount, packCode, edition])
 
   return (
     <div className="flex flex-col gap-4 pt-3 pb-8 lg:pt-8">
@@ -101,14 +79,6 @@ export function HomePage() {
             failed={ready && recentResult.phase === "error"}
             onRetry={readiness.retry}
           />
-          {pack !== undefined && (
-            <NewPackBanner
-              pack={pack}
-              counts={counts}
-              countTranslations={uiLanguage === "zh-TW"}
-              locale={uiLanguage}
-            />
-          )}
         </div>
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
           <SetEntries

@@ -11,6 +11,7 @@ import {
 } from "react"
 import { useTranslation } from "react-i18next"
 import {
+  Link as RouterLink,
   NavigationType,
   useLocation,
   useNavigate,
@@ -409,14 +410,14 @@ export function CardsPage() {
     code === null
       ? t("search.neutral")
       : (quickBar.find((item) => item.code === code)?.label ?? code)
-  // A set page's own set is the page, not a condition: it gets no chip and no badge count, and
-  // removing it from the chips is not offered (the path would imply it again at once).
-  const chipConditions = set
+  // A set page's own set is the page, not a condition: no chip, no badge count. The chips still
+  // edit the full query, so removing another chip never drops the implied set from a multi-select.
+  const countedConditions = set
     ? { ...query, sets: query.sets.filter((item) => item !== set.code) }
     : query
-  const filterCount = activeFilterCount(chipConditions)
+  const filterCount = activeFilterCount(countedConditions)
   const hasConditions =
-    chipConditions.text !== "" || chipConditions.classes.length > 0 || filterCount > 0
+    countedConditions.text !== "" || countedConditions.classes.length > 0 || filterCount > 0
   const panelOpen = prefs.filterPanelOpen
   const resultCount =
     page !== null ? (
@@ -470,9 +471,15 @@ export function CardsPage() {
             role="status"
             actions={
               <>
-                <Link to={editionUrl(location.pathname, otherEdition)} className="text-13">
+                <RouterLink
+                  to={editionUrl(location.pathname, otherEdition)}
+                  className="text-13 text-accent-text underline-offset-2 hover:underline"
+                  onClick={() => {
+                    prefsStore.set({ cardEdition: otherEdition })
+                  }}
+                >
                   {t("sets.switchEdition", { edition: t(`options.edition.${otherEdition}`) })}
-                </Link>
+                </RouterLink>
                 <Link to={editionUrl("/sets", edition)} className="text-13">
                   {t("home.sets.all")}
                 </Link>
@@ -563,7 +570,8 @@ export function CardsPage() {
       )}
       {/* The chip row sits with the class row, above the panel, so it stays in view either way. */}
       <ConditionChips
-        query={chipConditions}
+        query={query}
+        impliedSet={set?.code}
         edition={edition}
         classLabel={classLabel}
         rarityLabel={(code) => {

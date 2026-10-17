@@ -15,21 +15,21 @@ it("selects a family label by interface language and falls back to its original"
 it("drops the code from a caption whose name already starts with it", () => {
   const original = { text: "試作プロモ", lang: "ja" as const }
   const promo = {
-    code: "pr",
-    publicCode: "PR",
-    name: { original, translations: { "zh-Hant": "PR卡", en: "Promo Cards" } },
+    code: "xp",
+    publicCode: "XP",
+    name: { original, translations: { "zh-Hant": "XP試作卡", en: "Prototype Extras" } },
   }
   expect(setCaption(promo, "zh-Hant")).toEqual({
     code: null,
-    name: { text: "PR卡", lang: "zh-Hant" },
-    text: "PR卡",
+    name: { text: "XP試作卡", lang: "zh-Hant" },
+    text: "XP試作卡",
   })
   expect(setCaption(promo, "en")).toEqual({
-    code: "PR",
-    name: { text: "Promo Cards", lang: "en" },
-    text: "PR Promo Cards",
+    code: "XP",
+    name: { text: "Prototype Extras", lang: "en" },
+    text: "XP Prototype Extras",
   })
-  expect(setCaption(promo, "ja")).toEqual({ code: "PR", name: original, text: "PR 試作プロモ" })
+  expect(setCaption(promo, "ja")).toEqual({ code: "XP", name: original, text: "XP 試作プロモ" })
   // Without a public code the family code stands in, and the same rule applies to it.
   const bare = {
     code: "bp01",

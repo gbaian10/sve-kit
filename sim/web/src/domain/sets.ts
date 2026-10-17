@@ -16,11 +16,8 @@ export interface SetCaption {
   readonly text: string
 }
 
-/**
- * How every list, dropdown, header and chip captions a set (maintainer, 2026-10-18): the public
- * code and then the name, except that a name already starting with the code ("PR卡" under "PR")
- * is shown alone rather than as "PR PR卡".
- */
+// One caption rule for every list, dropdown, header and chip (maintainer, 2026-10-18): a name that
+// already starts with the public code is shown alone, so the code is never printed twice.
 export function setCaption(
   set: { readonly code: string; readonly publicCode?: string; readonly name: NameSource },
   lang: TextLang,
@@ -31,9 +28,8 @@ export function setCaption(
   return { code, name, text: code === null ? name.text : `${code} ${name.text}` }
 }
 
-// `/sets` groups families by `product_family.kind` (architecture §2.1): these kinds each get a
-// section of their own; every other kind, known or not, is listed under "decks and special products"
-// so a new kind in the snapshot is never dropped from the page.
+// The kinds with a section of their own on `/sets` (architecture §2.1); every other kind, known or
+// not, lands in "decks and special products" so a new kind in the snapshot is never dropped.
 const MAIN_SET_KINDS = ["booster", "collaboration", "special_pack", "promo"] as const
 export type MainSetKind = (typeof MAIN_SET_KINDS)[number]
 

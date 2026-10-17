@@ -52,8 +52,6 @@ it("fills every block from the search Worker without loading the full snapshot",
     )
     expect(recentLink).toBeInTheDocument()
   })
-  const banner = within(screen.getByRole("region", { name: "試作補充包第1彈" }))
-  expect(await banner.findByText(/已收錄/u)).toBeVisible()
   await user.type(screen.getByRole("combobox"), "試作")
   await waitFor(() => {
     const list = screen.getByRole("listbox", { name: "建議" })

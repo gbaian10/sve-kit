@@ -49,16 +49,16 @@ export function SetsPage() {
     void navigate(editionUrl("/sets", next))
   }
   const list = (items: readonly NonNullable<typeof sets>[number][]) => (
-    <ul className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
       {items.map((set) => {
         const { code, name } = setCaption(set, textLang)
         const released = releasedOn.get(set.id)
         const count = setCounts?.[set.code]
         return (
-          <li key={set.id}>
+          <li key={set.id} className="min-w-0">
             <RouterLink
               to={editionUrl(`/sets/${encodeURIComponent(set.publicCode ?? set.code)}`, edition)}
-              className="flex min-h-14 items-center gap-3 rounded-button border border-border bg-surface-1 px-3 py-1.5 text-text-1 hover:bg-surface-2"
+              className="flex min-h-14 min-w-0 items-center gap-3 rounded-button border border-border bg-surface-1 px-3 py-1.5 text-text-1 hover:bg-surface-2"
             >
               {code !== null && (
                 <span className="min-w-14 shrink-0 font-sans text-14 font-bold tabular-nums">

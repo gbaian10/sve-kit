@@ -199,9 +199,8 @@ describe("home search", () => {
     await user.click(main().getByRole("link", { name: "進階搜尋" }))
     expect(router.state.location.pathname).toBe("/cards")
     await goHome(router)
-    await user.click(main().getByRole("link", { name: "依卡包" }))
-    expect(router.state.location.pathname).toBe("/sets")
-    await goHome(router)
+    // "By set" left the shortcut row (maintainer, 2026-10-18): the set section's link covers /sets.
+    expect(main().queryByRole("link", { name: "依卡包" })).toBeNull()
     const random = screen.getByRole("button", { name: "隨機一張" })
     await waitFor(() => {
       expect(random).toBeEnabled()
@@ -282,8 +281,8 @@ describe("recently viewed", () => {
   })
 })
 
-describe("sets, new pack and official news", () => {
-  it("shows releases and counts from product family_ids in the selected edition", async () => {
+describe("sets and official news", () => {
+  it("shows releases from product family_ids in the selected edition", async () => {
     await open()
     const sets = within(screen.getByRole("region", { name: "依卡包・最近三彈" }))
     expect(sets.getByRole("link", { name: "全部卡包" })).toHaveAttribute("href", "/sets")
@@ -292,21 +291,11 @@ describe("sets, new pack and official news", () => {
     expect(entry).toHaveTextContent("2026-02-01 發售")
     // The one dated booster set leaves room for two more, so the undated rule is spelled out.
     expect(sets.getByText(/發售日未知的不列入/u)).toBeVisible()
-    const banner = within(screen.getByRole("region", { name: "試作補充包第1彈" }))
-    expect(banner.getByText(/新卡包/u)).toHaveTextContent("新卡包・2026-02-01 發售")
-    expect(banner.getByRole("link", { name: "看卡表" })).toHaveAttribute("href", "/sets/BP01")
-    // The fixture's booster holds 21 Japanese cards; 20 of them have a confident zh-Hant name.
-    expect(await banner.findByText(/已收錄/u)).toHaveTextContent("已收錄 21 種")
-    expect(banner.getByText(/繁中譯名/u)).toHaveTextContent("有繁中譯名 20")
-    expect(banner.queryByText(/待校對/u)).toBeNull()
-    expect(main().queryByText(/%|／/u)).toBeNull()
+    // The new-set banner was removed (maintainer, 2026-10-18): the set entries are the one set list.
+    expect(screen.queryByRole("region", { name: "試作補充包第1彈" })).toBeNull()
+    expect(main().queryByText(/新卡包|已收錄|%|／/u)).toBeNull()
     prefsStore.set({ cardEdition: "en" })
     expect(await sets.findByText("2026-04-01 發售")).toBeVisible()
-    await waitFor(() => {
-      const currentBanner = within(screen.getByRole("region", { name: "試作補充包第1彈" }))
-      expect(currentBanner.getByText(/已收錄/u)).toHaveTextContent("已收錄 15 種")
-      expect(currentBanner.getByText(/繁中譯名/u)).toHaveTextContent("有繁中譯名 14")
-    })
   })
 
   it("only links to official news, following the card edition", async () => {

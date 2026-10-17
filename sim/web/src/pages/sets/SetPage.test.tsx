@@ -1,30 +1,17 @@
 import { screen, waitFor, within } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
+import userEvent from "@testing-library/user-event"
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
+import { stubFixtureFetch } from "../../test-utils/fixture-fetch"
 import { TestSearchWorker } from "../../test-utils/search-worker"
 
 beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
 
-const built = await buildSnapshot({
-  encodeImage: ({ width, height, seed }) =>
-    Promise.resolve(
-      new TextEncoder().encode(`stub:${String(width)}x${String(height)}:${String(seed)}`),
-    ),
-})
+await stubFixtureFetch()
 
-beforeAll(() => {
-  vi.stubGlobal("fetch", (input: RequestInfo | URL) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
-    const bytes = built.files.get(url.replace(/^.*\/cdn\//u, ""))
-    return Promise.resolve(
-      bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
-    )
-  })
-})
 afterAll(() => {
   vi.unstubAllGlobals()
 })
@@ -88,6 +75,19 @@ describe("SetPage header", () => {
     expect(screen.getByRole("button", { name: "篩選" })).toHaveTextContent(/^$/u)
   })
 
+  it("keeps the implied set in a multi-select when another chip is removed", async () => {
+    const { router } = await open("/sets/BP01?set=bp01,sd01&class=elf")
+    await screen.findByRole("heading", { level: 1, name: "試作補充包第1彈" }, { timeout: 4000 })
+    const labels = () =>
+      screen
+        .getAllByRole("button", { name: /^移除條件：/u })
+        .map((button) => button.getAttribute("aria-label"))
+    expect(labels()).toEqual(["移除條件：精靈", "移除條件：SD01 試作起始牌組"])
+    await userEvent.click(screen.getByRole("button", { name: "移除條件：精靈" }))
+    expect(router.state.location.search).toBe("?set=bp01%2Csd01")
+    expect(labels()).toEqual(["移除條件：SD01 試作起始牌組"])
+  })
+
   it("labels a deck family by its own kind", async () => {
     await open("/sets/SD01")
     const heading = await screen.findByRole(
@@ -102,7 +102,8 @@ describe("SetPage header", () => {
 
   it("offers the other edition when the code has no printings in this one", async () => {
     // The promo set exists in JP only, so under EN it is not found rather than shown empty.
-    await open("/sets/PR?ed=en")
+    prefsStore.set({ cardEdition: "en" })
+    const { router } = await open("/sets/PR?ed=en")
     const text = await screen.findByText("找不到這個卡包", {}, { timeout: 4000 })
     const notice = text.closest<HTMLElement>("[role=status]")
     if (!notice) throw new Error("not-found text outside its notice")
@@ -115,5 +116,15 @@ describe("SetPage header", () => {
       "/sets?ed=en",
     )
     expect(document.querySelector("[data-result-key]")).toBeNull()
+    // Choosing the other edition here is a preference too, unlike merely opening a URL.
+    expect(prefsStore.get().cardEdition).toBe("en")
+    await userEvent.click(within(notice).getByRole("link", { name: "改看日版" }))
+    expect(router.state.location.pathname).toBe("/sets/PR")
+    expect(router.state.location.search).toBe("")
+    expect(prefsStore.get().cardEdition).toBe("jp")
+    await screen.findByRole("heading", { level: 1, name: "試作促銷卡" }, { timeout: 4000 })
+    await waitFor(() => {
+      expect(document.querySelector("[data-result-key]")).not.toBeNull()
+    })
   })
 })

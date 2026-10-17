@@ -1,33 +1,19 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
+import { stubFixtureFetch } from "../../test-utils/fixture-fetch"
 import { TestSearchWorker } from "../../test-utils/search-worker"
 
 beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
 
 // The synthetic snapshot has three families: a booster and a starter deck in both editions and a
 // JP-only promo set. Only the booster and the deck have dated products.
-const built = await buildSnapshot({
-  encodeImage: ({ width, height, seed }) =>
-    Promise.resolve(
-      new TextEncoder().encode(`stub:${String(width)}x${String(height)}:${String(seed)}`),
-    ),
-})
+await stubFixtureFetch()
 
-beforeAll(() => {
-  vi.stubGlobal("fetch", (input: RequestInfo | URL) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
-    const bytes = built.files.get(url.replace(/^.*\/cdn\//u, ""))
-    return Promise.resolve(
-      bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
-    )
-  })
-})
 afterAll(() => {
   vi.unstubAllGlobals()
 })

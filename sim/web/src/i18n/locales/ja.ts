@@ -89,7 +89,7 @@ export default {
   },
   home: {
     shortcuts: "ショートカット",
-    shortcut: { advanced: "詳細検索", sets: "パック別", random: "ランダム" },
+    shortcut: { advanced: "詳細検索", random: "ランダム" },
     randomPending: "カードデータのダウンロード後に使えます",
     searchPending: "カードデータをダウンロード中です。先に入力でき、完了後に自動で検索します。",
     searchFailed: "カードデータを読み込めなかったため、検索できません。",
@@ -105,15 +105,6 @@ export default {
       undated:
         "発売日が分かっているブースターパック・コラボパックだけを表示しています。発売日不明のものは含みません。",
       released: "{{date}} 発売",
-    },
-    pack: {
-      label: "新パック",
-      open: "カードリスト",
-      cards: "収録 {{value}} 種",
-      translated: "繁体字中国語の名前あり {{value}}",
-      proofreading: "うち {{value}} 件は校正待ち",
-      countsPending: "収録数を計算中",
-      countsUnavailable: "収録数をまだ計算できません",
     },
     news: {
       title: "公式の最新情報",
@@ -324,6 +315,9 @@ export default {
       special: "特別商品",
       other: "その他の商品",
     },
+    cards: "収録 {{value}} 種",
+    countsPending: "収録数を計算中",
+    countsUnavailable: "収録数をまだ計算できません",
     specialProducts: "構築済みデッキ・特別商品",
     switchEdition: "{{edition}}を見る",
     empty: "この版にはまだ表示できるカードパックがありません。",
