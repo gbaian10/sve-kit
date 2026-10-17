@@ -69,6 +69,7 @@ from sve_carddb.domains.translations.glossary.records import (
     TermRecord,
 )
 from sve_carddb.domains.translations.jp_sources import effect_bindings
+from sve_carddb.domains.translations.labels import apply as apply_labels
 from sve_carddb.domains.translations.models import EffectTerm, SourceValue
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
 from sve_carddb.domains.translations.recognition.rules import load as load_rules
@@ -558,6 +559,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             mark("db: rarities + card extras + names")
             flavor_report = apply_flavor(db, flavor)
             translation = adoptions.translation_inputs()
+            if translation is not None:
+                apply_labels(db, translation.load().four_layer)
             template_report = (
                 None
                 if templates is None or translation is None

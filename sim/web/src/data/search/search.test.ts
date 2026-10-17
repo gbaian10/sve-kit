@@ -2699,3 +2699,71 @@ it("selects Token by special kind and unions it with followers after index resto
     expect(index.options.types.find((type) => type.code === "token")?.kind).toBe("special_kind")
   }
 })
+
+it("keeps family label translations in set options and releases after index restore", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) =>
+        fragment.table === "product_family"
+          ? {
+              ...row,
+              translations: [
+                {
+                  field: "label",
+                  ordinal: null,
+                  target_lang: "zh-Hant",
+                  translation_id: "tr:family-label",
+                },
+              ],
+            }
+          : row,
+      ),
+    })),
+  )
+  const fragment = snapshot.bootstrap[0]
+  if (!fragment) throw new Error("missing bootstrap")
+  columns.ingest([
+    {
+      ...fragment,
+      table: "product",
+      rows: [
+        {
+          region: "jp",
+          date_precision: "day",
+          released_on: "2026-10-01",
+          family_ids: snapshot.bootstrap
+            .filter((item) => item.table === "product_family")
+            .flatMap((item) => item.rows.map((row) => row["id"] ?? null)),
+        },
+      ],
+    },
+    {
+      ...fragment,
+      table: "translation",
+      rows: [{ id: "tr:family-label", text_unit_id: "t:family-label" }],
+    },
+    {
+      ...fragment,
+      table: "text_unit",
+      rows: [{ id: "t:family-label", text: "試作卡包", lang: "zh-Hant" }],
+    },
+  ])
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    expect(index.options.sets.length).toBeGreaterThan(0)
+    expect(index.releases.length).toBeGreaterThan(0)
+    for (const set of [...index.options.sets, ...index.releases]) {
+      expect(set.name.translations["zh-Hant"]).toBe("試作卡包")
+      expect(set.name.original.text).not.toBe("試作卡包")
+      expect(set.name.translations["ja"]).toBeUndefined()
+      expect(set.name.translations["en"]).toBeUndefined()
+    }
+  }
+})

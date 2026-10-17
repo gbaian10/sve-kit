@@ -23,7 +23,7 @@
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital/links/index.yaml`、`digital/links/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
-| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |
+| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides,labels}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog/adoptions/<area>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與當前值) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `catalog/overrides/<area>/<sequence>.yaml`，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
 | 定案（新格式） | 數位名字／同名瀏覽政策 | `digital/policies/{names,links}.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
@@ -306,6 +306,21 @@ origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人
 平常一個新包只需一個資料 PR 與一張低信心／新句型／缺項清單，
 不要求首輪抽查、逐筆雙模型、approved_policy、額外核可頁或手動合併前驗證。
 官方 CI 輸入沿現有私有 testdata repo 及鎖定檔，個人機器路徑與事件不得進 committed 資料。
+
+### 6.1 卡包名稱 label
+
+`translations/labels/<filing_key>/<sequence>.yaml` 沿用 `format: 3`、
+`kind: translation_shard`、`records` 封套，記錄種類為 `product_family_label`。
+每筆 `data` 恰有 `public_code`、`lang`、`text`；public_code 對應本次建置的
+product_family，找不到即拒絕。`(public_code, lang)` 是全區唯一選用鍵，跨分片重複亦拒絕。
+code 與 text 必須非空白且無首尾空白；沿用 record 外層的 origin、low_confidence、note，
+origin 只允許 project／machine，不據此主張官方權威。
+
+這是可直接修改的當前譯名，唯一來源位於 authored，不另存前端字典。
+建置以 family 自己的 name_unit_id 為來源、`product_family:<family_id>` 為 semantic_variant，
+寫入 label 的 context/use/translation/selection；同原名的不同 family 不共用譯名選用，
+公開匯出沿用既有 FieldTranslation。介面依語言選用，缺譯名退回原文。
+此入口只實作 product_family；product label 仍未實作，也沒有 product→family 譯名回退。
 
 ## 7. DSL 與拒絕輸入
 

@@ -1,7 +1,7 @@
 import { type CardSummary } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
-import type { DisplayedText, NameSource } from "../../domain/nameDisplay"
-import type { Region, TextLang } from "../../domain/search"
+import type { DisplayedText } from "../../domain/nameDisplay"
+import type { Region } from "../../domain/search"
 
 export const RECENT_SET_LIMIT = 3
 
@@ -19,12 +19,6 @@ export function cardPath(summary: CardSummary): string {
 
 export function setPath(publicCode: string, edition: Region = "jp"): string {
   return `/sets/${encodeURIComponent(publicCode)}${edition === "en" ? "?ed=en" : ""}`
-}
-
-/** A set name in the interface's text language, else the original. */
-export function setLabel(name: NameSource, lang: TextLang): DisplayedText {
-  const translated = name.translations[lang]
-  return translated ? { text: translated, lang } : name.original
 }
 
 /** What the home page keeps on its own history entry, so back restores the typed text. */

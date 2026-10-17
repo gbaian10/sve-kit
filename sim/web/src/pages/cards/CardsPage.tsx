@@ -65,6 +65,7 @@ import {
 } from "../../domain/query/model"
 import { prStyleTokens } from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
+import { setLabel } from "../../domain/sets"
 import { leaderFrameTokens, tokenKindTokens } from "../../domain/typeFilter"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
@@ -466,9 +467,7 @@ export function CardsPage() {
   return (
     <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
       {code ? (
-        <h1 className="text-20 font-semibold">
-          {set ? (set.name.translations[textLang] ?? set.name.original.text) : code}
-        </h1>
+        <h1 className="text-20 font-semibold">{set ? setLabel(set.name, textLang).text : code}</h1>
       ) : (
         <h1 className="sr-only">{t("pages.cards")}</h1>
       )}
@@ -556,7 +555,7 @@ export function CardsPage() {
         setLabel={(code) => {
           const option = sets?.find((item) => item.code === code)
           return option
-            ? `${option.publicCode ?? option.code} ${option.name.translations[textLang] ?? option.name.original.text}`
+            ? `${option.publicCode ?? option.code} ${setLabel(option.name, textLang).text}`
             : code
         }}
         groups={{

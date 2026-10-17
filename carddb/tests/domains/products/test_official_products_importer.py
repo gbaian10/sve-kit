@@ -209,7 +209,7 @@ def test_date_precision_survives_db_without_guessing(
 
 
 @pytest.mark.parametrize(
-    "name", ["Promo Cards", "PRカード", "Unknown Synthetic Edition"]
+    "name", ["Synthetic Promo Edition", "合成PR商品", "Unknown Synthetic Edition"]
 )
 def test_missing_distribution_type_never_comes_from_owner(
     identity_fixture: IdentityFixture, name: str

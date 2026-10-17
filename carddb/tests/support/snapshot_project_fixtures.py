@@ -214,6 +214,8 @@ def extras() -> dict[str, dict[str, Value]]:
             "target_lang": "zh-Hant",
             "revision": 1,
             "text": "Synthetic translation",
+            "tokens": None,
+            "source_id": None,
             "origin": "project",
             "authority": "unofficial",
             "low_confidence": False,
