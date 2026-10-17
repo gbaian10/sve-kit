@@ -31,22 +31,26 @@ export interface CardIndex {
 }
 
 function* byId(rows: readonly Row[], field = "id"): Generator<void, Map<string, Row>> {
+  let visited = 0
   const out = new Map<string, Row>()
   for (const row of rows) {
     out.set(stringValue(row[field]), row)
-    yield
+    if ((++visited & 31) === 0) yield
   }
+  yield
   return out
 }
 function* group(rows: readonly Row[], field: string): Generator<void, Map<string, Row[]>> {
+  let visited = 0
   const out = new Map<string, Row[]>()
   for (const row of rows) {
     const key = stringValue(row[field])
     const list = out.get(key)
     if (list) list.push(row)
     else out.set(key, [row])
-    yield
+    if ((++visited & 31) === 0) yield
   }
+  yield
   return out
 }
 export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
@@ -54,6 +58,7 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
 }
 
 export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, CardIndex> {
+  let visited = 0
   const cards = yield* mergedRowsCursor(snapshot.bootstrap, "card")
   const faces = yield* mergedRowsCursor(snapshot.bootstrap, "face")
   const printingOwners = new Map<string, Row[string]>()
@@ -61,20 +66,20 @@ export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, Card
     if (fragment.table === "printing")
       for (const row of fragment.rows) {
         printingOwners.set(stringValue(row["id"]), (fragment.value["owner"] as Row)["id"] ?? null)
-        yield
+        if ((++visited & 31) === 0) yield
       }
   const printings: Row[] = [],
     printingIds = new Set<string>()
   for (const row of yield* mergedRowsCursor(snapshot.bootstrap, "printing")) {
     printings.push({ ...row, home_set_id: printingOwners.get(stringValue(row["id"])) ?? null })
     printingIds.add(stringValue(row["id"]))
-    yield
+    if ((++visited & 31) === 0) yield
   }
   for (const fragment of snapshot.bootstrap)
     if (fragment.table === "card_locator")
       for (const row of fragment.rows) {
         if (!printingIds.has(stringValue(row["id"]))) printings.push(row)
-        yield
+        if ((++visited & 31) === 0) yield
       }
   const revisions = yield* mergedRowsCursor(snapshot.bootstrap, "face_revision")
   const families = yield* mergedRowsCursor(snapshot.bootstrap, "product_family")
@@ -83,14 +88,14 @@ export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, Card
   const facesByCard = yield* group(faces, "card_id")
   for (const list of facesByCard.values()) {
     list.sort((a, b) => integerValue(a["ordinal"]) - integerValue(b["ordinal"]))
-    yield
+    if ((++visited & 31) === 0) yield
   }
   const printingMap = yield* byId(printings)
   const printingsByCard = yield* group(printings, "card_id")
   const printingByNo = new Map<string, Row>()
   for (const row of printings) {
     printingByNo.set(`${stringValue(row["region"])}\u0000${stringValue(row["card_no"])}`, row)
-    yield
+    if ((++visited & 31) === 0) yield
   }
   const revisionMap = yield* byId(revisions)
   const familyMap = yield* byId(families)
@@ -98,7 +103,7 @@ export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, Card
   const vocabularyMap = new Map<string, Row>()
   for (const row of yield* mergedRowsCursor(snapshot.bootstrap, "vocabulary")) {
     vocabularyMap.set(`${stringValue(row["kind"])}\u0000${stringValue(row["code"])}`, row)
-    yield
+    if ((++visited & 31) === 0) yield
   }
   const keywordMap = yield* byId(yield* mergedRowsCursor(snapshot.bootstrap, "keyword"))
   const supportMap = yield* byId(
@@ -116,6 +121,7 @@ export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, Card
   }
   const wording = (faceId: string, region: string): Row | undefined =>
     ((faceMap.get(faceId)?.["wording"] ?? []) as Row[]).find((entry) => entry["region"] === region)
+  yield
   return {
     cards,
     families,

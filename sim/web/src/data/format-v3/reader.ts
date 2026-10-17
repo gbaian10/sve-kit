@@ -282,12 +282,13 @@ export function* mergedRowsCursor(
   table: string,
 ): Generator<void, Row[]> {
   const result = new Map<string, Row>()
+  let visited = 0
   let fields: readonly string[] | undefined
   const regional = table === "card" ? ["regions"] : table === "face" ? ["current", "wording"] : []
   for (const fragment of fragments) {
     if (fragment.table !== table) continue
     for (const row of fragment.rows) {
-      yield
+      if ((++visited & 31) === 0) yield
       fields ??= primaryKey(table)
       const key = canonicalText(fields.map((field) => row[field] ?? null))
       const previous = result.get(key)
@@ -318,6 +319,7 @@ export function* mergedRowsCursor(
       result.set(key, merged)
     }
   }
+  yield
   return [...result.values()]
 }
 
@@ -432,6 +434,7 @@ export function validateCatalog(fragments: readonly Fragment[]): void {
 }
 
 export function* validateCatalogCursor(fragments: readonly Fragment[]): Generator<void, void> {
+  let visited = 0
   const texts = new Set<string>(),
     translations = new Set<string>(),
     revisions = new Set<string>()
@@ -442,7 +445,7 @@ export function* validateCatalogCursor(fragments: readonly Fragment[]): Generato
   ] as const) {
     for (const row of yield* mergedRowsCursor(fragments, table)) {
       ids.add(stringValue(row["id"]))
-      yield
+      if ((++visited & 31) === 0) yield
     }
   }
   for (const face of yield* mergedRowsCursor(fragments, "face")) {
@@ -453,57 +456,50 @@ export function* validateCatalogCursor(fragments: readonly Fragment[]): Generato
       ),
     ].filter((id) => id !== null)
     if (ids.some((id) => !revisions.has(stringValue(id)))) fail("shape", "missing catalog revision")
-    yield
+    if ((++visited & 31) === 0) yield
   }
   type Frame =
     | { kind: "array"; items: JsonValue[]; offset: number }
     | { kind: "object"; items: [string, JsonValue][]; offset: number }
-  function* visit(value: JsonValue): Generator<void> {
-    const stack: Frame[] = []
-    const push = (item: JsonValue): void => {
-      if (Array.isArray(item)) stack.push({ kind: "array", items: item, offset: 0 })
-      else if (item !== null && typeof item === "object")
-        stack.push({ kind: "object", items: Object.entries(item), offset: 0 })
-    }
-    push(value)
-    let nodes = 0
-    while (stack.length) {
-      const frame = stack[stack.length - 1]
-      if (!frame) break
-      if (frame.offset === frame.items.length) {
-        stack.pop()
-        continue
-      }
-      let item: JsonValue
-      if (frame.kind === "array") item = frame.items[frame.offset++] ?? null
-      else {
-        const entry = frame.items[frame.offset++]
-        if (!entry) continue
-        const [field, child] = entry
-        if (field.endsWith("_unit_id") && typeof child === "string" && !texts.has(child))
-          fail("shape", "missing catalog text")
-        if (field === "translation_id" && typeof child === "string" && !translations.has(child))
-          fail("shape", "missing catalog translation")
-        item = child
-      }
-      push(item)
-      // A row can contain many nested references; its size must not set the slice length.
-      if (++nodes === 32) {
-        nodes = 0
-        yield
-      }
-    }
+  const stack: Frame[] = []
+  const push = (item: JsonValue): void => {
+    if (Array.isArray(item)) stack.push({ kind: "array", items: item, offset: 0 })
+    else if (item !== null && typeof item === "object")
+      stack.push({ kind: "object", items: Object.entries(item), offset: 0 })
   }
   for (const fragment of fragments) {
     if (fragment.value["purpose"] !== "catalog") continue
     for (const row of fragment.rows) {
-      yield* visit(row)
-      yield
+      push(row)
+      while (stack.length) {
+        const frame = stack[stack.length - 1]
+        if (!frame) break
+        if (frame.offset === frame.items.length) {
+          stack.pop()
+          continue
+        }
+        let item: JsonValue
+        if (frame.kind === "array") item = frame.items[frame.offset++] ?? null
+        else {
+          const entry = frame.items[frame.offset++]
+          if (!entry) continue
+          const [field, child] = entry
+          if (field.endsWith("_unit_id") && typeof child === "string" && !texts.has(child))
+            fail("shape", "missing catalog text")
+          if (field === "translation_id" && typeof child === "string" && !translations.has(child))
+            fail("shape", "missing catalog translation")
+          item = child
+        }
+        push(item)
+        // Small rows share checkpoints without making deeply nested references atomic.
+        if ((++visited & 31) === 0) yield
+      }
     }
     for (const source of fragment.nameSources ?? []) {
       if (!texts.has(stringValue(source["text_unit_id"])))
         fail("shape", "missing catalog source text")
-      yield
+      if ((++visited & 31) === 0) yield
     }
   }
+  yield
 }

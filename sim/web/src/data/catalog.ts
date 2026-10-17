@@ -151,10 +151,11 @@ function* catalogCardCursor(
 ): Generator<
   undefined | { readonly entry: SearchEntry; readonly summaries: readonly CardSummary[] }
 > {
+  let visited = 0
   // Aliases of kind `card` name the card by its id without the `c:` prefix (Code has no colon).
   const aliases = new Map<string, SearchName[]>()
   for (const row of aliasRows) {
-    yield
+    if ((++visited & 15) === 0) yield
     if (row["kind"] !== "card") continue
     const lang = stringValue(row["lang"])
     if (!isTextLang(lang)) continue
@@ -166,7 +167,7 @@ function* catalogCardCursor(
   }
   let order = -1
   for (const card of cards) {
-    yield
+    if ((++visited & 15) === 0) yield
     order += 1
     const summaries: CardSummary[] = []
     const cardId = stringValue(card["id"])
@@ -212,7 +213,7 @@ function* catalogCardCursor(
       }
       if (edition !== undefined && region !== edition) continue
       for (const printing of index.printingsOf(cardId)) {
-        yield
+        if ((++visited & 15) === 0) yield
         if (printing["region"] !== region) continue
         const printedRarity = printingRarity(printing)
         const rarityCode = printedRarity.code
@@ -252,7 +253,7 @@ function* catalogCardCursor(
     }
     const printings: SearchPrinting[] = []
     for (const printing of index.printingsOf(cardId)) {
-      yield
+      if ((++visited & 15) === 0) yield
       const region = stringValue(printing["region"])
       if (!isRegion(region) || (edition !== undefined && region !== edition)) continue
       const cardNo = stringValue(printing["card_no"])
@@ -286,19 +287,21 @@ function* catalogCardCursor(
       }
     } else yield { entry, summaries }
   }
+  yield
 }
 
 function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
+  let visited = 0
   const index = yield* cardIndexCursor(snapshot)
   const sets = new Set<string>()
   for (const family of index.families) {
     sets.add(stringValue(family["code"]))
-    yield
+    if ((++visited & 31) === 0) yield
   }
   const classCodes: string[] = []
   for (const row of yield* mergedRowsCursor(snapshot.bootstrap, "vocabulary")) {
     if (row["kind"] === "class" && row["active"] === true) classCodes.push(stringValue(row["code"]))
-    yield
+    if ((++visited & 31) === 0) yield
   }
   const aliasRows = yield* mergedRowsCursor(snapshot.bootstrap, "search_alias")
   const entries: SearchEntry[] = []
@@ -308,11 +311,11 @@ function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
       yield
       continue
     }
-    yield
+    if ((++visited & 31) === 0) yield
     entries.push(card.entry)
     for (const summary of card.summaries) {
       summaries.set(summary.printingId, summary)
-      yield
+      if ((++visited & 31) === 0) yield
     }
   }
   const classLabel = (code: string, lang: TextLang): string => {
@@ -332,6 +335,7 @@ function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
     search !== null &&
     !Array.isArray(search) &&
     search["normalizer_version"] === NORMALIZER_VERSION
+  yield
   return {
     index,
     entries,
