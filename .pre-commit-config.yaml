@@ -141,6 +141,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: snapshot-format-lock
+        name: snapshot wire format lock
+        language: system
+        entry: uv --directory carddb run python ../.github/ci/snapshot_format.py
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit, pre-push, manual]
       - id: cargo-fmt
         name: cargo fmt
         language: system

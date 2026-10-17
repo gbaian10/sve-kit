@@ -134,6 +134,7 @@ AI-generated code tends to over-comment. Keep comments few and short:
 
 ### Documentation
 
+- Snapshot wire changes must pass the [format lock check](docs/schema/export/snapshot-contract.md#格式指紋鎖定): update the lock in the same PR while unfrozen, or bump the format under [transport §1.1](docs/schema/export/snapshot-transport.md#11-版本與相容判斷) once frozen.
 - Use [the project glossary](GLOSSARY.md) for project-specific names. Resolve
   new or renamed terms there first: one or two sentences, rejected aliases, no
   implementation details; group related terms naturally.

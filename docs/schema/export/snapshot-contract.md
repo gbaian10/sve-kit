@@ -58,6 +58,32 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 `test_schema_regeneration_matches_committed_bytes` 從來源重新產生並逐位元組比對提交版；另以未啟用 format checker 的 Draft 2020-12 驗證器拒絕共用形狀反例。產生器只產生 Schema，不生成 golden 或預期 logical view。欄位變更仍須對照 snapshot-format／snapshot-transport 審核，並依傳輸契約判定版本變動。
 
+## 格式指紋鎖定
+
+`carddb/src/sve_carddb/contracts/schema/format.lock.json` 記錄
+`format_version → {fingerprint, frozen}`，保留歷史凍結紀錄；目前 `4.0.0` 為未凍結。
+`.github/ci/snapshot_format.py` 是正式的本機 hook／CI 檢查，不需私有資料或匯出根。
+
+指紋的來源只有正式定義：
+
+- 重新產生的 `contract.schema.json`，包含 tuple 欄序、型別、nullable、enum、固定 descriptor、主鍵、fragment 配置及准入欄位。提交版須與來源的契約一致。
+- 從 `export/reader.py` 自動追蹤的套件內 runtime import 閉包，包含 `contracts/profiles.py` 的固定 bucket／band／capabilities、`core/json.py` 的 canonical 規則，以及 `export/buckets.py`、`semantics.py` 與 reader 的配置、join／引用驗證。不另維護欄位或規則的手抄清單。
+
+Schema 以鍵排序的 JSON 正規化，排除 `$comment`、title、description、examples 註記，並將 enum、required、type 聯集及組合 Schema 當集合處理；tuple／descriptor 陣列保留順序。literal const 及同名公開欄位不當註記刪除。Python 定義以 AST 正規化，排除註解、docstring、型別檢查專用區塊及原始碼排版；保留 runtime 型別註記，因 dataclass 等會讀取它們。套件初始化引用的 `_version.py` 是未進版控的 hatch-vcs 建置中繼資料，亦排除，避免 commit／tag 版號影響格式。指紋是上述結構的 SHA-256，不讀快照資料、`data_version` 值、golden 內容或部署狀態。
+
+AST 比對採保守界線：程式結構重構也可能改變指紋，無法證明任意兩段程式的行為等價。這類差異仍須依 §1.1 審查，不能將檢查通過當成語義等價的證明；文件中的 canonical／join 語義修改仍須同步實作及契約測試。
+
+本機 pre-commit、pre-push 與 CI 的 repo job 都會跑 `snapshot-format-lock`。
+CI 用事件的 base commit 比對既有凍結紀錄；本機預設用 `origin/main`，其他基準可用 `--base-ref` 指定，缺少基準會失敗。
+未凍結版本需要更新時，從 repo 根目錄執行並提交鎖定檔 diff：
+
+```bash
+uv --directory carddb run python ../.github/ci/snapshot_format.py --update
+uv --directory carddb run python ../.github/ci/snapshot_format.py
+```
+
+`--update` 只更新未凍結版本；凍結版差異會失敗並提示依[傳輸 §1.1](snapshot-transport.md#11-版本與相容判斷)升版。凍結狀態由維護者明示修改，不會因跑 update 或部署自動改變。
+
 ## 共用合成樣本
 
 索引為 `tests/fixtures/snapshot-contract/v3/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別撰寫，不從 reader 解碼或 producer 匯出產生預期值。
