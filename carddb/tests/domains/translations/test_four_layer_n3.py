@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.contracts.four_layer import GlossaryReference
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
@@ -28,10 +29,30 @@ def engine() -> Classifier:
             ("fourth", "仮丁"),
         )
     )
+    fixed = tuple(
+        Term("term:" + key, category, word)
+        for key, category, word in (
+            ("player.self", "rule_term", "自分"),
+            ("player.opponent", "rule_term", "相手"),
+            ("zone.deck", "rule_term", "デッキ"),
+            ("zone.evolve_deck", "rule_term", "エボルヴデッキ"),
+            ("zone.cemetery", "rule_term", "墓場"),
+            ("zone.ex", "rule_term", "EXエリア"),
+            ("object.card_name", "rule_term", "カード名"),
+            ("rule.cost", "rule_term", "コスト"),
+            ("rule.original_cost", "rule_term", "元のコスト"),
+            ("rule.instead", "rule_term", "代わりに"),
+            ("rule.ability", "rule_term", "能力"),
+            ("rule.damage", "rule_term", "ダメージ"),
+            ("action.banish", "rule_term", "消滅させる"),
+            ("event.evolve", "ability", "進化時"),
+        )
+    )
     return classifier(
         (
             *base.terms.values(),
             *names,
+            *fixed,
             Term("term:object.start_amulet", "rule_term", "スタートアミュレット"),
         ),
         (
@@ -273,6 +294,51 @@ def test_construction_and_continuation_shapes_bind_only_complete_guards(
             next(s for s in frame.leaf_schema.slots if s.type == "CardName").role
             == "name_fragment"
         )
+    required = {
+        "748-S01": {"term:player.self", "term:zone.deck"},
+        "748-S02": {"term:object.start_amulet", "term:object.card", "term:zone.deck"},
+        "748-S03": {
+            "term:object.card_name",
+            "term:object.card",
+            "term:zone.deck",
+            "term:zone.evolve_deck",
+        },
+        "748-S04": {
+            "term:event.evolve",
+            "term:player.self",
+            "term:zone.cemetery",
+            "term:object.card",
+            "term:rule.original_cost",
+        },
+        "748-S05": {
+            "term:zone.cemetery",
+            "term:object.card",
+            "term:rule.original_cost",
+            "term:action.banish",
+            "term:rule.cost",
+        },
+        "748-E01": {
+            "term:ability.lesson",
+            "term:player.self",
+            "term:zone.ex",
+            "term:action.banish",
+        },
+        "748-E02": {
+            "term:ability.necrocharge",
+            "term:player.self",
+            "term:zone.cemetery",
+        },
+        "748-E03": {"term:ability.spell_chain", "term:rule.cost", "term:rule.instead"},
+        "748-E04": {
+            "term:player.self",
+            "term:player.opponent",
+            "term:rule.ability",
+            "term:rule.damage",
+        },
+    }
+    assert required[case] <= {
+        v.key for v in binding.values.values() if isinstance(v, GlossaryReference)
+    }
     malformed = raw.replace(bad, "仮不明")
     rejected = derive_source(malformed, source(malformed, field), engine)
     assert any(p.issues for p in rejected.recognized) or all(
@@ -326,3 +392,20 @@ def test_flat_filter_cannot_hide_a_missing_required_trait(engine: Classifier) ->
     assert "missing_n3_filter_concept" in derived.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved source leaves"):
         derived.bind(0)
+
+
+@pytest.mark.parametrize("wrong_category", [False, True])
+def test_sealed_reminder_requires_its_exact_registered_concepts(
+    engine: Classifier, *, wrong_category: bool
+) -> None:
+    raw = "【スタートアミュレット】（【スタートアミュレット】を持つカードはデッキに１種しか入れられない）"
+    terms = tuple(
+        t for t in engine.terms.values() if t.id != "term:object.start_amulet"
+    )
+    if wrong_category:
+        terms += (Term("term:object.start_amulet", "ability", "スタートアミュレット"),)
+    incomplete = classifier(
+        terms, engine.rules.enabled(), vocabulary=engine.references.vocabulary
+    )
+    derived = derive_source(raw, source(raw), incomplete)
+    assert "missing_n3_required_reference" in derived.recognized[1].issues

@@ -37,6 +37,7 @@ from sve_carddb.domains.translations.four_layer_n3_numbers import (
     is_construction_fragment,
     repair_candidate,
 )
+from sve_carddb.domains.translations.four_layer_n3_references import reference_candidate
 from sve_carddb.domains.translations.four_layer_normalizer import (
     VERSION,
     SourcePart,
@@ -330,6 +331,7 @@ class Classifier:
             )
         assert candidate is not None
         candidate = repair_candidate(raw, part, candidate, field)
+        candidate = reference_candidate(part, candidate, field, self.references)
         issues = set(candidate.issues) - {
             "legacy_parenthesis_classification_requires_review"
         }
@@ -675,7 +677,9 @@ def _vocabulary_role(part: SourcePart, hint: Hint) -> str | None:
             r"^N(?:枚|体|つ)(?:まで)?(?:を)?選(?:ぶ|び|んで)(?=[。:、）)\n]|$)", after
         ):
             return "counted_kind"
-        if re.search(r"(?:元の)?コストN(?:以上|以下)の$", before):
+        if hint.semantic_role == "n3_filter_kind" or re.search(
+            r"(?:元の)?コストN(?:以上|以下)の$", before
+        ):
             return "filter_kind"
     elif field_filter(after.removeprefix("・").removeprefix("でない")) or (
         re.fullmatch(r"(?:・)?トークンすべては【[^【】]+】を持つ。", after)

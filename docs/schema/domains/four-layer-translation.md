@@ -1269,3 +1269,12 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 其來源拼字留在 canonical，沿既有型別與引用域驗回位置，不為了新增葉重寫骨架。
 缺少必要 trait／card 概念時保留 `missing_n3_filter_concept`，不能略過該葉完成 binding。
 構築限制中被否定的名稱片段使用 `CardName/name_fragment`，不標為完整名稱引用。
+
+`four_layer_n3_references` 在完整構築限制、四段種類數條件、十費用支付、
+三段 SC 替換減費、承受能力傷害及三種提醒內補齊已封的固定詞彙引用。
+玩家／區域詞彙沿既有 `Concept/rule_term`，明示卡種沿 `CardKind/filter_kind`；
+已有結構葉持有的位置仍由原葉負責，不建立重疊來源。
+起始護符沿 `term:object.start_amulet` 的 rule_term 類別，兩個構築牌堆位置分別引用，
+提醒維持 raw Unicode，不開放 N1 的玩家／區域推導。
+只有明列詞彙及完整來源守衛可產葉；未登錄或類別不符保留
+`missing_n3_required_reference`，不建立可用 binding。
