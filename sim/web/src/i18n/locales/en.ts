@@ -140,6 +140,8 @@ export default {
   results: {
     searchProgress: "Scanning effects ({{done}}/{{total}})",
     dependenciesPending: "Downloading data. Your conditions will apply when it is ready.",
+    countPrintingUnit: "printings",
+    allPrintingsLoaded: "All {{count}} printings",
     countUnit: "cards",
     sort: "Sort",
     columns: { number: "Number", name: "Name", effect: "Card text" },

@@ -1,9 +1,11 @@
 import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
+import type { QueryState } from "../../domain/query/model"
 import { Button } from "../ui/Button"
 
 interface PaginationTailProps {
+  readonly unit?: QueryState["unit"]
   readonly automatic?: boolean
   readonly requestKey: string
   readonly total: number
@@ -17,6 +19,7 @@ interface PaginationTailProps {
 /** One paging trigger for both the page viewport and the narrow list's scrollport. */
 export function PaginationTail({
   requestKey,
+  unit = "card",
   automatic = true,
   total,
   hasMore,
@@ -85,7 +88,11 @@ export function PaginationTail({
       ) : loading ? (
         <span role="status">{t("results.loadingMore")}</span>
       ) : !hasMore ? (
-        <span>{t("results.allLoaded", { count: total })}</span>
+        <span>
+          {unit === "printing"
+            ? t("results.allPrintingsLoaded", { count: total })
+            : t("results.allLoaded", { count: total })}
+        </span>
       ) : !automatic ? (
         <Button size="sm" onClick={onMore}>
           {t("results.loadMore")}

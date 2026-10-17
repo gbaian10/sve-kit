@@ -110,7 +110,7 @@ function RecentLink({
           background: "",
           source: "results",
           pages: 1,
-          resultKey: row.summary.cardId,
+          resultKey: row.summary.printingId,
           ...routeState(row.summary),
         }
         void navigate(to, { state })

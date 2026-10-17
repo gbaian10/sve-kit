@@ -142,6 +142,8 @@ export default {
   results: {
     searchProgress: "効果を検索中（{{done}}/{{total}}）",
     dependenciesPending: "データのダウンロード後に現在の条件を適用します。",
+    countPrintingUnit: "種の版",
+    allPrintingsLoaded: "全 {{count}} 種の版",
     countUnit: "枚",
     sort: "並び順",
     columns: { number: "番号", name: "名前", effect: "能力" },

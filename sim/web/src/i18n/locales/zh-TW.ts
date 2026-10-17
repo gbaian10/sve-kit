@@ -135,6 +135,8 @@ const zhTW = {
   results: {
     searchProgress: "效果掃描中（{{done}}/{{total}}）",
     dependenciesPending: "資料下載中，完成後套用目前條件。",
+    countPrintingUnit: "個版次",
+    allPrintingsLoaded: "共 {{count}} 個版次",
     countUnit: "張卡片",
     sort: "排序",
     columns: { number: "卡號", name: "名稱", effect: "卡文" },

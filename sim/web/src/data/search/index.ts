@@ -771,7 +771,10 @@ export class SearchIndex {
     eligible?: ReadonlySet<string>,
   ): { total: number; items: readonly SuggestedSummary[] } {
     if (eligible) {
-      const page = this.search({ state: DEFAULT_QUERY, edition: this.edition, limit }, eligible)
+      const page = this.search(
+        { state: { ...DEFAULT_QUERY, unit: "card" }, edition: this.edition, limit },
+        eligible,
+      )
       return {
         total: page.total,
         items: page.items.flatMap((item) =>
@@ -783,7 +786,7 @@ export class SearchIndex {
     const flat = normalizeText(text)
     const numberQuery =
       this.sets.has(flat) || cardNoKey(text, this.sets) !== null || /^\d+$/u.test(flat)
-    const state = { ...DEFAULT_QUERY, text }
+    const state = { ...DEFAULT_QUERY, unit: "card" as const, text }
     const matches = this.matches({ state, edition: this.edition }, undefined, !numberQuery)
     const page = {
       total: matches.length,
