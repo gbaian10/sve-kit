@@ -210,6 +210,7 @@ repos:
         stages: [pre-commit, manual]
       # Bun's TypeScript-Go checker keeps pre-push fast; CI still runs `bun run typecheck` (tsc -b) as the gate.
       # `bun check` would run the package's own `check` script, so the flag form is required.
+      # UV_THREADPOOL_SIZE is libuv's pool size, which `bun --check` uses as its thread count (default: all cores).
       - id: web-typecheck
         name: bun --check (sim/web)
         language: system
