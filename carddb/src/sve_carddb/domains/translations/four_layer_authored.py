@@ -45,6 +45,7 @@ from sve_carddb.domains.translations.glossary.records import (
     TermData,
     TermRecord,
 )
+from sve_carddb.domains.translations.labels import FamilyLabelRecord
 from sve_carddb.domains.translations.models import AuthoredValue, Quality, SourceValue
 
 if TYPE_CHECKING:
@@ -263,7 +264,8 @@ Record = Annotated[
     | OverrideRecord
     | SymbolChoiceRecord
     | EnglishTargetRecord
-    | EnglishUseRecord,
+    | EnglishUseRecord
+    | FamilyLabelRecord,
     Field(discriminator="kind"),
 ]
 
@@ -310,9 +312,10 @@ class Inputs:
 
 
 _PATH = re.compile(
-    r"translations/(?:(glossary|overrides)/[A-Za-z0-9_-]+|templates/(definitions|values|candidates)|(forms))/[0-9]{3,}\.yaml\Z"
+    r"translations/(?:(glossary|overrides|labels)/[A-Za-z0-9_-]+|templates/(definitions|values|candidates)|(forms))/[0-9]{3,}\.yaml\Z"
 )
 _KINDS = {
+    "labels": frozenset({"product_family_label"}),
     "glossary": frozenset(
         {
             "glossary_term",
@@ -375,6 +378,7 @@ def read_inputs(root: Path) -> Inputs:
     areas = (
         "translations/glossary",
         "translations/overrides",
+        "translations/labels",
         "translations/templates",
     )
     files = list(shards(root, areas, optional=areas))

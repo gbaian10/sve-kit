@@ -6,8 +6,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import create_database
-from sve_carddb.core.json import array, object_value, string
+from sve_carddb.core.json import array, canonical, digest, object_value, string
+from sve_carddb.domains.translations.four_layer_authored import Inputs, shard
 from sve_carddb.domains.translations.jp_sources import effect_bindings
+from sve_carddb.domains.translations.labels import apply as apply_labels
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.project import DisplayCheck, project
@@ -392,3 +394,68 @@ def test_retired_jp_display_basis_is_rejected(db: Database, basis: str) -> None:
     )
     with pytest.raises(ValueError, match="Unknown translation display basis"):
         dual_project(db, chosen)
+
+
+def test_family_label_is_exported_with_its_selected_text(db: Database) -> None:
+    records = shard(
+        canonical(
+            {
+                "format": 3,
+                "kind": "translation_shard",
+                "records": [
+                    {
+                        "kind": "product_family_label",
+                        "data": {
+                            "public_code": "TEST",
+                            "lang": "zh-Hant",
+                            "text": "試作卡包",
+                        },
+                    }
+                ],
+            }
+        )
+    ).records
+    with db.transaction():
+        db.update(
+            "text_unit", {"id": TEXT}, {"content_hash": digest(b"Synthetic text")}
+        )
+        apply_labels(db, Inputs((), records))
+    result = projected(db)
+    family = one(result, "product_family")
+    reference = object_value(array(family["translations"])[0])
+    assert reference["field"] == "label"
+    assert reference["target_lang"] == "zh-Hant"
+    translation = one(result, "translation", string(reference["translation_id"]))
+    assert (
+        one(result, "text_unit", string(translation["text_unit_id"]))["text"]
+        == "試作卡包"
+    )
+    result = replace(
+        result,
+        tables=result.tables
+        | {
+            "printing_image": [
+                row | {"availability": "unfetched", "publication_state": "pending"}
+                for row in result.tables["printing_image"]
+            ],
+            "image_variant": [],
+        },
+    )
+    result = prepare_media(result, None, revision=1).projection
+    exported = export_snapshot(
+        result,
+        Ownership.from_database(db, result),
+        Batch(
+            "preview-20261018T010203Z-0001",
+            "2026-10-18T01:02:03Z",
+            "2026-10-01",
+            ("jp",),
+        ),
+    )
+    assert (
+        read_snapshot(
+            exported.manifest,
+            {key: blob.raw for key, blob in exported.payloads.items()},
+        )
+        == result.tables
+    )
