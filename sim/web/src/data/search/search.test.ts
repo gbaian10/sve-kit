@@ -12,6 +12,7 @@ import type { Fetcher } from "../cdn"
 import { createSnapshotClient } from "../client"
 import {
   canonical,
+  integerValue,
   type JsonObject,
   type JsonValue,
   objectValue,
@@ -52,6 +53,7 @@ import { Columns, StringPool } from "./columns"
 import { SearchEngine } from "./engine"
 import { SearchIndex } from "./index"
 import type { BootstrapPlan, SearchEvent, SearchRequest } from "./messages"
+import { PreviewReader } from "./preview"
 import type { SearchTransportFactory } from "./session"
 import { ViewCache } from "./view"
 
@@ -1813,6 +1815,68 @@ it.each(["jp", "en"] as const)(
   },
   30_000,
 )
+
+it("loads a cross-set reprint's effect from its card owner and keeps its image owner", async () => {
+  const served = origin()
+  const client = createSnapshotClient(base, { fetch: served.fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing fixture")
+  const printingFragment = snapshot.bootstrap.find(
+    (fragment) =>
+      fragment.table === "printing" && fragment.rows.some((row) => row["id"] === "p:bp01-001"),
+  )
+  const original = printingFragment?.rows.find((row) => row["id"] === "p:bp01-001")
+  if (!printingFragment || !original) throw new Error("missing reprint source")
+  const reprint = {
+    ...original,
+    id: "p:synthetic-pr-reprint",
+    card_no: "PR-900",
+    int_id: 9999999,
+    home_set_id: "set:pr",
+  }
+  const columns = new BootstrapColumns()
+  columns.ingest([
+    ...snapshot.bootstrap,
+    {
+      ...printingFragment,
+      rows: [reprint],
+      value: { ...printingFragment.value, owner: { kind: "home_set", id: "set:pr" } },
+    },
+  ])
+  columns.seal()
+  const index = new SearchIndex(columns, "jp")
+  const summary = index.recent([reprint.id])[0]?.summary
+  if (!summary) throw new Error("missing reprint summary")
+  expect(summary.route).toEqual({ cardOwner: "set:bp01", printingOwner: "set:pr" })
+  expect(index.imageTargets([reprint.id])[0]?.owner).toBe("set:pr")
+  const reader = new PreviewReader(
+    snapshot.files,
+    integerValue(objectValue(snapshot.manifest["partitioning"])["bucket_count"]),
+    stringValue(snapshot.manifest["format_version"]),
+    new SearchBlobs(base, served.fetcher),
+  )
+  const revision = createCatalog(snapshot).index.displayRevision(summary.faceId, "jp")
+  if (!revision) throw new Error("missing reprint revision")
+  const resolver = sharedAnnotatedTextResolver(client)
+  for (const language of ["ja", "en", "zh-Hant"]) {
+    const selected = await resolver.resolve(
+      {
+        owner: { kind: "face_revision", id: stringValue(revision["id"]) },
+        field: "effect",
+        ordinal: null,
+      },
+      language,
+    )
+    const unit = selected ? (selected.translated ?? selected.original).unit : null
+    if (!unit) throw new Error("missing reprint effect")
+    await expect(
+      reader.resolve(index, reprint.id, summary.faceId, language, new AbortController().signal),
+    ).resolves.toEqual({ text: unit["text"], language: unit["lang"] })
+  }
+  expect(index.imageTargets([reprint.id])[0]?.owner).toBe("set:pr")
+})
 
 it("a pending visible preview neither blocks list queries nor publishes after its channel closes", async () => {
   const h = harness()

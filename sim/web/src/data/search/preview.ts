@@ -125,11 +125,11 @@ export class PreviewReader {
     if (cached !== undefined) return cached
     const summary = index.recent([printingId])[0]?.summary
     const target = index.imageTargets([printingId]).find((face) => face.faceId === faceId)
-    if (!summary || !target) throw new Error("preview face is not in this edition")
+    if (!summary?.route || !target) throw new Error("preview face is not in this edition")
     this.region = summary.region
     // Keep decoded files only for this preview, including both dictionary lookups.
     const decoded: DecodedFiles = new Map()
-    const owner = homeSetOwner(target.owner)
+    const owner = homeSetOwner(summary.route.cardOwner)
     const locatedFace = await this.row(
       "face",
       faceId,
