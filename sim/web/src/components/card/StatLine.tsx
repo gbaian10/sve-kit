@@ -72,7 +72,7 @@ function Stats({
             <span
               aria-hidden="true"
               className={cn(
-                "rounded-full bg-success ring-1 ring-text-1/30 ring-inset",
+                "rounded-full bg-cost-dot ring-1 ring-text-1/30 ring-inset",
                 small ? "size-3" : "size-3.5",
               )}
             />

@@ -588,7 +588,7 @@ export function CardList({
                 column === "cost" ? (
                   <span
                     aria-hidden="true"
-                    className="mx-auto block size-3 rounded-full bg-success ring-1 ring-text-1/30 ring-inset"
+                    className="mx-auto block size-3 rounded-full bg-cost-dot ring-1 ring-text-1/30 ring-inset"
                   />
                 ) : column === "attack" || column === "defense" ? (
                   <img
