@@ -22,6 +22,8 @@ export interface OverlayEntryState {
   readonly pushed?: boolean
   /** The result cell that opened the card: focus returns to it when the card closes. */
   readonly opener?: string
+  /** That cell's card, kept apart from the shown card so unit changes still find the cell. */
+  readonly openerRoute?: CardEntryState["route"]
   /** Where that cell sat in the viewport when it opened, so closing can put it back there. */
   readonly openerTop?: number
 }

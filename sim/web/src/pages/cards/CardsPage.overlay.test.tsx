@@ -309,6 +309,43 @@ describe("opening a card beside the results", () => {
   )
 
   it.each([
+    ["card", "printing", "c:bp01-001", "p:bp01-001", "p:bp01-002"],
+    ["printing", "card", "p:bp01-001", "c:bp01-001", "c:bp01-002"],
+  ] as const)(
+    "returns to the opening cell, not the card moved to, after a %s → %s unit change",
+    async (from, to, opened, openerAfter, shownAfter) => {
+      prefsStore.set({ filterPanelOpen: true })
+      const { router } = await open(`/cards?q=bp01${from === "card" ? "&unit=card" : ""}`, "panel")
+      const user = userEvent.setup()
+      const [first] = await cells()
+      if (!first) throw new Error("missing cell")
+      expect(first.getAttribute("data-result-key")).toBe(opened)
+      await user.click(first)
+      const aside = panel()
+      await within(aside).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+      const next = await within(aside).findByRole("button", { name: "下一張" }, { timeout: 5000 })
+      await waitFor(() => expect(next).toBeEnabled())
+      await user.click(next)
+      await within(aside).findByRole("heading", { name: "試作隊長" }, { timeout: 5000 })
+      await user.click(screen.getByRole("switch", { name: "同一張卡只顯示一次" }))
+      await waitFor(() => {
+        expect(new URLSearchParams(router.state.location.search).get("unit")).toBe(
+          to === "card" ? "card" : null,
+        )
+      })
+      // The shown card is marked in the new unit; focus will go back to where it started.
+      await waitFor(() => {
+        expect(cellLink(shownAfter)).toHaveAttribute("aria-current", "true")
+      })
+      await user.keyboard("{Escape}")
+      await waitFor(() => {
+        expect(noPanel()).toBeNull()
+      })
+      expect(cellLink(openerAfter)).toHaveFocus()
+    },
+  )
+
+  it.each([
     ["sort", "sort=cost"],
     ["view", "view=table"],
   ] as const)(

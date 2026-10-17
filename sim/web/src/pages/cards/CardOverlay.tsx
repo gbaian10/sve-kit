@@ -197,6 +197,7 @@ export function useCardOverlay({
         ...routeState(summary),
         pushed: alreadyOpen ? (previous?.pushed ?? false) : true,
         opener: key,
+        ...(summary.route ? { openerRoute: routeState(summary).route } : {}),
         ...(top === undefined ? {} : { openerTop: Math.round(top) }),
       },
     }
@@ -226,8 +227,15 @@ export function useCardOverlay({
   const opened = useRef<{ opener: string; top: number | undefined; drawer: boolean } | null>(null)
   const [returned, setReturned] = useState<string | undefined>(undefined)
   const selected = open ? currentKey(overlay?.resultKey, overlay?.route, unit, cells) : undefined
+  // The opening cell keeps its own identity: previous/next and printing links change the shown
+  // card, not where focus returns to.
   const opener = open
-    ? (currentKey(overlay?.opener ?? overlay?.resultKey, overlay?.route, unit, cells) ?? "")
+    ? (currentKey(
+        overlay?.opener ?? overlay?.resultKey,
+        overlay?.openerRoute ?? overlay?.route,
+        unit,
+        cells,
+      ) ?? "")
     : undefined
   const openerTop = overlay?.openerTop
   useEffect(() => {
@@ -350,6 +358,7 @@ export function useCardOverlay({
         ...(to.route ? { route: to.route } : {}),
         ...(previous?.pushed ? { pushed: true } : {}),
         ...(previous?.opener === undefined ? {} : { opener: previous.opener }),
+        ...(previous?.openerRoute === undefined ? {} : { openerRoute: previous.openerRoute }),
         ...(previous?.openerTop === undefined ? {} : { openerTop: previous.openerTop }),
       },
     }
