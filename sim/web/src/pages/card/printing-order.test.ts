@@ -12,7 +12,7 @@ const printing = (cardNo: string, rarity: string | null, region = "jp", premium 
 })
 
 describe("printing rows", () => {
-  it("separates editions and orders Merlin's ordinary, reprint, special and promotional editions", () => {
+  it("separates regions and orders ordinary, reprint, special and promotional editions", () => {
     const rows = [
       printing("PR-299", "PR"),
       printing("BP01-SL09", "SL"),
@@ -31,7 +31,7 @@ describe("printing rows", () => {
     ])
     expect(rows[0]?.["card_no"]).toBe("PR-299")
   })
-  it("puts premium variants after their base tier, unknowns before promos, and sorts tied card numbers", () => {
+  it("puts uncoded rarities first, preserves tier and premium order, and sorts numbers naturally", () => {
     const rows = [
       printing("PR-1", "PR"),
       printing("Z-1", null),
@@ -51,6 +51,8 @@ describe("printing rows", () => {
     expect(
       printingGroups(rows)[0]?.printings.map((row) => [row["card_no"], row["rarity_code"]]),
     ).toEqual([
+      ["F-1", "future"],
+      ["Z-1", null],
       ["A-2", "br"],
       ["A-10", "br"],
       ["A-1", "sr"],
@@ -62,9 +64,41 @@ describe("printing rows", () => {
       ["A-1", "sp"],
       ["A-1", "ssp"],
       ["P-1", null],
-      ["F-1", "future"],
-      ["Z-1", null],
       ["PR-1", "pr"],
     ])
   })
+
+  it.each(["jp", "en"])(
+    "puts ordinary numbering first within the same tier and premium state in %s",
+    (region) => {
+      const rows = [
+        printing("ECP02-SL34", null, region),
+        printing("BP15-PR01", null, region),
+        printing("BP01-UT01", null, region),
+        printing("BP01-SEP01", null, region),
+        printing("BP01-EP01", null, region),
+        printing("ECP02-T01", null, region),
+        printing("BP01-LD01", null, region),
+        printing("BP99-010", null, region),
+        printing("BP99-002", null, region),
+        printing("BP99-001", "LG", region, true),
+        printing("BP01-SL01", "LG", region),
+        printing("BP01-SL02", "LG", region, true),
+      ]
+      expect(printingGroups(rows)[0]?.printings.map((row) => row["card_no"])).toEqual([
+        "BP01-LD01",
+        "BP99-002",
+        "BP99-010",
+        "ECP02-T01",
+        "BP01-EP01",
+        "BP01-SEP01",
+        "BP01-UT01",
+        "BP15-PR01",
+        "ECP02-SL34",
+        "BP01-SL01",
+        "BP99-001",
+        "BP01-SL02",
+      ])
+    },
+  )
 })

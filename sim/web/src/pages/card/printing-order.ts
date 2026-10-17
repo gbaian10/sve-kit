@@ -2,13 +2,16 @@ import { type Row, stringValue } from "../../data"
 import type { Region } from "../../domain/search"
 
 // A bare premium has no rarity code, so it and the other uncoded printings get sort keys of their own.
-const RARITY_ORDER = ["br", "sr", "gr", "lg", "sl", "ur", "sp", "ssp", "premium", "unknown", "pr"]
+const RARITY_ORDER = ["unknown", "br", "sr", "gr", "lg", "sl", "ur", "sp", "ssp", "premium", "pr"]
 const rank = (row: Row): number => {
   const code = row["rarity_code"]
   const key = typeof code === "string" ? code : row["premium"] === true ? "premium" : "unknown"
   const index = RARITY_ORDER.indexOf(key)
   return index < 0 ? RARITY_ORDER.indexOf("unknown") : index
 }
+
+const specialNumber = (row: Row): boolean =>
+  !/^(?:T|LD)?\d/u.test(stringValue(row["card_no"]).split("-")[1] ?? "")
 
 export function printingGroups(rows: readonly Row[]): { region: Region; printings: Row[] }[] {
   return (["jp", "en"] as const)
@@ -20,6 +23,7 @@ export function printingGroups(rows: readonly Row[]): { region: Region; printing
           (a, b) =>
             rank(a) - rank(b) ||
             Number(a["premium"] === true) - Number(b["premium"] === true) ||
+            Number(specialNumber(a)) - Number(specialNumber(b)) ||
             stringValue(a["card_no"]).localeCompare(stringValue(b["card_no"]), "en", {
               numeric: true,
             }) ||
