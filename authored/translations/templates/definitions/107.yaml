@@ -1,8 +1,7 @@
 format: 3
 kind: translation_shard
 records:
-  - origin: machine
-    kind: sentence_template
+  - kind: sentence_template
     data:
       id: frame:db7457372791693f242c5a50b20aa858f375ccc01ac25139771910775aeda97b
       source:
@@ -376,8 +375,7 @@ records:
         imports: []
         exports: []
       content_hash: db80b1c0f28305ce98ff519b9bb27d86049953ce11612650a67f574ea3960372
-  - origin: machine
-    kind: sentence_template
+  - kind: sentence_template
     data:
       id: frame:db8f9ecb6dfe536e3fe0effc41d42dfc2b6c3d6b219f5008dc5f782d5a43059a
       source:
