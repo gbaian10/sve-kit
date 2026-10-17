@@ -104,7 +104,7 @@ export function CardsPage() {
   const readiness = useSearchReadiness(edition)
   const [params, setParams] = useSearchParams()
   const { code } = useParams()
-  const { sets, setCounts, rarities } = useSetOptions()
+  const { sets, quickSets, setCounts, rarities } = useSetOptions()
   const printingOptions = usePrintingOptions()
   const set = code ? sets?.find((set) => set.publicCode === code) : undefined
   const query = useMemo(() => {
@@ -601,6 +601,7 @@ export function CardsPage() {
             {!code && (
               <SetFilter
                 sets={sets}
+                quickSets={quickSets}
                 counts={setCounts}
                 textLang={textLang}
                 selected={query.sets}

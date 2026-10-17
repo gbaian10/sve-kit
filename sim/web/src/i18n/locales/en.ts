@@ -153,6 +153,7 @@ export default {
     statChip: "{{section}} {{value}}",
     subChip: "{{parent}} · {{child}}",
   },
+  quickSet: { latest: "Latest: {{code}}", latestAccessible: "Latest set: {{name}}" },
   typeFilter: {
     label: "Type",
     token: "Token",

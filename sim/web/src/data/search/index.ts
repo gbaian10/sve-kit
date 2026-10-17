@@ -10,7 +10,7 @@ import {
 } from "../../domain/query/model"
 import { UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
-import { datedSets, type PackCounts, packCounts } from "../../domain/sets"
+import { datedSets, type PackCounts, packCounts, recentSets } from "../../domain/sets"
 import { badgeOf, type CardSummary, catalogCards } from "../catalog"
 import {
   arrayValue,
@@ -45,6 +45,10 @@ export interface SearchOptions {
   readonly rarities: readonly SearchOption[]
   readonly classes: readonly SearchOption[]
   readonly sets: readonly SearchOption[]
+  readonly quickSets: {
+    readonly recent?: SearchOption
+    readonly promo?: SearchOption
+  }
   /** Printings per home-set family code in this edition, for the set filter's counts. */
   readonly setCounts: Readonly<Record<string, number>>
 }
@@ -122,7 +126,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 15
+export const INDEX_IMAGE_FORMAT = 16
 
 interface Parts {
   readonly pool: StringPool
@@ -340,6 +344,21 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
         (typeCounts[stringValue(row["code"])] ?? 0) > 0,
     )
     .map((row) => option(row, "label_unit_id"))
+  const setOptions = index.families
+    .filter((row) => editionOwners.has(stringValue(row["id"])))
+    .map((row) => ({
+      ...option(row, "name_unit_id"),
+      publicCode: stringValue(row["public_code"]),
+      kind: stringValue(row["kind"]),
+    }))
+    .sort(
+      (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
+    )
+  const promoSets = setOptions.filter((set) => set.kind === "promo")
+  const recentSet = recentSets(
+    releases.filter((release) => editionOwners.has(release.id)),
+    1,
+  )[0]
   const options: SearchOptions = {
     rarityCounts,
     typeCounts,
@@ -360,12 +379,11 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       .rows("vocabulary")
       .filter((row) => row["kind"] === "class" && row["active"] === true)
       .map((row) => option(row, "label_unit_id")),
-    sets: index.families
-      .filter((row) => editionOwners.has(stringValue(row["id"])))
-      .map((row) => option(row, "name_unit_id"))
-      .sort(
-        (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
-      ),
+    sets: setOptions,
+    quickSets: {
+      ...(recentSet ? { recent: recentSet } : {}),
+      ...(promoSets.length === 1 ? { promo: promoSets[0] } : {}),
+    },
     setCounts,
   }
   summaryColumns.append(batch as unknown as JsonObject[])

@@ -155,6 +155,7 @@ export default {
     statChip: "{{section}} {{value}}",
     subChip: "{{parent}}・{{child}}",
   },
+  quickSet: { latest: "最新：{{code}}", latestAccessible: "最新カードセット：{{name}}" },
   typeFilter: {
     label: "タイプ",
     token: "トークン",

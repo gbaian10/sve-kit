@@ -93,22 +93,29 @@ export function FacetFilter({
       >
         <fieldset disabled={!counts}>
           <legend className="sr-only">{label}</legend>
-          {groups.map((items) => (
-            <ul key={items[0]?.code} className="grid grid-cols-2 gap-x-4">
-              {items.map((item) => (
-                <li key={item.code} className={item.fullWidth ? "col-span-2" : undefined}>
-                  <FacetCheckbox
-                    label={item.label}
-                    count={counts?.[item.code] ?? 0}
-                    checked={selected.includes(item.code)}
-                    onChange={() => {
-                      toggle(item.code)
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
-          ))}
+          {groups
+            .filter((items) => items.length > 0)
+            .map((items, index) => (
+              <div key={items.at(0)?.code ?? index}>
+                {index > 0 && (
+                  <hr className="my-2 border-0 border-t border-dashed border-border-strong" />
+                )}
+                <ul className="grid grid-cols-2 gap-x-4">
+                  {items.map((item) => (
+                    <li key={item.code} className={item.fullWidth ? "col-span-2" : undefined}>
+                      <FacetCheckbox
+                        label={item.label}
+                        count={counts?.[item.code] ?? 0}
+                        checked={selected.includes(item.code)}
+                        onChange={() => {
+                          toggle(item.code)
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
         </fieldset>
       </div>
     </div>
