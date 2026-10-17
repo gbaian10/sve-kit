@@ -26,7 +26,6 @@ interface TextSymbol {
   readonly icon: string
   readonly kind: SymbolKind
 }
-
 interface SymbolDefinition extends TextSymbol {
   /** JP alt text and zh-Hant label, both exactly as they appear inside the braces. */
   readonly spellings: readonly string[]
@@ -159,11 +158,4 @@ export function inlinePieces(text: string): readonly InlinePiece[] {
   if (cursor < text.length)
     pieces.push({ kind: "text", text: text.slice(cursor), start: cursor, end: text.length })
   return pieces
-}
-
-/** The text with each known marker replaced by what its icon stands for (the copy form). */
-export function plainText(text: string): string {
-  return inlinePieces(text)
-    .map((piece) => (piece.kind === "text" ? piece.text : piece.alt))
-    .join("")
 }

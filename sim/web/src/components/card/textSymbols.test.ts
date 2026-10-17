@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { inlinePieces, plainText } from "./textSymbols"
+import { inlinePieces } from "./textSymbols"
 
 const kinds = (text: string) =>
   inlinePieces(text).map((piece) => (piece.kind === "text" ? piece.text : `<${piece.alt}>`))
@@ -62,11 +62,5 @@ describe("official text symbols", () => {
     ])
     expect(kinds("")).toEqual([])
     expect(kinds("なし")).toEqual(["なし"])
-  })
-  it("copies text with each icon replaced by the text it stands for", () => {
-    expect(plainText("{ファンファーレ}{コスト1}：1枚引く。")).toBe(
-      "ファンファーレコスト1：1枚引く。",
-    )
-    expect(plainText("{icon_fanfare|[fanfare]} Draw.")).toBe("[fanfare] Draw.")
   })
 })
