@@ -467,6 +467,6 @@ translation.annotation_kind=none 且 annotation_set_id=null 才表示空集合�
 
 ## 未定卡文的共同名稱
 
-`WordingView` 的欄序為 `region,state,display,candidates,undated_printing_ids,common_name`。
+`WordingView` 的欄序為 `region,state,display,candidates,undated_printing_ids,common_name,classification,method,reason,basis_printing_id,basis_released_on`。
 `common_name` 為 nullable `CommonName`：`name_unit_id,translations`；其 `CommonNameTranslation` 欄序是 `field,ordinal,target_lang,translation_id,basis`，field 固定 name、ordinal 固定 null。
-推導及退回依 [快照格式 §2.3](snapshot-format.md#23-表記未定的公開呈現)，名稱與可用名稱翻譯的必要字典隨 face 進 catalog，其他候選依舊走 history；catalog 不依賴 history。
+推導及退回依 [快照格式 §2.3](snapshot-format.md#23-卡文版本與依據版本)，名稱與可用名稱翻譯的必要字典隨 face 進 catalog。非 null 候選的輕量名稱與數值納入 display_ref，正文走 detail；display_ref 外的 revision 走 history，catalog 不依賴 history。
