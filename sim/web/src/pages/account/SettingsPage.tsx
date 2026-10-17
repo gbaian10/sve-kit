@@ -123,6 +123,13 @@ export function SettingsPage() {
         <h2 id="settings-advanced" className="pt-3 text-13 font-semibold text-text-3">
           {t("settings.advanced")}
         </h2>
+        <SettingRow className={ROW} label={t("settings.showFlavorText")}>
+          <Switch
+            label={t("settings.showFlavorText")}
+            checked={prefs.showFlavorText}
+            onChange={(showFlavorText) => prefsStore.set({ showFlavorText })}
+          />
+        </SettingRow>
         <SettingRow
           className={ROW}
           label={t("settings.infiniteScroll")}

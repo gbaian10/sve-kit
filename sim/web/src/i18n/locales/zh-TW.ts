@@ -65,6 +65,7 @@ const zhTW = {
     title: "帳號與設定",
     display: "顯示",
     effectLanguage: "效果文字",
+    showFlavorText: "顯示風味文字",
     termEmphasis: "術語加粗",
     termEmphasisHint: "只調整顯示，保留文字與說明引用",
     symbolLabels: "圖示旁附名稱",

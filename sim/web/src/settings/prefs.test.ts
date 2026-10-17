@@ -32,6 +32,7 @@ describe("readPrefs", () => {
       nameDisplay: "translated",
       effectLanguage: "both",
       symbolLabels: false,
+      showFlavorText: true,
       theme: "system",
       accent: null,
       banRegion: "jp",

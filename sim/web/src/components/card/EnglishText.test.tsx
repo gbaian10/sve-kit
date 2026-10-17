@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react"
+import { act, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 
 import fixture from "../../../../../tests/fixtures/snapshot-contract/v3/english-native.json"
@@ -57,6 +57,12 @@ describe("English whole-field display exceptions", () => {
     expect(screen.getByText("Rule.")).toBeVisible()
     expect(screen.getByText(/待校對/)).toBeVisible()
     expect(screen.getByText(/機器譯文/)).toHaveTextContent("非官方")
+    const effect = screen.getByRole("region", { name: "效果" })
+    const original = screen.getByText("Rule.").closest(".rounded-block")
+    expect(effect).not.toHaveClass("rounded-block")
+    expect(original).toContainElement(screen.getByText("原文"))
+    expect(original).not.toContainElement(screen.getByText("合成規則😀。"))
+    expect(container.querySelectorAll(".rounded-block")).toHaveLength(1)
     expect(container.querySelector("strong")).toBeNull()
     act(() => {
       prefsStore.set({ termEmphasis: false })
@@ -74,5 +80,28 @@ describe("English whole-field display exceptions", () => {
     expect(await screen.findByText("Reskin")).toBeVisible()
     expect(screen.getByText("缺少此語言譯文")).toBeVisible()
     expect(container.querySelector("strong")).toBeNull()
+    expect(screen.getByRole("region", { name: "名稱" })).not.toHaveClass("rounded-block")
   })
 })
+
+it.each(["translated", "original"] as const)(
+  "groups a single-language effect and its source in one box (%s)",
+  async (effectLanguage) => {
+    const { client, owner } = await englishOrigin()
+    await client.load()
+    prefsStore.set({ effectLanguage })
+    await renderInRouter(<CardText edition="en" client={client} owner={owner} field="effect" />)
+    const text = effectLanguage === "translated" ? "合成規則😀。" : "Rule."
+    await screen.findByText(text)
+    const effect = screen.getByRole("region", { name: "效果" })
+    expect(effect).toHaveClass("rounded-block", "border", "bg-surface-1")
+    expect(within(effect).getByRole("heading", { name: "效果" })).toHaveClass("text-12")
+    expect(within(effect).getByText(text)).toBeVisible()
+    expect(effect.querySelector(".rounded-block")).toBeNull()
+    expect(within(effect).queryByText("原文")).not.toBeInTheDocument()
+    if (effectLanguage === "translated") {
+      expect(within(effect).getByText(/機器譯文/)).toHaveTextContent("非官方")
+      expect(within(effect).queryByText("Rule.")).not.toBeInTheDocument()
+    } else expect(within(effect).queryByText("合成規則😀。")).not.toBeInTheDocument()
+  },
+)

@@ -111,6 +111,7 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     preloadPrintings: true,
     preloadNeighbours: true,
     infiniteScroll: false,
+    showFlavorText: false,
     symbolLabels: true,
     termEmphasis: false,
     theme: "dark",
@@ -136,4 +137,20 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
   expect(prefsStore.get()).toEqual(DEFAULT_PREFS)
   expect(recentStore.get()).toEqual(recent)
   expect(await cache.keys()).toHaveLength(1)
+})
+
+it("shows flavor text by default and remembers disabling it in advanced settings", async () => {
+  const view = await renderInRouter(<SettingsPage />)
+  const advanced = within(screen.getByRole("region", { name: "進階設定" }))
+  const toggle = advanced.getByRole("switch", { name: "顯示風味文字" })
+  expect(toggle).toHaveAttribute("aria-checked", "true")
+  await userEvent.click(toggle)
+  expect(readPrefs().showFlavorText).toBe(false)
+  view.unmount()
+  prefsStore.reload()
+  await renderInRouter(<SettingsPage />)
+  expect(screen.getByRole("switch", { name: "顯示風味文字" })).toHaveAttribute(
+    "aria-checked",
+    "false",
+  )
 })

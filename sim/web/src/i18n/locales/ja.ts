@@ -71,6 +71,7 @@ export default {
     title: "アカウントと設定",
     display: "表示",
     effectLanguage: "効果テキスト",
+    showFlavorText: "フレーバーテキストを表示",
     termEmphasis: "用語を太字で表示",
     termEmphasisHint: "表示のみを変更し、本文と参照は保持します",
     symbolLabels: "アイコンに名称を添える",

@@ -7,6 +7,7 @@ import { useTextLanguage } from "../../components/card/text-language"
 import { Segmented } from "../../components/ui/Segmented"
 import type { SnapshotClient } from "../../data"
 import type { Region } from "../../domain/search"
+import { usePrefs } from "../../settings"
 
 export function CardTextPanel({
   client,
@@ -23,6 +24,7 @@ export function CardTextPanel({
 }) {
   const { t } = useTranslation()
   const language = useTextLanguage()
+  const prefs = usePrefs()
   const [mode, setMode] = useState<"current" | "printed">("current")
   const owner = { kind: "printing_face", id: printingId, face_id: faceId }
   const printedName = useAnnotatedText(client, owner, "name", language, edition)
@@ -45,7 +47,9 @@ export function CardTextPanel({
         children
       )}
       {/* Flavor belongs to this printing alone, so both views show it. */}
-      {flavor.value && <CardText client={client} edition={edition} owner={owner} field="flavor" />}
+      {prefs.showFlavorText && flavor.value && (
+        <CardText client={client} edition={edition} owner={owner} field="flavor" />
+      )}
       {hasPrintedText && (
         <Segmented
           className="mt-4"
