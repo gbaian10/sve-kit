@@ -490,6 +490,12 @@ describe("CardsPage", () => {
       expect(panel).toBeVisible()
       expect(panel).not.toContainElement(classRow)
       expect(prefsStore.get().filterPanelOpen).toBe(true)
+      // Search bar → class row → chip row → panel: the chips stay in view while the panel is open.
+      const follows = (first: Element, second: Element) =>
+        Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
+      expect(follows(classRow, conditions)).toBe(true)
+      expect(panel && follows(conditions, panel)).toBe(true)
+      expect(panel).not.toContainElement(conditions)
       // The chip row stays the one clear entry; the panel has none of its own.
       expect(within(conditions).getByRole("button", { name: "清除" })).toBeVisible()
       expect(

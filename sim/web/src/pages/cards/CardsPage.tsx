@@ -536,6 +536,32 @@ export function CardsPage() {
           }}
         />
       )}
+      {/* The chip row sits with the class row, above the panel, so it stays in view either way. */}
+      <ConditionChips
+        query={query}
+        edition={edition}
+        classLabel={classLabel}
+        rarityLabel={(code) => {
+          const option = rarities?.find((item) => item.code === code)
+          return option
+            ? (option.name.translations[textLang] ?? option.name.original.text)
+            : code.toUpperCase()
+        }}
+        typeLabel={(code) => {
+          const option = printingOptions?.type.types.find((item) => item.code === code)
+          return option ? (option.name.translations[textLang] ?? option.name.original.text) : code
+        }}
+        setLabel={(code) => {
+          const option = sets?.find((item) => item.code === code)
+          return option
+            ? `${option.publicCode ?? option.code} ${option.name.translations[textLang] ?? option.name.original.text}`
+            : code
+        }}
+        onChange={commit}
+        onClear={() => {
+          commit(DEFAULT_QUERY)
+        }}
+      />
       <FilterPanel
         id={panelId}
         open={panelOpen}
@@ -579,31 +605,6 @@ export function CardsPage() {
             )}
           </>
         }
-      />
-      <ConditionChips
-        query={query}
-        edition={edition}
-        classLabel={classLabel}
-        rarityLabel={(code) => {
-          const option = rarities?.find((item) => item.code === code)
-          return option
-            ? (option.name.translations[textLang] ?? option.name.original.text)
-            : code.toUpperCase()
-        }}
-        typeLabel={(code) => {
-          const option = printingOptions?.type.types.find((item) => item.code === code)
-          return option ? (option.name.translations[textLang] ?? option.name.original.text) : code
-        }}
-        setLabel={(code) => {
-          const option = sets?.find((item) => item.code === code)
-          return option
-            ? `${option.publicCode ?? option.code} ${option.name.translations[textLang] ?? option.name.original.text}`
-            : code
-        }}
-        onChange={commit}
-        onClear={() => {
-          commit(DEFAULT_QUERY)
-        }}
       />
       {unsupported && (
         <Notice
