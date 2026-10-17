@@ -13,3 +13,10 @@ export function catalogWork<T>(stage: string, work: () => T): T {
     performance.clearMeasures(name)
   }
 }
+
+/** Active intervals exclude task-yield waits so the benchmark does not count elapsed time as work. */
+export function catalogInterval(stage: string, start: number, end: number): void {
+  const name = `sve:catalog:${stage}`
+  performance.measure(name, { start, end })
+  performance.clearMeasures(name)
+}

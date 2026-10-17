@@ -14,12 +14,13 @@ import {
   type Suggestion,
   type TextLang,
 } from "../domain/search"
+import { CatalogBudget, drainCatalog } from "./catalog-cursor"
 import { catalogWork } from "./catalog-timing"
 import type { LoadedSnapshot } from "./client"
 import type { Row } from "./format-v3/decode"
 import { integerValue, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
-import { mergedRows } from "./format-v3/reader"
-import { type CardIndex, createCardIndex } from "./store"
+import { mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
+import { type CardIndex, cardIndexCursor } from "./store"
 
 /** What a list cell or suggestion row shows for one card without loading any detail file. */
 export interface CardSummary {
@@ -137,9 +138,23 @@ export function* catalogCards(
   sets: ReadonlySet<string>,
   edition?: Region,
 ): Generator<{ readonly entry: SearchEntry; readonly summaries: readonly CardSummary[] }> {
+  for (const card of catalogCardCursor(index, cards, aliasRows, sets, edition))
+    if (card !== undefined) yield card
+}
+
+function* catalogCardCursor(
+  index: CardIndex,
+  cards: Iterable<Row>,
+  aliasRows: readonly Row[],
+  sets: ReadonlySet<string>,
+  edition?: Region,
+): Generator<
+  undefined | { readonly entry: SearchEntry; readonly summaries: readonly CardSummary[] }
+> {
   // Aliases of kind `card` name the card by its id without the `c:` prefix (Code has no colon).
   const aliases = new Map<string, SearchName[]>()
   for (const row of aliasRows) {
+    yield
     if (row["kind"] !== "card") continue
     const lang = stringValue(row["lang"])
     if (!isTextLang(lang)) continue
@@ -151,6 +166,7 @@ export function* catalogCards(
   }
   let order = -1
   for (const card of cards) {
+    yield
     order += 1
     const summaries: CardSummary[] = []
     const cardId = stringValue(card["id"])
@@ -196,6 +212,7 @@ export function* catalogCards(
       }
       if (edition !== undefined && region !== edition) continue
       for (const printing of index.printingsOf(cardId)) {
+        yield
         if (printing["region"] !== region) continue
         const printedRarity = printingRarity(printing)
         const rarityCode = printedRarity.code
@@ -233,21 +250,21 @@ export function* catalogCards(
         })
       }
     }
-    const printings: SearchPrinting[] = index.printingsOf(cardId).flatMap((printing) => {
+    const printings: SearchPrinting[] = []
+    for (const printing of index.printingsOf(cardId)) {
+      yield
       const region = stringValue(printing["region"])
-      if (!isRegion(region) || (edition !== undefined && region !== edition)) return []
+      if (!isRegion(region) || (edition !== undefined && region !== edition)) continue
       const cardNo = stringValue(printing["card_no"])
-      return [
-        {
-          id: stringValue(printing["id"]),
-          region,
-          cardNo,
-          lookupKey: cardNoLookupKey(cardNo, sets),
-          key: cardNoKey(cardNo, sets),
-          flat: normalizeText(cardNo),
-        },
-      ]
-    })
+      printings.push({
+        id: stringValue(printing["id"]),
+        region,
+        cardNo,
+        lookupKey: cardNoLookupKey(cardNo, sets),
+        key: cardNoKey(cardNo, sets),
+        flat: normalizeText(cardNo),
+      })
+    }
     const entry: SearchEntry = {
       cardId,
       classCode,
@@ -271,26 +288,32 @@ export function* catalogCards(
   }
 }
 
-export function createCatalog(snapshot: LoadedSnapshot): Catalog {
-  const index = createCardIndex(snapshot)
-  const rows = (table: string): Row[] => mergedRows(snapshot.bootstrap, table)
-  return catalogFromIndex(index, rows, snapshot.config)
-}
-
-function catalogFromIndex(
-  index: CardIndex,
-  rows: (table: string) => Row[],
-  config: JsonObject,
-): Catalog {
-  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
-  const classCodes = rows("vocabulary")
-    .filter((row) => row["kind"] === "class" && row["active"] === true)
-    .map((row) => stringValue(row["code"]))
+function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
+  const index = yield* cardIndexCursor(snapshot)
+  const sets = new Set<string>()
+  for (const family of index.families) {
+    sets.add(stringValue(family["code"]))
+    yield
+  }
+  const classCodes: string[] = []
+  for (const row of yield* mergedRowsCursor(snapshot.bootstrap, "vocabulary")) {
+    if (row["kind"] === "class" && row["active"] === true) classCodes.push(stringValue(row["code"]))
+    yield
+  }
+  const aliasRows = yield* mergedRowsCursor(snapshot.bootstrap, "search_alias")
   const entries: SearchEntry[] = []
   const summaries = new Map<string, CardSummary>()
-  for (const card of catalogCards(index, index.cards, rows("search_alias"), sets)) {
+  for (const card of catalogCardCursor(index, index.cards, aliasRows, sets)) {
+    if (card === undefined) {
+      yield
+      continue
+    }
+    yield
     entries.push(card.entry)
-    for (const summary of card.summaries) summaries.set(summary.printingId, summary)
+    for (const summary of card.summaries) {
+      summaries.set(summary.printingId, summary)
+      yield
+    }
   }
   const classLabel = (code: string, lang: TextLang): string => {
     const row = index.vocabulary("class", code)
@@ -303,7 +326,7 @@ function catalogFromIndex(
     const unit = index.textUnit(stringValue(row["label_unit_id"]))
     return unit ? stringValue(unit["text"]) : code
   }
-  const search = config["search"]
+  const search = snapshot.config["search"]
   const normalizerMatches =
     typeof search === "object" &&
     search !== null &&
@@ -323,6 +346,11 @@ function catalogFromIndex(
 }
 
 const catalogs = new WeakMap<LoadedSnapshot, Catalog>()
+const prepared = new WeakSet<LoadedSnapshot>()
+
+export function createCatalog(snapshot: LoadedSnapshot): Catalog {
+  return drainCatalog(catalogCursor(snapshot))
+}
 
 /** One catalog per loaded snapshot object; a reload that swaps the snapshot rebuilds it. */
 export function catalogOf(snapshot: LoadedSnapshot): Catalog {
@@ -332,4 +360,21 @@ export function catalogOf(snapshot: LoadedSnapshot): Catalog {
     catalogs.set(snapshot, catalog)
   }
   return catalog
+}
+
+/** Prepare the final candidate object before the client makes it visible to subscribers. */
+export async function prepareCatalog(snapshot: LoadedSnapshot, check: () => void): Promise<void> {
+  check()
+  if (prepared.has(snapshot)) return
+  const budget = new CatalogBudget(check)
+  try {
+    await budget.drain(validateCatalogCursor(snapshot.bootstrap), "validate")
+    const catalog =
+      catalogs.get(snapshot) ?? (await budget.drain(catalogCursor(snapshot), "catalogOf"))
+    check()
+    catalogs.set(snapshot, catalog)
+    prepared.add(snapshot)
+  } finally {
+    budget.close()
+  }
 }

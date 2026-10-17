@@ -1,7 +1,8 @@
+import { drainCatalog } from "./catalog-cursor"
 import type { LoadedSnapshot } from "./client"
 import type { Row } from "./format-v3/decode"
 import { integerValue, stringValue } from "./format-v3/json"
-import { mergedRows } from "./format-v3/reader"
+import { mergedRowsCursor } from "./format-v3/reader"
 
 /** Lookups over loaded catalog and page fragments; absent detail remains unavailable. */
 export interface CardIndex {
@@ -29,72 +30,83 @@ export interface CardIndex {
   readonly translation: (id: string) => Row | undefined
 }
 
-function byId(rows: readonly Row[], field = "id"): Map<string, Row> {
-  return new Map(rows.map((row) => [stringValue(row[field]), row]))
-}
-
-function group(rows: readonly Row[], field: string): Map<string, Row[]> {
-  const out = new Map<string, Row[]>()
+function* byId(rows: readonly Row[], field = "id"): Generator<void, Map<string, Row>> {
+  const out = new Map<string, Row>()
   for (const row of rows) {
-    const key = stringValue(row[field])
-    out.set(key, [...(out.get(key) ?? []), row])
+    out.set(stringValue(row[field]), row)
+    yield
   }
   return out
 }
-
+function* group(rows: readonly Row[], field: string): Generator<void, Map<string, Row[]>> {
+  const out = new Map<string, Row[]>()
+  for (const row of rows) {
+    const key = stringValue(row[field])
+    const list = out.get(key)
+    if (list) list.push(row)
+    else out.set(key, [row])
+    yield
+  }
+  return out
+}
 export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
-  const rows = (table: string): Row[] => mergedRows(snapshot.bootstrap, table)
-  const cards = rows("card")
-  const faces = rows("face")
-  const printingOwners = new Map(
-    snapshot.bootstrap
-      .filter((fragment) => fragment.table === "printing")
-      .flatMap((fragment) =>
-        fragment.rows.map(
-          (row) => [stringValue(row["id"]), (fragment.value["owner"] as Row)["id"]] as const,
-        ),
-      ),
-  )
-  const printingRows: Row[] = rows("printing").map((row) => ({
-    ...row,
-    home_set_id: printingOwners.get(stringValue(row["id"])) ?? null,
-  }))
-  const printingIds = new Set(printingRows.map((row) => stringValue(row["id"])))
-  const printings = [
-    ...printingRows,
-    ...snapshot.bootstrap
-      .filter((f) => f.table === "card_locator")
-      .flatMap((f) => f.rows)
-      .filter((row) => !printingIds.has(stringValue(row["id"]))),
-  ]
-  const revisions = rows("face_revision")
-  const families = rows("product_family")
-  const cardMap = byId(cards)
-  const faceMap = byId(faces)
-  const facesByCard = group(faces, "card_id")
-  for (const list of facesByCard.values())
+  return drainCatalog(cardIndexCursor(snapshot))
+}
+
+export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, CardIndex> {
+  const cards = yield* mergedRowsCursor(snapshot.bootstrap, "card")
+  const faces = yield* mergedRowsCursor(snapshot.bootstrap, "face")
+  const printingOwners = new Map<string, Row[string]>()
+  for (const fragment of snapshot.bootstrap)
+    if (fragment.table === "printing")
+      for (const row of fragment.rows) {
+        printingOwners.set(stringValue(row["id"]), (fragment.value["owner"] as Row)["id"] ?? null)
+        yield
+      }
+  const printings: Row[] = [],
+    printingIds = new Set<string>()
+  for (const row of yield* mergedRowsCursor(snapshot.bootstrap, "printing")) {
+    printings.push({ ...row, home_set_id: printingOwners.get(stringValue(row["id"])) ?? null })
+    printingIds.add(stringValue(row["id"]))
+    yield
+  }
+  for (const fragment of snapshot.bootstrap)
+    if (fragment.table === "card_locator")
+      for (const row of fragment.rows) {
+        if (!printingIds.has(stringValue(row["id"]))) printings.push(row)
+        yield
+      }
+  const revisions = yield* mergedRowsCursor(snapshot.bootstrap, "face_revision")
+  const families = yield* mergedRowsCursor(snapshot.bootstrap, "product_family")
+  const cardMap = yield* byId(cards)
+  const faceMap = yield* byId(faces)
+  const facesByCard = yield* group(faces, "card_id")
+  for (const list of facesByCard.values()) {
     list.sort((a, b) => integerValue(a["ordinal"]) - integerValue(b["ordinal"]))
-  const printingMap = byId(printings)
-  const printingsByCard = group(printings, "card_id")
-  const printingByNo = new Map(
-    printings.map((row) => [
-      `${stringValue(row["region"])}\u0000${stringValue(row["card_no"])}`,
-      row,
-    ]),
+    yield
+  }
+  const printingMap = yield* byId(printings)
+  const printingsByCard = yield* group(printings, "card_id")
+  const printingByNo = new Map<string, Row>()
+  for (const row of printings) {
+    printingByNo.set(`${stringValue(row["region"])}\u0000${stringValue(row["card_no"])}`, row)
+    yield
+  }
+  const revisionMap = yield* byId(revisions)
+  const familyMap = yield* byId(families)
+  const productMap = yield* byId(yield* mergedRowsCursor(snapshot.bootstrap, "product"))
+  const vocabularyMap = new Map<string, Row>()
+  for (const row of yield* mergedRowsCursor(snapshot.bootstrap, "vocabulary")) {
+    vocabularyMap.set(`${stringValue(row["kind"])}\u0000${stringValue(row["code"])}`, row)
+    yield
+  }
+  const keywordMap = yield* byId(yield* mergedRowsCursor(snapshot.bootstrap, "keyword"))
+  const supportMap = yield* byId(
+    yield* mergedRowsCursor(snapshot.bootstrap, "card_engine_support"),
+    "card_id",
   )
-  const revisionMap = byId(revisions)
-  const familyMap = byId(families)
-  const productMap = byId(rows("product"))
-  const vocabularyMap = new Map(
-    rows("vocabulary").map((row) => [
-      `${stringValue(row["kind"])}\u0000${stringValue(row["code"])}`,
-      row,
-    ]),
-  )
-  const keywordMap = byId(rows("keyword"))
-  const supportMap = byId(rows("card_engine_support"), "card_id")
-  const textMap = byId(rows("text_unit"))
-  const translationMap = byId(rows("translation"))
+  const textMap = yield* byId(yield* mergedRowsCursor(snapshot.bootstrap, "text_unit"))
+  const translationMap = yield* byId(yield* mergedRowsCursor(snapshot.bootstrap, "translation"))
   const currentRevision = (faceId: string, region: string): Row | undefined => {
     const face = faceMap.get(faceId)
     for (const entry of (face?.["current"] ?? []) as Row[]) {
