@@ -426,7 +426,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】原始消費
+            text: 】X張原始消費
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -438,7 +438,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: X張：在這張卡片上放置X個
+            text: ：在這張卡片上放置X個
           - kind: LeafRef
             slot: leaf_6
           - kind: LeafRef
@@ -1215,7 +1215,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 到來時，捨棄自己任意數量的手牌。抽X張卡片。X為「
+            text: 到來時，捨棄自己的任意數量的手牌。抽X張卡片。X為「
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
