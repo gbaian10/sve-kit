@@ -216,7 +216,7 @@ N0 原以全庫版本 `four-layer-jp-v1` 封版，該版已不再接受（見 §
 
 ### 4.2 N0 整段語義構造登錄
 
-N0 的 resolved key、來源 role、投影及能力作用域只由來源語義分類產生；B 以現行 v3 來源推導重放比對，不另設版本登錄。
+N0 的 resolved key、來源 role、投影及能力作用域只由來源語義分類產生；B 以 v3 來源推導重放比對，不另設版本登錄。
 未知 key、role／投影錯配或額外作用域均拒絕；未知完整語法維持 occurrence-scoped pending。
 
 | key | role | projection_kind | 獨立 ability scope 數 |
@@ -264,7 +264,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v3 來源推導。
+這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v4 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -380,7 +380,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v3。
+renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v4。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
 
 | ID | signature（name:type/role） | rule／cases |
@@ -769,7 +769,7 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。
 
-## 11. v3 來源推導與 expression 呈現
+## 11. v4 來源推導與 expression 呈現
 
 `four_layer_derivation.derive_source(raw, source, classifier)` 產生 `DerivedField`，
 由其 `bind` 建立 `four-layer-jp-v4` 身分；`verify` 從原始來源重新推導，
@@ -1248,7 +1248,7 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 | --- | --- |
 | N01～N03 | 二／三枝、純擇一或純並列的具名生成，每枝獨立明示數值且同單位；各自生成則沿既有不限名稱數的單一 count 與單一印刷 occurrence。完整掃描清單，拒絕長清單尾段或混合連接的新增生成。既有 compound action 接受域不收窄。 |
 | D01～D02 | 單名稱的戰場／EX 替代目的地，及三名稱各自生成的有限雙目的地。完整目的地片語固定在 canonical，不借選取來源的 ZoneSet 域。 |
-| R01～R03 | 緊鄰、同能力、唯一具名生成或抽牌的明示數量替換。至多替換只放寬具名生成，另驗採用種類與單位；非搜尋的其他動作仍拒絕至多替換。精確存在條件、原張數與替代張數各自保留。 |
+| R01～R03 | 緊鄰、同能力、唯一具名生成或抽牌的明示數量替換。至多替換只放寬具名生成，另驗採用種類與單位；非搜尋的其他動作仍拒絕至多替換。精確存在條件、原張數與替代張數各自保留。替換句後可接同能力的後續句。 |
 | C01～C03 | 完整名稱的現時存在量、OR 左側單 trait／class 的至少門檻、完整墓場集合及明示單一玩家。等於與至少不互換；OR 右側既有葉不重編。 |
 | S01～S03、S10 | 具名／明示種類的有限選取與戰場省略、兩名稱共享總數、兩種具名物件各自數量。名稱的種類證據取全部確認採用的同名定義；不同印刷來源可供相同完整名稱，異種或缺失證據仍拒絕。不從單位推種類，不新增省略玩家或區域葉。 |
 | S04～S09、S11 | 檢視後公開留頂、表向進化牌堆翻面、墓場與消失區共同具名選取、各玩家留下數量、場與 EX 的 trait/token 選取、手牌置入牌堆二端擇一、具名進化牌堆打出。每形各驗局部完整動作；不新增通用多區域、端點或任意張數域。 |

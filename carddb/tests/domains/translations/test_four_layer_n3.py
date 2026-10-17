@@ -9,6 +9,7 @@ from sve_carddb.contracts.four_layer import GlossaryReference
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
+from sve_carddb.domains.translations.four_layer_replacements import replacement_action
 
 from .test_four_layer_classification import classifier, source
 from .test_four_layer_n1 import n1_classifier
@@ -409,3 +410,176 @@ def test_sealed_reminder_requires_its_exact_registered_concepts(
     )
     derived = derive_source(raw, source(raw), incomplete)
     assert "missing_n3_required_reference" in derived.recognized[1].issues
+
+
+@pytest.mark.parametrize(
+    ("case", "raw", "field", "evidence", "role"),
+    [
+        (
+            "payment-multiple-copies",
+            "これをプレイする際、墓場の元のコスト１、２、３、４、５、６、７、８、９、１０のカードを２枚ずつ消滅:コストを-７する。",
+            "effect",
+            None,
+            "count",
+        ),
+        (
+            "payment-cost-order",
+            "これをプレイする際、墓場の元のコスト２、１、３、４、５、６、７、８、９、１０のカードを１枚ずつ消滅:コストを-７する。",
+            "effect",
+            None,
+            "cost_value",
+        ),
+        (
+            "lesson-count-mismatch",
+            "【レッスン_１】仮。（【レッスン_１】とは、自分のEXエリアの『仮甲』２枚を消滅させること）",
+            "effect",
+            None,
+            "count",
+        ),
+        (
+            "nc-anchor-mismatch",
+            "【ネクロチャージ_４】仮。【NC_６】仮。（自分の墓場が３枚以上なら、【ネクロチャージ_３】の後の能力が働く。６枚以上なら、さらに【NC_６】の後の能力が働く）",
+            "effect",
+            None,
+            "existence_count",
+        ),
+        (
+            "nc-descending",
+            "【ネクロチャージ_６】仮。【NC_３】仮。（自分の墓場が６枚以上なら、【ネクロチャージ_６】の後の能力が働く。３枚以上なら、さらに【NC_３】の後の能力が働く）",
+            "effect",
+            None,
+            "existence_count",
+        ),
+        (
+            "sc-descending",
+            "これをプレイする際、【スペルチェイン_６】コストを-２する。【SC_４】代わりに-３する。【SC_２】代わりに-４する。",
+            "effect",
+            None,
+            "cost_delta_magnitude",
+        ),
+        (
+            "cost-kinds-unordered",
+            "【進化時】自分の墓場にあるカードの元のコストの種類数が５種類以上なら、仮。３種類以上なら、仮。４種類以上なら、仮。２種類以上なら、仮。",
+            "effect",
+            None,
+            "threshold",
+        ),
+        (
+            "cost-kinds-new-head",
+            "【進化時】自分の墓場にあるカードの元のコストの種類数が２種類以上なら、仮。３種類以上なら、仮。【攻撃時】４種類以上なら、仮。５種類以上なら、仮。",
+            "effect",
+            None,
+            "threshold",
+        ),
+        (
+            "selection-heterogeneous-kinds",
+            "仮。自分の場の『仮甲』や『仮乙』２体まで選ぶ。",
+            "effect",
+            (("term:name.first", "follower"), ("term:name.second", "amulet")),
+            "selection_count",
+        ),
+        (
+            "selection-missing-kind",
+            "仮。自分の場の『仮甲』や『仮乙』２体まで選ぶ。",
+            "effect",
+            (("term:name.first", "follower"),),
+            "selection_count",
+        ),
+        (
+            "selection-ambiguous-kind",
+            "仮。自分の場の『仮甲』や『仮乙』２体まで選ぶ。",
+            "effect",
+            (
+                ("term:name.first", "follower"),
+                ("term:name.first", "amulet"),
+                ("term:name.second", "follower"),
+            ),
+            "selection_count",
+        ),
+        (
+            "existence-missing-kind",
+            "仮。自分の場の『仮甲』が２体以上なら、仮。",
+            "effect",
+            (),
+            "existence_count",
+        ),
+        (
+            "construction-effect-field",
+            "『仮甲』は自分のデッキに２枚まで入れることができる。",
+            "effect",
+            None,
+            "construction_copy_limit",
+        ),
+        (
+            "construction-evolve-deck",
+            "『仮甲』は自分のエボルヴデッキに２枚まで入れることができる。",
+            "section",
+            None,
+            "construction_copy_limit",
+        ),
+        (
+            "start-amulet-two-kinds",
+            "【スタートアミュレット】（【スタートアミュレット】を持つカードはデッキに２種しか入れられない）",
+            "effect",
+            None,
+            "construction_name_kind_limit",
+        ),
+        (
+            "damage-positive-sign",
+            "これがいる限り、自分のフォロワーが受ける「相手の能力によるダメージ」を+２する。",
+            "effect",
+            None,
+            "damage_delta_magnitude",
+        ),
+    ],
+    ids=lambda value: value if isinstance(value, str) and value.isascii() else None,
+)
+def test_sealed_numeric_and_kind_guards(
+    case: str,
+    raw: str,
+    field: str,
+    evidence: tuple[tuple[str, str], ...] | None,
+    role: str,
+    engine: Classifier,
+) -> None:
+    if evidence is not None:
+        engine.references.kind_facts = KindFacts(evidence)
+    derived = derive_source(raw, source(raw, field), engine)
+    assert any(p.issues for p in derived.recognized) or all(
+        slot.role != role for p in derived.recognized for slot in p.schema.slots
+    ), case
+
+
+def test_replacement_accepts_a_following_sentence_in_the_same_ability(
+    engine: Classifier,
+) -> None:
+    raw = "仮。『仮甲』２体を出す。【覚醒】状態なら、代わりに３体まで。仮。"
+    derived = derive_source(raw, source(raw), engine)
+    assert not derived.recognized[0].issues
+    frame, binding = derived.bind(0)
+    derived.verify_binding(raw, engine, frame, binding)
+    assert "selection_count" in {slot.role for slot in frame.leaf_schema.slots}
+
+
+def test_replacement_followup_cannot_borrow_an_action_before_a_new_head(
+    engine: Classifier,
+) -> None:
+    raw = "仮。『仮甲』２体を出す。【攻撃時】【覚醒】状態なら、代わりに３体まで。仮。"
+    assert derive_source(raw, source(raw), engine).recognized[0].issues
+    assert (
+        replacement_action(
+            "仮。『X』N体を出す。【攻撃時】【覚醒】状態なら、代わりに",
+            "体まで。仮。",
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "head", ["【攻撃時】", "【進化時】", "【超進化時】", "{進化}{コスト}N:"]
+)
+def test_replacement_uses_the_shared_head_to_exclude_an_earlier_action(
+    head: str,
+) -> None:
+    before = "『X』N体を出す。" + head + "『X』N体を出す。【覚醒】状態なら、代わりに"
+    assert replacement_action(before, "体まで。仮。") is not None

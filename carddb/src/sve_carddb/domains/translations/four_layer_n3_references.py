@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner, Span
+from sve_carddb.domains.translations.four_layer_n3_shapes import SHAPES
 from sve_carddb.domains.translations.recognition.models import Candidate, Hint
 from sve_carddb.domains.translations.recognition.provenance import merged
 
@@ -42,107 +43,16 @@ _WORDS = {
     "type/follower": ("フォロワー",),
     "type/leader": ("リーダー",),
 }
-_SELF_DECK = ("term:player.self", "term:zone.deck")
-_CARD_COST = ("term:object.card", "term:rule.original_cost", "term:rule.cost")
-_DIGIT = r"(?:N|[0-9０-９]+)"
 
 
 def _family(part: SourcePart, field: SourceField) -> tuple[str, ...]:
-    text = part.canonical_source
-    if part.source_span.role == "reminder":
-        return _reminder_family(text)
-    if part.source_span.role != "body":
-        return ()
-    if field.source.field == "section":
-        if text == r"『X』は自分のデッキにN枚まで入れることができる。":
-            return _SELF_DECK
+    for shape in SHAPES.values():
         if (
-            text
-            == "カード名に『X』を含まないカードは、メインデッキやエボルヴデッキにそれぞれN枚までしか入れられない。"
+            part.source_span.role == shape.role
+            and (not shape.section_only or field.source.field == "section")
+            and shape.match(part.canonical_source)
         ):
-            return (
-                "term:object.card_name",
-                "term:object.card",
-                "term:zone.deck",
-                "term:zone.evolve_deck",
-            )
-    return _body_family(text)
-
-
-def _reminder_family(text: str) -> tuple[str, ...]:
-    if re.fullmatch(
-        r"[（(]【スタートアミュレット】を持つカードはデッキに[1１]種しか入れられない[）)]",
-        text,
-    ):
-        return "term:object.start_amulet", "term:object.card", "term:zone.deck"
-    if re.fullmatch(
-        r"[（(]【レッスン_"
-        + _DIGIT
-        + r"】とは、自分のEXエリアの『[^』]+』"
-        + _DIGIT
-        + r"枚を消滅させること[）)]",
-        text,
-    ):
-        return (
-            "term:ability.lesson",
-            "term:player.self",
-            "term:zone.ex",
-            "term:action.banish",
-        )
-    if re.fullmatch(
-        r"[（(]自分の墓場が"
-        + _DIGIT
-        + r"枚以上なら、【ネクロチャージ_"
-        + _DIGIT
-        + r"】の後の能力が働く。"
-        + _DIGIT
-        + r"枚以上なら、さらに【NC_"
-        + _DIGIT
-        + r"】の後の能力が働く[）)]",
-        text,
-    ):
-        return "term:ability.necrocharge", "term:player.self", "term:zone.cemetery"
-    return ()
-
-
-def _body_family(text: str) -> tuple[str, ...]:
-    if re.fullmatch(
-        r"【進化時】自分の墓場にあるカードの元のコストの種類数がN種類以上なら、[^。]+。N種類以上なら、[^。]+。N種類以上なら、[^。]+。N種類以上なら、[^。]+。",
-        text,
-    ):
-        return (
-            "term:event.evolve",
-            "term:player.self",
-            "term:player.opponent",
-            "term:zone.cemetery",
-            "term:object.card",
-            "term:rule.original_cost",
-            "term:stat.health",
-            "type/follower",
-            "type/leader",
-            "term:rule.damage",
-        )
-    if re.fullmatch(
-        r"これをプレイする際、墓場の元のコストN(?:、N){9}のカードをN枚ずつ消滅:コストを-Nする。",
-        text,
-    ):
-        return *_CARD_COST, "term:zone.cemetery", "term:action.banish"
-    if re.fullmatch(
-        r"これをプレイする際、【スペルチェイン_N】コストを-Nする。【(?:SC|スペルチェイン)_N】代わりに-Nする。【(?:SC|スペルチェイン)_N】代わりに-Nする。",
-        text,
-    ):
-        return "term:ability.spell_chain", "term:rule.cost", "term:rule.instead"
-    if (
-        text
-        == "これがいる限り、自分のフォロワーが受ける「相手の能力によるダメージ」を-Nする。"
-    ):
-        return (
-            "term:player.self",
-            "term:player.opponent",
-            "type/follower",
-            "term:rule.ability",
-            "term:rule.damage",
-        )
+            return shape.words
     return ()
 
 

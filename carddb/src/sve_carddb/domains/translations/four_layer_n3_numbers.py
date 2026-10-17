@@ -6,6 +6,7 @@ from unicodedata import normalize
 
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner
 from sve_carddb.domains.translations.four_layer_ability import HEAD
+from sve_carddb.domains.translations.four_layer_n3_shapes import DIGIT, SHAPES
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_normalizer import (
@@ -16,7 +17,6 @@ if TYPE_CHECKING:
 
 _CHAIN_THRESHOLDS = 4
 _NC_OCCURRENCES = 4
-_DIGIT = r"(?:N(?![A-Za-z])|[0-9０-９]+)"
 
 
 def is_construction_fragment(part: SourcePart, field: SourceField | None) -> bool:
@@ -25,8 +25,7 @@ def is_construction_fragment(part: SourcePart, field: SourceField | None) -> boo
         field is not None
         and field.source.field == "section"
         and part.source_span.role == "body"
-        and part.canonical_source
-        == r"カード名に『X』を含まないカードは、メインデッキやエボルヴデッキにそれぞれN枚までしか入れられない。"
+        and SHAPES["construction_fragment"].match(part.canonical_source) is not None
     )
 
 
@@ -92,7 +91,7 @@ def number_rule(
         return None
     if part.source_span.role == "reminder":
         return _reminder(raw, part, hint, field)
-    if part.source_span.role != "body" or field is None:
+    if part.source_span.role != "body":
         return None
     return (
         (_construction(text, start) if field.source.field == "section" else None)
@@ -102,22 +101,20 @@ def number_rule(
 
 
 def _construction(text: str, start: int) -> tuple[str, str | None] | None:
-    patterns = (
-        r"『X』は自分のデッキに(?P<n>N)枚まで入れることができる。",
-        r"カード名に『X』を含まないカードは、メインデッキやエボルヴデッキにそれぞれ(?P<n>N)枚までしか入れられない。",
-    )
-    for pattern in patterns:
-        if (match := re.fullmatch(pattern, text)) and start == match.start("n"):
-            return "construction_copy_limit", "枚"
+    for shape in SHAPES.values():
+        if (
+            shape.section_only
+            and (match := shape.match(text))
+            and start == match.start("n")
+        ):
+            return shape.numbers["n"]
     return None
 
 
 def _payment(raw: str, part: SourcePart, start: int) -> tuple[str, str | None] | None:
     text = part.canonical_source
-    if match := re.fullmatch(
-        r"これをプレイする際、墓場の元のコスト(?P<costs>N(?:、N){9})のカードを(?P<n>N)枚ずつ消滅:コストを-Nする。",
-        text,
-    ):
+    shape = SHAPES["payment"]
+    if match := shape.match(text):
         positions = [
             m.start() + match.start("costs") for m in re.finditer(r"N", match["costs"])
         ]
@@ -131,34 +128,24 @@ def _payment(raw: str, part: SourcePart, start: int) -> tuple[str, str | None] |
         ]
         if values == list(range(1, 11)) and _value(raw, part, match, "n") == 1:
             if start in positions:
-                return "cost_value", None
+                return shape.numbers["costs"]
             if start == match.start("n"):
-                return "count", "枚"
+                return shape.numbers["n"]
     return None
 
 
 def _chains(raw: str, part: SourcePart, start: int) -> tuple[str, str | None] | None:
     text = part.canonical_source
-    if re.fullmatch(
-        r"これをプレイする際、【スペルチェイン_N】コストを-Nする。【(?:SC|スペルチェイン)_N】代わりに-Nする。【(?:SC|スペルチェイン)_N】代わりに-Nする。",
-        text,
-    ):
+    if SHAPES["spell_chain"].match(text):
         thresholds = list(re.finditer(r"【(?:SC|スペルチェイン)_(?P<n>N)】", text))
         values = [_value(raw, part, t, "n") for t in thresholds]
         if values == sorted(set(values)) and text[max(0, start - 5) : start].endswith(
             "代わりに-"
         ):
-            return "cost_delta_magnitude", None
-    if (
-        text
-        == r"これがいる限り、自分のフォロワーが受ける「相手の能力によるダメージ」を-Nする。"
-        and text[start - 1 : start] == "-"
-    ):
-        return "damage_delta_magnitude", None
-    chain = re.fullmatch(
-        r"【進化時】自分の墓場にあるカードの元のコストの種類数がN種類以上なら、[^。]+。N種類以上なら、[^。]+。N種類以上なら、[^。]+。N種類以上なら、[^。]+。",
-        text,
-    )
+            return SHAPES["spell_chain"].numbers["replacement"]
+    if SHAPES["damage"].match(text) and text[start - 1 : start] == "-":
+        return SHAPES["damage"].numbers["n"]
+    chain = SHAPES["cost_kinds"].match(text)
     if chain and len(tuple(HEAD.finditer(text))) == 1:
         thresholds = list(re.finditer(r"(?P<n>N)種類以上なら、", text))
         values = [_value(raw, part, t, "n") for t in thresholds]
@@ -167,7 +154,7 @@ def _chains(raw: str, part: SourcePart, start: int) -> tuple[str, str | None] | 
             and values == sorted(set(values))
             and any(start == t.start("n") for t in thresholds)
         ):
-            return "threshold", "種類"
+            return SHAPES["cost_kinds"].numbers["thresholds"]
     return None
 
 
@@ -180,24 +167,11 @@ def _reminder(
     text = part.canonical_source
     start = hint.occurrence.start
     if (
-        re.fullmatch(
-            r"[（(]【スタートアミュレット】を持つカードはデッキに(?P<n>"
-            + _DIGIT
-            + r")種しか入れられない[）)]",
-            text,
-        )
+        SHAPES["start_amulet"].match(text)
         and "【スタートアミュレット】" in body.canonical_source
-        and hint.value == 1
     ):
-        return "construction_name_kind_limit", "種"
-    lesson = re.fullmatch(
-        r"[（(]【レッスン_(?P<parameter>"
-        + _DIGIT
-        + r")】とは、自分のEXエリアの『[^』]+』(?P<count>"
-        + _DIGIT
-        + r")枚を消滅させること[）)]",
-        text,
-    )
+        return SHAPES["start_amulet"].numbers["n"]
+    lesson = SHAPES["lesson"].match(text)
     if (
         lesson
         and _value(raw, part, lesson, "parameter")
@@ -206,19 +180,12 @@ def _reminder(
         and _lesson_anchor(raw, body)
     ):
         if start == lesson.start("parameter"):
-            return "threshold", None
+            return SHAPES["lesson"].numbers["parameter"]
         if start == lesson.start("count"):
-            return "count", "枚"
-    nc = re.fullmatch(
-        r"[（(]自分の墓場が(?P<a>"
-        + _DIGIT
-        + r")枚以上なら、【ネクロチャージ_(?P<b>"
-        + _DIGIT
-        + r")】の後の能力が働く。(?:N|[0-9０-９]+)枚以上なら、さらに【NC_(?:N|[0-9０-９]+)】の後の能力が働く[）)]",
-        text,
-    )
+            return SHAPES["lesson"].numbers["count"]
+    nc = SHAPES["necrocharge"].match(text)
     if nc:
-        numbers = list(re.finditer(r"(?P<n>" + _DIGIT + ")", text))
+        numbers = list(re.finditer(r"(?P<n>" + DIGIT + ")", text))
         values = [_value(raw, part, n, "n") for n in numbers]
         anchors = list(
             re.finditer(r"【(?:ネクロチャージ|NC)_(?P<n>N)】", body.canonical_source)
@@ -232,9 +199,9 @@ def _reminder(
             for index, number in enumerate(numbers):
                 if start == number.start("n"):
                     return (
-                        ("existence_count", "枚")
+                        SHAPES["necrocharge"].numbers["count"]
                         if index % 2 == 0
-                        else ("threshold", None)
+                        else SHAPES["necrocharge"].numbers["parameter"]
                     )
     return None
 

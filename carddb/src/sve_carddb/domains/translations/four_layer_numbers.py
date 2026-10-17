@@ -221,7 +221,8 @@ def recognize_number(
         or _filtered_or_reference(before, references)
         else None
     )
-    if number is None and (rule := number_rule(raw, part, hint, field)) is not None:
+    rule = number_rule(raw, part, hint, field)
+    if number is None and rule is not None:
         role, unit = rule
         number = (
             _quantity(role, hint.value, "枚", "at_least")
@@ -250,7 +251,7 @@ def recognize_number(
         "selection_count",
         "existence_count",
     }:
-        if number_rule(raw, part, hint, field) == ("existence_count", "枚"):
+        if rule == ("existence_count", "枚"):
             return number
         replacement = replacement_action(before, after)
         counted = (

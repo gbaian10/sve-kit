@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import Literal
 
+from sve_carddb.domains.translations.four_layer_ability import HEAD
 from sve_carddb.domains.translations.four_layer_units import (
     CountContext,
     count_context,
@@ -67,12 +68,8 @@ def replacement_action(before: str, after: str) -> Replacement | None:
             else None
         )
     if match["named"]:
-        prefix = before[: match.start()]
-        heads = tuple(
-            re.finditer(
-                r"\{(?:ファンファーレ|起動|ラストワード|進化|食事|憑依)\}", prefix
-            )
-        )
+        prefix = before[: match.start("action")]
+        heads = tuple(HEAD.finditer(prefix))
         prefix = prefix[heads[-1].end() :] if heads else prefix
         if re.search(r"『X』N(?:枚|体|つ)(?:を)?(?:場に)?出す。", prefix):
             return None
