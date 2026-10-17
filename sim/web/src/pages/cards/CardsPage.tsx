@@ -38,13 +38,15 @@ import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
+import { ConditionChips } from "../../components/search/ConditionChips"
+import { FilterPanel } from "../../components/search/FilterPanel"
 import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
+import { SetFilter } from "../../components/search/SetFilter"
 import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
-import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
@@ -61,6 +63,9 @@ import {
   toggleClass,
   VIEW_MODES,
 } from "../../domain/query/model"
+import { prStyleTokens } from "../../domain/rarityFilter"
+import type { Region } from "../../domain/search"
+import { leaderFrameTokens, tokenKindTokens } from "../../domain/typeFilter"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 
@@ -98,18 +103,18 @@ export function CardsPage() {
   const readiness = useSearchReadiness(edition)
   const [params, setParams] = useSearchParams()
   const { code } = useParams()
-  const { sets, rarities } = useSetOptions()
+  const { sets, setCounts, rarities } = useSetOptions()
   const printingOptions = usePrintingOptions()
   const set = code ? sets?.find((set) => set.publicCode === code) : undefined
   const query = useMemo(() => {
     const parsed = parseQuery(params)
     return code && !params.has("set") ? { ...parsed, sets: set ? [set.code] : [] } : parsed
   }, [params, set, code])
-  const urlParams = (next: QueryState) => {
+  const urlParams = (next: QueryState, nextEdition: Region = edition) => {
     const result = formatQuery(next)
     // A set page's own set is implied by its path, so each state keeps one URL.
     if (set && next.sets.length === 1 && next.sets[0] === set.code) result.delete("set")
-    if (edition === "en") result.set("ed", "en")
+    if (nextEdition === "en") result.set("ed", "en")
     return result
   }
   const [entry, updateEntry] = useListEntryState()
@@ -136,6 +141,7 @@ export function CardsPage() {
   const armed = useRef<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listId = useId()
+  const panelId = useId()
   const debounced = useDebouncedValue(input, DEBOUNCE_MS)
   const active =
     focused && highlight !== null && highlight.text === debounced ? highlight.index : -1
@@ -147,6 +153,13 @@ export function CardsPage() {
     updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
     setEdit(null)
     setParams(urlParams(next))
+  }
+  // The list's edition lives in `ed`; the preference follows so other pages open the same edition.
+  const commitEdition = (next: Region) => {
+    prefsStore.set({ cardEdition: next })
+    updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
+    setEdit(null)
+    setParams(urlParams(query, next))
   }
   const nameOf = useCallback(
     (summary: CardSummary) => displayName(summary.name, uiLanguage, prefs.nameDisplay),
@@ -394,7 +407,17 @@ export function CardsPage() {
       ? t("search.neutral")
       : (quickBar.find((item) => item.code === code)?.label ?? code)
   const filterCount = activeFilterCount(query)
-  const hasConditions = query.text !== "" || filterCount > 0
+  const hasConditions = query.text !== "" || query.classes.length > 0 || filterCount > 0
+  const panelOpen = prefs.filterPanelOpen
+  const resultCount =
+    page !== null ? (
+      <p className="shrink-0 text-13 whitespace-nowrap text-text-2" aria-live="polite">
+        <b className="font-semibold text-text-1 tabular-nums">
+          {new Intl.NumberFormat(uiLanguage).format(page.total)}
+        </b>{" "}
+        {query.unit === "printing" ? t("results.countPrintingUnit") : t("results.countUnit")}
+      </p>
+    ) : null
   const view = chosenView ?? prefs.viewMode
   const unsupported = queryError?.kind === "unsupported-query"
   const pending = !queryError && page === null
@@ -471,6 +494,12 @@ export function CardsPage() {
           expanded={listOpen}
           {...(active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
           filterCount={filterCount}
+          filtersOpen={panelOpen}
+          filtersId={panelId}
+          onToggleFilters={() => {
+            prefsStore.set({ filterPanelOpen: !panelOpen })
+          }}
+          summary={resultCount}
         />
         {focused && !listOpen && readiness.phase !== "error" && (
           <p role="status" className="mt-2 text-13 text-text-2">
@@ -498,6 +527,7 @@ export function CardsPage() {
           </div>
         )}
       </div>
+      {/* The class row is the one filter outside the panel: always visible, so the page is never bare. */}
       {quickBar.length > 0 && (
         <ClassQuickBar
           label={t("search.classes")}
@@ -508,65 +538,81 @@ export function CardsPage() {
           }}
         />
       )}
-      <div className="flex flex-wrap items-start gap-2">
-        <TypeFilter
-          options={printingOptions?.type}
-          textLang={textLang}
-          selected={query.types}
-          onChange={(types) => {
-            commit({ ...query, types })
-          }}
-        />
-        <RarityFilter
-          rarities={(rarities ?? []).map((rarity) => ({
-            code: rarity.code,
-            label: rarity.name.translations[textLang] ?? rarity.name.original.text,
-          }))}
-          options={printingOptions?.rarity}
-          selected={query.rarities}
-          onChange={(rarities) => {
-            commit({ ...query, rarities })
-          }}
-        />
-      </div>
-      {hasConditions && (
-        <div
-          role="group"
-          aria-label={t("results.conditions")}
-          className="flex flex-wrap items-center gap-2"
-        >
-          {query.text !== "" && (
-            <Chip
-              removeLabel={t("results.removeCondition", { label: query.text })}
-              onRemove={() => {
-                commit({ ...query, text: "" })
+      {/* The chip row sits with the class row, above the panel, so it stays in view either way. */}
+      <ConditionChips
+        query={query}
+        edition={edition}
+        classLabel={classLabel}
+        rarityLabel={(code) => {
+          const option = rarities?.find((item) => item.code === code)
+          return option
+            ? (option.name.translations[textLang] ?? option.name.original.text)
+            : code.toUpperCase()
+        }}
+        typeLabel={(code) => {
+          const option = printingOptions?.type.types.find((item) => item.code === code)
+          return option ? (option.name.translations[textLang] ?? option.name.original.text) : code
+        }}
+        setLabel={(code) => {
+          const option = sets?.find((item) => item.code === code)
+          return option
+            ? `${option.publicCode ?? option.code} ${option.name.translations[textLang] ?? option.name.original.text}`
+            : code
+        }}
+        groups={{
+          pr: prStyleTokens(printingOptions?.rarity.styles ?? []),
+          token: tokenKindTokens(printingOptions?.type.typeCounts ?? {}),
+          leader: leaderFrameTokens(printingOptions?.type.typeCounts ?? {}),
+        }}
+        onChange={commit}
+        onClear={() => {
+          commit(DEFAULT_QUERY)
+        }}
+      />
+      <FilterPanel
+        id={panelId}
+        open={panelOpen}
+        query={query}
+        onChange={commit}
+        edition={edition}
+        onEditionChange={commitEdition}
+        facets={
+          <>
+            <RarityFilter
+              rarities={(rarities ?? []).map((rarity) => ({
+                code: rarity.code,
+                label: rarity.name.translations[textLang] ?? rarity.name.original.text,
+              }))}
+              options={printingOptions?.rarity}
+              edition={edition}
+              selected={query.rarities}
+              onChange={(rarities) => {
+                commit({ ...query, rarities })
               }}
-            >
-              {query.text}
-            </Chip>
-          )}
-          {query.classes.map((code) => (
-            <Chip
-              key={code}
-              removeLabel={t("results.removeCondition", { label: classLabel(code) })}
-              onRemove={() => {
-                commit(toggleClass(query, code))
+            />
+            <TypeFilter
+              options={printingOptions?.type}
+              textLang={textLang}
+              selected={query.types}
+              onChange={(types) => {
+                commit({ ...query, types })
               }}
-            >
-              {classLabel(code)}
-            </Chip>
-          ))}
-          <button
-            type="button"
-            onClick={() => {
-              commit(DEFAULT_QUERY)
-            }}
-            className="h-8 rounded-pill px-2 text-13 font-semibold text-accent-text hover:bg-surface-2"
-          >
-            {t("results.clearConditions")}
-          </button>
-        </div>
-      )}
+            />
+            {/* A set page's set comes from its path, so the dropdown would only show one choice. */}
+            {!code && (
+              <SetFilter
+                sets={sets}
+                counts={setCounts}
+                textLang={textLang}
+                selected={query.sets}
+                onChange={(sets) => {
+                  commit({ ...query, sets })
+                }}
+              />
+            )}
+          </>
+        }
+      />
       {unsupported && (
         <Notice
           tone="warning"
@@ -637,12 +683,6 @@ export function CardsPage() {
       {page !== null && page.total > 0 && (
         <>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <p className="text-13 text-text-2" aria-live="polite">
-              <b className="font-semibold text-text-1 tabular-nums">
-                {new Intl.NumberFormat(uiLanguage).format(page.total)}
-              </b>{" "}
-              {query.unit === "printing" ? t("results.countPrintingUnit") : t("results.countUnit")}
-            </p>
             {view === "list" && <ListColumnPicker />}
             <div className="ml-auto flex flex-wrap items-center gap-2">
               <label className="flex items-center gap-1 text-13">

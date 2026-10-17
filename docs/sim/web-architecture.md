@@ -59,12 +59,12 @@ sim/web/
 
 **使用者決定（2026-09-30）**：卡包選擇依 `product_family.kind` 分成主要分類與下拉選單兩區，套用全站目前選定的 JP／EN 版本，兩區結果不混。
 
-| 顯示區域 | kind | 顯示分類 |
-| --- | --- | --- |
-| 主要分類 | `booster` | 補充包 |
-| 主要分類 | `collaboration` | 合作包 |
-| 主要分類 | `special_pack` | 特殊卡包 |
-| 主要分類 | `promo` | PR |
+| 顯示區域                   | kind                       | 顯示分類             |
+| -------------------------- | -------------------------- | -------------------- |
+| 主要分類                   | `booster`                  | 補充包               |
+| 主要分類                   | `collaboration`            | 合作包               |
+| 主要分類                   | `special_pack`             | 特殊卡包             |
+| 主要分類                   | `promo`                    | PR                   |
 | 下拉選單「預組與特別商品」 | `deck`、`special`、`other` | 預組、特別商品、其他 |
 
 `special_pack` 表示隨機抽取、但不是補充包／合作包／PR 的特殊卡包，例如 SP01「スペシャルパック『シーサイド・メモリーズ』」。BSF2024、BSF2025、NY2024、GFE01 是有自己卡號的非賣品活動獎品，保留各自家族，`kind=promo`，顯示在 PR 分類底下；這項分組不合併歸檔代號或改寫 owner。GFB01a–d 使用 `kind=deck`，因為 Gloryfinder Bundle 是四副固定預組的同捆商品，顯示於「預組與特別商品」。
@@ -77,7 +77,9 @@ sim/web/
 interface QueryState {
   text: string;
   classes: ClassCode[];
-  cost: { min?: number; max?: number }; // 7 代表 ≥7
+  cost: number[]; // 選取的消費值，0–10，10 代表 ≥10；空陣列＝不限
+  attack: number[]; // 選取的攻擊力值，0–10，10 代表 ≥10
+  defense: number[]; // 選取的生命值，0–10，10 代表 ≥10
   types: TypeCode[];
   mechanics: Record<KeywordId, "has" | "not">; // 沒列＝不管
   sets: SetCode[];
@@ -89,8 +91,9 @@ interface QueryState {
 }
 ```
 
-`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost type mech set rarity alt unit sort view`）之間互轉：
-`set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
+`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type mech set rarity alt unit sort order view`）之間互轉：
+`set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code；`cost`、`atk`、`def` 是逗號分隔的數值清單，
+同一統計值內取聯集、不同統計值之間取交集。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
 `view` 是例外：URL 有帶就照 URL；沒帶就用偏好 `viewMode`；使用者切換檢視時同時寫 URL 與偏好。
 
 依使用者 2026-09-30 的規格變更（build-db §15），`/sets/:code` 的路徑代號是 `product_family.public_code`，解析到同一歸檔類別後，以其 `code` 預設 `set=`，標頭顯示歸檔類別名稱。卡包瀏覽與搜尋依已登錄的 `printing.home_set_id` 篩選，且只納入 `printing.region` 符合目前 `cardEdition`（`jp`／`en`，§3）的版次，兩區結果不混；合併卡片顯示也只使用命中的版次。商品名稱、發售日與收錄供單卡頁補充資訊及連結，不驅動 `set=` 篩選；獨立的初收錄 facet 依 build-db §15 的協調者決定，資料缺少或未知時標示 coverage，不因此隱藏卡片。
@@ -128,11 +131,12 @@ interface QueryState {
 | 偏好                           | `settings/prefs.ts`：一個 `Prefs` 物件、`useSyncExternalStore`、localStorage `sve-kit:prefs`（有版本欄、無效值回預設、讀寫都 try／catch） |
 | 最近查看                       | `settings/recent.ts`：最多 8 筆                                                                                                           |
 | 快照載入狀態與索引             | `data/status.ts` 的 store，`useSnapshot()`／`useCard()`／`useDetail()` 訂閱                                                               |
-| 面板開關、篩選草稿、toast      | React state／context，離開頁面即丟                                                                                                        |
+| 篩選面板開合                   | 偏好 `filterPanelOpen`（§3 `Prefs`）；條件本身在 URL，按鈕即時生效                                                                        |
+| toast                          | React state／context，離開頁面即丟                                                                                                        |
 
 `Prefs` 欄位：`uiLanguage`、`cardEdition`（`jp`／`en`，預設 `jp`）、`nameDisplay`（`translated`／`original`／`both`）、`effectLanguage`（同）、
 `symbolLabels`、`theme`（`system`／`light`／`dark`）、`accent`（`amber`／`teal`／`red`／`null`＝依主題預設）、`banRegion`（`jp`／`en`）、
-`gridDensity`（2／3）、`viewMode`。
+`gridDensity`（2／3）、`viewMode`、`filterPanelOpen`（查卡篩選面板是否展開，預設收合）。
 
 ## 4. 資料層（`src/data/`）
 
@@ -273,22 +277,22 @@ interface QueryState {
 
 共用數值與 [`index.css`](../../sim/web/src/styles/index.css) 一致：
 
-| 項目 | 數值 |
-| --- | --- |
-| 字級 | 11、12、13、14、15、16、17、18、20、22、24；實際值為該數字除以 16 的 rem，隨根字級縮放 |
-| 效果文字行高 | 1.75 |
-| 圓角（px） | badge 5、sm 6、card 8、control 10、button 12、block 14、pill 16、dialog 18、sheet 20 |
+| 項目         | 數值                                                                                   |
+| ------------ | -------------------------------------------------------------------------------------- |
+| 字級         | 11、12、13、14、15、16、17、18、20、22、24；實際值為該數字除以 16 的 rem，隨根字級縮放 |
+| 效果文字行高 | 1.75                                                                                   |
+| 圓角（px）   | badge 5、sm 6、card 8、control 10、button 12、block 14、pill 16、dialog 18、sheet 20   |
 
 ## 9. 自動把關與測試
 
-| 層        | 內容                                                                                                                                                                                                                          |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ESLint    | 顏色只能 token、禁 `dark:`、禁 `w-screen`／`h-screen`、禁任意值固定寬、禁寫死介面文字、資料／設定層邊界、a11y strict（規則 fixture 有測試）                                                                                   |
-| Stylelint | 非 token 檔禁色碼、禁 `vh`、禁 `!important`                                                                                                                                                                                   |
-| 型別      | TS strict＋額外選項；快照型別與常數表                                                                                                                                                                                         |
-| Vitest    | `domain/`、`data/`、`settings/` 的單元測試；元件測試只測行為（面板草稿／套用、鍵盤、卡文渲染、卡圖佔位、路由呈現規則、對話框焦點）；靜態檢查（i18n、token、theme-boot）；假資料可被 reader 載入；契約反例（每個拒絕條件一例） |
-| 腳本      | `knip`（手動）、首屏體積基準（只記錄不設門檻）                                                                                                                                                                                |
-| 真瀏覽器  | 不在 `bun run check` 內；版面以真瀏覽器在固定裝置尺寸與深淺色下的 DOM 幾何量測驗收（無水平捲動、主要觸控目標尺寸）                                                                                                            |
+| 層        | 內容                                                                                                                                                                                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ESLint    | 顏色只能 token、禁 `dark:`、禁 `w-screen`／`h-screen`、禁任意值固定寬、禁寫死介面文字、資料／設定層邊界、a11y strict（規則 fixture 有測試）                                                                                                                                           |
+| Stylelint | 非 token 檔禁色碼、禁 `vh`、禁 `!important`                                                                                                                                                                                                                                           |
+| 型別      | TS strict＋額外選項；快照型別與常數表                                                                                                                                                                                                                                                 |
+| Vitest    | `domain/`、`data/`、`settings/` 的單元測試；元件測試只測行為（篩選面板開合與條件按鈕；第一版即時生效，草稿制是 V3 待決方向、尚未實作。鍵盤、卡文渲染、卡圖佔位、路由呈現規則、對話框焦點）；靜態檢查（i18n、token、theme-boot）；假資料可被 reader 載入；契約反例（每個拒絕條件一例） |
+| 腳本      | `knip`（手動）、首屏體積基準（只記錄不設門檻）                                                                                                                                                                                                                                        |
+| 真瀏覽器  | 不在 `bun run check` 內；版面以真瀏覽器在固定裝置尺寸與深淺色下的 DOM 幾何量測驗收（無水平捲動、主要觸控目標尺寸）                                                                                                                                                                    |
 
 `bun run check`（Prettier、ESLint、Stylelint、`tsc -b`、Vitest、build）是合併的最低門檻。
 

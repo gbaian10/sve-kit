@@ -46,6 +46,8 @@ export interface Prefs {
   readonly collapsedText: CollapsedText
   readonly showFlavorText: boolean
   readonly termEmphasis: boolean
+  /** Whether the card list's filter panel is expanded. */
+  readonly filterPanelOpen: boolean
   readonly theme: ThemePref
   /** null = the theme's default accent. */
   readonly accent: Accent | null
@@ -71,6 +73,7 @@ export const DEFAULT_PREFS: Prefs = {
   collapsedText: { effectOriginal: false, flavorOriginal: false, sectionOriginal: false },
   showFlavorText: true,
   termEmphasis: true,
+  filterPanelOpen: false,
   theme: "system",
   accent: null,
   banRegion: "jp",
@@ -124,6 +127,7 @@ const sanitizers: Sanitizers = {
   collapsedText: withDefault(isCollapsedText, DEFAULT_PREFS.collapsedText),
   showFlavorText: withDefault(isBoolean, DEFAULT_PREFS.showFlavorText),
   termEmphasis: withDefault(isBoolean, DEFAULT_PREFS.termEmphasis),
+  filterPanelOpen: withDefault(isBoolean, DEFAULT_PREFS.filterPanelOpen),
   theme: withDefault(isThemePref, DEFAULT_PREFS.theme),
   accent: withDefault(isNullableAccent, DEFAULT_PREFS.accent),
   banRegion: withDefault(isCardEdition, DEFAULT_PREFS.banRegion),

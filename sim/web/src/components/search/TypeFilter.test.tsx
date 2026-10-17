@@ -39,22 +39,22 @@ function Harness() {
 
 it("restores frame URLs and supports mixed, parent and individual selections", async () => {
   await renderInRouter(<Harness />)
-  await userEvent.click(screen.getByRole("button", { name: /類型/u }))
-  const group = screen.getByRole("group", { name: "類型" })
-  const parent = within(group).getByRole("checkbox", { name: "主戰者" })
-  expect(parent).toBePartiallyChecked()
+  const parent = screen.getByRole("button", { name: "主戰者" })
+  expect(parent).toHaveAttribute("aria-pressed", "mixed")
+  await userEvent.click(screen.getByRole("button", { name: "主戰者的細項" }))
+  const group = screen.getByRole("group", { name: "主戰者" })
   expect(within(group).getByRole("checkbox", { name: "白框" })).toBeChecked()
   expect(within(group).getByRole("checkbox", { name: "金框" })).toHaveAccessibleDescription("2")
   await userEvent.click(parent)
-  expect(parent).toBeChecked()
+  expect(parent).toHaveAttribute("aria-pressed", "true")
   expect(screen.getByLabelText("url")).toHaveTextContent(/^type=leader$/u)
   await userEvent.click(within(group).getByRole("checkbox", { name: "白框" }))
-  expect(parent).toBePartiallyChecked()
+  expect(parent).toHaveAttribute("aria-pressed", "mixed")
   expect(screen.getByLabelText("url")).toHaveTextContent(/^type=leader%3Agold$/u)
   const restored = parseQuery(new URLSearchParams(screen.getByLabelText("url").textContent))
   expect(restored.types).toEqual(["leader:gold"])
   await userEvent.click(within(group).getByRole("checkbox", { name: "金框" }))
-  expect(parent).not.toBeChecked()
+  expect(parent).toHaveAttribute("aria-pressed", "false")
   expect(screen.getByLabelText("url")).toBeEmptyDOMElement()
 })
 
@@ -67,7 +67,7 @@ function GroupHarness() {
     ["amulet", "護符"],
     ["crest", "紋章"],
     ["ep", "EP"],
-    ["token", "Token（詞表）"],
+    ["token", "衍生物"],
     ["spell", "法術"],
     ["follower", "從者"],
   ] as const
@@ -110,43 +110,52 @@ function GroupHarness() {
   )
 }
 
-it("groups Token children, supports both parent trees and restores union URLs", async () => {
+it("orders the chips, names the token chip Token and keeps its kinds behind the popover", async () => {
   await renderInRouter(<GroupHarness />)
-  await userEvent.click(screen.getByRole("button", { name: /類型/u }))
-  const group = screen.getByRole("group", { name: "類型" })
-  const lists = within(group)
-    .getAllByRole("list")
-    .filter((list) => !list.parentElement?.closest("ul"))
+  const row = screen.getByRole("group", { name: "類型" })
   expect(
-    lists.map((list) =>
-      within(list)
-        .getAllByRole("checkbox")
-        .map((checkbox) => checkbox.getAttribute("aria-label")),
-    ),
+    within(row)
+      .getAllByRole("button")
+      .map((button) => button.getAttribute("aria-label")),
   ).toEqual([
-    ["從者", "法術", "護符", "Token（詞表）", "從者", "法術", "護符", "紋章", "裝備"],
-    ["主戰者", "金框", "白框"],
-    ["EP", "SEP"],
+    "清除類型",
+    "從者",
+    "法術",
+    "護符",
+    "Token",
+    "Token的細項",
+    "主戰者",
+    "主戰者的細項",
+    "EP",
+    "SEP",
   ])
-  const parent = within(group).getByRole("checkbox", { name: "Token（詞表）" })
-  const children = within(group).getByRole("list", { name: "Token（詞表）" })
-  expect(parent).toBePartiallyChecked()
-  expect(within(children).getByRole("checkbox", { name: "法術" })).toBeChecked()
+  expect(screen.queryByText("衍生物")).not.toBeInTheDocument()
+  const parent = within(row).getByRole("button", { name: "Token" })
+  expect(parent).toHaveAttribute("aria-pressed", "mixed")
+  await userEvent.click(within(row).getByRole("button", { name: "Token的細項" }))
+  const kinds = screen.getByRole("group", { name: "Token" })
+  expect(
+    within(kinds)
+      .getAllByRole("checkbox")
+      .map((checkbox) => checkbox.getAttribute("aria-label")),
+  ).toEqual(["從者", "法術", "護符", "紋章", "裝備"])
+  expect(within(kinds).getByRole("checkbox", { name: "法術" })).toBeChecked()
   await userEvent.click(parent)
-  expect(parent).toBeChecked()
+  expect(parent).toHaveAttribute("aria-pressed", "true")
   expect(screen.getByLabelText("url")).toHaveTextContent(/^type=token$/u)
-  await userEvent.click(within(children).getByRole("checkbox", { name: "護符" }))
-  expect(parent).toBePartiallyChecked()
+  await userEvent.click(within(kinds).getByRole("checkbox", { name: "護符" }))
+  expect(parent).toHaveAttribute("aria-pressed", "mixed")
   await userEvent.click(parent)
-  const follower = within(group).getAllByRole("checkbox", { name: "從者" })[0]
-  if (!follower) throw new Error("missing follower")
-  await userEvent.click(follower)
+  // A click on another chip is outside the popover and dismisses it.
+  await userEvent.click(within(row).getByRole("button", { name: "從者" }))
+  expect(kinds).not.toBeVisible()
   expect(parseQuery(new URLSearchParams(screen.getByLabelText("url").textContent)).types).toEqual([
     "follower",
     "token",
   ])
   await userEvent.click(parent)
-  await userEvent.click(within(children).getByRole("checkbox", { name: "法術" }))
+  await userEvent.click(within(row).getByRole("button", { name: "Token的細項" }))
+  await userEvent.click(within(kinds).getByRole("checkbox", { name: "法術" }))
   expect(parseQuery(new URLSearchParams(screen.getByLabelText("url").textContent)).types).toEqual([
     "follower",
     "token:spell",

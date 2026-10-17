@@ -1,19 +1,25 @@
 import { compareCodePoints } from "../normalize"
 import {
-  type CostRange,
+  COST_CAP,
   DEFAULT_QUERY,
   type MechanicState,
   QUERY_SORTS,
   QUERY_UNITS,
   type QueryState,
+  STAT_CAP,
   VIEW_MODES,
 } from "./model"
 
-// URL parameters: q class cost type mech set rarity alt unit sort order view. Lists are comma separated,
-// de-duplicated and sorted so equal states always give equal URLs; unknown values are dropped rather
-// than failing, because URLs arrive from anywhere. `cost` is `min-max`, `min-` or `-max` (7 = 7+).
+// URL parameters: q class cost atk def type mech set rarity alt unit sort order view. Lists are comma
+// separated, de-duplicated and sorted so equal states always give equal URLs; unknown values are
+// dropped rather than failing, because URLs arrive from anywhere. `cost`, `atk` and `def` list the
+// selected values; the cap (7 for cost, 10 for attack and defense) means that value or more.
 const LIST_PARAMS = { classes: "class", types: "type", sets: "set", rarities: "rarity" } as const
-const COST_MAX = 7
+const VALUE_PARAMS = {
+  cost: ["cost", COST_CAP],
+  attack: ["atk", STAT_CAP],
+  defense: ["def", STAT_CAP],
+} as const
 const CODE = /^[a-z][a-z0-9_:-]*$/u
 
 function list(params: URLSearchParams, name: string): string[] {
@@ -30,25 +36,16 @@ function oneOf<T extends string>(value: string | null, allowed: readonly T[]): T
   return allowed.find((item) => item === value)
 }
 
-function costBound(text: string): number | undefined {
-  if (!/^\d$/u.test(text)) return undefined
-  const value = Number(text)
-  return value <= COST_MAX ? value : undefined
-}
-
-function parseCost(text: string | null): CostRange {
-  if (text === null) return {}
-  const [minText = "", maxText = ""] = text.includes("-") ? text.split("-", 2) : [text, text]
-  const min = costBound(minText)
-  const max = costBound(maxText)
-  if (min !== undefined && max !== undefined && min > max) return {}
-  return { ...(min === undefined ? {} : { min }), ...(max === undefined ? {} : { max }) }
-}
-
-function formatCost(cost: CostRange): string | undefined {
-  if (cost.min === undefined && cost.max === undefined) return undefined
-  if (cost.min !== undefined && cost.min === cost.max) return String(cost.min)
-  return `${cost.min === undefined ? "" : String(cost.min)}-${cost.max === undefined ? "" : String(cost.max)}`
+function values(params: URLSearchParams, name: string, cap: number): number[] {
+  const selected =
+    params
+      .get(name)
+      ?.split(",")
+      .map((value) => value.trim())
+      .filter((value) => /^\d{1,2}$/u.test(value))
+      .map(Number)
+      .filter((value) => value <= cap) ?? []
+  return [...new Set(selected)].sort((a, b) => a - b)
 }
 
 function parseMechanics(text: string | null): Record<string, MechanicState> {
@@ -66,7 +63,9 @@ export function parseQuery(params: URLSearchParams): QueryState {
   return {
     text: params.get("q")?.trim() ?? "",
     classes: list(params, LIST_PARAMS.classes),
-    cost: parseCost(params.get("cost")),
+    cost: values(params, VALUE_PARAMS.cost[0], VALUE_PARAMS.cost[1]),
+    attack: values(params, VALUE_PARAMS.attack[0], VALUE_PARAMS.attack[1]),
+    defense: values(params, VALUE_PARAMS.defense[0], VALUE_PARAMS.defense[1]),
     types: list(params, LIST_PARAMS.types),
     mechanics: parseMechanics(params.get("mech")),
     sets: list(params, LIST_PARAMS.sets),
@@ -86,8 +85,17 @@ export function formatQuery(state: QueryState): URLSearchParams {
     const values = [...new Set(state[field])].sort(compareCodePoints)
     if (values.length > 0) params.set(name, values.join(","))
   }
-  const cost = formatCost(state.cost)
-  if (cost !== undefined) params.set("cost", cost)
+  for (const [field, [name, cap]] of Object.entries(VALUE_PARAMS) as [
+    keyof typeof VALUE_PARAMS,
+    readonly [string, number],
+  ][]) {
+    const selected = [
+      ...new Set(
+        state[field].filter((value) => Number.isInteger(value) && value >= 0 && value <= cap),
+      ),
+    ].sort((a, b) => a - b)
+    if (selected.length > 0) params.set(name, selected.join(","))
+  }
   const mechanics = Object.entries(state.mechanics)
     .sort(([a], [b]) => compareCodePoints(a, b))
     .map(([id, state]) => (state === "not" ? `-${id}` : id))

@@ -4,13 +4,22 @@ export interface SwitchProps {
   readonly checked: boolean
   readonly onChange: (checked: boolean) => void
   readonly label: string
+  /** Id of a longer description shown beside the switch. */
+  readonly describedBy?: string | undefined
   readonly size?: "md" | "sm"
   readonly className?: string
 }
 
 // Design §7: 48×28 track (small 36×22); on = accent with an accent-ink knob, off = surface-3 with
 // a strong border. The button itself is 44px tall so the touch target meets the phone minimum.
-export function Switch({ checked, onChange, label, size = "md", className }: SwitchProps) {
+export function Switch({
+  checked,
+  onChange,
+  label,
+  describedBy,
+  size = "md",
+  className,
+}: SwitchProps) {
   const track = size === "md" ? "h-7 w-12" : "h-5.5 w-9"
   const knob = size === "md" ? "size-5.5" : "size-4"
   const travel = size === "md" ? "translate-x-5" : "translate-x-3.5"
@@ -20,6 +29,7 @@ export function Switch({ checked, onChange, label, size = "md", className }: Swi
       role="switch"
       aria-checked={checked}
       aria-label={label}
+      aria-describedby={describedBy}
       onClick={() => {
         onChange(!checked)
       }}

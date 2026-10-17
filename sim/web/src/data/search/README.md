@@ -6,7 +6,8 @@ recent printing summaries, set `releases` and `count`. Replies carry generation,
 and query ID; old replies cannot replace current results. Suggestions preserve exact printing
 identity and name/alias ranking. Missing recent IDs explicitly return `not-in-edition`.
 
-Search supports card/printing units, text, classes, printing home-set family codes and cost. Types, rarities,
+Search supports card/printing units, text, classes, printing home-set family codes and the cost, attack
+and defense value selections (the last button collects every value at or above it). Types, rarities,
 mechanics, alternate-art filtering, the art unit and other sorting return `unsupported-query`.
 The list shows only cards released in the selected edition. Names remain multilingual, and
 UI language is independent of card edition. Card detail retains its on-demand compatibility

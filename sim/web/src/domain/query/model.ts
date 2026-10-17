@@ -15,16 +15,19 @@ export type MechanicState = "has" | "not"
 
 export const NEUTRAL_CLASS = "neutral"
 
-export interface CostRange {
-  readonly min?: number
-  /** 7 means 7 or more. */
-  readonly max?: number
-}
+/** Cost, attack and defense buttons run 0–9 and "10+"; the cap stands for that number or more. */
+export const COST_CAP = 10
+export const STAT_CAP = 10
 
 export interface QueryState {
   readonly text: string
   readonly classes: readonly string[]
-  readonly cost: CostRange
+  /** Selected cost values (0–7, 7 = 7 or more); empty means any cost. */
+  readonly cost: readonly number[]
+  /** Selected attack values (0–10, 10 = 10 or more); empty means any. */
+  readonly attack: readonly number[]
+  /** Selected defense values (0–10, 10 = 10 or more); empty means any. */
+  readonly defense: readonly number[]
   readonly types: readonly string[]
   /** Keyword ids not listed are "either". */
   readonly mechanics: Readonly<Record<string, MechanicState>>
@@ -41,7 +44,9 @@ export interface QueryState {
 export const DEFAULT_QUERY: QueryState = {
   text: "",
   classes: [],
-  cost: {},
+  cost: [],
+  attack: [],
+  defense: [],
   types: [],
   mechanics: {},
   sets: [],
@@ -52,10 +57,12 @@ export const DEFAULT_QUERY: QueryState = {
 }
 
 /** Number of filter facets set beyond the text, for the filter button's badge. */
+// The class row is always on screen, so the filter button's badge leaves classes out.
 export function activeFilterCount(state: QueryState): number {
   return (
-    (state.classes.length > 0 ? 1 : 0) +
-    (state.cost.min !== undefined || state.cost.max !== undefined ? 1 : 0) +
+    (state.cost.length > 0 ? 1 : 0) +
+    (state.attack.length > 0 ? 1 : 0) +
+    (state.defense.length > 0 ? 1 : 0) +
     (state.types.length > 0 ? 1 : 0) +
     (Object.keys(state.mechanics).length > 0 ? 1 : 0) +
     (state.sets.length > 0 ? 1 : 0) +
@@ -71,4 +78,25 @@ export function toggleClass(state: QueryState, code: string): QueryState {
     ? state.classes.filter((item) => item !== code)
     : [...state.classes, code].sort()
   return { ...state, classes }
+}
+
+/** Adds or removes one numeric value; the result stays sorted so URLs stay canonical. */
+export function toggleValue(values: readonly number[], value: number): number[] {
+  return values.includes(value)
+    ? values.filter((item) => item !== value)
+    : [...values, value].sort((a, b) => a - b)
+}
+
+/**
+ * Whether a card's stat passes a value selection: no selection passes everything, otherwise the
+ * stat must be one of the selected values, with the cap collecting every value at or above it.
+ */
+export function statSelected(
+  values: readonly number[],
+  cap: number,
+  stat: number | null | undefined,
+): boolean {
+  if (values.length === 0) return true
+  if (stat === null || stat === undefined || Number.isNaN(stat)) return false
+  return values.includes(Math.min(stat, cap))
 }

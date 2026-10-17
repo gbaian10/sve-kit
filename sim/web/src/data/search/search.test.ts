@@ -328,7 +328,7 @@ describe("complete Worker catalog generations", () => {
     }
   })
 
-  it("cost bounds read the opened printing's summary, and a max of 7 means 7 or more", async () => {
+  it("cost values read the opened printing's summary, and 10 means 10 or more", async () => {
     const served = origin()
     const baseline = createSnapshotClient(base, { fetch: served.fetcher })
     await baseline.load()
@@ -343,20 +343,17 @@ describe("complete Worker catalog generations", () => {
     h.session.load(base, "jp", "preview")
     await h.settled()
     const totals: number[] = []
-    for (const cost of [{ min: 2, max: 3 }, { min: 7 }, { max: 7 }, { max: 1 }]) {
+    for (const cost of [[2, 3], [10], [], [0, 1], [7]]) {
       h.channel.search({ ...query, state: { ...CARD_QUERY, cost } })
       await h.queried()
       const result = h.status().result
       if (result.phase !== "complete") throw new Error("missing result")
-      const upper = cost.max !== undefined && cost.max < 7 ? cost.max : undefined
       const expected =
-        cost.min === undefined && upper === undefined
+        cost.length === 0
           ? all
           : all.filter(
               (summary) =>
-                typeof summary?.cost === "number" &&
-                (cost.min === undefined || summary.cost >= cost.min) &&
-                (upper === undefined || summary.cost <= upper),
+                typeof summary?.cost === "number" && cost.includes(Math.min(summary.cost, 10)),
             )
       expect(result.page.total).toBe(expected.length)
       totals.push(result.page.total)
@@ -1059,7 +1056,12 @@ it("cost columns preserve the signed safe integers accepted by the snapshot read
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
-  for (const cost of [-3, 2 ** 40]) {
+  // A huge cost lands in the 10+ bucket and nowhere else; a negative one matches no button at all.
+  // A column stored as 32-bit integers would wrap both into the small buttons.
+  for (const [cost, matching] of [
+    [2 ** 40, [10]],
+    [-3, []],
+  ] as [number, number[]][]) {
     const columns = new BootstrapColumns()
     columns.ingest(
       snapshot.bootstrap.map((fragment) =>
@@ -1070,13 +1072,81 @@ it("cost columns preserve the signed safe integers accepted by the snapshot read
     )
     columns.seal()
     const index = new SearchIndex(columns, "jp")
-    const page = index.search({ ...query, state: { ...CARD_QUERY, cost: { min: cost } } })
-    expect(page.total).toBeGreaterThan(0)
-    expect(page.items.every((item) => item.summary?.cost === cost)).toBe(true)
-    expect(
-      index.search({ ...query, state: { ...CARD_QUERY, cost: { min: cost + 1 } } }).total,
-    ).toBe(0)
+    const all = index.search({ ...query, state: CARD_QUERY }).total
+    expect(all).toBeGreaterThan(0)
+    for (const value of [0, 1, 2, 3, 4, 5, 6, 7]) {
+      const page = index.search({ ...query, state: { ...CARD_QUERY, cost: [value] } })
+      expect(page.total, String(value)).toBe(matching.includes(value) ? all : 0)
+      expect(page.items.every((item) => item.summary?.cost === cost)).toBe(true)
+    }
   }
+})
+
+it("attack and defense values union within a stat, intersect across stats, and 10 means 10 or more", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const columns = new BootstrapColumns()
+  columns.ingest(snapshot.bootstrap)
+  columns.seal()
+  const index = new SearchIndex(columns, "jp")
+  const all = index.search({ ...query, state: CARD_QUERY }).items
+  const bucket = (value: number | null | undefined) =>
+    typeof value === "number" ? Math.min(value, 10) : null
+  const count = (state: Partial<typeof CARD_QUERY>) =>
+    index.search({ ...query, state: { ...CARD_QUERY, ...state } }).total
+  const attacks = new Set(all.map((item) => bucket(item.summary?.attack)).filter((v) => v !== null))
+  expect(attacks.size).toBeGreaterThan(1)
+  const [first, second] = [...attacks].sort((a, b) => a - b)
+  if (first === undefined || second === undefined) throw new Error("need two attack values")
+  const expectAttack = (values: number[]) =>
+    all.filter((item) => {
+      const value = bucket(item.summary?.attack)
+      return value !== null && values.includes(value)
+    }).length
+  expect(count({ attack: [first] })).toBe(expectAttack([first]))
+  expect(count({ attack: [first, second] })).toBe(expectAttack([first, second]))
+  expect(count({ attack: [first, second] })).toBeGreaterThan(count({ attack: [first] }))
+  const defenses = [...new Set(all.map((item) => bucket(item.summary?.defense)))].filter(
+    (v) => v !== null,
+  )
+  const defense = defenses[0]
+  if (defense === undefined) throw new Error("need a defense value")
+  const both = count({ attack: [first, second], defense: [defense] })
+  expect(both).toBe(
+    all.filter((item) => {
+      const atk = bucket(item.summary?.attack)
+      const def = bucket(item.summary?.defense)
+      return atk !== null && [first, second].includes(atk) && def === defense
+    }).length,
+  )
+  expect(both).toBeLessThanOrEqual(count({ attack: [first, second] }))
+  // Spells and amulets have no stats; a stat selection drops them.
+  const statless = all.filter((item) => item.summary?.attack === null).length
+  expect(statless).toBeGreaterThan(0)
+  expect(count({ attack: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] })).toBe(all.length - statless)
+  // Values at or above 10 share the last button.
+  const big = new BootstrapColumns()
+  big.ingest(
+    snapshot.bootstrap.map((fragment) =>
+      fragment.table === "face_revision"
+        ? {
+            ...fragment,
+            rows: fragment.rows.map((row) =>
+              typeof row["attack"] === "number" ? { ...row, attack: 13 } : row,
+            ),
+          }
+        : fragment,
+    ),
+  )
+  big.seal()
+  const bigIndex = new SearchIndex(big, "jp")
+  expect(bigIndex.search({ ...query, state: { ...CARD_QUERY, attack: [10] } }).total).toBe(
+    all.length - statless,
+  )
+  expect(bigIndex.search({ ...query, state: { ...CARD_QUERY, attack: [9] } }).total).toBe(0)
 })
 
 it("cache cleanup still reclaims stale plans when a blob write hits quota", async () => {
@@ -1142,7 +1212,8 @@ it("a stored index image answers every query like the index it was encoded from"
       .map((name) => ({ ...CARD_QUERY, text: name.text.slice(0, 2) })),
     { ...CARD_QUERY, classes: ["forestcraft"] },
     { ...CARD_QUERY, sets: ["bp01"] },
-    { ...CARD_QUERY, cost: { min: 2, max: 3 } },
+    { ...CARD_QUERY, cost: [2, 3] },
+    { ...CARD_QUERY, attack: [1, 10], defense: [2] },
   ]
   for (const edition of ["jp", "en"] as const) {
     const columns = new BootstrapColumns()
@@ -1648,7 +1719,7 @@ it("printing pages preserve every edition printing, numbering, filters and cache
       ...CARD_QUERY,
       unit: "printing" as const,
       classes: ["forestcraft"],
-      cost: { max: 1 },
+      cost: [0, 1],
     }
     h.channel.search({ ...query, edition, state })
     await h.queried()

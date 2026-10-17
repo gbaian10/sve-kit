@@ -1,4 +1,4 @@
-import { type ChangeEvent, type KeyboardEvent, type RefObject } from "react"
+import { type ChangeEvent, type KeyboardEvent, type ReactNode, type RefObject } from "react"
 import { useTranslation } from "react-i18next"
 
 import { cn } from "../ui/cn"
@@ -16,7 +16,12 @@ export interface SearchBarProps {
   readonly activeOptionId?: string
   /** Facets set beyond the text; 0 hides the badge, undefined hides the filter button. */
   readonly filterCount?: number
-  readonly onOpenFilters?: () => void
+  /** The filter panel this button expands; `filtersId` is the panel element's id. */
+  readonly filtersOpen?: boolean
+  readonly filtersId?: string
+  readonly onToggleFilters?: () => void
+  /** Rendered after the filter button: the current result count. */
+  readonly summary?: ReactNode
 }
 
 // Design 04: 44px input, radius 12, surface-1 with a 1px border; the filter button beside it.
@@ -31,7 +36,10 @@ export function SearchBar({
   expanded,
   activeOptionId,
   filterCount,
-  onOpenFilters,
+  filtersOpen = false,
+  filtersId,
+  onToggleFilters,
+  summary,
 }: SearchBarProps) {
   const { t } = useTranslation()
   return (
@@ -107,12 +115,13 @@ export function SearchBar({
         <button
           type="button"
           aria-label={t("search.filters")}
-          title={onOpenFilters ? t("search.filters") : t("search.filtersSoon")}
-          aria-disabled={onOpenFilters === undefined}
-          onClick={onOpenFilters}
+          title={t("search.filters")}
+          aria-expanded={filtersOpen}
+          aria-controls={filtersId}
+          onClick={onToggleFilters}
           className={cn(
-            "relative flex size-11 shrink-0 items-center justify-center rounded-button border border-border bg-surface-1 text-text-1",
-            onOpenFilters ? "hover:bg-surface-2" : "text-text-3",
+            "relative flex size-11 shrink-0 items-center justify-center rounded-button border text-text-1 hover:bg-surface-2",
+            filtersOpen ? "border-text-1 bg-surface-3" : "border-border bg-surface-1",
           )}
         >
           <svg
@@ -133,6 +142,7 @@ export function SearchBar({
           )}
         </button>
       )}
+      {summary}
     </div>
   )
 }
