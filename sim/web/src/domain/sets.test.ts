@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest"
 import {
   datedSets,
   groupSets,
-  packCounts,
   type ProductFacts,
   recentSets,
   type SetFacts,
@@ -115,24 +114,6 @@ describe("datedSets and recentSets", () => {
       { id: "s3", publicCode: "S3", kind: "booster", releasedOn: "2026-02-01" },
     ])
     expect(datedSets(sets, [product([], "jp", "2026-08-01")], "jp")).toEqual([])
-  })
-})
-
-describe("packCounts", () => {
-  it("counts each card once and keeps low-confidence names as translated", () => {
-    expect(
-      packCounts([
-        { key: "c1", translated: true, lowConfidence: false },
-        { key: "c1", translated: true, lowConfidence: false },
-        { key: "c2", translated: true, lowConfidence: true },
-        { key: "c3", translated: false, lowConfidence: false },
-        { key: "c4", translated: false, lowConfidence: true },
-      ]),
-    ).toEqual({ cards: 4, translated: 2, proofreading: 1 })
-  })
-
-  it("reports zero only for a complete empty set", () => {
-    expect(packCounts([])).toEqual({ cards: 0, translated: 0, proofreading: 0 })
   })
 })
 

@@ -1,5 +1,5 @@
 import { DEFAULT_QUERY } from "../../domain/query/model"
-import type { Region, TextLang } from "../../domain/search"
+import type { Region } from "../../domain/search"
 import type { PackCounts } from "../../domain/sets"
 import type { QueryFailure, SearchPage, SearchQuery, SetRelease } from "./index"
 import type { RecentSummary, SuggestedSummary } from "./index"
@@ -114,7 +114,7 @@ export interface SearchChannel {
   suggest(text: string, edition: Region, limit?: number): void
   recent(printingIds: readonly string[], edition: Region): void
   releases(edition: Region): void
-  count(query: SearchQuery, language: TextLang): void
+  count(query: SearchQuery): void
   dispose(): void
 }
 interface ChannelOwner {
@@ -168,8 +168,8 @@ class Channel implements SearchChannel {
   releases(edition: Region): void {
     this.submit({ kind: "releases" }, { state: DEFAULT_QUERY, edition })
   }
-  count(query: SearchQuery, language: TextLang): void {
-    this.submit({ kind: "count", query, language }, query)
+  count(query: SearchQuery): void {
+    this.submit({ kind: "count", query }, query)
   }
   images(printingIds: readonly string[], edition: Region): void {
     this.submit({ kind: "images", printingIds }, { state: DEFAULT_QUERY, edition })

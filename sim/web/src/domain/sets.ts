@@ -124,37 +124,7 @@ export function recentSets<T extends SetFacts & { readonly releasedOn: string }>
     .slice(0, limit)
 }
 
-export interface PackCard {
-  /** One card, whatever printing represents it. */
-  readonly key: string
-  /** Has a name translation in the counted language, low confidence included. */
-  readonly translated: boolean
-  readonly lowConfidence: boolean
-}
-
 export interface PackCounts {
+  /** Distinct cards among the matching printings. */
   readonly cards: number
-  readonly translated: number
-  /** Translated cards whose name translation still awaits proofreading. */
-  readonly proofreading: number
-}
-
-/** Counts each card once, so several printings of a card in the set never inflate the totals. */
-export function packCounts(items: readonly PackCard[]): PackCounts {
-  const cards = new Map<string, { translated: boolean; lowConfidence: boolean }>()
-  for (const item of items) {
-    const known = cards.get(item.key)
-    cards.set(item.key, {
-      translated: (known?.translated ?? false) || item.translated,
-      lowConfidence: (known?.lowConfidence ?? false) || (item.translated && item.lowConfidence),
-    })
-  }
-  let translated = 0
-  let proofreading = 0
-  for (const card of cards.values()) {
-    if (!card.translated) continue
-    translated += 1
-    if (card.lowConfidence) proofreading += 1
-  }
-  return { cards: cards.size, translated, proofreading }
 }

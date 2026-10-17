@@ -36,7 +36,7 @@ export function SetHeader({
     releases.result.phase === "complete" && releases.lastInput?.edition === edition
       ? releases.result.releases?.find((item) => item.id === set.id)
       : undefined
-  const counted = useSetCounts(set.code, edition, "zh-Hant")
+  const counted = useSetCounts(set.code, edition)
   const counts =
     counted.result.phase === "complete" &&
     counted.result.counts &&

@@ -1,4 +1,4 @@
-import type { Region, TextLang } from "../../domain/search"
+import type { Region } from "../../domain/search"
 import type { PackCounts } from "../../domain/sets"
 import type { JsonObject } from "../format-v3/json"
 import type { Files } from "../format-v3/reader"
@@ -38,7 +38,7 @@ export type PurposeRequest =
   | { readonly kind: "suggest"; readonly text: string; readonly limit: number }
   | { readonly kind: "recent"; readonly printingIds: readonly string[] }
   | { readonly kind: "releases" }
-  | { readonly kind: "count"; readonly query: SearchQuery; readonly language: TextLang }
+  | { readonly kind: "count"; readonly query: SearchQuery }
 export type QueryRequest = PurposeRequest & {
   readonly generation: number
   readonly channelId: number
