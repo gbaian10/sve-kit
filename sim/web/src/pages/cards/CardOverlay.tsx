@@ -7,9 +7,10 @@ import {
   cardParamOf,
   type CardPresentation,
   DRAWER_WIDTH_VAR,
-  drawerWidthValue,
+  effectiveDrawerWidth,
   parseCardParam,
   useCardPresentation,
+  useViewportWidth,
   withoutCardParam,
 } from "../../app/card-overlay"
 import {
@@ -22,6 +23,7 @@ import { useRouteEdition } from "../../app/snapshot"
 import { Dialog } from "../../components/ui/Dialog"
 import type { CardRouteInput, CardSummary } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
+import type { QueryState } from "../../domain/query/model"
 import { usePrefs } from "../../settings"
 import type { CardFrame, OverlayLinkTarget } from "../card/CardPage"
 import { routeInput } from "../card/useCardContent"
@@ -33,6 +35,8 @@ export interface CardOverlayArgs {
   /** The list's search string without the card, which previous/next walk. */
   readonly background: string
   readonly pages: number
+  /** What one result cell stands for; decides which cell another printing of the card belongs to. */
+  readonly unit: QueryState["unit"]
   readonly listScroll: RefObject<{ readonly top: number; readonly left: number }>
   readonly root: RefObject<HTMLElement | null>
 }
@@ -43,6 +47,8 @@ export interface CardOverlay {
   readonly open: boolean
   /** The result cell whose card is open, when the list knows it. */
   readonly selected: string | undefined
+  /** The cell the last closed card returns to, highlighted like a cell returned to from the page. */
+  readonly returned: string | undefined
   /** Opens the cell's card in place; false when cards open as pages, so the caller navigates. */
   readonly openInPlace: (summary: CardSummary, key: string) => boolean
   readonly close: () => void
@@ -58,6 +64,13 @@ const DRAWER_CLASS =
   "fixed inset-y-0 right-0 z-40 flex border-l border-border bg-surface-1 shadow-lg outline-none transition-transform duration-200 ease-out starting:translate-x-full data-[state=closing]:translate-x-full motion-reduce:transition-none"
 const EXIT_MS = 200
 
+function cellOf(root: HTMLElement | null, key: string | undefined): HTMLElement | undefined {
+  if (key === undefined || key === "") return undefined
+  return [...(root?.querySelectorAll<HTMLElement>("a[data-result-key]") ?? [])].find(
+    (link) => link.getAttribute("data-result-key") === key,
+  )
+}
+
 /**
  * The card a list shows beside (drawer) or over (modal) its results: `?card=` names it, the list's
  * history entry keeps what the opening cell knew (`overlay`), and the preference decides the frame.
@@ -66,6 +79,7 @@ export function useCardOverlay({
   entry,
   background,
   pages,
+  unit,
   listScroll,
   root,
 }: CardOverlayArgs): CardOverlay {
@@ -76,6 +90,8 @@ export function useCardOverlay({
   const edition = useRouteEdition()
   const presentation = useCardPresentation()
   const { drawerWidth } = usePrefs()
+  const viewportWidth = useViewportWidth()
+  const width = effectiveDrawerWidth(drawerWidth, viewportWidth)
   const param = params.get(CARD_PARAM)
   const overlay = entry.overlay
   const open = param !== null && presentation !== "page"
@@ -107,14 +123,15 @@ export function useCardOverlay({
   const contentParam = open ? param : shownParam
   const target = useMemo(() => parseCardParam(contentParam), [contentParam])
 
+  // One value drives both the drawer and the frame's padding, so they never disagree.
   useEffect(() => {
     if (!drawerOpen) return
     const style = document.documentElement.style
-    style.setProperty(DRAWER_WIDTH_VAR, drawerWidthValue(drawerWidth))
+    style.setProperty(DRAWER_WIDTH_VAR, `${String(width)}px`)
     return () => {
       style.removeProperty(DRAWER_WIDTH_VAR)
     }
-  }, [drawerOpen, drawerWidth])
+  }, [drawerOpen, width])
 
   // The preference says "page" (or changed to it while open): the card URL becomes the page.
   useEffect(() => {
@@ -143,6 +160,7 @@ export function useCardOverlay({
     const alreadyOpen = next.has(CARD_PARAM)
     next.set(CARD_PARAM, cardParamOf(summary))
     const { overlay: previous, ...list } = entry
+    const top = cellOf(root.current, key)?.getBoundingClientRect().top
     const state: ListEntryState = {
       ...list,
       pages,
@@ -152,6 +170,8 @@ export function useCardOverlay({
         resultKey: key,
         ...routeState(summary),
         pushed: alreadyOpen ? (previous?.pushed ?? false) : true,
+        opener: key,
+        ...(top === undefined ? {} : { openerTop: Math.round(top) }),
       },
     }
     void navigate(
@@ -174,24 +194,46 @@ export function useCardOverlay({
   }
 
   // Focus enters the drawer when it opens and returns to the opening cell when it closes, however
-  // it closed; the modal's dialog does the same on its own.
+  // it closed. The frame's padding takes a moment to give the width back, so the cell is put back
+  // where it was only after that; the modal's dialog hands focus back on its own.
   const drawerRef = useRef<HTMLElement>(null)
-  const lastSelected = useRef<string | null>(null)
+  const opened = useRef<{ opener: string; top: number | undefined } | null>(null)
+  const [returned, setReturned] = useState<string | undefined>(undefined)
   const selected = open ? overlay?.resultKey : undefined
+  const opener = open ? (overlay?.opener ?? overlay?.resultKey ?? "") : undefined
+  const openerTop = overlay?.openerTop
   useEffect(() => {
-    if (open) {
-      if (lastSelected.current === null && presentation === "panel") drawerRef.current?.focus()
-      lastSelected.current = selected ?? ""
+    if (opener !== undefined) {
+      if (opened.current === null && presentation === "panel") drawerRef.current?.focus()
+      opened.current = { opener, top: openerTop }
       return
     }
-    const key = lastSelected.current
-    lastSelected.current = null
-    if (key === null || key === "") return
-    const cell = [
-      ...(root.current?.querySelectorAll<HTMLElement>("a[data-result-key]") ?? []),
-    ].find((link) => link.getAttribute("data-result-key") === key)
-    cell?.focus()
-  }, [open, selected, presentation, root])
+    const last = opened.current
+    opened.current = null
+    if (last === null) return
+    const cell = cellOf(root.current, last.opener)
+    if (!cell) return
+    cell.focus({ preventScroll: true })
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    // Rows far from the viewport are laid out from estimates (content-visibility), so one scroll
+    // rarely lands exactly: scroll, let the rows near the cell render, and measure again.
+    let attempts = 0
+    let timer: ReturnType<typeof setTimeout>
+    const settle = () => {
+      const delta = last.top === undefined ? 0 : cell.getBoundingClientRect().top - last.top
+      if (Math.abs(delta) > 1 && attempts < 8) {
+        attempts += 1
+        window.scrollBy({ top: delta })
+        timer = setTimeout(settle, 16)
+        return
+      }
+      setReturned(last.opener)
+    }
+    timer = setTimeout(settle, reduced ? 0 : EXIT_MS + 50)
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [opener, openerTop, presentation, root])
 
   useEffect(() => {
     if (!drawerOpen) return
@@ -221,16 +263,26 @@ export function useCardOverlay({
         : null,
     [target, edition, routeKey],
   )
+  // Another printing of the same card keeps the card's own result cell when cells are cards;
+  // otherwise the printing stands in, and previous/next find it if it is in the loaded results.
   const link = (to: OverlayLinkTarget) => {
     const next = new URLSearchParams(location.search)
     next.set(CARD_PARAM, cardParamOf(to))
     const { overlay: previous, ...list } = entry
+    const sameCard =
+      unit === "card" &&
+      to.route?.cardId !== undefined &&
+      to.route.cardId === previous?.route?.cardId
+    const kept = sameCard ? previous.resultKey : undefined
+    const resultKey = to.resultKey ?? kept ?? to.route?.printingId
     const state: ListEntryState = {
       ...list,
       overlay: {
-        ...(to.resultKey ? { resultKey: to.resultKey } : {}),
+        ...(resultKey === undefined ? {} : { resultKey }),
         ...(to.route ? { route: to.route } : {}),
         ...(previous?.pushed ? { pushed: true } : {}),
+        ...(previous?.opener === undefined ? {} : { opener: previous.opener }),
+        ...(previous?.openerTop === undefined ? {} : { openerTop: previous.openerTop }),
       },
     }
     return { to: { pathname: location.pathname, search: `?${next.toString()}` }, state }
@@ -255,6 +307,7 @@ export function useCardOverlay({
     presentation,
     open,
     selected,
+    returned: open ? undefined : returned,
     openInPlace,
     close,
     drawer: drawerShown ? (
@@ -267,7 +320,7 @@ export function useCardOverlay({
         aria-hidden={drawerOpen ? undefined : true}
         inert={!drawerOpen}
         className={DRAWER_CLASS}
-        style={{ width: `var(${DRAWER_WIDTH_VAR}, ${drawerWidthValue(drawerWidth)})` }}
+        style={{ width: `var(${DRAWER_WIDTH_VAR}, ${String(width)}px)` }}
       >
         <DrawerHandle />
         <div className="@container min-w-0 flex-1 overflow-y-auto">{content}</div>

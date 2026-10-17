@@ -22,7 +22,8 @@
     "fixture:build": "bun run scripts/fixture/main.ts",
     "deploy:dev": "VITE_CDN_BASE=/cdn-preview VITE_SVE_DEV_TOOLS=1 bun run build && wrangler deploy --config wrangler.dev.jsonc",
     "shots": "bun run scripts/screenshots/main.ts",
-    "bench:catalog": "bun run scripts/catalog/main.ts"
+    "bench:catalog": "bun run scripts/catalog/main.ts",
+    "check:drawer": "bun run scripts/drawer-check/main.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",

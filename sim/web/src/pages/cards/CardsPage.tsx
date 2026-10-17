@@ -21,7 +21,12 @@ import {
 } from "react-router"
 
 import { CARD_PARAM, withoutCardParam } from "../../app/card-overlay"
-import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
+import {
+  type CardEntryState,
+  type ListEntryState,
+  routeState,
+  useListEntryState,
+} from "../../app/listEntryState"
 import {
   useListView,
   usePrintingOptions,
@@ -122,15 +127,10 @@ export function CardsPage() {
     // A set page's own set is implied by its path, so each state keeps one URL.
     if (set && next.sets.length === 1 && next.sets[0] === set.code) result.delete("set")
     if (nextEdition === "en") result.set("ed", "en")
-    // The open card stays beside the results while their conditions change.
-    const card = params.get(CARD_PARAM)
-    if (card !== null) result.set(CARD_PARAM, card)
     return result
   }
   const [entry, updateEntry] = useListEntryState()
-  // A new list entry keeps the open card but not the push that opened it: back is the old list.
   const { overlay, ...listEntry } = entry
-  const keptOverlay = overlay ? { overlay: { ...overlay, pushed: false } } : {}
   const listScroll = useRef(entry.listScroll ?? { top: 0, left: 0 })
   const restoreScroll = useRef(entry.scrollY)
   const navigate = useNavigate()
@@ -162,17 +162,40 @@ export function CardsPage() {
     setHighlight({ text: debounced, index })
   }
 
+  // New conditions or a new view push a list entry. With a card open beside the results the card
+  // stays, but history keeps one closable card entry: the new list replaces the card's entry and
+  // the card is pushed again on top, so back closes the card and back again is the old list.
+  const openCardParam = params.get(CARD_PARAM)
+  const commitList = (next: URLSearchParams, state: ListEntryState, preventScrollReset = false) => {
+    const searchOf = (value: URLSearchParams) => {
+      const text = value.toString()
+      return text === "" ? "" : `?${text}`
+    }
+    if (openCardParam === null) {
+      updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
+      setParams(next, { state, preventScrollReset })
+      return
+    }
+    void navigate(
+      { pathname: location.pathname, search: searchOf(next) },
+      { replace: true, state, preventScrollReset },
+    )
+    const withCard = new URLSearchParams(next)
+    withCard.set(CARD_PARAM, openCardParam)
+    void navigate(
+      { pathname: location.pathname, search: searchOf(withCard) },
+      { state: { ...state, overlay: { ...overlay, pushed: true } }, preventScrollReset: true },
+    )
+  }
   const commit = (next: QueryState) => {
-    updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
     setEdit(null)
-    setParams(urlParams(next), { state: keptOverlay })
+    commitList(urlParams(next), {})
   }
   // The list's edition lives in `ed`; the preference follows so other pages open the same edition.
   const commitEdition = (next: Region) => {
     prefsStore.set({ cardEdition: next })
-    updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
     setEdit(null)
-    setParams(urlParams(query, next), { state: keptOverlay })
+    commitList(urlParams(query, next), {})
   }
   const nameOf = useCallback(
     (summary: CardSummary) => displayName(summary.name, uiLanguage, prefs.nameDisplay),
@@ -297,10 +320,13 @@ export function CardsPage() {
     entry,
     background: querySearch(searchState),
     pages,
+    unit: query.unit,
     listScroll,
     root: imageRoot,
   })
   const openInPlace = cardOverlay.openInPlace
+  // The cell a closed card came back to, or the one a card page returned to.
+  const returnAnchor = cardOverlay.open ? undefined : (cardOverlay.returned ?? entry.anchor)
   const openContextRef = useRef({ pages, updateEntry, background, openInPlace })
   useLayoutEffect(() => {
     openContextRef.current = { pages, updateEntry, background, openInPlace }
@@ -790,22 +816,13 @@ export function CardsPage() {
                   }))}
                   value={view}
                   onChange={(next) => {
-                    updateEntry({
-                      pages,
-                      listScroll: listScroll.current,
-                      scrollY: window.scrollY,
-                    })
                     prefsStore.set({ viewMode: next })
                     setEdit(null)
-                    setParams(urlParams({ ...query, view: next }), {
-                      state: {
-                        ...listEntry,
-                        ...keptOverlay,
-                        listScroll: listScroll.current,
-                        scrollY: window.scrollY,
-                      },
-                      preventScrollReset: true,
-                    })
+                    commitList(
+                      urlParams({ ...query, view: next }),
+                      { ...listEntry, listScroll: listScroll.current, scrollY: window.scrollY },
+                      true,
+                    )
                   }}
                 />
               </div>
@@ -815,9 +832,7 @@ export function CardsPage() {
                 cells={cells}
                 images={images}
                 onOpen={openCell}
-                {...(entry.anchor === undefined || cardOverlay.open
-                  ? {}
-                  : { anchor: entry.anchor })}
+                {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
                 {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
               />
             )}
@@ -827,9 +842,7 @@ export function CardsPage() {
                 images={images}
                 onOpen={openCell}
                 artOf={artOf}
-                {...(entry.anchor === undefined || cardOverlay.open
-                  ? {}
-                  : { anchor: entry.anchor })}
+                {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
                 {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
               />
             )}
@@ -850,9 +863,7 @@ export function CardsPage() {
                 scrollPositionRef={listScroll}
                 cells={cells}
                 onOpen={openCell}
-                {...(entry.anchor === undefined || cardOverlay.open
-                  ? {}
-                  : { anchor: entry.anchor })}
+                {...(returnAnchor === undefined ? {} : { anchor: returnAnchor })}
                 {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
               />
             )}

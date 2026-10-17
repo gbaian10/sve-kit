@@ -20,6 +20,10 @@ export interface OverlayEntryState {
   readonly route?: CardEntryState["route"]
   /** Opening pushed a history entry, so closing from the UI pops it instead of replacing. */
   readonly pushed?: boolean
+  /** The result cell that opened the card: focus returns to it when the card closes. */
+  readonly opener?: string
+  /** Where that cell sat in the viewport when it opened, so closing can put it back there. */
+  readonly openerTop?: number
 }
 
 /** What a card entry receives from the list or suggest list that opened it. */
