@@ -211,3 +211,25 @@ it("persists list columns and widths, rejecting settings without an identity col
   )
   expect(readPrefs().listVisibility).toEqual(DEFAULT_PREFS.listVisibility)
 })
+
+it("cleans a saved column order and appends missing columns in default order", () => {
+  localStorage.setItem(
+    PREFS_KEY,
+    JSON.stringify({ v: 1, listOrder: ["effect", "name", "removed", "effect"] }),
+  )
+  expect(readPrefs().listOrder).toEqual([
+    "effect",
+    "name",
+    "number",
+    "rarity",
+    "class",
+    "cost",
+    "attack",
+    "defense",
+  ])
+  const store = createPrefsStore()
+  store.set({ listOrder: readPrefs().listOrder })
+  expect(createPrefsStore().get().listOrder).toEqual(store.get().listOrder)
+  store.set(DEFAULT_PREFS)
+  expect(createPrefsStore().get().listOrder).toEqual(DEFAULT_PREFS.listOrder)
+})

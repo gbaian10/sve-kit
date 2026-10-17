@@ -163,7 +163,14 @@ export default {
     sort: "Sort",
     visibleColumns: "Visible columns",
     resizeColumn: "Resize {{column}} column",
-    columns: { rarity: "Rarity", number: "Number", name: "Name", effect: "Card text" },
+    reorderColumn: "Reorder {{column}} (↑/↓ to move)",
+    columns: {
+      class: "Class",
+      rarity: "Rarity",
+      number: "Number",
+      name: "Name",
+      effect: "Card text",
+    },
     sortBy: {
       date: "Date",
       no: "Number",

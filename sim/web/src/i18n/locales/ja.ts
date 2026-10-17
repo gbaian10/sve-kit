@@ -165,7 +165,14 @@ export default {
     sort: "並び順",
     visibleColumns: "表示する列",
     resizeColumn: "「{{column}}」の列幅を調整",
-    columns: { rarity: "レアリティ", number: "番号", name: "名前", effect: "能力" },
+    reorderColumn: "「{{column}}」の順序を変更（↑／↓ で移動）",
+    columns: {
+      class: "クラス",
+      rarity: "レアリティ",
+      number: "番号",
+      name: "名前",
+      effect: "能力",
+    },
     sortBy: {
       date: "発売日",
       no: "番号",

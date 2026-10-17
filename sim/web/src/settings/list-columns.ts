@@ -2,8 +2,9 @@ import { RARITY_COLUMN_MIN_WIDTH } from "../domain/rarityBadges"
 
 export const LIST_COLUMNS = [
   "number",
-  "rarity",
   "name",
+  "rarity",
+  "class",
   "cost",
   "attack",
   "defense",
@@ -17,6 +18,7 @@ export const LIST_MIN_WIDTHS: Readonly<Record<ListColumn, number>> = {
   number: 84,
   rarity: RARITY_COLUMN_MIN_WIDTH,
   name: 100,
+  class: 48,
   cost: 40,
   attack: 40,
   defense: 40,
@@ -27,10 +29,35 @@ export const DEFAULT_LIST_VISIBILITY: ListVisibility = {
   number: true,
   rarity: true,
   name: true,
+  class: true,
   cost: true,
   attack: true,
   defense: true,
   effect: true,
+}
+
+export function sanitizeListOrder(value: unknown): readonly ListColumn[] {
+  const known = Array.isArray(value)
+    ? value.filter((column): column is ListColumn => LIST_COLUMNS.includes(column as ListColumn))
+    : []
+  return [...new Set([...known, ...LIST_COLUMNS])]
+}
+
+export function moveListColumn(
+  order: readonly ListColumn[],
+  source: ListColumn,
+  target: ListColumn,
+  after = false,
+): readonly ListColumn[] {
+  if (source === target) return order
+  const remaining = order.filter((column) => column !== source)
+  const index = remaining.indexOf(target)
+  if (index < 0) return order
+  return [
+    ...remaining.slice(0, index + Number(after)),
+    source,
+    ...remaining.slice(index + Number(after)),
+  ]
 }
 
 export function isListWidths(value: unknown): value is ListWidths {

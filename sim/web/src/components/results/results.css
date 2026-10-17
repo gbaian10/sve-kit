@@ -55,6 +55,7 @@ html:has([data-card-list]) {
   --list-size-number: var(--list-user-number, 132px);
   --list-size-rarity: max(var(--list-user-rarity, 0px), var(--rarity-column-min-width));
   --list-size-name: var(--list-user-name, 192px);
+  --list-size-class: max(var(--list-user-class, 0px), var(--class-column-min-width));
   --list-size-cost: var(--list-user-cost, 44px);
   --list-size-attack: var(--list-user-attack, 44px);
   --list-size-defense: var(--list-user-defense, 44px);
@@ -71,6 +72,58 @@ html:has([data-card-list]) {
 
 :where([data-list-col="name"]) {
   width: var(--list-size-name);
+}
+
+:where([data-list-col="class"]) {
+  width: var(--list-size-class);
+}
+
+:where([data-list-heading="class"]) {
+  min-width: var(--class-column-min-width);
+}
+
+:where([data-column-order] [data-drop])::after {
+  position: absolute;
+  z-index: 6;
+  content: "";
+  background: var(--color-text-1);
+  pointer-events: none;
+}
+
+:where([data-list-column-picker] [data-drop])::after {
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+:where([data-list-column-picker] [data-drop="before"])::after {
+  top: -4px;
+}
+
+:where([data-list-column-picker] [data-drop="after"])::after {
+  bottom: -4px;
+}
+
+@media (width >= 600px) {
+  :where([data-list-heading]) {
+    cursor: grab;
+    user-select: none;
+    touch-action: pan-y;
+  }
+
+  :where([data-list-heading][data-drop])::after {
+    top: 0;
+    bottom: 0;
+    width: 3px;
+  }
+
+  :where([data-list-heading][data-drop="before"])::after {
+    left: 0;
+  }
+
+  :where([data-list-heading][data-drop="after"])::after {
+    right: 0;
+  }
 }
 
 :where([data-list-col="cost"]) {
@@ -181,13 +234,20 @@ html:has([data-card-list]) {
   padding-inline: 4px;
 }
 
+:where([data-card-list] [data-list-class]),
+:where([data-list-heading="class"]) {
+  padding-inline: 4px;
+  text-align: center;
+}
+
 :where([data-list-heading="rarity"]) {
   min-width: var(--rarity-column-min-width);
   font-size: var(--rarity-badge-height);
   line-height: 1;
 }
 
-:where([data-list-heading="rarity"] [data-list-heading-label]) {
+:where([data-list-heading="rarity"] [data-list-heading-label]),
+:where([data-list-heading="class"] [data-list-heading-label]) {
   display: inline-block;
 }
 
@@ -260,6 +320,7 @@ html:has([data-card-list]) {
     --list-size-number: 84px;
     --list-size-rarity: var(--rarity-column-min-width);
     --list-size-name: 124px;
+    --list-size-class: var(--class-column-min-width);
     --list-size-cost: 44px;
     --list-size-attack: 44px;
     --list-size-defense: 44px;
