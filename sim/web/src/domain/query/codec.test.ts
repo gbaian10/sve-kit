@@ -28,6 +28,12 @@ describe("query codec", () => {
     )
   })
 
+  it("defaults to printing rows in card-number order and preserves explicit card URLs", () => {
+    expect(parseQuery(new URLSearchParams())).toMatchObject({ unit: "printing", sort: "no" })
+    expect(formatQuery(parseQuery(new URLSearchParams("unit=printing"))).toString()).toBe("")
+    expect(formatQuery(parseQuery(new URLSearchParams("unit=card"))).toString()).toBe("unit=card")
+  })
+
   it("reads open and single cost bounds and drops impossible ones", () => {
     expect(parseQuery(new URLSearchParams("cost=3")).cost).toEqual({ min: 3, max: 3 })
     expect(parseQuery(new URLSearchParams("cost=-2")).cost).toEqual({ max: 2 })

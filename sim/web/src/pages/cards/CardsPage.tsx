@@ -161,7 +161,8 @@ export function CardsPage() {
     suggestionState.lastInput?.state.text !== debounced ||
     suggestionState.lastInput.edition !== edition
   const totalQuery = useMemo<SearchQuery | null>(
-    () => (typed ? { state: { ...DEFAULT_QUERY, text: typed }, edition, limit: 1 } : null),
+    () =>
+      typed ? { state: { ...DEFAULT_QUERY, unit: "card", text: typed }, edition, limit: 1 } : null,
     [typed, edition],
   )
   const totalState = useSearch(totalQuery)
@@ -269,7 +270,7 @@ export function CardsPage() {
       background,
       source: fromSuggest ? "suggest" : "results",
       pages: 1,
-      resultKey: row.summary.cardId,
+      resultKey: row.summary.printingId,
       ...routeState(row.summary),
     }
     recentStore.push(row.summary.printingId)
@@ -398,6 +399,7 @@ export function CardsPage() {
   const pagination =
     page && page.total > 0 ? (
       <PaginationTail
+        unit={query.unit}
         automatic={prefs.infiniteScroll}
         requestKey={JSON.stringify([conditionsKey, edition, pages])}
         total={page.total}
@@ -610,7 +612,7 @@ export function CardsPage() {
               <b className="font-semibold text-text-1 tabular-nums">
                 {new Intl.NumberFormat(uiLanguage).format(page.total)}
               </b>{" "}
-              {t("results.countUnit")}
+              {t(query.unit === "printing" ? "results.countPrintingUnit" : "results.countUnit")}
             </p>
             <div className="ml-auto flex items-center gap-2">
               <label className="flex items-center gap-1 text-13">

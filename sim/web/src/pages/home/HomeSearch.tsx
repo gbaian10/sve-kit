@@ -105,7 +105,7 @@ export function HomeSearch({
     focused && ready && !failed && !queryFailed && (settled === "" || complete || rows.length > 0)
 
   const everyCard = useMemo<SearchQuery>(
-    () => ({ state: DEFAULT_QUERY, edition, limit: 1 }),
+    () => ({ state: { ...DEFAULT_QUERY, unit: "card" }, edition, limit: 1 }),
     [edition],
   )
   const all = useSearch(everyCard)
@@ -119,7 +119,12 @@ export function HomeSearch({
     () =>
       cardCount === 0
         ? null
-        : { state: DEFAULT_QUERY, edition, offset: Math.floor(seed * cardCount), limit: 1 },
+        : {
+            state: { ...DEFAULT_QUERY, unit: "card" },
+            edition,
+            offset: Math.floor(seed * cardCount),
+            limit: 1,
+          },
     [cardCount, edition, seed],
   )
   const picked = useSearch(pickQuery)
@@ -144,13 +149,13 @@ export function HomeSearch({
             background: editionUrl("", edition),
             source: "results",
             pages: 1,
-            resultKey: row.summary.cardId,
+            resultKey: row.summary.printingId,
           }
         : {
             background: editionUrl(querySearch({ ...DEFAULT_QUERY, text: settled }), edition),
             source: "suggest",
             pages: 1,
-            resultKey: row.summary.cardId,
+            resultKey: row.summary.printingId,
           }
     recentStore.push(row.summary.printingId)
     setFocused(false)

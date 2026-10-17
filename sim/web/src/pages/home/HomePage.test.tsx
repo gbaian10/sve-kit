@@ -88,7 +88,7 @@ describe("home search", () => {
       background: "?q=bp01-51",
       source: "suggest",
       pages: 1,
-      resultKey: "c:bp01-051",
+      resultKey: "p:bp01-051",
     })
     expect(recentStore.get()[0]).toBe("p:bp01-051")
     await act(() => router.navigate(-1))

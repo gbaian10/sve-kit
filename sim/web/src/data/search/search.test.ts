@@ -60,7 +60,9 @@ import { ViewCache } from "./view"
 const built = await buildSnapshot({
   encodeImage: ({ seed }) => Promise.resolve(new TextEncoder().encode(String(seed))),
 })
-const query: SearchQuery = { state: DEFAULT_QUERY, edition: "jp", limit: 100 }
+// Legacy catalog comparisons exercise explicit card grouping alongside the printing default.
+const CARD_QUERY = { ...DEFAULT_QUERY, unit: "card" as const }
+const query: SearchQuery = { state: CARD_QUERY, edition: "jp", limit: 100 }
 const base = "https://cdn.test"
 function origin() {
   const files = new Map(built.files)
@@ -195,7 +197,7 @@ describe("complete Worker catalog generations", () => {
     const release = h.served.hold(heldPath)
     h.session.load(base, "jp", "preview")
     for (const text of ["first", "second", "bp01-001"])
-      h.channel.search({ ...query, state: { ...DEFAULT_QUERY, text } })
+      h.channel.search({ ...query, state: { ...CARD_QUERY, text } })
     expect(h.status()).toMatchObject({
       phase: "downloading",
       generation: null,
@@ -307,7 +309,7 @@ describe("complete Worker catalog generations", () => {
       h.session.load(base, "jp", "preview")
       await h.settled()
       for (const text of ["", "bp01-001", "試作", "テンプラー", "51", "does not exist"]) {
-        const state = { ...DEFAULT_QUERY, text }
+        const state = { ...CARD_QUERY, text }
         h.channel.search({ ...query, state, limit: 2 })
         await h.queried()
         const result = h.status().result
@@ -334,7 +336,7 @@ describe("complete Worker catalog generations", () => {
     if (!snapshot) throw new Error("missing baseline")
     const catalog = createCatalog(snapshot)
     const all = catalog
-      .results(DEFAULT_QUERY, "jp")
+      .results(CARD_QUERY, "jp")
       .map((item) => catalog.summary(item.printingId))
       .filter((summary) => summary?.region === "jp")
     const h = harness(served)
@@ -342,7 +344,7 @@ describe("complete Worker catalog generations", () => {
     await h.settled()
     const totals: number[] = []
     for (const cost of [{ min: 2, max: 3 }, { min: 7 }, { max: 7 }, { max: 1 }]) {
-      h.channel.search({ ...query, state: { ...DEFAULT_QUERY, cost } })
+      h.channel.search({ ...query, state: { ...CARD_QUERY, cost } })
       await h.queried()
       const result = h.status().result
       if (result.phase !== "complete") throw new Error("missing result")
@@ -418,7 +420,7 @@ it("rejects late responses by both queryId and generation", () => {
   receive(ready(1))
   const previous = sent.findLast((request) => request.kind === "search")
   if (!previous) throw new Error("missing query")
-  channel.search({ ...query, state: { ...DEFAULT_QUERY, text: "last" } })
+  channel.search({ ...query, state: { ...CARD_QUERY, text: "last" } })
   receive({
     kind: "result",
     generation: 1,
@@ -623,7 +625,7 @@ it("rarity queries use the completed printing closure", async () => {
   const h = harness()
   h.session.load(base, "jp", "preview")
   await h.settled()
-  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, rarities: ["legend"] } })
+  h.channel.search({ ...query, state: { ...CARD_QUERY, rarities: ["legend"] } })
   await h.queried()
   const result = h.status().result
   expect(result.phase).toBe("complete")
@@ -673,7 +675,7 @@ it("set filters follow the printing owner dictionary and open a matching printin
   }
   columns.seal()
   const index = new SearchIndex(columns, "jp")
-  const page = index.search({ ...query, state: { ...DEFAULT_QUERY, sets: ["sd01"] } })
+  const page = index.search({ ...query, state: { ...CARD_QUERY, sets: ["sd01"] } })
   expect(page.total).toBe(1)
   expect(page.items[0]?.printingId).toBe("p:bp01-001")
 })
@@ -683,7 +685,7 @@ it("shares one generation across independently coalesced result and suggestion c
   const suggestions = h.session.createChannel()
   h.session.load(base, "jp", "preview")
   h.channel.search(query)
-  suggestions.search({ ...query, state: { ...DEFAULT_QUERY, text: "bp01-001" }, limit: 1 })
+  suggestions.search({ ...query, state: { ...CARD_QUERY, text: "bp01-001" }, limit: 1 })
   await h.settled()
   expect(h.events.filter((event) => event.kind === "ready")).toHaveLength(1)
   expect(suggestions.getStatus().result).toMatchObject({ phase: "complete" })
@@ -695,9 +697,9 @@ it("shares one generation across independently coalesced result and suggestion c
   expect(all).toMatchObject({ phase: "complete", root: base })
   const before = h.events.length
   for (const text of ["b", "bp", "bp01-001"])
-    suggestions.search({ ...query, state: { ...DEFAULT_QUERY, text } })
+    suggestions.search({ ...query, state: { ...CARD_QUERY, text } })
   for (const text of ["missing", "試作"])
-    h.channel.search({ ...query, state: { ...DEFAULT_QUERY, text } })
+    h.channel.search({ ...query, state: { ...CARD_QUERY, text } })
   await h.queried()
   const results = h.events.slice(before).filter((event) => event.kind === "result")
   expect(results).toHaveLength(2)
@@ -728,7 +730,7 @@ it("query failures are typed and isolated from other channels and load state", a
     [["mechanics"], { mechanics: { quick: "has" } }],
     [["sort"], { sort: "date" }],
   ] as const) {
-    h.channel.search({ ...query, state: { ...DEFAULT_QUERY, ...changes } })
+    h.channel.search({ ...query, state: { ...CARD_QUERY, ...changes } })
     other.search(query)
     await h.queried()
     const result = h.channel.getStatus().result
@@ -854,7 +856,7 @@ it("orders text results by the selected sort and number suggestions by card numb
   const created = new SearchIndex(columns, "jp")
   const catalog = createCatalog(snapshot)
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
-    const state = { ...DEFAULT_QUERY, text: "bp01-0" }
+    const state = { ...CARD_QUERY, text: "bp01-0" }
     const page = index.search({ ...query, state })
     expect(page.total).toBeGreaterThan(8)
     expect(page.items).toEqual(orderExpected(catalog, [...page.items]))
@@ -926,7 +928,7 @@ it("keeps name-prefix suggestions ahead of contains hits while results follow ca
   const index = new SearchIndex(columns, "jp")
   expect(
     index
-      .search({ ...query, state: { ...DEFAULT_QUERY, text: "needle" } })
+      .search({ ...query, state: { ...CARD_QUERY, text: "needle" } })
       .items.map((item) => item.printingId),
   ).toEqual([first.printingId, second.printingId])
   expect(index.suggest("needle", 1).items.map((item) => item.summary.printingId)).toEqual([
@@ -988,7 +990,7 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
       ]
     })
     for (const text of texts) {
-      const state = { ...DEFAULT_QUERY, text }
+      const state = { ...CARD_QUERY, text }
       h.channel.search({ ...query, edition, state, offset: 1, limit: 2 })
       await h.queried()
       const result = h.channel.getStatus().result
@@ -1068,11 +1070,11 @@ it("cost columns preserve the signed safe integers accepted by the snapshot read
     )
     columns.seal()
     const index = new SearchIndex(columns, "jp")
-    const page = index.search({ ...query, state: { ...DEFAULT_QUERY, cost: { min: cost } } })
+    const page = index.search({ ...query, state: { ...CARD_QUERY, cost: { min: cost } } })
     expect(page.total).toBeGreaterThan(0)
     expect(page.items.every((item) => item.summary?.cost === cost)).toBe(true)
     expect(
-      index.search({ ...query, state: { ...DEFAULT_QUERY, cost: { min: cost + 1 } } }).total,
+      index.search({ ...query, state: { ...CARD_QUERY, cost: { min: cost + 1 } } }).total,
     ).toBe(0)
   }
 })
@@ -1130,17 +1132,17 @@ it("a stored index image answers every query like the index it was encoded from"
   if (!snapshot) throw new Error("missing snapshot")
   const catalog = createCatalog(snapshot)
   const states = [
-    DEFAULT_QUERY,
+    CARD_QUERY,
     ...["bp", "bp01-001", "51", "試作", "does not exist"].map((text) => ({
-      ...DEFAULT_QUERY,
+      ...CARD_QUERY,
       text,
     })),
     ...catalog.entries
       .flatMap((entry) => entry.names)
-      .map((name) => ({ ...DEFAULT_QUERY, text: name.text.slice(0, 2) })),
-    { ...DEFAULT_QUERY, classes: ["forestcraft"] },
-    { ...DEFAULT_QUERY, sets: ["bp01"] },
-    { ...DEFAULT_QUERY, cost: { min: 2, max: 3 } },
+      .map((name) => ({ ...CARD_QUERY, text: name.text.slice(0, 2) })),
+    { ...CARD_QUERY, classes: ["forestcraft"] },
+    { ...CARD_QUERY, sets: ["bp01"] },
+    { ...CARD_QUERY, cost: { min: 2, max: 3 } },
   ]
   for (const edition of ["jp", "en"] as const) {
     const columns = new BootstrapColumns()
@@ -1428,7 +1430,7 @@ it("remembers the current completed query for a view-first reload without metada
   const first = harness(served, storage)
   first.session.load(base, "jp", "preview")
   await first.settled()
-  const current = { ...query, state: { ...DEFAULT_QUERY, text: "bp01-001" }, limit: 60 }
+  const current = { ...query, state: { ...CARD_QUERY, text: "bp01-001" }, limit: 60 }
   first.channel.view(current, true)
   await expect.poll(() => first.channel.getStatus().result.phase, POLL).toBe("complete")
   const pointer = await storage.open(`sve-search-view-selection:${encodeURIComponent(base)}`)
@@ -1626,7 +1628,7 @@ it("printing pages preserve every edition printing, numbering, filters and cache
       new Set(entries.map((entry) => entry.cardId)).size,
     )
     for (const text of ["", "BP01", "BP01-001", "51", "試作", "missing"]) {
-      const state = { ...DEFAULT_QUERY, unit: "printing" as const, text }
+      const state = { ...CARD_QUERY, unit: "printing" as const, text }
       h.channel.search({ ...query, edition, state, offset: 1, limit: 3 })
       await h.queried()
       const result = h.status().result
@@ -1643,7 +1645,7 @@ it("printing pages preserve every edition printing, numbering, filters and cache
       )
     }
     const state = {
-      ...DEFAULT_QUERY,
+      ...CARD_QUERY,
       unit: "printing" as const,
       classes: ["forestcraft"],
       cost: { max: 1 },
@@ -1666,7 +1668,7 @@ it("printing pages preserve every edition printing, numbering, filters and cache
     const viewQuery = {
       ...query,
       edition,
-      state: { ...DEFAULT_QUERY, unit: "printing" as const },
+      state: { ...CARD_QUERY, unit: "printing" as const },
       limit: 60,
     }
     h.channel.view(viewQuery, true)
@@ -1696,7 +1698,7 @@ it("printing pages preserve every edition printing, numbering, filters and cache
   }
 })
 
-it("keeps two printings of one card as separate numbered items after index restore", async () => {
+it("defaults to separate printing rows after index restore while explicit card queries stay grouped", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
   await client.prefetchPrintings?.()
@@ -1718,7 +1720,7 @@ it("keeps two printings of one card as separate numbered items after index resto
   const created = new SearchIndex(columns, "jp")
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
     const cards = index.search(query)
-    const printings = index.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing" } })
+    const printings = index.search({ ...query, state: DEFAULT_QUERY })
     expect(printings.total).toBe(
       snapshot.bootstrap.flatMap((fragment) =>
         fragment.table === "printing" ? fragment.rows.filter((row) => row["region"] === "jp") : [],
@@ -1739,7 +1741,7 @@ it("keeps two printings of one card as separate numbered items after index resto
     expect(extraItem).toMatchObject({ key: extra.id, summary: { cardNo: "BP01-P01" } })
     expect(cards.items.some((item) => item.printingId === extra.id)).toBe(false)
     expect(
-      index.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing", text: "BP01-P01" } })
+      index.search({ ...query, state: { ...CARD_QUERY, unit: "printing", text: "BP01-P01" } })
         .items,
     ).toEqual([extraItem])
   }
@@ -1902,7 +1904,7 @@ it("a pending visible preview neither blocks list queries nor publishes after it
   const preview = h.session.createChannel()
   preview.preview(summary.printingId, summary.faceId, "zh-Hant", "jp")
   await expect.poll(() => h.served.requests.includes(stringValue(detail["path"])), POLL).toBe(true)
-  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, text: "BP01-051" } })
+  h.channel.search({ ...query, state: { ...CARD_QUERY, text: "BP01-051" } })
   await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
   expect(preview.getStatus().result.phase).toBe("pending")
   preview.dispose()
@@ -2019,10 +2021,10 @@ describe("set releases and counts", () => {
       expect(index.releases.find((set) => set.code === "bp01")?.releasedOn).toBe("2026-02-01")
       expect(index.releases.find((set) => set.code === "sd01")?.releasedOn).toBe("2026-05-01")
       expect(
-        index.count({ state: { ...DEFAULT_QUERY, sets: ["bp01"] }, edition: "en" }, "zh-Hant"),
+        index.count({ state: { ...CARD_QUERY, sets: ["bp01"] }, edition: "en" }, "zh-Hant"),
       ).toEqual({ cards: 15, translated: 14, proofreading: 0 })
       expect(
-        index.count({ state: { ...DEFAULT_QUERY, sets: ["sd01"] }, edition: "en" }, "zh-Hant"),
+        index.count({ state: { ...CARD_QUERY, sets: ["sd01"] }, edition: "en" }, "zh-Hant"),
       ).toEqual({ cards: 2, translated: 2, proofreading: 0 })
     }
   })
@@ -2068,7 +2070,7 @@ describe("set releases and counts", () => {
     const h = harness(served)
     h.session.load(base, "jp", "preview")
     await h.settled()
-    const state = { ...DEFAULT_QUERY, sets: ["bp01"] }
+    const state = { ...CARD_QUERY, sets: ["bp01"] }
     for (const language of ["zh-Hant", "en"] as const) {
       h.channel.count({ state, edition: "jp" }, language)
       await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
@@ -2102,7 +2104,7 @@ it("effect URLs wait for the whole regional closure and return the same cold and
   if (!file) throw new Error("detail fixture missing")
   const path = stringValue(file["path"])
   const release = served.hold(path)
-  const advanced = { ...query, state: { ...DEFAULT_QUERY, text: "effect:defense" } }
+  const advanced = { ...query, state: { ...CARD_QUERY, text: "effect:defense" } }
   h.channel.search(advanced)
   await expect.poll(() => served.requests.includes(path), POLL).toBe(true)
   expect(h.status().result.phase).toBe("pending")
@@ -2133,7 +2135,7 @@ it("an unchanged-version check during the background download still completes pr
   h.session.load(base, "jp", "preview")
   release()
   await expect.poll(readies, POLL).toBe(2)
-  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, rarities: ["legend"] } })
+  h.channel.search({ ...query, state: { ...CARD_QUERY, rarities: ["legend"] } })
   await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
   await h.settled()
 }, 30_000)
@@ -2150,7 +2152,7 @@ it("a failed background printing closure is downloaded again by the next check",
   h.served.files.delete(path)
   h.session.load(base, "jp", "preview")
   await h.settled()
-  const rarity = { ...query, state: { ...DEFAULT_QUERY, rarities: ["legend"] } }
+  const rarity = { ...query, state: { ...CARD_QUERY, rarities: ["legend"] } }
   h.channel.search(rarity)
   await expect.poll(() => h.status().result.phase, POLL).toBe("error")
   h.served.files.set(path, bytes)
@@ -2196,7 +2198,7 @@ it.each(["jp", "en"] as const)(
       return new Intl.Collator(locales ?? "sv", options).compare(this, other)
     })
     try {
-      const page = index.search({ ...query, edition, state: { ...DEFAULT_QUERY, sort: "name" } })
+      const page = index.search({ ...query, edition, state: { ...CARD_QUERY, sort: "name" } })
       const actual = page.items.map((item) => item.summary?.name.original.text)
       expect(actual).toContain(names[0])
       expect(actual).toContain(names[1])
@@ -2217,7 +2219,7 @@ it("sorts descending before pagination, preserves tie order and leaves missing s
   columns.seal()
   const index = new SearchIndex(columns, "jp")
   for (const sort of ["no", "cost", "atk", "def", "name"] as const) {
-    const state = { ...DEFAULT_QUERY, sort, order: "desc" as const }
+    const state = { ...CARD_QUERY, sort, order: "desc" as const }
     const full = index.search({ ...query, state, limit: 100 })
     const page = index.search({ ...query, state, offset: 2, limit: 3 })
     expect(page.items).toEqual(full.items.slice(2, 5))

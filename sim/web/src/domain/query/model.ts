@@ -47,7 +47,7 @@ export const DEFAULT_QUERY: QueryState = {
   sets: [],
   rarities: [],
   altArtOnly: false,
-  unit: "card",
+  unit: "printing",
   sort: "no",
 }
 

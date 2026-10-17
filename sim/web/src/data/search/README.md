@@ -20,13 +20,14 @@ zeros do not affect comparison. Ties use permanent card ID, then printing ID. Un
 number forms follow recognized keys and compare folded literal text. Text queries retain
 the existing relevance ranking. This does not change representative-printing selection.
 A persisted scalar rank avoids decoding summaries or re-sorting all printings per query.
-Prefixes sort empty, LD, P, PR, SL in ASCII order within the same set. For V3, pass
+Prefixes sort empty, LD, P, PR, SL in ASCII order within the same set. For a set view, pass
 `state: { ...DEFAULT_QUERY, unit: "printing", sort: "no", sets: [familyCode] }` to
 `channel.view` or `useListView`. Each item key is its printing ID; `summary.cardId`
 remains the card identity, and every face/image source belongs to that printing.
 Totals and paging count printings, and query/cache identity distinguishes units.
-The existing P2a screen retains its card-unit default; V3 can set printing as its default
-without a new index layout or a full catalog on the main thread.
+The cards page defaults to printing units and card-number sorting in all three views.
+Home random-card queries and suggestions explicitly retain card units; their totals count cards.
+No new index layout or full catalog on the main thread is needed.
 
 The Worker retains scalar index columns, a shared string pool, multilingual class/set
 options and image targets (printing ID, face ID, permanent integer ID, ordinal and owner).

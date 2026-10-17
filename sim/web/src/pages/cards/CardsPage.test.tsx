@@ -96,6 +96,34 @@ describe("CardsPage", () => {
     },
   )
 
+  it.each(["grid", "table", "list"])(
+    "keeps both printings of one card in the %s results with their own images",
+    async (view) => {
+      await open(`/cards?q=bp01-002&view=${view}`)
+      await waitFor(() => {
+        const links = document.querySelectorAll("a[data-result-key]")
+        expect([...links].map((link) => link.getAttribute("data-result-key"))).toEqual([
+          "p:bp01-002",
+          "p:bp01-002-alt",
+          "p:bp01-020",
+          "p:bp01-021",
+          "p:bp01-021-sp",
+        ])
+      })
+      expect(screen.getByText("個版次")).toHaveTextContent("5 個版次")
+      expect(screen.getByText("共 5 個版次")).toBeVisible()
+      if (view === "grid") {
+        await waitFor(() => {
+          for (const id of ["p:bp01-002", "p:bp01-002-alt"]) {
+            expect(
+              document.querySelector(`a[data-result-key="${id}"] [data-image-printing]`),
+            ).toHaveAttribute("data-image-printing", id)
+          }
+        })
+      }
+    },
+  )
+
   it("keeps IME confirmation in the search input", async () => {
     const { router } = await open()
     const user = userEvent.setup()
@@ -189,7 +217,7 @@ describe("CardsPage", () => {
 
   it("preserves loaded pages and the anchor when switching views", async () => {
     const { router } = await open("/cards?class=bishop")
-    const entry = { pages: 3, anchor: "c:bp01-051" }
+    const entry = { pages: 3, anchor: "p:bp01-051" }
     await act(() => router.navigate("/cards?class=bishop", { replace: true, state: entry }))
     await userEvent.click(await screen.findByRole("radio", { name: "表格" }))
     expect(router.state.location.search).toBe("?class=bishop&view=table")
@@ -290,7 +318,7 @@ describe("CardsPage", () => {
       background: "?q=bp01-51",
       source: "suggest",
       pages: 1,
-      resultKey: "c:bp01-051",
+      resultKey: "p:bp01-051",
     })
     // Back lands on the list with the typed text in the URL and the input.
     await router.navigate(-1)
@@ -318,13 +346,13 @@ describe("CardsPage", () => {
     expect(router.state.location.pathname).toBe("/cards/BP01-051")
     expect(router.state.location.state).toMatchObject({
       source: "results",
-      resultKey: "c:bp01-051",
+      resultKey: "p:bp01-051",
     })
     await router.navigate(-1)
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("テンプラー")
     })
-    expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
+    expect(router.state.location.state).toMatchObject({ anchor: "p:bp01-051", pages: 1 })
   })
 
   it("suggests across classes and 'see all' commits the text alone", async () => {
@@ -387,7 +415,7 @@ describe("CardsPage", () => {
     expect(screen.getByText("沒有符合的卡")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "清除全部條件" }))
     expect(router.state.location.search).toBe("")
-    await screen.findByText("張卡片", { exact: false })
+    await screen.findByText("個版次")
     await user.click(screen.getByRole("combobox", { name: "搜尋卡片" }))
     expect(await screen.findByText("還沒看過任何卡", { exact: false })).toBeInTheDocument()
     await user.keyboard("{Escape}")
