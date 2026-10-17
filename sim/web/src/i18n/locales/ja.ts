@@ -222,6 +222,8 @@ export default {
     retry: "画像情報を取得",
   },
   card: {
+    expandText: "{{field}}を展開",
+    collapseText: "{{field}}を折りたたむ",
     originalText: "原文",
     sourcePending: "日本語の根拠を読み込み中",
     annotationsPending: "注釈を読み込み中",
