@@ -60,6 +60,9 @@ job = "repo"
 [hooks.schema-er-build]
 job = "repo"
 
+[hooks.snapshot-format-lock]
+job = "repo"
+
 [hooks.ruff-format]
 job = "python"
 

@@ -209,7 +209,7 @@ def export_snapshot(
             "data_as_of": batch.data_as_of,
             "regions": list(batch.regions),
             "languages": languages,
-            "min_reader_version": format_version,
+            "min_reader_version": selected.min_reader_version,
             "required_capabilities": list(selected.capabilities),
             "files": [files.files[key] for key in sorted(files.files)],
             "config_ref": file_reference(config),

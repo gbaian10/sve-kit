@@ -58,6 +58,34 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 `test_schema_regeneration_matches_committed_bytes` 從來源重新產生並逐位元組比對提交版；另以未啟用 format checker 的 Draft 2020-12 驗證器拒絕共用形狀反例。產生器只產生 Schema，不生成 golden 或預期 logical view。欄位變更仍須對照 snapshot-format／snapshot-transport 審核，並依傳輸契約判定版本變動。
 
+## 格式指紋鎖定
+
+`.github/ci/snapshot-format.lock` 記錄
+`format_version → {fingerprint, frozen}`，保留歷史凍結紀錄；目前 `4.0.0` 為未凍結。
+`.github/ci/snapshot_format.py` 是正式的本機 hook／CI 檢查，不需私有資料或匯出根。
+
+指紋的來源只有正式定義：
+
+- 重新產生的 `contract.schema.json`，包含 tuple 欄序、型別、nullable、enum、固定 descriptor、主鍵、fragment 配置及准入欄位。提交版須與來源的契約一致。
+- `contracts/profiles.py` 的 `PROFILES` 資料值直接序列化，包含版號、資源、bucket 數、文字／影像 band 寬度與家族例外、capabilities、最低 reader 版本。producer 與 reader 仍使用同一份 profile 常數，不另寫一份配置清單。
+- 共用合成 golden `tests/fixtures/snapshot-contract/v3/**` 的逐檔內容 SHA-256 與相對檔名，遞迴包含 wire tuples、`expected-logical.json`、`reader-invalid*`、`bucket-cases.json`、canonical 向量及 README；新增、刪除、改名或改內容均受檢查。這些樣本本來就是 Python、Web、Rust 共用的 reader 契約，不另建立第二份案例清單。
+
+Schema 以鍵排序的 JSON 正規化，排除 `$comment`、title、description、examples 註記，並將 enum、required、type 聯集及組合 Schema 當集合處理；tuple／descriptor 陣列保留順序。literal const 及同名公開欄位不當註記刪除。profile 直接轉成 JSON 資料；不解析 Python 原始碼或 AST，因此 reader 區域變數改名、搬檔、效能重構或 Python 升級本身不改變指紋。指紋是上述三項結構的 SHA-256，不讀實際快照資料、套件建置版號或部署狀態。
+
+golden 取 exact bytes 的內容 hash，不移除排版、註解或合成資料值；即使只改其中的 `data_version` 字串也會觸發。這是契約樣本變更，與實際匯出批次換 `data_version` 不同，凍結前須更新鎖定，凍結後依傳輸 §1.1 處理。canonical／join 等語義變動須同步正式契約、共用 golden 及契約測試；未反映在這些來源的語義差異無法由指紋單獨偵測，檢查通過不能取代契約測試完整性的審查。
+
+本機 pre-commit、pre-push 與 CI 的 repo job 都會跑 `snapshot-format-lock`。
+CI 用事件的 base commit 比對既有凍結紀錄；本機預設用 `origin/main`，其他基準可用 `--base-ref` 指定，缺少基準會失敗。
+檢查程式本身與鎖定檔路徑的變更須由維護者審核，避免修改檢查或搬移路徑繞過凍結保護。
+未凍結版本需要更新時，從 repo 根目錄執行並提交鎖定檔 diff：
+
+```bash
+uv --directory carddb run python ../.github/ci/snapshot_format.py --update
+uv --directory carddb run python ../.github/ci/snapshot_format.py
+```
+
+`--update` 只更新未凍結版本；凍結版差異會失敗並提示依[傳輸 §1.1](snapshot-transport.md#11-版本與相容判斷)升版。凍結狀態由維護者明示修改，不會因跑 update 或部署自動改變。
+
 ## 共用合成樣本
 
 索引為 `tests/fixtures/snapshot-contract/v3/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別撰寫，不從 reader 解碼或 producer 匯出產生預期值。
