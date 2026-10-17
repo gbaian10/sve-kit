@@ -266,7 +266,7 @@ qa_version 用 question/answer，cr_clause 用 effect，vocabulary／商品用 l
 | vocabulary／vocabulary_kind,vocabulary_code；product_family／product_family_id；product／product_id | label |
 | keyword／keyword_id | label、effect（definition）、action_label |
 
-商品 label 目前只實作 product_family：由 authored-layout §6.4 的 public_code 選取，
+商品 label 目前只實作 product_family：由 [authored-layout §6.1](authored-layout.md#61-卡包名稱-label) 的 public_code 選取，
 直接建立整欄 label 翻譯，不經效果模板。product label 尚無 authored 入口。
 
 未實作的 owner 不因有 FK 就宣稱支援。相同模板與參數預設同翻法；§2 的 pin 明示選用可重用替代譯詞，真正歧義才另用語義分支。

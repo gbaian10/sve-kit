@@ -32,11 +32,12 @@ class FamilyLabel(RecordData):
 
 class FamilyLabelRecord(Quality):
     kind: Literal["product_family_label"]
+    origin: Literal["project", "machine"] = "project"
     data: FamilyLabel
 
-    @field_validator("origin")
+    @field_validator("origin", mode="before")
     @classmethod
-    def _authored(cls, value: str) -> str:
+    def _authored(cls, value: object) -> object:
         if value == "official":
             raise ValueError(
                 "Family label only supports project or machine translations"
@@ -63,8 +64,6 @@ def apply(db: Database, inputs: Inputs) -> None:
             )
     for record in records:
         family = families[record.data.public_code]
-        if record.origin == "official":
-            raise ValueError("Family label cannot claim official authority")
         write(
             db,
             {"product_family_id": str(family["id"])},

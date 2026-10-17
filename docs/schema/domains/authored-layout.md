@@ -307,7 +307,7 @@ origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人
 不要求首輪抽查、逐筆雙模型、approved_policy、額外核可頁或手動合併前驗證。
 官方 CI 輸入沿現有私有 testdata repo 及鎖定檔，個人機器路徑與事件不得進 committed 資料。
 
-### 6.4 卡包名稱 label
+### 6.1 卡包名稱 label
 
 `translations/labels/<filing_key>/<sequence>.yaml` 沿用 `format: 3`、
 `kind: translation_shard`、`records` 封套，記錄種類為 `product_family_label`。
