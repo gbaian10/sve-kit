@@ -28,6 +28,10 @@ type GridDensity = (typeof GRID_DENSITIES)[number]
 const VIEW_MODES = ["grid", "table", "list"] as const
 type ViewMode = (typeof VIEW_MODES)[number]
 
+const TEXT_BOX_KINDS = ["effectOriginal", "flavorOriginal", "sectionOriginal"] as const
+export type TextBoxKind = (typeof TEXT_BOX_KINDS)[number]
+type CollapsedText = Readonly<Record<TextBoxKind, boolean>>
+
 export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */
   readonly uiLanguage: UiLanguage | null
@@ -39,6 +43,7 @@ export interface Prefs {
   readonly preloadPrintings: boolean
   readonly preloadNeighbours: boolean
   readonly symbolLabels: boolean
+  readonly collapsedText: CollapsedText
   readonly showFlavorText: boolean
   readonly termEmphasis: boolean
   readonly theme: ThemePref
@@ -62,6 +67,7 @@ export const DEFAULT_PREFS: Prefs = {
   preloadPrintings: false,
   preloadNeighbours: false,
   symbolLabels: false,
+  collapsedText: { effectOriginal: false, flavorOriginal: false, sectionOriginal: false },
   showFlavorText: true,
   termEmphasis: true,
   theme: "system",
@@ -92,6 +98,11 @@ const isEditionSwitches = (value: unknown): value is Readonly<Record<CardEdition
   value !== null &&
   CARD_EDITIONS.every((edition) => isBoolean((value as Record<string, unknown>)[edition]))
 
+const isCollapsedText = (value: unknown): value is CollapsedText =>
+  typeof value === "object" &&
+  value !== null &&
+  TEXT_BOX_KINDS.every((kind) => isBoolean((value as Record<string, unknown>)[kind]))
+
 type Sanitizers = { readonly [K in keyof Prefs]: (value: unknown) => Prefs[K] }
 
 function withDefault<T>(guard: (value: unknown) => value is T, fallback: T): (value: unknown) => T {
@@ -108,6 +119,7 @@ const sanitizers: Sanitizers = {
   preloadPrintings: withDefault(isBoolean, DEFAULT_PREFS.preloadPrintings),
   preloadNeighbours: withDefault(isBoolean, DEFAULT_PREFS.preloadNeighbours),
   symbolLabels: withDefault(isBoolean, DEFAULT_PREFS.symbolLabels),
+  collapsedText: withDefault(isCollapsedText, DEFAULT_PREFS.collapsedText),
   showFlavorText: withDefault(isBoolean, DEFAULT_PREFS.showFlavorText),
   termEmphasis: withDefault(isBoolean, DEFAULT_PREFS.termEmphasis),
   theme: withDefault(isThemePref, DEFAULT_PREFS.theme),

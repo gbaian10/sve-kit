@@ -61,6 +61,7 @@ describe("readPrefs", () => {
         gridDensity: 5,
         viewMode: "table",
         symbolLabels: "yes",
+        collapsedText: { effect: true, original: true, flavor: true },
       }),
     )
     expect(readPrefs()).toEqual({ ...DEFAULT_PREFS, theme: "dark", viewMode: "table" })

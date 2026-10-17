@@ -1,3 +1,5 @@
+import { Minus, Plus } from "lucide-react"
+import { type ReactNode, useId } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useAnnotatedText } from "../../app/snapshot"
@@ -9,7 +11,7 @@ import {
 } from "../../data"
 import type { NameDisplay } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
-import { usePrefs } from "../../settings"
+import { prefsStore, type TextBoxKind, usePrefs } from "../../settings"
 import { cn } from "../ui/cn"
 import { AnnotatedText } from "./AnnotatedText"
 import { useTextLanguage } from "./text-language"
@@ -19,7 +21,64 @@ import { TranslationSourceLine } from "./TranslationSourceLine"
 // Effect text is the reason the page exists: 16px at line-height 1.75, full width (design 06).
 const BODY = "text-16 leading-effect"
 const TEXT_BOX =
-  "rounded-block border border-border bg-surface-1 px-3 py-2.5 text-14 leading-effect text-text-2"
+  "rounded-block border border-border bg-surface-1 text-14 leading-effect text-text-2"
+
+function TextBox({
+  kind,
+  heading,
+  field,
+  children,
+}: {
+  readonly kind?: TextBoxKind
+  readonly heading: string
+  readonly field?: string
+  readonly children: ReactNode
+}) {
+  const { t } = useTranslation()
+  const prefs = usePrefs()
+  const contentId = useId()
+  const expanded = kind === undefined || !prefs.collapsedText[kind]
+  const Container = field ? "section" : "div"
+  return (
+    <Container
+      className={cn(TEXT_BOX, !kind && "px-3 py-2.5", field && "mt-3")}
+      aria-label={field ? heading : undefined}
+      data-field={field}
+    >
+      <h3 className="text-12 leading-5 text-text-3" aria-label={heading}>
+        {kind ? (
+          <button
+            type="button"
+            className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-control px-3 py-1.5 text-start"
+            aria-expanded={expanded}
+            aria-controls={contentId}
+            aria-label={
+              expanded
+                ? t("card.collapseText", { field: heading })
+                : t("card.expandText", { field: heading })
+            }
+            onClick={() => {
+              const collapsedText = prefsStore.get().collapsedText
+              prefsStore.set({ collapsedText: { ...collapsedText, [kind]: !collapsedText[kind] } })
+            }}
+          >
+            <span>{heading}</span>
+            {expanded ? (
+              <Minus aria-hidden="true" size={14} />
+            ) : (
+              <Plus aria-hidden="true" size={14} />
+            )}
+          </button>
+        ) : (
+          heading
+        )}
+      </h3>
+      <div id={contentId} hidden={!expanded}>
+        <div className={cn("mt-1 space-y-2", kind && "px-3 pb-2.5")}>{children}</div>
+      </div>
+    </Container>
+  )
+}
 
 export function CardText({
   client,
@@ -72,19 +131,20 @@ export function CardText({
   const showOriginal =
     mode !== "translated" || !value.translated || value.selection?.["basis"] === "jp_source"
   const showTranslated = mode !== "original" && value.translated !== undefined
-  const boxed = field !== "name" && !(showOriginal && showTranslated)
+  const boxed = field !== "name"
   // The printed state describes the printed name and effect, never the flavor.
   const printedState = field === "flavor" ? undefined : value.printedState
   const heading = label ?? (field === "section" ? t("card.originalText") : t(`card.field.${field}`))
-  return (
-    <section
-      className={cn("mt-3 space-y-2", boxed && TEXT_BOX)}
-      aria-label={heading}
-      data-field={field}
-    >
-      <h3 className={boxed ? "text-12 text-text-3" : "text-13 font-semibold text-text-3"}>
-        {heading}
-      </h3>
+  const original = (
+    <AnnotatedText
+      value={value.original}
+      context={value}
+      emphasis={prefs.termEmphasis}
+      annotationReady={annotationReady}
+    />
+  )
+  const content = (
+    <>
       {printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
       {printedState === "unknown" && <p className="text-13">{t("card.printedUnconfirmed")}</p>}
       <TextPurposeStatus readiness={readiness} />
@@ -116,33 +176,40 @@ export function CardText({
             )}
         </>
       )}
-      {/* Beside a translation the original is the reference copy: boxed and quieter, same flow. */}
-      {showOriginal && showTranslated && (
-        <div className={TEXT_BOX}>
-          <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
-          <AnnotatedText
-            value={value.original}
-            context={value}
-            emphasis={prefs.termEmphasis}
-            annotationReady={annotationReady}
-          />
-        </div>
-      )}
-      {showOriginal && !showTranslated && (
-        <div className={BODY}>
-          <AnnotatedText
-            value={value.original}
-            context={value}
-            emphasis={prefs.termEmphasis}
-            annotationReady={annotationReady}
-          />
-        </div>
-      )}
+      {showOriginal && !showTranslated && <div className={BODY}>{original}</div>}
       {mode !== "original" &&
         !value.translated &&
         stringValue(value.original.unit["lang"]) !== language && (
           <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
         )}
+    </>
+  )
+  if (boxed) {
+    if (showOriginal && showTranslated)
+      return (
+        <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
+          <TextBox heading={heading}>{content}</TextBox>
+          <TextBox kind={`${field}Original`} heading={t("card.originalText")}>
+            {original}
+          </TextBox>
+        </section>
+      )
+    return (
+      <TextBox heading={heading} field={field}>
+        {content}
+      </TextBox>
+    )
+  }
+  return (
+    <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
+      <h3 className="text-13 font-semibold text-text-3">{heading}</h3>
+      {content}
+      {showOriginal && showTranslated && (
+        <div className={cn(TEXT_BOX, "px-3 py-2.5")}>
+          <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
+          {original}
+        </div>
+      )}
     </section>
   )
 }
