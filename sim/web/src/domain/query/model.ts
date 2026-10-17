@@ -32,6 +32,7 @@ export interface QueryState {
   readonly rarities: readonly string[]
   readonly altArtOnly: boolean
   readonly unit: QueryUnit
+  readonly order?: "desc"
   readonly sort: QuerySort
   /** Absent means "use the preference"; only an explicit choice goes into the URL. */
   readonly view?: ViewMode

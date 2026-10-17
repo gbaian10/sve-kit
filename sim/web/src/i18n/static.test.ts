@@ -25,7 +25,8 @@ function flatten(tree: Tree, prefix = ""): Map<string, string> {
 // the language's own name, as the language picker does) rather than widening the control. The
 // home shortcuts share a third of a phone row each, so they get the same budget.
 const OPTION_BUDGET_EM = 6
-const SHORT_LABEL = /^(?:options\.|home\.shortcut\.)|^card\.(?:currentText|printedText)$/u
+const SHORT_LABEL =
+  /^(?:options\.|home\.shortcut\.)|^card\.(?:currentText|printedText)$|^results\.(?:columns|sortBy)\./u
 // A whole segmented group must fit the 320px account menu (288px inside its padding): 13px text,
 // 24px horizontal padding per pill, 4px of group padding and border.
 const GROUP_BUDGET_PX = 288

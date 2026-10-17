@@ -1,14 +1,13 @@
-import { memo, type MouseEvent, useRef } from "react"
+import { memo, type MouseEvent, type RefObject, useLayoutEffect, useRef } from "react"
 import { useHref, useNavigate } from "react-router"
 
 import { useAbilityPreview } from "../../app/snapshot"
 import { type ImageSource } from "../../data"
 import { classStyle } from "../../domain/classes"
+import type { QueryState } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
-import { CLASS_ICON } from "../card/classIcons"
 import { InlineText } from "../card/InlineText"
 import { StatLine } from "../card/StatLine"
-import { costIcon, costIconNeedsNumber } from "../card/symbolIcons"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { ArtThumb } from "./ArtThumb"
@@ -20,35 +19,6 @@ import { useSeen } from "./useSeen"
 export interface CardRowsProps extends CardGridProps {
   /** The 4:3 illustration crop of a cell's face, once its image metadata is known. */
   readonly artOf: (cell: GridCell) => ImageSource | undefined
-}
-
-function Stat({
-  value,
-  def = false,
-  labels,
-}: {
-  readonly value: number | null
-  readonly def?: boolean
-  readonly labels: ResultLabels
-}) {
-  return (
-    <span className={cn("text-14 font-semibold tabular-nums", def && "text-def")}>
-      {value === null ? labels.noValue : value}
-    </span>
-  )
-}
-
-function Cost({ value, labels }: { readonly value: number; readonly labels: ResultLabels }) {
-  return (
-    <span className="flex shrink-0 items-center gap-1 text-14 font-semibold tabular-nums">
-      <img
-        src={costIcon(value)}
-        alt={labels.t("cardPage.costValue", { value })}
-        className="size-5.5"
-      />
-      {costIconNeedsNumber(value) && <span aria-hidden="true">{value}</span>}
-    </span>
-  )
 }
 
 function RowLink({
@@ -218,71 +188,192 @@ export function CardTable({ cells, images, onOpen, anchor, artOf }: CardRowsProp
   )
 }
 
-// List row (design 05, 02a): 52px base, a 3px class-coloured edge, 22px cost icon, name over
-// translation, attack/defense, chevron.
-export function CardList({ cells, onOpen, anchor }: Omit<CardRowsProps, "images" | "artOf">) {
-  const labels = useResultLabels()
+interface ListScrollPosition {
+  top: number
+  left: number
+}
+
+interface CardListProps extends Omit<CardRowsProps, "images" | "artOf"> {
+  readonly sort?: QueryState["sort"]
+  readonly descending?: boolean
+  readonly onSort?: (sort: QueryState["sort"]) => void
+  readonly scrollPositionRef?: RefObject<ListScrollPosition>
+}
+
+function ListEffect({ cell, labels }: { readonly cell: GridCell; readonly labels: ResultLabels }) {
+  const result = useAbilityPreview(
+    cell.summary.printingId,
+    cell.summary.faceId,
+    labels.language,
+    cell.summary.region,
+  )
+  if (result.phase !== "complete")
+    return (
+      <span
+        data-preview={result.phase === "error" ? "error" : "pending"}
+        role={result.phase === "pending" ? "status" : undefined}
+      >
+        {result.phase === "error" ? labels.effectUnavailable : labels.effectPending}
+      </span>
+    )
   return (
-    <ul data-view="list" className="flex flex-col">
-      {cells.map((cell) => {
-        const style = classStyle(cell.summary.classCode)
-        return (
-          <li key={cell.key} className="min-w-0">
-            <RowLink
+    <span data-preview="ready" lang={result.preview?.language}>
+      {result.preview?.text ? (
+        <InlineText text={result.preview.text.replace(/\s*\n\s*/gu, " ")} />
+      ) : (
+        labels.t("card.noEffect")
+      )}
+    </span>
+  )
+}
+
+const ListRow = memo(function ListRow({
+  cell,
+  onOpen,
+  highlighted,
+  labels,
+}: {
+  readonly cell: GridCell
+  readonly onOpen: CardRowsProps["onOpen"]
+  readonly highlighted: boolean
+  readonly labels: ResultLabels
+}) {
+  const row = useRef<HTMLTableRowElement>(null)
+  const link = useRef<HTMLAnchorElement>(null)
+  const seen = useSeen(row)
+  const navigate = useNavigate()
+  const href = useHref(cell.to)
+  return (
+    <tr
+      ref={row}
+      data-class={classStyle(cell.summary.classCode)}
+      data-highlighted={highlighted || undefined}
+      onClick={(event) => {
+        if (event.target instanceof Element && event.target.closest("a")) return
+        link.current?.click()
+      }}
+    >
+      <td data-list-number="">
+        <span>{cell.summary.cardNo}</span>
+      </td>
+      <td data-list-name="">
+        <a
+          ref={link}
+          href={href}
+          data-result-key={cell.key}
+          lang={cell.name.primary.lang}
+          title={cell.name.primary.text}
+          onClick={(event) => {
+            if (!isPlainClick(event)) return
+            event.preventDefault()
+            onOpen(cell, event)
+            void navigate(cell.to, { state: cell.state })
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return
+            const next =
+              event.key === "ArrowDown"
+                ? row.current?.nextElementSibling
+                : row.current?.previousElementSibling
+            const target = next?.querySelector<HTMLAnchorElement>("a[data-result-key]")
+            if (target) {
+              event.preventDefault()
+              target.focus()
+            }
+          }}
+        >
+          {cell.name.primary.text}
+        </a>
+      </td>
+      <td data-list-stat="">{cell.summary.cost ?? labels.noValue}</td>
+      <td data-list-stat="">{cell.summary.attack ?? labels.noValue}</td>
+      <td data-list-stat="">{cell.summary.defense ?? labels.noValue}</td>
+      <td data-list-effect="">
+        <span data-list-effect-text="">
+          {cell.summary.wordingPending ? (
+            <span>{labels.wordingPending}</span>
+          ) : seen ? (
+            <ListEffect cell={cell} labels={labels} />
+          ) : (
+            <span data-preview="waiting">{labels.effectPending}</span>
+          )}
+        </span>
+      </td>
+    </tr>
+  )
+})
+
+export function CardList({
+  cells,
+  onOpen,
+  anchor,
+  sort = "no",
+  descending = false,
+  onSort,
+  scrollPositionRef,
+}: CardListProps) {
+  const labels = useResultLabels()
+  const scroll = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    if (!scroll.current || !scrollPositionRef) return
+    scroll.current.scrollTop = scrollPositionRef.current.top
+    scroll.current.scrollLeft = scrollPositionRef.current.left
+  }, [scrollPositionRef])
+  const columns = [
+    ["no", labels.t("results.columns.number")],
+    ["name", labels.t("results.columns.name")],
+    ["cost", labels.stats.cost],
+    ["atk", labels.stats.attack],
+    ["def", labels.stats.defense],
+  ] as const
+  return (
+    <div
+      ref={scroll}
+      data-list-scroll=""
+      onScroll={(event) => {
+        if (scrollPositionRef)
+          scrollPositionRef.current = {
+            top: event.currentTarget.scrollTop,
+            left: event.currentTarget.scrollLeft,
+          }
+      }}
+    >
+      <table data-view="list" data-card-list="" aria-label={labels.t("results.view")}>
+        <colgroup>
+          <col data-list-number-col="" />
+          <col data-list-name-col="" />
+          <col span={3} data-list-stat-col="" />
+          <col />
+        </colgroup>
+        <thead>
+          <tr>
+            {columns.map(([key, label]) => (
+              <th
+                key={key}
+                scope="col"
+                aria-sort={sort === key ? (descending ? "descending" : "ascending") : "none"}
+              >
+                <button type="button" onClick={() => onSort?.(key)}>
+                  {label}
+                  <span aria-hidden="true">{sort === key ? (descending ? " ↓" : " ↑") : ""}</span>
+                </button>
+              </th>
+            ))}
+            <th scope="col">{labels.t("results.columns.effect")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cells.map((cell) => (
+            <ListRow
+              key={cell.key}
               cell={cell}
               onOpen={onOpen}
               highlighted={anchor === cell.key}
-              className="min-h-13 border-l-3 border-l-class-current py-1 pr-2 pl-3"
-            >
-              {cell.summary.cost !== null ? (
-                <Cost value={cell.summary.cost} labels={labels} />
-              ) : (
-                <img src={CLASS_ICON[style]} alt="" className="size-5.5 shrink-0 object-contain" />
-              )}
-              <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                <span className="flex items-baseline gap-2">
-                  <span
-                    lang={cell.name.primary.lang}
-                    className="min-w-0 truncate text-15 font-semibold"
-                  >
-                    {cell.name.primary.text}
-                  </span>
-                  <span className="shrink-0 text-11 text-text-3 tabular-nums">
-                    {cell.summary.cardNo}
-                  </span>
-                </span>
-                {cell.name.secondary && (
-                  <span lang={cell.name.secondary.lang} className="truncate text-12 text-text-2">
-                    {cell.name.secondary.text}
-                  </span>
-                )}
-                <NameNotices name={cell.name} labels={labels} />
-                {cell.summary.wordingPending && (
-                  <Badge className="mt-0.5 self-start">{labels.wordingPending}</Badge>
-                )}
-              </span>
-              {cell.summary.attack !== null && cell.summary.defense !== null && (
-                <span className="flex shrink-0 items-baseline gap-0.5">
-                  <Stat value={cell.summary.attack} labels={labels} />
-                  <span className="text-13 text-text-3">/</span>
-                  <Stat value={cell.summary.defense} def labels={labels} />
-                </span>
-              )}
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="size-4 shrink-0 text-text-3"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <path d="m9 5 7 7-7 7" />
-              </svg>
-            </RowLink>
-          </li>
-        )
-      })}
-    </ul>
+              labels={labels}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

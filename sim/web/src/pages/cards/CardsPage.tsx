@@ -34,6 +34,7 @@ import {
   activeFilterCount,
   DEFAULT_QUERY,
   NEUTRAL_CLASS,
+  QUERY_SORTS,
   type QueryState,
   toggleClass,
   VIEW_MODES,
@@ -71,6 +72,7 @@ export function CardsPage() {
     return result
   }
   const [entry, updateEntry] = useListEntryState()
+  const listScroll = useRef(entry.listScroll ?? { top: 0, left: 0 })
   const navigate = useNavigate()
   const location = useLocation()
   const recent = useRecent()
@@ -257,7 +259,7 @@ export function CardsPage() {
   const openCell = useCallback(
     (cell: GridCell) => {
       // The anchor goes on the list's own entry first; the cell then pushes the card entry.
-      updateEntry({ anchor: cell.key, pages })
+      updateEntry({ anchor: cell.key, pages, listScroll: listScroll.current })
       recentStore.push(cell.summary.printingId)
     },
     [updateEntry, pages],
@@ -486,15 +488,35 @@ export function CardsPage() {
               {t("results.countUnit")}
             </p>
             <div className="ml-auto flex items-center gap-2">
-              {/* Sorting arrives with the filter panel (V3); the control keeps its place and says so. */}
+              <label className="flex items-center gap-1 text-13">
+                <span>{t("results.sort")}</span>
+                <select
+                  aria-label={t("results.sort")}
+                  value={query.sort}
+                  className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
+                  onChange={(event) => {
+                    const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
+                    if (sort) commit({ ...query, sort })
+                  }}
+                >
+                  {QUERY_SORTS.filter((sort) => sort !== "date").map((sort) => (
+                    <option key={sort} value={sort}>
+                      {t(`results.sortBy.${sort}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <button
                 type="button"
-                aria-disabled="true"
-                title={t("results.sortSoon")}
-                className="flex h-8 items-center gap-1 rounded-control border border-border bg-surface-1 px-2.5 text-13 text-text-3"
+                aria-label={t("results.descending")}
+                aria-pressed={query.order === "desc"}
+                className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
+                onClick={() => {
+                  const { order, ...rest } = query
+                  commit(order === "desc" ? rest : { ...rest, order: "desc" })
+                }}
               >
-                <span>{t("results.sort")}</span>
-                <span className="text-text-2">{t("results.sortDefault")}</span>
+                {query.order === "desc" ? "↓" : "↑"}
               </button>
               <Segmented
                 size="sm"
@@ -506,7 +528,7 @@ export function CardsPage() {
                   prefsStore.set({ viewMode: next })
                   setEdit(null)
                   setParams(urlParams({ ...query, view: next }), {
-                    state: entry,
+                    state: { ...entry, listScroll: listScroll.current },
                     preventScrollReset: true,
                   })
                 }}
@@ -532,6 +554,17 @@ export function CardsPage() {
           )}
           {view === "list" && (
             <CardList
+              sort={query.sort}
+              descending={query.order === "desc"}
+              onSort={(sort) => {
+                const { order, ...rest } = query
+                commit(
+                  sort === query.sort && order !== "desc"
+                    ? { ...rest, sort, order: "desc" }
+                    : { ...rest, sort },
+                )
+              }}
+              scrollPositionRef={listScroll}
               cells={cells}
               onOpen={openCell}
               {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}

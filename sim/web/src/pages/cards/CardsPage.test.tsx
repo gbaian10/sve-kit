@@ -1,4 +1,4 @@
-import { act, screen, waitFor, within } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -141,7 +141,41 @@ describe("CardsPage", () => {
     expect(router.state.location.state).toMatchObject(entry)
     await userEvent.click(screen.getByRole("radio", { name: "清單" }))
     expect(router.state.location.state).toMatchObject(entry)
+    const scroll = document.querySelector<HTMLElement>("[data-list-scroll]")
+    if (!scroll) throw new Error("missing list scrollport")
+    scroll.scrollTop = 240
+    scroll.scrollLeft = 120
+    fireEvent.scroll(scroll)
+    await userEvent.click(screen.getByRole("radio", { name: "表格" }))
+    await userEvent.click(screen.getByRole("radio", { name: "清單" }))
+    const restored = document.querySelector<HTMLElement>("[data-list-scroll]")
+    expect(restored?.scrollTop).toBe(240)
+    expect(restored?.scrollLeft).toBe(120)
+    expect(router.state.location.state).toMatchObject({
+      ...entry,
+      listScroll: { top: 240, left: 120 },
+    })
   })
+  it("synchronizes header sorting, direction and the toolbar through the URL", async () => {
+    const { router } = await open("/cards?class=bishop&view=list")
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole("button", { name: "消費" }))
+    expect(await screen.findByRole("combobox", { name: "排序" })).toHaveValue("cost")
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("cost")
+    await user.click(await screen.findByRole("button", { name: "消費" }))
+    expect(new URLSearchParams(router.state.location.search).get("order")).toBe("desc")
+    expect(await screen.findByRole("columnheader", { name: "消費" })).toHaveAttribute(
+      "aria-sort",
+      "descending",
+    )
+    await user.selectOptions(screen.getByRole("combobox", { name: "排序" }), "atk")
+    expect(await screen.findByRole("columnheader", { name: "攻擊力" })).toHaveAttribute(
+      "aria-sort",
+      "descending",
+    )
+    expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
+  })
+
   it("lists the snapshot and keeps the class filter in the URL", async () => {
     const { router } = await open()
     const user = userEvent.setup()
@@ -158,7 +192,7 @@ describe("CardsPage", () => {
   it("suggests while typing, names the matched field and opens with the keyboard", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-51")
     const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     const options = within(list).getAllByRole("option")
@@ -186,7 +220,7 @@ describe("CardsPage", () => {
     // Back lands on the list with the typed text in the URL and the input.
     await router.navigate(-1)
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
     })
     expect(router.state.location.search).toBe("?q=bp01-51")
   })
@@ -194,7 +228,7 @@ describe("CardsPage", () => {
   it("marks alias hits, shows all with the see-all link and keeps the text on back", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "テンプラー")
     expect(await screen.findByText(/符合：別名/u)).toBeInTheDocument()
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
@@ -213,7 +247,7 @@ describe("CardsPage", () => {
     })
     await router.navigate(-1)
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("テンプラー")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("テンプラー")
     })
     expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
   })
@@ -221,7 +255,7 @@ describe("CardsPage", () => {
   it("suggests across classes and 'see all' commits the text alone", async () => {
     const { router } = await open("/cards?class=bishop")
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "試作の妖精")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "試作の妖精")
     const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     expect(within(list).getAllByRole("option").length).toBeGreaterThan(0)
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
@@ -231,7 +265,7 @@ describe("CardsPage", () => {
   it("'see all' takes what is typed now, even during the debounce window", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-0")
     await screen.findByRole("listbox")
     await user.type(input, "5")
@@ -242,7 +276,7 @@ describe("CardsPage", () => {
   it("ignores clicks on stale suggestions until the list has caught up", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-0")
     const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     const first = within(list).getAllByRole("option")[0]
@@ -262,7 +296,7 @@ describe("CardsPage", () => {
   it("keeps suggestions pickable when the text has surrounding spaces", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), " bp01-51 ")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), " bp01-51 ")
     const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     await waitFor(() => {
       expect(list).toHaveAttribute("aria-busy", "false")
@@ -279,7 +313,7 @@ describe("CardsPage", () => {
     await user.click(screen.getByRole("button", { name: "清除全部條件" }))
     expect(router.state.location.search).toBe("")
     await screen.findByText("張卡片", { exact: false })
-    await user.click(screen.getByRole("combobox"))
+    await user.click(screen.getByRole("combobox", { name: "搜尋卡片" }))
     expect(await screen.findByText("還沒看過任何卡", { exact: false })).toBeInTheDocument()
     await user.keyboard("{Escape}")
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
@@ -288,12 +322,12 @@ describe("CardsPage", () => {
   it("drops the typed draft when the browser goes back to an older URL", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "foo")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "foo")
     await user.keyboard("{Enter}")
     expect(router.state.location.search).toBe("?q=foo")
     await router.navigate(-1)
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("")
     })
     expect(router.state.location.search).toBe("")
   })
@@ -301,7 +335,7 @@ describe("CardsPage", () => {
   it("commits typed text with Enter when nothing matches and the Escape closes the list", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "nothing-here")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "nothing-here")
     expect(await screen.findByText("沒有符合的卡")).toBeInTheDocument()
     await user.keyboard("{Enter}")
     expect(router.state.location.search).toBe("?q=nothing-here")

@@ -628,6 +628,9 @@ export class SearchIndex {
         (printing) => representatives.get(this.printings.art[printing] ?? 0) === printing,
       )
     }
+    const direction = state.order === "desc" ? -1 : 1
+    if (state.sort === "no" && direction === -1)
+      matches.sort((a, b) => (this.order[b] ?? 0) - (this.order[a] ?? 0))
     if (state.sort !== "no") {
       const summary = (p: number) =>
         this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
@@ -656,8 +659,9 @@ export class SearchIndex {
               : second === null
                 ? -1
                 : typeof first === "string" && typeof second === "string"
-                  ? first.localeCompare(second, this.edition === "jp" ? "ja" : "en")
-                  : Number(first) - Number(second)) || (this.order[a] ?? 0) - (this.order[b] ?? 0)
+                  ? direction * first.localeCompare(second, this.edition === "jp" ? "ja" : "en")
+                  : direction * (Number(first) - Number(second))) ||
+          (this.order[a] ?? 0) - (this.order[b] ?? 0)
         )
       })
     }

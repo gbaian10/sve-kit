@@ -53,8 +53,10 @@ describe("query codec", () => {
 
   it("round-trips through the URL", () => {
     const state = parseQuery(
-      new URLSearchParams("q=x&class=royal&cost=2-&view=list&unit=printing&sort=name"),
+      new URLSearchParams("q=x&class=royal&cost=2-&view=list&unit=printing&sort=name&order=desc"),
     )
+    expect(state.order).toBe("desc")
+    expect(formatQuery(state).get("order")).toBe("desc")
     expect(parseQuery(formatQuery(state))).toEqual(state)
   })
 
