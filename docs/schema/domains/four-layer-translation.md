@@ -1299,7 +1299,7 @@ P01 的具名生成池、P02 的十名稱搜尋實際結果池、P03 的生成�
 P03 另要求 live `source_actor`；場容量是操作限制，不產生 Nat 葉。
 搜尋不足與放置被替代時，remainder 的含義仍是實際池成員減去第一次實際放置成員，
 不能以要求數量相減；本階段來源驗證不執行遊戲容量、替代或失敗處理。
-不同的 allocation 不得重複使用同一物件世代。
+lowering／runtime 必須保證不同 allocation 不重複使用同一物件世代；本階段來源驗證不執行此約束。
 
 n1／n2／n3 接口補充：第二次放置只匯入一份 ObjectSet，新增
 `ObjectSetRef.origin="pool_remainder"`，其 `pool` 與 `placement` 皆必填，
@@ -1325,7 +1325,7 @@ paired export／import 的身分與證據一致；不再匯入一份重複的 po
 非池用途另沿既有 read_subject／read_event／read_receipt／read_player、choice_context、
 declared_x、payment_complete 用途；本節的具名 provider 用途碼為
 `history_actor`、`declared_dice_face`、`dice_event`、`dice_result`、`ability_source`
-與 `ex_passion_749_highest_satisfied_witness`。它們同樣是接口用途碼，
+與 `highest_satisfied_holder`。它們同樣是接口用途碼，
 各自受上述封閉簽章與 exact source 重建限制，不是新增數值角色。
 
 H01 的 EX 指示物兩段比較使用同一張卡、同一物件世代、live 同種類指示物讀值。
@@ -1334,7 +1334,8 @@ H01 的 EX 指示物兩段比較使用同一張卡、同一物件世代、live �
 由 `HOLDER_REVISIONS` 記錄，不成為其他來源的預設 holder。
 見證必須讓已達最高門檻成立：4／10 只可選 10；4／9 可選任一；10／12 可選任一，
 但兩次讀值必同世代；3／2 或空集合為 false／false，不捏造 holder；0／10 只可選 10。
-錯種類、換世代、換能力、換分枝都不可借用。
+錯種類、換世代、換能力、換分枝都不可借用。這些 K5 見證條件是 lowering／runtime 的約束；
+`verify_counter_witness` 提供參考檢查，供後續 lowering 使用，本階段來源驗證不執行。
 前段五個 4 隨 typed read 使用 `comparison_threshold`；沒有 typed read 的舊 `threshold` 不改。
 
 H02 的 `counter_amount` 是 up_to 常數 QuantitySpec，與目前量、移除量分開。
