@@ -31,6 +31,7 @@ def _gc_command(
                     namespace or (IMAGE_PREFIXES if images else SNAPSHOT_PREFIXES)
                 ),
                 execute=execute,
+                progress=lambda line: typer.echo(line, err=True),
             )
         typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
     except ExportError as error:

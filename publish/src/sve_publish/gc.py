@@ -17,11 +17,13 @@ from sve_carddb.export.read_api import (
     string,
 )
 
-from sve_publish.adapter import IMAGE_PREFIXES, SNAPSHOT_PREFIXES
+from sve_publish.adapter import IMAGE_PREFIXES, MAX_DELETE_BATCH, SNAPSHOT_PREFIXES
 from sve_publish.inventory import INVENTORY, commit_inventory, inventory, read_inventory
 from sve_publish.publish import read_index
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pydantic import JsonValue
 
     from sve_publish.adapter import R2Store, Stored
@@ -66,10 +68,32 @@ def retained(store: R2Store) -> tuple[Stored, set[str], set[str]]:
     return remote, required, optional
 
 
+def _delete_batches(
+    store: R2Store,
+    remote: Stored,
+    candidates: list[str],
+    progress: Callable[[str], None] | None,
+) -> list[str]:
+    deleted: list[str] = []
+    for start in range(0, len(candidates), MAX_DELETE_BATCH):
+        batch = candidates[start : start + MAX_DELETE_BATCH]
+        if store.get(INDEX) != remote:
+            raise ExportError("GC version index changed; run it again")
+        store.delete_many(batch)
+        deleted.extend(batch)
+        if progress is not None:
+            progress(f"GC: {len(deleted)}/{len(candidates)} deleted")
+    return deleted
+
+
 def collect(
-    store: R2Store, namespaces: frozenset[str], *, execute: bool
+    store: R2Store,
+    namespaces: frozenset[str],
+    *,
+    execute: bool,
+    progress: Callable[[str], None] | None = None,
 ) -> dict[str, object]:
-    """Recheck the index before each DELETE; never run while an upload is running."""
+    """Recheck the index before each batch; never run during an upload."""
     if not namespaces or not namespaces <= SNAPSHOT_PREFIXES:
         raise ExportError("GC namespace is not explicitly public")
     try:
@@ -90,13 +114,9 @@ def collect(
         for k in listed - required - optional
         if any(k.startswith(p) for p in namespaces)
     )
-    deleted: list[str] = []
-    if execute:
-        for key in candidates:
-            if store.get(INDEX) != remote:
-                raise ExportError("GC version index changed; run it again")
-            store.delete(key)
-            deleted.append(key)
+    if progress is not None:
+        progress(f"GC: {len(candidates)} candidates")
+    deleted = _delete_batches(store, remote, candidates, progress) if execute else []
     return {
         "mode": "execute" if execute else "dry_run",
         "candidates": candidates,
@@ -105,14 +125,18 @@ def collect(
 
 
 def collect_images(  # ruff: ignore[complex-structure] -- retention checks and invalidation must all precede the first DELETE
-    store: R2Store, namespaces: frozenset[str], *, execute: bool
+    store: R2Store,
+    namespaces: frozenset[str],
+    *,
+    execute: bool,
+    progress: Callable[[str], None] | None = None,
 ) -> dict[str, object]:
     """Invalidate claims before deleting; LIST also finds interrupted upload orphans."""
     if not namespaces or not namespaces <= IMAGE_PREFIXES:
         raise ExportError("GC namespace is not explicitly public")
     remote = store.get(INDEX)
     index = read_index(remote)
-    if index is None:
+    if remote is None or index is None:
         raise ExportError("GC requires a published version index")
     try:
         required = _current_images(
@@ -137,17 +161,15 @@ def collect_images(  # ruff: ignore[complex-structure] -- retention checks and i
         for item in rows.objects
         if item.key in required or not any(item.key.startswith(p) for p in namespaces)
     )
+    if progress is not None:
+        progress(f"GC: {len(candidates)} candidates")
     deleted = []
     if execute:
         if store.get(INDEX) != remote:
             raise ExportError("GC version index changed; run it again")
         if kept != rows.objects:
             commit_inventory(store, before, inventory(kept))
-        for key in candidates:
-            if store.get(INDEX) != remote:
-                raise ExportError("GC version index changed; run it again")
-            store.delete(key)
-            deleted.append(key)
+        deleted = _delete_batches(store, remote, candidates, progress)
     return {
         "mode": "execute" if execute else "dry_run",
         "candidates": candidates,

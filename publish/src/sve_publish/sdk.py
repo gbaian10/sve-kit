@@ -110,18 +110,23 @@ class Buffered:
             yield chunk
 
 
-def _inventory_xml(data: bytes) -> None:
+def _response_xml(data: bytes, operation: str) -> None:
+    label = "inventory" if operation == "ListObjectsV2" else "DELETE"
     try:
         text = data.decode("utf-8")
     except UnicodeError:
-        raise BoundaryError("R2 inventory XML must be UTF-8") from None
+        raise BoundaryError(f"R2 {label} XML must be UTF-8") from None
     if "<!" in text:
-        raise BoundaryError("R2 inventory XML declarations are forbidden")
+        raise BoundaryError(f"R2 {label} XML declarations are forbidden")
     try:
         root = ET.fromstring(text)  # ruff: ignore[suspicious-xml-element-tree-usage] -- declarations rejected above
     except ET.ParseError:
-        raise BoundaryError("R2 inventory XML is invalid") from None
+        raise BoundaryError(f"R2 {label} XML is invalid") from None
     namespace = "{http://s3.amazonaws.com/doc/2006-03-01/}"
+    if operation == "DeleteObjects":
+        if root.tag != namespace + "DeleteResult":
+            raise BoundaryError("R2 DELETE XML requires a DeleteResult")
+        return
     if root.tag != namespace + "ListBucketResult":
         raise BoundaryError("R2 inventory prefix differs from request")
     # The SDK's permissive boolean parser otherwise treats any text as false.
@@ -156,7 +161,7 @@ class Transport:
             "GetObject",
             "PutObject",
             "ListObjectsV2",
-            "DeleteObject",
+            "DeleteObjects",
         }:
             raise BoundaryError("Unexpected R2 SDK operation")
         self.state.operation = model.name
@@ -192,8 +197,6 @@ class Transport:
         accepted = {HTTPStatus.OK}
         if self.state.operation == "PutObject":
             accepted |= {HTTPStatus.CREATED, HTTPStatus.NO_CONTENT}
-        elif self.state.operation == "DeleteObject":
-            accepted.add(HTTPStatus.NO_CONTENT)
         if response.status_code not in accepted:
             raw.close()
             # No SDK error parser or redirect handler sees remote error contents.
@@ -218,10 +221,10 @@ class Transport:
         finally:
             raw.close()
         if (
-            self.state.operation == "ListObjectsV2"
+            self.state.operation in {"ListObjectsV2", "DeleteObjects"}
             and response.status_code == HTTPStatus.OK
         ):
-            _inventory_xml(data)
+            _response_xml(data, self.state.operation)
         headers = HTTPHeaders()
         for name in response.headers:
             value: object = response.headers[name]
