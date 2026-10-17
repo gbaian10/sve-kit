@@ -653,16 +653,18 @@ describe("CardsPage", () => {
     it("switches the row unit and the card edition from the panel", async () => {
       const { router } = await open()
       const user = userEvent.setup()
-      const rows = screen.getByRole("group", { name: "每列單位" })
-      expect(within(rows).getByRole("button", { name: "每個版次一行" })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      )
-      await user.click(within(rows).getByRole("button", { name: "每張卡一行" }))
+      await expectCount(27)
+      const onePerCard = screen.getByRole("switch", { name: "同一張卡只顯示一次" })
+      expect(onePerCard).toHaveAttribute("aria-checked", "false")
+      expect(onePerCard).toHaveAccessibleDescription("不同稀有度、異圖與再錄合併成一張")
+      await user.click(onePerCard)
       expect(router.state.location.search).toBe("?unit=card")
+      expect(onePerCard).toHaveAttribute("aria-checked", "true")
       await waitFor(() => {
-        expect(screen.getByText("張卡片")).toBeInTheDocument()
+        expect(screen.getByText("張卡片")).toHaveTextContent(/^\d+ 張卡片$/u)
       })
+      // Display only: no condition chip.
+      expect(screen.queryByRole("group", { name: "目前條件" })).not.toBeInTheDocument()
       const edition = screen.getByRole("group", { name: "卡面版本" })
       expect(within(edition).getByRole("button", { name: "日版" })).toHaveAttribute(
         "aria-pressed",

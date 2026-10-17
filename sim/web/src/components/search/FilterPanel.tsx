@@ -1,8 +1,9 @@
-import type { ReactNode } from "react"
+import { type ReactNode, useId } from "react"
 import { useTranslation } from "react-i18next"
 
 import { COST_CAP, type QueryState, STAT_CAP, toggleValue } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
+import { Switch } from "../ui/Switch"
 import { Section, Toggle } from "./FilterControls"
 
 export interface FilterPanelProps {
@@ -34,6 +35,7 @@ export function FilterPanel({
   facets,
 }: FilterPanelProps) {
   const { t } = useTranslation()
+  const hintId = useId()
   const stat = (
     title: string,
     field: "cost" | "attack" | "defense",
@@ -87,24 +89,26 @@ export function FilterPanel({
       {stat(t("filters.attack"), "attack", STAT_CAP, query.attack)}
       {stat(t("filters.defense"), "defense", STAT_CAP, query.defense)}
       {facets}
-      <Section title={t("filters.rows")}>
-        <Toggle
-          pressed={query.unit === "card"}
-          onClick={() => {
-            onChange({ ...query, unit: "card" })
+      {/* Display, not a filter: on = one row per card (`unit=card`), off = one per printing. */}
+      <div className="flex items-start gap-2">
+        <Switch
+          size="sm"
+          label={t("filters.onePerCard")}
+          describedBy={hintId}
+          checked={query.unit === "card"}
+          onChange={(checked) => {
+            onChange({ ...query, unit: checked ? "card" : "printing" })
           }}
-        >
-          {t("filters.rowPerCard")}
-        </Toggle>
-        <Toggle
-          pressed={query.unit === "printing"}
-          onClick={() => {
-            onChange({ ...query, unit: "printing" })
-          }}
-        >
-          {t("filters.rowPerPrinting")}
-        </Toggle>
-      </Section>
+        />
+        <div className="flex min-w-0 flex-col justify-center py-2.5 leading-tight">
+          <span aria-hidden="true" className="text-13 text-text-1">
+            {t("filters.onePerCard")}
+          </span>
+          <span id={hintId} className="text-12 text-text-3">
+            {t("filters.onePerCardHint")}
+          </span>
+        </div>
+      </div>
     </section>
   )
 }
