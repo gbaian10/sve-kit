@@ -49,7 +49,7 @@ export function DevBadge({ client }: { readonly client: SnapshotClient }) {
       role="status"
       title={status.state === "ready" ? status.dataVersion : undefined}
       data-manifest-hash={client.snapshot()?.manifestHash ?? ""}
-      className="fixed right-2 bottom-24 z-40 flex max-w-[calc(100vw-1rem)] flex-wrap items-center gap-2 rounded-pill border border-border bg-surface-1 py-1 pr-1 pl-3 text-12 text-text-2 shadow-lg lg:bottom-3 phone-landscape:bottom-3"
+      className="fixed right-[calc(0.5rem+var(--drawer-width,0px))] bottom-24 z-40 flex max-w-[calc(100vw-1rem)] flex-wrap items-center gap-2 rounded-pill border border-border bg-surface-1 py-1 pr-1 pl-3 text-12 text-text-2 shadow-lg lg:bottom-3 phone-landscape:bottom-3"
     >
       <span className="shrink-0 font-semibold">{rootLabel}</span>
       <span className="min-w-0 truncate">{text}</span>

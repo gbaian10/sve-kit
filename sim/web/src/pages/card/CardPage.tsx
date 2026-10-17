@@ -97,8 +97,6 @@ export interface CardFrame {
   /** Where a link to another printing goes while the overlay stays open. */
   readonly link: (target: OverlayLinkTarget) => { readonly to: To; readonly state: unknown }
   readonly onClose: () => void
-  /** `column` stacks image over text (the side panel); `wide` puts them side by side from `md`. */
-  readonly layout: "column" | "wide"
 }
 
 export interface CardViewProps {
@@ -627,8 +625,8 @@ export function CardView({
       <div
         className={cn(
           frame === undefined && "lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10",
-          frame !== undefined && "px-4",
-          frame?.layout === "wide" && "md:grid md:grid-cols-[280px_minmax(0,1fr)] md:gap-x-6",
+          // The drawer and the modal are containers: side by side only once they are wide enough.
+          frame !== undefined && "px-4 @4xl:grid @4xl:grid-cols-[280px_minmax(0,1fr)] @4xl:gap-x-6",
         )}
         onClickCapture={(event) => {
           if (
@@ -645,7 +643,7 @@ export function CardView({
           className={cn(
             "mt-1 flex flex-col items-center gap-3",
             frame === undefined && "lg:sticky lg:top-4 lg:self-start",
-            frame?.layout === "wide" && "md:sticky md:top-13 md:self-start",
+            frame !== undefined && "@4xl:sticky @4xl:top-13 @4xl:self-start",
           )}
         >
           {views.map(
@@ -663,8 +661,7 @@ export function CardView({
                   className={cn(
                     "block rounded-card shadow-lg transition-transform hover:scale-[1.01]",
                     frame === undefined && IMAGE_SLOT,
-                    frame?.layout === "column" && "w-[64%] max-w-64",
-                    frame?.layout === "wide" && "w-[64%] max-w-64 md:w-full md:max-w-none",
+                    frame !== undefined && "w-[64%] max-w-64 @4xl:w-full @4xl:max-w-none",
                   )}
                 >
                   <CardImage

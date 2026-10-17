@@ -1,4 +1,4 @@
-import { type ReactNode, type RefObject, useEffect, useMemo, useRef } from "react"
+import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
@@ -6,6 +6,8 @@ import {
   CARD_PARAM,
   cardParamOf,
   type CardPresentation,
+  DRAWER_WIDTH_VAR,
+  drawerWidthValue,
   parseCardParam,
   useCardPresentation,
   withoutCardParam,
@@ -20,9 +22,11 @@ import { useRouteEdition } from "../../app/snapshot"
 import { Dialog } from "../../components/ui/Dialog"
 import type { CardRouteInput, CardSummary } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
+import { usePrefs } from "../../settings"
 import type { CardFrame, OverlayLinkTarget } from "../card/CardPage"
 import { routeInput } from "../card/useCardContent"
 import { CardOverlayContent } from "./CardOverlayContent"
+import { DrawerHandle } from "./DrawerHandle"
 
 export interface CardOverlayArgs {
   readonly entry: ListEntryState
@@ -42,19 +46,20 @@ export interface CardOverlay {
   /** Opens the cell's card in place; false when cards open as pages, so the caller navigates. */
   readonly openInPlace: (summary: CardSummary, key: string) => boolean
   readonly close: () => void
-  /** The side panel for the results' right column, or null. */
-  readonly panel: ReactNode
+  /** The drawer at the app frame's right edge, kept while it slides out; null otherwise. */
+  readonly drawer: ReactNode
   /** The modal over the results; always rendered so its dialog can hand focus back on close. */
   readonly modal: ReactNode
 }
 
-const PANEL_CLASS =
-  "mt-3 rounded-block border border-border bg-surface-1 outline-none lg:sticky lg:top-4 lg:mt-0 lg:overflow-y-auto"
-// The panel sticks 1rem below the viewport top; its height follows its own top edge until then.
-const PANEL_GAP_PX = 16
+// A column of the app frame like the side rail (same layer); the frame pads its right side by the
+// drawer width while it is open, so the results reflow instead of being covered.
+const DRAWER_CLASS =
+  "fixed inset-y-0 right-0 z-40 flex border-l border-border bg-surface-1 shadow-lg outline-none transition-transform duration-200 ease-out starting:translate-x-full data-[state=closing]:translate-x-full motion-reduce:transition-none"
+const EXIT_MS = 200
 
 /**
- * The card a list shows beside (panel) or over (modal) its results: `?card=` names it, the list's
+ * The card a list shows beside (drawer) or over (modal) its results: `?card=` names it, the list's
  * history entry keeps what the opening cell knew (`overlay`), and the preference decides the frame.
  */
 export function useCardOverlay({
@@ -70,18 +75,56 @@ export function useCardOverlay({
   const [params] = useSearchParams()
   const edition = useRouteEdition()
   const presentation = useCardPresentation()
+  const { drawerWidth } = usePrefs()
   const param = params.get(CARD_PARAM)
-  const target = useMemo(() => parseCardParam(param), [param])
   const overlay = entry.overlay
-  const open = target !== null && presentation !== "page"
+  const open = param !== null && presentation !== "page"
+  const drawerOpen = open && presentation === "panel"
+
+  // The drawer slides out before it unmounts, still showing the card it had.
+  const [wasDrawerOpen, setWasDrawerOpen] = useState(drawerOpen)
+  const [closing, setClosing] = useState(false)
+  if (drawerOpen !== wasDrawerOpen) {
+    setWasDrawerOpen(drawerOpen)
+    setClosing(!drawerOpen)
+  }
+  const [shownParam, setShownParam] = useState(param)
+  if (param !== null && param !== shownParam) setShownParam(param)
+  useEffect(() => {
+    if (!closing) return
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const timer = setTimeout(
+      () => {
+        setClosing(false)
+      },
+      reduced ? 0 : EXIT_MS,
+    )
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [closing])
+  const drawerShown = drawerOpen || closing
+  const contentParam = open ? param : shownParam
+  const target = useMemo(() => parseCardParam(contentParam), [contentParam])
+
+  useEffect(() => {
+    if (!drawerOpen) return
+    const style = document.documentElement.style
+    style.setProperty(DRAWER_WIDTH_VAR, drawerWidthValue(drawerWidth))
+    return () => {
+      style.removeProperty(DRAWER_WIDTH_VAR)
+    }
+  }, [drawerOpen, drawerWidth])
 
   // The preference says "page" (or changed to it while open): the card URL becomes the page.
   useEffect(() => {
-    if (!target || presentation !== "page") return
+    if (param === null || presentation !== "page") return
+    const page = parseCardParam(param)
+    if (!page) return
     const path =
-      target.namespace === "provisional"
-        ? printingPath({ cardNo: "", cardNoState: "provisional", intId: Number(target.key) })
-        : printingPath({ cardNo: target.key })
+      page.namespace === "provisional"
+        ? printingPath({ cardNo: "", cardNoState: "provisional", intId: Number(page.key) })
+        : printingPath({ cardNo: page.key })
     const state: CardEntryState | null = overlay?.resultKey
       ? {
           background,
@@ -92,7 +135,7 @@ export function useCardOverlay({
         }
       : null
     void navigate(path, { replace: true, state })
-  }, [target, presentation, overlay, background, pages, navigate])
+  }, [param, presentation, overlay, background, pages, navigate])
 
   const openInPlace = (summary: CardSummary, key: string) => {
     if (presentation === "page") return false
@@ -130,14 +173,14 @@ export function useCardOverlay({
     )
   }
 
-  // Focus enters the panel when it opens and returns to the opening cell when it closes, however
+  // Focus enters the drawer when it opens and returns to the opening cell when it closes, however
   // it closed; the modal's dialog does the same on its own.
-  const panelRef = useRef<HTMLElement>(null)
+  const drawerRef = useRef<HTMLElement>(null)
   const lastSelected = useRef<string | null>(null)
   const selected = open ? overlay?.resultKey : undefined
   useEffect(() => {
     if (open) {
-      if (lastSelected.current === null && presentation === "panel") panelRef.current?.focus()
+      if (lastSelected.current === null && presentation === "panel") drawerRef.current?.focus()
       lastSelected.current = selected ?? ""
       return
     }
@@ -150,27 +193,8 @@ export function useCardOverlay({
     cell?.focus()
   }, [open, selected, presentation, root])
 
-  const panelOpen = open && presentation === "panel"
   useEffect(() => {
-    const panel = panelRef.current
-    if (!panelOpen || !panel) return
-    const fit = () => {
-      const top = Math.max(panel.getBoundingClientRect().top, PANEL_GAP_PX)
-      panel.style.maxHeight = `calc(100dvh - ${String(Math.round(top) + PANEL_GAP_PX)}px)`
-    }
-    fit()
-    window.addEventListener("scroll", fit, { passive: true })
-    window.addEventListener("resize", fit)
-    return () => {
-      window.removeEventListener("scroll", fit)
-      window.removeEventListener("resize", fit)
-      panel.style.maxHeight = ""
-    }
-  }, [panelOpen])
-
-  const closeOnEscape = panelOpen
-  useEffect(() => {
-    if (!closeOnEscape) return
+    if (!drawerOpen) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.defaultPrevented) return
       // Dialogs (zoom, filters) and the suggestion list take Escape first.
@@ -223,7 +247,6 @@ export function useCardOverlay({
         key: target.key,
         link,
         onClose: close,
-        layout: presentation === "panel" ? "column" : "wide",
       }
     : null
   const content = input && frame ? <CardOverlayContent input={input} frame={frame} /> : null
@@ -234,18 +257,22 @@ export function useCardOverlay({
     selected,
     openInPlace,
     close,
-    panel:
-      open && presentation === "panel" ? (
-        <aside
-          ref={panelRef}
-          tabIndex={-1}
-          data-card-overlay=""
-          aria-label={t("cardPage.panel")}
-          className={PANEL_CLASS}
-        >
-          {content}
-        </aside>
-      ) : null,
+    drawer: drawerShown ? (
+      <aside
+        ref={drawerRef}
+        tabIndex={-1}
+        data-card-overlay=""
+        data-state={drawerOpen ? "open" : "closing"}
+        aria-label={t("cardPage.panel")}
+        aria-hidden={drawerOpen ? undefined : true}
+        inert={!drawerOpen}
+        className={DRAWER_CLASS}
+        style={{ width: `var(${DRAWER_WIDTH_VAR}, ${drawerWidthValue(drawerWidth)})` }}
+      >
+        <DrawerHandle />
+        <div className="@container min-w-0 flex-1 overflow-y-auto">{content}</div>
+      </aside>
+    ) : null,
     modal: (
       <Dialog
         open={open && presentation === "modal"}
@@ -255,7 +282,7 @@ export function useCardOverlay({
         bare
       >
         {open && presentation === "modal" && (
-          <div data-card-overlay="" className="min-h-full">
+          <div data-card-overlay="" className="@container min-h-full">
             {content}
           </div>
         )}

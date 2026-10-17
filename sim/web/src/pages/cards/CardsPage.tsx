@@ -50,7 +50,6 @@ import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
-import { cn } from "../../components/ui/cn"
 import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
@@ -717,168 +716,151 @@ export function CardsPage() {
           {t("results.loadFailed")}
         </Notice>
       )}
-      {/* Results on the left, the open card's panel on the right (design 04d: 400 at 1180, 440 at 1440). */}
-      <div
-        className={cn(
-          cardOverlay.panel !== null &&
-            "lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-6 xl:grid-cols-[minmax(0,1fr)_440px]",
+      <div className="flex min-w-0 flex-col gap-3">
+        {/* The status strip above says what is downloading; the list only shows its skeleton. */}
+        {pending && readiness.phase !== "error" && (
+          <>
+            {readiness.phase === "ready" && (
+              <p role="status" className="text-13 text-text-2">
+                {progress
+                  ? t("results.searchProgress", progress)
+                  : t("results.dependenciesPending")}
+              </p>
+            )}
+            <SkeletonGrid />
+          </>
         )}
-      >
-        <div
-          className="flex min-w-0 flex-col gap-3"
-          data-beside-panel={cardOverlay.panel !== null ? "" : undefined}
-        >
-          {/* The status strip above says what is downloading; the list only shows its skeleton. */}
-          {pending && readiness.phase !== "error" && (
-            <>
-              {readiness.phase === "ready" && (
-                <p role="status" className="text-13 text-text-2">
-                  {progress
-                    ? t("results.searchProgress", progress)
-                    : t("results.dependenciesPending")}
-                </p>
-              )}
-              <SkeletonGrid />
-            </>
-          )}
-          {page !== null && page.total === 0 && (
-            <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
-              <p className="text-16 font-semibold">{t("results.empty")}</p>
-              <p className="text-13 text-text-3">{t("results.emptyHint")}</p>
-              {hasConditions && (
-                <Button
-                  onClick={() => {
-                    commit(DEFAULT_QUERY)
-                  }}
-                >
-                  {t("results.clearAll")}
-                </Button>
-              )}
-            </div>
-          )}
-          {page !== null && page.total > 0 && (
-            <>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                {view === "list" && <ListColumnPicker />}
-                <div className="ml-auto flex flex-wrap items-center gap-2">
-                  <label className="flex items-center gap-1 text-13">
-                    <span>{t("results.sort")}</span>
-                    <select
-                      aria-label={t("results.sort")}
-                      value={query.sort}
-                      className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
-                      onChange={(event) => {
-                        const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
-                        if (sort) commit({ ...query, sort })
-                      }}
-                    >
-                      {QUERY_SORTS.map((sort) => (
-                        <option key={sort} value={sort} disabled={sort === "date"}>
-                          {t(`results.sortBy.${sort}`)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button
-                    type="button"
-                    aria-label={t("results.descending")}
-                    aria-pressed={query.order === "desc"}
-                    className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
-                    onClick={() => {
-                      const { order, ...rest } = query
-                      commit(order === "desc" ? rest : { ...rest, order: "desc" })
+        {page !== null && page.total === 0 && (
+          <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
+            <p className="text-16 font-semibold">{t("results.empty")}</p>
+            <p className="text-13 text-text-3">{t("results.emptyHint")}</p>
+            {hasConditions && (
+              <Button
+                onClick={() => {
+                  commit(DEFAULT_QUERY)
+                }}
+              >
+                {t("results.clearAll")}
+              </Button>
+            )}
+          </div>
+        )}
+        {page !== null && page.total > 0 && (
+          <>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              {view === "list" && <ListColumnPicker />}
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <label className="flex items-center gap-1 text-13">
+                  <span>{t("results.sort")}</span>
+                  <select
+                    aria-label={t("results.sort")}
+                    value={query.sort}
+                    className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
+                    onChange={(event) => {
+                      const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
+                      if (sort) commit({ ...query, sort })
                     }}
                   >
-                    {query.order === "desc" ? "↓" : "↑"}
-                  </button>
-                  <Segmented
-                    size="sm"
-                    tone="accent"
-                    label={t("results.view")}
-                    options={VIEW_MODES.map((value) => ({
-                      value,
-                      label: t(`options.view.${value}`),
-                    }))}
-                    value={view}
-                    onChange={(next) => {
-                      updateEntry({
-                        pages,
+                    {QUERY_SORTS.map((sort) => (
+                      <option key={sort} value={sort} disabled={sort === "date"}>
+                        {t(`results.sortBy.${sort}`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  aria-label={t("results.descending")}
+                  aria-pressed={query.order === "desc"}
+                  className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
+                  onClick={() => {
+                    const { order, ...rest } = query
+                    commit(order === "desc" ? rest : { ...rest, order: "desc" })
+                  }}
+                >
+                  {query.order === "desc" ? "↓" : "↑"}
+                </button>
+                <Segmented
+                  size="sm"
+                  tone="accent"
+                  label={t("results.view")}
+                  options={VIEW_MODES.map((value) => ({
+                    value,
+                    label: t(`options.view.${value}`),
+                  }))}
+                  value={view}
+                  onChange={(next) => {
+                    updateEntry({
+                      pages,
+                      listScroll: listScroll.current,
+                      scrollY: window.scrollY,
+                    })
+                    prefsStore.set({ viewMode: next })
+                    setEdit(null)
+                    setParams(urlParams({ ...query, view: next }), {
+                      state: {
+                        ...listEntry,
+                        ...keptOverlay,
                         listScroll: listScroll.current,
                         scrollY: window.scrollY,
-                      })
-                      prefsStore.set({ viewMode: next })
-                      setEdit(null)
-                      setParams(urlParams({ ...query, view: next }), {
-                        state: {
-                          ...listEntry,
-                          ...keptOverlay,
-                          listScroll: listScroll.current,
-                          scrollY: window.scrollY,
-                        },
-                        preventScrollReset: true,
-                      })
-                    }}
-                  />
-                </div>
-              </div>
-              {view === "grid" && (
-                <CardGrid
-                  cells={cells}
-                  images={images}
-                  onOpen={openCell}
-                  {...(entry.anchor === undefined || cardOverlay.open
-                    ? {}
-                    : { anchor: entry.anchor })}
-                  {...(cardOverlay.selected === undefined
-                    ? {}
-                    : { selected: cardOverlay.selected })}
-                />
-              )}
-              {view === "table" && (
-                <CardTable
-                  cells={cells}
-                  images={images}
-                  onOpen={openCell}
-                  artOf={artOf}
-                  {...(entry.anchor === undefined || cardOverlay.open
-                    ? {}
-                    : { anchor: entry.anchor })}
-                  {...(cardOverlay.selected === undefined
-                    ? {}
-                    : { selected: cardOverlay.selected })}
-                />
-              )}
-              {view === "list" && (
-                <CardList
-                  classLabel={classLabel}
-                  footer={pagination}
-                  sort={query.sort}
-                  descending={query.order === "desc"}
-                  onSort={(sort) => {
-                    const { order, ...rest } = query
-                    commit(
-                      sort === query.sort && order !== "desc"
-                        ? { ...rest, sort, order: "desc" }
-                        : { ...rest, sort },
-                    )
+                      },
+                      preventScrollReset: true,
+                    })
                   }}
-                  scrollPositionRef={listScroll}
-                  cells={cells}
-                  onOpen={openCell}
-                  {...(entry.anchor === undefined || cardOverlay.open
-                    ? {}
-                    : { anchor: entry.anchor })}
-                  {...(cardOverlay.selected === undefined
-                    ? {}
-                    : { selected: cardOverlay.selected })}
                 />
-              )}
-              {view !== "list" && pagination}
-            </>
-          )}
-        </div>
-        {cardOverlay.panel}
+              </div>
+            </div>
+            {view === "grid" && (
+              <CardGrid
+                cells={cells}
+                images={images}
+                onOpen={openCell}
+                {...(entry.anchor === undefined || cardOverlay.open
+                  ? {}
+                  : { anchor: entry.anchor })}
+                {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
+              />
+            )}
+            {view === "table" && (
+              <CardTable
+                cells={cells}
+                images={images}
+                onOpen={openCell}
+                artOf={artOf}
+                {...(entry.anchor === undefined || cardOverlay.open
+                  ? {}
+                  : { anchor: entry.anchor })}
+                {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
+              />
+            )}
+            {view === "list" && (
+              <CardList
+                classLabel={classLabel}
+                footer={pagination}
+                sort={query.sort}
+                descending={query.order === "desc"}
+                onSort={(sort) => {
+                  const { order, ...rest } = query
+                  commit(
+                    sort === query.sort && order !== "desc"
+                      ? { ...rest, sort, order: "desc" }
+                      : { ...rest, sort },
+                  )
+                }}
+                scrollPositionRef={listScroll}
+                cells={cells}
+                onOpen={openCell}
+                {...(entry.anchor === undefined || cardOverlay.open
+                  ? {}
+                  : { anchor: entry.anchor })}
+                {...(cardOverlay.selected === undefined ? {} : { selected: cardOverlay.selected })}
+              />
+            )}
+            {view !== "list" && pagination}
+          </>
+        )}
       </div>
+      {cardOverlay.drawer}
       {cardOverlay.modal}
     </div>
   )

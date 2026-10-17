@@ -7,7 +7,7 @@ import { useMediaQuery } from "./useMediaQuery"
 export const CARD_PARAM = "card"
 const PROVISIONAL_PREFIX = "_provisional/"
 
-/** Same keys as the card routes, so the panel and the page resolve one card the same way. */
+/** Same keys as the card routes, so the drawer and the page resolve one card the same way. */
 export function cardParamOf(printing: {
   readonly cardNo: string
   readonly cardNoState?: string
@@ -36,16 +36,32 @@ export function withoutCardParam(search: string): string {
 
 export type CardPresentation = Exclude<CardOpenMode, "auto">
 
-// The side panel needs the desktop layout (the `lg` breakpoint); narrower screens get the modal
-// even when the preference asks for the panel.
-const DESKTOP_QUERY = "(min-width: 1000px)"
+// The drawer pushes the whole app frame left, so it needs room beside it; narrower screens get the
+// modal even when the preference asks for the drawer.
+const DRAWER_QUERY = "(min-width: 900px)"
 
-function resolvePresentation(mode: CardOpenMode, desktop: boolean): CardPresentation {
+function resolvePresentation(mode: CardOpenMode, wide: boolean): CardPresentation {
   if (mode === "page" || mode === "modal") return mode
-  return desktop ? "panel" : "modal"
+  return wide ? "panel" : "modal"
 }
 
 export function useCardPresentation(): CardPresentation {
   const { cardOpenMode } = usePrefs()
-  return resolvePresentation(cardOpenMode, useMediaQuery(DESKTOP_QUERY))
+  return resolvePresentation(cardOpenMode, useMediaQuery(DRAWER_QUERY))
+}
+
+/** Set on the root element while the drawer is open; the app frame pads its right side by it. */
+export const DRAWER_WIDTH_VAR = "--drawer-width"
+export const DRAWER_MIN_PX = 600
+const DRAWER_MAX_PX = 1200
+// What the results keep at least when the drawer is dragged wide.
+const RESULTS_MIN_PX = 480
+
+export function drawerWidthValue(preferred: number | null): string {
+  return preferred === null ? "clamp(600px, 34vw, 720px)" : `${String(preferred)}px`
+}
+
+export function clampDrawerWidth(px: number, viewportWidth: number): number {
+  const max = Math.max(DRAWER_MIN_PX, Math.min(DRAWER_MAX_PX, viewportWidth - RESULTS_MIN_PX))
+  return Math.min(max, Math.max(DRAWER_MIN_PX, Math.round(px)))
 }

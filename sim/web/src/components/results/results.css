@@ -301,19 +301,6 @@ html:has([data-card-list]) {
     inset 0 -2px var(--color-accent);
 }
 
-/* Results beside the open card panel (design 04d) lose two grid columns to it. */
-@media (width >= 1000px) {
-  [data-beside-panel] [data-view="grid"] {
-    --result-columns: 3;
-  }
-}
-
-@media (width >= 1440px) {
-  [data-beside-panel] [data-view="grid"] {
-    --result-columns: 4;
-  }
-}
-
 :where([data-card-list] th:last-child),
 :where([data-card-list] td:last-child) {
   border-right: 0;

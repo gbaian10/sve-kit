@@ -4,7 +4,13 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
-import { type CardOpenMode, DEFAULT_PREFS, prefsStore, recentStore } from "../../settings"
+import {
+  type CardOpenMode,
+  DEFAULT_PREFS,
+  prefsStore,
+  readPrefs,
+  recentStore,
+} from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 
@@ -23,11 +29,11 @@ const stubImage = ({ width, height, seed }: { width: number; height: number; see
   )
 const built = await buildSnapshot({ encodeImage: stubImage })
 
-// jsdom has no layout: the desktop media query answers from this switch.
+// jsdom has no layout: the drawer's media query answers from this switch.
 let desktop = true
 const matchMedia = (query: string): MediaQueryList =>
   ({
-    matches: query === "(min-width: 1000px)" ? desktop : false,
+    matches: query === "(min-width: 900px)" ? desktop : false,
     media: query,
     onchange: null,
     addEventListener: () => undefined,
@@ -188,7 +194,31 @@ describe("opening a card beside the results", () => {
       source: "results",
       resultKey: "p:bp01-001",
     })
-    expect(screen.queryByRole("complementary", { name: "單卡面板" })).toBeNull()
+    await waitFor(() => {
+      expect(noPanel()).toBeNull()
+    })
+  })
+
+  it("pads the app frame by the drawer and lets the keyboard resize it", async () => {
+    vi.stubGlobal("innerWidth", 1440)
+    await open("/cards?q=bp01", "panel")
+    const user = userEvent.setup()
+    const [first] = await cells()
+    if (!first) throw new Error("missing cell")
+    await user.click(first)
+    expect(document.documentElement.style.getPropertyValue("--drawer-width")).toBe(
+      "clamp(600px, 34vw, 720px)",
+    )
+    const handle = within(panel()).getByRole("separator", { name: "調整抽屜寬度" })
+    handle.focus()
+    await user.keyboard("{ArrowLeft}")
+    expect(readPrefs().drawerWidth).toBe(640)
+    expect(document.documentElement.style.getPropertyValue("--drawer-width")).toBe("640px")
+    await user.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(noPanel()).toBeNull()
+    })
+    expect(document.documentElement.style.getPropertyValue("--drawer-width")).toBe("")
   })
 
   it("names the English edition in a copied link", async () => {

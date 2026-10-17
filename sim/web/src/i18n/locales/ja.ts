@@ -31,7 +31,7 @@ export default {
     accent: { amber: "アンバー", teal: "ティール", red: "レッド" },
     region: { jp: "日本", en: "英語圏" },
     view: { grid: "画像", table: "表", list: "リスト" },
-    cardOpenMode: { auto: "自動", panel: "右パネル", modal: "中央表示", page: "全ページ" },
+    cardOpenMode: { auto: "自動", panel: "ドロワー", modal: "中央表示", page: "全ページ" },
   },
   settings: {
     infiniteScroll: "無限スクロール",
@@ -80,7 +80,7 @@ export default {
     banRegion: "禁止・制限の地域",
     cardOpenMode: "カードの開き方",
     cardOpenModeHint:
-      "自動：PC では結果の右にパネル、スマホでは中央に表示。全ページはカードページへ移動します。",
+      "自動：PC では右側にドロワー、スマホでは中央に表示。全ページはカードページへ移動します。",
   },
   pages: {
     home: "ホーム",
@@ -344,6 +344,7 @@ export default {
     copyLink: "リンクをコピー",
     fullscreen: "全画面で表示",
     closePanel: "パネルを閉じる",
+    resizeDrawer: "ドロワーの幅を調整",
     panel: "カードパネル",
     linkCopied: "このカードのリンクをコピーしました",
     linkCopyFailed: "コピーできません。アドレスバーからコピーしてください",

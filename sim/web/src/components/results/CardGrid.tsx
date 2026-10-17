@@ -146,23 +146,27 @@ const CardCell = memo(function CardCell({
 export function CardGrid({ cells, images, onOpen, anchor, selected }: CardGridProps) {
   const labels = useResultLabels()
   return (
-    // One column count drives both the grid and the off-screen height estimate in results.css.
-    <ul
-      data-view="grid"
-      className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] md:[--result-columns:4] lg:[--result-columns:5] xl:[--result-columns:6]"
-    >
-      {cells.map((cell) => (
-        <li key={cell.key} className="min-w-0">
-          <CardCell
-            cell={cell}
-            images={images}
-            onOpen={onOpen}
-            highlighted={anchor === cell.key}
-            selected={selected === cell.key}
-            labels={labels}
-          />
-        </li>
-      ))}
-    </ul>
+    // One column count drives both the grid and the off-screen height estimate in results.css. The
+    // count follows the width the grid gets (the card drawer narrows it), not the viewport: 2 on
+    // phones, 4 from 600 wide, 5 on desktop, 6 from 1440.
+    <div className="@container">
+      <ul
+        data-view="grid"
+        className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] @min-[520px]:[--result-columns:4] @min-[840px]:[--result-columns:5] @min-[1100px]:[--result-columns:6]"
+      >
+        {cells.map((cell) => (
+          <li key={cell.key} className="min-w-0">
+            <CardCell
+              cell={cell}
+              images={images}
+              onOpen={onOpen}
+              highlighted={anchor === cell.key}
+              selected={selected === cell.key}
+              labels={labels}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

@@ -29,7 +29,7 @@ const zhTW = {
     accent: { amber: "琥珀", teal: "青綠", red: "紅" },
     region: { jp: "日本", en: "英文圈" },
     view: { grid: "卡圖", table: "表格", list: "清單" },
-    cardOpenMode: { auto: "自動", panel: "右側面板", modal: "中間彈出", page: "整頁" },
+    cardOpenMode: { auto: "自動", panel: "右側抽屜", modal: "中間彈出", page: "整頁" },
   },
   settings: {
     infiniteScroll: "無限捲動",
@@ -73,7 +73,7 @@ const zhTW = {
     symbolLabelsHint: "只有關鍵字類會顯示名稱",
     banRegion: "禁限地區",
     cardOpenMode: "單卡開啟方式",
-    cardOpenModeHint: "自動：電腦在結果右側開面板，手機從中間彈出。選整頁則一律跳到單卡頁。",
+    cardOpenModeHint: "自動：電腦從右側推開抽屜，手機從中間彈出。選整頁則一律跳到單卡頁。",
   },
   pages: {
     home: "主頁",
@@ -324,6 +324,7 @@ const zhTW = {
     copyLink: "複製連結",
     fullscreen: "全螢幕顯示",
     closePanel: "關閉面板",
+    resizeDrawer: "調整抽屜寬度",
     panel: "單卡面板",
     linkCopied: "已複製這張卡的連結",
     linkCopyFailed: "無法複製，請從網址列複製",

@@ -59,6 +59,8 @@ export interface Prefs {
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
   readonly cardOpenMode: CardOpenMode
+  /** The card drawer's width in px once the user has dragged it; null = the default clamp. */
+  readonly drawerWidth: number | null
   readonly listWidths: ListWidths
   readonly listMobileWidths: ListWidths
   readonly listVisibility: ListVisibility
@@ -85,6 +87,7 @@ export const DEFAULT_PREFS: Prefs = {
   gridDensity: 2,
   viewMode: "grid",
   cardOpenMode: "auto",
+  drawerWidth: null,
   listWidths: {},
   listMobileWidths: {},
   listVisibility: DEFAULT_LIST_VISIBILITY,
@@ -100,6 +103,9 @@ const isTextDisplay = oneOf(TEXT_DISPLAYS)
 const isGridDensity = oneOf(GRID_DENSITIES)
 const isViewMode = oneOf(VIEW_MODES)
 const isCardOpenMode = oneOf(CARD_OPEN_MODES)
+const isDrawerWidth = (value: unknown): value is number | null =>
+  value === null ||
+  (Number.isInteger(value) && (value as number) >= 600 && (value as number) <= 1200)
 const isBoolean = (value: unknown): value is boolean => typeof value === "boolean"
 const isNullableUiLanguage = (value: unknown): value is UiLanguage | null =>
   value === null || isUiLanguage(value)
@@ -141,6 +147,7 @@ const sanitizers: Sanitizers = {
   gridDensity: withDefault(isGridDensity, DEFAULT_PREFS.gridDensity),
   viewMode: withDefault(isViewMode, DEFAULT_PREFS.viewMode),
   cardOpenMode: withDefault(isCardOpenMode, DEFAULT_PREFS.cardOpenMode),
+  drawerWidth: withDefault(isDrawerWidth, DEFAULT_PREFS.drawerWidth),
   listWidths: withDefault(isListWidths, DEFAULT_PREFS.listWidths),
   listMobileWidths: withDefault(isListWidths, DEFAULT_PREFS.listMobileWidths),
   listVisibility: withDefault(isListVisibility, DEFAULT_PREFS.listVisibility),
