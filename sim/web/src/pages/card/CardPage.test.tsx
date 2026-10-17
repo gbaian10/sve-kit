@@ -108,7 +108,8 @@ vi.mock("../../app/snapshot", () => {
       ordinal: number | null,
     ) => ({
       readiness: {
-        basic: field === "effect" || field === "section" || state.originalName ? "ready" : "pending",
+        basic:
+          field === "effect" || field === "section" || state.originalName ? "ready" : "pending",
         source: "none",
         annotations: "none",
       },
@@ -116,56 +117,33 @@ vi.mock("../../app/snapshot", () => {
         field === "name" && state.originalName && owner.id === "rev:other"
           ? {
               original: { unit: { text: "Synthetic original name", lang: "ja" }, annotation: null },
-              concepts: [], explanations: [], cards: [], keywords: [], abilities: [],
-            }
-          : owner.kind === "face_revision" && (field === "effect" || field === "section")
-          ? {
-              ...(state.sections && field === "effect"
-                ? {
-                    originalSections: [
-                      {
-                        ordinal: 1,
-                        label: `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} heading`,
-                      },
-                      { ordinal: 3 },
-                    ],
-                  }
-                : {}),
-              original: {
-                unit: {
-                  text:
-                    field === "section"
-                      ? `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} reminder ${String(ordinal)}`
-                      : owner.id === "rev:other"
-                        ? "Synthetic older effect"
-                        : "Synthetic selected effect",
-                  lang: "ja",
-                },
-                annotation: null,
-              },
-              ...(state.translated
-                ? {
-                    translated: {
-                      unit: {
-                        text: field === "section" ? "合成補充譯文" : "合成新版譯文",
-                        lang: "zh-Hant",
-                      },
-                      annotation: null,
-                    },
-                  }
-                : {}),
               concepts: [],
               explanations: [],
               cards: [],
+              keywords: [],
+              abilities: [],
             }
-          : owner.kind === "face_revision" && field === "effect"
+          : owner.kind === "face_revision" && (field === "effect" || field === "section")
             ? {
+                ...(state.sections && field === "effect"
+                  ? {
+                      originalSections: [
+                        {
+                          ordinal: 1,
+                          label: `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} heading`,
+                        },
+                        { ordinal: 3 },
+                      ],
+                    }
+                  : {}),
                 original: {
                   unit: {
                     text:
-                      owner.id === "rev:other"
-                        ? "Synthetic older effect"
-                        : "Synthetic selected effect",
+                      field === "section"
+                        ? `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} reminder ${String(ordinal)}`
+                        : owner.id === "rev:other"
+                          ? "Synthetic older effect"
+                          : "Synthetic selected effect",
                     lang: "ja",
                   },
                   annotation: null,
@@ -173,7 +151,10 @@ vi.mock("../../app/snapshot", () => {
                 ...(state.translated
                   ? {
                       translated: {
-                        unit: { text: "合成新版譯文", lang: "zh-Hant" },
+                        unit: {
+                          text: field === "section" ? "合成補充譯文" : "合成新版譯文",
+                          lang: "zh-Hant",
+                        },
                         annotation: null,
                       },
                     }

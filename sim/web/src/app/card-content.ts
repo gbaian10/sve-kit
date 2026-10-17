@@ -80,9 +80,16 @@ export async function prepareCardContent(
     })),
     // A text that cannot load shows its own error after the commit; the card itself was located.
     Promise.all(
-      [...pointers.values()].map((pointer) =>
-        resolver.resolve(pointer, language).catch(() => null),
-      ),
+      [...pointers.values()].map(async (pointer) => {
+        const value = await resolver.resolve(pointer, language).catch(() => null)
+        await Promise.all(
+          (value?.originalSections ?? []).map(({ ordinal }) =>
+            resolver
+              .resolve({ owner: pointer["owner"] ?? null, field: "section", ordinal }, language)
+              .catch(() => null),
+          ),
+        )
+      }),
     ),
   ])
   const prepareFace = ({ printingId, faceId }: { printingId: string; faceId: string }) => {

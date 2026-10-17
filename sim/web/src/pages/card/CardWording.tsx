@@ -25,11 +25,12 @@ function PrintingSections({
   edition,
   revisionId,
 }: TextProps & { readonly revisionId: string }) {
+  const language = useTextLanguage()
   const { value } = useAnnotatedText(
     client,
     { kind: "face_revision", id: revisionId },
     "effect",
-    edition === "jp" ? "ja" : "en",
+    language,
     edition,
   )
   return (value?.originalSections ?? []).map(({ ordinal, label }) => (

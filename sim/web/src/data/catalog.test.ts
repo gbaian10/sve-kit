@@ -179,7 +179,7 @@ describe("pending display in the list", () => {
       bootstrap: snapshot.bootstrap.map((fragment) => ({
         ...fragment,
         rows: fragment.rows.map((row) =>
-          row["id"] === "f:bp01-001"
+          row["id"] === "f:bp01-001" && fragment.value["region"] === "jp"
             ? {
                 ...row,
                 current: (row["current"] as { region: string }[]).filter(
@@ -273,7 +273,7 @@ describe("current name translations", () => {
 describe("pending card basic fields", () => {
   const original = catalog.index.currentRevision("f:bp01-001", "jp")
   if (!original) throw new Error("missing synthetic revision")
-  const candidates = (rows: Row[], refs: Row[]) => {
+  const candidates = (rows: Row[], refs: Row[], selected?: string) => {
     return createCatalog({
       ...snapshot,
       bootstrap: snapshot.bootstrap.map((fragment) => ({
@@ -284,11 +284,16 @@ describe("pending card basic fields", () => {
           return [
             {
               ...row,
-              current: [],
+              current: selected
+                ? [{ region: "jp", revision_id: selected, basis: "latest_known_release" }]
+                : [],
               wording: [
                 {
                   region: "jp",
-                  display: { revision_id: null, basis: "candidates" },
+                  display: {
+                    revision_id: selected ?? null,
+                    basis: selected ? "current" : "candidates",
+                  },
                   common_name: null,
                   candidates: refs,
                 },
@@ -336,6 +341,20 @@ describe("pending card basic fields", () => {
       ],
     )
     expect(faceBasics(index, "f:bp01-001", "jp", "p:b").values["cost"]).toBe(8)
+  })
+  it("uses this printing's stats when a different shared revision is current", () => {
+    const index = candidates(
+      [one, { ...two, cost: 8 }],
+      [
+        { printing_id: "p:a", revision_id: "r:one" },
+        { printing_id: "p:b", revision_id: "r:two" },
+      ],
+      "r:one",
+    )
+    expect(index.currentRevision("f:bp01-001", "jp")?.["cost"]).toBe(3)
+    const basics = faceBasics(index, "f:bp01-001", "jp", "p:b")
+    expect(basics.values["cost"]).toBe(8)
+    expect(basics.revision?.["id"]).toBe("r:two")
   })
   it("keeps conflicting observations of one printing unresolved", () => {
     const index = candidates(
