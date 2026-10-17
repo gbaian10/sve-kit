@@ -43,7 +43,7 @@ export class StringPool {
     if (typeof value === "boolean") return value ? 3 : 1
     if (typeof value === "number") {
       if (this.numberCount === this.numbers.length) {
-        const grown = new Float64Array(this.numbers.length * 2)
+        const grown = new Float64Array(Math.max(1, this.numbers.length * 2))
         grown.set(this.numbers)
         this.numbers = grown
       }
@@ -113,6 +113,17 @@ export class StringPool {
     this.stringNodes.clear()
   }
 
+  /** Completion reuses the existing string identities instead of duplicating the sealed pool. */
+  reopen(): void {
+    this.values.forEach((value, ordinal) => this.ordinals.set(value, ordinal))
+    for (let offset = 5; offset < this.used;) {
+      const kind = this.nodes[offset]
+      const count = this.nodes[offset + 1] ?? 0
+      if (kind === 3) this.stringNodes.set(count, offset)
+      offset += kind === 4 ? 2 + count : kind === 5 ? 2 + count * 2 : 2
+    }
+  }
+
   /** A sealed pool's contents; `restore` rebuilds a pool that decodes but no longer interns. */
   parts(): { values: string[]; nodes: Uint32Array; numbers: Float64Array } {
     return { values: this.values, nodes: this.nodes, numbers: this.numbers }
@@ -147,6 +158,30 @@ interface Block {
   readonly columns: ReadonlyMap<string, Column>
 }
 
+export interface ColumnEdit {
+  readonly source: number
+  /** Undefined removes an optional field; null retains the field with a null value. */
+  readonly changes: Readonly<Record<string, JsonValue | undefined>>
+}
+
+// Packed cells allow floats, unlike snapshot canonical JSON.
+function sameJson(a: JsonValue, b: JsonValue): boolean {
+  if (a === b) return true
+  if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false
+  if (Array.isArray(a))
+    return (
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((item, i) => sameJson(item, b[i] ?? null))
+    )
+  if (Array.isArray(b)) return false
+  const keys = Object.keys(a)
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => Object.hasOwn(b, key) && sameJson(a[key] ?? null, b[key] ?? null))
+  )
+}
+
 /** Each append keeps its own block, so ingesting a file never reallocates earlier files. */
 export class Columns {
   private readonly pool: StringPool
@@ -162,34 +197,76 @@ export class Columns {
     const names = new Set(rows.flatMap((row) => Object.keys(row)))
     const columns = new Map<string, Column>()
     for (const name of names) {
-      const kinds = new Uint8Array(rows.length)
-      const values = new Uint32Array(rows.length)
+      const column = { kinds: new Uint8Array(rows.length), values: new Uint32Array(rows.length) }
       rows.forEach((row, ordinal) => {
-        const value = row[name]
-        if (value === null || value === undefined) return
-        if (typeof value === "number") {
-          if (Number.isInteger(value) && value >= 0 && value <= 0xffff_ffff) {
-            kinds[ordinal] = 1
-            values[ordinal] = value
-          } else {
-            kinds[ordinal] = 4
-            values[ordinal] = this.pool.encode(value)
-          }
-        } else if (typeof value === "boolean") {
-          kinds[ordinal] = 2
-          values[ordinal] = Number(value)
-        } else {
-          kinds[ordinal] = typeof value === "string" ? 3 : 4
-          values[ordinal] =
-            typeof value === "string"
-              ? this.pool.intern(value, name === "id" || name.endsWith("_id"))
-              : this.pool.encode(value)
-        }
+        this.write(column, ordinal, name, row[name])
       })
-      columns.set(name, { kinds, values })
+      columns.set(name, column)
     }
     this.blocks.push({ start: this.length, length: rows.length, columns })
     this.length += rows.length
+  }
+
+  private write(column: Column, ordinal: number, name: string, value: JsonValue | undefined): void {
+    if (value === null || value === undefined) return
+    if (
+      typeof value === "number" &&
+      Number.isInteger(value) &&
+      value >= 0 &&
+      value <= 0xffff_ffff
+    ) {
+      column.kinds[ordinal] = 1
+      column.values[ordinal] = value
+    } else if (typeof value === "boolean") {
+      column.kinds[ordinal] = 2
+      column.values[ordinal] = Number(value)
+    } else {
+      column.kinds[ordinal] = typeof value === "string" ? 3 : 4
+      column.values[ordinal] =
+        typeof value === "string"
+          ? this.pool.intern(value, name === "id" || name.endsWith("_id"))
+          : this.pool.encode(value)
+    }
+  }
+
+  /** Copy packed cells in the requested order, encoding only changed fields. */
+  remap(batches: readonly (readonly ColumnEdit[])[]): Columns {
+    const result = new Columns(this.pool)
+    for (const batch of batches) {
+      if (!batch.length) continue
+      const rows = batch.map((edit) => {
+        const source = this.block(edit.source)
+        if (!source) throw new Error("column remap source is out of range")
+        return { ...edit, block: source, offset: edit.source - source.start }
+      })
+      const names = new Set(
+        rows.flatMap((row) => [
+          ...[...row.block.columns.keys()].filter((name) => !Object.hasOwn(row.changes, name)),
+          ...Object.keys(row.changes).filter((name) => row.changes[name] !== undefined),
+        ]),
+      )
+      const columns = new Map<string, Column>()
+      for (const name of names) {
+        const column = { kinds: new Uint8Array(rows.length), values: new Uint32Array(rows.length) }
+        rows.forEach((row, ordinal) => {
+          const source = row.block.columns.get(name)
+          const value = row.changes[name]
+          const reuse =
+            source?.kinds[row.offset] === 4 &&
+            value !== undefined &&
+            sameJson(this.cell(source, row.offset), value)
+          if (Object.hasOwn(row.changes, name) && !reuse) this.write(column, ordinal, name, value)
+          else {
+            column.kinds[ordinal] = source?.kinds[row.offset] ?? 0
+            column.values[ordinal] = source?.values[row.offset] ?? 0
+          }
+        })
+        columns.set(name, column)
+      }
+      result.blocks.push({ start: result.length, length: rows.length, columns })
+      result.length += rows.length
+    }
+    return result
   }
 
   private block(ordinal: number): Block | undefined {
