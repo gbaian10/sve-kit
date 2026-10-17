@@ -416,6 +416,49 @@ it("previews a drag locally and persists once when released", async () => {
   }
 })
 
+it("keeps touch resize drafts separate from desktop widths and restores both defaults", async () => {
+  vi.stubGlobal("matchMedia", () => ({ matches: true }))
+  act(() => {
+    prefsStore.set({ listWidths: { name: 280 } })
+  })
+  const { unmount } = await renderInRouter(
+    <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+  )
+  const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
+  const heading = handle.parentElement
+  if (!heading) throw new Error("missing heading")
+  vi.spyOn(heading, "getBoundingClientRect").mockReturnValue({ width: 124 } as DOMRect)
+  Object.defineProperty(handle, "setPointerCapture", { value: vi.fn() })
+  Object.defineProperty(handle, "releasePointerCapture", { value: vi.fn() })
+  const writes = vi.spyOn(Storage.prototype, "setItem")
+  try {
+    fireEvent.pointerDown(handle, { pointerId: 1, pointerType: "touch", button: 0, clientX: 100 })
+    for (let x = 110; x <= 180; x += 10) {
+      fireEvent.pointerMove(handle, { pointerId: 1, pointerType: "touch", clientX: x })
+    }
+    expect(screen.getByRole("table").style.getPropertyValue("--list-mobile-user-name")).toBe(
+      "204px",
+    )
+    expect(writes).not.toHaveBeenCalled()
+    fireEvent.pointerUp(handle, { pointerId: 1, pointerType: "touch" })
+    expect(writes).toHaveBeenCalledTimes(1)
+    expect(prefsStore.get().listMobileWidths.name).toBe(204)
+    expect(prefsStore.get().listWidths.name).toBe(280)
+    expect(prefsStore.get().listOrder).toEqual(DEFAULT_PREFS.listOrder)
+  } finally {
+    writes.mockRestore()
+  }
+  unmount()
+  prefsStore.reload()
+  await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
+  expect(screen.getByRole("table").style.getPropertyValue("--list-mobile-user-name")).toBe("204px")
+  act(() => {
+    prefsStore.set(DEFAULT_PREFS)
+  })
+  expect(screen.getByRole("table").style.getPropertyValue("--list-mobile-user-name")).toBe("")
+  expect(screen.getByRole("table").style.getPropertyValue("--list-user-name")).toBe("")
+})
+
 it("shows only class icons with localized accessible names including neutral, and hides their column", async () => {
   function Example() {
     const { t } = useTranslation()

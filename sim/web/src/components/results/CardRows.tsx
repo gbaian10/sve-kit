@@ -493,7 +493,7 @@ export function CardList({
   const scroll = useRef<HTMLDivElement>(null)
   const body = useRef<HTMLTableSectionElement>(null)
   const windowed = useRowWindow(body, cells.length)
-  const { listVisibility, listWidths, listOrder } = usePrefs()
+  const { listVisibility, listWidths, listMobileWidths, listOrder } = usePrefs()
   const reorder = useColumnReorder("horizontal")
   const tableId = useId()
   const [overflow, setOverflow] = useState(false)
@@ -539,6 +539,12 @@ export function CardList({
     ...Object.fromEntries(
       Object.entries(listWidths).map(([column, width]) => [
         `--list-user-${column}`,
+        `${String(width)}px`,
+      ]),
+    ),
+    ...Object.fromEntries(
+      Object.entries(listMobileWidths).map(([column, width]) => [
+        `--list-mobile-user-${column}`,
         `${String(width)}px`,
       ]),
     ),
@@ -702,11 +708,16 @@ function ColumnResize({
     draft: number
     table: HTMLTableElement
     previous: string
+    variable: string
+    preference: "listWidths" | "listMobileWidths"
     moved: boolean
   } | null>(null)
   const handleRef = useRef<HTMLButtonElement>(null)
   const [measured, setMeasured] = useState<{ width: number; minimum: number } | null>(null)
-  const variable = `--list-user-${column}`
+  const widthPreference = (): "listWidths" | "listMobileWidths" =>
+    window.matchMedia("(width < 600px)").matches ? "listMobileWidths" : "listWidths"
+  const widthVariable = (preference: "listWidths" | "listMobileWidths") =>
+    `--list-${preference === "listMobileWidths" ? "mobile-user" : "user"}-${column}`
   useLayoutEffect(() => {
     const heading = handleRef.current?.parentElement
     if (!heading) return
@@ -745,15 +756,15 @@ function ColumnResize({
   }, [column, label])
   const minimum = measured?.minimum ?? LIST_MIN_WIDTHS[column]
   const clamp = (next: number) => Math.max(minimum, Math.round(next))
-  const resize = (next: number) => {
-    prefsStore.set({ listWidths: { ...prefsStore.get().listWidths, [column]: clamp(next) } })
+  const resize = (next: number, preference = widthPreference()) => {
+    prefsStore.set({ [preference]: { ...prefsStore.get()[preference], [column]: clamp(next) } })
   }
   const cancel = () => {
     const active = drag.current
     if (!active) return
     drag.current = null
-    if (active.previous) active.table.style.setProperty(variable, active.previous)
-    else active.table.style.removeProperty(variable)
+    if (active.previous) active.table.style.setProperty(active.variable, active.previous)
+    else active.table.style.removeProperty(active.variable)
   }
   return (
     <button
@@ -782,7 +793,11 @@ function ColumnResize({
         if (!table) return
         handle.setPointerCapture(event.pointerId)
         const width = handle.parentElement?.getBoundingClientRect().width ?? minimum
+        const preference = widthPreference()
+        const variable = widthVariable(preference)
         drag.current = {
+          preference,
+          variable,
           pointer: event.pointerId,
           x: event.clientX,
           width,
@@ -797,13 +812,13 @@ function ColumnResize({
         if (active?.pointer !== event.pointerId) return
         active.draft = clamp(active.width + event.clientX - active.x)
         active.moved = true
-        active.table.style.setProperty(variable, `${String(active.draft)}px`)
+        active.table.style.setProperty(active.variable, `${String(active.draft)}px`)
       }}
       onPointerUp={(event) => {
         const active = drag.current
         if (active?.pointer !== event.pointerId) return
         drag.current = null
-        if (active.moved) resize(active.draft)
+        if (active.moved) resize(active.draft, active.preference)
         event.currentTarget.releasePointerCapture(event.pointerId)
       }}
       onPointerCancel={cancel}
