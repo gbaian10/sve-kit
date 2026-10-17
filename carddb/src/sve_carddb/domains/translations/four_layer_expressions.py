@@ -400,7 +400,9 @@ def verify_target_shape(
             identifiers.add(expr.expression_id)
             if expr.expression_id in translations:
                 expander.expand(expr, frame.leaf_schema, lang, forms, frame=frame)
-        elif slot.type in {"QuantityExpr", "PredicateExpr"} or slot.domain.values == ():
+        elif slot.type in {"QuantityExpr", "PredicateExpr"} or slot.domain.values == (
+            CHOICE_DOMAIN,
+        ):
             # B11 operands are supplied by the binding rather than embedded in the frame.
             incomplete = True
             possible.update(

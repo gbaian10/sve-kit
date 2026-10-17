@@ -33,6 +33,7 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     definition,
     target_dependencies,
     verify_quantities,
+    verify_target_shape,
 )
 from sve_carddb.domains.translations.four_layer_n3_events import HOLDER_REVISIONS
 from sve_carddb.domains.translations.four_layer_n3_ports import (
@@ -750,3 +751,37 @@ def test_discard_definition_must_precede_deck_limit(engine: Classifier) -> None:
     assert found.recognized[0].issues or not any(
         r.startswith("N3-749") for r in found.derived.registry_rows[0]
     )
+
+
+def test_target_shape_requires_plain_nat_leaves(engine: Classifier) -> None:
+    _, raw, ordinal = next(c for c in CASES if c[0] == "P01-pair")
+    frame, _ = derive(raw, engine).bind(ordinal)
+    assert all(slot.expression is None for slot in frame.leaf_schema.slots)
+    target = Target(
+        format=1,
+        nodes=tuple(
+            LeafRef(kind="LeafRef", slot=s.name) for s in frame.leaf_schema.slots
+        ),
+    )
+    verify_target_shape(frame, target, {}, "zh-Hant", {})
+    omitted = next(s for s in frame.leaf_schema.slots if s.required and s.type == "Nat")
+    invalid = Target(
+        format=1,
+        nodes=tuple(
+            n
+            for n in target.nodes
+            if not isinstance(n, LeafRef) or n.slot != omitted.name
+        ),
+    )
+    with pytest.raises(ValueError, match="Target must use every required leaf"):
+        verify_target_shape(frame, invalid, {}, "zh-Hant", {})
+
+
+def test_target_shape_defers_binding_supplied_choice_count(engine: Classifier) -> None:
+    _, raw, ordinal = next(c for c in CASES if c[0] == "X02")
+    frame, _ = derive(raw, engine).bind(ordinal)
+    choice = next(s for s in frame.leaf_schema.slots if s.role == "choice_mode_count")
+    target = Target(format=1, nodes=(LeafRef(kind="LeafRef", slot=choice.name),))
+    with pytest.raises(ValueError, match="Target must use every required leaf"):
+        target.verify(frame.leaf_schema, "zh-Hant", {})
+    verify_target_shape(frame, target, {}, "zh-Hant", {})
