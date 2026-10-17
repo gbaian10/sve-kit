@@ -64,6 +64,11 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
     )
     for area in ("products", "products/identities"):
         (case.case.root / area).mkdir(parents=True, exist_ok=True)
+    install(
+        case.case.root,
+        "catalog/rarity-badges.yaml",
+        {"format": 1, "kind": "printing_rarity_badges", "records": []},
+    )
     store = _store(case.case.repository.parent / "translation-sources")
     shutil.copytree(case.archive, store.root, dirs_exist_ok=True)
     payloads = {

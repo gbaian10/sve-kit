@@ -214,6 +214,8 @@ vi.mock("../../app/snapshot", () => {
                 cardNo: "BP-SYNTHETIC",
                 region: "jp",
                 classCode: null,
+                rarityCode: "sr",
+                premium: true,
                 // A pending card's catalog name is the card-number stand-in.
                 name: {
                   original: {
@@ -377,6 +379,10 @@ it("shows the shared type line and stats without a display revision", async () =
   })
   expect(screen.getAllByText(/royal.*follower/)[0]).toBeVisible()
   expect(screen.getAllByText("synthetic")[0]).toBeVisible()
+  expect(
+    screen.getAllByRole("img", { name: "官方稀有度：SR" })[0]?.parentElement?.parentElement,
+  ).toHaveTextContent(/royal.*follower/)
+  expect(document.querySelectorAll("[data-rarity-badges] img")).toHaveLength(2)
   for (const [label, value] of [
     ["消費", "3"],
     ["攻擊力", "4"],

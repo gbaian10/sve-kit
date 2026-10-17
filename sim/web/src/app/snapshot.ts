@@ -511,7 +511,7 @@ function useSummaryImages(result: SearchChannelStatus["previous"], edition: Regi
     const images = viewImages({
       query: { state: DEFAULT_QUERY, edition },
       page: result.page,
-      options: { classes: [], sets: [] },
+      options: { classes: [], sets: [], rarities: [], prBadgeStyles: [], rarityCounts: {} },
       faces,
     })
     return failed ? { ...images, failed: true, known: () => true } : images
@@ -552,7 +552,25 @@ export function useSetOptions() {
     edition: cardEdition,
     limit: 60,
   })
-  return { sets: view?.options.sets, classes: view?.options.classes, result, status }
+  return {
+    sets: view?.options.sets,
+    classes: view?.options.classes,
+    rarities: view?.options.rarities,
+    result,
+    status,
+  }
+}
+/** PR options use the existing rarity gate, after the region's printing closure is ready. */
+export function useRarityOptions() {
+  const edition = useRouteEdition()
+  const { view } = useSearchView({
+    state: { ...DEFAULT_QUERY, rarities: ["pr"] },
+    edition,
+    limit: 1,
+  })
+  return view
+    ? { styles: view.options.prBadgeStyles, counts: view.options.rarityCounts }
+    : undefined
 }
 /** Sets with their first known release in the edition, without building a list view. */
 export function useSetReleases(edition: Region) {

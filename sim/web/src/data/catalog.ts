@@ -2,6 +2,7 @@ import { cardNoKey, cardNoLookupKey } from "../domain/cardNo"
 import type { NameSource } from "../domain/nameDisplay"
 import { NORMALIZER_VERSION, normalizeText } from "../domain/normalize"
 import type { QueryState } from "../domain/query/model"
+import type { RarityBadge } from "../domain/rarityBadges"
 import {
   apply,
   type Region,
@@ -34,7 +35,10 @@ export interface CardSummary {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
+  readonly rarityCode?: string | null
+  readonly premium?: boolean | null
   readonly rarity?: NameSource
+  readonly rarityBadge?: RarityBadge | null
   readonly wordingPending?: boolean
 }
 
@@ -109,6 +113,21 @@ function nullableInteger(value: JsonValue | undefined): number | null {
   return value === null || value === undefined ? null : integerValue(value)
 }
 
+/** The exporter and Python reader validate this object; the browser trusts verified data. */
+export function badgeOf(row: JsonObject): RarityBadge | null {
+  return (row["rarity_badge"] as RarityBadge | null | undefined) ?? null
+}
+
+/** Official rarity controls sorting; the appearance only describes this printing's badge. */
+function printingRarity(row: JsonObject) {
+  return {
+    code: typeof row["rarity_code"] === "string" ? row["rarity_code"] : null,
+    raw: typeof row["rarity_raw"] === "string" ? row["rarity_raw"] : "",
+    premium: typeof row["premium"] === "boolean" ? row["premium"] : null,
+    badge: badgeOf(row),
+  }
+}
+
 /** The Worker consumes one card at a time, without constructing another region's summaries. */
 export function* catalogCards(
   index: CardIndex,
@@ -177,7 +196,8 @@ export function* catalogCards(
       if (edition !== undefined && region !== edition) continue
       for (const printing of index.printingsOf(cardId)) {
         if (printing["region"] !== region) continue
-        const rarityCode = printing["rarity_code"]
+        const printedRarity = printingRarity(printing)
+        const rarityCode = printedRarity.code
         const rarity =
           typeof rarityCode === "string" ? index.vocabulary("rarity", rarityCode) : undefined
         const rarityName = rarity ? nameOf(index, rarity, "label") : undefined
@@ -186,6 +206,10 @@ export function* catalogCards(
         summaries.push({
           cardId,
           ...(rarityName ? { rarity: rarityName } : {}),
+          rarityBadge: printedRarity.badge,
+          rarityCode:
+            typeof rarityCode === "string" ? rarityCode : printedRarity.raw === "-" ? "-" : null,
+          premium: printedRarity.premium,
           printingId: stringValue(printing["id"]),
           faceId,
           cardNo: stringValue(printing["card_no"]),

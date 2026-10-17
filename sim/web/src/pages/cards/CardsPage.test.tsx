@@ -136,6 +136,19 @@ describe("CardsPage", () => {
     expect(router.state.location.search).toBe("")
   })
 
+  it("uses vocabulary rarity options and hides PR appearance styles with no data", async () => {
+    const { router } = await open()
+    const button = await screen.findByRole("button", { name: /稀有度/u })
+    await waitFor(() => expect(button).toBeEnabled())
+    await userEvent.click(button)
+    const group = screen.getByRole("group", { name: "稀有度" })
+    expect(within(group).queryByRole("checkbox", { name: /^PR（/u })).not.toBeInTheDocument()
+    const bronze = within(group).getByRole("checkbox", { name: "銅" })
+    await userEvent.click(bronze)
+    await waitFor(() => expect(bronze).toBeChecked())
+    expect(router.state.location.search).toContain("rarity=bronze")
+  })
+
   it.each([
     ["zh-TW", "銅"],
     ["ja", "ブロンズ"],

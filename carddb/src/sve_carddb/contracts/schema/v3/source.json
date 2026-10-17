@@ -55,6 +55,7 @@
     "Section",
     "FieldTranslation",
     "Correction",
+    "RarityBadge",
     "PrintingStamp",
     "PrintingFace",
     "ArtArtist",
@@ -2838,6 +2839,46 @@
           "items": false
         }
       ]
+    },
+    "RarityBadge": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "style": {
+              "enum": [
+                "bronze",
+                "silver",
+                "gold",
+                "red",
+                "pastel",
+                "rainbow"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "style",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "style": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "style"
+          ],
+          "additionalProperties": false
+        }
+      ]
     }
   },
   "tuples": {
@@ -5319,6 +5360,23 @@
             }
           }
         },
+        "rarity_badge": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/RarityBadge"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "json": "RarityBadge"
+            }
+          }
+        },
         "rarity_raw": {
           "schema": {
             "$ref": "#/$defs/Text"
@@ -5465,6 +5523,7 @@
                 {},
                 {},
                 {},
+                {},
                 {
                   "const": "verified"
                 },
@@ -5475,6 +5534,7 @@
             },
             "then": {
               "prefixItems": [
+                {},
                 {},
                 {},
                 {},
@@ -5503,6 +5563,7 @@
             },
             "else": {
               "prefixItems": [
+                {},
                 {},
                 {},
                 {},
@@ -5552,6 +5613,7 @@
                 {},
                 {},
                 {},
+                {},
                 {}
               ]
             },
@@ -5578,6 +5640,7 @@
                 {},
                 {},
                 {},
+                {},
                 {}
               ]
             },
@@ -5594,6 +5657,7 @@
                 {
                   "minItems": 1
                 },
+                {},
                 {},
                 {},
                 {},
@@ -9356,6 +9420,9 @@
         "rarity_code": {
           "from": "printing"
         },
+        "rarity_badge": {
+          "from": "printing"
+        },
         "rarity_raw": {
           "from": "printing"
         },
@@ -9415,6 +9482,7 @@
                 {},
                 {},
                 {},
+                {},
                 {
                   "const": "verified"
                 },
@@ -9425,6 +9493,7 @@
             },
             "then": {
               "prefixItems": [
+                {},
                 {},
                 {},
                 {},
@@ -9453,6 +9522,7 @@
             },
             "else": {
               "prefixItems": [
+                {},
                 {},
                 {},
                 {},
@@ -9502,6 +9572,7 @@
                 {},
                 {},
                 {},
+                {},
                 {}
               ]
             },
@@ -9528,6 +9599,7 @@
                 {},
                 {},
                 {},
+                {},
                 {}
               ]
             },
@@ -9544,6 +9616,7 @@
                 {
                   "minItems": 1
                 },
+                {},
                 {},
                 {},
                 {},

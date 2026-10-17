@@ -1,9 +1,10 @@
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { normalizeText } from "../../domain/normalize"
 import { DEFAULT_QUERY, NEUTRAL_CLASS, type QueryState } from "../../domain/query/model"
+import { UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, packCounts } from "../../domain/sets"
-import { type CardSummary, catalogCards } from "../catalog"
+import { badgeOf, type CardSummary, catalogCards } from "../catalog"
 import {
   arrayValue,
   integerValue,
@@ -30,6 +31,9 @@ interface SearchOption {
   readonly name: CardSummary["name"]
 }
 export interface SearchOptions {
+  readonly prBadgeStyles: readonly string[]
+  readonly rarityCounts: Readonly<Record<string, number>>
+  readonly rarities: readonly SearchOption[]
   readonly classes: readonly SearchOption[]
   readonly sets: readonly SearchOption[]
 }
@@ -93,6 +97,7 @@ const PRINTING_COLUMNS = [
   "summary",
   "type",
   "rarity",
+  "badge",
   "art",
   "alt",
 ] as const
@@ -104,7 +109,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 8
+export const INDEX_IMAGE_FORMAT = 10
 
 interface Parts {
   readonly pool: StringPool
@@ -169,7 +174,32 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       .filter((row) => row["region"] === edition)
       .map((row) => stringValue(row["home_set_id"])),
   )
+  const rarityCounts: Record<string, number> = {}
+  for (const row of bootstrap.rows("printing")) {
+    // Locator-only rows do not yet carry an official classification.
+    if (row["region"] !== edition || !Object.hasOwn(row, "rarity_code")) continue
+    const official = typeof row["rarity_code"] === "string" ? row["rarity_code"] : ""
+    const token = !official || official === "-" ? UNRATED_RARITY : official
+    rarityCounts[token] = (rarityCounts[token] ?? 0) + 1
+    if (official === "pr") {
+      const child = `pr:${badgeOf(row)?.style ?? "unknown"}`
+      rarityCounts[child] = (rarityCounts[child] ?? 0) + 1
+    }
+  }
   const options: SearchOptions = {
+    rarityCounts,
+    prBadgeStyles: [
+      ...new Set(
+        bootstrap
+          .rows("printing")
+          .filter((row) => row["region"] === edition && row["rarity_code"] === "pr")
+          .map((row) => badgeOf(row)?.style ?? "unknown"),
+      ),
+    ],
+    rarities: bootstrap
+      .rows("vocabulary")
+      .filter((row) => row["kind"] === "rarity" && row["active"] === true)
+      .map((row) => option(row, "label_unit_id")),
     classes: bootstrap
       .rows("vocabulary")
       .filter((row) => row["kind"] === "class" && row["active"] === true)
@@ -243,6 +273,9 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
         intern(
           typeof fullPrinting?.["rarity_code"] === "string" ? fullPrinting["rarity_code"] : "",
         ),
+      )
+      printings.badge.push(
+        intern(fullPrinting ? (badgeOf(fullPrinting)?.style ?? "unknown") : "unknown"),
       )
       printings.art.push(intern(art || printing.id))
       printings.alt.push(Number(!!art && !!defaultArt && art !== defaultArt))
@@ -499,7 +532,15 @@ export class SearchIndex {
       (!state.types.length ||
         state.types.includes(this.pool.get(this.printings.type[printing] ?? 0))) &&
       (!state.rarities.length ||
-        state.rarities.includes(this.pool.get(this.printings.rarity[printing] ?? 0))) &&
+        state.rarities.some((rarity) => {
+          const official = this.pool.get(this.printings.rarity[printing] ?? 0)
+          return rarity === UNRATED_RARITY
+            ? !official || official === "-"
+            : rarity.startsWith("pr:")
+              ? official === "pr" &&
+                rarity === `pr:${this.pool.get(this.printings.badge[printing] ?? 0)}`
+              : rarity === official
+        })) &&
       (!state.altArtOnly || this.printings.alt[printing] === 1)
     const upper = state.cost.max !== undefined && state.cost.max < 7 ? state.cost.max : undefined
     const costAllowed = (printing: number) => {

@@ -1,4 +1,11 @@
-import { memo, type MouseEvent, type RefObject, useLayoutEffect, useRef } from "react"
+import {
+  type CSSProperties,
+  memo,
+  type MouseEvent,
+  type RefObject,
+  useLayoutEffect,
+  useRef,
+} from "react"
 import { useHref, useNavigate } from "react-router"
 
 import { useAbilityPreview } from "../../app/snapshot"
@@ -8,6 +15,8 @@ import type { QueryState } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { usePrefs } from "../../settings"
 import { InlineText } from "../card/InlineText"
+import { RarityBadges } from "../card/RarityBadges"
+import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
 import { StatLine } from "../card/StatLine"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
@@ -208,7 +217,7 @@ const TableRow = memo(function TableRow({
           labels={labels}
         />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5 leading-tight">
-          <span className="flex items-baseline gap-2">
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span
               data-row-name=""
               lang={cell.name.primary.lang}
@@ -227,7 +236,10 @@ const TableRow = memo(function TableRow({
                 </>
               )}
             </span>
-            <span className="shrink-0 text-11 text-text-3 tabular-nums">{cell.summary.cardNo}</span>
+            <span className="inline-flex shrink-0 items-center gap-2 text-11 text-text-3 tabular-nums">
+              {cell.summary.cardNo}
+              <RarityBadges {...cell.summary} />
+            </span>
           </span>
           <NameNotices name={cell.name} labels={labels} />
           <StatLine
@@ -241,7 +253,7 @@ const TableRow = memo(function TableRow({
             <Badge className="mt-0.5 self-start">{labels.wordingPending}</Badge>
           )}
         </span>
-        <span className="basis-full pl-23">
+        <span className="min-w-0 basis-full pl-23">
           {seen ? (
             <EffectPreview
               printingId={cell.summary.printingId}
@@ -325,6 +337,9 @@ const ListRow = memo(function ListRow({
     >
       <td data-list-number="">
         <span>{cell.summary.cardNo}</span>
+      </td>
+      <td data-list-rarity="">
+        <RarityBadges {...cell.summary} />
       </td>
       <td data-list-name="">
         <a
@@ -420,6 +435,7 @@ export function CardList({
   }, [scrollPositionRef])
   const columns = [
     ["no", labels.t("results.columns.number")],
+    [null, labels.t("results.columns.rarity")],
     ["name", labels.t("results.columns.name")],
     ["cost", labels.stats.cost],
     ["atk", labels.stats.attack],
@@ -440,30 +456,49 @@ export function CardList({
       <table
         data-view="list"
         data-card-list=""
+        style={
+          {
+            "--rarity-column-min-width": `${String(RARITY_COLUMN_MIN_WIDTH)}px`,
+            "--rarity-badge-height": `${String(RARITY_BADGE_HEIGHT)}px`,
+          } as CSSProperties
+        }
         data-loaded-count={cells.length}
         aria-rowcount={cells.length + 1}
         aria-label={labels.t("results.listLabel")}
       >
         <colgroup>
           <col data-list-number-col="" />
+          <col data-list-rarity-col="" />
           <col data-list-name-col="" />
           <col span={3} data-list-stat-col="" />
-          <col />
+          <col data-list-effect-col="" />
         </colgroup>
         <thead>
           <tr aria-rowindex={1}>
             {columns.map(([key, label]) => (
               <th
-                key={key}
+                key={key ?? "rarity"}
                 scope="col"
-                aria-sort={sort === key ? (descending ? "descending" : "ascending") : "none"}
+                aria-sort={
+                  key === null
+                    ? undefined
+                    : sort === key
+                      ? descending
+                        ? "descending"
+                        : "ascending"
+                      : "none"
+                }
               >
-                <button type="button" onClick={() => onSort?.(key)}>
-                  <span data-sort-label="">{label}</span>
-                  <span data-sort-arrow="" aria-hidden="true">
-                    {sort === key ? (descending ? " ↓" : " ↑") : ""}
-                  </span>
-                </button>
+                {key === null ? (
+                  label
+                ) : (
+                  <button type="button" onClick={() => onSort?.(key)}>
+                    <span data-sort-label="">{label}</span>
+                    <span data-sort-arrow="" aria-hidden="true">
+                      {sort === key ? (descending ? " ↓" : " ↑") : ""}
+                    </span>
+                  </button>
+                )}
               </th>
             ))}
             <th scope="col">{labels.t("results.columns.effect")}</th>
@@ -472,7 +507,7 @@ export function CardList({
         <tbody ref={body}>
           {windowed.before > 0 && (
             <tr data-list-spacer="" aria-hidden="true">
-              <td colSpan={6} style={{ height: windowed.before }} />
+              <td colSpan={7} style={{ height: windowed.before }} />
             </tr>
           )}
           {cells.slice(windowed.start, windowed.end).map((cell, index) => (
@@ -487,7 +522,7 @@ export function CardList({
           ))}
           {windowed.after > 0 && (
             <tr data-list-spacer="" aria-hidden="true">
-              <td colSpan={6} style={{ height: windowed.after }} />
+              <td colSpan={7} style={{ height: windowed.after }} />
             </tr>
           )}
         </tbody>
