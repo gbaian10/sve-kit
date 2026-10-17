@@ -85,6 +85,56 @@ describe("catalog", () => {
     expect(catalog.summary("p:nope")).toBeUndefined()
   })
 
+  it("passes through official rarity, Premium and optional face appearance to result summaries", () => {
+    const modified = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["id"] === "p:bp01-001"
+            ? {
+                ...row,
+                rarity_code: "sp",
+                premium: true,
+                rarity_badge: { style: "rainbow", text: "PR" },
+              }
+            : row,
+        ),
+      })),
+    }
+    expect(createCatalog(modified).summary("p:bp01-001")).toMatchObject({
+      rarityCode: "sp",
+      premium: true,
+      rarityBadge: { style: "rainbow", text: "PR" },
+    })
+    expect(catalog.summary("p:bp01-001")?.rarityBadge).toBeNull()
+  })
+
+  it("keeps null appearances and official dashes distinct from explicit no-label appearances", () => {
+    const changed = (badge: null | { style: string }) =>
+      createCatalog({
+        ...snapshot,
+        bootstrap: snapshot.bootstrap.map((fragment) => ({
+          ...fragment,
+          rows: fragment.rows.map((row) =>
+            row["id"] === "p:bp01-001"
+              ? {
+                  ...row,
+                  rarity_code: null,
+                  rarity_raw: "-",
+                  rarity_badge: badge,
+                }
+              : row,
+          ),
+        })),
+      }).summary("p:bp01-001")
+    expect(changed(null)).toMatchObject({ rarityCode: "-", rarityBadge: null })
+    expect(changed({ style: "none" })).toMatchObject({
+      rarityCode: "-",
+      rarityBadge: { style: "none" },
+    })
+  })
+
   it("lists results in snapshot order and filters by class", () => {
     const all = catalog.results(DEFAULT_QUERY, "jp")
     expect(all).toHaveLength(catalog.entries.length)

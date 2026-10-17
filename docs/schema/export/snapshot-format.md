@@ -149,6 +149,11 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 （`SL`、`PR`、`EP`、`SEP`、`UT` 等其他字首），再依卡號自然排序、永久版次 ID 定序。
 編號類別僅決定版次列顯示順序，不推導稀有度或版次身分，也不改變卡頁預設版次選取。
 
+Web 的 `rarity` 篩選取聯集，使用官方 `rarity_code` 歸類；保留 token `unrated` 表示官方代碼為 null 或「-」，與 PR 外觀 `pr:none`（官方仍是 pr）不同。
+PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none`、`unknown`）；子項目僅列該地區有資料的外觀。
+計數按該地區版次計算，不隨目前文字或其他篩選條件縮減；官方 pr 的外觀子項目互斥且完整，加總等於父項目。
+例如 `rarity=sp,pr:bronze,unrated` 同時包含官方 SP、官方 PR 的銅色外觀，以及無分類版次；圖牌仍依卡面外觀顯示。
+
 `printing.rarity_badge` 是與 `rarity_code` 一同載入的可空物件：`null` 表示待確認；
 `{style: "none"}` 表示已確認無標籤；其他 style 為 `bronze / silver / gold / red / pastel / rainbow`，
 必須帶 `text` 原樣印字（例如 `PR` 或 `BR`）。每版次一筆，雙面標註時一起確認；

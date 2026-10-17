@@ -20,6 +20,7 @@ import { StatusStrip } from "../../app/StatusStrip"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
 import { CLASS_ICON } from "../../components/card/classIcons"
+import { RarityBadges } from "../../components/card/RarityBadges"
 import { StatLine } from "../../components/card/StatLine"
 import { useTextLanguage } from "../../components/card/text-language"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
@@ -713,7 +714,10 @@ export function CardView({
                     ) : (
                       <PlainNameHeading name={name} />
                     )}
-                    {(classCode !== undefined || typeCode !== null || traits !== "") && (
+                    {(classCode !== undefined ||
+                      typeCode !== null ||
+                      traits !== "" ||
+                      faceSummary.rarityCode) && (
                       <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-13 text-text-2">
                         {classCode !== undefined && (
                           <img
@@ -723,6 +727,7 @@ export function CardView({
                           />
                         )}
                         <span>{metaLine(classCode, typeCode)}</span>
+                        <RarityBadges {...faceSummary} />
                         {traits !== "" && <span className="text-text-3">{traits}</span>}
                       </p>
                     )}

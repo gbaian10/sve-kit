@@ -104,7 +104,7 @@ special_kinds 必填；欄位缺漏是格式錯誤。
 來源的未知符號（含 `-`）如何投影 null 須有欄位 recipe，不把它自動採為職業或稀有度 code。
 稀有度／premium 的拆解是釘住 recipe 的來源投影，不能讓 raw_mappings 改寫 premium；未知組合不猜。
 稀有度目前不建 raw_mappings，原值→code 的程式對照與改走 authored 採納的條件見 §7。
-技術預設 P3 分開篩選基礎 rarity 與 premium，顯示可組合；複合顯示別名不建立第二份稀有度真值。
+技術預設 P3 分開篩選基礎 rarity 與 premium；前端本次不顯示 premium 記號，複合顯示別名不建立第二份稀有度真值。
 
 label 只保存一個基底原文／自撰標籤；其他語言的選詞放在同一記錄的 `value.translations`（`lang,text,origin,low_confidence`，不得為 ja），建置時寫成 vocabulary 的 label 翻譯；此處 origin／low_confidence 也可省略為 project／false，寫出端省略預設值。
 若 trait 同時是 glossary 概念，只有明示同概念關係才可使用既有選詞，不能因字串相同合併概念。
@@ -255,7 +255,7 @@ variant_key=standard 或本次選中的 default 推論普通加工。
 | 編號 | 定案的技術設計 |
 | --- | --- |
 | P0 | 採獨立 current 入口，依 §2–§3；穩定鍵與實際來源引用保留，直接修改當前值 |
-| P3 | rarity 與 premium 分開篩選、可組合顯示，不另立複合稀有度真值 |
+| P3 | rarity 與 premium 分開篩選；前端本次不顯示 premium 記號，不另立複合稀有度真值 |
 | P5 | NFKC 後 casefold；不 trim／合併空白、不折假名、不去標點，版本化且多義不任選 |
 | P6 | 使用既有投影允許的完整同區展示集合；人工 default 只比同卡同區 candidates_hash 與目標有效性 |
 | P7 | 記號三語不必齊全，缺譯回原記號；建置自動選有效 choice，不二次簽核記號 |

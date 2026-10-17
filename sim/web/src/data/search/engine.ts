@@ -192,6 +192,7 @@ export class SearchEngine {
           )
             await active.printings
           const index = active.index
+          const printingsReady = active.printings === undefined
           let eligible: ReadonlySet<string> | undefined
           if (index && ("query" in request || request.kind === "suggest")) {
             const term = effectTerm(
@@ -242,7 +243,13 @@ export class SearchEngine {
                   if (view) return { view, stored: Promise.resolve() }
                   if (!index) return undefined
                   const completed = completeView(query, index, eligible)
-                  return { view: completed, stored: active.views.write(completed, active.hash) }
+                  return {
+                    view: completed,
+                    // Locator-only summaries lack non-default printing badges and must refresh.
+                    stored: printingsReady
+                      ? active.views.write(completed, active.hash)
+                      : Promise.resolve(),
+                  }
                 })()
                 const built = building
                 const drop = () => {
@@ -255,13 +262,18 @@ export class SearchEngine {
             }
             if (!cached) return
             const { view, stored } = cached
-            active.memory.set(key, cached)
+            if (printingsReady) active.memory.set(key, cached)
             while (active.memory.size > 8)
               active.memory.delete(active.memory.keys().next().value ?? "")
             event = { kind: "view-result", ...identity, view }
             const completed = view
             void stored.then(async () => {
-              if (request.remember && this.active === active && this.rememberedRequest === request)
+              if (
+                printingsReady &&
+                request.remember &&
+                this.active === active &&
+                this.rememberedRequest === request
+              )
                 await active.views.remember(completed.query, active.hash)
             })
           } else if (request.kind === "images" && index) {
@@ -799,6 +811,7 @@ export class SearchEngine {
           index = new SearchIndex(background, request.edition)
           active.index = index
           active.memory.clear()
+          active.building.clear()
           printingsApplied = true
           printingsGate.resolve(undefined)
           // Like a restored image, the context is now complete and an unchanged check may keep it.

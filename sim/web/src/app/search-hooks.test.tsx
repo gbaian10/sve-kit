@@ -16,6 +16,7 @@ import { prefsStore } from "../settings"
 import {
   useAbilityPreview,
   useListView,
+  useRarityOptions,
   useSearch,
   useSearchReadiness,
   useSetOptions,
@@ -127,7 +128,7 @@ function answerViews(
             summary: undefined,
           })),
         },
-        options: { classes, sets: [] },
+        options: { classes, sets: [], rarities: [], prBadgeStyles: [], rarityCounts: {} },
         faces: [],
       },
     })
@@ -551,4 +552,35 @@ it("prefetches nearby result slots only and retains faces until the snapshot cha
   })
   ready("v2")
   expect(screen.getByTestId("known")).toBeEmptyDOMElement()
+})
+
+it("keeps PR appearance options pending independently of the basic set and class view", () => {
+  const { result } = renderHook(() => ({
+    classes: useSetOptions().classes,
+    options: useRarityOptions(),
+  }))
+  ready()
+  const requests = fake.requests.filter((request) => request.kind === "view")
+  const basic = requests.findLast((request) => request.query.state.rarities.length === 0)
+  const rarity = requests.findLast((request) => request.query.state.rarities.includes("pr"))
+  if (!basic || !rarity) throw new Error("missing option requests")
+  const answer = (request: typeof basic, prBadgeStyles: readonly string[]) => {
+    emit({
+      kind: "view-result",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      view: {
+        query: request.query,
+        page: { total: 0, offset: 0, items: [] },
+        options: { classes: [], sets: [], rarities: [], prBadgeStyles, rarityCounts: { pr: 2 } },
+        faces: [],
+      },
+    })
+  }
+  answer(basic, [])
+  expect(result.current.classes).toEqual([])
+  expect(result.current.options).toBeUndefined()
+  answer(rarity, ["bronze", "unknown"])
+  expect(result.current.options).toEqual({ styles: ["bronze", "unknown"], counts: { pr: 2 } })
 })

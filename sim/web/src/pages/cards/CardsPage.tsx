@@ -22,6 +22,7 @@ import {
 import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
 import {
   useListView,
+  useRarityOptions,
   useRecentSummaries,
   useRouteEdition,
   useSearch,
@@ -36,6 +37,7 @@ import { CardList, CardTable } from "../../components/results/CardRows"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
+import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
 import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
@@ -94,7 +96,8 @@ export function CardsPage() {
   const readiness = useSearchReadiness(edition)
   const [params, setParams] = useSearchParams()
   const { code } = useParams()
-  const { sets } = useSetOptions()
+  const { sets, rarities } = useSetOptions()
+  const rarityOptions = useRarityOptions()
   const set = code ? sets?.find((set) => set.publicCode === code) : undefined
   const query = useMemo(() => {
     const parsed = parseQuery(params)
@@ -500,6 +503,17 @@ export function CardsPage() {
           }}
         />
       )}
+      <RarityFilter
+        rarities={(rarities ?? []).map((rarity) => ({
+          code: rarity.code,
+          label: rarity.name.translations[textLang] ?? rarity.name.original.text,
+        }))}
+        options={rarityOptions}
+        selected={query.rarities}
+        onChange={(rarities) => {
+          commit({ ...query, rarities })
+        }}
+      />
       {hasConditions && (
         <div
           role="group"

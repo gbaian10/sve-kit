@@ -123,7 +123,7 @@ it("updates table labels and fallback thumbnails on language changes while retai
 })
 
 describe("spreadsheet list", () => {
-  it("renders six columns, explicit states, full one-line text and absent stats without card images", async () => {
+  it("renders seven columns, explicit states, full one-line text and absent stats without card images", async () => {
     vi.stubGlobal("IntersectionObserver", undefined)
     const states = ["ready", "pending", "error", "unknown", "blank"]
     const cells = states.map((state) => ({
@@ -161,6 +161,7 @@ describe("spreadsheet list", () => {
     await renderInRouter(<CardList cells={cells} onOpen={vi.fn()} />)
     expect(screen.getAllByRole("columnheader").map((column) => column.textContent)).toEqual([
       "卡號 ↑",
+      "稀有度",
       "名稱",
       "消費",
       "攻擊力",
@@ -318,3 +319,26 @@ it("preserves a text selection instead of opening a row and exposes translation 
   expect(onOpen).not.toHaveBeenCalled()
   selection?.removeAllRanges()
 })
+
+it.each(["list", "table"] as const)(
+  "shows a printing badge in %s without loading a card image for the list",
+  async (view) => {
+    const premium = { ...cell, summary: { ...cell.summary, rarityCode: "sr", premium: true } }
+    await renderInRouter(
+      view === "list" ? (
+        <CardList cells={[premium]} onOpen={vi.fn()} />
+      ) : (
+        <CardTable cells={[premium]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />
+      ),
+    )
+    expect(screen.getByRole("img", { name: "官方稀有度：SR" })).toBeVisible()
+    expect(document.querySelectorAll("[data-rarity-badges] img")).toHaveLength(1)
+    if (view === "list") {
+      const headers = screen.getAllByRole("columnheader")
+      expect(headers[1]).toHaveTextContent("稀有度")
+      expect(headers[1]?.querySelector("button")).toBeNull()
+      expect(document.querySelector("[data-list-rarity] img")).not.toBeNull()
+      expect(document.querySelector("[data-image-state], [data-image-printing]")).toBeNull()
+    }
+  },
+)
