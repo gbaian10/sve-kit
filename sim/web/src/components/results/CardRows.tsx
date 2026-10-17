@@ -451,7 +451,7 @@ export function CardList({
           <col />
         </colgroup>
         <thead>
-          <tr>
+          <tr aria-rowindex={1}>
             {columns.map(([key, label]) => (
               <th
                 key={key}

@@ -270,6 +270,7 @@ it("keeps a large loaded list bounded and replaces its visible rows when the pag
   const table = screen.getByRole("table")
   expect(table).toHaveAttribute("data-loaded-count", "600")
   expect(table).toHaveAttribute("aria-rowcount", "601")
+  expect(table.querySelector("thead tr")).toHaveAttribute("aria-rowindex", "1")
   expect(screen.getAllByRole("link").length).toBeLessThan(100)
   const body = table.querySelector("tbody")
   if (!body) throw new Error("missing result body")
