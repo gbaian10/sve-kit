@@ -394,14 +394,18 @@ stand in for the maintainer's phone: CJK font size and wrapping are judged on th
 
 ### Card drawer geometry
 
-`bun run check:drawer -- --base https://127.0.0.1:5793 [--out /tmp/drawer]` drives the same kind of
-server and checks what jsdom cannot: the card drawer pushes the frame (main content and the avatar
-end where the drawer starts, frame padding equals the drawer width, no horizontal overflow), a
-saved width wider than a narrower window is cut to what the window leaves and falls back to the
-modal below 1000px, choosing another printing keeps the result cell and previous/next, a sort
-change keeps the card while back closes it and back again restores the old list, and a card opened
-from the second page returns to the same viewport position with focus on its cell. It exits
-non-zero on any failed check and writes `drawer-check.json` when `--out` is given.
+`bun run check:drawer -- --base https://127.0.0.1:5793 [--out /tmp/drawer]` is a manual tool like
+`shots`: run by hand against a running dev server with real data, not part of `bun run check` and
+never run in CI, so a local pass is not a CI guarantee. It needs real data with several printings
+of the first card (the printing case) and at least two pages of results (the second-page case). It
+checks what jsdom cannot: the card drawer pushes the frame (main content and the avatar end where
+the drawer starts, frame padding equals the drawer width, no horizontal overflow), a saved width
+wider than a narrower window is cut to what the window leaves and falls back to the modal below
+1000px, choosing another printing keeps the result cell and previous/next, a sort change keeps the
+card while back closes it and back again restores the old list, and a card opened from the second
+page (after the drawer was opened and closed once) returns to the same viewport position with
+focus on its cell. It exits non-zero on any failed check and writes `drawer-check.json` when
+`--out` is given.
 
 ## Not set up yet
 

@@ -285,23 +285,25 @@ try {
     )
     await ctx.close()
   }
-  // F4: a card opened from the second page comes back to the same place with focus on its cell.
+  // F4: after the drawer has been opened and closed once, a card opened from the second page comes
+  // back to the same place with focus on its cell (the reviewer's reproduction, same timing).
   {
     const { context: ctx, page } = await context(1440, {})
-    await page.goto(`${values.base}/cards?view=grid`)
-    await ready(page)
-    await page.locator("a[data-result-key]").first().waitFor({ timeout: 60_000 })
+    await openFirst(page, "/cards?view=grid")
+    await page.keyboard.press("Escape")
+    await page.waitForFunction(`!new URL(location.href).searchParams.has("card")`)
+    await page.waitForTimeout(500)
     await page.getByRole("button", { name: "載入更多", exact: true }).click()
     await page.waitForFunction(`document.querySelectorAll("a[data-result-key]").length > 60`)
     const target = page.locator("a[data-result-key]").nth(65)
     await target.scrollIntoViewIfNeeded()
-    await page.waitForTimeout(800)
+    await page.waitForTimeout(1000)
     const key = await target.getAttribute("data-result-key")
     const before = await target.boundingBox()
     const scrollBefore = await page.evaluate<number>(`scrollY`)
     await target.click()
     await cardLoaded(page)
-    await settled(page)
+    await page.waitForTimeout(500)
     await page.goBack()
     await page.waitForFunction(`!new URL(location.href).searchParams.has("card")`)
     await page.waitForTimeout(700)

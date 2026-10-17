@@ -37,6 +37,8 @@ export interface CardOverlayArgs {
   readonly pages: number
   /** What one result cell stands for; decides which cell another printing of the card belongs to. */
   readonly unit: QueryState["unit"]
+  /** The loaded result cells, so the open card finds its cell again after the unit changes. */
+  readonly cells: readonly { readonly key: string; readonly summary: CardSummary }[]
   readonly listScroll: RefObject<{ readonly top: number; readonly left: number }>
   readonly root: RefObject<HTMLElement | null>
 }
@@ -63,6 +65,29 @@ export interface CardOverlay {
 const DRAWER_CLASS =
   "fixed inset-y-0 right-0 z-40 flex border-l border-border bg-surface-1 shadow-lg outline-none transition-transform duration-200 ease-out starting:translate-x-full data-[state=closing]:translate-x-full motion-reduce:transition-none"
 const EXIT_MS = 200
+// Putting the opening cell back waits for the frame to give the width back, then for the position
+// to hold still; a layout that never settles gives up here and only keeps the cell in view.
+const RESTORE_LIMIT_MS = 1500
+const STABLE_FRAMES = 3
+
+/**
+ * The cell the open card belongs to in the current results: its stored key while that key is
+ * listed, otherwise the cell with the same identity under the current unit (another printing of
+ * the card when cells are cards; the printing itself when cells are printings or arts).
+ */
+function currentKey(
+  stored: string | undefined,
+  route: OverlayEntryState["route"],
+  unit: QueryState["unit"],
+  cells: CardOverlayArgs["cells"],
+): string | undefined {
+  if (cells.length === 0) return stored
+  if (stored !== undefined && cells.some((cell) => cell.key === stored)) return stored
+  if (!route) return undefined
+  const byPrinting = cells.find((cell) => cell.summary.printingId === route.printingId)
+  const byCard = cells.find((cell) => cell.summary.cardId === route.cardId)
+  return (unit === "card" ? (byCard ?? byPrinting) : byPrinting)?.key
+}
 
 function cellOf(root: HTMLElement | null, key: string | undefined): HTMLElement | undefined {
   if (key === undefined || key === "") return undefined
@@ -80,6 +105,7 @@ export function useCardOverlay({
   background,
   pages,
   unit,
+  cells,
   listScroll,
   root,
 }: CardOverlayArgs): CardOverlay {
@@ -197,15 +223,17 @@ export function useCardOverlay({
   // it closed. The frame's padding takes a moment to give the width back, so the cell is put back
   // where it was only after that; the modal's dialog hands focus back on its own.
   const drawerRef = useRef<HTMLElement>(null)
-  const opened = useRef<{ opener: string; top: number | undefined } | null>(null)
+  const opened = useRef<{ opener: string; top: number | undefined; drawer: boolean } | null>(null)
   const [returned, setReturned] = useState<string | undefined>(undefined)
-  const selected = open ? overlay?.resultKey : undefined
-  const opener = open ? (overlay?.opener ?? overlay?.resultKey ?? "") : undefined
+  const selected = open ? currentKey(overlay?.resultKey, overlay?.route, unit, cells) : undefined
+  const opener = open
+    ? (currentKey(overlay?.opener ?? overlay?.resultKey, overlay?.route, unit, cells) ?? "")
+    : undefined
   const openerTop = overlay?.openerTop
   useEffect(() => {
     if (opener !== undefined) {
       if (opened.current === null && presentation === "panel") drawerRef.current?.focus()
-      opened.current = { opener, top: openerTop }
+      opened.current = { opener, top: openerTop, drawer: presentation === "panel" }
       return
     }
     const last = opened.current
@@ -214,24 +242,64 @@ export function useCardOverlay({
     const cell = cellOf(root.current, last.opener)
     if (!cell) return
     cell.focus({ preventScroll: true })
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    let frame: number | undefined
+    let fallback: ReturnType<typeof setTimeout> | undefined
+    let done = false
+    let stable = 0
+    const started = performance.now()
     // Rows far from the viewport are laid out from estimates (content-visibility), so one scroll
-    // rarely lands exactly: scroll, let the rows near the cell render, and measure again.
-    let attempts = 0
-    let timer: ReturnType<typeof setTimeout>
-    const settle = () => {
+    // rarely lands exactly: scroll, let the rows near the cell render, measure again, and accept
+    // the position once it has held still for a few frames.
+    const restore = () => {
+      if (done) return
       const delta = last.top === undefined ? 0 : cell.getBoundingClientRect().top - last.top
-      if (Math.abs(delta) > 1 && attempts < 8) {
-        attempts += 1
+      if (Math.abs(delta) > 1) {
         window.scrollBy({ top: delta })
-        timer = setTimeout(settle, 16)
+        stable = 0
+      } else stable += 1
+      if (stable >= STABLE_FRAMES) {
+        done = true
+        setReturned(last.opener)
         return
       }
-      setReturned(last.opener)
+      if (performance.now() - started > RESTORE_LIMIT_MS) {
+        done = true
+        const rect = cell.getBoundingClientRect()
+        if (rect.bottom < 0 || rect.top > window.innerHeight)
+          cell.scrollIntoView({ block: "center" })
+        return
+      }
+      frame = requestAnimationFrame(restore)
     }
-    timer = setTimeout(settle, reduced ? 0 : EXIT_MS + 50)
+    const start = () => {
+      frame = requestAnimationFrame(restore)
+    }
+    // The drawer hands its width back to the frame through a padding transition; the cell can only
+    // be put back once that has ended (at once when motion is reduced or no drawer was open).
+    const appFrame = document.querySelector<HTMLElement>("[data-app-frame]")
+    const animated =
+      last.drawer &&
+      appFrame !== null &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      !/^(?:0s)?$/u.test(getComputedStyle(appFrame).transitionDuration)
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.target !== appFrame || event.propertyName !== "padding-right") return
+      appFrame?.removeEventListener("transitionend", onTransitionEnd)
+      clearTimeout(fallback)
+      start()
+    }
+    if (animated) {
+      appFrame.addEventListener("transitionend", onTransitionEnd)
+      fallback = setTimeout(() => {
+        appFrame.removeEventListener("transitionend", onTransitionEnd)
+        start()
+      }, EXIT_MS * 3)
+    } else start()
     return () => {
-      clearTimeout(timer)
+      done = true
+      if (frame !== undefined) cancelAnimationFrame(frame)
+      clearTimeout(fallback)
+      appFrame?.removeEventListener("transitionend", onTransitionEnd)
     }
   }, [opener, openerTop, presentation, root])
 
@@ -293,7 +361,7 @@ export function useCardOverlay({
           background,
           source: "results",
           pages,
-          ...(overlay?.resultKey ? { resultKey: overlay.resultKey } : {}),
+          ...(selected === undefined ? {} : { resultKey: selected }),
           ...(overlay?.route ? { route: overlay.route } : {}),
         },
         key: target.key,

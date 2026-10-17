@@ -321,6 +321,7 @@ export function CardsPage() {
     background: querySearch(searchState),
     pages,
     unit: query.unit,
+    cells,
     listScroll,
     root: imageRoot,
   })

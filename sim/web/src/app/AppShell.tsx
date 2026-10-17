@@ -46,7 +46,10 @@ export function AppShell() {
   return (
     <ToastProvider>
       {/* The card drawer is a column at the right edge: the frame pads for it like for the rail. */}
-      <div className="flex min-h-dvh flex-col pr-[var(--drawer-width,0px)] pb-21 transition-[padding-right] duration-200 ease-out motion-reduce:transition-none lg:pb-0 lg:pl-18 xl:pl-50 phone-landscape:pb-0 phone-landscape:pl-16">
+      <div
+        data-app-frame=""
+        className="flex min-h-dvh flex-col pr-[var(--drawer-width,0px)] pb-21 transition-[padding-right] duration-200 ease-out motion-reduce:transition-none lg:pb-0 lg:pl-18 xl:pl-50 phone-landscape:pb-0 phone-landscape:pl-16"
+      >
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-button focus:bg-surface-1 focus:px-4 focus:py-2"

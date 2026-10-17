@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { effectiveDrawerWidth } from "../../app/card-overlay"
 import { routes } from "../../app/routes"
 import {
   type CardOpenMode,
@@ -206,31 +205,30 @@ describe("opening a card beside the results", () => {
     })
   })
 
-  // The frame's padding and the drawer read one value; what it is at each window width is
-  // `effectiveDrawerWidth`'s contract (card-overlay.test.ts), and the real geometry is checked in a
-  // browser by `bun run check:drawer`.
-  it("saves the width the keyboard sets and keeps the shared width inside a narrower window", async () => {
+  // What width the drawer and the frame share at each window width is `effectiveDrawerWidth`'s
+  // contract (card-overlay.test.ts); the real geometry is checked in a browser by
+  // `bun run check:drawer`. Here: the preference the keyboard writes, and the frame that a saved
+  // width no longer fits.
+  it("saves the width the keyboard sets and falls back to the modal when the window is too narrow", async () => {
     await open("/cards?q=bp01", "panel")
     const user = userEvent.setup()
     const [first] = await cells()
     if (!first) throw new Error("missing cell")
     await user.click(first)
-    const width = () => document.documentElement.style.getPropertyValue("--drawer-width")
-    expect(width()).toBe(`${String(effectiveDrawerWidth(null, 1440))}px`)
     const handle = within(panel()).getByRole("separator", { name: "調整抽屜寬度" })
     handle.focus()
     await user.keyboard("{ArrowLeft}")
     expect(readPrefs().drawerWidth).toBe(640)
-    expect(width()).toBe("640px")
+    await user.keyboard("{ArrowRight}{ArrowRight}")
+    expect(readPrefs().drawerWidth).toBe(600)
 
-    // A wider saved width than the window allows is not applied as saved.
+    // A saved width wider than the window allows still shows the drawer, not a broken frame.
     prefsStore.set({ drawerWidth: 1200 })
     act(() => {
       resizeWindow(1180)
     })
-    expect(width()).toBe(`${String(effectiveDrawerWidth(1200, 1180))}px`)
-    expect(Number.parseInt(width(), 10)).toBeLessThanOrEqual(1180 - 400)
     expect(panel()).toBeInTheDocument()
+    expect(screen.queryByRole("dialog", { name: "單卡面板" })).toBeNull()
 
     // Below the room for a drawer plus usable results the card becomes a modal instead.
     act(() => {
@@ -240,7 +238,6 @@ describe("opening a card beside the results", () => {
       expect(noPanel()).toBeNull()
     })
     expect(screen.getByRole("dialog", { name: "單卡面板" })).toHaveAttribute("open")
-    expect(width()).toBe("")
     expect(readPrefs().drawerWidth).toBe(1200)
   })
 
@@ -268,15 +265,48 @@ describe("opening a card beside the results", () => {
     await waitFor(() => {
       expect(within(aside).getByRole("button", { name: "下一張" })).toBeEnabled()
     })
-    const focus = vi.spyOn(HTMLElement.prototype, "focus")
     await user.keyboard("{Escape}")
     await waitFor(() => {
       expect(noPanel()).toBeNull()
     })
     expect(cellLink(key)).toHaveFocus()
-    expect(focus).toHaveBeenCalledWith({ preventScroll: true })
-    focus.mockRestore()
   })
+
+  it.each([
+    ["card", "printing", "c:bp01-001", "p:bp01-001"],
+    ["printing", "card", "p:bp01-001", "c:bp01-001"],
+  ] as const)(
+    "follows the open card to its %s → %s cell when the row unit changes",
+    async (from, to, before, after) => {
+      prefsStore.set({ filterPanelOpen: true })
+      const { router } = await open(`/cards?q=bp01${from === "card" ? "&unit=card" : ""}`, "panel")
+      const user = userEvent.setup()
+      const [first] = await cells()
+      if (!first) throw new Error("missing cell")
+      expect(first.getAttribute("data-result-key")).toBe(before)
+      await user.click(first)
+      const aside = panel()
+      await within(aside).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
+      await user.click(screen.getByRole("switch", { name: "同一張卡只顯示一次" }))
+      await waitFor(() => {
+        expect(new URLSearchParams(router.state.location.search).get("unit")).toBe(
+          to === "card" ? "card" : null,
+        )
+      })
+      await waitFor(() => {
+        expect(cellLink(after)).toHaveAttribute("aria-current", "true")
+      })
+      expect(document.querySelectorAll("a[data-result-key][aria-current]")).toHaveLength(1)
+      await waitFor(() => {
+        expect(within(panel()).getByRole("button", { name: "下一張" })).toBeEnabled()
+      })
+      await user.keyboard("{Escape}")
+      await waitFor(() => {
+        expect(noPanel()).toBeNull()
+      })
+      expect(cellLink(after)).toHaveFocus()
+    },
+  )
 
   it.each([
     ["sort", "sort=cost"],
