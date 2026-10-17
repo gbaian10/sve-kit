@@ -38,7 +38,7 @@ describe("query codec", () => {
 
   it("reads stat values up to their cap and drops anything else", () => {
     expect(parseQuery(new URLSearchParams("cost=7,2")).cost).toEqual([2, 7])
-    expect(parseQuery(new URLSearchParams("cost=8")).cost).toEqual([])
+    expect(parseQuery(new URLSearchParams("cost=8,11")).cost).toEqual([8])
     expect(parseQuery(new URLSearchParams("cost=2-4&atk=-1,x,1.5,10&def=11")).cost).toEqual([])
     expect(parseQuery(new URLSearchParams("atk=-1,x,1.5,10")).attack).toEqual([10])
     expect(parseQuery(new URLSearchParams("def=11")).defense).toEqual([])
@@ -61,7 +61,11 @@ describe("query codec", () => {
   })
 
   it("drops non-integer and out-of-range stat values before writing and round-trips the rest", () => {
-    const state = { ...DEFAULT_QUERY, cost: [1.5, 7, Number.NaN, 2, 8, -0.5], defense: [10.000001] }
+    const state = {
+      ...DEFAULT_QUERY,
+      cost: [1.5, 7, Number.NaN, 2, 11, -0.5],
+      defense: [10.000001],
+    }
     const params = formatQuery(state)
     expect(params.get("cost")).toBe("2,7")
     expect(params.has("def")).toBe(false)

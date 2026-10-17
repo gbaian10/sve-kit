@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next"
 
-import { BADGE_STYLES } from "../../domain/rarityBadges"
-import { orderRarities, UNRATED_RARITY } from "../../domain/rarityFilter"
+import { orderRarities, prStyleTokens, UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
 import { type FacetChip, type FacetChipOption, FacetChips } from "./FacetChips"
 import { prBadgeVisual, prStyleLabel, prStyleVisual, rarityBadgeVisual } from "./rarityVisuals"
@@ -26,13 +25,10 @@ export function RarityFilter({
   const { t } = useTranslation()
   const visual = (content: FacetChipOption["content"]): Pick<FacetChipOption, "content"> =>
     content === undefined ? {} : { content }
-  const children: FacetChipOption[] = ([...BADGE_STYLES, "unknown"] as const)
-    .filter((style) => options?.styles.includes(style))
-    .map((style) => ({
-      code: `pr:${style}`,
-      label: prStyleLabel(t, style),
-      ...visual(prStyleVisual(style, edition)),
-    }))
+  const children: FacetChipOption[] = prStyleTokens(options?.styles ?? []).map((code) => {
+    const style = code.slice("pr:".length)
+    return { code, label: prStyleLabel(t, style), ...visual(prStyleVisual(style, edition)) }
+  })
   const items: FacetChip[] = [
     ...orderRarities(rarities).map((rarity) =>
       rarity.code === "pr"

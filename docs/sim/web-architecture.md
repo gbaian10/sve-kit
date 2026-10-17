@@ -77,7 +77,7 @@ sim/web/
 interface QueryState {
   text: string;
   classes: ClassCode[];
-  cost: number[]; // 選取的消費值，0–7，7 代表 ≥7；空陣列＝不限
+  cost: number[]; // 選取的消費值，0–10，10 代表 ≥10；空陣列＝不限
   attack: number[]; // 選取的攻擊力值，0–10，10 代表 ≥10
   defense: number[]; // 選取的生命值，0–10，10 代表 ≥10
   types: TypeCode[];

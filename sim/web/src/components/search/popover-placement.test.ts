@@ -22,9 +22,10 @@ it("hangs from the left edge while the panel fits, from the right edge near the 
   )
 })
 
-it("does not depend on where the panel currently is, so reopening gives the same answer", () => {
+it("answers from the anchor alone: the same anchor near the edge is always end, and start once the viewport is wide", () => {
   const box = { anchorLeft: 241, anchorRight: 334, panelWidth: 208, viewportWidth: 410 }
-  expect(popoverAlignment(box)).toBe(popoverAlignment({ ...box }))
+  expect(popoverAlignment(box)).toBe("end")
+  expect(popoverAlignment(box)).toBe("end")
   expect(popoverAlignment({ ...box, viewportWidth: 1440 })).toBe("start")
 })
 

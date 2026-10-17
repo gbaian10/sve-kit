@@ -63,7 +63,9 @@ import {
   toggleClass,
   VIEW_MODES,
 } from "../../domain/query/model"
+import { prStyleTokens } from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
+import { leaderFrameTokens, tokenKindTokens } from "../../domain/typeFilter"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 
@@ -556,6 +558,11 @@ export function CardsPage() {
           return option
             ? `${option.publicCode ?? option.code} ${option.name.translations[textLang] ?? option.name.original.text}`
             : code
+        }}
+        groups={{
+          pr: prStyleTokens(printingOptions?.rarity.styles ?? []),
+          token: tokenKindTokens(printingOptions?.type.typeCounts ?? {}),
+          leader: leaderFrameTokens(printingOptions?.type.typeCounts ?? {}),
         }}
         onChange={commit}
         onClear={() => {

@@ -14,6 +14,13 @@ export function orderRarities<T extends { readonly code: string }>(rarities: rea
   return [...rarities].sort((a, b) => rank(a.code) - rank(b.code))
 }
 
+/** The PR appearance tokens (`pr:<style>`) the panel offers, in badge order. */
+export function prStyleTokens(styles: readonly string[]): string[] {
+  return [...BADGE_STYLES, "unknown"]
+    .filter((style) => styles.includes(style))
+    .map((style) => `pr:${style}`)
+}
+
 /** Selected rarity tokens (`lg`, `pr`, `pr:gr`, `unrated`) in the filter's display order. */
 export function orderRarityTokens(tokens: readonly string[]): string[] {
   const key = (token: string): [number, number] => {

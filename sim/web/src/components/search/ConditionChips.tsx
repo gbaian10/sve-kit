@@ -11,11 +11,13 @@ import { prBadgeVisual, prStyleLabel, prStyleVisual, rarityBadgeVisual } from ".
 export interface ConditionChipsProps {
   readonly query: QueryState
   readonly edition: Region
-  readonly classLabel: (code: string) => string
   /** Vocabulary labels; each falls back to the code when the vocabulary has none. */
+  readonly classLabel: (code: string) => string
   readonly rarityLabel: (code: string) => string
   readonly typeLabel: (code: string) => string
   readonly setLabel: (code: string) => string
+  /** The sub-values the panel offers under each parent (`pr`, `token`, `leader`), as tokens. */
+  readonly groups: Readonly<Record<string, readonly string[]>>
   readonly onChange: (next: QueryState) => void
   readonly onClear: () => void
 }
@@ -33,9 +35,10 @@ const STATS = [
   ["defense", STAT_CAP],
 ] as const
 
-// Every committed condition as one removable chip, in the panel's order; a parent selected as a
-// whole (PR, Token, leader) is one chip, a partial selection one chip per sub-value. The row is
-// the one place to clear everything, so it always carries "clear".
+// Every committed condition as one removable chip, in the panel's order. A group selected as a
+// whole (its parent, or every sub-value the panel offers) is one chip whose × clears the whole
+// group, the same reading the panel's chips use; a partial selection is one chip per sub-value.
+// The row is the one place to clear everything, so it always carries "clear".
 export function ConditionChips({
   query,
   edition,
@@ -43,10 +46,34 @@ export function ConditionChips({
   rarityLabel,
   typeLabel,
   setLabel,
+  groups,
   onChange,
   onClear,
 }: ConditionChipsProps) {
   const { t } = useTranslation()
+  const parentOf = (token: string) =>
+    Object.keys(groups).find((parent) => token === parent || token.startsWith(`${parent}:`))
+  const whole = (selected: readonly string[], parent: string) => {
+    const children = groups[parent] ?? []
+    return (
+      selected.includes(parent) ||
+      (children.length > 0 && children.every((child) => selected.includes(child)))
+    )
+  }
+  /** Collapses a whole group to its parent token, keeping the first member's position. */
+  const collapse = (tokens: readonly string[]): string[] => {
+    const result: string[] = []
+    for (const token of tokens) {
+      const parent = parentOf(token)
+      const shown = parent !== undefined && whole(tokens, parent) ? parent : token
+      if (!result.includes(shown)) result.push(shown)
+    }
+    return result
+  }
+  const without = (selected: readonly string[], token: string): string[] =>
+    token in groups
+      ? selected.filter((value) => value !== token && !value.startsWith(`${token}:`))
+      : selected.filter((value) => value !== token)
   const sub = (parent: string, child: string) => t("filters.subChip", { parent, child })
   const typeChip = (token: string): Pick<Condition, "label"> => {
     const [code = "", child] = token.split(":")
@@ -98,21 +125,31 @@ export function ConditionChips({
         without: { ...query, [field]: query[field].filter((other) => other !== value) },
       })),
     ),
-    ...orderRarityTokens(query.rarities).map((token) => ({
+    ...collapse(orderRarityTokens(query.rarities)).map((token) => ({
       key: `rarity:${token}`,
       ...rarityChip(token),
-      without: { ...query, rarities: query.rarities.filter((other) => other !== token) },
+      without: { ...query, rarities: without(query.rarities, token) },
     })),
-    ...orderTypeTokens(query.types).map((token) => ({
+    ...collapse(orderTypeTokens(query.types)).map((token) => ({
       key: `type:${token}`,
       ...typeChip(token),
-      without: { ...query, types: query.types.filter((other) => other !== token) },
+      without: { ...query, types: without(query.types, token) },
     })),
     ...query.sets.map((code) => ({
       key: `set:${code}`,
       label: setLabel(code),
       without: { ...query, sets: query.sets.filter((other) => other !== code) },
     })),
+    // The "one per card" switch is display, but the maintainer wants it removable from here too.
+    ...(query.unit === "card"
+      ? [
+          {
+            key: "unit",
+            label: t("filters.onePerCard"),
+            without: { ...query, unit: "printing" as const },
+          },
+        ]
+      : []),
   ]
   if (conditions.length === 0) return null
   return (

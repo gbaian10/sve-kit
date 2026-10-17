@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 
 import type { SearchOptions } from "../../data"
 import type { TextLang } from "../../domain/search"
-import { LEADER_FRAMES, TOKEN_TYPES, TYPE_ORDER } from "../../domain/typeFilter"
+import { leaderFrameTokens, tokenKindTokens, TYPE_ORDER } from "../../domain/typeFilter"
 import { type FacetChip, FacetChips } from "./FacetChips"
 
 export function TypeFilter({
@@ -20,7 +20,6 @@ export function TypeFilter({
   const typeOf = (code: string) => options?.types.find((item) => item.code === code)
   const label = (type: SearchOptions["types"][number]) =>
     type.name.translations[textLang] ?? type.name.original.text
-  const count = (code: string) => options?.typeCounts[code] ?? 0
   const items = TYPE_ORDER.flatMap((code): FacetChip[] => {
     const type = typeOf(code)
     if (!type) return []
@@ -30,11 +29,9 @@ export function TypeFilter({
         {
           code,
           label: t("typeFilter.token"),
-          children: TOKEN_TYPES.flatMap((child) => {
-            const option = typeOf(child)
-            return option && count(`token:${child}`) > 0
-              ? [{ code: `token:${child}`, label: label(option) }]
-              : []
+          children: tokenKindTokens(options?.typeCounts ?? {}).flatMap((code) => {
+            const option = typeOf(code.slice("token:".length))
+            return option ? [{ code, label: label(option) }] : []
           }),
         },
       ]
@@ -43,10 +40,16 @@ export function TypeFilter({
         {
           code,
           label: label(type),
-          children: LEADER_FRAMES.filter((frame) => count(`leader:${frame}`) > 0).map((frame) => ({
-            code: `leader:${frame}`,
-            label: t(`typeFilter.${frame}`),
-          })),
+          children: leaderFrameTokens(options?.typeCounts ?? {}).map((code) => {
+            const frame = code.slice("leader:".length)
+            return {
+              code,
+              label:
+                frame === "gold" || frame === "white" || frame === "unknown"
+                  ? t(`typeFilter.${frame}`)
+                  : frame,
+            }
+          }),
         },
       ]
     return [{ code, label: label(type) }]

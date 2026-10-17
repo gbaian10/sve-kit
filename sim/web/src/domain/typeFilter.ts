@@ -1,7 +1,17 @@
 // The type filter's chip order (the maintainer's), and the sub-values behind Token and leader.
 export const TYPE_ORDER = ["follower", "spell", "amulet", "token", "leader", "ep", "sep"] as const
-export const TOKEN_TYPES = ["follower", "spell", "amulet", "crest", "equipment"] as const
-export const LEADER_FRAMES = ["gold", "white", "unknown"] as const
+const TOKEN_TYPES = ["follower", "spell", "amulet", "crest", "equipment"] as const
+const LEADER_FRAMES = ["gold", "white", "unknown"] as const
+
+/** The Token kind tokens (`token:<type>`) with printings, in display order. */
+export function tokenKindTokens(counts: Readonly<Record<string, number>>): string[] {
+  return TOKEN_TYPES.map((kind) => `token:${kind}`).filter((token) => (counts[token] ?? 0) > 0)
+}
+
+/** The leader frame tokens (`leader:<frame>`) with printings, in display order. */
+export function leaderFrameTokens(counts: Readonly<Record<string, number>>): string[] {
+  return LEADER_FRAMES.map((frame) => `leader:${frame}`).filter((token) => (counts[token] ?? 0) > 0)
+}
 
 const rank = (order: readonly string[], code: string) => {
   const index = order.indexOf(code)

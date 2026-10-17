@@ -15,9 +15,8 @@ export type MechanicState = "has" | "not"
 
 export const NEUTRAL_CLASS = "neutral"
 
-/** Cost buttons run 0–6 and "7+"; the last value stands for that number or more. */
-export const COST_CAP = 7
-/** Attack and defense buttons run 0–9 and "10+". */
+/** Cost, attack and defense buttons run 0–9 and "10+"; the cap stands for that number or more. */
+export const COST_CAP = 10
 export const STAT_CAP = 10
 
 export interface QueryState {

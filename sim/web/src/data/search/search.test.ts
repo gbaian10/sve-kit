@@ -328,7 +328,7 @@ describe("complete Worker catalog generations", () => {
     }
   })
 
-  it("cost values read the opened printing's summary, and 7 means 7 or more", async () => {
+  it("cost values read the opened printing's summary, and 10 means 10 or more", async () => {
     const served = origin()
     const baseline = createSnapshotClient(base, { fetch: served.fetcher })
     await baseline.load()
@@ -343,7 +343,7 @@ describe("complete Worker catalog generations", () => {
     h.session.load(base, "jp", "preview")
     await h.settled()
     const totals: number[] = []
-    for (const cost of [[2, 3], [7], [], [0, 1]]) {
+    for (const cost of [[2, 3], [10], [], [0, 1], [7]]) {
       h.channel.search({ ...query, state: { ...CARD_QUERY, cost } })
       await h.queried()
       const result = h.status().result
@@ -353,7 +353,7 @@ describe("complete Worker catalog generations", () => {
           ? all
           : all.filter(
               (summary) =>
-                typeof summary?.cost === "number" && cost.includes(Math.min(summary.cost, 7)),
+                typeof summary?.cost === "number" && cost.includes(Math.min(summary.cost, 10)),
             )
       expect(result.page.total).toBe(expected.length)
       totals.push(result.page.total)
@@ -1056,10 +1056,10 @@ it("cost columns preserve the signed safe integers accepted by the snapshot read
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
-  // A huge cost lands in the 7+ bucket and nowhere else; a negative one matches no button at all.
+  // A huge cost lands in the 10+ bucket and nowhere else; a negative one matches no button at all.
   // A column stored as 32-bit integers would wrap both into the small buttons.
   for (const [cost, matching] of [
-    [2 ** 40, [7]],
+    [2 ** 40, [10]],
     [-3, []],
   ] as [number, number[]][]) {
     const columns = new BootstrapColumns()
