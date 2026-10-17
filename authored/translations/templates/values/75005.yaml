@@ -72,7 +72,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: false
-    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.8; source review pending.'
+    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.11; source review pending.'
     kind: template_translation
     data:
       template_id: frame:dc18a04a53781091f3f56fda1e00c80db4237bb66e0a559ea1c0a3c3b2258883
@@ -97,7 +97,7 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 上。將其中任意數量的卡片放置到
+            text: 上。將其餘卡片中任意數量的卡片放置到
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -184,7 +184,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: false
-    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.8; source review pending.'
+    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.11; source review pending.'
     kind: template_translation
     data:
       template_id: frame:9028257187218ae855476f61810dacd55dc4c1a3ae4f13557c8223ba1314d05a
@@ -199,7 +199,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 中至多可以放入
+            text: 中可以放入至多
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -270,7 +270,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: false
-    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.8; source review pending.'
+    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.11; source review pending.'
     kind: template_translation
     data:
       template_id: frame:e73f823623d7275c386b788d0c8167e16d0c983dc6eaa1942d8eabd20137e8c7
@@ -287,7 +287,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 』。若為【覺醒】狀態，則改為
+            text: 』。若處於【覺醒】狀態，則改為
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -384,7 +384,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: false
-    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.8; source review pending.'
+    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.11; source review pending.'
     kind: template_translation
     data:
       template_id: frame:a084f71f8fd167518b0be4f0298b8527ae85ef1377e1caa57967a4cd935c3e85
@@ -409,7 +409,7 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 上。將其中任意數量的卡片放置到
+            text: 上。將其餘卡片中任意數量的卡片放置到
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -624,7 +624,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: false
-    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.8; source review pending.'
+    note: '#750 P05; Codex gpt-6.1-sol; four-layer-jp-v5; P0 v1.11; source review pending.'
     kind: template_translation
     data:
       template_id: frame:c48915d28ea08ed69ef42f196f04485c89acddc70de29d458e41e25fa74b8f1d
@@ -641,7 +641,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 』。若為【覺醒】狀態，則改為
+            text: 』。若處於【覺醒】狀態，則改為
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
