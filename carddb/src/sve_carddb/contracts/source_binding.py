@@ -48,6 +48,18 @@ TypedValue = (
 )
 
 
+def expression_node(
+    value: TypedValue,
+) -> Expression | ContextExpression | PredicateExpr | None:
+    """Quantity wrappers preserve the same dependency node as their inline expression."""
+    expr = value.expr if isinstance(value, QuantitySpec) else value
+    return (
+        expr
+        if isinstance(expr, (Expression, ContextExpression, PredicateExpr))
+        else None
+    )
+
+
 class ZoneDomain(RecordData):
     type: Literal["ZoneSet"]
     zones: Annotated[tuple[Code, ...], Field(min_length=1)]
@@ -90,6 +102,7 @@ class QuantityDomain(RecordData):
     imports: tuple[Code, ...]
     expressions: tuple[Code, ...]
     constant_only: bool = False
+    context_expressions: tuple[Code, ...] = ()
 
 
 class PreparationDomain(RecordData):
@@ -356,10 +369,10 @@ def _quantity_value(domain: QuantityDomain, value: TypedValue) -> None:
         if not isinstance(value, (Bound, Constant, Expression)):
             raise ValueError("QuantityExpr leaf has the wrong value shape")
         expr = value
-    if isinstance(expr, ContextExpression) and domain.type in {
-        "QuantitySpec",
-        "QuantityExpr",
-    }:
+    if isinstance(expr, ContextExpression) and (
+        domain.type != "QuantitySpec"
+        or expr.expression_id not in domain.context_expressions
+    ):
         raise ValueError("Context expression requires a preparation domain")
     if domain.constant_only and not isinstance(expr, Constant):
         raise ValueError("Quantity domain requires a constant expression")

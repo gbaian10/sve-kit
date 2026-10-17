@@ -1,4 +1,4 @@
-"""Derive and verify the complete sealed v4 source construction."""
+"""Derive and verify the complete sealed v5 source construction."""
 
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
@@ -27,6 +27,8 @@ from sve_carddb.domains.translations.four_layer_expressions import (
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
 from sve_carddb.domains.translations.four_layer_n2_counters import prepare_capacities
 from sve_carddb.domains.translations.four_layer_n2_parameters import prepare_parameters
+from sve_carddb.domains.translations.four_layer_n3_context import DOMAINS as N3_DOMAINS
+from sve_carddb.domains.translations.four_layer_n3_ports import verify_pool_allocation
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_reads import prepare_reads
 
@@ -118,7 +120,7 @@ class DerivedField:
         lang: str = "zh-Hant",
         forms: Mapping[tuple[str, str], FormDefinition] | None = None,
     ) -> None:
-        """Reconstruct exact source evidence; a version label never proves v4 validity."""
+        """Reconstruct exact source evidence; a version label never proves v5 validity."""
         if frame.source.normalizer_version != VERSION:
             raise ValueError("Unsupported four-layer normalizer version")
         expected = derive_source(
@@ -158,7 +160,12 @@ class DerivedField:
             raw,
             frame,
             binding,
-            {**classifier.domains, DOMAIN_CODE: DOMAIN, **registry.domains},
+            {
+                **classifier.domains,
+                DOMAIN_CODE: DOMAIN,
+                **N3_DOMAINS,
+                **registry.domains,
+            },
             normalizer_version=VERSION,
         )
         reconstructed = bind_recognized(frame, self.derived.field, part, found)
@@ -172,6 +179,7 @@ class DerivedField:
                 "Binding differs from the complete current source construction"
             )
         verify_quantities(frame, binding, scopes={}, registry=registry)
+        verify_pool_allocation(frame, binding)
         if target is not None:
             self.derived.verify_target(binding, target)
             if forms is not None:
@@ -199,6 +207,7 @@ def derive_source(
 ) -> DerivedField:
     """Apply every sealed family through the sole production source entry."""
     from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- providers share this source construction type
+    from sve_carddb.domains.translations.four_layer_n3_sources import FAMILY as N3  # ruff: ignore[import-outside-top-level] -- source adapters depend on the shared derivation boundary
 
     derived = analyze_source(raw, source, classifier, context=context)
     derived = prepare_capacities(raw, derived, classifier)
@@ -222,10 +231,11 @@ def derive_source(
     prepared = FAMILY.prepare(
         raw, DerivedField(derived, interfaces), classifier, context
     )
+    prepared = N3.prepare(raw, prepared, classifier, context)
     if len(prepared.interfaces) != len(prepared.derived.field.parts):
         raise ValueError("Source interfaces must preserve source part order")
     if prepared.mode_rules and len(prepared.mode_rules) != len(
         prepared.derived.field.parts
     ):
         raise ValueError("Mode rules must preserve source part order")
-    return replace(prepared, families=(FAMILY,))
+    return replace(prepared, families=(FAMILY, N3))

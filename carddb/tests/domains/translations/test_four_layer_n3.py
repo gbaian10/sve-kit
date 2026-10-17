@@ -18,8 +18,8 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Classifier
 
 
-@pytest.fixture
-def engine() -> Classifier:
+def n3_classifier() -> Classifier:
+    """Share the synthetic N3 catalog without coupling tests to fixture internals."""
     base = n1_classifier()
     names = tuple(
         Term("term:name." + key, "card_name", name)
@@ -66,6 +66,11 @@ def engine() -> Classifier:
         vocabulary=base.references.vocabulary,
         kind_facts=KindFacts(tuple((t.id, "follower") for t in names)),
     )
+
+
+@pytest.fixture
+def engine() -> Classifier:
+    return n3_classifier()
 
 
 @pytest.mark.parametrize(

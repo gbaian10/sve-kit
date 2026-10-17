@@ -309,6 +309,7 @@ def test_event_import_rejects_wrong_or_ambiguous_evidence(mode: str) -> None:
     if mode == "missing_fact":
         del ports[index]
     else:
+        assert fact.subject is not None
         fact = (
             fact.model_copy(update={"event_kind": "Play"})
             if mode == "wrong_kind"

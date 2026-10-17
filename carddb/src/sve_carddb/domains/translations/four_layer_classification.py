@@ -541,12 +541,21 @@ class Classifier:
             DOMAIN_CODE,
         )
         from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- source families depend on the classifier type
+        from sve_carddb.domains.translations.four_layer_n3_context import (  # ruff: ignore[import-outside-top-level] -- avoids a classifier/source adapter cycle
+            DESCRIPTORS as N3_DESCRIPTORS,
+        )
+        from sve_carddb.domains.translations.four_layer_n3_context import (  # ruff: ignore[import-outside-top-level] -- avoids a classifier/source adapter cycle
+            DOMAINS as N3_DOMAINS,
+        )
 
         return MappingProxyType(
             {
                 **self._domains,
+                **N3_DOMAINS,
                 DOMAIN_CODE: DOMAIN,
-                **DEFAULT_REGISTRY.extend(FAMILY.descriptors).domains,
+                **DEFAULT_REGISTRY.extend(
+                    (*FAMILY.descriptors, *N3_DESCRIPTORS)
+                ).domains,
             }
         )
 

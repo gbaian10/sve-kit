@@ -7,9 +7,10 @@ from sve_carddb.contracts.four_layer import (
     ContextExpression,
     Expression,
     PredicateExpr,
+    QuantitySpec,
     hash_payload,
 )
-from sve_carddb.contracts.source_binding import SourceBinding
+from sve_carddb.contracts.source_binding import SourceBinding, expression_node
 from sve_carddb.core.json import canonical
 
 if TYPE_CHECKING:
@@ -137,16 +138,30 @@ def bind_recognized(
             return None
         name = mapped.pop()
         value = recognized.values[occurrence.slot]
-        if isinstance(value, (Expression, ContextExpression, PredicateExpr)):
+        if isinstance(value, QuantitySpec) and isinstance(
+            value.expr, (Expression, ContextExpression)
+        ):
+            value = value.model_copy(
+                update={
+                    "expr": value.expr.model_copy(
+                        update={
+                            "leaves": tuple(omitted_names[n] for n in value.expr.leaves)
+                        }
+                    )
+                }
+            )
+        elif isinstance(value, (Expression, ContextExpression, PredicateExpr)):
             value = value.model_copy(
                 update={"leaves": tuple(omitted_names[n] for n in value.leaves)}
             )
         actual_slot = next(
             slot for slot in frame.leaf_schema.slots if slot.name == name
         )
-        if (actual_slot.expression is not None and actual_slot.expression != value) or (
-            name in values and values[name] != value
-        ):
+        if (
+            actual_slot.expression is not None
+            and actual_slot.expression
+            != (value.expr if isinstance(value, QuantitySpec) else value)
+        ) or (name in values and values[name] != value):
             return None
         values[name] = value
         ordinal = ordinals.get(name, 0)
@@ -179,15 +194,13 @@ def _mixed_names(
         names = {actual[span.start, span.end].name for span in slot.occurrences}
         if len(names) == 1:
             omitted_names[slot.name] = names.pop()
-        elif isinstance(
-            recognized.values[slot.name], (Expression, ContextExpression, PredicateExpr)
-        ) or any(
+        elif expression_node(recognized.values[slot.name]) is not None or any(
             o.slot == slot.name and o.source_presence == "omitted"
             for o in recognized.occurrences
         ):
             return False
-    return all(
-        not isinstance(value, (Expression, ContextExpression, PredicateExpr))
-        or all(name in omitted_names for name in value.leaves)
-        for value in recognized.values.values()
-    )
+    for value in recognized.values.values():
+        node = expression_node(value)
+        if node is not None and any(name not in omitted_names for name in node.leaves):
+            return False
+    return True

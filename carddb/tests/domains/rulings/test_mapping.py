@@ -80,7 +80,7 @@ class SyntheticSources:
             source=Source(
                 source_lang="ja",
                 canonical_hash=digest(part.canonical_source.encode())[7:],
-                normalizer_version="four-layer-jp-v4",
+                normalizer_version="four-layer-jp-v5",
             ),
             role="body",
             semantic_variant=SemanticVariant(

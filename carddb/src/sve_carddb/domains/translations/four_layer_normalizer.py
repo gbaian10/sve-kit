@@ -5,7 +5,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, Literal
 from unicodedata import normalize
 
-from sve_carddb.contracts.four_layer import Constant, QuantitySpec, Span
+from sve_carddb.contracts.four_layer import (
+    Constant,
+    ContextExpression,
+    Expression,
+    QuantitySpec,
+    Span,
+)
 from sve_carddb.contracts.source_binding import SourceSpan, TracePiece, verify_partition
 from sve_carddb.core.json import digest
 from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER
@@ -14,11 +20,12 @@ from sve_carddb.domains.translations.recognition.provenance import Unit, merged,
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.contracts.four_layer import Frame, Role
+    from sve_carddb.contracts.four_layer import Frame, LeafSlot, Role
     from sve_carddb.contracts.source_binding import (
         ClosedDomain,
         SourceBinding,
         SourceDescriptor,
+        TypedValue,
     )
 
 __all__ = (
@@ -27,7 +34,7 @@ __all__ = (
     "SourcePart",
     "normalize_source",
 )
-VERSION: Final = "four-layer-jp-v4"
+VERSION: Final = "four-layer-jp-v5"
 _NAME = re.compile(r"『[^』]*』")
 _REMINDER = re.compile(r"（[^（）]*）")
 _NUMBER = re.compile(r"[0-9０-９]+")
@@ -98,6 +105,8 @@ class SourcePart:
             if occurrence.source_presence == "explicit":
                 value = binding.values.get(occurrence.slot)
                 spelling = "".join(raw[s.start : s.end] for s in expected)
+                if _context_choice_use(slots[occurrence.slot], value, spelling):
+                    continue
                 numeric = (
                     value.expr.value
                     if isinstance(value, QuantitySpec)
@@ -134,6 +143,7 @@ class SourcePart:
                     "CardKind",
                     "Concept",
                     "QuantityExpr",
+                    "PredicateExpr",
                 }
                 if unit.transformation == "leaf"
                 else None
@@ -366,3 +376,17 @@ def source_trace(
         for s in span.segments
         for i in range(s.start, s.end)
     )
+
+
+def _context_choice_use(
+    slot: LeafSlot, value: TypedValue | None, spelling: str
+) -> bool:
+    if slot.domain.values != ("quantity.choice_mode_count.context.v1",):
+        return False
+    if (
+        not isinstance(value, QuantitySpec)
+        or not isinstance(value.expr, (Expression, ContextExpression))
+        or spelling != "X"
+    ):
+        raise ValueError("Context choice quantity requires an explicit X use")
+    return True
