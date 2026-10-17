@@ -475,7 +475,7 @@ export class SearchIndex {
     )
   }
 
-  private matches(query: SearchQuery, eligible?: ReadonlySet<string>): number[] {
+  private matches(query: SearchQuery, eligible?: ReadonlySet<string>, ranked = false): number[] {
     if (query.edition !== this.edition)
       throw new SearchQueryError({ kind: "edition-not-ready", message: "edition is not ready" })
     const state = eligible ? { ...query.state, text: "" } : query.state
@@ -611,8 +611,10 @@ export class SearchIndex {
       if (!costAllowed(printing)) continue
       buckets[rank]?.push(printing)
     }
-    let matches = buckets.flat()
-    if (state.text === "") matches.sort((a, b) => (this.order[a] ?? 0) - (this.order[b] ?? 0))
+    const byNumber = (a: number, b: number) => (this.order[a] ?? 0) - (this.order[b] ?? 0)
+    let matches = ranked
+      ? buckets.flatMap((bucket) => bucket.sort(byNumber))
+      : buckets.flat().sort(byNumber)
     if (state.unit === "art") {
       const representatives = new Map<number, number>()
       for (const printing of matches) {
@@ -778,12 +780,15 @@ export class SearchIndex {
       }
     }
     if (!text) return { total: 0, items: [] }
-    const page = this.search({
-      state: { ...DEFAULT_QUERY, text },
-      edition: this.edition,
-      limit: Math.min(20, limit),
-    })
     const flat = normalizeText(text)
+    const numberQuery =
+      this.sets.has(flat) || cardNoKey(text, this.sets) !== null || /^\d+$/u.test(flat)
+    const state = { ...DEFAULT_QUERY, text }
+    const matches = this.matches({ state, edition: this.edition }, undefined, !numberQuery)
+    const page = {
+      total: matches.length,
+      items: matches.slice(0, Math.max(1, Math.min(20, limit))).map((p) => this.item(p, state)),
+    }
     const lookup = cardNoLookupKey(text, this.sets)
     const digits = /^\d+$/u.test(flat) ? String(Number(flat)) : null
     return {

@@ -51,20 +51,35 @@ async function goHome(router: Awaited<ReturnType<typeof open>>["router"]) {
 }
 
 describe("home search", () => {
+  it.each([false, true])(
+    "submits multiple matches to the list (before debounce: %s)",
+    async (early) => {
+      const { router } = await open()
+      const user = userEvent.setup()
+      await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01")
+      if (!early) await screen.findByRole("listbox", { name: "建議" })
+      await user.keyboard("{Enter}")
+      await waitFor(() => {
+        expect(router.state.location.pathname).toBe("/cards")
+      })
+      expect(router.state.location.search).toBe("?q=bp01")
+    },
+  )
+
   it("keeps the EN list background when opening a recent card from home", async () => {
     prefsStore.set({ cardEdition: "en" })
     recentStore.push("p:bp01-002-en")
     const { router } = await open()
-    await userEvent.click(screen.getByRole("combobox"))
+    await userEvent.click(screen.getByRole("combobox", { name: "搜尋卡片" }))
     const list = await screen.findByRole("listbox")
     await userEvent.click(await within(list).findByRole("option", { name: /BP01EN-002/u }))
     expect(router.state.location.state).toMatchObject({ background: "?ed=en" })
   })
 
-  it("opens the first suggestion with Enter and keeps the text when coming back", async () => {
+  it("opens the unique result with Enter and keeps the text when coming back", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "bp01-51")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01-51")
     const list = await screen.findByRole("listbox")
     expect(within(list).getAllByRole("option")[0]).toHaveTextContent("BP01-051")
     await user.keyboard("{Enter}")
@@ -76,16 +91,16 @@ describe("home search", () => {
       resultKey: "c:bp01-051",
     })
     expect(recentStore.get()[0]).toBe("p:bp01-051")
-    await router.navigate(-1)
+    await act(() => router.navigate(-1))
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
     })
   })
 
   it("opens the highlighted suggestion", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "試作")
     const options = within(await screen.findByRole("listbox")).getAllByRole("option")
     expect(options.length).toBeGreaterThan(1)
@@ -101,7 +116,7 @@ describe("home search", () => {
   it("marks alias hits in the home suggestions", async () => {
     await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "テンプラー")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "テンプラー")
     const list = await screen.findByRole("listbox", { name: "建議" })
     expect(within(list).getAllByRole("option")[0]).toHaveTextContent("符合：別名")
   })
@@ -109,7 +124,7 @@ describe("home search", () => {
   it("waits for the suggestions when Enter comes inside the debounce window", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "bp01-51{Enter}")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01-51{Enter}")
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/cards/BP01-051")
     })
@@ -118,7 +133,7 @@ describe("home search", () => {
   it("keeps IME confirmation keys inside the search input", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-51")
     await screen.findByRole("listbox")
     fireEvent.keyDown(input, { key: "ArrowDown", isComposing: true })
@@ -132,7 +147,7 @@ describe("home search", () => {
   it("cancels an Enter waiting for debounce when the suggestions are dismissed", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-51{Enter}{Escape}")
     await user.tab()
     await user.click(input)
@@ -144,32 +159,32 @@ describe("home search", () => {
     recentStore.push("p:bp01-001")
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "bp01-51")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01-51")
     const recent = within(screen.getByRole("region", { name: "最近查看" }))
     await user.click(recent.getByRole("link"))
     expect(router.state.location.pathname).toBe("/cards/BP01-001")
-    await router.navigate(-1)
+    await act(() => router.navigate(-1))
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
     })
-    await user.click(screen.getByRole("combobox"))
+    await user.click(screen.getByRole("combobox", { name: "搜尋卡片" }))
     await user.click(main().getByRole("link", { name: "進階搜尋" }))
-    await router.navigate(-1)
+    await act(() => router.navigate(-1))
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
     })
   })
 
   it("takes the last input to the list with 'see all' and shows the empty list on no match", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "試作")
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
     expect(router.state.location.pathname).toBe("/cards")
     expect(router.state.location.search).toBe("?q=%E8%A9%A6%E4%BD%9C")
     await goHome(router)
-    await user.type(screen.getByRole("combobox"), "zzqqxx")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "zzqqxx")
     expect(await screen.findByText("沒有符合的卡")).toBeVisible()
     expect(screen.queryByRole("button", { name: /看全部/u })).toBeNull()
     await user.keyboard("{Enter}")
@@ -255,11 +270,11 @@ describe("recently viewed", () => {
     })
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "bp01-51")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01-51")
     await screen.findByRole("listbox")
     await user.keyboard("{Enter}")
     expect(router.state.location.pathname).toBe("/cards/BP01-051")
-    await router.navigate(-1)
+    await act(() => router.navigate(-1))
     const section = within(await screen.findByRole("region", { name: "最近查看" }))
     expect(await section.findByRole("link")).toHaveTextContent("BP01-051")
   })

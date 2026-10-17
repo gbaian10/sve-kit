@@ -53,6 +53,61 @@ async function open(path = "/cards") {
 }
 
 describe("CardsPage", () => {
+  it("commits a multi-match query with Enter without picking a suggestion", async () => {
+    const { router } = await open("/cards?sort=cost")
+    const user = userEvent.setup()
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01")
+    const list = await screen.findByRole("listbox")
+    await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
+    await user.keyboard("{Enter}")
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("?q=bp01&sort=cost")
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+  })
+
+  it("opens the explicitly selected suggestion when several cards match", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
+    await user.type(input, "bp01")
+    const list = await screen.findByRole("listbox")
+    await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
+    const second = within(list).getAllByRole("option")[1]
+    await user.keyboard("{ArrowDown}{ArrowDown}")
+    expect(input).toHaveAttribute("aria-activedescendant", second?.id)
+    await user.keyboard("{Enter}")
+    expect(router.state.location.pathname).toBe("/cards/BP01-002")
+  })
+
+  it.each([false, true])(
+    "opens the unique result with Enter (before debounce: %s)",
+    async (early) => {
+      const { router } = await open()
+      const user = userEvent.setup()
+      await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "bp01-051")
+      if (!early) {
+        const list = await screen.findByRole("listbox")
+        await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
+      }
+      await user.keyboard("{Enter}")
+      await waitFor(() => {
+        expect(router.state.location.pathname).toBe("/cards/BP01-051")
+      })
+    },
+  )
+
+  it("keeps IME confirmation in the search input", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
+    await user.type(input, "bp01")
+    const list = await screen.findByRole("listbox")
+    await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true })
+    expect(router.state.location.pathname).toBe("/cards")
+    expect(router.state.location.search).toBe("")
+  })
+
   it.each([
     ["zh-TW", "銅"],
     ["ja", "ブロンズ"],
@@ -344,7 +399,9 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "foo")
     await user.keyboard("{Enter}")
-    expect(router.state.location.search).toBe("?q=foo")
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("?q=foo")
+    })
     await router.navigate(-1)
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("")

@@ -314,7 +314,7 @@ describe("complete Worker catalog generations", () => {
         const expected = catalog
           .results(state, "jp")
           .filter((item) => catalog.summary(item.printingId)?.region === "jp")
-        if (!text) orderExpected(catalog, expected)
+        orderExpected(catalog, expected)
         expect(result.page.total).toBe(expected.length)
         expect(result.page.items.map(({ key, printingId }) => ({ key, printingId }))).toEqual(
           expected.slice(0, 2),
@@ -840,6 +840,98 @@ it("compact cells preserve null, signed, large and fractional numbers and nested
   expect(columns.rows()).toEqual(values)
 })
 
+it("orders text results by the selected sort and number suggestions by card number", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing fixture")
+  const columns = new BootstrapColumns()
+  columns.ingest(snapshot.bootstrap)
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  const catalog = createCatalog(snapshot)
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const state = { ...DEFAULT_QUERY, text: "bp01-0" }
+    const page = index.search({ ...query, state })
+    expect(page.total).toBeGreaterThan(8)
+    expect(page.items).toEqual(orderExpected(catalog, [...page.items]))
+    const costs = index.search({ ...query, state: { ...state, sort: "cost" } }).items
+    expect(costs).toEqual(
+      [...page.items].sort(
+        (a, b) =>
+          (a.summary?.cost ?? Infinity) - (b.summary?.cost ?? Infinity) ||
+          page.items.indexOf(a) - page.items.indexOf(b),
+      ),
+    )
+    const descending = index.search({ ...query, state: { ...state, order: "desc" } })
+    expect(descending.items.map((item) => item.printingId)).toEqual(
+      page.items.toReversed().map((item) => item.printingId),
+    )
+    const descendingCosts = index.search({
+      ...query,
+      state: { ...state, sort: "cost", order: "desc" },
+    }).items
+    expect(descendingCosts).toEqual(
+      [...page.items].sort((a, b) => {
+        const first = a.summary?.cost,
+          second = b.summary?.cost
+        return (
+          (first == null ? (second == null ? 0 : 1) : second == null ? -1 : second - first) ||
+          page.items.indexOf(a) - page.items.indexOf(b)
+        )
+      }),
+    )
+    const suggestions = index.suggest("bp01-0")
+    expect(suggestions.items.map((item) => item.summary.printingId)).toEqual(
+      page.items.slice(0, 8).map((item) => item.printingId),
+    )
+  }
+})
+
+it("keeps name-prefix suggestions ahead of contains hits while results follow card numbers", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing fixture")
+  const initial = new BootstrapColumns()
+  initial.ingest(snapshot.bootstrap)
+  initial.seal()
+  const originals = new SearchIndex(initial, "jp").search(query).items
+  const first = originals[0]?.summary
+  const second = originals[1]?.summary
+  if (!first || !second) throw new Error("missing test names")
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) =>
+      fragment.table === "text_unit"
+        ? {
+            ...fragment,
+            rows: fragment.rows.map((row) => ({
+              ...row,
+              text:
+                row["text"] === first.name.original.text
+                  ? "a needle"
+                  : row["text"] === second.name.original.text
+                    ? "needle"
+                    : stringValue(row["text"]),
+            })),
+          }
+        : fragment,
+    ),
+  )
+  columns.seal()
+  const index = new SearchIndex(columns, "jp")
+  expect(
+    index
+      .search({ ...query, state: { ...DEFAULT_QUERY, text: "needle" } })
+      .items.map((item) => item.printingId),
+  ).toEqual([first.printingId, second.printingId])
+  expect(index.suggest("needle", 1).items.map((item) => item.summary.printingId)).toEqual([
+    second.printingId,
+  ])
+})
+
 it("typed matching preserves catalog ranking, canonical pagination and summaries in either edition", async () => {
   const served = origin()
   const client = createSnapshotClient(base, { fetch: served.fetcher })
@@ -900,7 +992,7 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
       const result = h.channel.getStatus().result
       if (result.phase !== "complete") throw new Error("missing result")
       const expected = apply(state, entries, { edition, sets: catalog.sets })
-      if (!text) orderExpected(catalog, expected)
+      orderExpected(catalog, expected)
       expect(result.page.total).toBe(expected.length)
       expect(result.page.items).toEqual(
         expected
@@ -1538,7 +1630,7 @@ it("printing pages preserve every edition printing, numbering, filters and cache
       const result = h.status().result
       if (result.phase !== "complete") throw new Error("missing printing page")
       const expected = apply(state, entries, { edition, sets: catalog.sets })
-      if (!text) orderExpected(catalog, expected)
+      orderExpected(catalog, expected)
       expect(result.page.total).toBe(expected.length)
       expect(result.page.items).toEqual(
         expected.slice(1, 4).map((item) => ({

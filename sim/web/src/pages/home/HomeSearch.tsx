@@ -62,7 +62,7 @@ export function HomeSearch({
     readonly text: string
     readonly index: number
   } | null>(null)
-  // Enter during the debounce window opens the first suggestion once the list has caught up.
+  // Enter during debounce waits to distinguish a unique match from a result list.
   const armed = useRef<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listId = useId()
@@ -163,7 +163,8 @@ export function HomeSearch({
     void navigate(editionUrl(`/cards${querySearch({ ...DEFAULT_QUERY, text: typed })}`, edition))
   }
   const activate = (index: number) => {
-    if (rows.length > 0) openRow(index === -1 ? 0 : index)
+    if (index >= 0) openRow(index)
+    else if (total === 1) openRow(0)
     else seeAll()
   }
   const openArmed = useEffectEvent(() => {
@@ -171,7 +172,7 @@ export function HomeSearch({
       armed.current = null
       return
     }
-    if (armed.current === null || armed.current !== debounced || !complete) return
+    if (armed.current === null || armed.current !== settled || !complete) return
     armed.current = null
     activate(-1)
   })
@@ -209,7 +210,7 @@ export function HomeSearch({
       return
     }
     if (stale || !complete) {
-      armed.current = input
+      armed.current = typed
       return
     }
     activate(active)
