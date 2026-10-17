@@ -7,6 +7,7 @@ import pytest
 from sve_carddb.contracts.four_layer import (
     AbilitySetRef,
     CardNameReference,
+    Constant,
     ContextExpression,
     EventRef,
     Expression,
@@ -31,6 +32,7 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
     definition,
     target_dependencies,
+    verify_quantities,
 )
 from sve_carddb.domains.translations.four_layer_n3_context import CHOICE_DOMAIN
 from sve_carddb.domains.translations.four_layer_n3_events import HOLDER_REVISIONS
@@ -603,3 +605,32 @@ def test_pool_verifier_rejects_wrong_connections(mode: str, engine: Classifier) 
         verify_pool_allocation(
             frame.model_copy(update={"projection": projection}), binding
         )
+
+
+@pytest.mark.parametrize("mutation", ["constant", "mode", "expression"])
+def test_context_domain_cannot_borrow_a_constant_or_other_provider(
+    mutation: str, engine: Classifier
+) -> None:
+    _, raw, ordinal = next(c for c in CASES if c[0] == "X02")
+    found = derive(raw, engine)
+    frame, binding = found.bind(ordinal)
+    slot = next(s for s in frame.leaf_schema.slots if s.role == "choice_mode_count")
+    value = binding.values[slot.name]
+    assert isinstance(value, QuantitySpec)
+    assert isinstance(value.expr, Expression)
+    invalid = (
+        value.model_copy(update={"expr": Constant(kind="constant", value=1)})
+        if mutation == "constant"
+        else value.model_copy(update={"mode": "exact"})
+        if mutation == "mode"
+        else value.model_copy(
+            update={
+                "expr": value.expr.model_copy(
+                    update={"expression_id": "read.offset.add.v1"}
+                )
+            }
+        )
+    )
+    bad = binding.model_copy(update={"values": {**binding.values, slot.name: invalid}})
+    with pytest.raises(ValueError, match="Context choice"):
+        verify_quantities(frame, bad, scopes={}, registry=found.registry)

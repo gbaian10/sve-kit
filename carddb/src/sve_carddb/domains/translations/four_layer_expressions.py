@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import (
     Bound,
-    Constant,
     ContextExpression,
     Domain,
     Expression,
@@ -209,16 +208,15 @@ def _verify_expression(
 ) -> None:
     value = binding.values[name]
     expr = value.expr if isinstance(value, QuantitySpec) else value
-    if (
-        isinstance(value, QuantitySpec)
-        and value.mode == "up_to"
-        and not isinstance(value.expr, Constant)
-    ):
+    if isinstance(value, QuantitySpec):
         from sve_carddb.domains.translations.four_layer_n3_context import (  # ruff: ignore[import-outside-top-level] -- avoids a descriptor/registry cycle
+            CHOICE_DOMAIN,
             verify_context_choice,
         )
 
-        verify_context_choice(frame, binding, name, value)
+        slot = next((s for s in frame.leaf_schema.slots if s.name == name), None)
+        if slot is not None and slot.domain.values == (CHOICE_DOMAIN,):
+            verify_context_choice(frame, binding, name, value)
     if isinstance(expr, Expression):
         for operand in expr.leaves:
             visit(operand)
