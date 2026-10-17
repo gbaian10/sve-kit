@@ -845,7 +845,7 @@ function generationOf(snapshot: LoadedSnapshot | null): number | null {
 
 // Keep all purposes pending until the full V1 resolver settles (public-annotation §4.1).
 
-export type TextField = "name" | "effect" | "flavor"
+export type TextField = "name" | "effect" | "flavor" | "section"
 
 /** `none` = this purpose does not apply to the text (no JP source, no annotation set). */
 type TextPurposePhase = "pending" | "ready" | "none" | "error"
@@ -864,8 +864,8 @@ interface TextReadiness {
   readonly manifestHash?: string
   readonly edition: Region
   readonly owner: JsonObject
-  /** V1 only consumes whole name/effect/flavor fields, not section paragraphs. */
-  readonly ordinal: null
+  /** Section ordinals retain the printing's exact source paragraph identity. */
+  readonly ordinal: number | null
   readonly field: TextField
   /** Target text language of the translation row (`zh-Hant`, `ja`, `en`). */
   readonly language: string
@@ -919,10 +919,11 @@ export function useAnnotatedText(
   language: string,
   edition: Region,
   sharedResolver?: AnnotatedTextResolver | null,
+  ordinal: number | null = null,
 ): AnnotatedTextState {
   const root = useSnapshotRoot()
   const snapshot = client.snapshot()
-  const identity = canonicalText([owner, field, language, edition])
+  const identity = canonicalText([owner, field, language, edition, ordinal])
   const [loaded, setLoaded] = useState<{
     readonly snapshot: typeof snapshot
     readonly identity: string
@@ -931,17 +932,19 @@ export function useAnnotatedText(
   }>()
   // A text resolved earlier for this snapshot renders final on the first pass.
   const peeked = (sharedResolver ?? peekAnnotatedTextResolver(client))?.peek(
-    { owner, field, ordinal: null },
+    { owner, field, ordinal },
     language,
   )
   useEffect(() => {
     if (!snapshot) return
     let active = true
-    const [currentOwner, currentField, currentLanguage] = arrayValue(parseJson(identity))
+    const [currentOwner, currentField, currentLanguage, , currentOrdinal] = arrayValue(
+      parseJson(identity),
+    )
     const pointer = {
       owner: objectValue(currentOwner),
       field: stringValue(currentField),
-      ordinal: null,
+      ordinal: currentOrdinal ?? null,
     }
     const existing = sharedResolver ?? peekAnnotatedTextResolver(client)
     if (existing?.peek(pointer, stringValue(currentLanguage)) !== undefined) return
@@ -983,7 +986,7 @@ export function useAnnotatedText(
     generation: generationOf(snapshot),
     ...(snapshot ? { dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash } : {}),
     owner,
-    ordinal: null,
+    ordinal,
     field,
     language,
     edition,

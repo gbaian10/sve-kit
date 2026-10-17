@@ -1,0 +1,63 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:57b3535002db5f118c1f6aa7c06b3151
+    region: en
+    comparison_hash: sha256:9322e7ce602c09f5ac96ae467232040781a6d33a077117c0eec563fcb1cf4c40
+    classification: pending_review
+    method: ai
+    reason: 官方宇宙／作品標籤有增刪；它是可被規則引用的資料欄，不能只憑主文相同判定等價。
+  - face_id: f:6813e1793cff5208b0091abb8ef3a96f
+    region: jp
+    comparison_hash: sha256:7eea15bd76e9c86e6c0f7c3eb1fd7a68256f5edba1dea5b44a799b87ff473a9f
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:a326d4a3de345edb9cdc54c131ba507f
+    region: jp
+    comparison_hash: sha256:9ef36238024905da2d67a1d527eac242e640ef07c0c52b84d9b8b43640a2a5e5
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:c61fcab06c8a57c48dcda29f0d3fa841
+    region: en
+    comparison_hash: sha256:2eeb015ce519270714675dcb32793e3c6fbd99ef6d10a041b8972b9258710a6d
+    classification: pending_review
+    method: ai
+    reason: 官方宇宙／作品標籤有增刪；它是可被規則引用的資料欄，不能只憑主文相同判定等價。
+  - face_id: f:c61fcab06c8a57c48dcda29f0d3fa841
+    region: jp
+    comparison_hash: sha256:556d8b550d135c37316c70d2470b8bf5bdd2ae54e3acb8eb373fdfd64a6810bc
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:d92418d6955854289cf5b47a2c7dff7b
+    region: en
+    comparison_hash: sha256:cf16023c289bb0b678c5807be2957d7268d2892c42e18cb8b91162b95e716bb1
+    classification: pending_review
+    method: ai
+    reason: 官方宇宙／作品標籤有增刪；它是可被規則引用的資料欄，不能只憑主文相同判定等價。
+  - face_id: f:ef3504a5f7255299ae680cb851b9ec11
+    region: jp
+    comparison_hash: sha256:726aa2b3a8d77a543e6083c11e9c33cef850bb25618f88bdceb4a96849e65b6b
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:f3f4353bc9e158a681af4ef5bb59a897
+    region: en
+    comparison_hash: sha256:6e1b83209916b41c4ccbe72df1d8b8d55d9cfa24ffd8e79ba30ddb43289eb2c1
+    classification: pending_review
+    method: ai
+    reason: 官方宇宙／作品標籤有增刪；它是可被規則引用的資料欄，不能只憑主文相同判定等價。
+  - face_id: f:fbbee38f22d952139652f82f5588faa3
+    region: en
+    comparison_hash: sha256:9db3f1a59297f69a2041044c8347e3ebe6f4b9cc2ca014d2e66418a2bf3ef605
+    classification: pending_review
+    method: ai
+    reason: 官方宇宙／作品標籤有增刪；它是可被規則引用的資料欄，不能只憑主文相同判定等價。
+  - face_id: f:fbbee38f22d952139652f82f5588faa3
+    region: jp
+    comparison_hash: sha256:bcf605fb78cd668c0536864274d3fd7a8a2e46bd7758ef60c1211b263ab631a6
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。

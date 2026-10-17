@@ -72,6 +72,7 @@ const state = vi.hoisted(() => ({
     | null,
   translated: false,
   originalName: false,
+  sections: false,
   candidates: [] as { printing_id: string; revision_id: string | null }[],
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
@@ -97,9 +98,18 @@ vi.mock("../../app/snapshot", () => {
   return {
     useImageIndex: () => undefined,
     // Most cases leave the exact name pending to exercise the catalog stand-in.
-    useAnnotatedText: (_client: unknown, owner: { kind: string; id: string }, field: string) => ({
+    useAnnotatedText: (
+      _client: unknown,
+      owner: { kind: string; id: string },
+      field: string,
+      _language: string,
+      _edition: string,
+      _resolver: unknown,
+      ordinal: number | null,
+    ) => ({
       readiness: {
-        basic: field === "effect" || state.originalName ? "ready" : "pending",
+        basic:
+          field === "effect" || field === "section" || state.originalName ? "ready" : "pending",
         source: "none",
         annotations: "none",
       },
@@ -110,15 +120,30 @@ vi.mock("../../app/snapshot", () => {
               concepts: [],
               explanations: [],
               cards: [],
+              keywords: [],
+              abilities: [],
             }
-          : owner.kind === "face_revision" && field === "effect"
+          : owner.kind === "face_revision" && (field === "effect" || field === "section")
             ? {
+                ...(state.sections && field === "effect"
+                  ? {
+                      originalSections: [
+                        {
+                          ordinal: 1,
+                          label: `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} heading`,
+                        },
+                        { ordinal: 3 },
+                      ],
+                    }
+                  : {}),
                 original: {
                   unit: {
                     text:
-                      owner.id === "rev:other"
-                        ? "Synthetic older effect"
-                        : "Synthetic selected effect",
+                      field === "section"
+                        ? `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} reminder ${String(ordinal)}`
+                        : owner.id === "rev:other"
+                          ? "Synthetic older effect"
+                          : "Synthetic selected effect",
                     lang: "ja",
                   },
                   annotation: null,
@@ -126,7 +151,10 @@ vi.mock("../../app/snapshot", () => {
                 ...(state.translated
                   ? {
                       translated: {
-                        unit: { text: "合成新版譯文", lang: "zh-Hant" },
+                        unit: {
+                          text: field === "section" ? "合成補充譯文" : "合成新版譯文",
+                          lang: "zh-Hant",
+                        },
                         annotation: null,
                       },
                     }
@@ -218,6 +246,8 @@ vi.mock("../../app/snapshot", () => {
           wording: (face: string, region: string) => {
             state.wording(face, region)
             return {
+              classification: "same_effect",
+              basis_printing_id: "p:undated",
               display: {
                 revision_id: state.available ? "rev:synthetic" : null,
                 basis: state.current
@@ -251,7 +281,7 @@ vi.mock("../../app/snapshot", () => {
                         : [],
                   }
                 : state.available
-                  ? { id: "rev:synthetic", name_unit_id: "t:synthetic" }
+                  ? { id: "rev:synthetic", face_id: "f:synthetic", name_unit_id: "t:synthetic" }
                   : undefined,
           revision: (id: string) => ({
             id,
@@ -300,6 +330,7 @@ beforeEach(() => {
   state.multiplePrintings = false
   state.printingRows = null
   state.translated = false
+  state.sections = false
   state.candidates = [
     { printing_id: "p:synthetic", revision_id: "rev:other" },
     { printing_id: "p:undated", revision_id: "rev:synthetic" },
@@ -356,13 +387,25 @@ it("shows the shared type line and stats without a display revision", async () =
 })
 
 describe("plain wording on the card page", () => {
-  it.each([
-    ["zh-TW", "此卡各版次的卡文不同"],
-    ["ja", "このカードは版によってテキストが異なります"],
-    ["en", "This card has different text across printings"],
-  ] as const)(
-    "groups candidates by text and initially opens the displayed wording in %s",
-    async (language, heading) => {
+  it("retains every section of this printing as original text beside the shared translation", async () => {
+    state.available = true
+    state.translated = true
+    state.sections = true
+    state.undated = []
+    prefsStore.set({ effectLanguage: "translated" })
+    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByText("Synthetic older reminder 1")).toBeVisible()
+    expect(screen.getByText("Synthetic older reminder 3")).toBeVisible()
+    expect(screen.getByRole("heading", { name: "Synthetic older heading" })).toBeVisible()
+    expect(screen.queryByText("Synthetic selected heading")).not.toBeInTheDocument()
+    expect(screen.queryByText("Synthetic selected reminder 1")).not.toBeInTheDocument()
+    expect(screen.queryByText("合成補充譯文")).not.toBeInTheDocument()
+  })
+  it.each(["zh-TW", "ja", "en"] as const)(
+    "shows this printing's own original in %s",
+    async (language) => {
       state.available = true
       state.current = true
       state.candidates.push({ printing_id: "p:additional", revision_id: "rev:other" })
@@ -370,18 +413,9 @@ describe("plain wording on the card page", () => {
         initialEntries: ["/cards/BP-SYNTHETIC"],
         language,
       })
-      expect(screen.getByRole("heading", { name: heading })).toBeVisible()
-      expect(container.querySelectorAll("details")).toHaveLength(2)
-      expect(container.querySelectorAll("details[open]")).toHaveLength(1)
-      expect(screen.getByText("Synthetic selected effect")).toBeVisible()
-      expect(screen.queryByText("Synthetic older effect")).not.toBeInTheDocument()
-      expect(screen.getByText("BP-SYNTHETIC / BP-OTHER")).toBeVisible()
-      await userEvent.click(screen.getByText("BP-SYNTHETIC / BP-OTHER"))
       expect(screen.getByText("Synthetic older effect")).toBeVisible()
-      expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument()
-      expect(container).not.toHaveTextContent(
-        /原文字段未知|印刷文字尚未確認|依已知發售日暫顯|日期未定版次/,
-      )
+      expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+      expect(container.querySelectorAll("details")).toHaveLength(0)
     },
   )
   it("shows a printing's own original beside the latest translation and preserves the list on its source link", async () => {
@@ -416,13 +450,13 @@ describe("plain wording on the card page", () => {
     })
     expect(screen.getByRole("heading", { name: "此卡各版次的卡文不同" })).toBeVisible()
     expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
+    expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
   })
   it("opens this printing's own wording when no wording is displayed yet", async () => {
     const { container } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(container.querySelectorAll("details")).toHaveLength(2)
-    expect(container.querySelectorAll("details[open]")).toHaveLength(1)
+    expect(container.querySelectorAll("details")).toHaveLength(0)
     expect(screen.getByText("Synthetic older effect")).toBeVisible()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
     expect(screen.queryByText("目前顯示的卡文")).not.toBeInTheDocument()
@@ -448,7 +482,7 @@ describe("plain wording on the card page", () => {
         { initialEntries: [path] },
       )
       expect(state.wording).toHaveBeenCalledWith("f:synthetic", "en")
-      expect(screen.getByText("Synthetic selected effect")).toBeVisible()
+      expect(screen.getByText("Synthetic older effect")).toBeVisible()
     },
   )
 })

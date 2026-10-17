@@ -20,6 +20,33 @@ interface TextProps {
   readonly edition: Region
 }
 
+function PrintingSections({
+  client,
+  edition,
+  revisionId,
+}: TextProps & { readonly revisionId: string }) {
+  const language = useTextLanguage()
+  const { value } = useAnnotatedText(
+    client,
+    { kind: "face_revision", id: revisionId },
+    "effect",
+    language,
+    edition,
+  )
+  return (value?.originalSections ?? []).map(({ ordinal, label }) => (
+    <CardText
+      key={ordinal}
+      client={client}
+      edition={edition}
+      owner={{ kind: "face_revision", id: revisionId }}
+      field="section"
+      ordinal={ordinal}
+      label={label}
+      display="original"
+    />
+  ))
+}
+
 function CandidateText({
   candidate,
   selected,
@@ -49,12 +76,16 @@ function CandidateText({
         (candidate.revisionId === null ? (
           <p className="mt-2 text-14 text-text-2">{t("card.wording.unavailable")}</p>
         ) : (
-          <CardText
-            client={client}
-            edition={edition}
-            owner={{ kind: "face_revision", id: candidate.revisionId }}
-            field="effect"
-          />
+          <>
+            <CardText
+              client={client}
+              edition={edition}
+              owner={{ kind: "face_revision", id: candidate.revisionId }}
+              field="effect"
+              display="original"
+            />
+            <PrintingSections client={client} edition={edition} revisionId={candidate.revisionId} />
+          </>
         ))}
     </details>
   )
@@ -66,11 +97,15 @@ function PrintingWording({
   ownRevisionId,
   translationRevisionId,
   basisPrinting,
+  catalog,
+  faceId,
   entry,
 }: TextProps & {
   readonly ownRevisionId: string
   readonly translationRevisionId: string
   readonly basisPrinting: Candidate["printings"][number] | undefined
+  readonly catalog: Catalog
+  readonly faceId: string
   readonly entry: unknown
 }) {
   const { t } = useTranslation()
@@ -83,6 +118,21 @@ function PrintingWording({
     language,
     edition,
   )
+  const source = translation.value?.selection?.["source"] as Row | undefined
+  const sourceOwner = source?.["owner"] as Row | undefined
+  const sourceId = sourceOwner?.["id"]
+  const jpWording = catalog.index.wording(faceId, "jp")
+  const sourceCandidate = ((jpWording?.["candidates"] ?? []) as Row[]).find(
+    (candidate) =>
+      candidate["revision_id"] === sourceId &&
+      candidate["printing_id"] === jpWording?.["basis_printing_id"],
+  )
+  const sourcePrinting = sourceCandidate
+    ? catalog.index.printing(stringValue(sourceCandidate["printing_id"]))
+    : undefined
+  const basisCardNo = sourcePrinting
+    ? stringValue(sourcePrinting["card_no"])
+    : basisPrinting?.cardNo
   const different = ownRevisionId !== translationRevisionId
   const showTranslation =
     prefs.effectLanguage !== "original" && translation.value?.translated !== undefined
@@ -102,14 +152,14 @@ function PrintingWording({
         <>
           <p className="mt-3 text-13 text-text-2">
             {t("card.wording.translationBasis")}{" "}
-            {basisPrinting && (
+            {basisCardNo && (
               <Link
-                to={`/cards/${encodeURIComponent(basisPrinting.cardNo)}`}
+                to={`/cards/${encodeURIComponent(basisCardNo)}`}
                 state={entry}
                 replace
                 className="text-accent-text underline underline-offset-2"
               >
-                {basisPrinting.cardNo}
+                {basisCardNo}
               </Link>
             )}
           </p>
@@ -130,6 +180,7 @@ function PrintingWording({
         display={different ? "original" : undefined}
         label={different ? t("card.wording.printingOriginal") : undefined}
       />
+      <PrintingSections client={client} edition={edition} revisionId={ownRevisionId} />
       {different &&
         prefs.effectLanguage !== "original" &&
         (translation.readiness.basic === "ready" || translation.readiness.basic === "none") &&
@@ -170,16 +221,33 @@ export function CardWording({
   }
   const candidates = [...grouped].map(([revisionId, printings]) => ({ revisionId, printings }))
   const own = candidates.filter((candidate) => candidate.printings.some((p) => p.id === printingId))
-  const displayId = revision ? stringValue(revision["id"]) : undefined
+  const basisRevision = catalog.index.displayRevision(
+    stringValue(revision?.["face_id"] ?? ""),
+    edition,
+  )
+  const displayId = basisRevision
+    ? stringValue(basisRevision["id"])
+    : revision
+      ? stringValue(revision["id"])
+      : undefined
   if (displayId && !candidates.some((candidate) => candidate.revisionId === displayId))
     candidates.unshift({ revisionId: displayId, printings: [] })
   const display = wording?.["display"] as Row | undefined
   const undated = (wording?.["undated_printing_ids"] ?? []) as string[]
-  const basisPrinting = candidates
-    .find((candidate) => candidate.revisionId === displayId)
-    ?.printings.find((p) => !undated.includes(p.id))
+  const basisPrinting =
+    candidates
+      .flatMap((candidate) => candidate.printings)
+      .find((printing) => printing.id === wording?.["basis_printing_id"]) ??
+    candidates
+      .find((candidate) => candidate.revisionId === displayId)
+      ?.printings.find((p) => !undated.includes(p.id))
   const ownId = own.length === 1 ? own[0]?.revisionId : null
-  if (ownId && displayId && display?.["basis"] === "latest_known_release" && basisPrinting) {
+  if (
+    ownId &&
+    displayId &&
+    (wording?.["classification"] === "same_effect" || display?.["basis"] === "current") &&
+    basisPrinting
+  ) {
     return (
       <PrintingWording
         key={printingId}
@@ -188,20 +256,38 @@ export function CardWording({
         ownRevisionId={ownId}
         translationRevisionId={displayId}
         basisPrinting={basisPrinting}
+        catalog={catalog}
+        faceId={stringValue(revision?.["face_id"] ?? "")}
         entry={entry}
       />
     )
   }
   if (!wording)
     return displayId ? (
-      <CardText
-        client={client}
-        edition={edition}
-        owner={{ kind: "face_revision", id: displayId }}
-        field="effect"
-      />
+      <>
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: displayId }}
+          field="effect"
+        />
+        <PrintingSections client={client} edition={edition} revisionId={displayId} />
+      </>
     ) : (
       <p className="mt-3 text-14 text-text-2">{t("card.wording.unavailable")}</p>
+    )
+  if (ownId)
+    return (
+      <>
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: ownId }}
+          field="effect"
+          display="original"
+        />
+        <PrintingSections client={client} edition={edition} revisionId={ownId} />
+      </>
     )
   return (
     <section className="mt-4 space-y-2" aria-label={t("card.wording.different")}>

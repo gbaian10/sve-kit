@@ -110,7 +110,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | 出現位置 | 型別名 | columns（依序） |
 | --- | --- | --- |
 | face.current | Current | region, revision_id, basis |
-| face.wording | WordingView | region, state, display, candidates, undated_printing_ids, common_name |
+| face.wording | WordingView | region, state, display, candidates, undated_printing_ids, common_name, classification, method, reason, basis_printing_id, basis_released_on |
 | WordingView.display | WordingDisplay | revision_id, basis |
 | WordingView.candidates | WordingCandidate | printing_id, revision_id |
 | WordingView.common_name | CommonName | name_unit_id, translations |
@@ -128,7 +128,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | card_engine_support.overrides | SupportOverride | region, support |
 | card_engine_support.region_blocks | RegionBlock | region, reasons |
 
-每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表記未定新增的 WordingView／WordingDisplay／WordingCandidate／ObservedText 是 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現) 經使用者 2026-10-01 核可的公開呈現擴充，nullable／enum 依該節，不從 face_current 推斷。face.wording 接在 face.current 之後，只收 pending 項；settled region 不出項，全部 settled 時該 tuple 位置仍為空陣列，不能縮短欄序。PrintingFace.observations 接在 printed_text_state 之後（詳情分片同位置）；Schema、types、fragment columns、golden 與 reader 使用同一候選配置。表格 tuple 中保留的 JSON 值限 §3.2 的 `ParameterSchema`、§3.3 的 `CorrectionValue`，以及 §8 的 `AnnotationReference`、`PublicTextOwner`、`ExplanationReference`；descriptor 以 `{"json":"<具名型別>"}` 指定；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
+每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表記未定新增的 WordingView／WordingDisplay／WordingCandidate／ObservedText 是 [snapshot-format §2.3](snapshot-format.md#23-卡文版本與依據版本) 經使用者 2026-10-01 核可的公開呈現擴充，nullable／enum 依該節，不從 face_current 推斷。face.wording 接在 face.current 之後，只收 pending 項；settled region 不出項，全部 settled 時該 tuple 位置仍為空陣列，不能縮短欄序。PrintingFace.observations 接在 printed_text_state 之後（詳情分片同位置）；Schema、types、fragment columns、golden 與 reader 使用同一候選配置。表格 tuple 中保留的 JSON 值限 §3.2 的 `ParameterSchema`、§3.3 的 `CorrectionValue`，以及 §8 的 `AnnotationReference`、`PublicTextOwner`、`ExplanationReference`；descriptor 以 `{"json":"<具名型別>"}` 指定；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
 
 `Correction.source_url` 沒有可公開官方頁 URL 時填 null；`card_related.applicable_regions` 非 reskin 時填 null。所有 tuple 仍佔原位置；空字串、缺欄、少一格不等於 null。
 
@@ -232,7 +232,14 @@ printing/bootstrap.faces 使用 PrintingFaceBootstrap，detail.faces 使用 Prin
 
 row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。detail 按 row_index 排序，每個 base row 必須且只能有一列 detail，包含文字未知／空陣列的卡，不能藉缺列改變 unknown 語意。printing detail 每列須恰有與 bootstrap 相同的 faces 集合，從 base 的 face_id 連回 face.ordinal 來定位。join 以 base 還原 id／face_id，不輸出 row_index／face_ordinal；translations 按 `(field,ordinal,target_lang)` 合併並拒絕同鍵重複，合併後依該鍵排序（null ordinal 在數字前）。
 
-`current_ref` 只是從所有 face.current.revision_id 推導的去重集合；`display_ref` 依 snapshot-format §2.3 為 current_ref 加 pending wording.display 非 null revision ID 的聯集，不加入其餘 candidates。兩者都不是 manifest 欄位、檔案或額外公開集合。display_ref 內只用 bootstrap/detail，每個 pending face-region 最多一筆暫顯的輕量欄位、名稱與可用名稱翻譯閉包進 bootstrap；集合外（含其餘候選）用 history 完整列，role=text、base=null，按需載入。history 不表示年代，其餘候選引用不形成 bootstrap 對 history 的強制下載依賴。候選與現行／暫顯共用 revision 時只沿用其唯一儲存；同一 revision 不可同時兩邊出現。current 或 display 改變時重算分割，永久 ID 不變；所有分割 join 後必須恰等於公開邏輯投影，無遺失、無重複欄、無額外列。須量測日版／英版各自的 manifest、config 與基本目錄實際必載容器（含暫顯輕量投影、名稱／可用名稱翻譯閉包及稀疏 wording 引用），共用／混區檔整檔計入；基本目錄 Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者決定，詳 [size-budget.md](size-budget.md)。另列其餘按需候選片容量；未載候選的索引與搜尋進度依 snapshot-format §2.3 標示。
+`current_ref` 是所有 face.current.revision_id 的去重集合；`display_ref` 依 snapshot-format §2.3，
+為 current_ref 加上全部 wording.display 與 candidates 非 null revision ID 的聯集。這些版本的名稱／數值放入 bootstrap，
+效果等其他欄位放入 detail，讓沒有唯一依據的版次仍可顯示自己的卡名與數值。
+集合外的歷史版本用 history 完整列，role=text、base=null，按需載入。
+同一 revision 不可同時兩邊出現；current、display 或候選改變時重算分割，永久 ID 不變。
+所有分割 join 後恰等於公開邏輯投影，無遺失、無重複欄、無額外列。
+仍須量測日版／英版各自基本目錄的實際容器與完整名稱翻譯閉包，共用／混區檔整檔計入；
+Brotli 2 MiB 分界及按需容量依 [size-budget.md](size-budget.md)。
 
 例如 base 有依 ID 排序的兩列 revision，detail 的 `[1,...]` 只可指第二列。缺 base hash、hash 指舊片、index=2、重複 index=1、漏 index=0，或 printing 同一 face_ordinal 兩次，都必須拒收，不能 fallback 到最新 bootstrap。
 
@@ -460,6 +467,6 @@ translation.annotation_kind=none 且 annotation_set_id=null 才表示空集合�
 
 ## 未定卡文的共同名稱
 
-`WordingView` 的欄序為 `region,state,display,candidates,undated_printing_ids,common_name`。
+`WordingView` 的欄序為 `region,state,display,candidates,undated_printing_ids,common_name,classification,method,reason,basis_printing_id,basis_released_on`。
 `common_name` 為 nullable `CommonName`：`name_unit_id,translations`；其 `CommonNameTranslation` 欄序是 `field,ordinal,target_lang,translation_id,basis`，field 固定 name、ordinal 固定 null。
-推導及退回依 [快照格式 §2.3](snapshot-format.md#23-表記未定的公開呈現)，名稱與可用名稱翻譯的必要字典隨 face 進 catalog，其他候選依舊走 history；catalog 不依賴 history。
+推導及退回依 [快照格式 §2.3](snapshot-format.md#23-卡文版本與依據版本)，名稱與可用名稱翻譯的必要字典隨 face 進 catalog。非 null 候選的輕量名稱與數值納入 display_ref，正文走 detail；display_ref 外的 revision 走 history，catalog 不依賴 history。

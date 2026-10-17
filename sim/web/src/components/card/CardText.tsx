@@ -30,12 +30,14 @@ export function CardText({
   sharedResolver,
   display,
   label,
+  ordinal = null,
 }: {
   readonly sharedResolver?: AnnotatedTextResolver | null
   readonly client: SnapshotClient
   readonly edition: Region
   readonly owner: JsonObject
-  readonly field: "name" | "effect" | "flavor"
+  readonly field: "name" | "effect" | "flavor" | "section"
+  readonly ordinal?: number | null
   readonly display?: NameDisplay | undefined
   readonly label?: string | undefined
 }) {
@@ -50,6 +52,7 @@ export function CardText({
     language,
     edition,
     sharedResolver,
+    ordinal,
   )
   if (readiness.basic === "pending") return <p role="status">{t("card.annotationPending")}</p>
   if (readiness.basic === "error")
@@ -86,13 +89,10 @@ export function CardText({
       toast.show({ message: t("card.textCopyFailed") })
     }
   }
+  const heading = label ?? (field === "section" ? t("card.originalText") : t(`card.field.${field}`))
   return (
-    <section
-      className="mt-3 space-y-2"
-      aria-label={label ?? t(`card.field.${field}`)}
-      data-field={field}
-    >
-      <h3 className="text-13 font-semibold text-text-3">{label ?? t(`card.field.${field}`)}</h3>
+    <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
+      <h3 className="text-13 font-semibold text-text-3">{heading}</h3>
       {printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
       {printedState === "unknown" && <p className="text-13">{t("card.printedUnconfirmed")}</p>}
       <TextPurposeStatus readiness={readiness} />

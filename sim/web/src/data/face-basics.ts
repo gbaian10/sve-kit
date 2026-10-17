@@ -44,7 +44,7 @@ export function faceBasics(
   region: string,
   printingId: string,
 ): { readonly values: Row; readonly revision: Row | undefined } {
-  const display = index.displayRevision(faceId, region)
+  const display = index.displayRevision(faceId, region, printingId)
   if (display) return { values: display, revision: display }
   const candidates = (index.wording(faceId, region)?.["candidates"] ?? []) as Row[]
   const revisions = candidates.map((candidate) =>

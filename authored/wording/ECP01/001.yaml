@@ -1,0 +1,21 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:392c283ca24b5ba6a1e863b51f5b9535
+    region: en
+    comparison_hash: sha256:7a87c404fc690cf29db237516224006a13b2891ea84a163f3dabeabb33a72c64
+    classification: pending_review
+    method: ai
+    reason: 選項分隔處有問號與空白差異，可能是來源編碼損壞；須核對來源，不能自行修復。
+  - face_id: f:85ace96dbba8556fab1f05ceb0779cea
+    region: jp
+    comparison_hash: sha256:46fd90b2d8af337ea52a6f37204a5b518b669aa00f62036a09513ba53247ff93
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:f88a64d3db7b5a7f973b8b7eda8c032a
+    region: jp
+    comparison_hash: sha256:7aa2fe6e567443be5b3fdb1f7d1ee81848540ff87f78553461d982e5e4986aa9
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。

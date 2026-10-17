@@ -350,7 +350,7 @@
       {
         "file": {
           "key": "catalog/jp/family-set%3Aa/0",
-          "sha256": "sha256:c7f51ea915a1def24e1894052ec32903cdd62fa6e781a49e30820a86fc867d62"
+          "sha256": "sha256:b0dd730fd4a1fe2e7c09eed84871810941478f1d04b77c3d3f0d64ebd4140531"
         },
         "owner": {
           "id": "set:a",
@@ -810,7 +810,7 @@
       0,
       1
     ],
-    "value": "r:a1",
+    "value": "r:b1",
     "rehash": true,
     "error": "no printing observation"
   },
@@ -904,7 +904,7 @@
       2
     ],
     "value": [
-      "r:a1",
+      "r:b1",
       "latest_known_release"
     ],
     "rehash": true,
@@ -1027,30 +1027,6 @@
             ]
           ]
         ]
-      },
-      {
-        "target": "catalog/jp/family-set%3Aa/0",
-        "path": [
-          "tables",
-          "face_revision",
-          0,
-          4,
-          0,
-          0
-        ],
-        "value": "r:a1"
-      },
-      {
-        "target": "history/jp/family-set%3Aa/0",
-        "path": [
-          "tables",
-          "face_revision",
-          0,
-          4,
-          0,
-          0
-        ],
-        "value": "r:a2"
       }
     ]
   },
@@ -1332,7 +1308,7 @@
     ]
   },
   {
-    "name": "pending-display-not-latest",
+    "name": "pending-latest-candidate-requires-bootstrap-original",
     "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
@@ -1349,7 +1325,7 @@
       "latest_known_release"
     ],
     "rehash": true,
-    "error": "unavailable/latest",
+    "error": "Current/display/history partition mismatch",
     "setup": [
       {
         "target": "catalog/jp/family-set%3Aa/0",
@@ -1589,6 +1565,11 @@
         [
           "p:a"
         ],
+        null,
+        "unresolved",
+        "none",
+        "not_assessed",
+        null,
         null
       ]
     ],
@@ -1667,6 +1648,11 @@
             [
               "p:a"
             ],
+            null,
+            "unresolved",
+            "none",
+            "not_assessed",
+            null,
             null
           ],
           [
@@ -1690,6 +1676,11 @@
               "p:a",
               "p:b"
             ],
+            null,
+            "unresolved",
+            "none",
+            "not_assessed",
+            null,
             null
           ]
         ]
@@ -1721,6 +1712,11 @@
             [
               "p:a"
             ],
+            null,
+            "unresolved",
+            "none",
+            "not_assessed",
+            null,
             null
           ]
         ]
@@ -1747,7 +1743,7 @@
     ]
   },
   {
-    "name": "pending-observation-cross-region",
+    "name": "pending-observation-cross-face",
     "target": "print-detail/jp/family-set%3Aa/0",
     "path": [
       "tables",
@@ -1761,43 +1757,14 @@
     ],
     "value": [
       [
-        "r:a1",
+        "r:b1",
         "available",
         "https://example.invalid/observations/a"
       ]
     ],
     "rehash": true,
-    "error": "Text owner card region is missing or ambiguous",
-    "setup": [
-      {
-        "target": "history/jp/family-set%3Aa/0",
-        "path": [
-          "tables",
-          "face_revision",
-          0,
-          4,
-          0,
-          2
-        ],
-        "value": "en"
-      },
-      {
-        "target": "catalog/jp/family-set%3Aa/0",
-        "path": [
-          "tables",
-          "face",
-          0,
-          4,
-          0,
-          5,
-          0,
-          3,
-          0,
-          1
-        ],
-        "value": "r:a1"
-      }
-    ]
+    "error": "Observation revision belongs",
+    "setup": []
   },
   {
     "name": "pending-wording-unsorted",
@@ -1832,6 +1799,11 @@
           "p:a",
           "p:b"
         ],
+        null,
+        "unresolved",
+        "none",
+        "not_assessed",
+        null,
         null
       ],
       [
@@ -1855,6 +1827,11 @@
           "p:a",
           "p:b"
         ],
+        null,
+        "unresolved",
+        "none",
+        "not_assessed",
+        null,
         null
       ]
     ],

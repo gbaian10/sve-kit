@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.registry.review import Inputs
 
 
-def test_unresolved_correction_never_selects_latest_known_display(
+def test_older_correction_does_not_hide_a_complete_latest_display(
     tmp_path: Path, inputs: Inputs
 ) -> None:
     case = make_correction_case(tmp_path, inputs, state="needs_review").texts
@@ -53,8 +53,9 @@ def test_unresolved_correction_never_selects_latest_known_display(
             v for v in wording_views(db, case.plan)[group.face_id] if v.region == "jp"
         )
         assert all(c.revision_id is not None for c in projected.candidates)
-        assert projected.display.basis == "candidates"
-        assert projected.display.revision_id is None
+        assert projected.display.basis == "latest_known_release"
+        assert projected.display.revision_id is not None
+        assert not any(row.values["region"] == "jp" for row in db.rows("face_current"))
         assert all(
             o.state == "available"
             for entries in printing_observed_texts(db, case.plan).values()

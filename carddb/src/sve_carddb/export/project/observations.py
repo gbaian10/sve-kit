@@ -164,7 +164,18 @@ def validate_wording(view: dict[str, list[Record]]) -> None:
             wording = object_value(raw)
             if (
                 set(wording)
-                != {"region", "state", "display", "candidates", "undated_printing_ids"}
+                != {
+                    "region",
+                    "state",
+                    "display",
+                    "candidates",
+                    "undated_printing_ids",
+                    "classification",
+                    "method",
+                    "reason",
+                    "basis_printing_id",
+                    "basis_released_on",
+                }
                 or wording["state"] != "pending"
             ):
                 raise ValueError("Wording whitelist/state mismatch")

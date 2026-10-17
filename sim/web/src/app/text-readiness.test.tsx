@@ -9,6 +9,27 @@ import { useAnnotatedText } from "./snapshot"
 const owner = { kind: "face_revision", id: "revision" }
 
 describe("useAnnotatedText", () => {
+  it("keeps section ordinals separate when the exact owner remains unchanged", async () => {
+    const { client } = await annotatedOrigin(fixture)
+    await client.load()
+    const resolve = vi.fn().mockResolvedValue(null)
+    const resolver = { resolve, peek: () => undefined }
+    const { result, rerender } = renderHook(
+      ({ ordinal }) => useAnnotatedText(client, owner, "section", "ja", "jp", resolver, ordinal),
+      { initialProps: { ordinal: 1 } },
+    )
+    await waitFor(() => {
+      expect(result.current.readiness.basic).toBe("none")
+    })
+    expect(resolve).toHaveBeenCalledWith({ owner, field: "section", ordinal: 1 }, "ja")
+    rerender({ ordinal: 3 })
+    expect(result.current.readiness.basic).toBe("pending")
+    await waitFor(() => {
+      expect(result.current.readiness.basic).toBe("none")
+    })
+    expect(resolve).toHaveBeenLastCalledWith({ owner, field: "section", ordinal: 3 }, "ja")
+    expect(result.current.readiness.ordinal).toBe(3)
+  })
   it("keeps every purpose pending until the exact owner resolves, then reports each from the value", async () => {
     const { client } = await annotatedOrigin(fixture)
     await client.load()

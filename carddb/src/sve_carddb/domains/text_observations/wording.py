@@ -1,6 +1,7 @@
-"""Pending wording projections use product evidence without creating a current."""
+"""Printing observations and reviewed semantic bases remain separate projections."""
 
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, model_validator
@@ -10,12 +11,19 @@ from sve_carddb.core.json import string
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.products.models import Date, Precision, check_date
-from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.records import CorrectionData, PrintingData
+from sve_carddb.domains.text_observations.equivalence import (
+    Classification,
+    Method,
+    WordingDecision,
+    comparison_hash,
+    equivalent,
+)
 from sve_carddb.domains.text_observations.models import candidate_revision_id
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database, Value
-    from sve_carddb.domains.text_observations.plan import TextPlan
+    from sve_carddb.domains.text_observations.plan import FaceGroup, TextPlan
 
 
 def _string(value: object) -> str:
@@ -56,6 +64,11 @@ class WordingView(RecordData):
     display: WordingDisplay
     candidates: tuple[WordingCandidate, ...]
     undated_printing_ids: tuple[Text, ...]
+    classification: Classification = "unresolved"
+    method: Method = "none"
+    reason: Text = "not_assessed"
+    basis_printing_id: Text | None = None
+    basis_released_on: Date | None = None
 
     def wire(self) -> list[JsonValue]:
         """Name selections are resolved later by the export projection."""
@@ -66,6 +79,11 @@ class WordingView(RecordData):
             [[c.printing_id, c.revision_id] for c in self.candidates],
             list[JsonValue](self.undated_printing_ids),
             None,
+            self.classification,
+            self.method,
+            self.reason,
+            self.basis_printing_id,
+            self.basis_released_on,
         ]
 
 
@@ -151,9 +169,12 @@ def _display(
     dates: dict[str, str | None],
     blocked: frozenset[str],
     contents: dict[str, str],
+    *,
+    empty: frozenset[str] = frozenset(),
 ) -> WordingDisplay:
     if current is not None:
         return WordingDisplay(revision_id=current, basis="current")
+    candidates = _rules_candidates(candidates, empty)
     known = [
         dates[c.printing_id] for c in candidates if dates[c.printing_id] is not None
     ]
@@ -171,6 +192,24 @@ def _display(
                 basis="latest_known_release",
             )
     return WordingDisplay(revision_id=None, basis="candidates")
+
+
+def _rules_candidates(
+    candidates: tuple[WordingCandidate, ...], empty: frozenset[str]
+) -> tuple[WordingCandidate, ...]:
+    if any(
+        c.revision_id is not None and c.revision_id not in empty for c in candidates
+    ):
+        return tuple(c for c in candidates if c.revision_id not in empty)
+    return candidates
+
+
+def _empty_revisions(plan: TextPlan) -> frozenset[str]:
+    return frozenset(
+        candidate_revision_id(item)
+        for item in plan.candidates()
+        if item.content.effect is not None and not item.content.effect.strip()
+    )
 
 
 def _candidate_revisions(
@@ -200,9 +239,32 @@ def _candidate_revisions(
     return observations
 
 
+def _correction_blocks(plan: TextPlan, face: str, region: Region) -> frozenset[str]:
+    applied = {
+        item.data.id
+        for item in plan.corrections or ()
+        if item.status in {"applied", "already_fixed"}
+    }
+    blocked = set()
+    for record in plan.identity.snapshot.records.values():
+        data = record.data
+        if (
+            isinstance(data, CorrectionData)
+            and data.face_id == face
+            and data.id not in applied
+        ):
+            printing = plan.identity.snapshot.records[
+                "printing:" + data.printing_id
+            ].data
+            if isinstance(printing, PrintingData) and printing.region == region:
+                blocked.add(data.printing_id)
+    return frozenset(blocked)
+
+
 def wording_views(db: Database, plan: TextPlan) -> dict[str, tuple[WordingView, ...]]:
     """Keep every identity-eligible face/region, including missing-source positions."""
     dates = printing_dates(db)
+    empty = _empty_revisions(plan)
     parents: dict[tuple[str, Region], set[str]] = defaultdict(set)
     for record in plan.publication_identity().included("printing"):
         p = record.data
@@ -222,6 +284,10 @@ def wording_views(db: Database, plan: TextPlan) -> dict[str, tuple[WordingView, 
         if item.content.effect is not None
     }
     groups = {(g.face_id, g.region): g for g in plan.groups}
+    assessments = {
+        (_string(row.values["face_id"]), _string(row.values["region"])): row.values
+        for row in db.rows("face_wording")
+    }
     result: dict[str, list[WordingView]] = defaultdict(list)
     for (face, region), printings in sorted(parents.items()):
         current = currents.get((face, region))
@@ -233,22 +299,297 @@ def wording_views(db: Database, plan: TextPlan) -> dict[str, tuple[WordingView, 
             for p in sorted(printings)
             for r in _revision_options(observations[p, face])
         )
-        blocked = (
-            frozenset(printings)
-            if group is not None and "source_correction_pending" in group.reasons
-            else frozenset()
-        )
+        blocked = _correction_blocks(plan, face, region)
         result[face].append(
-            WordingView(
-                region=region,
-                display=_display(current, candidates, dates, blocked, contents),
-                candidates=candidates,
-                undated_printing_ids=tuple(
-                    p for p in sorted(printings) if dates[p] is None
-                ),
+            WordingView.model_validate(
+                {
+                    "region": region,
+                    "display": _display(
+                        current, candidates, dates, blocked, contents, empty=empty
+                    ),
+                    "candidates": candidates,
+                    "undated_printing_ids": tuple(
+                        p for p in sorted(printings) if dates[p] is None
+                    ),
+                    **{
+                        key: value
+                        for key, value in assessments.get((face, region), {}).items()
+                        if key
+                        in {
+                            "classification",
+                            "method",
+                            "reason",
+                            "basis_printing_id",
+                            "basis_released_on",
+                        }
+                    },
+                }
             )
         )
     return {face: tuple(items) for face, items in sorted(result.items())}
+
+
+def _release_basis(
+    view: WordingView,
+    decision: WordingDecision | None,
+    dates: dict[str, str | None],
+    empty: frozenset[str],
+) -> tuple[WordingDisplay, str | None]:
+    eligible = _rules_candidates(view.candidates, empty)
+    if decision is not None and decision.basis_printing_id is not None:
+        candidates = [
+            candidate
+            for candidate in eligible
+            if candidate.printing_id == decision.basis_printing_id
+        ]
+        if len(candidates) != 1 or candidates[0].revision_id is None:
+            raise ValueError("Manual wording basis has no unique observation")
+        return WordingDisplay(
+            revision_id=candidates[0].revision_id, basis="latest_known_release"
+        ), decision.basis_printing_id
+    identifiers = [
+        candidate.printing_id
+        for candidate in view.candidates
+        if candidate.revision_id == view.display.revision_id
+        and dates[candidate.printing_id] is not None
+    ]
+    if not identifiers:
+        if (
+            eligible != view.candidates
+            and not any(dates[c.printing_id] is not None for c in eligible)
+            and view.display.basis != "current"
+        ):
+            candidate = next((c for c in eligible if c.revision_id is not None), None)
+            if candidate is not None:
+                return WordingDisplay(
+                    revision_id=candidate.revision_id, basis="latest_known_release"
+                ), candidate.printing_id
+        return view.display, None
+    latest = max(dates[identifier] or "" for identifier in identifiers)
+    return view.display, min(
+        identifier for identifier in identifiers if dates[identifier] == latest
+    )
+
+
+def _adopt_basis(
+    db: Database,
+    face: str,
+    view: WordingView,
+    display: WordingDisplay,
+    classification: Classification,
+    *,
+    undated_fallback: bool = False,
+) -> None:
+    if (
+        classification != "same_effect"
+        or display.revision_id is None
+        or display.basis == "current"
+    ):
+        return
+    values: dict[str, Value] = {
+        "face_id": face,
+        "region": view.region,
+        "revision_id": display.revision_id,
+        "basis": "latest_observed_no_errata"
+        if undated_fallback
+        else "latest_known_release",
+        "decision_id": None,
+    }
+    if view.display.basis == "current":
+        db.update(
+            "face_current",
+            {"face_id": face, "region": view.region},
+            {
+                key: value
+                for key, value in values.items()
+                if key not in {"face_id", "region"}
+            },
+        )
+    else:
+        db.insert("face_current", values)
+
+
+def _unresolved_reason(view: WordingView, dates: dict[str, str | None]) -> str:
+    known = [dates[item.printing_id] for item in view.candidates]
+    if not any(known):
+        return "no_known_release_day"
+    latest = max(day for day in known if day is not None)
+    if any(
+        item.revision_id is None and dates[item.printing_id] == latest
+        for item in view.candidates
+    ):
+        return "latest_release_missing_source"
+    return "latest_release_conflict"
+
+
+def _discard_empty_current(db: Database, plan: TextPlan, empty: frozenset[str]) -> None:
+    included = {
+        record.data.id
+        for record in plan.publication_identity().included("printing")
+        if isinstance(record.data, PrintingData)
+    }
+    nonempty_groups = {
+        (item.face_id, item.region)
+        for item in plan.candidates()
+        if item.printing_id in included
+        and item.content.effect is not None
+        and item.content.effect.strip()
+    }
+    # An adopted full-art blank must not hide the rules printed on another version.
+    for row in db.rows("face_current"):
+        values = row.values
+        if (
+            values["revision_id"] in empty
+            and (values["face_id"], values["region"]) in nonempty_groups
+        ):
+            db.delete(
+                "face_current", {key: values[key] for key in ("face_id", "region")}
+            )
+
+
+@dataclass(frozen=True)
+class _Comparison:
+    fingerprint: str
+    all_equivalent: bool
+    equivalent: bool
+    excludes_empty: bool
+    candidates: tuple[WordingCandidate, ...]
+    printings: frozenset[str]
+
+
+def _comparison(
+    view: WordingView,
+    group: FaceGroup | None,
+    dates: dict[str, str | None],
+    empty: frozenset[str],
+) -> _Comparison:
+    observations = () if group is None else group.observations
+    raw = tuple(item.content for item in observations)
+    eligible = _rules_candidates(view.candidates, empty)
+    printings = frozenset(c.printing_id for c in eligible)
+    selected = tuple(
+        item
+        for item in observations
+        if item.printing_id in printings
+        and (eligible == view.candidates or candidate_revision_id(item) not in empty)
+    )
+    dated = tuple(
+        item.content for item in selected if dates[item.printing_id] is not None
+    )
+    contents = (
+        tuple(item.content for item in selected)
+        if not dated and eligible != view.candidates
+        else dated
+    )
+    return _Comparison(
+        fingerprint=comparison_hash(raw),
+        all_equivalent=equivalent(raw),
+        equivalent=equivalent(contents),
+        excludes_empty=eligible != view.candidates,
+        candidates=eligible,
+        printings=printings,
+    )
+
+
+def _classification(
+    comparison: _Comparison, decision: WordingDecision | None
+) -> tuple[Classification, Method, str]:
+    if decision is not None and decision.comparison_hash != comparison.fingerprint:
+        raise ValueError("Stale wording decision")
+    if decision is not None and (
+        decision.method == "manual"
+        or not comparison.equivalent
+        or comparison.all_equivalent
+    ):
+        return decision.classification, decision.method, decision.reason
+    if not comparison.equivalent:
+        return "pending_review", "none", "semantic_review_required"
+    if comparison.excludes_empty:
+        return "same_effect", "mechanical", "empty_wording_excluded"
+    return (
+        "same_effect",
+        "mechanical",
+        (
+            "undated_difference_excluded"
+            if decision is not None
+            else "reminder_or_punctuation"
+        ),
+    )
+
+
+def populate_wording_basis(db: Database, plan: TextPlan) -> None:
+    """Select a dated semantic basis only after equivalence or an exact authored decision."""
+    dates = printing_dates(db)
+    empty = _empty_revisions(plan)
+    _discard_empty_current(db, plan, empty)
+    decisions = {(item.face_id, item.region): item for item in plan.wording_decisions}
+    views = wording_views(db, plan)
+    groups = {(group.face_id, group.region): group for group in plan.groups}
+    for face, entries in views.items():
+        for view in entries:
+            group = groups.get((face, view.region))
+            comparison = _comparison(view, group, dates, empty)
+            decision = decisions.pop((face, view.region), None)
+            classification, method, reason = _classification(comparison, decision)
+            display, printing = _release_basis(view, decision, dates, empty)
+            if (
+                classification != "errata"
+                and view.display.basis == "current"
+                and not (
+                    decision is not None and decision.basis_printing_id is not None
+                )
+            ):
+                classification, reason = "unresolved", "adopted_current_preserved"
+            if display.revision_id is None and classification != "errata":
+                classification, reason = "unresolved", _unresolved_reason(view, dates)
+            elif classification != "errata" and (
+                group is None
+                or any(reason in group.reasons for reason in ("identity_pending",))
+                or any(
+                    dates[identifier] is not None
+                    or (
+                        printing is not None
+                        and dates[printing] is None
+                        and identifier in comparison.printings
+                    )
+                    for identifier in _correction_blocks(plan, face, view.region)
+                )
+                or any(
+                    candidate.revision_id is None
+                    and dates[candidate.printing_id] is not None
+                    for candidate in comparison.candidates
+                )
+            ):
+                classification, reason = "unresolved", "incomplete_source"
+            db.insert(
+                "face_wording",
+                {
+                    "face_id": face,
+                    "region": view.region,
+                    "classification": classification,
+                    "method": method,
+                    "reason": reason,
+                    "comparison_hash": comparison.fingerprint,
+                    "basis_printing_id": printing
+                    if classification == "same_effect"
+                    else None,
+                    "basis_released_on": dates[printing]
+                    if printing is not None and classification == "same_effect"
+                    else None,
+                },
+            )
+            _adopt_basis(
+                db,
+                face,
+                view,
+                display,
+                classification,
+                undated_fallback=printing is not None
+                and dates[printing] is None
+                and method != "manual",
+            )
+    if decisions:
+        raise ValueError("Wording decision has no pending face/region")
 
 
 def wording_region_blocks(db: Database, plan: TextPlan) -> dict[str, list[JsonValue]]:

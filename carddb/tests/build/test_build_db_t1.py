@@ -39,7 +39,7 @@ def test_exact_inventory_and_optional_closure() -> None:
     base = {table.name for table in T0_TABLES}
     assert {table.name for table in TABLES} == expected
     assert {table.name for table in compile_build(("cr",)).tables} == base | expected
-    assert len(compile_build(("cr",)).tables) == 43
+    assert len(compile_build(("cr",)).tables) == 44
     assert {table.name for table in compile_build().tables} == base
     assert compile_build(("cr",)).sql == compile_build(("cr", "t0")).sql
     for cap in ("dsl", "keyword", "unknown"):
@@ -54,9 +54,9 @@ def test_connected_graph_and_pragma_inventory() -> None:
             populate(db)
         for table in schema.tables:
             assert db.rows(table.name)
-        assert db._read("PRAGMA user_version") == ((9,),)
+        assert db._read("PRAGMA user_version") == ((10,),)
         assert db._read("SELECT count(*) FROM sqlite_schema WHERE type='table'") == (
-            (43,),
+            (44,),
         )
         assert db.rows("cr_clause")[0].values["number"] == "1.10.2"
         db.verify()

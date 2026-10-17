@@ -1,0 +1,63 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:4bfaeafe99cd5c1b913f62ba41ce0a5d
+    region: en
+    comparison_hash: sha256:f27eef718f59cb0137fde99114c806ef0e219f08ecb256e7eb0266bd87693b65
+    classification: pending_review
+    method: ai
+    reason: 官方宇宙／作品標籤有增刪；它是可被規則引用的資料欄，不能只憑主文相同判定等價。
+  - face_id: f:4d857c66ffea51afa45066ce8c0f566b
+    region: en
+    comparison_hash: sha256:0fc0e3ebecf983df41920ce7f900dad6c17ca346599b3b666ac84c410d3573fe
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:6960037ee77a52159b8aae3bdaa84901
+    region: en
+    comparison_hash: sha256:ad91c563a9ca99825907e48d440b2612e1c10623782e18d5c183de36979d21d4
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:6960037ee77a52159b8aae3bdaa84901
+    region: jp
+    comparison_hash: sha256:5795e040a1714cd5c27baa12015540e435722e9cb46f266e4e5e57fc93f73754
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:77d72ccfe202547e982135f4a0a72a28
+    region: en
+    comparison_hash: sha256:50cd80e1e6711efcef01a9af1d347a3c7e22c25c77f2bc384272cae2fcaa29e9
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:993e70a4f2435c3199475615c9ef0f07
+    region: en
+    comparison_hash: sha256:5a562f823b0e8985ee1db786b15e7dff9032106c3d2a457d305041374fee8b05
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:a0b695b019c254189399f1526760a23d
+    region: en
+    comparison_hash: sha256:441dbdb028ea919a633bc692d57427f1cbe3ed21e231eacedb535a31be18ca8f
+    classification: pending_review
+    method: ai
+    reason: 官方宇宙／作品標籤有增刪；它是可被規則引用的資料欄，不能只憑主文相同判定等價。
+  - face_id: f:d71c45f867c753de982fc6b67b788d54
+    region: jp
+    comparison_hash: sha256:20cee7d18bef5cddb877129b9f22b1c6d8271254a734ba29fa31a808d31a9caa
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:f1b26abc375755e8b1375daa4efa7818
+    region: en
+    comparison_hash: sha256:9418ec9954c6830e7d0986e70064c306756d006cf413dc3129ef0b3c3c4ff48a
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:f1b26abc375755e8b1375daa4efa7818
+    region: jp
+    comparison_hash: sha256:270710d94c6a42848c82d99e3fb7e3722a33217c36fccfd0c3a6c046eb3170b7
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。

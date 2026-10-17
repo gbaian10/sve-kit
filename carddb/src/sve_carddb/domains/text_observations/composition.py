@@ -1,6 +1,6 @@
 """Compose complete diagnostic staging and a pinned inseparable build bundle."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.provenance import input_record
@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.products.plan import OfficialProducts
     from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.domains.source_corrections.images import ImageProvider
+    from sve_carddb.domains.text_observations.equivalence import WordingDecision
     from sve_carddb.domains.text_observations.models import TextProvider
     from sve_carddb.domains.text_observations.plan import TextPlan
     from sve_carddb.domains.text_observations.vocabulary import Vocabulary
@@ -104,9 +105,15 @@ class TextObservations:
         provider: TextProvider,
         *,
         images: ImageProvider | None = None,
+        wording_decisions: tuple[WordingDecision, ...] = (),
     ) -> None:
         object.__setattr__(
-            self, "plan", plan_text_observations(preview, provider, images=images)
+            self,
+            "plan",
+            replace(
+                plan_text_observations(preview, provider, images=images),
+                wording_decisions=wording_decisions,
+            ),
         )
 
     def configuration(

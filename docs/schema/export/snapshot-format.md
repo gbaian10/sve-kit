@@ -87,7 +87,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RegionView | `region, release_state:released/unknown/announced/not_released_confirmed, mapping_state:unmapped/pending/confirmed/confirmed_none, availability_override_as_of?, mapping_as_of?, mapping_scope?, default_printing_id?, default_method?, deck_role?, debut_product_ids:[id], debut_state:known/unknown`；來自建置資料庫推導，無法判最早時 unknown |
 | PrintingFace | `face_id, art_id?, frame_code?, signed?, embellishment_state, printed_name_unit_id?, printed_effect_unit_id?, flavor_unit_id?, printed_text_state, observations:[ObservedText], sections:[Section], stamps:[{stamp_id,position?,color?}], translations:[FieldTranslation], corrections:[Correction], name_concept_id?`；不帶 `card_id/credit_raw/source` |
-| WordingView | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id], common_name:CommonName?`；暫顯不等於 current，見 §2.3 |
+| WordingView | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id], common_name:CommonName?, classification:same_effect/pending_review/errata/unresolved, method:mechanical/ai/manual/none, reason, basis_printing_id?, basis_released_on?`；見 §2.3 |
 | ObservedText | `revision_id?, state:available/missing_effect/correction_conflict, source_url`；同版次觀測，不等於 printed，見 §2.3 |
 | Section | `ordinal, text_unit_id, kind` |
 | FieldTranslation | `field:name/effect/flavor/question/answer/section/label/action_label, ordinal?, target_lang, translation_id, basis:own_source/jp_source/official_counterpart, source:PublicTextPointer, counterpart:PublicTextPointer?`；逐 card/face/region 選用，不能只以共享文字單元判同語義 |
@@ -187,40 +187,60 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 
 延後 `event/printing_event`、`signature/printing_signature`、`artist_link/art_post`、`query_alias`、Decklog 外部 ID 格式；不是先做空表出貨。provenance 不是離線文字包，也沒有預設的公開按需稽核包；如未來要開發者除錯另設發行產物，不能偷偷加回玩家快照清單。
 
-### 2.3 表記未定的公開呈現
+### 2.3 卡文版本與依據版本
 
-**使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單。公開形狀、Schema／types／golden 與 reader 依 [snapshot-contract](snapshot-contract.md) 同步維護，4.0 新增欄位仍以公開 annotation 契約為準。
+各版次的日文／英文原文取該版次官網頁面的 `PrintingFace.observations`，不以共享依據版本覆寫。
+單一 available 觀測的 revision 提供該版次卡名、數值、主文與補充段落；同版次多種觀測且無可驗更新順序時列候選，不任取一筆。
+missing_effect 表示未知，不能顯示為沒有能力；correction_conflict 不作可信依據。
+`printed_*` 與 `printed_text_state` 仍保留既有印刷證據語意，不由觀測填入。
 
-- `PrintingFace.observations` 是 `{revision_id?,state,source_url}` 陣列；state=`available/missing_effect/correction_conflict`。available 必有同 face、同 printing.region 的公開 revision；missing_effect 的 revision_id=null，表示原觀測主文未知且無法建 revision；correction_conflict 可有原觀測 revision 或 null，只供帶警告查閱，不能作可信暫顯。source_url 是該 printing 的原始來源 URL，不出 source ID、hash 或決定。完整三欄 exact 相同才去重；按來源 URL／狀態／revision ID 的固定字串序儲存**不表示年代**。
-- `face.wording` 是稀疏陣列，只對表記未定的公開 face-region 各出一項，恰有 `{region,state,display,candidates,undated_printing_ids,common_name}`。state 固定 `pending`；display 恰有 `{revision_id?,basis}`，basis=`current/latest_known_release/candidates`。candidates 是 `{printing_id,revision_id?}` 陣列，恰列仍需核對的候選版次／revision，去重並按 printing_id／revision_id 固定排序，null 為尚無可表示 revision；undated_printing_ids 列無可信完整日精度收錄日的候選版次，去重排序。這些 ID 排序僅供穩定序列化，UI 的年代由日期證據顯示，不能用 ID 補順序。
-- 已有有效 current 且無待核對候選的 face-region 為 settled，省略該 region 的 wording 項目，不複製 current 的 display；所有 region 均 settled 時 `wording=[]`，固定 tuple 欄位仍保留。reader 由同 region 有 current 且無 wording 項推得 settled；沒有 current 不能藉省略項目冒充 settled。pending 保留所有待核對候選，即使 display 能選出暫顯值也不能省略；其中每項須能連回同一 printing face 的 observations，非 null revision 必同 face／region。undated_printing_ids 必為 candidates 的 printing 子集，與可信日期判別一致。
+`face.wording` 保留有觀測差異或來源問題的 face-region，各項固定欄位為
+`region,state,display,candidates,undated_printing_ids,common_name,classification,method,reason,basis_printing_id,basis_released_on`。
+state 固定 pending，表示有比較資料，不表示效果一定未定；完全相同且無問題的 region 省略 wording。
+分類 classification 為 same_effect／pending_review／errata／unresolved；method 為 mechanical／ai／manual／none。
+reason 是判定或未定原因，AI 判定不等於真人核可。basis_printing_id 與 basis_released_on 只在 same_effect 時非空，
+日期依商品證據核對，人工指定日期不明版次或以下空白原文例外時日期可 null。
 
-producer 按下列規則計算 pending 的 display，reader 不自行推論 current：
+依據版本依以下規則產生，瀏覽器只消費結果：
 
-1. 有仍有效的已採納／機械 current，display 指它、basis=current；新候選不覆蓋它，也不能因 current 存在把 pending 改成 settled。
-2. 無 current 時，在所有有可信完整日精度首次收錄／發售日的候選版次中比較，包含主文待確認／更正衝突者，不先丟掉問題版本。日期讀 product／printing_product，依既有 precision 繼承與 unknown 覆寫規則；多重收錄取可驗首次取得日。若其他收錄日期未知而無法證明首次日，該 printing 亦列 undated，不任取已知商品日期。只讀「目前已知日精度版本的最新值」，不是全部版次的官方最新表記。
-3. 最大日期涉及的觀測全部 available 且投影內容 exact 相同，display 指其中一個 revision、basis=latest_known_release。多個 exact 同內容 revision 取 ID 字串序第一個僅供內容定位；仍保留所有版次／觀測，不由 ID 斷言先後。同日不同內容、同 printing 有多個無法排序內容、或沒有上述可用日期時，display.revision_id=null、basis=candidates，列全部候選。已知日期最新的版次若仍有 missing_effect／correction_conflict，也不能退取較舊版假稱「已知最新版」；改列候選與問題。
-4. 未知／月年精度版次獨立顯示日期未定清單，即使第 3 步有暫顯值也不隱藏，交 Artifact 頁詢問使用者。不補一號、不以 fetched_at／卡號／hash 排序；目前沒有採納輸入，不能由 UI 點選候選靜默建立 current。
+1. 同一卡面／地區有非空主文時，空白版次不參與比較，也不能當共享依據；全部空白才維持空白。
+   缺來源的 null 不等於空白主文。非空版次通常比較完整日精度發售／首次收錄日；日期不明不參與，也不阻擋。
+   precision 繼承、unknown 覆寫及多次收錄的最早日證明依商品契約；不以爬取時間、卡號或 ID 推斷年代。
+2. 只有效果相同才共用最新日期的卡文。機械比對只忽略空白、句子標點與已識別關鍵字的括號提醒，
+   保留數字、算術符號、條件與其他資料欄。其他差異逐筆保存 AI 理由並交維護者確認；人工紀錄可覆寫。
+3. 最新日期的觀測須完整且 exact 相同；同日不同內容、缺來源或未解更正衝突維持 unresolved。
+   手動指定唯一觀測的版次可解除日期歧義；紀錄綁定全部比較內容的 hash，來源改變即拒絕過期紀錄。
+4. 空白與非空主文並存、卻沒有非空版次的完整日期時，比較全部非空主文；同效果才按候選穩定排序選依據，
+   `face.current.basis=latest_observed_no_errata`、`basis_released_on=null`，不推斷年代或製造日期。
+   其他非空版次仍依原有最新日與語意規則，詳見[卡文依據契約](../domains/wording-basis.md)。
+5. 一般 same_effect 的依據寫入 face.current，basis=latest_known_release，供翻譯／DSL／搜尋使用；
+   display 同時指向它、basis=current。已採納勘誤或其他有效的非空 current 優先，不能由機械結果覆寫；空白 current 在有非空主文時不保留。
+   pending_review／errata 不建立共用 current；errata 保留給勘誤與印刷版本呈現，不冒充等價文字。
 
-printing 頁顯示自己的 observations 文字，並標為官網觀測；有多種內容且沒有可驗來源更新順序時列全部，不任取最後爬到者。不將它填進 printed_name_unit_id／printed_effect_unit_id 或提升 printed_text_state；有成功 source correction 時顯示該來源的更正後 revision 與既有 Correction，原始來源觀測仍留建置歷史。沒有 current 的 card／face 顯示上述暫顯值與「表記未定」，basis=latest_known_release 另標「依已知發售日暫顯」；basis=candidates 則列候選，文字未知者顯示待確認而非無能力。雙面各自保留狀態，不能只出一面。
+candidates 恰列同 printing face 的 `{printing_id,revision_id?}` 觀測並穩定排序；
+undated_printing_ids 保存無完整日精度日期的候選身分。兩者皆不以排序暗示年代。
+沒有 current 時 display 可以定位 latest_known_release，或用 null／candidates 表示無唯一版本；
+這個定位本身不准許共用譯文或啟用 DSL。每個缺 current 的必要卡面仍附 wording_pending 區域 block。
 
-所有非 null revision／printing／文字引用均須在同份快照可達，候選不指向 report 或不存在的 revision。未解表記不刪 route、預設版次或 Decklog 可用性，也不能拿 #144 診斷排除閉包決定發布範圍。沒有 current 的 pending region 在 card_engine_support.region_blocks 加 `wording_pending`，強制手動並禁止由暫顯值自動繼承 DSL／跨區翻譯；有舊 current 時照既有 freshness／衝突檢查，不一律宣告新候選已通過。真正來源損壞、錯身分與勘誤／更正衝突仍按各自閘門處理。
-
-分片時，稀疏的 `face.wording` 隨 face 進啟動包，帶未定狀態、暫顯／候選 revision 引用及未知日期版次 ID；PrintingFace.observations 進 printing 詳情。`current_ref` 為所有 face.current.revision_id 的去重集合；`display_ref` 為 current_ref 加上 pending wording.display 非 null revision ID 的聯集，**不加入其餘 candidates**。每個 pending face-region 最多一筆 display revision，其 §3.1 輕量投影、名稱及可用名稱翻譯的文字閉包均進 bootstrap，讓整區基本目錄完成後可使用暫顯卡名／數值；其餘欄位仍走 detail。這只是顯示分割，不建立 current 或採納。
+單卡頁總是呈現該版次原文；繁中使用共享依據版本，兩者不同且有譯文時標明「繁中翻譯依據」與版次連結，並另列自己的原文。
+沒有採用版本的卡面亦從自己的觀測 revision 取得卡名與數值，不退成只有卡號。
+`display_ref` 為所有 current、display 與非 null candidates 的 revision ID 聯集；
+這些卡文版本的名稱／數值放入啟動包，效果按需載入。
+所有引用在同份快照可達，不能指向私人報告。公開欄序、Schema、Python／TS reader 與合成 golden 同步維護。
 
 無 display 時，`wording.common_name` 是全候選名稱一致的輕量投影 `{name_unit_id, translations}`；其他情況為 null。所有候選都須有非 null revision 且同一名稱單元，不能跳過未知候選。翻譯只保留每個候選都選用的相同 target_lang／translation_id／basis，投影為 `CommonNameTranslation`（field 固定 name，不宣稱某個 revision 已採納）。名稱與翻譯文字閉包隨 face 進基本目錄，不帶候選完整 revision 或正文，也不建立 current／display。共同名稱只有匯出端一處推導，完整 reader 核對同一規則。
 
-不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿局部字典及固定共用譯文檔的強依賴閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
+候選的輕量名稱與數值隨 display_ref 進啟動包；效果與補充原文仍按需載入，不能因基本目錄已完成就宣稱全文索引完整。
 
-開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡在基本目錄使用其名稱與數值，標表記未定；沒有唯一 display 時優先使用共同名稱與可用名稱翻譯，沒有共同名稱才保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值；卡頁若需本版次值，須精確定位 printing，且多個不同觀測不能任取其中之一，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display／共同名稱與可用名稱翻譯，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
+須依 [size-budget](size-budget.md) 量測當次 JP／EN 的完整基本目錄冷載；共用／混區檔整檔計入，候選正文按需增量另報。
 
-須以當次日英、所有卡片及實際可用名稱翻譯閉包量基本目錄冷載，包含完整 manifest／config、暫顯 revision、稀疏 wording 引用及必要實體檔；候選按需增量另報。依 [size-budget](size-budget.md)，Brotli 2 MiB 是分界，略超報精確差額，明顯超出才交維護者；共用／混區檔整檔計入，不能以尚未下載候選宣稱進階索引完整。
+判定輸入與建置欄位見[卡文依據契約](../domains/wording-basis.md)。
 
 ## 3. 分檔、下載順序與記憶體
 
 穩定 owner 是資料分片規則，與商品收錄分開：card/revision/support 跟 `card.home_set_id`；printing 跟第一次配發的 `printing.home_set_id`；再錄新 printing 到新 owner，舊列不搬。`printing_product` 新關係跟 printing owner，可引用舊 card，不能複製舊 card。QA／CR 依固定 ID bucket；字典按檔局部出貨，JP 來源繁中正文譯文固定放來源 JP owner 家族的共用譯文檔，不依後續 EN 引用搬動。各 family 過大時依已固定 ID bucket 拆子片，快照清單決定檔案；翻譯/勘誤只更動涉及的片。
 
-基本目錄是所選區全部卡片／面、current／暫顯／共同名稱與可用名稱翻譯、基本數值、卡號定位及基本 facet／字典的完整集合。首頁先顯示，之後背景下載所選 jp／en 基本目錄；整區驗畢且索引完成才開放搜尋。下載中可打字並顯示「資料下載中」，完成後自動搜尋一次，不顯示部分結果。稀有度、異圖與完整印刷資料在基本目錄之後背景補齊；未備妥的進階條件明示載入中，使用時須等完整用途閉包。另一區只在切換或對照時下載；效果全文、Q&A／裁定、商品收錄、引擎支援與歷史按需，不要求首訪三語全量或 PWA 整庫預取。所有連線使用同一政策，不做省流量模式。直接連結單卡可先讀其精確閉包，但不代表整區搜尋 ready。
+基本目錄是所選區全部卡片／面、current／觀測候選名稱與可用名稱翻譯、基本數值、卡號定位及基本 facet／字典的完整集合。首頁先顯示，之後背景下載所選 jp／en 基本目錄；整區驗畢且索引完成才開放搜尋。下載中可打字並顯示「資料下載中」，完成後自動搜尋一次，不顯示部分結果。稀有度、異圖與完整印刷資料在基本目錄之後背景補齊；未備妥的進階條件明示載入中，使用時須等完整用途閉包。另一區只在切換或對照時下載；效果全文、Q&A／裁定、商品收錄、引擎支援與歷史按需，不要求首訪三語全量或 PWA 整庫預取。所有連線使用同一政策，不做省流量模式。直接連結單卡可先讀其精確閉包，但不代表整區搜尋 ready。
 
 **下載完成不等於全部常駐 JS heap。** Worker 逐檔解壓、驗證、解析及建立緊湊索引，主執行緒只取必要 view／結果 ID；詳情以 LRU 釋放，不把全庫物件傳回主端。全文搜尋先取得所選區該用途全部效果閉包，再回完整結果，不只掃已載入卡。持久 bytes 與衍生索引均可快取；IndexedDB 依根目錄、manifest hash、reader／normalizer 隔離，不能形成第二真值。儲存被拒時可重建記憶體索引並如實標示可用範圍。
 
@@ -236,8 +256,8 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | card、face、`product_family`、product、`printing_product`、`identity_change` | 全部欄位 | 無資料列，不發僅 PK 的空殼 |
 | `printing` | id 及除 faces 外全部欄位；faces 的裝飾欄位分割為 `face_id/art_id/frame_code/signed/embellishment_state/stamps` | id；faces 的文字欄位分割為 `face_id/printed_name_unit_id/printed_effect_unit_id/flavor_unit_id/printed_text_state/observations/sections/translations/corrections` |
-| `face_revision`：§2.3 display_ref 的現行／暫顯列 | `id/face_id/region/name_unit_id/class_code/type_code/cost/attack/defense/traits/titles/special_kinds`；translations 中 field=name 的列 | id＋其餘白名單欄；translations 僅非 name 列 |
-| `face_revision`：display_ref 外的候選／其餘觀測／歷史列 | 無；以 §2.3 的 `display_ref` 區分，不另出貨集合 | history 的完整列，按需載入（含其餘候選，不是現行／暫顯複本） |
+| `face_revision`：§2.3 display_ref 的現行／觀測候選列 | `id/face_id/region/name_unit_id/class_code/type_code/cost/attack/defense/traits/titles/special_kinds`；translations 中 field=name 的列 | id＋其餘白名單欄；translations 僅非 name 列 |
+| `face_revision`：display_ref 外的歷史列 | 無；以 §2.3 的 `display_ref` 區分，不另出貨集合 | history 的完整列，按需載入（不是現行／候選複本） |
 | `card_engine_support`、`mechanic_projection`、`card_mechanic_coverage` | 全部欄位；status/reasons 不複製進 `card_facet` | 無 |
 | `rules_name`、`face_rules_name` | 無 | 全部原欄位，global detail |
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
@@ -249,9 +269,9 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 `rules_name`／`face_rules_name` 的全部欄位唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。商品收錄、完整 printing 裝飾與 support 可背景／按需；保留其完整欄位與邏輯參照。
 
-表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。永久 owner 與固定背景 band 穩定，不因分片切換改永久 ID；字典選用狀態變更可更新實際依賴它的檔案。
+表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。永久 owner 與固定背景 band 穩定，不因分片切換改永久 ID；字典選用狀態變更可更新實際依賴它的檔案。
 
-`card_facet/printing_facet/rules_facet` 只是 reader 建出的索引視圖，**不出貨三份 facet 列**。職業/作品/類型/數值/特性從現行 `face_revision`；無 current 的表記未定依 §2.3 的暫顯／候選及未定 facet 規則，不因此隱藏卡片；稀有度/標誌/圖從 printing 與裝飾片；三語名字從 name 的 `FieldTranslation→translation→text_unit`，缺譯 state=missing 並回原文；引擎五態按 `Support/region_blocks` 推導。Q&A/errata 的存在與否用快照清單的兩個稀疏 card ID 集合 `qa_card_ids/errata_card_ids`，加 `source_windows` 覆蓋判 present/absent/unknown，無閉包不能假 absent。兩集合是唯一額外 facet 摘要，容量另量。`rules_facet` 從已下載 rules/profile/restriction 與指定日期計算，不存第二份每卡/賽制摘要；也不能把單卡摘要當整副牌合法性。
+`card_facet/printing_facet/rules_facet` 只是 reader 建出的索引視圖，**不出貨三份 facet 列**。職業/作品/類型/數值/特性從現行 `face_revision`；無 current 的卡面依 §2.3 用各版次自己的觀測 revision，同版次沒有唯一觀測時不任取其中一筆，只用全部候選一致的值或保持未定，不因此隱藏卡片；稀有度/標誌/圖從 printing 與裝飾片；三語名字從 name 的 `FieldTranslation→translation→text_unit`，缺譯 state=missing 並回原文；引擎五態按 `Support/region_blocks` 推導。Q&A/errata 的存在與否用快照清單的兩個稀疏 card ID 集合 `qa_card_ids/errata_card_ids`，加 `source_windows` 覆蓋判 present/absent/unknown，無閉包不能假 absent。兩集合是唯一額外 facet 摘要，容量另量。`rules_facet` 從已下載 rules/profile/restriction 與指定日期計算，不存第二份每卡/賽制摘要；也不能把單卡摘要當整副牌合法性。
 
 依使用者 2026-09-30 的規格變更（build-db §15），卡包（`set=`）facet 由已登錄的 `printing.home_set_id` 建立，以 `product_family.code` 為篩選值，並限定 `printing.region` 為全站目前選定的版本（`jp`／`en`），兩區結果不混。合併卡片顯示也只使用命中的版次；`card.home_set_id` 不代替這項篩選。商品與收錄（`product`／`printing_product`）供單卡頁補充資訊與連結，不作卡包（`set=`）facet，也不由卡號前綴推斷商品收錄。初收錄（首次／再錄）是獨立 facet，可依收錄資料建立；資料缺少或狀態未知時標示 coverage，不因此隱藏卡片（build-db §15 的協調者決定）。
 

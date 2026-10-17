@@ -1,0 +1,45 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:135728184ff45af699369f8cbb6a9769
+    region: jp
+    comparison_hash: sha256:7d20d0fdc57dac1d16d9c260cebd147afb7a1e28f972d3058dffcbbd121737a6
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:31c7d998836b5d858f4c4510c849dcfe
+    region: en
+    comparison_hash: sha256:52105a92c8c453779161484dd6de7ab87022b24ba465a303bdc609834ddb7a05
+    classification: pending_review
+    method: ai
+    reason: 空主文與完整資源使用說明並存；須確認這是共通規則提醒還是資源功能改動。
+  - face_id: f:31c7d998836b5d858f4c4510c849dcfe
+    region: jp
+    comparison_hash: sha256:0a7439ff2b13369ca791bd9a519ea0ba8bd9132283caaec7de82a38ae4ffe8de
+    classification: pending_review
+    method: ai
+    reason: 空主文與完整資源使用說明並存；須確認這是共通規則提醒還是資源功能改動。
+  - face_id: f:37cdd559762c5a2f93e65273e705990c
+    region: jp
+    comparison_hash: sha256:b2c9fba20fda2896c56df9ce0ebbe6a9f7a47c3d62a81658da9058013a096229
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:69e791647e5a5381a6e3e08d576630a0
+    region: jp
+    comparison_hash: sha256:be586ca322f9185b8f033481fd43bdb4af01ab7711ddf22bffd37e1a38072f03
+    classification: pending_review
+    method: ai
+    reason: 空主文與完整資源使用說明並存；須確認這是共通規則提醒還是資源功能改動。
+  - face_id: f:8ee1db40632d59efaacf852fdb786b98
+    region: en
+    comparison_hash: sha256:a75c89e59895550ab9c07e5147b8e5b88ea4838db20635fd1893bc814cd9bab6
+    classification: errata
+    method: ai
+    reason: 生成物可放入兩個區域的連接詞改變，可能改變能否分配至不同區域。
+  - face_id: f:8ee1db40632d59efaacf852fdb786b98
+    region: jp
+    comparison_hash: sha256:9fad343802e83802e0ce2bfcf06224fe703dcb5dcc77950057a70f679dcc2c9a
+    classification: same_effect
+    method: ai
+    reason: 持續能力的場上適用範圍與對象不變；差異是省略已由能力種類決定的區域敘述，或調整獨立能力段落位置。

@@ -172,6 +172,38 @@ describe("pending display in the list", () => {
       pending.results(DEFAULT_QUERY, "jp").some((item) => item.printingId === "p:bp01-001"),
     ).toBe(true)
   })
+  it("uses the printing observation's name and stats without an adopted or displayed revision", () => {
+    const original = catalog.index.currentRevision("f:bp01-001", "jp")
+    const revised = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["id"] === "f:bp01-001" && fragment.value["region"] === "jp"
+            ? {
+                ...row,
+                current: (row["current"] as { region: string }[]).filter(
+                  (entry) => entry.region !== "jp",
+                ),
+                wording: [
+                  {
+                    region: "jp",
+                    display: { revision_id: null, basis: "candidates" },
+                    candidates: [
+                      { printing_id: "p:bp01-001", revision_id: original?.["id"] ?? null },
+                    ],
+                    undated_printing_ids: [],
+                  },
+                ],
+              }
+            : row,
+        ),
+      })),
+    }
+    const own = createCatalog(revised).summary("p:bp01-001")
+    expect(own?.name.original.text).toBe("試作の見習い兵")
+    expect(own?.cost).toBe(1)
+  })
   it("prefers current over a pending display", () => {
     const revision = catalog.index.currentRevision("f:bp01-001", "jp")
     expect(catalog.index.displayRevision("f:bp01-001", "jp")).toEqual(revision)
@@ -241,7 +273,7 @@ describe("current name translations", () => {
 describe("pending card basic fields", () => {
   const original = catalog.index.currentRevision("f:bp01-001", "jp")
   if (!original) throw new Error("missing synthetic revision")
-  const candidates = (rows: Row[], refs: Row[]) => {
+  const candidates = (rows: Row[], refs: Row[], selected?: string) => {
     return createCatalog({
       ...snapshot,
       bootstrap: snapshot.bootstrap.map((fragment) => ({
@@ -252,11 +284,16 @@ describe("pending card basic fields", () => {
           return [
             {
               ...row,
-              current: [],
+              current: selected
+                ? [{ region: "jp", revision_id: selected, basis: "latest_known_release" }]
+                : [],
               wording: [
                 {
                   region: "jp",
-                  display: { revision_id: null, basis: "candidates" },
+                  display: {
+                    revision_id: selected ?? null,
+                    basis: selected ? "current" : "candidates",
+                  },
                   common_name: null,
                   candidates: refs,
                 },
@@ -304,6 +341,20 @@ describe("pending card basic fields", () => {
       ],
     )
     expect(faceBasics(index, "f:bp01-001", "jp", "p:b").values["cost"]).toBe(8)
+  })
+  it("uses this printing's stats when a different shared revision is current", () => {
+    const index = candidates(
+      [one, { ...two, cost: 8 }],
+      [
+        { printing_id: "p:a", revision_id: "r:one" },
+        { printing_id: "p:b", revision_id: "r:two" },
+      ],
+      "r:one",
+    )
+    expect(index.currentRevision("f:bp01-001", "jp")?.["cost"]).toBe(3)
+    const basics = faceBasics(index, "f:bp01-001", "jp", "p:b")
+    expect(basics.values["cost"]).toBe(8)
+    expect(basics.revision?.["id"]).toBe("r:two")
   })
   it("keeps conflicting observations of one printing unresolved", () => {
     const index = candidates(

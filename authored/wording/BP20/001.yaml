@@ -1,0 +1,21 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:ce25b0c6351d5fae9f814bfbb2a9c2f9
+    region: en
+    comparison_hash: sha256:deb496e234ff86e3a8c0d6b61213c5dc5f7beeab8017318f3a9fad0879a193dc
+    classification: same_effect
+    method: ai
+    reason: 持續能力的場上適用範圍與對象不變；差異是省略已由能力種類決定的區域敘述，或調整獨立能力段落位置。
+  - face_id: f:ce25b0c6351d5fae9f814bfbb2a9c2f9
+    region: jp
+    comparison_hash: sha256:689d4f00ea6d3772aea7e35215c90a060b0f2adb132e60094c17bcb1fe7e402d
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:ff6a18cb3e575198ba7b8cde84912777
+    region: jp
+    comparison_hash: sha256:9d239f4a7caa3ffa25ca84ff04ddaea9706b1925709361da817b16015cfa6907
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。

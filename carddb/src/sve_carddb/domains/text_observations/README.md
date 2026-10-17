@@ -23,9 +23,9 @@ identical current-bearing variant and there are no missing sources, identity
 gates, null effects, errata links or unresolved source corrections. When an explicit
 image provider is supplied, successful [source corrections](../source_corrections/README.md)
 are applied to separate candidates before comparison; raw observations remain exact.
-Differences stay
-pending, including changes that might eventually prove equivalent. Source dates
-and fetch times never rank variants. Current uses the existing
+Differences retain their individual observations. `populate_wording_basis` compares
+dated printings, applies exact-content AI/manual decisions, and selects the latest
+known release only after equivalence. Fetch times never rank variants. Current uses the existing
 `latest_observed_no_errata` basis with no invented decision. Candidate revision
 ordinals enumerate deterministically sorted revision IDs; raw variants precede
 corrected variants. `initial`/`wording` records represent
@@ -75,8 +75,8 @@ its `observed` field contains each physical
 printing's own observations, using successfully corrected candidates while the
 original observation and correction application stay separate in the build DB.
 An unknown main effect is a null revision with `missing_effect`; unavailable
-text positions retain the independently pinned identity source URL. These values
-never fill printed text columns or create an adopted current.
+text positions retain the independently pinned identity source URL. These values never fill printed text columns. Equivalent dated comparisons can
+create a semantic current with `latest_known_release`; unresolved comparisons cannot.
 
 This projector currently produces only `available` and `missing_effect`.
 `correction_conflict` is reserved by the public contract but is not emitted here:
@@ -99,13 +99,13 @@ ID ordering only chooses a stable representative and never supplies chronology.
 card/region missing a current on any required face. `mark_wording_pending` adds
 that reason and disables automatic operation on existing build support rows;
 callers generating support rows later must merge the declared blocks. A settled
-front and pending back both remain visible. These APIs do not consume equivalence
-adoptions or enable DSL capabilities.
+front and pending back both remain visible. The selected current supplies translation and DSL source freshness; a selection
+does not itself certify an engine implementation.
 
-Format 1.0.0's candidate schema, descriptors, handwritten shared golden and Python
+Format 3.0.0's schema, descriptors, handwritten shared golden and Python
 reader now include `WordingDisplay`, `WordingCandidate`, `WordingView`,
-`ObservedText`, `face.wording`, and `PrintingFace.observations`. Display revisions
-join current revisions in bootstrap; other candidates remain in history/detail.
+`ObservedText`, `face.wording`, and `PrintingFace.observations`. Display and candidate revisions join current revisions in bootstrap for names and
+stats; their effects remain in detail. Other revisions remain in history.
 The web reader update is reviewed separately and must land before this extension
 of the shared golden. Public inclusion dates use `available_on/date_precision`;
 these are distinct from the build DB columns `first_available_on/first_available_precision`.
@@ -174,3 +174,11 @@ original projected physical revision as `supersedes_id`, and
 remain in F1. Correction reports distinguish `raw_face_hash` from
 `projected_face_hash`; neither a type correction nor its hash may erase the
 verified empty effect. Unknown effects still cannot acquire invented revisions.
+
+## Authored comparisons
+
+Optional `authored/wording/<group>/<sequence>.yaml` shards pin every compared content
+fingerprint, with explicit classification, AI/manual method and a reason. Stale or
+duplicate decisions fail. A manual same-effect record may choose a unique printing
+basis to resolve chronology; other decisions cannot override chronology. See
+[the wording basis contract](../../../../../docs/schema/domains/wording-basis.md).

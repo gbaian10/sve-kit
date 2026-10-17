@@ -253,17 +253,28 @@ def _annotation_owners(
 
 
 def _annotation_partitions(view: View, fragments: list[Fragment]) -> None:
-    display = {
-        string(object_value(item)["revision_id"])
-        for face in view["face"]
-        for item in array(face["current"])
-    } | {
-        string(value["revision_id"])
-        for face in view["face"]
-        for raw in array(face["wording"])
-        for value in (object_value(object_value(raw)["display"]),)
-        if value["revision_id"] is not None
-    }
+    display = (
+        {
+            string(object_value(item)["revision_id"])
+            for face in view["face"]
+            for item in array(face["current"])
+        }
+        | {
+            string(value["revision_id"])
+            for face in view["face"]
+            for raw in array(face["wording"])
+            for value in (object_value(object_value(raw)["display"]),)
+            if value["revision_id"] is not None
+        }
+        | {
+            string(candidate["revision_id"])
+            for face in view["face"]
+            for raw in array(face["wording"])
+            for entry in array(object_value(raw)["candidates"])
+            for candidate in (object_value(entry),)
+            if candidate["revision_id"] is not None
+        }
+    )
     annotations: set[str] = set()
     for fragment in fragments:
         part = fragment.value["partition"]
@@ -472,6 +483,8 @@ def _wording_candidates(
     physical: dict[tuple[str, str], tuple[str, Row]],
     dates: dict[str, str | None],
     revisions: dict[str, Row],
+    *,
+    eligible: list[Row],
 ) -> None:
     candidates = [object_value(item) for item in array(wording["candidates"])]
     printings = {string(item["printing_id"]) for item in candidates}
@@ -492,12 +505,12 @@ def _wording_candidates(
             raise ValueError("Wording candidate has no printing observation")
     display = object_value(wording["display"])
     if display["basis"] == "latest_known_release":
-        known = {dates[printing] for printing in printings} - {None}
+        known = {dates[string(item["printing_id"])] for item in eligible} - {None}
         if not known:
             raise ValueError("Latest wording display requires a complete release day")
         latest = max(day for day in known if day is not None)
         newest = [
-            item for item in candidates if dates[string(item["printing_id"])] == latest
+            item for item in eligible if dates[string(item["printing_id"])] == latest
         ]
         if (
             len(
@@ -569,8 +582,62 @@ def _wording_display(
             raise ValueError("Display belongs to another face/region")
 
 
+def _wording_basis(
+    face: Row, wording: Row, dates: dict[str, str | None], candidates: list[Row]
+) -> None:
+    """Verify semantic selection independently of the producing database."""
+    identifier = wording["basis_printing_id"]
+    day = wording["basis_released_on"]
+    if wording["classification"] != "same_effect":
+        if identifier is not None or day is not None:
+            raise ValueError("Non-equivalent wording cannot have a shared basis")
+        return
+    if identifier is None:
+        raise ValueError("Equivalent wording requires a basis printing")
+    selected = [item for item in candidates if item["printing_id"] == identifier]
+    display = object_value(wording["display"])
+    if (
+        len(selected) != 1
+        or selected[0]["revision_id"] is None
+        or selected[0]["revision_id"] != display["revision_id"]
+        or display["basis"] != "current"
+    ):
+        raise ValueError("Shared wording basis disagrees with the selected observation")
+    if day != dates[string(identifier)]:
+        raise ValueError("Wording basis release day disagrees with product evidence")
+    if wording["method"] != "manual":
+        known = [dates[string(item["printing_id"])] for item in candidates]
+        fallback = (
+            day is None
+            and not any(known)
+            and len(candidates) < len(array(wording["candidates"]))
+            and any(
+                object_value(item)["revision_id"] == display["revision_id"]
+                and object_value(item)["basis"] == "latest_observed_no_errata"
+                for item in array(face["current"])
+            )
+        )
+        if not fallback and (
+            day is None or day != max(value for value in known if value is not None)
+        ):
+            raise ValueError("Shared wording basis must use the latest known release")
+    if not any(
+        object_value(item)["revision_id"] == display["revision_id"]
+        and object_value(item)["region"] == wording["region"]
+        for item in array(face["current"])
+    ):
+        raise ValueError("Shared wording basis requires a current")
+
+
 def _wording(view: View) -> None:
     revisions = {string(row["id"]): row for row in view["face_revision"]}
+    units = {string(row["id"]): string(row["text"]) for row in view["text_unit"]}
+    empty = {
+        identifier
+        for identifier, revision in revisions.items()
+        if revision["effect_unit_id"] is not None
+        and not units[string(revision["effect_unit_id"])].strip()
+    }
     physical = _physical_observations(view, revisions)
     regions_by_face: dict[str, set[str]] = {}
     for (_, face_id), (region, _) in physical.items():
@@ -608,7 +675,19 @@ def _wording(view: View) -> None:
                 current,
                 blocks.get(string(face["card_id"]), {}),
             )
-            _wording_candidates(face, wording, physical, dates, revisions)
+            candidates = [object_value(item) for item in array(wording["candidates"])]
+            eligible = (
+                [item for item in candidates if item["revision_id"] not in empty]
+                if any(
+                    item["revision_id"] is not None and item["revision_id"] not in empty
+                    for item in candidates
+                )
+                else candidates
+            )
+            _wording_candidates(
+                face, wording, physical, dates, revisions, eligible=eligible
+            )
+            _wording_basis(face, wording, dates, eligible)
             if wording["common_name"] != common_name(wording, revisions):
                 raise ValueError("Pending common name differs from candidates")
 

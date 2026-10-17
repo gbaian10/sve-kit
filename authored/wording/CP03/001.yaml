@@ -1,0 +1,15 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:27c28687d18b51a09f73bbf9dca8d5dd
+    region: jp
+    comparison_hash: sha256:0bfb16250f03dd277023ffa266f44a62339a7aa7788d66c1dbbed527dd49eadd
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:ac76d3ee6fe25a60bbd29d64b3c65f59
+    region: jp
+    comparison_hash: sha256:902db544383825903a26dd6d576071a73dd1cad7bde88756a7ddd460b72b4080
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。

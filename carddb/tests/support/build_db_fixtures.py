@@ -153,6 +153,14 @@ def rows() -> dict[str, dict[str, Value]]:
             "revision_id": "revision",
             "special_kind_code": "synthetic",
         },
+        "face_wording": {
+            "face_id": "face",
+            "region": "jp",
+            "classification": "same_effect",
+            "method": "mechanical",
+            "reason": "synthetic",
+            "comparison_hash": "sha256:" + "0" * 64,
+        },
         "face_current": {
             "face_id": "face",
             "region": "jp",

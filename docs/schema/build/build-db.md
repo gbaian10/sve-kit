@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-建置資料庫的完整邏輯契約，共 123 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
+建置資料庫的完整邏輯契約，共 124 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
 
 ## 1. 兩層與範圍
 
@@ -143,18 +143,19 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 ## 4. 文字、現行版本與印刷原文
 
-| 表                          | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 表 | 建置期欄位、鍵與約束 |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `text_unit`                 | `id:ID PK,lang:Lang,text:Text,content_hash:Hash`；`UQ(lang,content_hash)`、`FK(lang)→language(code)`，命中 hash 後仍比 exact bytes；依語言與完整文字去重，不含 `source_id/kind`；用途與來源留引用端                                                                                                                                                                                                                                                                              |
-| `face_revision`             | `id:ID PK,face_id→face,region:Region,revision:UInt,effective_from:Date?,effective_until:Date?,temporal_status:known\|unknown,observed_at:Instant,change_kind:initial\|errata\|wording\|source_correction,name_unit_id→text_unit,effect_unit_id→text_unit,class_code:Code?,type_code:Code,cost:Int?,attack:Int?,defense:Int?,source_id→source_record,decision_id→decision?,supersedes_id→face_revision?`；`UQ(face_id,region,revision)`，`UQ(id,face_id,region)`，數值非負或 null |
-| `face_text_section`         | `revision_id→face_revision,ordinal:UInt,text_unit_id→text_unit,kind:rule\|reminder\|token_definition\|unknown,decision_id→decision?`；`PK(revision_id,ordinal)`                                                                                                                                                                                                                                                                                                                  |
-| `printing_text_section`     | `printing_id,face_id→printing_face,ordinal:UInt,text_unit_id→text_unit,kind:rule\|reminder\|token_definition\|unknown,source_id→source_record`；`PK(printing_id,face_id,ordinal)`，`FK(printing_id,face_id)→printing_face(printing_id,face_id)`                                                                                                                                                                                                                                  |
-| `face_trait`                | `revision_id→face_revision,trait_code:Code`；`PK(revision_id,trait_code)`                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `face_title`                | `revision_id→face_revision,title_code:Code`；`PK(revision_id,title_code)`                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `face_special_kind`         | `revision_id→face_revision,special_kind_code:Code`；`PK(revision_id,special_kind_code)`                                                                                                                                                                                                                                                                                                                                                                                          |
-| `face_current`              | `face_id→face,region:Region,revision_id→face_revision,basis:dated_effective\|latest_observed_no_errata\|latest_adopted_wording\|reviewed_override,decision_id→decision?`；`PK(face_id,region)`，`FK(revision_id,face_id,region)→face_revision(id,face_id,region)`                                                                                                                                                                                                                |
-| `printing_face_observation` | `printing_id,face_id→printing_face,source_id→source_record,revision_id→face_revision,observed_at:Instant`；`PK(printing_id,face_id,source_id)`，revision 同 face/region；保留各版次頁面各次文字，不能只剩 current                                                                                                                                                                                                                                                                |
-| `source_coverage`           | `kind:errata\|qa\|cardlist\|cr,region:Region,scope_key:Text,from_date:Date,until_date:Date?,as_of:Date,state:complete\|partial,source_id→source_record,decision_id→decision?`；`PK(kind,region,scope_key,from_date,as_of)`，`scope_key` 明列來源涵蓋集合；until 為排他上界，null 不表示未來已爬完                                                                                                                                                                                |
+| `text_unit` | `id:ID PK,lang:Lang,text:Text,content_hash:Hash`；`UQ(lang,content_hash)`、`FK(lang)→language(code)`，命中 hash 後仍比 exact bytes；依語言與完整文字去重，不含 `source_id/kind`；用途與來源留引用端 |
+| `face_revision` | `id:ID PK,face_id→face,region:Region,revision:UInt,effective_from:Date?,effective_until:Date?,temporal_status:known\|unknown,observed_at:Instant,change_kind:initial\|errata\|wording\|source_correction,name_unit_id→text_unit,effect_unit_id→text_unit,class_code:Code?,type_code:Code,cost:Int?,attack:Int?,defense:Int?,source_id→source_record,decision_id→decision?,supersedes_id→face_revision?`；`UQ(face_id,region,revision)`，`UQ(id,face_id,region)`，數值非負或 null |
+| `face_text_section` | `revision_id→face_revision,ordinal:UInt,text_unit_id→text_unit,kind:rule\|reminder\|token_definition\|unknown,decision_id→decision?`；`PK(revision_id,ordinal)` |
+| `printing_text_section` | `printing_id,face_id→printing_face,ordinal:UInt,text_unit_id→text_unit,kind:rule\|reminder\|token_definition\|unknown,source_id→source_record`；`PK(printing_id,face_id,ordinal)`，`FK(printing_id,face_id)→printing_face(printing_id,face_id)` |
+| `face_trait` | `revision_id→face_revision,trait_code:Code`；`PK(revision_id,trait_code)` |
+| `face_title` | `revision_id→face_revision,title_code:Code`；`PK(revision_id,title_code)` |
+| `face_special_kind` | `revision_id→face_revision,special_kind_code:Code`；`PK(revision_id,special_kind_code)` |
+| `face_current` | `face_id→face,region:Region,revision_id→face_revision,basis:dated_effective\|latest_observed_no_errata\|latest_adopted_wording\|latest_known_release\|reviewed_override,decision_id→decision?`；`PK(face_id,region)`，`FK(revision_id,face_id,region)→face_revision(id,face_id,region)` |
+| `face_wording` | `face_id→face,region:Region,classification:same_effect\|pending_review\|errata\|unresolved,method:mechanical\|ai\|manual\|none,reason:Text,comparison_hash:Hash,basis_printing_id→printing?,basis_released_on:Date?`；`PK(face_id,region)` |
+| `printing_face_observation` | `printing_id,face_id→printing_face,source_id→source_record,revision_id→face_revision,observed_at:Instant`；`PK(printing_id,face_id,source_id)`，revision 同 face/region；保留各版次頁面各次文字，不能只剩 current |
+| `source_coverage` | `kind:errata\|qa\|cardlist\|cr,region:Region,scope_key:Text,from_date:Date,until_date:Date?,as_of:Date,state:complete\|partial,source_id→source_record,decision_id→decision?`；`PK(kind,region,scope_key,from_date,as_of)`，`scope_key` 明列來源涵蓋集合；until 為排他上界，null 不表示未來已爬完 |
 
 `text_unit` 依 `(lang,exact text bytes)` 去重，不讓單一 `source_id` 丟失再錄來源；`face_revision`、`printing_face`、QA 等引用端保留自己的 source。ID 固定為 `t:{lang}:{SHA256(exact UTF-8 text) 前16hex}`，同一份快照內同鍵不同完整內容一律停止匯出，不自動加長新舊鍵；不另保存跨版本的已發布文字鍵索引或發布收據，也不保存完整歷史文字到 R2。既有鍵不變，改規則需新 format/命名空間並保留舊引用。內容不可變，不把完整 hash 出貨。null 是缺資料；空字串是已確定無文字；原始 text=null 先檢查 type/sections/來源，不能直接當無能力。
 
@@ -168,7 +169,7 @@ type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipmen
 
 active 更正先驗再比較投影內容，原始觀測保留。排序依可信發售日／更新證據，不用 fetched_at、卡號、hash 補順序。
 
-**使用者 2026-10-01 核可以下暫顯規則**：無新版採納仍保留有效舊 current；沒有可用舊版、觀測有差異時也公開可讀，不因此排除 card／printing。printing 顯示自己的觀測；face／card 依已知完整發售日的最新版次暫顯，同日不同內容／沒有可判日期時列候選，未知日期版本另列待問，全部標「表記未定」。暫顯不建立 face_current 或假 decision；公開欄位與決定演算法依 [snapshot-format §2.3](../export/snapshot-format.md#23-表記未定的公開呈現)。無 current 的區域以 wording_pending 阻止自動操作，但不影響依既有規則建牌與手動。#144 的診斷排除閉包不是發布閘門；真正來源損壞、已知更正／勘誤衝突仍受原本的完整性閘門約束。
+**使用者 2026-10-01 核可以下暫顯規則**：無新版採納仍保留有效舊 current；沒有可用舊版、觀測有差異時也公開可讀，不因此排除 card／printing。printing 顯示自己的觀測；face／card 依已知完整發售日的最新版次暫顯，同日不同內容／沒有可判日期時列候選，未知日期版本另列待問，全部標「表記未定」。暫顯不建立 face_current 或假 decision；公開欄位與決定演算法依 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本)。無 current 的區域以 wording_pending 阻止自動操作，但不影響依既有規則建牌與手動。#144 的診斷排除閉包不是發布閘門；真正來源損壞、已知更正／勘誤衝突仍受原本的完整性閘門約束。
 
 觀測、暫顯、已採納 current 與 printed 狀態分開，日期排序不填未知規則生效日。暫顯不建立規則等義證明，也不放行 DSL 重用。
 
@@ -317,7 +318,7 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 ### 9.2 當前翻譯投影
 
 §9.1 的既有 DDL 透過 `build.t1.compile_build()` 編譯。
-建置 DB 版本為 8；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
+建置 DB 版本為 10；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
 無譯名時仍保留原文用途。名稱內不再抽術語，不能把缺概念的名字造為 CardName 引用。
 [翻譯契約](../domains/translation-contract.md)已描述四層目標行為，具體差異依 §9.3；typed frame、target 與 binding 已接入正式建置。
 模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
@@ -578,13 +579,13 @@ SNC 最低資料仍為 `catalog_state`、`card_no_state`、`serial_total`、`lis
 
 ## 18. 實作分期
 
-完整邏輯契約不要求第一次查卡發布就實作所有能力；[implementation-tiers.md](implementation-tiers.md) 逐表分配唯一 tier 與啟用條件。首發明列 T0 41＋T1 必要子組 13＝54 表（含構築與 CR 引用），`identity_change` 先於第一次公開 `int_id`；必須同時滿足來源、永久身分、全部面、現行/印刷觀測、商品/路由、文字快照與缺 DSL 狀態；條件表沒上線時相關公開欄位為明定 null/空/unknown，不能假裝已完整或省掉 required 欄。
+完整邏輯契約不要求第一次查卡發布就實作所有能力；[implementation-tiers.md](implementation-tiers.md) 逐表分配唯一 tier 與啟用條件。首發明列 T0 42＋T1 必要子組 13＝55 表（含構築與 CR 引用），`identity_change` 先於第一次公開 `int_id`；必須同時滿足來源、永久身分、全部面、現行/印刷觀測、商品/路由、文字快照與缺 DSL 狀態；條件表沒上線時相關公開欄位為明定 null/空/unknown，不能假裝已完整或省掉 required 欄。
 
 跨 tier nullable FK 在未啟用該能力時必須為 null；非空 FK 的依賴 closure 必須一併啟用（tier 是最早實作時間，不是略過 FK 的許可）。若某批輸入有勘誤/更正/雙區/模板/禁限/DSL，就在發布前把對應組及引用閉包完成，不以「未實作」丟棄已知更正而出錯資料。可以先發布支援的資料子集並明示 coverage，但不能聲稱全庫能力通過。v1 延後的 event/signature 等尚未建表項仍留待未來設計，不建空表冒充完成。
 
 ### 18.1 DDL 能力與建置 schema 升版
 
-DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 54 表及條件組的可用性驗收。
+DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 55 表及條件組的可用性驗收。
 
 建置 SQLite 的 `PRAGMA user_version` 記錄實作宣告版號，與本文件的邏輯契約 v1、抓取 manifest schema、快照 format／data_version 分開。相同宣告版號仍可依能力選擇不同表集合。啟用新組或升版時，正常路徑是從釘住的輸入全量建置新檔，套用新 FK、CHECK 與跨表驗證，成功提交並關閉後才替換舊的建置產物；不複製未驗證的舊列，也不關閉 FK 作為升版捷徑。建立／匯入／驗證／替換失敗保留舊產物；呼叫端必須獨占離線目標並關閉所有連線，不對帶 SQLite sidecar 的目標替換。此流程不處理來源歸檔，也不代替正式發布交易。
 
@@ -597,3 +598,11 @@ same_character/name_only不能**經該關係**直接供官方名或battle語音�
 啟用前須程式PR同步DDL／schema／projector／reader與反例；卡名來源走本節翻譯表與source_record/F1，不造same_card或新的核可證明。
 digital_voice/card_voice與digital_art_link仍只驗自己的原合法證據，不因新relation放行。
 發布按§16／§18驗實際能力與非空引用閉包，不要求card/game都有coverage；unknown不當已查無。
+
+## 卡文依據判定
+
+建置 schema 10 新增 `face_wording`（PK face_id、region），記錄 classification、method、reason、
+comparison_hash、basis_printing_id、basis_released_on；依據版次引用 printing，卡面引用 face。
+`face_current.basis` 增加 latest_known_release，只有等價且可定位唯一依據時由日期證據建立；
+各 printing_face_observation 仍保留自己的 revision。契約與覆寫規則依
+[卡文依據契約](../domains/wording-basis.md)。

@@ -435,6 +435,11 @@ def pending() -> Record:
         "display": {"revision_id": None, "basis": "candidates"},
         "candidates": [{"printing_id": "printing", "revision_id": "revision"}],
         "undated_printing_ids": ["printing"],
+        "classification": "unresolved",
+        "method": "none",
+        "reason": "not_assessed",
+        "basis_printing_id": None,
+        "basis_released_on": None,
     }
 
 
