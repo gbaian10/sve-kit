@@ -612,7 +612,7 @@ export function CardsPage() {
               <b className="font-semibold text-text-1 tabular-nums">
                 {new Intl.NumberFormat(uiLanguage).format(page.total)}
               </b>{" "}
-              {t(query.unit === "printing" ? "results.countPrintingUnit" : "results.countUnit")}
+              {query.unit === "printing" ? t("results.countPrintingUnit") : t("results.countUnit")}
             </p>
             <div className="ml-auto flex items-center gap-2">
               <label className="flex items-center gap-1 text-13">

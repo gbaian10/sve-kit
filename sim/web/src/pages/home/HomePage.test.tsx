@@ -163,6 +163,7 @@ describe("home search", () => {
     const recent = within(screen.getByRole("region", { name: "最近查看" }))
     await user.click(recent.getByRole("link"))
     expect(router.state.location.pathname).toBe("/cards/BP01-001")
+    expect(router.state.location.state).toMatchObject({ resultKey: "p:bp01-001" })
     await act(() => router.navigate(-1))
     await waitFor(() => {
       expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
@@ -211,6 +212,7 @@ describe("home search", () => {
     })
     // A random card of the Japanese edition, opened on its Japanese printing.
     expect(recentStore.get()).toHaveLength(1)
+    expect(router.state.location.state).toMatchObject({ resultKey: recentStore.get()[0] })
     expect(recentStore.get()[0]).not.toMatch(/-en$/u)
   })
 

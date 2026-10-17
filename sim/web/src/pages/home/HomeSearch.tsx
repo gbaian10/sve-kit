@@ -230,7 +230,7 @@ export function HomeSearch({
       background: "",
       source: "results",
       pages: 1,
-      resultKey: randomItem.key,
+      resultKey: summary.printingId,
       ...routeState(summary),
     }
     void navigate(cardPath(summary), { state })

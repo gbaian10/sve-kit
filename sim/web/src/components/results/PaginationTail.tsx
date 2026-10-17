@@ -89,9 +89,9 @@ export function PaginationTail({
         <span role="status">{t("results.loadingMore")}</span>
       ) : !hasMore ? (
         <span>
-          {t(unit === "printing" ? "results.allPrintingsLoaded" : "results.allLoaded", {
-            count: total,
-          })}
+          {unit === "printing"
+            ? t("results.allPrintingsLoaded", { count: total })
+            : t("results.allLoaded", { count: total })}
         </span>
       ) : !automatic ? (
         <Button size="sm" onClick={onMore}>
