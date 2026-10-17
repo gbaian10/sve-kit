@@ -19,6 +19,7 @@ export {
 export { cardPrintings, editionPrinting, locateEdition } from "./edition"
 export { faceBasics, loadFaceCandidates } from "./face-basics"
 export type { Row } from "./format-v3/decode"
+export { decodeMessage, type DecodeRequest } from "./format-v3/decode-message"
 export { SnapshotError } from "./format-v3/errors"
 export {
   arrayValue,

@@ -31,6 +31,7 @@ export default {
     accent: { amber: "Amber", teal: "Teal", red: "Red" },
     region: { jp: "Japanese", en: "English" },
     view: { grid: "Images", table: "Table", list: "List" },
+    cardOpenMode: { auto: "Auto", panel: "Panel", modal: "Pop-up", page: "Page" },
   },
   settings: {
     infiniteScroll: "Infinite scroll",
@@ -75,6 +76,9 @@ export default {
     symbolLabels: "Label symbols",
     symbolLabelsHint: "Only keyword symbols get a label",
     banRegion: "Ban list region",
+    cardOpenMode: "Opening a card",
+    cardOpenModeHint:
+      "Auto: a panel beside the results on desktop, a pop-up on phones. Page always goes to the card page.",
   },
   pages: {
     home: "Home",
@@ -343,6 +347,9 @@ export default {
     printings: "Printings",
     back: "Back",
     copyLink: "Copy link",
+    fullscreen: "Open full page",
+    closePanel: "Close panel",
+    panel: "Card panel",
     linkCopied: "Link to this card copied",
     linkCopyFailed: "Could not copy; use the address bar",
     set: "Set {{code}}",

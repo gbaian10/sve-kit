@@ -11,6 +11,15 @@ export interface ListEntryState {
   readonly scrollY?: number
   readonly listScroll?: { readonly top: number; readonly left: number }
   readonly anchor?: string
+  /** The card open beside or over the results (`?card=`), with what the opening cell knew. */
+  readonly overlay?: OverlayEntryState
+}
+
+export interface OverlayEntryState {
+  readonly resultKey?: string
+  readonly route?: CardEntryState["route"]
+  /** Opening pushed a history entry, so closing from the UI pops it instead of replacing. */
+  readonly pushed?: boolean
 }
 
 /** What a card entry receives from the list or suggest list that opened it. */

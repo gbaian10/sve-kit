@@ -8,6 +8,7 @@ import { TopBar } from "../components/nav/TopBar"
 import { ToastProvider } from "../components/ui/Toast"
 import { snapshotClient } from "../data"
 import { showsOtherEdition, usePrefs } from "../settings"
+import { CARD_PARAM } from "./card-overlay"
 import { DevBadge } from "./DevBadge"
 import { useUiLanguageSync } from "./language"
 import { useOtherEdition } from "./other-edition"
@@ -17,10 +18,12 @@ import { useThemeAttributes } from "./theme-attributes"
 
 // Layout switches on content width (design §11): < lg bottom bar, ≥ lg left rail (72px, 200px
 // expanded from xl); content is capped at 1280 and centred.
-// Switching the result view (grid / table / list) is the same list, so it keeps its scroll position.
+// Switching the result view (grid / table / list) is the same list, so it keeps its scroll position;
+// so is opening a card beside it.
 function scrollKeySearch(search: string): string {
   const params = new URLSearchParams(search)
   params.delete("view")
+  params.delete(CARD_PARAM)
   const rest = params.toString()
   return rest === "" ? "" : `?${rest}`
 }

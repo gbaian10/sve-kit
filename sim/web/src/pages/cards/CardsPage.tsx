@@ -20,6 +20,7 @@ import {
   useSearchParams,
 } from "react-router"
 
+import { CARD_PARAM, withoutCardParam } from "../../app/card-overlay"
 import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
 import {
   useListView,
@@ -37,6 +38,7 @@ import { CardGrid, type GridCell } from "../../components/results/CardGrid"
 import { CardList, CardTable } from "../../components/results/CardRows"
 import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
+import type { OpenOutcome } from "../../components/results/plain-click"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { ConditionChips } from "../../components/search/ConditionChips"
@@ -48,6 +50,7 @@ import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
+import { cn } from "../../components/ui/cn"
 import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
@@ -72,6 +75,7 @@ import { leaderFrameTokens, tokenKindTokens } from "../../domain/typeFilter"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 import { SetHeader } from "../sets/SetHeader"
+import { useCardOverlay } from "./CardOverlay"
 
 const DEBOUNCE_MS = 150
 
@@ -119,9 +123,15 @@ export function CardsPage() {
     // A set page's own set is implied by its path, so each state keeps one URL.
     if (set && next.sets.length === 1 && next.sets[0] === set.code) result.delete("set")
     if (nextEdition === "en") result.set("ed", "en")
+    // The open card stays beside the results while their conditions change.
+    const card = params.get(CARD_PARAM)
+    if (card !== null) result.set(CARD_PARAM, card)
     return result
   }
   const [entry, updateEntry] = useListEntryState()
+  // A new list entry keeps the open card but not the push that opened it: back is the old list.
+  const { overlay, ...listEntry } = entry
+  const keptOverlay = overlay ? { overlay: { ...overlay, pushed: false } } : {}
   const listScroll = useRef(entry.listScroll ?? { top: 0, left: 0 })
   const restoreScroll = useRef(entry.scrollY)
   const navigate = useNavigate()
@@ -156,14 +166,14 @@ export function CardsPage() {
   const commit = (next: QueryState) => {
     updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
     setEdit(null)
-    setParams(urlParams(next))
+    setParams(urlParams(next), { state: keptOverlay })
   }
   // The list's edition lives in `ed`; the preference follows so other pages open the same edition.
   const commitEdition = (next: Region) => {
     prefsStore.set({ cardEdition: next })
     updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
     setEdit(null)
-    setParams(urlParams(query, next))
+    setParams(urlParams(query, next), { state: keptOverlay })
   }
   const nameOf = useCallback(
     (summary: CardSummary) => displayName(summary.name, uiLanguage, prefs.nameDisplay),
@@ -237,11 +247,16 @@ export function CardsPage() {
   } = useListView(searchQuery, pages)
   const page = listView?.page ?? null
   const positionQuery = JSON.stringify([location.pathname, conditionsKey, edition])
-  const positionRef = useRef({ query: positionQuery, key: location.key })
+  const openCard = params.get(CARD_PARAM)
+  const positionRef = useRef({ query: positionQuery, key: location.key, card: openCard })
   useLayoutEffect(() => {
     const previous = positionRef.current
     const changedQuery = previous.query !== positionQuery
-    const returning = navigationType === NavigationType.Pop && previous.key !== location.key
+    // Back that only closes or changes the open card leaves the list where the user scrolled it.
+    const returning =
+      navigationType === NavigationType.Pop &&
+      previous.key !== location.key &&
+      (changedQuery || previous.card === openCard)
     if (changedQuery || returning) {
       listScroll.current =
         navigationType === NavigationType.Pop
@@ -254,8 +269,16 @@ export function CardsPage() {
         container.scrollLeft = listScroll.current.left
       }
     }
-    positionRef.current = { query: positionQuery, key: location.key }
-  }, [positionQuery, location.key, navigationType, entry.listScroll, entry.scrollY, imageRoot])
+    positionRef.current = { query: positionQuery, key: location.key, card: openCard }
+  }, [
+    positionQuery,
+    openCard,
+    location.key,
+    navigationType,
+    entry.listScroll,
+    entry.scrollY,
+    imageRoot,
+  ])
   useLayoutEffect(() => {
     if (!page || pageLoading || restoreScroll.current === undefined) return
     window.scrollTo(0, restoreScroll.current)
@@ -270,11 +293,19 @@ export function CardsPage() {
       }) ?? [],
     [page, cellOf],
   )
-  const background = code ? querySearch(searchState) : location.search
-  const openContextRef = useRef({ pages, updateEntry, background })
+  const background = code ? querySearch(searchState) : withoutCardParam(location.search)
+  const cardOverlay = useCardOverlay({
+    entry,
+    background: querySearch(searchState),
+    pages,
+    listScroll,
+    root: imageRoot,
+  })
+  const openInPlace = cardOverlay.openInPlace
+  const openContextRef = useRef({ pages, updateEntry, background, openInPlace })
   useLayoutEffect(() => {
-    openContextRef.current = { pages, updateEntry, background }
-  }, [pages, updateEntry, background])
+    openContextRef.current = { pages, updateEntry, background, openInPlace }
+  }, [pages, updateEntry, background, openInPlace])
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
@@ -370,22 +401,24 @@ export function CardsPage() {
     }
     activate(active)
   }
-  const openCell = useCallback((cell: GridCell): CardEntryState => {
+  const openCell = useCallback((cell: GridCell): OpenOutcome => {
     const current = openContextRef.current
+    recentStore.push(cell.summary.printingId)
+    if (current.openInPlace(cell.summary, cell.key)) return { kind: "opened" }
     current.updateEntry({
       anchor: cell.key,
       pages: current.pages,
       listScroll: listScroll.current,
       scrollY: window.scrollY,
     })
-    recentStore.push(cell.summary.printingId)
-    return {
+    const state: CardEntryState = {
       background: current.background,
       ...routeState(cell.summary),
       source: "results",
       pages: current.pages,
       resultKey: cell.key,
     }
+    return { kind: "navigate", state }
   }, [])
 
   const loadNextPage = useCallback(() => {
@@ -684,125 +717,169 @@ export function CardsPage() {
           {t("results.loadFailed")}
         </Notice>
       )}
-      {/* The status strip above says what is downloading; the list only shows its skeleton. */}
-      {pending && readiness.phase !== "error" && (
-        <>
-          {readiness.phase === "ready" && (
-            <p role="status" className="text-13 text-text-2">
-              {progress ? t("results.searchProgress", progress) : t("results.dependenciesPending")}
-            </p>
+      {/* Results on the left, the open card's panel on the right (design 04d: 400 at 1180, 440 at 1440). */}
+      <div
+        className={cn(
+          cardOverlay.panel !== null &&
+            "lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-6 xl:grid-cols-[minmax(0,1fr)_440px]",
+        )}
+      >
+        <div
+          className="flex min-w-0 flex-col gap-3"
+          data-beside-panel={cardOverlay.panel !== null ? "" : undefined}
+        >
+          {/* The status strip above says what is downloading; the list only shows its skeleton. */}
+          {pending && readiness.phase !== "error" && (
+            <>
+              {readiness.phase === "ready" && (
+                <p role="status" className="text-13 text-text-2">
+                  {progress
+                    ? t("results.searchProgress", progress)
+                    : t("results.dependenciesPending")}
+                </p>
+              )}
+              <SkeletonGrid />
+            </>
           )}
-          <SkeletonGrid />
-        </>
-      )}
-      {page !== null && page.total === 0 && (
-        <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
-          <p className="text-16 font-semibold">{t("results.empty")}</p>
-          <p className="text-13 text-text-3">{t("results.emptyHint")}</p>
-          {hasConditions && (
-            <Button
-              onClick={() => {
-                commit(DEFAULT_QUERY)
-              }}
-            >
-              {t("results.clearAll")}
-            </Button>
-          )}
-        </div>
-      )}
-      {page !== null && page.total > 0 && (
-        <>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            {view === "list" && <ListColumnPicker />}
-            <div className="ml-auto flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-1 text-13">
-                <span>{t("results.sort")}</span>
-                <select
-                  aria-label={t("results.sort")}
-                  value={query.sort}
-                  className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
-                  onChange={(event) => {
-                    const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
-                    if (sort) commit({ ...query, sort })
+          {page !== null && page.total === 0 && (
+            <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
+              <p className="text-16 font-semibold">{t("results.empty")}</p>
+              <p className="text-13 text-text-3">{t("results.emptyHint")}</p>
+              {hasConditions && (
+                <Button
+                  onClick={() => {
+                    commit(DEFAULT_QUERY)
                   }}
                 >
-                  {QUERY_SORTS.map((sort) => (
-                    <option key={sort} value={sort} disabled={sort === "date"}>
-                      {t(`results.sortBy.${sort}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                type="button"
-                aria-label={t("results.descending")}
-                aria-pressed={query.order === "desc"}
-                className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
-                onClick={() => {
-                  const { order, ...rest } = query
-                  commit(order === "desc" ? rest : { ...rest, order: "desc" })
-                }}
-              >
-                {query.order === "desc" ? "↓" : "↑"}
-              </button>
-              <Segmented
-                size="sm"
-                tone="accent"
-                label={t("results.view")}
-                options={VIEW_MODES.map((value) => ({ value, label: t(`options.view.${value}`) }))}
-                value={view}
-                onChange={(next) => {
-                  updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
-                  prefsStore.set({ viewMode: next })
-                  setEdit(null)
-                  setParams(urlParams({ ...query, view: next }), {
-                    state: { ...entry, listScroll: listScroll.current, scrollY: window.scrollY },
-                    preventScrollReset: true,
-                  })
-                }}
-              />
+                  {t("results.clearAll")}
+                </Button>
+              )}
             </div>
-          </div>
-          {view === "grid" && (
-            <CardGrid
-              cells={cells}
-              images={images}
-              onOpen={openCell}
-              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
-            />
           )}
-          {view === "table" && (
-            <CardTable
-              cells={cells}
-              images={images}
-              onOpen={openCell}
-              artOf={artOf}
-              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
-            />
+          {page !== null && page.total > 0 && (
+            <>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                {view === "list" && <ListColumnPicker />}
+                <div className="ml-auto flex flex-wrap items-center gap-2">
+                  <label className="flex items-center gap-1 text-13">
+                    <span>{t("results.sort")}</span>
+                    <select
+                      aria-label={t("results.sort")}
+                      value={query.sort}
+                      className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
+                      onChange={(event) => {
+                        const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
+                        if (sort) commit({ ...query, sort })
+                      }}
+                    >
+                      {QUERY_SORTS.map((sort) => (
+                        <option key={sort} value={sort} disabled={sort === "date"}>
+                          {t(`results.sortBy.${sort}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    aria-label={t("results.descending")}
+                    aria-pressed={query.order === "desc"}
+                    className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
+                    onClick={() => {
+                      const { order, ...rest } = query
+                      commit(order === "desc" ? rest : { ...rest, order: "desc" })
+                    }}
+                  >
+                    {query.order === "desc" ? "↓" : "↑"}
+                  </button>
+                  <Segmented
+                    size="sm"
+                    tone="accent"
+                    label={t("results.view")}
+                    options={VIEW_MODES.map((value) => ({
+                      value,
+                      label: t(`options.view.${value}`),
+                    }))}
+                    value={view}
+                    onChange={(next) => {
+                      updateEntry({
+                        pages,
+                        listScroll: listScroll.current,
+                        scrollY: window.scrollY,
+                      })
+                      prefsStore.set({ viewMode: next })
+                      setEdit(null)
+                      setParams(urlParams({ ...query, view: next }), {
+                        state: {
+                          ...listEntry,
+                          ...keptOverlay,
+                          listScroll: listScroll.current,
+                          scrollY: window.scrollY,
+                        },
+                        preventScrollReset: true,
+                      })
+                    }}
+                  />
+                </div>
+              </div>
+              {view === "grid" && (
+                <CardGrid
+                  cells={cells}
+                  images={images}
+                  onOpen={openCell}
+                  {...(entry.anchor === undefined || cardOverlay.open
+                    ? {}
+                    : { anchor: entry.anchor })}
+                  {...(cardOverlay.selected === undefined
+                    ? {}
+                    : { selected: cardOverlay.selected })}
+                />
+              )}
+              {view === "table" && (
+                <CardTable
+                  cells={cells}
+                  images={images}
+                  onOpen={openCell}
+                  artOf={artOf}
+                  {...(entry.anchor === undefined || cardOverlay.open
+                    ? {}
+                    : { anchor: entry.anchor })}
+                  {...(cardOverlay.selected === undefined
+                    ? {}
+                    : { selected: cardOverlay.selected })}
+                />
+              )}
+              {view === "list" && (
+                <CardList
+                  classLabel={classLabel}
+                  footer={pagination}
+                  sort={query.sort}
+                  descending={query.order === "desc"}
+                  onSort={(sort) => {
+                    const { order, ...rest } = query
+                    commit(
+                      sort === query.sort && order !== "desc"
+                        ? { ...rest, sort, order: "desc" }
+                        : { ...rest, sort },
+                    )
+                  }}
+                  scrollPositionRef={listScroll}
+                  cells={cells}
+                  onOpen={openCell}
+                  {...(entry.anchor === undefined || cardOverlay.open
+                    ? {}
+                    : { anchor: entry.anchor })}
+                  {...(cardOverlay.selected === undefined
+                    ? {}
+                    : { selected: cardOverlay.selected })}
+                />
+              )}
+              {view !== "list" && pagination}
+            </>
           )}
-          {view === "list" && (
-            <CardList
-              classLabel={classLabel}
-              footer={pagination}
-              sort={query.sort}
-              descending={query.order === "desc"}
-              onSort={(sort) => {
-                const { order, ...rest } = query
-                commit(
-                  sort === query.sort && order !== "desc"
-                    ? { ...rest, sort, order: "desc" }
-                    : { ...rest, sort },
-                )
-              }}
-              scrollPositionRef={listScroll}
-              cells={cells}
-              onOpen={openCell}
-              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
-            />
-          )}
-          {view !== "list" && pagination}
-        </>
-      )}
+        </div>
+        {cardOverlay.panel}
+      </div>
+      {cardOverlay.modal}
     </div>
   )
 }

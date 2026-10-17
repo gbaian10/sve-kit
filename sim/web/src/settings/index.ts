@@ -7,6 +7,8 @@ export {
 } from "./list-columns"
 export {
   CARD_EDITIONS,
+  CARD_OPEN_MODES,
+  type CardOpenMode,
   DEFAULT_PREFS,
   prefsStore,
   readPrefs,

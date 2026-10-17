@@ -28,6 +28,10 @@ type GridDensity = (typeof GRID_DENSITIES)[number]
 const VIEW_MODES = ["grid", "table", "list"] as const
 type ViewMode = (typeof VIEW_MODES)[number]
 
+/** How a result opens its card: `auto` = side panel on desktop, modal elsewhere. */
+export const CARD_OPEN_MODES = ["auto", "panel", "modal", "page"] as const
+export type CardOpenMode = (typeof CARD_OPEN_MODES)[number]
+
 const TEXT_BOX_KINDS = ["effectOriginal", "flavorOriginal", "sectionOriginal"] as const
 export type TextBoxKind = (typeof TEXT_BOX_KINDS)[number]
 type CollapsedText = Readonly<Record<TextBoxKind, boolean>>
@@ -54,6 +58,7 @@ export interface Prefs {
   readonly banRegion: CardEdition
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
+  readonly cardOpenMode: CardOpenMode
   readonly listWidths: ListWidths
   readonly listMobileWidths: ListWidths
   readonly listVisibility: ListVisibility
@@ -79,6 +84,7 @@ export const DEFAULT_PREFS: Prefs = {
   banRegion: "jp",
   gridDensity: 2,
   viewMode: "grid",
+  cardOpenMode: "auto",
   listWidths: {},
   listMobileWidths: {},
   listVisibility: DEFAULT_LIST_VISIBILITY,
@@ -93,6 +99,7 @@ const isCardEdition = oneOf(CARD_EDITIONS)
 const isTextDisplay = oneOf(TEXT_DISPLAYS)
 const isGridDensity = oneOf(GRID_DENSITIES)
 const isViewMode = oneOf(VIEW_MODES)
+const isCardOpenMode = oneOf(CARD_OPEN_MODES)
 const isBoolean = (value: unknown): value is boolean => typeof value === "boolean"
 const isNullableUiLanguage = (value: unknown): value is UiLanguage | null =>
   value === null || isUiLanguage(value)
@@ -133,6 +140,7 @@ const sanitizers: Sanitizers = {
   banRegion: withDefault(isCardEdition, DEFAULT_PREFS.banRegion),
   gridDensity: withDefault(isGridDensity, DEFAULT_PREFS.gridDensity),
   viewMode: withDefault(isViewMode, DEFAULT_PREFS.viewMode),
+  cardOpenMode: withDefault(isCardOpenMode, DEFAULT_PREFS.cardOpenMode),
   listWidths: withDefault(isListWidths, DEFAULT_PREFS.listWidths),
   listMobileWidths: withDefault(isListWidths, DEFAULT_PREFS.listMobileWidths),
   listVisibility: withDefault(isListVisibility, DEFAULT_PREFS.listVisibility),

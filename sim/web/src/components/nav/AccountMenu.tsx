@@ -13,6 +13,7 @@ import { type Accent, ACCENTS, resolveTheme, THEME_PREFS } from "../../domain/th
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
 import {
   CARD_EDITIONS,
+  CARD_OPEN_MODES,
   prefsStore,
   showsOtherEdition,
   TEXT_DISPLAYS,
@@ -228,6 +229,18 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           options={textDisplayOptions}
           value={prefs.effectLanguage}
           onChange={(effectLanguage) => prefsStore.set({ effectLanguage })}
+        />
+      </SettingRow>
+      <SettingRow size="sm" label={t("settings.cardOpenMode")}>
+        <Segmented
+          size="sm"
+          label={t("settings.cardOpenMode")}
+          options={CARD_OPEN_MODES.map((value) => ({
+            value,
+            label: t(`options.cardOpenMode.${value}`),
+          }))}
+          value={prefs.cardOpenMode}
+          onChange={(cardOpenMode) => prefsStore.set({ cardOpenMode })}
         />
       </SettingRow>
       <SettingRow size="sm" label={t("account.uiLanguage")}>
