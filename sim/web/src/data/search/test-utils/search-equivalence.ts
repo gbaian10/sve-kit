@@ -18,7 +18,7 @@ type SearchApi = Pick<
   | "releases"
 >
 
-/** Hash comparison keeps official wording out of failures from opt-in real-data checks. */
+/** Failures report hashes so a mismatch never prints card wording. */
 export function compareSearchIndexes(actual: SearchApi, expected: SearchApi, edition: Region) {
   let comparisons = 0
   const digest = createHash("sha256")

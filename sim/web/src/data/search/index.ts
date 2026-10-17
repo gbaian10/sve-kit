@@ -608,6 +608,7 @@ export class SearchIndex {
     )
     const entries: { row: JsonObject; old: number; card: number }[] = []
     const defaults = new Uint32Array(this.cards.default.length)
+    const preferredIds: (JsonValue | undefined)[] = []
     for (let card = 0; card < this.cards.id.length; card++) {
       const id = this.pool.get(this.cards.id[card] ?? 0)
       const rows = index.printingsOf(id).filter((row) => row["region"] === this.edition)
@@ -616,9 +617,11 @@ export class SearchIndex {
         (this.cards.printingStart[card + 1] ?? 0) - (this.cards.printingStart[card] ?? 0)
       )
         throw new Error("printing closure changes catalog membership")
-      const preferred = ((index.card(id)?.["regions"] ?? []) as JsonObject[]).find(
-        (row) => row["region"] === this.edition,
-      )?.["default_printing_id"]
+      const preferred =
+        ((index.card(id)?.["regions"] ?? []) as JsonObject[]).find(
+          (row) => row["region"] === this.edition,
+        )?.["default_printing_id"] ?? rows[0]?.["id"]
+      preferredIds[card] = preferred
       defaults[card] = entries.length
       for (const row of rows) {
         const old = slots.get(stringValue(row["id"]))
@@ -649,9 +652,7 @@ export class SearchIndex {
         const id = stringValue(row["id"])
         const cardId = this.pool.get(this.cards.id[card] ?? 0)
         const cardRow = index.card(cardId)
-        const preferred = ((cardRow?.["regions"] ?? []) as JsonObject[]).find(
-          (region) => region["region"] === this.edition,
-        )?.["default_printing_id"]
+        const preferred = preferredIds[card]
         const art = artOf(row),
           defaultArt = artOf(index.printing(typeof preferred === "string" ? preferred : ""))
         const frame =

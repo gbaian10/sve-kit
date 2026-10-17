@@ -60,8 +60,9 @@ The initial search index uses bootstrap locators, so initial results do not wait
 printing downloads. Completion keeps the same index and its name, alias and card columns.
 It permutes packed summary/image-target cells into the completed printing order and updates
 printing metadata, scalar filters, representative printings, ranks, options and releases.
-The locator contract fixes printing membership; a closure that changes it is rejected before
-replacing the initial columns. Both stages can be persisted and restored with the same layout.
+Completion checks printing counts and locator ownership for cards already in the index.
+It relies on the locator contract to cover the edition's full membership.
+Both stages can be persisted and restored with the same layout.
 
 Cache identity includes root, manifest hash, reader build and local format. View slots also
 include the normalizer version, selected-region policy and complete query. Multilingual

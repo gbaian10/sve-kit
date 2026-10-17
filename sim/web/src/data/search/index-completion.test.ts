@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import type { Region } from "../../domain/search"
 import { decodeMessage } from "../format-v3/decode-message"
-import { stringValue } from "../format-v3/json"
+import { arrayValue, objectValue, stringValue } from "../format-v3/json"
 import { catalogKeys, type Fragment } from "../format-v3/reader"
 import { BootstrapColumns } from "./bootstrap"
 import { SearchIndex } from "./index"
@@ -67,6 +67,41 @@ describe("printing completion without replacing the search index", () => {
       compareSearchIndexes(new SearchIndex(index.encode(), edition), expected, edition).digest,
     ).toBe(completed.digest)
   })
+
+  it.each(["jp", "en"] as const)(
+    "matches a full build without a default printing for %s",
+    (edition) => {
+      const stagesForEdition = stages(edition)
+      const basic = stagesForEdition.basic.map((fragment) =>
+        fragment.table !== "card"
+          ? fragment
+          : {
+              ...fragment,
+              rows: fragment.rows.map((row) => ({
+                ...row,
+                regions: arrayValue(row["regions"]).map((value) => {
+                  const view = { ...objectValue(value) }
+                  if (view["region"] === edition) delete view["default_printing_id"]
+                  return view
+                }),
+              })),
+            },
+      )
+      const source = columns(basic)
+      const index = new SearchIndex(source, edition)
+      const restoredInitial = new SearchIndex(index.encode(), edition)
+      source.ingest(stagesForEdition.printing)
+      source.seal()
+      index.completePrintings(source)
+      restoredInitial.completePrintings(source)
+      const expected = new SearchIndex(columns([...basic, ...stagesForEdition.printing]), edition)
+      const completed = compareSearchIndexes(index, expected, edition)
+      expect(compareSearchIndexes(restoredInitial, expected, edition).digest).toBe(completed.digest)
+      expect(
+        compareSearchIndexes(new SearchIndex(index.encode(), edition), expected, edition).digest,
+      ).toBe(completed.digest)
+    },
+  )
 
   it("preserves the initial index when a closure changes locator membership", () => {
     const { basic, printing } = stages("jp")
