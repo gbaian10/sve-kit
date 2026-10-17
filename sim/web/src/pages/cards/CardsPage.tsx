@@ -1,4 +1,12 @@
-import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from "react"
+import {
+  type KeyboardEvent,
+  useCallback,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router"
 
@@ -16,6 +24,7 @@ import { StatusStrip } from "../../app/StatusStrip"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
 import { CardList, CardTable } from "../../components/results/CardRows"
+import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { SearchBar } from "../../components/search/SearchBar"
@@ -73,6 +82,7 @@ export function CardsPage() {
   }
   const [entry, updateEntry] = useListEntryState()
   const listScroll = useRef(entry.listScroll ?? { top: 0, left: 0 })
+  const restoreScroll = useRef(entry.scrollY)
   const navigate = useNavigate()
   const location = useLocation()
   const recent = useRecent()
@@ -165,6 +175,7 @@ export function CardsPage() {
   )
   const {
     view: listView,
+    loading: pageLoading,
     images,
     imageRoot,
     error: queryError,
@@ -172,6 +183,11 @@ export function CardsPage() {
     retry: retryView,
   } = useListView(searchQuery, pages)
   const page = listView?.page ?? null
+  useLayoutEffect(() => {
+    if (!page || pageLoading || restoreScroll.current === undefined) return
+    window.scrollTo(0, restoreScroll.current)
+    restoreScroll.current = undefined
+  }, [page, pageLoading])
   const cells: GridCell[] = useMemo(() => {
     if (!page) return []
     return page.items.flatMap((item) => {
@@ -259,11 +275,20 @@ export function CardsPage() {
   const openCell = useCallback(
     (cell: GridCell) => {
       // The anchor goes on the list's own entry first; the cell then pushes the card entry.
-      updateEntry({ anchor: cell.key, pages, listScroll: listScroll.current })
+      updateEntry({
+        anchor: cell.key,
+        pages,
+        listScroll: listScroll.current,
+        scrollY: window.scrollY,
+      })
       recentStore.push(cell.summary.printingId)
     },
     [updateEntry, pages],
   )
+
+  const loadNextPage = useCallback(() => {
+    updateEntry({ pages: pages + 1 })
+  }, [updateEntry, pages])
 
   const quickBar: QuickBarClass[] = useMemo(
     () =>
@@ -290,6 +315,24 @@ export function CardsPage() {
       images?.artImage?.(cell.summary.printingId, cell.summary.faceId),
     [images],
   )
+
+  const pagination =
+    page && page.total > 0 ? (
+      <PaginationTail
+        requestKey={JSON.stringify([conditionsKey, edition, pages])}
+        total={page.total}
+        hasMore={page.items.length < page.total}
+        loading={
+          pageLoading || (!queryError && page.items.length < Math.min(pages * 60, page.total))
+        }
+        failed={Boolean(queryError)}
+        onMore={loadNextPage}
+        onRetry={() => {
+          retryView()
+          if (readiness.phase === "error") readiness.retry()
+        }}
+      />
+    ) : null
 
   if (code && !set) {
     return (
@@ -433,7 +476,7 @@ export function CardsPage() {
           })}
         </Notice>
       )}
-      {queryError && !unsupported && readiness.phase !== "error" && (
+      {queryError && !unsupported && page === null && readiness.phase !== "error" && (
         <Notice
           tone="danger"
           role="alert"
@@ -554,6 +597,7 @@ export function CardsPage() {
           )}
           {view === "list" && (
             <CardList
+              footer={pagination}
               sort={query.sort}
               descending={query.order === "desc"}
               onSort={(sort) => {
@@ -570,16 +614,7 @@ export function CardsPage() {
               {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
             />
           )}
-          {page.items.length < page.total && (
-            <Button
-              className="mx-auto mt-2 w-full max-w-80"
-              onClick={() => {
-                updateEntry({ pages: pages + 1 })
-              }}
-            >
-              {t("results.loadMore")}
-            </Button>
-          )}
+          {view !== "list" && pagination}
         </>
       )}
     </div>

@@ -2,11 +2,11 @@ import { act, render, screen } from "@testing-library/react"
 import { useRef } from "react"
 import { afterEach, expect, it, vi } from "vitest"
 
-import { useSeen } from "./useSeen"
+import { useVisible } from "./useVisible"
 
 function Preview({ name }: { readonly name: string }) {
   const ref = useRef<HTMLDivElement>(null)
-  const seen = useSeen(ref)
+  const seen = useVisible(ref)
   return (
     <div ref={ref}>
       {name}: {seen ? "ready" : "waiting"}
@@ -16,7 +16,7 @@ function Preview({ name }: { readonly name: string }) {
 
 afterEach(() => vi.unstubAllGlobals())
 
-it("shares a viewport-height preload margin, follows resizes and resolves each row once", () => {
+it("shares a viewport-height preload margin, follows resizes and unmounts readers again outside the viewport", () => {
   const observers: Observer[] = []
   class Observer {
     readonly targets = new Set<Element>()
@@ -66,7 +66,11 @@ it("shares a viewport-height preload margin, follows resizes and resolves each r
     resized?.notify([{ target: first, isIntersecting: true }])
   })
   expect(screen.getByText("First: ready")).toBeVisible()
-  expect(resized?.targets.size).toBe(1)
+  expect(resized?.targets.size).toBe(2)
+  act(() => {
+    resized?.notify([{ target: first, isIntersecting: false }])
+  })
+  expect(screen.getByText("First: waiting")).toBeVisible()
   view.unmount()
   expect(resized?.disconnect).toHaveBeenCalled()
   act(() => {

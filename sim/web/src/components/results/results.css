@@ -32,10 +32,8 @@
   contain-intrinsic-block-size: auto 140px;
 }
 
-/* One scrollport keeps both the header and the first two columns visible. */
+/* Desktop headers follow the page; narrow layouts retain a scrollport for frozen columns. */
 :where([data-list-scroll]) {
-  overflow: auto;
-  max-height: 70dvh;
   isolation: isolate;
   border: 1px solid var(--color-border-strong);
   border-radius: 4px;
@@ -43,7 +41,6 @@
 
 :where([data-card-list]) {
   width: 100%;
-  min-width: 884px;
   table-layout: fixed;
   border-spacing: 0;
   border-collapse: separate;
@@ -86,11 +83,6 @@
   height: 100%;
   text-align: inherit;
   cursor: pointer;
-}
-
-:where([data-card-list] th:nth-child(-n + 2)),
-:where([data-card-list] td:nth-child(-n + 2)) {
-  position: sticky;
 }
 
 :where([data-card-list] th:first-child),
@@ -177,4 +169,26 @@
   :where([data-card-list] td:nth-child(2)) {
     left: 112px;
   }
+}
+
+@media (width < 1000px) {
+  :where([data-card-list] td:nth-child(-n + 2)) {
+    position: sticky;
+  }
+
+  :where([data-list-scroll]) {
+    overflow: auto;
+    max-height: 70dvh;
+  }
+
+  :where([data-card-list]) {
+    min-width: 884px;
+  }
+}
+
+:where([data-list-spacer] td) {
+  position: static;
+  padding: 0;
+  border: 0;
+  pointer-events: none;
 }

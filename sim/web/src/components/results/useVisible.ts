@@ -1,7 +1,7 @@
 import { type RefObject, useEffect, useState } from "react"
 
 // Sharing the observer avoids per-row work; pixel margins follow viewport height, not width.
-const callbacks = new Map<Element, () => void>()
+const callbacks = new Map<Element, (visible: boolean) => void>()
 let observer: IntersectionObserver | undefined
 const pending = new Set<Element>()
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -12,8 +12,7 @@ function activate(): void {
   if (!node) return
   pending.delete(node)
   const onSeen = callbacks.get(node)
-  callbacks.delete(node)
-  onSeen?.()
+  onSeen?.(true)
   release()
   if (pending.size) timer = setTimeout(activate, 0)
 }
@@ -35,7 +34,9 @@ function createObserver(): IntersectionObserver {
         if (entry.isIntersecting) {
           if (!callbacks.has(entry.target)) continue
           pending.add(entry.target)
-          observer?.unobserve(entry.target)
+        } else {
+          pending.delete(entry.target)
+          callbacks.get(entry.target)?.(false)
         }
       // A single intersection delivery can cover a whole screen of expensive previews.
       if (timer === undefined) activate()
@@ -50,9 +51,9 @@ function resize(): void {
   for (const node of callbacks.keys()) observer.observe(node)
 }
 
-function observe(node: Element, onSeen: () => void): () => void {
+function observe(node: Element, onSeen: (visible: boolean) => void): () => void {
   if (typeof IntersectionObserver === "undefined") {
-    onSeen()
+    onSeen(true)
     return () => undefined
   }
   if (!observer) {
@@ -69,15 +70,13 @@ function observe(node: Element, onSeen: () => void): () => void {
   }
 }
 
-/** True once the referenced element has come near the viewport; never goes back to false. */
-export function useSeen(ref: RefObject<Element | null>): boolean {
-  const [seen, setSeen] = useState(false)
+/** Readers live only near the viewport; decoded text stays in the existing data-layer cache. */
+export function useVisible(ref: RefObject<Element | null>): boolean {
+  const [visible, setVisible] = useState(false)
   useEffect(() => {
     const node = ref.current
-    if (!node || seen) return
-    return observe(node, () => {
-      setSeen(true)
-    })
-  }, [ref, seen])
-  return seen
+    if (!node) return
+    return observe(node, setVisible)
+  }, [ref])
+  return visible
 }
