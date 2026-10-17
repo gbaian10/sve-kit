@@ -47,10 +47,9 @@ async function open(path = "/cards", { panel = true } = {}) {
   // jsdom reports en-US; the assertions below read the Traditional Chinese copy.
   prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: panel })
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
-  // The class buttons appear once the snapshot has loaded, whatever the results are; a collapsed
-  // panel hides them, so that case waits for the result count instead.
-  if (panel) await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
-  else await screen.findByText("個版次", {}, { timeout: 4000 })
+  // The class row sits outside the panel and appears once the snapshot has loaded, whatever the
+  // results are.
+  await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
   return rendered
 }
 
@@ -145,16 +144,14 @@ describe("CardsPage", () => {
     expect(router.state.location.search).toBe("")
   })
 
-  it("uses vocabulary rarity options and hides PR appearance styles with no data", async () => {
+  it("uses vocabulary rarity chips and shows no PR chip when the vocabulary has none", async () => {
     const { router } = await open()
-    const button = await screen.findByRole("button", { name: /稀有度/u })
-    await waitFor(() => expect(button).toBeEnabled())
-    await userEvent.click(button)
     const group = screen.getByRole("group", { name: "稀有度" })
-    expect(within(group).queryByRole("checkbox", { name: /^PR（/u })).not.toBeInTheDocument()
-    const bronze = within(group).getByRole("checkbox", { name: "銅" })
+    const bronze = within(group).getByRole("button", { name: "銅" })
+    await waitFor(() => expect(bronze).toBeEnabled())
+    expect(within(group).queryByRole("button", { name: /^PR/u })).not.toBeInTheDocument()
     await userEvent.click(bronze)
-    await waitFor(() => expect(bronze).toBeChecked())
+    await waitFor(() => expect(bronze).toHaveAttribute("aria-pressed", "true"))
     expect(router.state.location.search).toContain("rarity=bronze")
   })
 
@@ -479,11 +476,19 @@ describe("CardsPage", () => {
       const panel = document.getElementById(button.getAttribute("aria-controls") ?? "")
       expect(panel).not.toBeNull()
       expect(panel).not.toBeVisible()
-      expect(screen.queryByRole("button", { name: "精靈" })).not.toBeInTheDocument()
+      // The class row stays outside the panel, visible while collapsed, and the badge leaves it out.
+      const classRow = screen.getByRole("group", { name: "職業" })
+      expect(classRow).toBeVisible()
+      expect(panel).not.toContainElement(classRow)
+      expect(within(classRow).getByRole("button", { name: "主教" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
+      expect(button).toHaveTextContent("")
       await userEvent.click(button)
       expect(button).toHaveAttribute("aria-expanded", "true")
       expect(panel).toBeVisible()
-      expect(screen.getByRole("button", { name: "精靈" })).toBeVisible()
+      expect(panel).not.toContainElement(classRow)
       expect(prefsStore.get().filterPanelOpen).toBe(true)
       expect(within(conditions).queryByRole("button", { name: "清除" })).not.toBeInTheDocument()
       expect(

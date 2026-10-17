@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react"
-import { Fragment, useEffect, useId, useRef, useState } from "react"
+import { Fragment, type ReactNode, useEffect, useId, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { toggleFacet } from "../../domain/rarityFilter"
@@ -12,14 +12,17 @@ interface FacetOption {
   readonly fullWidth?: boolean
 }
 
-function FacetCheckbox({
+export function FacetCheckbox({
   label,
+  content,
   checked,
   mixed = false,
   count,
   onChange,
 }: {
   readonly label: string
+  /** The visual (a badge image) shown in place of the label text; the label stays the name. */
+  readonly content?: ReactNode
   readonly checked: boolean
   readonly mixed?: boolean
   readonly count: number
@@ -42,7 +45,7 @@ function FacetCheckbox({
         onChange={onChange}
         className="size-4 shrink-0 accent-accent"
       />
-      <span>{label}</span>
+      <span className="flex items-center">{content ?? label}</span>
       <span id={countId} className="ml-auto text-text-3 tabular-nums">
         {count}
       </span>

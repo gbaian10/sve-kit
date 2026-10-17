@@ -148,8 +148,16 @@ export default {
     rowPerCard: "One row per card",
     rowPerPrinting: "One row per printing",
     clearAll: "Clear all",
+    details: "{{label}} details",
+    chipTitle: "{{label}} ({{count}})",
   },
-  typeFilter: { label: "Type", gold: "Gold frame", white: "White frame", unknown: "Unconfirmed" },
+  typeFilter: {
+    label: "Type",
+    token: "Token",
+    gold: "Gold frame",
+    white: "White frame",
+    unknown: "Unconfirmed",
+  },
   rarityBadge: {
     unrated: "Unrated",
     selected: "{{count}} selected",

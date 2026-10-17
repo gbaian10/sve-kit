@@ -150,8 +150,16 @@ export default {
     rowPerCard: "カードごとに1行",
     rowPerPrinting: "版ごとに1行",
     clearAll: "すべて解除",
+    details: "{{label}}の内訳",
+    chipTitle: "{{label}}（{{count}}）",
   },
-  typeFilter: { label: "タイプ", gold: "金枠", white: "白枠", unknown: "未確認" },
+  typeFilter: {
+    label: "タイプ",
+    token: "トークン",
+    gold: "金枠",
+    white: "白枠",
+    unknown: "未確認",
+  },
   rarityBadge: {
     unrated: "分類なし",
     selected: "{{count}} 件選択",

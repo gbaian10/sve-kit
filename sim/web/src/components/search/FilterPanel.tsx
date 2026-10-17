@@ -1,17 +1,10 @@
-import { type ReactNode, useId } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
-import {
-  COST_CAP,
-  type QueryState,
-  STAT_CAP,
-  toggleClass,
-  toggleValue,
-} from "../../domain/query/model"
+import { COST_CAP, type QueryState, STAT_CAP, toggleValue } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { Button } from "../ui/Button"
-import { cn } from "../ui/cn"
-import { ClassQuickBar, type QuickBarClass } from "./ClassQuickBar"
+import { Section, Toggle } from "./FilterControls"
 
 export interface FilterPanelProps {
   /** The element id the search bar's filter button controls. */
@@ -21,8 +14,7 @@ export interface FilterPanelProps {
   readonly onChange: (next: QueryState) => void
   readonly edition: Region
   readonly onEditionChange: (edition: Region) => void
-  readonly classes: readonly QuickBarClass[]
-  /** The dropdown facets (rarity, type, set) that keep their checklist form in this version. */
+  /** The facet rows (rarity, type, set) rendered between the stats and the row unit. */
   readonly facets: ReactNode
   /** Shown while any condition is set; clears every condition. */
   readonly onClearAll?: (() => void) | undefined
@@ -31,46 +23,9 @@ export interface FilterPanelProps {
 const EDITIONS = ["jp", "en"] as const
 const range = (cap: number) => Array.from({ length: cap + 1 }, (_, value) => value)
 
-function Toggle({
-  pressed,
-  onClick,
-  children,
-}: {
-  readonly pressed: boolean
-  readonly onClick: () => void
-  readonly children: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={cn(
-        "flex h-9 min-w-9 items-center justify-center rounded-control border px-2.5 text-13 font-semibold whitespace-nowrap tabular-nums",
-        pressed
-          ? "border-text-1 bg-surface-3 text-text-1 ring-1 ring-text-1 ring-inset"
-          : "border-border bg-surface-1 text-text-2 hover:bg-surface-2",
-      )}
-    >
-      {children}
-    </button>
-  )
-}
-
-function Section({ title, children }: { readonly title: string; readonly children: ReactNode }) {
-  const id = useId()
-  return (
-    <div role="group" aria-labelledby={id} className="flex flex-col gap-1.5">
-      <p id={id} className="text-12 font-semibold text-text-2">
-        {title}
-      </p>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
-    </div>
-  )
-}
-
 // Every button applies at once (the maintainer chose the reference site's behaviour over the
-// drafted "apply" step); the panel only renders the committed state it is given.
+// drafted "apply" step); the panel only renders the committed state it is given. The class row
+// lives outside the panel so it stays visible while this is collapsed.
 export function FilterPanel({
   id,
   open,
@@ -78,7 +33,6 @@ export function FilterPanel({
   onChange,
   edition,
   onEditionChange,
-  classes,
   facets,
   onClearAll,
 }: FilterPanelProps) {
@@ -117,16 +71,6 @@ export function FilterPanel({
           </Button>
         </div>
       )}
-      {classes.length > 0 && (
-        <ClassQuickBar
-          label={t("search.classes")}
-          classes={classes}
-          selected={query.classes}
-          onToggle={(code) => {
-            onChange(toggleClass(query, code))
-          }}
-        />
-      )}
       <Section title={t("filters.edition")}>
         {EDITIONS.map((code) => (
           <Toggle
@@ -143,7 +87,7 @@ export function FilterPanel({
       {stat(t("filters.cost"), "cost", COST_CAP, query.cost)}
       {stat(t("filters.attack"), "attack", STAT_CAP, query.attack)}
       {stat(t("filters.defense"), "defense", STAT_CAP, query.defense)}
-      <div className="flex flex-wrap items-start gap-2">{facets}</div>
+      {facets}
       <Section title={t("filters.rows")}>
         <Toggle
           pressed={query.unit === "card"}

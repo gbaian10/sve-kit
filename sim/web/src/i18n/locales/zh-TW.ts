@@ -143,8 +143,10 @@ const zhTW = {
     rowPerCard: "每張卡一行",
     rowPerPrinting: "每個版次一行",
     clearAll: "清除全部",
+    details: "{{label}}的細項",
+    chipTitle: "{{label}}（{{count}}）",
   },
-  typeFilter: { label: "類型", gold: "金框", white: "白框", unknown: "待確認" },
+  typeFilter: { label: "類型", token: "Token", gold: "金框", white: "白框", unknown: "待確認" },
   rarityBadge: {
     unrated: "無分類",
     selected: "已選 {{count}} 項",

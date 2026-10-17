@@ -91,7 +91,7 @@ describe("query codec", () => {
         altArtOnly: true,
         unit: "art",
       }),
-    ).toBe(5)
+    ).toBe(4)
   })
 
   it("toggles a stat value and keeps the list in numeric order", () => {

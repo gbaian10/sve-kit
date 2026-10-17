@@ -37,7 +37,7 @@ import { CardList, CardTable } from "../../components/results/CardRows"
 import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
-import type { QuickBarClass } from "../../components/search/ClassQuickBar"
+import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { FilterPanel } from "../../components/search/FilterPanel"
 import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
@@ -405,7 +405,7 @@ export function CardsPage() {
       ? t("search.neutral")
       : (quickBar.find((item) => item.code === code)?.label ?? code)
   const filterCount = activeFilterCount(query)
-  const hasConditions = query.text !== "" || filterCount > 0
+  const hasConditions = query.text !== "" || query.classes.length > 0 || filterCount > 0
   const panelOpen = prefs.filterPanelOpen
   const resultCount =
     page !== null ? (
@@ -525,6 +525,17 @@ export function CardsPage() {
           </div>
         )}
       </div>
+      {/* The class row is the one filter outside the panel: always visible, so the page is never bare. */}
+      {quickBar.length > 0 && (
+        <ClassQuickBar
+          label={t("search.classes")}
+          classes={quickBar}
+          selected={query.classes}
+          onToggle={(code) => {
+            commit(toggleClass(query, code))
+          }}
+        />
+      )}
       <FilterPanel
         id={panelId}
         open={panelOpen}
@@ -532,7 +543,6 @@ export function CardsPage() {
         onChange={commit}
         edition={edition}
         onEditionChange={commitEdition}
-        classes={quickBar}
         onClearAll={
           hasConditions
             ? () => {
@@ -548,6 +558,7 @@ export function CardsPage() {
                 label: rarity.name.translations[textLang] ?? rarity.name.original.text,
               }))}
               options={printingOptions?.rarity}
+              edition={edition}
               selected={query.rarities}
               onChange={(rarities) => {
                 commit({ ...query, rarities })
