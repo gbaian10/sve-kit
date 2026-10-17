@@ -62,6 +62,23 @@ describe("datedSets and recentSets", () => {
     ])
   })
 
+  it("chooses the latest set separately for each card edition", () => {
+    const sets = [set("jp-latest"), set("en-latest"), set("jp-older"), set("en-older")]
+    const products = [
+      product(["jp-latest"], "jp", "2026-09-01"),
+      product(["jp-older"], "jp", "2026-03-01"),
+      product(["en-latest"], "en", "2026-08-01"),
+      product(["en-older"], "en", "2026-02-01"),
+    ]
+
+    expect(recentSets(datedSets(sets, products, "jp"), 1).map((item) => item.id)).toEqual([
+      "jp-latest",
+    ])
+    expect(recentSets(datedSets(sets, products, "en"), 1).map((item) => item.id)).toEqual([
+      "en-latest",
+    ])
+  })
+
   it("dates every family of a composite product by the earliest regional product", () => {
     const sets = [set("s1"), set("s2"), set("s3", "collaboration")]
     const products = [

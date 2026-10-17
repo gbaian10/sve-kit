@@ -51,7 +51,7 @@ import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
 import { Columns, StringPool } from "./columns"
 import { SearchEngine } from "./engine"
-import { SearchIndex } from "./index"
+import { SearchIndex, uniquePromoLeader } from "./index"
 import type { BootstrapPlan, SearchEvent, SearchRequest } from "./messages"
 import { PreviewReader } from "./preview"
 import type { SearchTransportFactory } from "./session"
@@ -63,6 +63,38 @@ const built = await buildSnapshot({
 // Legacy catalog comparisons exercise explicit card grouping alongside the printing default.
 const CARD_QUERY = { ...DEFAULT_QUERY, unit: "card" as const }
 const query: SearchQuery = { state: CARD_QUERY, edition: "jp", limit: 100 }
+
+it("chooses the uniquely largest promo family and hides ties", () => {
+  const promos = [
+    {
+      id: "pr",
+      code: "PR",
+      name: {
+        original: { lang: "ja" as const, text: "" },
+        translations: { "zh-Hant": "", en: "" },
+      },
+    },
+    {
+      id: "bsf24",
+      code: "BSF2024",
+      name: {
+        original: { lang: "ja" as const, text: "" },
+        translations: { "zh-Hant": "", en: "" },
+      },
+    },
+    {
+      id: "bsf25",
+      code: "BSF2025",
+      name: {
+        original: { lang: "ja" as const, text: "" },
+        translations: { "zh-Hant": "", en: "" },
+      },
+    },
+  ]
+  expect(uniquePromoLeader(promos, { PR: 557, BSF2024: 1, BSF2025: 1 })?.code).toBe("PR")
+  expect(uniquePromoLeader(promos, { PR: 2, BSF2024: 2, BSF2025: 1 })).toBeUndefined()
+})
+
 const base = "https://cdn.test"
 function origin() {
   const files = new Map(built.files)

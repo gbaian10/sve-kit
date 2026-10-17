@@ -121,6 +121,7 @@ const zhTW = {
     label: "搜尋卡片",
     clear: "清除",
     filters: "篩選",
+    filtersSelected: "已啟用 {{count}} 個篩選條件",
     suggestions: "建議",
     seeAll: "看全部 {{count}} 張",
     noSuggestions: "沒有符合的卡",
@@ -148,6 +149,7 @@ const zhTW = {
     statChip: "{{section}} {{value}}",
     subChip: "{{parent}}・{{child}}",
   },
+  quickSet: { latest: "最新：{{code}}", latestAccessible: "最新卡包：{{name}}" },
   typeFilter: { label: "類型", token: "Token", gold: "金框", white: "白框", unknown: "待確認" },
   rarityBadge: {
     unrated: "無分類",

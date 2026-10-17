@@ -514,6 +514,7 @@ function useSummaryImages(result: SearchChannelStatus["previous"], edition: Regi
       options: {
         classes: [],
         sets: [],
+        quickSets: {},
         rarities: [],
         prBadgeStyles: [],
         rarityCounts: {},
@@ -563,6 +564,7 @@ export function useSetOptions() {
   })
   return {
     sets: view?.options.sets,
+    quickSets: view?.options.quickSets,
     setCounts: view?.options.setCounts,
     classes: view?.options.classes,
     rarities: view?.options.rarities,

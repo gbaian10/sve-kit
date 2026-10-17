@@ -125,6 +125,7 @@ export default {
     label: "Search cards",
     clear: "Clear",
     filters: "Filters",
+    filtersSelected: "{{count}} filters selected",
     suggestions: "Suggestions",
     seeAll: "See all {{count}}",
     noSuggestions: "No matching cards",
@@ -153,6 +154,7 @@ export default {
     statChip: "{{section}} {{value}}",
     subChip: "{{parent}} · {{child}}",
   },
+  quickSet: { latest: "Latest: {{code}}", latestAccessible: "Latest set: {{name}}" },
   typeFilter: {
     label: "Type",
     token: "Token",

@@ -43,7 +43,7 @@ export function SearchBar({
 }: SearchBarProps) {
   const { t } = useTranslation()
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <div className="relative flex h-11 min-w-0 flex-1 items-center">
         <svg
           aria-hidden="true"
@@ -118,16 +118,21 @@ export function SearchBar({
           title={t("search.filters")}
           aria-expanded={filtersOpen}
           aria-controls={filtersId}
+          aria-describedby={
+            filterCount > 0 && filtersId ? `${filtersId}-count-description` : undefined
+          }
           onClick={onToggleFilters}
           className={cn(
-            "relative flex size-11 shrink-0 items-center justify-center rounded-button border text-text-1 hover:bg-surface-2",
-            filtersOpen ? "border-text-1 bg-surface-3" : "border-border bg-surface-1",
+            "relative flex h-11 shrink-0 items-center justify-center gap-2 rounded-button border px-3 text-13 font-semibold whitespace-nowrap",
+            filtersOpen
+              ? "border-accent bg-accent text-accent-ink hover:brightness-105"
+              : "border-border bg-surface-1 text-text-1 hover:bg-surface-2",
           )}
         >
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            className="size-5"
+            className="size-4 shrink-0"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -135,9 +140,18 @@ export function SearchBar({
           >
             <path d="M4 6h16M7 12h10M10 18h4" />
           </svg>
+          <span>{t("search.filters")}</span>
           {filterCount > 0 && (
-            <span className="absolute top-1 right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-11 font-bold text-accent-ink tabular-nums">
+            <span
+              aria-hidden="true"
+              className="absolute top-1 right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-11 font-bold text-accent-ink tabular-nums"
+            >
               {filterCount}
+            </span>
+          )}
+          {filterCount > 0 && filtersId && (
+            <span id={`${filtersId}-count-description`} className="sr-only">
+              {t("search.filtersSelected", { count: filterCount })}
             </span>
           )}
         </button>

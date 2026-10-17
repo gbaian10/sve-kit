@@ -128,6 +128,7 @@ export default {
     label: "カードを検索",
     clear: "クリア",
     filters: "絞り込み",
+    filtersSelected: "{{count}} 個の絞り込み条件を選択中",
     suggestions: "候補",
     seeAll: "すべて見る（{{count}}枚）",
     noSuggestions: "該当するカードはありません",
@@ -155,6 +156,7 @@ export default {
     statChip: "{{section}} {{value}}",
     subChip: "{{parent}}・{{child}}",
   },
+  quickSet: { latest: "最新：{{code}}", latestAccessible: "最新カードセット：{{name}}" },
   typeFilter: {
     label: "タイプ",
     token: "トークン",
