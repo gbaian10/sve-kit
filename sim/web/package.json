@@ -10,6 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
+    "typecheck:local": "UV_THREADPOOL_SIZE=4 bun --check",
     "lint": "bun run lint:js && bun run lint:css",
     "lint:js": "eslint --max-warnings=0 --no-warn-ignored",
     "lint:css": "stylelint \"src/**/*.css\"",

@@ -37,22 +37,25 @@ root and the badge switches roots by hand. Only two derived flags reach browser 
 
 ## Scripts
 
-| Script                 | What it does                                              |
-| ---------------------- | --------------------------------------------------------- |
-| `bun run check`        | Everything below, in order; run it before pushing         |
-| `bun run format:check` | Prettier (`bun run format` rewrites)                      |
-| `bun run lint`         | ESLint (`lint:js`) and Stylelint (`lint:css`)             |
-| `bun run typecheck`    | `tsc -b` with TypeScript 6                                |
-| `bun run test`         | Vitest, including the ESLint and Stylelint rule fixtures  |
-| `bun run build`        | Production build into `dist/`                             |
-| `bun run shots`        | Manual: real-browser screenshots and geometry (see below) |
+| Script                    | What it does                                                 |
+| ------------------------- | ------------------------------------------------------------ |
+| `bun run check`           | Everything below, in order; run it before pushing            |
+| `bun run format:check`    | Prettier (`bun run format` rewrites)                         |
+| `bun run lint`            | ESLint (`lint:js`) and Stylelint (`lint:css`)                |
+| `bun run typecheck`       | `tsc -b` with TypeScript 6                                   |
+| `bun run typecheck:local` | Pre-push only, not in `check`: `bun --check` (TypeScript-Go) |
+| `bun run test`            | Vitest, including the ESLint and Stylelint rule fixtures     |
+| `bun run build`           | Production build into `dist/`                                |
+| `bun run shots`           | Manual: real-browser screenshots and geometry (see below)    |
 
 `bun test` is Bun's own test runner and ignores the Vitest config. Always use `bun run test`.
 
 The pre-commit hooks run Prettier, ESLint and Stylelint on changed files; the pre-push hook checks
-types with `bun --check` (Bun's TypeScript-Go checker, under a second), while CI keeps `tsc -b` as the
-gate. Vitest is a manual hook (`pre-commit run --hook-stage manual web-test`); CI runs
-the whole `bun run check` on every web change.
+types with `typecheck:local` (under a second), while CI keeps `tsc -b` as the gate. That script caps
+`UV_THREADPOOL_SIZE`, libuv's pool size, which `bun --check` uses as its thread count. Write
+`bun --check`, not `bun check`: the latter runs this package's `check` script. Vitest is a manual
+hook (`pre-commit run --hook-stage manual web-test`); CI runs the whole `bun run check` on every web
+change.
 
 ## Theme tokens
 
