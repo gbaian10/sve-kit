@@ -1,5 +1,12 @@
+import type { DisplayedText, NameSource } from "./nameDisplay"
 import { compareCodePoints } from "./normalize"
-import type { Region } from "./search"
+import type { Region, TextLang } from "./search"
+
+/** A set name in the interface's text language, else the original. */
+export function setLabel(name: NameSource, lang: TextLang): DisplayedText {
+  const translated = name.translations[lang]
+  return translated ? { text: translated, lang } : name.original
+}
 
 // The home page's set entries (#519). Product release dates only order sets and are shown; they
 // never decide which printings a set holds (`set=` stays on the printing's home set).

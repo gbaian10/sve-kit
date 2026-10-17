@@ -24,6 +24,7 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
     text: str,
     origin: Literal["project", "machine"],
     low_confidence: bool,
+    semantic_variant: str = "default",
 ) -> None:
     """Insert context, use, translation and selection; a differing repeat is a conflict."""
     if not owner or not set(owner) <= _OWNER_COLUMNS:
@@ -40,7 +41,7 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
                 {
                     "recipe": "context-v1",
                     "source_unit_id": source_unit_id,
-                    "semantic_variant": "default",
+                    "semantic_variant": semantic_variant,
                 }
             )
         )[7:]
@@ -51,7 +52,7 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
         {
             "id": context,
             "source_unit_id": source_unit_id,
-            "semantic_variant": "default",
+            "semantic_variant": semantic_variant,
         },
         ("id",),
     )

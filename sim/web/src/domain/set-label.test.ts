@@ -1,6 +1,6 @@
 import { expect, it } from "vitest"
 
-import { setLabel } from "./home-model"
+import { setLabel } from "./sets"
 
 it("selects a family label by interface language and falls back to its original", () => {
   const original = { text: "試作パック", lang: "ja" as const }
@@ -9,4 +9,5 @@ it("selects a family label by interface language and falls back to its original"
   expect(setLabel(name, "ja")).toEqual(original)
   expect(setLabel(name, "en")).toEqual(original)
   expect(setLabel({ original, translations: {} }, "zh-Hant")).toEqual(original)
+  expect(setLabel({ original, translations: { "zh-Hant": "" } }, "zh-Hant")).toEqual(original)
 })

@@ -110,3 +110,31 @@ def test_family_label_populates_translation_tables(tmp_path: Path) -> None:
         assert db.rows("translation")[0].values["text"] == "試作卡包"
         assert db.rows("translation")[0].values["authority"] == "unofficial"
         assert len(db.rows("translation_selection")) == 1
+
+
+def test_families_with_the_same_original_keep_distinct_labels(tmp_path: Path) -> None:
+    other = label("OTHER")
+    data = other["data"]
+    assert isinstance(data, dict)
+    data["text"] = "另一卡包"
+    authored(tmp_path, [label(), other])
+    with create_database(
+        compile_build(("t0", "translation_evidence", "translation_names"))
+    ) as db:
+        seed(db)
+        with db.transaction():
+            db.insert(
+                "product_family",
+                dict(db.rows("product_family")[0].values)
+                | {
+                    "id": "other-family",
+                    "code": "other",
+                    "public_code": "OTHER",
+                },
+            )
+            apply(db, read_inputs(tmp_path))
+        assert len(db.rows("translation_context")) == 2
+        assert {row.values["text"] for row in db.rows("translation")} == {
+            "試作卡包",
+            "另一卡包",
+        }

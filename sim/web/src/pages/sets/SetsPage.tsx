@@ -5,6 +5,7 @@ import { StatusStrip } from "../../app/StatusStrip"
 import { Link } from "../../components/ui/Link"
 import { UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { editionUrl } from "../../domain/query/codec"
+import { setLabel } from "../../domain/sets"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -30,7 +31,7 @@ export function SetsPage() {
               to={editionUrl(`/sets/${encodeURIComponent(set.publicCode ?? set.code)}`, edition)}
             >
               <span className="font-semibold">{set.publicCode ?? set.code}</span>
-              <span>{set.name.translations[language] ?? set.name.original.text}</span>
+              <span>{setLabel(set.name, language).text}</span>
             </Link>
           </li>
         ))}

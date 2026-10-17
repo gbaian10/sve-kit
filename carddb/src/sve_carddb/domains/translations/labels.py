@@ -74,4 +74,5 @@ def apply(db: Database, inputs: Inputs) -> None:
             text=record.data.text,
             origin=record.origin,
             low_confidence=record.low_confidence,
+            semantic_variant="product_family:" + str(family["id"]),
         )

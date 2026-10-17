@@ -1,15 +1,14 @@
 import { useTranslation } from "react-i18next"
 
+import type { NameSource } from "../../domain/nameDisplay"
 import type { TextLang } from "../../domain/search"
+import { setLabel } from "../../domain/sets"
 import { FacetFilter } from "./FacetFilter"
 
 interface SetOption {
   readonly code: string
   readonly publicCode?: string
-  readonly name: {
-    readonly original: { readonly text: string }
-    readonly translations: Partial<Record<TextLang, string>>
-  }
+  readonly name: NameSource
 }
 
 export function SetFilter({
@@ -28,7 +27,7 @@ export function SetFilter({
   const { t } = useTranslation()
   const options = (sets ?? []).map((set) => ({
     code: set.code,
-    label: `${set.publicCode ?? set.code} ${set.name.translations[textLang] ?? set.name.original.text}`,
+    label: `${set.publicCode ?? set.code} ${setLabel(set.name, textLang).text}`,
     fullWidth: true,
   }))
   return (

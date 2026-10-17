@@ -317,7 +317,8 @@ code 與 text 必須非空白且無首尾空白；沿用 record 外層的 origin
 origin 只允許 project／machine，不據此主張官方權威。
 
 這是可直接修改的當前譯名，唯一來源位於 authored，不另存前端字典。
-建置以 family 自己的 name_unit_id 為來源，寫入 label 的 context/use/translation/selection；
+建置以 family 自己的 name_unit_id 為來源、`product_family:<family_id>` 為 semantic_variant，
+寫入 label 的 context/use/translation/selection；同原名的不同 family 不共用譯名選用，
 公開匯出沿用既有 FieldTranslation。介面依語言選用，缺譯名退回原文。
 此入口只實作 product_family；product label 仍未實作，也沒有 product→family 譯名回退。
 
