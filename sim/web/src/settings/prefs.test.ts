@@ -191,3 +191,23 @@ it("restores each edition's comparison choice independently", () => {
   writePrefs(prefs)
   expect(readPrefs().showOtherEdition).toEqual({ jp: true, en: false })
 })
+
+it("persists list columns and widths, rejecting settings without an identity column", () => {
+  const store = createPrefsStore()
+  store.set({
+    listWidths: { name: 280 },
+    listVisibility: { ...DEFAULT_PREFS.listVisibility, rarity: false },
+  })
+  expect(createPrefsStore().get()).toMatchObject({
+    listWidths: { name: 280 },
+    listVisibility: { rarity: false },
+  })
+  localStorage.setItem(
+    PREFS_KEY,
+    JSON.stringify({
+      v: 1,
+      listVisibility: { ...DEFAULT_PREFS.listVisibility, number: false, name: false },
+    }),
+  )
+  expect(readPrefs().listVisibility).toEqual(DEFAULT_PREFS.listVisibility)
+})

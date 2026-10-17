@@ -34,6 +34,7 @@ import { StatusStrip } from "../../app/StatusStrip"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
 import { CardList, CardTable } from "../../components/results/CardRows"
+import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
@@ -628,7 +629,8 @@ export function CardsPage() {
               </b>{" "}
               {query.unit === "printing" ? t("results.countPrintingUnit") : t("results.countUnit")}
             </p>
-            <div className="ml-auto flex items-center gap-2">
+            {view === "list" && <ListColumnPicker />}
+            <div className="ml-auto flex flex-wrap items-center gap-2">
               <label className="flex items-center gap-1 text-13">
                 <span>{t("results.sort")}</span>
                 <select

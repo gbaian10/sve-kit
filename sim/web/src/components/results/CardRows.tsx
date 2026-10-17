@@ -3,8 +3,10 @@ import {
   memo,
   type MouseEvent,
   type RefObject,
+  useId,
   useLayoutEffect,
   useRef,
+  useState,
 } from "react"
 import { useHref, useNavigate } from "react-router"
 
@@ -13,11 +15,19 @@ import { type ImageSource } from "../../data"
 import { classStyle } from "../../domain/classes"
 import type { QueryState } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
-import { usePrefs } from "../../settings"
+import {
+  LIST_COLUMNS,
+  LIST_MIN_WIDTHS,
+  type ListColumn,
+  type ListVisibility,
+  prefsStore,
+  usePrefs,
+} from "../../settings"
 import { InlineText } from "../card/InlineText"
 import { RarityBadges } from "../card/RarityBadges"
 import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
 import { StatLine } from "../card/StatLine"
+import { ATTACK_ICON, DEFENSE_ICON } from "../card/symbolIcons"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { ArtThumb } from "./ArtThumb"
@@ -311,18 +321,66 @@ const ListRow = memo(function ListRow({
   highlighted,
   labels,
   rowIndex,
+  visibility,
 }: {
   readonly cell: GridCell
   readonly onOpen: CardRowsProps["onOpen"]
   readonly highlighted: boolean
   readonly labels: ResultLabels
   readonly rowIndex: number
+  readonly visibility: ListVisibility
 }) {
   const row = useRef<HTMLTableRowElement>(null)
   const link = useRef<HTMLAnchorElement>(null)
   const seen = useVisible(row)
   const navigate = useNavigate()
   const href = useHref(cell.to)
+  const navigationLink = (
+    <a
+      ref={link}
+      href={href}
+      data-result-key={cell.key}
+      data-row-name=""
+      lang={cell.name.primary.lang}
+      title={cell.name.primary.text}
+      onClick={(event) => {
+        if (!isPlainClick(event)) return
+        if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
+          event.preventDefault()
+          return
+        }
+        event.preventDefault()
+        const state = onOpen(cell, event) ?? cell.state
+        void navigate(cell.to, { state })
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return
+        const next =
+          event.key === "ArrowDown"
+            ? row.current?.nextElementSibling
+            : row.current?.previousElementSibling
+        const target = next?.querySelector<HTMLAnchorElement>("a[data-result-key]")
+        if (target) {
+          event.preventDefault()
+          target.focus()
+        }
+      }}
+    >
+      {visibility.name && <NameNotices name={cell.name} labels={labels} compact />}
+      {visibility.name ? cell.name.primary.text : cell.summary.cardNo}
+      {visibility.name && cell.name.secondary && (
+        <>
+          <span
+            aria-hidden="true"
+            className="mx-2 inline-block h-3 border-l border-border-strong align-middle"
+          />
+          <span lang={cell.name.secondary.lang} className="font-normal text-text-2">
+            {cell.name.secondary.text}
+          </span>
+        </>
+      )}
+    </a>
+  )
   return (
     <tr
       ref={row}
@@ -335,81 +393,42 @@ const ListRow = memo(function ListRow({
         link.current?.click()
       }}
     >
-      <td data-list-number="">
-        <span>{cell.summary.cardNo}</span>
-      </td>
-      <td data-list-rarity="">
-        <RarityBadges {...cell.summary} />
-      </td>
-      <td data-list-name="">
-        <a
-          ref={link}
-          href={href}
-          data-result-key={cell.key}
-          data-row-name=""
-          lang={cell.name.primary.lang}
-          title={cell.name.primary.text}
-          onClick={(event) => {
-            if (!isPlainClick(event)) return
-            if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
-              event.preventDefault()
-              return
-            }
-            event.preventDefault()
-            const state = onOpen(cell, event) ?? cell.state
-            void navigate(cell.to, { state })
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return
-            const next =
-              event.key === "ArrowDown"
-                ? row.current?.nextElementSibling
-                : row.current?.previousElementSibling
-            const target = next?.querySelector<HTMLAnchorElement>("a[data-result-key]")
-            if (target) {
-              event.preventDefault()
-              target.focus()
-            }
-          }}
-        >
-          <NameNotices name={cell.name} labels={labels} compact />
-          {cell.name.primary.text}
-          {cell.name.secondary && (
-            <>
-              <span
-                aria-hidden="true"
-                className="mx-2 inline-block h-3 border-l border-border-strong align-middle"
+      {visibility.number && (
+        <td data-list-number="">
+          {visibility.name ? <span>{cell.summary.cardNo}</span> : navigationLink}
+        </td>
+      )}
+      {visibility.rarity && (
+        <td data-list-rarity="">
+          <RarityBadges {...cell.summary} />
+        </td>
+      )}
+      {visibility.name && <td data-list-name="">{navigationLink}</td>}
+      {visibility.cost && <td data-list-stat="">{cell.summary.cost ?? labels.noValue}</td>}
+      {visibility.attack && <td data-list-stat="">{cell.summary.attack ?? labels.noValue}</td>}
+      {visibility.defense && <td data-list-stat="">{cell.summary.defense ?? labels.noValue}</td>}
+      {visibility.effect && (
+        <td data-list-effect="">
+          <span data-list-effect-text="">
+            {cell.summary.wordingPending && (
+              <Badge className="mr-2 align-middle">{labels.wordingPending}</Badge>
+            )}
+            {seen ? (
+              <EffectPreview
+                printingId={cell.summary.printingId}
+                faceId={cell.summary.faceId}
+                edition={cell.summary.region}
+                labels={labels}
+                singleLine
               />
-              <span lang={cell.name.secondary.lang} className="font-normal text-text-2">
-                {cell.name.secondary.text}
+            ) : (
+              <span data-preview="waiting" className="text-text-3 italic">
+                {labels.effectPending}
               </span>
-            </>
-          )}
-        </a>
-      </td>
-      <td data-list-stat="">{cell.summary.cost ?? labels.noValue}</td>
-      <td data-list-stat="">{cell.summary.attack ?? labels.noValue}</td>
-      <td data-list-stat="">{cell.summary.defense ?? labels.noValue}</td>
-      <td data-list-effect="">
-        <span data-list-effect-text="">
-          {cell.summary.wordingPending && (
-            <Badge className="mr-2 align-middle">{labels.wordingPending}</Badge>
-          )}
-          {seen ? (
-            <EffectPreview
-              printingId={cell.summary.printingId}
-              faceId={cell.summary.faceId}
-              edition={cell.summary.region}
-              labels={labels}
-              singleLine
-            />
-          ) : (
-            <span data-preview="waiting" className="text-text-3 italic">
-              {labels.effectPending}
-            </span>
-          )}
-        </span>
-      </td>
+            )}
+          </span>
+        </td>
+      )}
     </tr>
   )
 })
@@ -428,23 +447,56 @@ export function CardList({
   const scroll = useRef<HTMLDivElement>(null)
   const body = useRef<HTMLTableSectionElement>(null)
   const windowed = useRowWindow(body, cells.length)
+  const { listVisibility, listWidths } = usePrefs()
+  const tableId = useId()
+  const [overflow, setOverflow] = useState(false)
+  useLayoutEffect(() => {
+    const container = scroll.current
+    const table = container?.querySelector("table")
+    if (!container || !table || typeof ResizeObserver === "undefined") return
+    const update = () => {
+      setOverflow(table.offsetWidth > container.clientWidth)
+    }
+    const observer = new ResizeObserver(update)
+    observer.observe(container)
+    observer.observe(table)
+    update()
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
   useLayoutEffect(() => {
     if (!scroll.current || !scrollPositionRef) return
     scroll.current.scrollTop = scrollPositionRef.current.top
     scroll.current.scrollLeft = scrollPositionRef.current.left
-  }, [scrollPositionRef])
-  const columns = [
-    ["no", labels.t("results.columns.number")],
-    [null, labels.t("results.columns.rarity")],
-    ["name", labels.t("results.columns.name")],
-    ["cost", labels.stats.cost],
-    ["atk", labels.stats.attack],
-    ["def", labels.stats.defense],
-  ] as const
+  }, [overflow, scrollPositionRef])
+  const columns = LIST_COLUMNS.filter((column) => listVisibility[column])
+  const names = {
+    number: labels.t("results.columns.number"),
+    rarity: labels.t("results.columns.rarity"),
+    name: labels.t("results.columns.name"),
+    cost: labels.stats.cost,
+    attack: labels.stats.attack,
+    defense: labels.stats.defense,
+    effect: labels.t("results.columns.effect"),
+  }
+  const sorts = { number: "no", name: "name", cost: "cost", attack: "atk", defense: "def" } as const
+  const style = {
+    "--rarity-column-min-width": `${String(RARITY_COLUMN_MIN_WIDTH)}px`,
+    "--rarity-badge-height": `${String(RARITY_BADGE_HEIGHT)}px`,
+    ...Object.fromEntries(
+      Object.entries(listWidths).map(([column, width]) => [
+        `--list-user-${column}`,
+        `${String(width)}px`,
+      ]),
+    ),
+    minWidth: `calc(${columns.map((column) => `var(--list-size-${column})`).join(" + ")})`,
+  } as CSSProperties
   return (
     <div
       ref={scroll}
       data-list-scroll=""
+      data-list-overflow={overflow || undefined}
       onScroll={(event) => {
         if (scrollPositionRef)
           scrollPositionRef.current = {
@@ -454,60 +506,91 @@ export function CardList({
       }}
     >
       <table
+        id={tableId}
+        style={style}
+        data-frozen-column={listVisibility.name ? "name" : "number"}
         data-view="list"
         data-card-list=""
-        style={
-          {
-            "--rarity-column-min-width": `${String(RARITY_COLUMN_MIN_WIDTH)}px`,
-            "--rarity-badge-height": `${String(RARITY_BADGE_HEIGHT)}px`,
-          } as CSSProperties
-        }
         data-loaded-count={cells.length}
         aria-rowcount={cells.length + 1}
         aria-label={labels.t("results.listLabel")}
       >
         <colgroup>
-          <col data-list-number-col="" />
-          <col data-list-rarity-col="" />
-          <col data-list-name-col="" />
-          <col span={3} data-list-stat-col="" />
-          <col data-list-effect-col="" />
+          {columns.map((column) => (
+            <col
+              key={column}
+              data-list-col={column}
+              data-list-effect-col={column === "effect" ? "" : undefined}
+            />
+          ))}
         </colgroup>
         <thead>
           <tr aria-rowindex={1}>
-            {columns.map(([key, label]) => (
-              <th
-                key={key ?? "rarity"}
-                scope="col"
-                aria-sort={
-                  key === null
-                    ? undefined
-                    : sort === key
-                      ? descending
-                        ? "descending"
-                        : "ascending"
-                      : "none"
-                }
-              >
-                {key === null ? (
-                  label
+            {columns.map((column) => {
+              const key = column === "rarity" || column === "effect" ? null : sorts[column]
+              const label = names[column]
+              const title =
+                column === "cost" ? (
+                  <span
+                    aria-hidden="true"
+                    className="mx-auto block size-3 rounded-full bg-success ring-1 ring-text-1/30 ring-inset"
+                  />
+                ) : column === "attack" || column === "defense" ? (
+                  <img
+                    src={column === "attack" ? ATTACK_ICON : DEFENSE_ICON}
+                    alt=""
+                    className="mx-auto size-4"
+                  />
                 ) : (
-                  <button type="button" onClick={() => onSort?.(key)}>
-                    <span data-sort-label="">{label}</span>
-                    <span data-sort-arrow="" aria-hidden="true">
-                      {sort === key ? (descending ? " ↓" : " ↑") : ""}
-                    </span>
-                  </button>
-                )}
-              </th>
-            ))}
-            <th scope="col">{labels.t("results.columns.effect")}</th>
+                  label
+                )
+              return (
+                <th
+                  key={column}
+                  data-list-heading={column}
+                  scope="col"
+                  aria-label={label}
+                  title={label}
+                  aria-sort={
+                    key === null
+                      ? undefined
+                      : sort === key
+                        ? descending
+                          ? "descending"
+                          : "ascending"
+                        : "none"
+                  }
+                >
+                  {key === null ? (
+                    <span data-list-heading-label="">{title}</span>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label={label}
+                      title={label}
+                      onClick={() => onSort?.(key)}
+                    >
+                      <span data-sort-label="">{title}</span>
+                      <span data-sort-arrow="" aria-hidden="true">
+                        {sort === key ? (descending ? " ↓" : " ↑") : ""}
+                      </span>
+                    </button>
+                  )}
+                  <ColumnResize
+                    column={column}
+                    label={labels.t("results.resizeColumn", { column: label })}
+                    tableId={tableId}
+                    width={listWidths[column]}
+                  />
+                </th>
+              )
+            })}
           </tr>
         </thead>
         <tbody ref={body}>
           {windowed.before > 0 && (
             <tr data-list-spacer="" aria-hidden="true">
-              <td colSpan={7} style={{ height: windowed.before }} />
+              <td colSpan={columns.length} style={{ height: windowed.before }} />
             </tr>
           )}
           {cells.slice(windowed.start, windowed.end).map((cell, index) => (
@@ -518,11 +601,12 @@ export function CardList({
               highlighted={anchor === cell.key}
               labels={labels}
               rowIndex={windowed.start + index}
+              visibility={listVisibility}
             />
           ))}
           {windowed.after > 0 && (
             <tr data-list-spacer="" aria-hidden="true">
-              <td colSpan={7} style={{ height: windowed.after }} />
+              <td colSpan={columns.length} style={{ height: windowed.after }} />
             </tr>
           )}
         </tbody>
@@ -531,3 +615,131 @@ export function CardList({
     </div>
   )
 }
+
+/* eslint-disable jsx-a11y/no-interactive-element-to-noninteractive-role -- Focusable ARIA separators support resizing; this rule only recognizes static separators. */
+function ColumnResize({
+  column,
+  label,
+  tableId,
+  width,
+}: {
+  readonly column: ListColumn
+  readonly label: string
+  readonly tableId: string
+  readonly width: number | undefined
+}) {
+  const drag = useRef<{
+    pointer: number
+    x: number
+    width: number
+    draft: number
+    table: HTMLTableElement
+    previous: string
+    moved: boolean
+  } | null>(null)
+  const handleRef = useRef<HTMLButtonElement>(null)
+  const [measured, setMeasured] = useState<{ width: number; minimum: number } | null>(null)
+  const variable = `--list-user-${column}`
+  useLayoutEffect(() => {
+    const heading = handleRef.current?.parentElement
+    if (!heading) return
+    const text =
+      column === "rarity" ? heading.querySelector<HTMLElement>("[data-list-heading-label]") : null
+    const update = () => {
+      let minimum = LIST_MIN_WIDTHS[column]
+      if (text) {
+        const style = getComputedStyle(heading)
+        const edges = [
+          style.paddingLeft,
+          style.paddingRight,
+          style.borderLeftWidth,
+          style.borderRightWidth,
+        ].reduce((sum, value) => sum + (Number.parseFloat(value) || 0), 0)
+        minimum = Math.max(minimum, Math.ceil(text.getBoundingClientRect().width + edges))
+        heading
+          .closest("table")
+          ?.style.setProperty("--rarity-column-min-width", `${String(minimum)}px`)
+      }
+      const width = Math.round(heading.getBoundingClientRect().width)
+      setMeasured((previous) =>
+        previous?.width === width && previous.minimum === minimum ? previous : { width, minimum },
+      )
+    }
+    update()
+    if (typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(update)
+    observer.observe(heading)
+    if (text) observer.observe(text)
+    return () => {
+      observer.disconnect()
+    }
+  }, [column, label])
+  const minimum = measured?.minimum ?? LIST_MIN_WIDTHS[column]
+  const clamp = (next: number) => Math.max(minimum, Math.round(next))
+  const resize = (next: number) => {
+    prefsStore.set({ listWidths: { ...prefsStore.get().listWidths, [column]: clamp(next) } })
+  }
+  const cancel = () => {
+    const active = drag.current
+    if (!active) return
+    drag.current = null
+    if (active.previous) active.table.style.setProperty(variable, active.previous)
+    else active.table.style.removeProperty(variable)
+  }
+  return (
+    <button
+      type="button"
+      ref={handleRef}
+      role="separator"
+      tabIndex={0}
+      aria-label={label}
+      aria-orientation="vertical"
+      aria-controls={tableId}
+      aria-valuemin={minimum}
+      aria-valuenow={measured?.width || width || minimum}
+      data-column-resize={column}
+      onKeyDown={(event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
+        event.preventDefault()
+        const current = event.currentTarget.parentElement?.getBoundingClientRect().width ?? minimum
+        resize(current + (event.key === "ArrowRight" ? 10 : -10))
+      }}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return
+        const handle = event.currentTarget
+        // Clear keyboard focus when the pointer takes over the same handle.
+        handle.blur()
+        const table = handle.closest("table")
+        if (!table) return
+        handle.setPointerCapture(event.pointerId)
+        const width = handle.parentElement?.getBoundingClientRect().width ?? minimum
+        drag.current = {
+          pointer: event.pointerId,
+          x: event.clientX,
+          width,
+          draft: width,
+          table,
+          previous: table.style.getPropertyValue(variable),
+          moved: false,
+        }
+      }}
+      onPointerMove={(event) => {
+        const active = drag.current
+        if (active?.pointer !== event.pointerId) return
+        active.draft = clamp(active.width + event.clientX - active.x)
+        active.moved = true
+        active.table.style.setProperty(variable, `${String(active.draft)}px`)
+      }}
+      onPointerUp={(event) => {
+        const active = drag.current
+        if (active?.pointer !== event.pointerId) return
+        drag.current = null
+        if (active.moved) resize(active.draft)
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }}
+      onPointerCancel={cancel}
+      onLostPointerCapture={cancel}
+    />
+  )
+}
+/* eslint-enable jsx-a11y/no-interactive-element-to-noninteractive-role */

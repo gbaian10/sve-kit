@@ -1,5 +1,8 @@
 import type { Region } from "./search"
 
+export const RARITY_BADGE_HEIGHT = 11
+export const RARITY_COLUMN_MIN_WIDTH = Math.ceil((RARITY_BADGE_HEIGHT * 56) / 21) + 10
+
 export const BADGE_STYLES = [
   "bronze",
   "silver",

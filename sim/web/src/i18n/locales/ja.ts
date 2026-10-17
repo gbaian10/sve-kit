@@ -163,6 +163,8 @@ export default {
     allPrintingsLoaded: "全 {{count}} 種の版",
     countUnit: "枚",
     sort: "並び順",
+    visibleColumns: "表示する列",
+    resizeColumn: "「{{column}}」の列幅を調整",
     columns: { rarity: "レアリティ", number: "番号", name: "名前", effect: "能力" },
     sortBy: {
       date: "発売日",

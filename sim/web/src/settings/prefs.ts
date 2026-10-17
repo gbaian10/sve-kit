@@ -2,6 +2,13 @@ import { useSyncExternalStore } from "react"
 
 import { type Accent, isAccent, isThemePref, type ThemePref } from "../domain/theme"
 import { isUiLanguage, type UiLanguage } from "../i18n/languages"
+import {
+  DEFAULT_LIST_VISIBILITY,
+  isListVisibility,
+  isListWidths,
+  type ListVisibility,
+  type ListWidths,
+} from "./list-columns"
 
 export const PREFS_KEY = "sve-kit:prefs"
 const PREFS_VERSION = 1
@@ -36,6 +43,8 @@ export interface Prefs {
   readonly banRegion: CardEdition
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
+  readonly listWidths: ListWidths
+  readonly listVisibility: ListVisibility
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -54,6 +63,8 @@ export const DEFAULT_PREFS: Prefs = {
   banRegion: "jp",
   gridDensity: 2,
   viewMode: "grid",
+  listWidths: {},
+  listVisibility: DEFAULT_LIST_VISIBILITY,
 }
 
 function oneOf<T extends string | number>(values: readonly T[]): (value: unknown) => value is T {
@@ -92,6 +103,8 @@ const guards: Guards = {
   banRegion: isCardEdition,
   gridDensity: isGridDensity,
   viewMode: isViewMode,
+  listWidths: isListWidths,
+  listVisibility: isListVisibility,
 }
 
 type StorageSource = Storage | (() => Storage) | undefined
