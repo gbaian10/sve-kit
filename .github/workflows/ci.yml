@@ -111,10 +111,10 @@ jobs:
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
-          SVE_FORMAT_BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip repo)"
           export SKIP GITLEAKS_RANGE="${BASE}..${HEAD}"
+          export SVE_FORMAT_BASE_REF="$BASE"
           # Shared configuration and action metadata can invalidate otherwise unchanged files.
           full_scan_inputs=(
             .pre-commit-config.yaml .github/ci/hooks.toml .github/ci/hooks.py

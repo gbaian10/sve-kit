@@ -21,7 +21,7 @@
 ### 1.1 版本與相容判斷
 
 - `format_version`、`min_reader_version` 為不含 prerelease/build 的 SemVer；後者屬獨立的快照 reader 契約版本，不是 web、Python 套件或 Git tag 版號。reader 明示自身契約版本、支援的 format 範圍及 capabilities。
-- 「發布凍結」是維護者將該 `format_version` 的 wire 解釋與配置定案，並在[格式鎖定檔](../../../carddb/src/sve_carddb/contracts/schema/format.lock.json)將 `frozen` 設為 `true`。凍結時機由維護者決定，必須在正式站上線前完成；開發桶曾部署不代表已凍結。目前 `4.0.0` 尚未凍結。凍結後不得改寫指紋、解除凍結或刪除該紀錄；格式變更依下列 major／minor 規則建立新版紀錄。
+- 「發布凍結」是維護者將該 `format_version` 的 wire 解釋與配置定案，並在[格式鎖定檔](../../../.github/ci/snapshot-format.lock)將 `frozen` 設為 `true`。凍結時機由維護者決定，必須在正式站上線前完成；開發桶曾部署不代表已凍結。目前 `4.0.0` 尚未凍結。凍結後不得改寫指紋、解除凍結或刪除該紀錄；格式變更依下列 major／minor 規則建立新版紀錄。檢查程式本身與鎖定檔路徑的變更須由維護者審核。
 - 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配，只能進開發桶的版本索引，不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
 - `required_capabilities` 是排序、唯一的非空 Code 陣列，4.0 的固定集合依 §5.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。已發布格式新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本；尚未發布的 4.0.0 可同步原地替換，不留雙格式 parser，也不另增 capability。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
@@ -31,7 +31,7 @@
 未知格式拒收；更新失敗可保留相容 current／previous 或本機已驗 active。
 `preview-20260929T010203Z-0001` 即使格式相容，也不能交給正式發布器。
 
-本機 hook 與 CI 會重算[格式指紋](snapshot-contract.md#格式指紋鎖定)。未凍結版本變動須在同一個 PR 明示更新鎖定檔，讓格式變更進入審查；資料修字或只換 `data_version` 不更新格式指紋。已凍結版本的指紋不符時必須升版，不能以更新鎖定檔通過檢查。
+本機 hook 與 CI 會從正規化 Schema、profile 常數與共用合成 golden 的內容 hash 重算[格式指紋](snapshot-contract.md#格式指紋鎖定)。未凍結版本變動須在同一個 PR 明示更新鎖定檔，讓契約變更進入審查；實際快照的資料修字或只換 `data_version` 不更新格式指紋。golden 是正式 reader 契約樣本，其內容即使只改合成 `data_version` 字串也會觸發指紋變動；凍結前須更新鎖定，凍結後須依本節判定契約升版。reader 純重構不改這三項來源，不須更新鎖定或升版。已凍結版本的指紋不符時必須升版，不能以更新鎖定檔通過檢查。
 
 ## 2. 快照清單與檔案描述
 

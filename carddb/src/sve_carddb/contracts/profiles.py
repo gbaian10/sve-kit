@@ -6,18 +6,34 @@ MEDIA = "4.0.0"
 
 
 @dataclass(frozen=True)
+class Bands:
+    family: int
+    shared: int
+    overrides: tuple[tuple[str, int], ...] = ()
+
+    def width(self, family: str) -> int:
+        """Resolve the fixed width without deriving overrides from snapshot contents."""
+        for name, width in self.overrides:
+            if name == family:
+                return width
+        return self.family if family else self.shared
+
+
+@dataclass(frozen=True)
 class Profile:
     version: str
     resource: str
     buckets: int
     capabilities: tuple[str, ...]
+    min_reader_version: str
+    text_bands: Bands
+    image_bands: Bands
 
-    @staticmethod
-    def width(purpose: str, family: str) -> int:
+    def width(self, purpose: str, family: str) -> int:
         """Keep physical membership stable across data versions, including exceptions."""
-        if purpose == "images":
-            return 32 if family else 1
-        return 32 if family in {"BP01", "CP04"} else 64 if family else 8
+        return (self.image_bands if purpose == "images" else self.text_bands).width(
+            family
+        )
 
 
 PROFILES = (
@@ -35,6 +51,9 @@ PROFILES = (
             "public-annotation-v1",
             "rules-name-on-demand-v1",
         ),
+        min_reader_version=MEDIA,
+        text_bands=Bands(family=64, shared=8, overrides=(("BP01", 32), ("CP04", 32))),
+        image_bands=Bands(family=32, shared=1),
     ),
 )
 

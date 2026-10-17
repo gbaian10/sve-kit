@@ -1,26 +1,24 @@
-"""Lock the snapshot schema and executable reference-reader contract."""
+"""Lock the snapshot schema, profile values and shared synthetic reader contract."""
 
 import argparse
-import ast
-import importlib.util
 import json
 import os
 import re
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- reads the committed lock from Git without changing the checkout
 import sys
+from dataclasses import asdict
 from pathlib import Path
-from typing import override
 
 from pydantic import JsonValue
 from sve_carddb.contracts import snapshot
 from sve_carddb.contracts.generate_schema import generate
-from sve_carddb.contracts.profiles import PROFILES
+from sve_carddb.contracts.profiles import PROFILES, Profile
 from sve_carddb.core.json import canonical, digest, object_value, parse
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = Path(snapshot.__file__).resolve().parents[1]
-LOCK_PATH = "carddb/src/sve_carddb/contracts/schema/format.lock.json"
+LOCK_PATH = ".github/ci/snapshot-format.lock"
 GUIDANCE = "See snapshot-transport.md §1.1."
 
 
@@ -65,90 +63,37 @@ def schema_contract(value: JsonValue) -> JsonValue:
     return result
 
 
-class _Executable(ast.NodeTransformer):
-    @override
-    def visit_Expr(self, node: ast.Expr) -> ast.AST | None:
-        if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
-            return None
-        return self.generic_visit(node)
-
-    @override
-    def visit_If(self, node: ast.If) -> ast.AST | None:
-        if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
-            return (
-                self.generic_visit(ast.Module(body=node.orelse, type_ignores=[]))
-                if node.orelse
-                else None
-            )
-        return self.generic_visit(node)
+def profile_contract(selected: Profile) -> dict[str, JsonValue]:
+    """Serialize the producer's actual constants without inspecting Python syntax."""
+    return object_value(parse(json.dumps(asdict(selected)).encode("utf-8")))
 
 
-def reader_contract(source: str) -> str:
-    """Normalize executable syntax independently of comments and layout."""
-    return ast.dump(_Executable().visit(ast.parse(source)), include_attributes=False)
+def golden_hashes(directory: Path) -> dict[str, str]:
+    """Hash every shared contract file, retaining relative names and exact bytes."""
+    hashes = {
+        path.relative_to(directory).as_posix(): digest(path.read_bytes())
+        for path in sorted(directory.rglob("*"))
+        if path.is_file()
+    }
+    if not hashes:
+        raise ValueError(
+            f"Shared snapshot contract golden files are missing: {directory}"
+        )
+    return hashes
 
 
-def _imports(tree: ast.AST, package: Path, context: str) -> list[str]:
-    result: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            result.extend(
-                alias.name
-                for alias in node.names
-                if alias.name.startswith("sve_carddb.")
-            )
-        elif isinstance(node, ast.ImportFrom):
-            module = node.module or ""
-            if node.level:
-                module = importlib.util.resolve_name("." * node.level + module, context)
-            if module != "sve_carddb" and not module.startswith("sve_carddb."):
-                continue
-            result.append(module)
-            for alias in node.names:
-                child = package.joinpath(*module.split(".")[1:], alias.name)
-                if child.is_dir() or child.with_suffix(".py").is_file():
-                    result.append(module + "." + alias.name)
-    return result
-
-
-def reader_sources(package: Path) -> dict[str, str]:
-    """Follow reference-reader runtime imports, including canonical and profile rules."""
-    pending = ["sve_carddb.export.reader"]
-    result: dict[str, str] = {}
-    while pending:
-        name = pending.pop()
-        # Hatch's ignored build metadata changes on commits, not on wire changes.
-        if name == "sve_carddb._version":
-            continue
-        if name in result:
-            continue
-        parent = name.rpartition(".")[0]
-        if parent:
-            pending.append(parent)
-        path = package.joinpath(*name.split(".")[1:]).with_suffix(".py")
-        if not path.is_file():
-            directory = path.with_suffix("")
-            path = directory / "__init__.py"
-            if directory.is_dir() and not path.exists():
-                result[name] = ""
-                continue
-        source = path.read_text(encoding="utf-8")
-        result[name] = source
-        tree = _Executable().visit(ast.parse(source))
-        context = name if path.name == "__init__.py" else parent
-        pending.extend(_imports(tree, package, context))
-    return result
-
-
-def fingerprint(schema: JsonValue, sources: dict[str, str]) -> str:
-    """Hash formal definitions; snapshot payloads and data versions are never inputs."""
+def fingerprint(
+    schema: JsonValue,
+    profile_values: JsonValue = None,
+    golden: dict[str, str] | None = None,
+) -> str:
+    """Hash formal schema, profile constants and shared golden content only."""
     return digest(
         canonical(
             {
                 "schema": schema_contract(schema),
-                "reader": {
-                    name: reader_contract(source) for name, source in sources.items()
-                },
+                "profile": profile_values,
+                "golden": dict(golden or {}),
             }
         )
     )
@@ -236,31 +181,49 @@ def baseline_lock(ref: str, repository: Path = ROOT) -> dict[str, JsonValue]:
         ).stdout
 
     # Validate ref even when this is the first PR introducing the lock.
-    read("rev-parse", "--verify", ref + "^{commit}")
+    try:
+        read("rev-parse", "--verify", ref + "^{commit}")
+    except subprocess.CalledProcessError as error:
+        raise ValueError(
+            f"Git base ref {ref!r} was not found. Run git fetch origin main, "
+            "or choose an existing ref with --base-ref or SVE_FORMAT_BASE_REF."
+        ) from error
     if not read("ls-tree", "--name-only", ref, "--", LOCK_PATH).strip():
         return {}
     return object_value(parse(read("show", ref + ":" + LOCK_PATH)))
 
 
-def current_fingerprints() -> dict[str, str]:
+def current_fingerprints(
+    repository: Path = ROOT,
+    package: Path = PACKAGE,
+) -> dict[str, str]:
     """Require generated and packaged schemas to define the same current contracts."""
-    sources = reader_sources(PACKAGE)
     current: dict[str, str] = {}
     for selected in PROFILES:
         generated = parse(generate(selected.version))
         resource = (
-            PACKAGE / "contracts/schema" / selected.resource / "contract.schema.json"
+            package / "contracts/schema" / selected.resource / "contract.schema.json"
         )
         if fingerprint(parse(resource.read_bytes()), {}) != fingerprint(generated, {}):
             raise ValueError(
                 "Committed Schema differs from its source. Regenerate it with "
                 "uv --directory carddb run python -m sve_carddb.contracts.generate_schema"
             )
-        current[selected.version] = fingerprint(generated, sources)
+        golden = golden_hashes(
+            repository / "tests/fixtures/snapshot-contract" / selected.resource
+        )
+        current[selected.version] = fingerprint(
+            generated, profile_contract(selected), golden
+        )
     return current
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(
+    argv: list[str] | None = None,
+    *,
+    repository: Path = ROOT,
+    package: Path = PACKAGE,
+) -> int:
     """Check or explicitly refresh the checkout's snapshot format lock."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--update", action="store_true")
@@ -269,10 +232,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     try:
-        current = current_fingerprints()
-        path = ROOT / LOCK_PATH
+        current = current_fingerprints(repository, package)
+        path = repository / LOCK_PATH
         locked = object_value(parse(path.read_bytes())) if path.exists() else {}
-        baseline = baseline_lock(args.base_ref)
+        baseline = baseline_lock(args.base_ref, repository)
         if args.update:
             locked = update_lock(locked, current, baseline)
             path.write_text(json.dumps(locked, indent=2) + "\n", encoding="utf-8")
