@@ -14,7 +14,7 @@ from xml.sax.saxutils import escape
 import httpx
 import pytest
 
-from sve_publish.adapter import R2Store, Stored
+from sve_publish.adapter import MAX_DELETE_BATCH, R2Store, Stored
 from sve_publish.sdk import Credentials
 
 from .r2_sdk_fixtures import mock_client
@@ -173,7 +173,7 @@ class Handler(BaseHTTPRequestHandler):
         root = ET.fromstring(raw)  # ruff: ignore[suspicious-xml-element-tree-usage] -- trusted synthetic SDK payload
         namespace = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
         keys = [node.text or "" for node in root.findall("s3:Object/s3:Key", namespace)]
-        assert 1 <= len(keys) <= 1000
+        assert 1 <= len(keys) <= MAX_DELETE_BATCH
         assert root.findtext("s3:Quiet", namespaces=namespace) == "true"
         state.delete_batches.append(keys)
         state.operations.extend(("DELETE", key, None) for key in keys)

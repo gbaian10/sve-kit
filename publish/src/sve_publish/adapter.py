@@ -37,7 +37,8 @@ PUBLIC_PREFIXES = frozenset(
 SNAPSHOT_PREFIXES = frozenset(p for p in PUBLIC_PREFIXES if p.startswith("snapshots/"))
 IMAGE_PREFIXES = PUBLIC_PREFIXES - SNAPSHOT_PREFIXES
 MAX_OBJECT = 128 * 1024 * 1024
-MAX_DELETE_BATCH = 1000
+# R2 processes roughly 60 ms per key, so each batch must finish within the 30-second read timeout.
+MAX_DELETE_BATCH = 100
 
 
 @dataclass(frozen=True, repr=False)
@@ -149,7 +150,7 @@ class R2Store:
     def delete_many(self, keys: list[str]) -> None:
         """Delete one public-only batch; validate every key before sending it."""
         if not 1 <= len(keys) <= MAX_DELETE_BATCH:
-            raise ExportError("Deletion batch requires 1 to 1000 keys")
+            raise ExportError(f"Deletion batch requires 1 to {MAX_DELETE_BATCH} keys")
         if any(
             not any(key.startswith(p) for p in PUBLIC_PREFIXES)
             or not (JSON_KEY.fullmatch(key) or IMAGE_KEY.fullmatch(key))
