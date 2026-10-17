@@ -70,6 +70,10 @@ def prepared(
     (repo / "authored/rules/rulings").mkdir(parents=True)
     (repo / "carddb/src/sve_carddb").mkdir(parents=True)
     (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
+    (repo / "authored/catalog").mkdir()
+    (repo / "authored/catalog/rarity-badges.yaml").write_text(
+        "format: 1\nkind: printing_rarity_badges\nrecords: []\n"
+    )
     for name in (
         "carddb/pyproject.toml",
         "carddb/src/sve_carddb/parse/pages/extract_jp.py",

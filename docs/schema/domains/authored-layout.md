@@ -29,6 +29,7 @@
 | 定案（新格式） | 數位名字／同名瀏覽政策 | `digital/policies/{names,links}.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
 | legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 定案（新格式） | 模板參數辨識規則 | `translations/parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
+| 技術契約 | 卡面標籤外觀 | `catalog/rarity-badges.yaml` 單檔，見下方「卡面標籤外觀」 |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md) |
 | 提案 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
@@ -60,6 +61,26 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 `effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，未來正式 DSL 使用另一 kind 或入口。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
 
 [#476](https://github.com/gbaian10/sve-kit/issues/476) 使用新封套及路徑重建私人 source-record ID／provenance，Rust authored／settings／schemas fingerprints 亦如實重算。舊私人 provenance、序列化背景與回放指紋不相容，不保留舊 reader。各種 exact／canonical authored source hash 包含封套；raw 來源 hash、record-level 語義 hash 與公開匯出契約不因此改變。公開 323 JSON、媒體及 token 必須逐 byte 同值。
+
+### 卡面標籤外觀
+
+`catalog/rarity-badges.yaml` 是可修改的單一檔案，封套為 `format: 1`、`kind: printing_rarity_badges`、`records`。
+每列以 `printing_id` 為鍵，必填審閱標註 `region`（jp／en）、`card_no`，以及
+`style`（bronze／silver／gold／red／pastel／rainbow／none）。非 none 必填卡面原樣 `text`；none 必須省略 text。
+未知欄位、未知 style、YAML 重複鍵、重複 printing_id 與不存在的版次都使建置失敗；
+region／card_no 僅供審閱，不作識別鍵。沒有記錄表示待確認，不表示無標籤。
+外觀不綁圖片 hash，不改寫官方稀有度；雙面卡需一起看兩面後登錄一筆。
+
+```yaml
+format: 1
+kind: printing_rarity_badges
+records:
+  - printing_id: p:synthetic
+    region: jp
+    card_no: SYN-001
+    style: bronze
+    text: BR
+```
 
 ## 2. 分片與來源
 

@@ -141,7 +141,15 @@ def printing_records(source: Source, view: dict[str, list[Record]]) -> None:
     }
     internal = source.index("printing", "id,decklog_source_id")
     ordinals = {row["id"]: integer(row["ordinal"]) for row in view["face"]}
+    badges = source.index("printing", "id,rarity_badge_style,rarity_badge_text")
     for printing in view["printing"]:
+        badge = badges[string(printing["id"])]
+        appearance: Record = {"style": badge["rarity_badge_style"]}
+        if badge["rarity_badge_text"] is not None:
+            appearance["text"] = badge["rarity_badge_text"]
+        printing["rarity_badge"] = (
+            None if badge["rarity_badge_style"] is None else appearance
+        )
         printing["int_id"] = integers[printing["id"]]
         details = internal[string(printing["id"])]
         # Registry identities are manually confirmed; the registry has no other state.

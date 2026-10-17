@@ -128,7 +128,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | card_engine_support.overrides | SupportOverride | region, support |
 | card_engine_support.region_blocks | RegionBlock | region, reasons |
 
-每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表記未定新增的 WordingView／WordingDisplay／WordingCandidate／ObservedText 是 [snapshot-format §2.3](snapshot-format.md#23-卡文版本與依據版本) 經使用者 2026-10-01 核可的公開呈現擴充，nullable／enum 依該節，不從 face_current 推斷。face.wording 接在 face.current 之後，只收 pending 項；settled region 不出項，全部 settled 時該 tuple 位置仍為空陣列，不能縮短欄序。PrintingFace.observations 接在 printed_text_state 之後（詳情分片同位置）；Schema、types、fragment columns、golden 與 reader 使用同一候選配置。表格 tuple 中保留的 JSON 值限 §3.2 的 `ParameterSchema`、§3.3 的 `CorrectionValue`，以及 §8 的 `AnnotationReference`、`PublicTextOwner`、`ExplanationReference`；descriptor 以 `{"json":"<具名型別>"}` 指定；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
+每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表記未定新增的 WordingView／WordingDisplay／WordingCandidate／ObservedText 是 [snapshot-format §2.3](snapshot-format.md#23-卡文版本與依據版本) 經使用者 2026-10-01 核可的公開呈現擴充，nullable／enum 依該節，不從 face_current 推斷。face.wording 接在 face.current 之後，只收 pending 項；settled region 不出項，全部 settled 時該 tuple 位置仍為空陣列，不能縮短欄序。PrintingFace.observations 接在 printed_text_state 之後（詳情分片同位置）；Schema、types、fragment columns、golden 與 reader 使用同一候選配置。表格 tuple 中保留的 JSON 值限 [snapshot-format §2](snapshot-format.md) 的 `RarityBadge`、§3.2 的 `ParameterSchema`、§3.3 的 `CorrectionValue`，以及 §8 的 `AnnotationReference`、`PublicTextOwner`、`ExplanationReference`；descriptor 以 `{"json":"<具名型別>"}` 指定；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
 
 `Correction.source_url` 沒有可公開官方頁 URL 時填 null；`card_related.applicable_regions` 非 reskin 時填 null。所有 tuple 仍佔原位置；空字串、缺欄、少一格不等於 null。
 
@@ -221,7 +221,7 @@ printing/detail 與現行／暫顯 face_revision/detail 的 `base={file:FileRef,
 
 | fragment／巢狀型別 | columns（依序） |
 | --- | --- |
-| printing/bootstrap | id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence, review_level, reference_urls, variant_key, rarity_code, rarity_raw, premium, serial_total, int_id, decklog_available, decklog_verification, decklog_source_url, decklog_checked_on, faces |
+| printing/bootstrap | id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence, review_level, reference_urls, variant_key, rarity_code, rarity_badge, rarity_raw, premium, serial_total, int_id, decklog_available, decklog_verification, decklog_source_url, decklog_checked_on, faces |
 | PrintingFaceBootstrap | face_id, art_id, frame_code, signed, embellishment_state, stamps |
 | printing/detail | row_index, faces |
 | PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, observations, sections, translations, corrections, name_concept_id |

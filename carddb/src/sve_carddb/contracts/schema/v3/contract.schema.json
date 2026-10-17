@@ -960,6 +960,46 @@
         }
       ]
     },
+    "RarityBadge": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "style": {
+              "enum": [
+                "bronze",
+                "silver",
+                "gold",
+                "red",
+                "pastel",
+                "rainbow"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "style",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "style": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "style"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
     "PrintingStamp": {
       "type": "array",
       "prefixItems": [
@@ -3214,6 +3254,16 @@
           ]
         },
         {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RarityBadge"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
           "$ref": "#/$defs/Text"
         },
         {
@@ -3278,8 +3328,8 @@
         }
       ],
       "items": false,
-      "minItems": 20,
-      "maxItems": 20,
+      "minItems": 21,
+      "maxItems": 21,
       "x-columns": [
         "id",
         "card_id",
@@ -3292,6 +3342,7 @@
         "reference_urls",
         "variant_key",
         "rarity_code",
+        "rarity_badge",
         "rarity_raw",
         "premium",
         "serial_total",
@@ -3358,6 +3409,11 @@
           }
         },
         {
+          "nullable": {
+            "json": "RarityBadge"
+          }
+        },
+        {
           "scalar": "Text"
         },
         {
@@ -3421,6 +3477,7 @@
               {},
               {},
               {},
+              {},
               {
                 "const": "verified"
               },
@@ -3431,6 +3488,7 @@
           },
           "then": {
             "prefixItems": [
+              {},
               {},
               {},
               {},
@@ -3459,6 +3517,7 @@
           },
           "else": {
             "prefixItems": [
+              {},
               {},
               {},
               {},
@@ -3508,6 +3567,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -3534,6 +3594,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -3550,6 +3611,7 @@
               {
                 "minItems": 1
               },
+              {},
               {},
               {},
               {},
@@ -8306,6 +8368,16 @@
           ]
         },
         {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RarityBadge"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
           "$ref": "#/$defs/Text"
         },
         {
@@ -8370,8 +8442,8 @@
         }
       ],
       "items": false,
-      "minItems": 20,
-      "maxItems": 20,
+      "minItems": 21,
+      "maxItems": 21,
       "x-columns": [
         "id",
         "card_id",
@@ -8384,6 +8456,7 @@
         "reference_urls",
         "variant_key",
         "rarity_code",
+        "rarity_badge",
         "rarity_raw",
         "premium",
         "serial_total",
@@ -8450,6 +8523,11 @@
           }
         },
         {
+          "nullable": {
+            "json": "RarityBadge"
+          }
+        },
+        {
           "scalar": "Text"
         },
         {
@@ -8510,6 +8588,7 @@
               {},
               {},
               {},
+              {},
               {
                 "const": "verified"
               },
@@ -8520,6 +8599,7 @@
           },
           "then": {
             "prefixItems": [
+              {},
               {},
               {},
               {},
@@ -8548,6 +8628,7 @@
           },
           "else": {
             "prefixItems": [
+              {},
               {},
               {},
               {},
@@ -8597,6 +8678,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -8623,6 +8705,7 @@
               {},
               {},
               {},
+              {},
               {}
             ]
           },
@@ -8639,6 +8722,7 @@
               {
                 "minItems": 1
               },
+              {},
               {},
               {},
               {},
@@ -17409,6 +17493,7 @@
                         "reference_urls",
                         "variant_key",
                         "rarity_code",
+                        "rarity_badge",
                         "rarity_raw",
                         "premium",
                         "serial_total",
@@ -19585,6 +19670,7 @@
                         "reference_urls",
                         "variant_key",
                         "rarity_code",
+                        "rarity_badge",
                         "rarity_raw",
                         "premium",
                         "serial_total",
@@ -21803,6 +21889,7 @@
                         "reference_urls",
                         "variant_key",
                         "rarity_code",
+                        "rarity_badge",
                         "rarity_raw",
                         "premium",
                         "serial_total",

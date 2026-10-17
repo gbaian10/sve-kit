@@ -31,6 +31,7 @@ from sve_carddb.domains.products import (
     plan_official_products,
 )
 from sve_carddb.domains.products.models import Date
+from sve_carddb.domains.registry.badges import load_badges, populate_badges
 from sve_carddb.domains.registry.preview import (
     FrozenEN,
     FrozenJP,
@@ -474,6 +475,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     vocabulary = derived.vocabulary
     configuration |= observations.configuration(vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, configuration)
+    badges = load_badges(authored_root(inputs.repo))
     flavor = load_flavor(authored_root(inputs.repo))
     templates = _templates(adoptions)
     translation_sources = TranslationSources(
@@ -531,6 +533,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             )
             name_sources = translation_sources.stage(context)
             added = populate_planned_card_extras(db, extras, build=context)
+            missing_badges = populate_badges(db, badges)
             if names is not None:
                 replay = _current_names(adoptions, context, stores, db, name_sources)
                 assert replay is not None
@@ -698,6 +701,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 "Web handoff and acceptance",
             ],
         }
+        report["missing_pr_badges"] = list(missing_badges)
         report["registry_reviews"] = {
             "registry_review_inputs": identity.review_input_pin,
             "uncovered_jp_card_numbers": list[JsonValue](
