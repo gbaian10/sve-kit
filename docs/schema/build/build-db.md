@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-建置資料庫的完整邏輯契約，共 123 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
+建置資料庫的完整邏輯契約，共 124 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
 
 ## 1. 兩層與範圍
 
@@ -601,7 +601,7 @@ digital_voice/card_voice與digital_art_link仍只驗自己的原合法證據，�
 
 ## 卡文依據判定
 
-建置 schema 9 新增 `face_wording`（PK face_id、region），記錄 classification、method、reason、
+建置 schema 10 新增 `face_wording`（PK face_id、region），記錄 classification、method、reason、
 comparison_hash、basis_printing_id、basis_released_on；依據版次引用 printing，卡面引用 face。
 `face_current.basis` 增加 latest_known_release，只有等價且可定位唯一依據時由日期證據建立；
 各 printing_face_observation 仍保留自己的 revision。契約與覆寫規則依

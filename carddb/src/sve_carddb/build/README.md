@@ -182,7 +182,7 @@ run complete domain validation before publication.
 
 Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
 `PRAGMA user_version` during creation and checked before every commit. Legacy
-`compile_t0()` uses version 1; the optional T1 registry uses version 9, including
+`compile_t0()` uses version 1; the optional T1 registry uses version 10, including
 its T0-only selection. Version 9 removes the obsolete image tables; image
 metadata and size configuration belong to the image index and public contract.
 The
