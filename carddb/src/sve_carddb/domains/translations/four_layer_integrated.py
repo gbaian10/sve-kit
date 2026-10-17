@@ -1,4 +1,4 @@
-"""Compose the sealed providers used by the normal v3 source constructor."""
+"""Compose the sealed providers used by the normal v4 source constructor."""
 
 from collections import Counter
 from dataclasses import replace

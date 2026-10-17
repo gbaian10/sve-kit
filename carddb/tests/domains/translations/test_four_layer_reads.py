@@ -343,7 +343,7 @@ def test_prepared_count_renders_through_normal_labels_and_annotation_paths(  # r
             )
         }
     )
-    with pytest.raises(ValueError, match="v3"):
+    with pytest.raises(ValueError, match="v4"):
         target_dependencies(old_frame, binding)
     values = dict(binding.values)
     values.pop(expr.leaves[0])

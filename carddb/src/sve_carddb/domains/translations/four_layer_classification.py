@@ -33,6 +33,7 @@ from sve_carddb.contracts.source_binding import (
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_n1_leaves import DOMAINS as N1_DOMAINS
+from sve_carddb.domains.translations.four_layer_n3_numbers import repair_candidate
 from sve_carddb.domains.translations.four_layer_normalizer import (
     VERSION,
     SourcePart,
@@ -325,6 +326,7 @@ class Classifier:
                 else None,
             )
         assert candidate is not None
+        candidate = repair_candidate(raw, part, candidate, field)
         issues = set(candidate.issues) - {
             "legacy_parenthesis_classification_requires_review"
         }
@@ -670,6 +672,9 @@ def _vocabulary_role(part: SourcePart, hint: Hint) -> str | None:
             return "counted_kind"
         if re.search(r"(?:元の)?コストN(?:以上|以下)の$", before):
             return "filter_kind"
-    elif field_filter(after.removeprefix("・").removeprefix("でない")):
+    elif field_filter(after.removeprefix("・").removeprefix("でない")) or (
+        re.fullmatch(r"(?:・)?トークンすべては【[^【】]+】を持つ。", after)
+        and before == r"これが場にいる限り、自分の場の"
+    ):
         return "class_filter"
     return None

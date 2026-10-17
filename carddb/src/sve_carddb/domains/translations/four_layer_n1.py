@@ -236,6 +236,7 @@ def operands(text: str) -> tuple[tuple[Operand, ...], tuple[Attempt, ...]]:
     registry.destinations()
     registry.phases()
     registry.costs()
+    registry.class_tokens()
     return tuple(registry.found), tuple(registry.attempts)
 
 
@@ -254,6 +255,23 @@ class _Registry:
             and not any(s.start <= start < s.end for s in self.blocked)
             and not _parent_excluded(self.text, start, end)
         )
+
+    def class_tokens(self) -> None:
+        match = re.fullmatch(
+            r"これが場にいる限り、自分の場の\{[^{}]+\}(?:・)?(?P<token>トークン)すべては【[^【】]+】を持つ。",
+            self.text,
+        )
+        if match is not None:
+            span = _span(match, "token")
+            self.found.append(
+                Operand(
+                    "N3-T01",
+                    span,
+                    noun=Noun(
+                        span, "card", (Filter("token", match["token"], span),), True
+                    ),
+                )
+            )
 
     def unions(self) -> None:
         text, found, attempts = self.text, self.found, self.attempts

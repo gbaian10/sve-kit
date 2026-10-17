@@ -19,7 +19,8 @@ _ACTION = re.compile(
     r"N枚引く|"
     r"(?P<np>[^。:：]+?)N(?P<unit>枚|体|つ)(?:を)?墓場に置く|"
     r"(?P<search>[^。:：]+?)N枚(?:を)?探し、EXエリアに置く|"
-    r"『X』N枚か『X』N枚をEXエリアに置く)"
+    r"『X』N枚か『X』N枚をEXエリアに置く|"
+    r"(?P<named>『X』)N(?P<named_unit>枚|体|つ)(?:を)?(?:(?:場に)?出す|EXエリアに置く))"
     r"[。](?P<condition>[^。:：]*)代わりに$"
 )
 
@@ -33,21 +34,28 @@ class Replacement:
 
 
 def _condition(text: str) -> bool:
-    if _MARKER.fullmatch(text) or text == "【真紅】状態なら、":
+    if _MARKER.fullmatch(text) or text in {"【真紅】状態なら、", "【覚醒】状態なら、"}:
         return True
     if match := re.fullmatch(r"(?P<np>.+)を捨てたなら、", text):
         return written_card_np(match["np"])
     if match := re.fullmatch(r"(?P<np>.+?)(?:が)?(?:いる|ある)なら、", text):
-        return count_context(match["np"]) is not None
-    if match := re.fullmatch(r"(?P<np>.+?)N(?P<unit>枚|体|つ)以上なら、", text):
+        return (
+            count_context(match["np"]) is not None
+            or re.fullmatch(r"(?:自分|相手)の場に『X』が?", match["np"]) is not None
+        )
+    if match := re.fullmatch(r"(?P<np>.+?)N(?P<unit>枚|体|つ)(?:以上)?なら、", text):
         context = count_context(match["np"])
-        return context is not None and source_unit(context, match["unit"]).merge_allowed
+        return (
+            context is not None and source_unit(context, match["unit"]).merge_allowed
+        ) or re.fullmatch(
+            r"(?:自分|相手)の(?:場|EXエリア)の『X』が", match["np"]
+        ) is not None
     return False
 
 
 def replacement_action(before: str, after: str) -> Replacement | None:
     """A new ability or sentence cannot bridge the original action and its replacement."""
-    suffix = re.fullmatch(r"(?P<unit>枚|体|つ)(?P<limit>まで|ずつ置く)?[。]", after)
+    suffix = re.match(r"^(?P<unit>枚|体|つ)(?P<limit>まで|ずつ置く)?[。]", after)
     match = _ACTION.search(before)
     if suffix is None or match is None or not _condition(match["condition"]):
         return None
@@ -58,12 +66,39 @@ def replacement_action(before: str, after: str) -> Replacement | None:
             if unit == "枚" and not suffix["limit"]
             else None
         )
+    if match["named"]:
+        prefix = before[: match.start()]
+        heads = tuple(
+            re.finditer(
+                r"\{(?:ファンファーレ|起動|ラストワード|進化|食事|憑依)\}", prefix
+            )
+        )
+        prefix = prefix[heads[-1].end() :] if heads else prefix
+        if re.search(r"『X』N(?:枚|体|つ)(?:を)?(?:場に)?出す。", prefix):
+            return None
+        return (
+            Replacement(
+                "selection_count" if suffix["limit"] else "count",
+                unit,
+                "up_to" if suffix["limit"] else "exact",
+                None,
+            )
+            if unit == match["named_unit"] and suffix["limit"] in {None, "まで"}
+            else None
+        )
     if match["action"].startswith("『X』"):
         return (
             Replacement("count", unit, "exact", None)
             if unit == "枚" and suffix["limit"] == "ずつ置く"
             else None
         )
+    return _object_replacement(match, suffix)
+
+
+def _object_replacement(
+    match: re.Match[str], suffix: re.Match[str]
+) -> Replacement | None:
+    unit = suffix["unit"]
     np = match["search"] or match["np"]
     context = count_context(np)
     original_unit = "枚" if match["search"] else match["unit"]
