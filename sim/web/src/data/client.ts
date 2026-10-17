@@ -1,4 +1,5 @@
 import { catalogOf } from "./catalog"
+import { catalogWork } from "./catalog-timing"
 import { fetchBytes, type Fetcher, NetworkError } from "./cdn"
 import { createDecoder } from "./format-v3/decoder"
 import { SnapshotError } from "./format-v3/errors"
@@ -416,7 +417,9 @@ export function createSnapshotClient(
       config,
       bootstrap,
     }
-    validateCatalog(bootstrap)
+    catalogWork("validate", () => {
+      validateCatalog(bootstrap)
+    })
     catalogOf(snapshot)
     return { snapshot, downloaded: true }
   }
@@ -806,7 +809,9 @@ export function createSnapshotClient(
       printingReady: false,
       bootstrap: [...snapshot.bootstrap, ...parts.flat()],
     }
-    validateCatalog(candidate.bootstrap)
+    catalogWork("validate", () => {
+      validateCatalog(candidate.bootstrap)
+    })
     catalogOf(candidate)
     unsaved.add(candidate)
     catalogs.set(key, candidate)
