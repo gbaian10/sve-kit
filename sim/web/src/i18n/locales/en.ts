@@ -125,6 +125,7 @@ export default {
     label: "Search cards",
     clear: "Clear",
     filters: "Filters",
+    filtersSelected: "{{count}} filters selected",
     suggestions: "Suggestions",
     seeAll: "See all {{count}}",
     noSuggestions: "No matching cards",

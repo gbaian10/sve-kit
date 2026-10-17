@@ -128,6 +128,7 @@ export default {
     label: "カードを検索",
     clear: "クリア",
     filters: "絞り込み",
+    filtersSelected: "{{count}} 個の絞り込み条件を選択中",
     suggestions: "候補",
     seeAll: "すべて見る（{{count}}枚）",
     noSuggestions: "該当するカードはありません",

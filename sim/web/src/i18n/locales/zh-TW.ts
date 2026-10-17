@@ -121,6 +121,7 @@ const zhTW = {
     label: "搜尋卡片",
     clear: "清除",
     filters: "篩選",
+    filtersSelected: "已啟用 {{count}} 個篩選條件",
     suggestions: "建議",
     seeAll: "看全部 {{count}} 張",
     noSuggestions: "沒有符合的卡",

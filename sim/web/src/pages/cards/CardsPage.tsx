@@ -412,7 +412,7 @@ export function CardsPage() {
   const panelOpen = prefs.filterPanelOpen
   const resultCount =
     page !== null ? (
-      <p className="shrink-0 text-13 whitespace-nowrap text-text-2" aria-live="polite">
+      <p className="min-w-0 text-right text-13 text-text-2" aria-live="polite">
         <b className="font-semibold text-text-1 tabular-nums">
           {new Intl.NumberFormat(uiLanguage).format(page.total)}
         </b>{" "}
