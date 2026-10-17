@@ -52,6 +52,25 @@ export interface SearchOptions {
   /** Printings per home-set family code in this edition, for the set filter's counts. */
   readonly setCounts: Readonly<Record<string, number>>
 }
+export function uniquePromoLeader(
+  promoSets: readonly SearchOption[],
+  counts: Readonly<Record<string, number>>,
+): SearchOption | undefined {
+  let leader: SearchOption | undefined
+  let highest = -1
+  let tied = false
+  for (const set of promoSets) {
+    const count = counts[set.code] ?? 0
+    if (count > highest) {
+      leader = set
+      highest = count
+      tied = false
+    } else if (count === highest) {
+      tied = true
+    }
+  }
+  return tied ? undefined : leader
+}
 /** A set with its first day-precision release in the index's edition. */
 export interface SetRelease extends SearchOption {
   readonly publicCode: string
@@ -355,6 +374,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
     )
   const promoSets = setOptions.filter((set) => set.kind === "promo")
+  const promoLeader = uniquePromoLeader(promoSets, setCounts)
   const recentSet = recentSets(
     releases.filter((release) => editionOwners.has(release.id)),
     1,
@@ -382,7 +402,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     sets: setOptions,
     quickSets: {
       ...(recentSet ? { recent: recentSet } : {}),
-      ...(promoSets.length === 1 ? { promo: promoSets[0] } : {}),
+      ...(promoLeader ? { promo: promoLeader } : {}),
     },
     setCounts,
   }

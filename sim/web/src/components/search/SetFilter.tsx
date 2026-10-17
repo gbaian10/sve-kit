@@ -32,21 +32,29 @@ export function SetFilter({
   const { t } = useTranslation()
   const options = (sets ?? []).map((set) => ({
     code: set.code,
+    publicCode: set.publicCode ?? set.code,
     kind: set.kind,
     label: `${set.publicCode ?? set.code} ${setLabel(set.name, textLang).text}`,
     fullWidth: true,
   }))
-  const boosters = options.filter((set) => set.kind === "booster")
-  const collaborations = options.filter((set) => set.kind === "collaboration")
-  const otherSets = options.filter((set) => set.kind !== "booster" && set.kind !== "collaboration")
-  const groups = [
-    boosters,
-    collaborations,
-    [
-      ...otherSets.filter((set) => set.kind === "promo"),
-      ...otherSets.filter((set) => set.kind !== "promo"),
-    ],
-  ].filter((group) => group.length > 0)
+  const kindOrder = ["booster", "collaboration", "special_pack", "promo", "deck", "special"]
+  const groups = kindOrder.flatMap((kind) => {
+    const kindSets = options.filter((set) => set.kind === kind)
+    if (kind !== "deck") return kindSets.length ? [kindSets] : []
+
+    // This is display grouping only; card ownership always comes from home_set_id. The data has no deck-series field yet, so use that authored field if one is added.
+    const deckGroups = new Map<string, typeof kindSets>()
+    for (const set of kindSets) {
+      const prefix = /^[A-Za-z]+/u.exec(set.publicCode)?.[0] ?? ""
+      const group = deckGroups.get(prefix) ?? []
+      group.push(set)
+      deckGroups.set(prefix, group)
+    }
+    return [...deckGroups.values()]
+  })
+  const knownKinds = new Set(kindOrder)
+  const unknownSets = options.filter((set) => !knownKinds.has(set.kind ?? ""))
+  if (unknownSets.length) groups.push(unknownSets)
   const toggleSet = (code: string) => {
     onChange(
       selected.includes(code)

@@ -16,13 +16,17 @@ const name = (text: string): NameSource => ({
 })
 
 const sets = [
-  { code: "promo-a", publicCode: "PX01", kind: "promo", name: name("宣傳甲") },
-  { code: "collab-a", publicCode: "CX01", kind: "collaboration", name: name("合作甲") },
   { code: "booster-a", publicCode: "BX01", kind: "booster", name: name("補充甲") },
-  { code: "other-a", publicCode: "SX01", kind: "special", name: name("其他甲") },
-  { code: "promo-b", publicCode: "PX02", kind: "promo", name: name("宣傳乙") },
   { code: "booster-b", publicCode: "BX02", kind: "booster", name: name("補充乙") },
+  { code: "collab-a", publicCode: "CX01", kind: "collaboration", name: name("合作甲") },
   { code: "collab-b", publicCode: "CX02", kind: "collaboration", name: name("合作乙") },
+  { code: "special-pack", publicCode: "SP01", kind: "special_pack", name: name("特別卡包") },
+  { code: "promo-a", publicCode: "PX01", kind: "promo", name: name("宣傳甲") },
+  { code: "promo-b", publicCode: "PX02", kind: "promo", name: name("宣傳乙") },
+  { code: "deck-csd", publicCode: "CSD02a", kind: "deck", name: name("牌組CSD") },
+  { code: "deck-sd", publicCode: "SD01", kind: "deck", name: name("牌組SD") },
+  { code: "deck-sdd", publicCode: "SDD01", kind: "deck", name: name("牌組SDD") },
+  { code: "other-a", publicCode: "SX01", kind: "special", name: name("其他甲") },
   { code: "other-b", publicCode: "SX02", kind: "other", name: name("其他乙") },
 ]
 
@@ -32,8 +36,8 @@ const asSearchOption = (set: (typeof sets)[number] | undefined) => {
 }
 
 const quickSets: SearchOptions["quickSets"] = {
-  recent: asSearchOption(sets[2]),
-  promo: asSearchOption(sets[0]),
+  recent: asSearchOption(sets[0]),
+  promo: asSearchOption(sets[5]),
 }
 
 function Harness({
@@ -68,7 +72,7 @@ async function openFilter(items = sets, quick = quickSets) {
   return document.getElementById(button.getAttribute("aria-controls") ?? "")
 }
 
-it("groups synthetic sets by family kind and puts promo first within the remaining group", async () => {
+it("groups by family kind and splits decks by their leading letter prefix", async () => {
   const dropdown = await openFilter()
   const lists = within(dropdown as HTMLElement).getAllByRole("list")
   expect(
@@ -80,9 +84,15 @@ it("groups synthetic sets by family kind and puts promo first within the remaini
   ).toEqual([
     ["BX01 譯名補充甲", "BX02 譯名補充乙"],
     ["CX01 譯名合作甲", "CX02 譯名合作乙"],
-    ["PX01 譯名宣傳甲", "PX02 譯名宣傳乙", "SX01 譯名其他甲", "SX02 譯名其他乙"],
+    ["SP01 譯名特別卡包"],
+    ["PX01 譯名宣傳甲", "PX02 譯名宣傳乙"],
+    ["CSD02a 譯名牌組CSD"],
+    ["SD01 譯名牌組SD"],
+    ["SDD01 譯名牌組SDD"],
+    ["SX01 譯名其他甲"],
+    ["SX02 譯名其他乙"],
   ])
-  expect(within(dropdown as HTMLElement).getAllByRole("separator")).toHaveLength(2)
+  expect(within(dropdown as HTMLElement).getAllByRole("separator")).toHaveLength(8)
 })
 
 it("keeps quick buttons and dropdown selections in sync with the URL", async () => {
@@ -118,7 +128,9 @@ it("hides quick buttons when no recent set or unique promo is available", async 
 })
 
 it("omits empty groups without leaving extra separators", async () => {
-  const dropdown = await openFilter(sets.filter((set) => set.kind !== "collaboration"))
-  expect(within(dropdown as HTMLElement).getAllByRole("list")).toHaveLength(2)
-  expect(within(dropdown as HTMLElement).getAllByRole("separator")).toHaveLength(1)
+  const dropdown = await openFilter(
+    sets.filter((set) => !["special_pack", "promo", "deck"].includes(set.kind)),
+  )
+  expect(within(dropdown as HTMLElement).getAllByRole("list")).toHaveLength(4)
+  expect(within(dropdown as HTMLElement).getAllByRole("separator")).toHaveLength(3)
 })
