@@ -491,7 +491,7 @@ describe("CardsPage", () => {
         "aria-pressed",
         "true",
       )
-      expect(button).toHaveTextContent("")
+      expect(button).toHaveTextContent("篩選")
       await userEvent.click(button)
       expect(button).toHaveAttribute("aria-expanded", "true")
       expect(panel).toBeVisible()
@@ -624,7 +624,7 @@ describe("CardsPage", () => {
         "false",
       )
       // The set dropdown's choice gets a chip with the dropdown's own wording.
-      await userEvent.click(screen.getByRole("button", { name: /卡包/u }))
+      await userEvent.click(screen.getByRole("button", { name: /^卡包/u }))
       const first = screen.getAllByRole("checkbox", { name: /^BP01 / })[0]
       if (!first) throw new Error("missing set")
       await userEvent.click(first)
