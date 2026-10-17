@@ -73,7 +73,8 @@ def test_production_reconstructs_v4_from_complete_source() -> None:
 
 
 @pytest.mark.parametrize(
-    "version", ["four-layer-jp-v2", "four-layer-jp-v3", "four-layer-jp-v999"]
+    "version",
+    ["four-layer-jp-v2", "four-layer-jp-v4", "four-layer-jp-v3", "four-layer-jp-v999"],
 )
 def test_production_authored_and_binding_entry_reject_preparation_versions(
     version: str,

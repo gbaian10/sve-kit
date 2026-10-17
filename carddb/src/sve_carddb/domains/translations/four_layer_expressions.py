@@ -29,6 +29,7 @@ from sve_carddb.domains.translations.four_layer_context import (
     visible,
 )
 from sve_carddb.domains.translations.four_layer_errors import MissingValueError
+from sve_carddb.domains.translations.four_layer_n3_shapes import CHOICE_DOMAIN
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 if TYPE_CHECKING:
@@ -184,7 +185,8 @@ def verify_quantities(
         if (
             slot is not None
             and slot.expression is not None
-            and value != slot.expression
+            and (value.expr if isinstance(value, QuantitySpec) else value)
+            != slot.expression
         ):
             raise ValueError("Expression value differs from its source structure")
         _verify_expression(frame, binding, name, scopes, registry, visit)
@@ -207,6 +209,14 @@ def _verify_expression(
 ) -> None:
     value = binding.values[name]
     expr = value.expr if isinstance(value, QuantitySpec) else value
+    if isinstance(value, QuantitySpec):
+        from sve_carddb.domains.translations.four_layer_n3_context import (  # ruff: ignore[import-outside-top-level] -- avoids a descriptor/registry cycle
+            verify_context_choice,
+        )
+
+        slot = next((s for s in frame.leaf_schema.slots if s.name == name), None)
+        if slot is not None and slot.domain.values == (CHOICE_DOMAIN,):
+            verify_context_choice(frame, binding, name, value)
     if isinstance(expr, Expression):
         for operand in expr.leaves:
             visit(operand)
@@ -231,7 +241,7 @@ def target_dependencies(
         )
         for value in binding.values.values()
     ):
-        raise ValueError("Expression target dependencies require a v4 frame")
+        raise ValueError("Expression target dependencies require a v5 frame")
     dependencies = {}
     for name, value in binding.values.items():
         expr = value.expr if isinstance(value, QuantitySpec) else value
@@ -348,8 +358,9 @@ class ExpressionTargets:
 @cache
 def _source_registry() -> Registry:
     from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- source construction imports this module
+    from sve_carddb.domains.translations.four_layer_n3_sources import FAMILY as N3  # ruff: ignore[import-outside-top-level] -- source adapters depend on the shared derivation boundary
 
-    return DEFAULT_REGISTRY.extend(FAMILY.descriptors)
+    return DEFAULT_REGISTRY.extend((*FAMILY.descriptors, *N3.descriptors))
 
 
 def verify_target_shape(
@@ -389,7 +400,9 @@ def verify_target_shape(
             identifiers.add(expr.expression_id)
             if expr.expression_id in translations:
                 expander.expand(expr, frame.leaf_schema, lang, forms, frame=frame)
-        elif slot.type in {"QuantityExpr", "PredicateExpr"}:
+        elif slot.type in {"QuantityExpr", "PredicateExpr"} or slot.domain.values == (
+            CHOICE_DOMAIN,
+        ):
             # B11 operands are supplied by the binding rather than embedded in the frame.
             incomplete = True
             possible.update(

@@ -47,6 +47,10 @@ from sve_carddb.domains.translations.four_layer_expressions import (
 )
 from sve_carddb.domains.translations.four_layer_integrated import FAMILY
 from sve_carddb.domains.translations.four_layer_n2_forms import validate_parameter_form
+from sve_carddb.domains.translations.four_layer_n3_context import (
+    DESCRIPTORS as N3_DESCRIPTORS,
+)
+from sve_carddb.domains.translations.four_layer_n3_context import DOMAINS as N3_DOMAINS
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -367,7 +371,7 @@ class Renderer:
         *,
         domains: Mapping[str, ClosedDomain] | None = None,
     ) -> None:
-        self.registry = DEFAULT_REGISTRY.extend(FAMILY.descriptors)
+        self.registry = DEFAULT_REGISTRY.extend((*FAMILY.descriptors, *N3_DESCRIPTORS))
         self.labels = dict(labels)
         self.code_references: dict[tuple[LeafType, str], Reference] = {
             (type_name, code): GlossaryReference(kind="glossary", key="term:" + term)
@@ -375,7 +379,12 @@ class Renderer:
             for code, term in codes.items()
         } | dict(code_references)
         self.forms = dict(forms)
-        self.domains = {**(domains or {}), DOMAIN_CODE: DOMAIN, **self.registry.domains}
+        self.domains = {
+            **(domains or {}),
+            DOMAIN_CODE: DOMAIN,
+            **N3_DOMAINS,
+            **self.registry.domains,
+        }
         for key, value in self.labels.items():
             if key != (canonical(value.reference.model_dump(mode="json")), value.lang):
                 raise ValueError(

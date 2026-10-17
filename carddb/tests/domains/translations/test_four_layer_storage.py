@@ -568,7 +568,9 @@ def test_annotation_concept_category_and_current_emphasis_are_checked(
         read_annotation(db, selected.id)
 
 
-@pytest.mark.parametrize("version", ["four-layer-jp-v2", "four-layer-jp-v999"])
+@pytest.mark.parametrize(
+    "version", ["four-layer-jp-v2", "four-layer-jp-v4", "four-layer-jp-v999"]
+)
 def test_sqlite_source_contract_rejects_nonproduction_versions(
     stored: tuple[Database, Frame, SourceBinding], version: str
 ) -> None:

@@ -13,9 +13,11 @@ from sve_carddb.contracts.four_layer import (
     PortEvidence,
     PredicateExpr,
     Projection,
+    QuantitySpec,
     Scope,
     Span,
 )
+from sve_carddb.contracts.source_binding import expression_node
 from sve_carddb.domains.translations.four_layer_ability import (
     ABILITY_HEAD,
     OPTION_LABEL,
@@ -25,6 +27,8 @@ from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.recognition.provenance import merged
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sve_carddb.contracts.four_layer import CaptureTime, PortValue
     from sve_carddb.contracts.source_binding import SourceDescriptor, TypedValue
     from sve_carddb.domains.translations.four_layer_classification import (
@@ -233,6 +237,10 @@ def update_source(
     names = {item.slot.name: f"leaf_{i}" for i, item in enumerate(leaves)}
 
     def remap(value: TypedValue) -> TypedValue:
+        if isinstance(value, QuantitySpec) and isinstance(
+            value.expr, (Expression, ContextExpression)
+        ):
+            return value.model_copy(update={"expr": remap(value.expr)})
         if isinstance(value, (Expression, ContextExpression, PredicateExpr)):
             return value.model_copy(
                 update={"leaves": tuple(names[n] for n in value.leaves)}
@@ -240,13 +248,25 @@ def update_source(
         return value
 
     values = {name: remap(value) for name, value in result.values.items()}
-    schema = LeafSchema(
-        format=2,
-        slots=tuple(
-            slot.model_copy(update={"expression": values[slot.name]})
-            if isinstance(values[slot.name], (ContextExpression, PredicateExpr))
-            else slot
-            for slot in result.schema.slots
+    return (
+        part,
+        replace(
+            result, values=values, schema=_expression_schema(result.schema, values)
         ),
+        rows,
+        names,
     )
-    return part, replace(result, values=values, schema=schema), rows, names
+
+
+def _expression_schema(
+    schema: LeafSchema, values: Mapping[str, TypedValue]
+) -> LeafSchema:
+    slots = []
+    for slot in schema.slots:
+        expr = expression_node(values[slot.name])
+        slots.append(
+            slot.model_copy(update={"expression": expr})
+            if isinstance(expr, (ContextExpression, PredicateExpr))
+            else slot
+        )
+    return LeafSchema(format=2, slots=tuple(slots))

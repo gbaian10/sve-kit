@@ -44,6 +44,8 @@ PortType = Literal[
     "QuantityExpr",
     "ChoiceContext",
     "EventRef",
+    "PoolContext",
+    "AbilitySetRef",
 ]
 
 
@@ -403,7 +405,14 @@ class OccurrenceKey(OwnerField):
 
 
 CaptureTime = Literal[
-    "live", "selection", "lki", "receipt", "at_event", "current_turn", "play_parameter"
+    "live",
+    "selection",
+    "lki",
+    "receipt",
+    "at_event",
+    "current_turn",
+    "play_parameter",
+    "declaration",
 ]
 
 
@@ -415,7 +424,54 @@ class ObjectGeneration(RecordData):
 class ObjectSetRef(RecordData):
     kind: Literal["ObjectSet"]
     objects: tuple[ObjectGeneration, ...]
-    origin: Literal["holder", "event_subject", "selection", "direct_ability_source"]
+    origin: Literal[
+        "holder",
+        "event_subject",
+        "selection",
+        "direct_ability_source",
+        "pool_remainder",
+    ]
+    pool: Code | None = Field(default=None, exclude_if=lambda value: value is None)
+    placement: Code | None = Field(default=None, exclude_if=lambda value: value is None)
+
+    @model_validator(mode="after")
+    def _remainder(self) -> Self:
+        if (self.origin == "pool_remainder") != (
+            self.pool is not None and self.placement is not None
+        ) or (self.origin != "pool_remainder" and (self.pool or self.placement)):
+            raise ValueError(
+                "Pool remainder requires exactly its pool and placement ports"
+            )
+        return self
+
+
+class PoolContext(RecordData):
+    kind: Literal["PoolContext"]
+    pool_id: Id
+    source_kind: Literal["generated", "search_result"]
+    members: tuple[tuple[Code, Code], ...] = ()
+    receipt: Code | None = None
+    scope: Code
+
+    @model_validator(mode="after")
+    def _provider(self) -> Self:
+        if self.source_kind == "generated":
+            if len(self.members) not in {1, 2} or self.receipt is not None:
+                raise ValueError("Generated pool requires one or two name/count pairs")
+            if len({name for pair in self.members for name in pair}) != 2 * len(
+                self.members
+            ):
+                raise ValueError("Pool members must remain distinct")
+        elif self.members or self.receipt is None:
+            raise ValueError("Search pool requires exactly one objects receipt")
+        return self
+
+
+class AbilitySetRef(RecordData):
+    kind: Literal["AbilitySetRef"]
+    holder_generation: ObjectGeneration
+    ability_kind: Literal["term:event.evolve"]
+    source_selector: OccurrenceKey
 
 
 class PlayerRef(RecordData):
@@ -451,14 +507,39 @@ class ChoiceContext(RecordData):
 
 class EventRef(RecordData):
     kind: Literal["EventRef"]
-    event_kind: Literal["EnterField", "Play", "Damage"]
+    event_kind: Literal["EnterField", "Play", "Damage", "DiceRoll"]
     event_id: Id
-    subject: ObjectGeneration
+    subject: ObjectGeneration | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
     direct_ability_source: ObjectGeneration | None = None
+    actor: PlayerRef | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+
+    @model_validator(mode="after")
+    def _participant(self) -> Self:
+        if self.event_kind == "DiceRoll":
+            if self.subject is not None or self.actor is None:
+                raise ValueError(
+                    "DiceRoll requires a player actor and no object subject"
+                )
+        elif self.subject is None or self.actor is not None:
+            raise ValueError(
+                "Object events require an object subject and no player actor"
+            )
+        return self
 
 
 PortValue = Annotated[
-    ObjectSetRef | PlayerRef | ReceiptRef | CapturedValueRef | ChoiceContext | EventRef,
+    ObjectSetRef
+    | PlayerRef
+    | ReceiptRef
+    | CapturedValueRef
+    | ChoiceContext
+    | EventRef
+    | PoolContext
+    | AbilitySetRef,
     Field(discriminator="kind"),
 ]
 
@@ -549,7 +630,7 @@ class Frame(RecordData):
 
     @model_validator(mode="after")
     def _identity(self) -> Self:
-        if self.source.normalizer_version != "four-layer-jp-v4" and (
+        if self.source.normalizer_version != "four-layer-jp-v5" and (
             self.mode_rules
             or any(
                 s.type == "PredicateExpr" or s.expression is not None
@@ -560,7 +641,7 @@ class Frame(RecordData):
                 for p in (*self.projection.imports, *self.projection.exports)
             )
         ):
-            raise ValueError("Preparation structure requires a v4 frame")
+            raise ValueError("Preparation structure requires a v5 frame")
         if self.id != "frame:" + self.content_hash:
             raise ValueError("Frame ID differs from full content hash")
         if (

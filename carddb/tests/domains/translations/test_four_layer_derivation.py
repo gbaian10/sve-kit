@@ -339,7 +339,9 @@ def test_existing_entry_semantics_and_leaf_values_survive_preparation() -> None:
     assert binding == lexical_binding
 
 
-@pytest.mark.parametrize("version", ["four-layer-jp-v1", "four-layer-jp-v2", "unknown"])
+@pytest.mark.parametrize(
+    "version", ["four-layer-jp-v1", "four-layer-jp-v2", "four-layer-jp-v4", "unknown"]
+)
 def test_production_reader_accepts_only_current_v3_frames(version: str) -> None:
     raw = "{クイック}"
     facts = context(raw)

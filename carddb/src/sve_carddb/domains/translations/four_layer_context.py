@@ -6,19 +6,27 @@ from typing import TYPE_CHECKING, Literal, cast
 
 from sve_carddb.contracts.four_layer import (
     CapturedValueRef,
+    Constant,
     ContextExpression,
     EventRef,
     Expression,
     GlossaryReference,
     LinkedCondition,
     ObjectSetRef,
+    PlayerRef,
     Port,
     PredicateExpr,
+    QuantitySpec,
     ReceiptRef,
     ResolvedCondition,
     Signature,
 )
 from sve_carddb.contracts.source_binding import PreparationDomain
+from sve_carddb.domains.translations.four_layer_n3_shapes import (
+    CHOICE_DOMAIN,
+    CHOSEN_X_EXPRESSION,
+    FUSION_MAX,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -35,6 +43,7 @@ if TYPE_CHECKING:
     )
     from sve_carddb.contracts.source_binding import SourceBinding, TypedValue
     from sve_carddb.domains.translations.four_layer_expressions import Definition
+
 
 _ALIAS = "read.quantity.v1"
 
@@ -58,7 +67,7 @@ class ImportSignature:
     origin: str | None = None
     result_type: Literal["Nat", "Bool"] | None = None
     measure: str | None = None
-    event_kind: Literal["EnterField", "Play", "Damage"] | None = None
+    event_kind: Literal["EnterField", "Play", "Damage", "DiceRoll"] | None = None
     subject_import: str | None = None
     receipt_result: Literal["objects", "amount", "payment_complete"] | None = None
 
@@ -303,10 +312,7 @@ class Registry:
         if (
             slot is None
             or slot.expression != expr
-            or slot.type
-            != ("QuantityExpr" if rule.result_type == "Nat" else "PredicateExpr")
-            or slot.domain.values != (rule.domain,)
-            or slot.role != rule.role
+            or not _slot_matches(slot, rule, expr)
         ):
             raise ValueError("Expression structure differs from its source leaf schema")
         for actual in expr.leaves:
@@ -329,6 +335,7 @@ class Registry:
         if rule.source_family == "A11":
             self._entry(ports)
         self._verify_operands(rule, expr, binding)
+        _sealed_operands(rule, expr, frame, binding, ports)
         return (
             *expr.leaves,
             *(
@@ -465,7 +472,7 @@ def _read(
             "read.object.counter.v1": ("V.counter",),
             "read.faceup_evolve.count.v1": ("V.zone-count", "V.state", "X.aggregate"),
             "read.quantity.v1": ("V.binding",),
-            "read.parameter.chosen_x.v1": ("D.play-param", "V.binding"),
+            CHOSEN_X_EXPRESSION: ("D.play-param", "V.binding"),
         }[id_],
         scalable=True,
     )
@@ -538,7 +545,7 @@ _READS = (
     ),
     _read("read.quantity.v1", "operand", (), (_VALUE,)),
     _read(
-        "read.parameter.chosen_x.v1",
+        CHOSEN_X_EXPRESSION,
         "declared_x",
         (
             ImportSignature(
@@ -728,3 +735,108 @@ def verify_mode_count(
             raise ValueError("Mode count condition requires a typed predicate")
         if predicate.scope != rule.scope:
             raise ValueError("Mode count condition crosses a source scope")
+
+
+def _slot_matches(
+    slot: LeafSlot, rule: Descriptor, expr: ContextExpression | PredicateExpr
+) -> bool:
+    if slot.type == "QuantitySpec":
+        return (slot.domain.values, slot.role, expr.expression_id) == (
+            (CHOICE_DOMAIN,),
+            "choice_mode_count",
+            CHOSEN_X_EXPRESSION,
+        )
+    return (slot.type, slot.domain.values, slot.role) == (
+        "QuantityExpr" if rule.result_type == "Nat" else "PredicateExpr",
+        (rule.domain,),
+        rule.role,
+    )
+
+
+def _sealed_operands(
+    rule: Descriptor,
+    expr: ContextExpression | PredicateExpr,
+    frame: Frame,
+    binding: SourceBinding,
+    ports: Mapping[str, Port],
+) -> None:
+    arguments = rule.arguments(expr, frame.leaf_schema)
+    if rule.id == "history.dice.face.exists.v1":
+        actor = ports["actor"].evidence
+        if (
+            actor is None
+            or not isinstance(actor.value, PlayerRef)
+            or actor.value.player != binding.values[arguments["owner"].name]
+        ):
+            raise ValueError("Dice history actor differs from its owner")
+    elif rule.id == "predicate.dice.matches_declaration.v1":
+        selection = binding.values[arguments["selection"].name]
+        if selection != QuantitySpec(
+            mode="exact", expr=Constant(kind="constant", value=1)
+        ):
+            raise ValueError("Dice declaration selects exactly one number")
+        _dice_evidence(frame, binding, expr, ports)
+    elif rule.id == "read.result.destroyed_follower_by_player.v1":
+        receipt, player = ports["receipt"].evidence, ports["player"].evidence
+        assert receipt is not None
+        assert player is not None
+        if (
+            not isinstance(player.value, PlayerRef)
+            or player.value.player != "each_player_at_destroy"
+            or player.source != receipt.source
+        ):
+            raise ValueError(
+                "Destroyed followers require their controller-at-destroy grouping receipt"
+            )
+    elif rule.id == "condition.quantity.at_most.v1":
+        value = binding.values[expr.leaves[0]]
+        if (
+            not isinstance(value, ContextExpression)
+            or value.expression_id != CHOSEN_X_EXPRESSION
+            or binding.values[expr.leaves[1]] != FUSION_MAX
+        ):
+            raise ValueError("Sealed upper bound requires chosen X and threshold two")
+
+
+def _dice_evidence(
+    frame: Frame,
+    binding: SourceBinding,
+    expr: ContextExpression | PredicateExpr,
+    ports: Mapping[str, Port],
+) -> None:
+    event, result, declared = (
+        ports[k].evidence for k in ("event", "result", "declared")
+    )
+    assert event is not None
+    assert result is not None
+    assert declared is not None
+    if event.source != result.source or event.source.model_dump(
+        exclude={"segments"}
+    ) != declared.source.model_dump(exclude={"segments"}):
+        raise ValueError(
+            "Dice declaration, event and result require the same source execution"
+        )
+    actors = [
+        p
+        for p in frame.projection.imports
+        if p.source_role == "source_actor" and p.scope == expr.scope
+    ]
+    if len(actors) != 1:
+        raise ValueError("Dice roll requires the current ability actor provider")
+    actor = typed_import(
+        frame,
+        binding,
+        actors[0].name,
+        expr.scope,
+        ImportSignature("actor", "PlayerRef", "live"),
+    )
+    assert actor.evidence is not None
+    if (
+        not isinstance(event.value, EventRef)
+        or event.value.actor != actor.evidence.value
+    ):
+        raise ValueError("Dice event actor differs from the current ability actor")
+    if max(p.end for p in declared.source.segments) > min(
+        p.start for p in event.source.segments
+    ):
+        raise ValueError("Dice declaration must precede its roll")
