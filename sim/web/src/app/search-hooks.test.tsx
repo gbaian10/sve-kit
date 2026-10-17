@@ -268,11 +268,13 @@ describe("Worker hooks", () => {
     expect(shown?.page.items.map((item) => item.key)).toEqual(["c:0"])
     const before = fake.requests.filter((request) => request.kind === "view").length
     rerender({ pages: 2 })
+    expect(result.current.loading).toBe(true)
     expect(result.current.view).toBe(shown)
     expect(fake.requests.filter((request) => request.kind === "view").slice(before)).toMatchObject([
       { query: { offset: 60, limit: 60 } },
     ])
     answerViews()
+    expect(result.current.loading).toBe(false)
     expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0", "c:60"])
     // Returning to fewer pages shows only those, without asking the Worker again.
     const asked = fake.requests.length
@@ -282,6 +284,41 @@ describe("Worker hooks", () => {
     rerender({ pages: 2 })
     expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0", "c:60"])
     expect(fake.requests).toHaveLength(asked)
+  })
+  it("retains loaded rows on an appended-page failure and retries only the failed page", () => {
+    const { result, rerender } = renderHook(
+      ({ pages }: { pages: number }) => useListView(query, pages),
+      { initialProps: { pages: 1 } },
+    )
+    ready()
+    answerViews()
+    const shown = result.current.view
+    rerender({ pages: 2 })
+    const request = fake.requests.findLast(
+      (request) => request.kind === "view" && request.query.offset === 60,
+    )
+    if (request?.kind !== "view") throw new Error("missing appended-page request")
+    emit({
+      kind: "query-error",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      error: { kind: "query-failed", message: "synthetic network error" },
+    })
+    expect(result.current.view).toBe(shown)
+    expect(result.current.loading).toBe(false)
+    expect(result.current.error?.kind).toBe("query-failed")
+    const before = fake.requests.length
+    act(() => {
+      result.current.retry()
+    })
+    expect(fake.requests.slice(before)).toMatchObject([{ kind: "view", query: { offset: 60 } }])
+    expect(result.current.view).toBe(shown)
+    expect(result.current.loading).toBe(true)
+    expect(result.current.error).toBeUndefined()
+    answerViews()
+    expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0", "c:60"])
+    expect(result.current.loading).toBe(false)
   })
   it("a newer data version keeps the shown pages until its own pages arrive", () => {
     const { result } = renderHook(() => useListView(query, 1))

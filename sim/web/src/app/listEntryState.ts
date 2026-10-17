@@ -8,6 +8,8 @@ export const LIST_PAGE_SIZE = 60
 /** What the list keeps on its own history entry so "back" can rebuild it (architecture §2.2). */
 export interface ListEntryState {
   readonly pages?: number
+  readonly scrollY?: number
+  readonly listScroll?: { readonly top: number; readonly left: number }
   readonly anchor?: string
 }
 
@@ -56,6 +58,7 @@ export function useListEntryState(): readonly [ListEntryState, (patch: ListEntry
     (patch: ListEntryState) => {
       void navigate(location.pathname + location.search, {
         replace: true,
+        preventScrollReset: true,
         state: { ...(isListEntryState(location.state) ? location.state : {}), ...patch },
       })
     },

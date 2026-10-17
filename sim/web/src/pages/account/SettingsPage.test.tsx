@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { DEFAULT_PREFS, prefsStore, readPrefs } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, readPrefs, recentStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
 import { SettingsPage } from "./SettingsPage"
@@ -11,6 +11,7 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
   prefsStore.set(DEFAULT_PREFS)
+  recentStore.clear()
 })
 
 describe("SettingsPage", () => {
@@ -81,4 +82,54 @@ it("starts preloading disabled and remembers both advanced switches", async () =
   await renderInRouter(<SettingsPage />)
   for (const name of ["預先下載所有版次", "預先下載上一張／下一張"])
     expect(screen.getByRole("switch", { name })).toHaveAttribute("aria-checked", "true")
+})
+
+it("defaults to infinite scroll and persists the manual paging preference", async () => {
+  prefsStore.set(DEFAULT_PREFS)
+  await renderInRouter(<SettingsPage />)
+  const toggle = screen.getByRole("switch", { name: "無限捲動" })
+  expect(toggle).toHaveAttribute("aria-checked", "true")
+  await userEvent.click(toggle)
+  expect(readPrefs().infiniteScroll).toBe(false)
+})
+
+it("confirms restoring all defaults and keeps recent cards and downloaded data", async () => {
+  const storage = memoryCache()
+  vi.stubGlobal("caches", storage)
+  const cache = await storage.open("sve-image-responses-v2")
+  await cache.put(
+    "https://cdn.test/images/card_m/synthetic.webp?v=1",
+    new Response(new Uint8Array([1])),
+  )
+  recentStore.push("p:synthetic-recent")
+  const recent = recentStore.get()
+  prefsStore.set({
+    uiLanguage: "ja",
+    cardEdition: "en",
+    nameDisplay: "both",
+    effectLanguage: "original",
+    preloadPrintings: true,
+    preloadNeighbours: true,
+    infiniteScroll: false,
+    symbolLabels: true,
+    termEmphasis: false,
+    theme: "dark",
+    accent: "red",
+    banRegion: "en",
+    gridDensity: 3,
+    viewMode: "list",
+    showOtherEdition: { jp: true, en: false },
+  })
+  await renderInRouter(<SettingsPage />)
+  await userEvent.click(screen.getByRole("button", { name: "恢復預設" }))
+  await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "取消" }))
+  expect(readPrefs().infiniteScroll).toBe(false)
+  await userEvent.click(screen.getByRole("button", { name: "恢復預設" }))
+  await userEvent.click(
+    within(screen.getByRole("dialog")).getByRole("button", { name: "恢復預設" }),
+  )
+  expect(readPrefs()).toEqual(DEFAULT_PREFS)
+  expect(prefsStore.get()).toEqual(DEFAULT_PREFS)
+  expect(recentStore.get()).toEqual(recent)
+  expect(await cache.keys()).toHaveLength(1)
 })

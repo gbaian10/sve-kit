@@ -1,12 +1,15 @@
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AccentPicker } from "../../components/nav/AccountMenu"
+import { Button } from "../../components/ui/Button"
+import { Dialog } from "../../components/ui/Dialog"
 import { Segmented } from "../../components/ui/Segmented"
 import { SettingRow } from "../../components/ui/SettingRow"
 import { Switch } from "../../components/ui/Switch"
 import { THEME_PREFS } from "../../domain/theme"
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
-import { CARD_EDITIONS, prefsStore, TEXT_DISPLAYS, usePrefs } from "../../settings"
+import { CARD_EDITIONS, DEFAULT_PREFS, prefsStore, TEXT_DISPLAYS, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { StorageSettings } from "./StorageSettings"
 
@@ -16,6 +19,7 @@ const ROW = "min-h-14 border-b border-border py-2"
 export function SettingsPage() {
   const { t } = useTranslation()
   const prefs = usePrefs()
+  const [resetting, setResetting] = useState(false)
   return (
     <>
       <PageTitle>{t("settings.title")}</PageTitle>
@@ -121,6 +125,17 @@ export function SettingsPage() {
         </h2>
         <SettingRow
           className={ROW}
+          label={t("settings.infiniteScroll")}
+          hint={t("settings.infiniteScrollHint")}
+        >
+          <Switch
+            label={t("settings.infiniteScroll")}
+            checked={prefs.infiniteScroll}
+            onChange={(infiniteScroll) => prefsStore.set({ infiniteScroll })}
+          />
+        </SettingRow>
+        <SettingRow
+          className={ROW}
           label={t("settings.preloadPrintings")}
           hint={t("settings.preloadPrintingsHint")}
         >
@@ -142,6 +157,45 @@ export function SettingsPage() {
           />
         </SettingRow>
       </section>
+      <div className="mt-4">
+        <Button
+          onClick={() => {
+            setResetting(true)
+          }}
+        >
+          {t("settings.resetDefaults")}
+        </Button>
+      </div>
+      <Dialog
+        open={resetting}
+        onClose={() => {
+          setResetting(false)
+        }}
+        title={t("settings.resetTitle")}
+        variant="center"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                setResetting(false)
+              }}
+            >
+              {t("settings.resetCancel")}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                prefsStore.set(DEFAULT_PREFS)
+                setResetting(false)
+              }}
+            >
+              {t("settings.resetDefaults")}
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-14 text-text-2">{t("settings.resetHint")}</p>
+      </Dialog>
       <StorageSettings />
     </>
   )

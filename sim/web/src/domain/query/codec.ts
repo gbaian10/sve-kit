@@ -9,7 +9,7 @@ import {
   VIEW_MODES,
 } from "./model"
 
-// URL parameters: q class cost type mech set rarity alt unit sort view. Lists are comma separated,
+// URL parameters: q class cost type mech set rarity alt unit sort order view. Lists are comma separated,
 // de-duplicated and sorted so equal states always give equal URLs; unknown values are dropped rather
 // than failing, because URLs arrive from anywhere. `cost` is `min-max`, `min-` or `-max` (7 = 7+).
 const LIST_PARAMS = { classes: "class", types: "type", sets: "set", rarities: "rarity" } as const
@@ -74,6 +74,7 @@ export function parseQuery(params: URLSearchParams): QueryState {
     altArtOnly: params.get("alt") === "1",
     unit: oneOf(params.get("unit"), QUERY_UNITS) ?? DEFAULT_QUERY.unit,
     sort: oneOf(params.get("sort"), QUERY_SORTS) ?? DEFAULT_QUERY.sort,
+    ...(params.get("order") === "desc" ? { order: "desc" as const } : {}),
     ...(view === undefined ? {} : { view }),
   }
 }
@@ -94,6 +95,7 @@ export function formatQuery(state: QueryState): URLSearchParams {
   if (state.altArtOnly) params.set("alt", "1")
   if (state.unit !== DEFAULT_QUERY.unit) params.set("unit", state.unit)
   if (state.sort !== DEFAULT_QUERY.sort) params.set("sort", state.sort)
+  if (state.order === "desc") params.set("order", "desc")
   if (state.view !== undefined) params.set("view", state.view)
   return params
 }

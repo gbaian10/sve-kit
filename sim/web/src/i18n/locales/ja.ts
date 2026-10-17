@@ -33,6 +33,15 @@ export default {
     view: { grid: "画像", table: "表", list: "リスト" },
   },
   settings: {
+    infiniteScroll: "無限スクロール",
+    infiniteScrollHint:
+      "一覧の末尾に近づくと自動読み込みします。オフの場合はボタンで読み込みます。",
+    resetDefaults: "初期設定に戻す",
+    resetTitle: "初期設定に戻しますか？",
+    resetHint:
+      "表示と詳細設定をすべて初期値に戻します。ダウンロード済みデータと閲覧履歴は残ります。",
+    resetCancel: "キャンセル",
+
     advanced: "詳細設定",
     preloadPrintings: "すべての版を先読み",
     preloadPrintingsHint:
@@ -135,8 +144,16 @@ export default {
     dependenciesPending: "データのダウンロード後に現在の条件を適用します。",
     countUnit: "枚",
     sort: "並び順",
-    sortDefault: "番号順",
-    sortSoon: "並び替えは近日公開",
+    columns: { number: "番号", name: "名前", effect: "能力" },
+    sortBy: {
+      date: "発売日",
+      no: "番号",
+      name: "名前",
+      cost: "コスト",
+      atk: "攻撃力",
+      def: "体力",
+    },
+    descending: "降順",
     view: "表示",
     abilityPreview: "能力プレビュー・未完",
     effectPending: "効果を読み込み中",
@@ -155,7 +172,10 @@ export default {
       unit: "表示単位",
       sort: "並び順",
     },
-    loadMore: "もっと読み込む",
+    loadMore: "さらに読み込む",
+    listLabel: "カード一覧",
+    loadingMore: "カードを読み込み中",
+    allLoaded: "全 {{count}} 枚",
     empty: "該当するカードはありません",
     emptyHint: "条件を緩めるか、番号や別の表記で試してください。",
     clearAll: "条件をすべて解除",
@@ -266,7 +286,6 @@ export default {
     routeFailed: "カードを読み込めません",
     routeFailedHint: "カードデータが不完全か、読み込みに失敗しました。更新して再試行してください。",
 
-    costValue: "コスト {{value}}",
     noValue: "—",
     previous: "前のカード",
     next: "次のカード",

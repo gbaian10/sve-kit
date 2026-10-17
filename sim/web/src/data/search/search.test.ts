@@ -2050,3 +2050,37 @@ it.each(["jp", "en"] as const)(
     }
   },
 )
+
+it("sorts descending before pagination, preserves tie order and leaves missing stats last", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const columns = new BootstrapColumns()
+  columns.ingest(snapshot.bootstrap)
+  columns.seal()
+  const index = new SearchIndex(columns, "jp")
+  for (const sort of ["no", "cost", "atk", "def", "name"] as const) {
+    const state = { ...DEFAULT_QUERY, sort, order: "desc" as const }
+    const full = index.search({ ...query, state, limit: 100 })
+    const page = index.search({ ...query, state, offset: 2, limit: 3 })
+    expect(page.items).toEqual(full.items.slice(2, 5))
+    expect(page.total).toBe(full.total)
+    if (sort === "no") {
+      const ascending = index.search({ ...query, limit: 100 })
+      expect(full.items.map((item) => item.key)).toEqual(
+        ascending.items.map((item) => item.key).reverse(),
+      )
+    } else if (sort !== "name") {
+      const field = sort === "atk" ? "attack" : sort === "def" ? "defense" : "cost"
+      const values = full.items.map((item) => item.summary?.[field] ?? null)
+      for (let i = 1; i < values.length; i++) {
+        const previous = values[i - 1],
+          current = values[i]
+        if (previous === null) expect(current).toBeNull()
+        else if (current !== null && current !== undefined)
+          expect(previous).toBeGreaterThanOrEqual(current)
+      }
+    }
+  }
+})

@@ -1,6 +1,21 @@
-import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from "react"
+import {
+  type KeyboardEvent,
+  useCallback,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router"
+import {
+  NavigationType,
+  useLocation,
+  useNavigate,
+  useNavigationType,
+  useParams,
+  useSearchParams,
+} from "react-router"
 
 import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
 import {
@@ -16,6 +31,7 @@ import { StatusStrip } from "../../app/StatusStrip"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
 import { CardList, CardTable } from "../../components/results/CardRows"
+import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { SearchBar } from "../../components/search/SearchBar"
@@ -25,7 +41,7 @@ import { Button } from "../../components/ui/Button"
 import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
-import { type CardSummary, type ImageSource, type SearchQuery } from "../../data"
+import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -34,6 +50,7 @@ import {
   activeFilterCount,
   DEFAULT_QUERY,
   NEUTRAL_CLASS,
+  QUERY_SORTS,
   type QueryState,
   toggleClass,
   VIEW_MODES,
@@ -45,6 +62,24 @@ const DEBOUNCE_MS = 150
 
 function cardPath(summary: CardSummary): string {
   return printingPath(summary)
+}
+
+function createCellReader(nameOf: (summary: CardSummary) => GridCell["name"]) {
+  const cells = new WeakMap<SearchPage["items"][number], GridCell>()
+  return (item: SearchPage["items"][number]): GridCell | undefined => {
+    if (!item.summary) return undefined
+    const existing = cells.get(item)
+    if (existing) return existing
+    const cell = {
+      key: item.key,
+      summary: item.summary,
+      name: nameOf(item.summary),
+      to: cardPath(item.summary),
+      state: null,
+    }
+    cells.set(item, cell)
+    return cell
+  }
 }
 
 // The URL holds committed conditions; the input draft drives independent Worker suggestions.
@@ -71,8 +106,11 @@ export function CardsPage() {
     return result
   }
   const [entry, updateEntry] = useListEntryState()
+  const listScroll = useRef(entry.listScroll ?? { top: 0, left: 0 })
+  const restoreScroll = useRef(entry.scrollY)
   const navigate = useNavigate()
   const location = useLocation()
+  const navigationType = useNavigationType()
   const recent = useRecent()
 
   // The typed text is a draft on top of one history entry: any navigation (commit, back, forward)
@@ -98,6 +136,7 @@ export function CardsPage() {
   }
 
   const commit = (next: QueryState) => {
+    updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
     setEdit(null)
     setParams(urlParams(next))
   }
@@ -163,6 +202,7 @@ export function CardsPage() {
   )
   const {
     view: listView,
+    loading: pageLoading,
     images,
     imageRoot,
     error: queryError,
@@ -170,29 +210,45 @@ export function CardsPage() {
     retry: retryView,
   } = useListView(searchQuery, pages)
   const page = listView?.page ?? null
-  const cells: GridCell[] = useMemo(() => {
-    if (!page) return []
-    return page.items.flatMap((item) => {
-      if (!item.summary) return []
-      const state: CardEntryState = {
-        // The card page rebuilds the sequence from this string alone, so a set page names its set.
-        background: code ? querySearch(searchState) : location.search,
-        ...routeState(item.summary),
-        source: "results",
-        pages,
-        resultKey: item.key,
+  const positionQuery = JSON.stringify([location.pathname, conditionsKey, edition])
+  const positionRef = useRef({ query: positionQuery, key: location.key })
+  useLayoutEffect(() => {
+    const previous = positionRef.current
+    const changedQuery = previous.query !== positionQuery
+    const returning = navigationType === NavigationType.Pop && previous.key !== location.key
+    if (changedQuery || returning) {
+      listScroll.current =
+        navigationType === NavigationType.Pop
+          ? (entry.listScroll ?? { top: 0, left: 0 })
+          : { top: 0, left: 0 }
+      restoreScroll.current = navigationType === NavigationType.Pop ? (entry.scrollY ?? 0) : 0
+      const container = imageRoot.current?.querySelector<HTMLElement>("[data-list-scroll]")
+      if (container) {
+        container.scrollTop = listScroll.current.top
+        container.scrollLeft = listScroll.current.left
       }
-      return [
-        {
-          key: item.key,
-          summary: item.summary,
-          name: nameOf(item.summary),
-          to: cardPath(item.summary),
-          state,
-        },
-      ]
-    })
-  }, [page, location.search, code, searchState, pages, nameOf])
+    }
+    positionRef.current = { query: positionQuery, key: location.key }
+  }, [positionQuery, location.key, navigationType, entry.listScroll, entry.scrollY, imageRoot])
+  useLayoutEffect(() => {
+    if (!page || pageLoading || restoreScroll.current === undefined) return
+    window.scrollTo(0, restoreScroll.current)
+    restoreScroll.current = undefined
+  }, [page, pageLoading, positionQuery, location.key])
+  const cellOf = useMemo(() => createCellReader(nameOf), [nameOf])
+  const cells: GridCell[] = useMemo(
+    () =>
+      page?.items.flatMap((item) => {
+        const cell = cellOf(item)
+        return cell ? [cell] : []
+      }) ?? [],
+    [page, cellOf],
+  )
+  const background = code ? querySearch(searchState) : location.search
+  const openContextRef = useRef({ pages, updateEntry, background })
+  useLayoutEffect(() => {
+    openContextRef.current = { pages, updateEntry, background }
+  }, [pages, updateEntry, background])
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
@@ -254,14 +310,27 @@ export function CardsPage() {
     inputRef.current?.blur()
     commit({ ...query, text: input })
   }
-  const openCell = useCallback(
-    (cell: GridCell) => {
-      // The anchor goes on the list's own entry first; the cell then pushes the card entry.
-      updateEntry({ anchor: cell.key, pages })
-      recentStore.push(cell.summary.printingId)
-    },
-    [updateEntry, pages],
-  )
+  const openCell = useCallback((cell: GridCell): CardEntryState => {
+    const current = openContextRef.current
+    current.updateEntry({
+      anchor: cell.key,
+      pages: current.pages,
+      listScroll: listScroll.current,
+      scrollY: window.scrollY,
+    })
+    recentStore.push(cell.summary.printingId)
+    return {
+      background: current.background,
+      ...routeState(cell.summary),
+      source: "results",
+      pages: current.pages,
+      resultKey: cell.key,
+    }
+  }, [])
+
+  const loadNextPage = useCallback(() => {
+    updateEntry({ pages: pages + 1, listScroll: listScroll.current, scrollY: window.scrollY })
+  }, [updateEntry, pages])
 
   const quickBar: QuickBarClass[] = useMemo(
     () =>
@@ -288,6 +357,25 @@ export function CardsPage() {
       images?.artImage?.(cell.summary.printingId, cell.summary.faceId),
     [images],
   )
+
+  const pagination =
+    page && page.total > 0 ? (
+      <PaginationTail
+        automatic={prefs.infiniteScroll}
+        requestKey={JSON.stringify([conditionsKey, edition, pages])}
+        total={page.total}
+        hasMore={page.items.length < page.total}
+        loading={
+          pageLoading || (!queryError && page.items.length < Math.min(pages * 60, page.total))
+        }
+        failed={Boolean(queryError)}
+        onMore={loadNextPage}
+        onRetry={() => {
+          retryView()
+          if (readiness.phase === "error") readiness.retry()
+        }}
+      />
+    ) : null
 
   if (code && !set) {
     return (
@@ -431,7 +519,7 @@ export function CardsPage() {
           })}
         </Notice>
       )}
-      {queryError && !unsupported && readiness.phase !== "error" && (
+      {queryError && !unsupported && page === null && readiness.phase !== "error" && (
         <Notice
           tone="danger"
           role="alert"
@@ -486,15 +574,35 @@ export function CardsPage() {
               {t("results.countUnit")}
             </p>
             <div className="ml-auto flex items-center gap-2">
-              {/* Sorting arrives with the filter panel (V3); the control keeps its place and says so. */}
+              <label className="flex items-center gap-1 text-13">
+                <span>{t("results.sort")}</span>
+                <select
+                  aria-label={t("results.sort")}
+                  value={query.sort}
+                  className="h-8 rounded-control border border-border bg-surface-1 px-2 text-text-1"
+                  onChange={(event) => {
+                    const sort = QUERY_SORTS.find((sort) => sort === event.target.value)
+                    if (sort) commit({ ...query, sort })
+                  }}
+                >
+                  {QUERY_SORTS.map((sort) => (
+                    <option key={sort} value={sort} disabled={sort === "date"}>
+                      {t(`results.sortBy.${sort}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <button
                 type="button"
-                aria-disabled="true"
-                title={t("results.sortSoon")}
-                className="flex h-8 items-center gap-1 rounded-control border border-border bg-surface-1 px-2.5 text-13 text-text-3"
+                aria-label={t("results.descending")}
+                aria-pressed={query.order === "desc"}
+                className="h-8 rounded-control border border-border bg-surface-1 px-2 text-13"
+                onClick={() => {
+                  const { order, ...rest } = query
+                  commit(order === "desc" ? rest : { ...rest, order: "desc" })
+                }}
               >
-                <span>{t("results.sort")}</span>
-                <span className="text-text-2">{t("results.sortDefault")}</span>
+                {query.order === "desc" ? "↓" : "↑"}
               </button>
               <Segmented
                 size="sm"
@@ -503,10 +611,11 @@ export function CardsPage() {
                 options={VIEW_MODES.map((value) => ({ value, label: t(`options.view.${value}`) }))}
                 value={view}
                 onChange={(next) => {
+                  updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
                   prefsStore.set({ viewMode: next })
                   setEdit(null)
                   setParams(urlParams({ ...query, view: next }), {
-                    state: entry,
+                    state: { ...entry, listScroll: listScroll.current, scrollY: window.scrollY },
                     preventScrollReset: true,
                   })
                 }}
@@ -532,21 +641,24 @@ export function CardsPage() {
           )}
           {view === "list" && (
             <CardList
+              footer={pagination}
+              sort={query.sort}
+              descending={query.order === "desc"}
+              onSort={(sort) => {
+                const { order, ...rest } = query
+                commit(
+                  sort === query.sort && order !== "desc"
+                    ? { ...rest, sort, order: "desc" }
+                    : { ...rest, sort },
+                )
+              }}
+              scrollPositionRef={listScroll}
               cells={cells}
               onOpen={openCell}
               {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
             />
           )}
-          {page.items.length < page.total && (
-            <Button
-              className="mx-auto mt-2 w-full max-w-80"
-              onClick={() => {
-                updateEntry({ pages: pages + 1 })
-              }}
-            >
-              {t("results.loadMore")}
-            </Button>
-          )}
+          {view !== "list" && pagination}
         </>
       )}
     </div>

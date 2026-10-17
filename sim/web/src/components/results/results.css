@@ -4,8 +4,7 @@
 }
 
 [data-view="grid"] > li,
-[data-view="table"] > li,
-[data-view="list"] > li {
+[data-view="table"] > li {
   content-visibility: auto;
 
   /* Paint containment needs room for the existing outer highlight and focus outline. */
@@ -17,8 +16,7 @@
 }
 
 [data-view="grid"] > li > *,
-[data-view="table"] > li > *,
-[data-view="list"] > li > * {
+[data-view="table"] > li > * {
   pointer-events: auto;
 }
 
@@ -34,6 +32,187 @@
   contain-intrinsic-block-size: auto 140px;
 }
 
-[data-view="list"] > li {
-  contain-intrinsic-block-size: auto 52px;
+/* Only the phone needs a horizontal scrollport and a frozen name column. */
+:where([data-list-scroll]) {
+  isolation: isolate;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 4px;
+  scroll-padding-top: 48px;
+}
+
+html:has([data-card-list]) {
+  scroll-padding-top: 48px;
+}
+
+:where([data-card-list]) {
+  width: 100%;
+  table-layout: fixed;
+  border-spacing: 0;
+  border-collapse: separate;
+  font-size: 13px;
+}
+
+:where([data-list-number-col]) {
+  width: 132px;
+}
+
+:where([data-list-name-col]) {
+  width: 192px;
+}
+
+:where([data-list-stat-col]) {
+  width: 68px;
+}
+
+:where([data-card-list] th),
+:where([data-card-list] td) {
+  height: 40px;
+  padding: 0 10px;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  background: var(--color-surface-1);
+}
+
+:where([data-card-list] th) {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  background: var(--color-surface-2);
+  text-align: left;
+  font-weight: 600;
+}
+
+:where([data-card-list] th button) {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+:where([data-sort-label]) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:where([data-sort-arrow]) {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  font-size: 10px;
+  line-height: 1;
+}
+
+:where([data-card-list] [data-list-number]) {
+  border-left: 3px solid var(--class-color);
+  color: var(--color-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+:where([data-list-number] > span),
+:where([data-list-name] a),
+:where([data-list-effect-text]) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:where([data-list-name] a) {
+  font-weight: 600;
+}
+
+:where([data-list-effect-text]) {
+  color: var(--color-text-2);
+}
+
+:where([data-card-list] [data-list-stat]),
+:where([data-card-list] th:nth-child(n + 3):nth-child(-n + 5)) {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+:where([data-card-list] th:nth-child(n + 3):nth-child(-n + 5)) {
+  padding-inline: 4px;
+}
+
+:where([data-card-list] tbody tr) {
+  cursor: pointer;
+}
+
+:where([data-card-list] tbody tr:hover td),
+:where([data-card-list] tbody tr:focus-within td) {
+  background: var(--color-surface-2);
+}
+
+:where([data-card-list] tr[data-highlighted] td) {
+  box-shadow:
+    inset 0 2px var(--color-text-1),
+    inset 0 -2px var(--color-text-1);
+}
+
+:where([data-card-list] th:last-child),
+:where([data-card-list] td:last-child) {
+  border-right: 0;
+}
+
+:where([data-card-list] tbody tr:last-child td) {
+  border-bottom: 0;
+}
+
+@media (600px <= width < 1000px) {
+  :where([data-list-number-col]) {
+    width: 112px;
+  }
+
+  :where([data-list-name-col]) {
+    width: 176px;
+  }
+}
+
+@media (width < 600px) {
+  :where([data-list-scroll]) {
+    overflow: auto;
+    max-height: 70dvh;
+  }
+
+  :where([data-card-list]) {
+    min-width: 600px;
+  }
+
+  :where([data-list-number-col]) {
+    width: 84px;
+  }
+
+  :where([data-list-name-col]) {
+    width: 124px;
+  }
+
+  :where([data-list-stat-col]) {
+    width: 60px;
+  }
+
+  :where([data-card-list] th:nth-child(2)),
+  :where([data-card-list] td:nth-child(2)) {
+    position: sticky;
+    left: 0;
+  }
+
+  :where([data-card-list] td:nth-child(2)) {
+    z-index: 1;
+  }
+
+  :where([data-card-list] th:nth-child(2)) {
+    z-index: 4;
+  }
+}
+
+:where([data-list-spacer] td) {
+  position: static;
+  padding: 0;
+  border: 0;
+  pointer-events: none;
 }

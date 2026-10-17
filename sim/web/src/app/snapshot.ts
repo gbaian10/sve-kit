@@ -270,13 +270,14 @@ export function useListView(query: SearchQuery, pages: number) {
     const state: {
       wanted: number
       value: {
+        loading: boolean
         view?: CompleteView
         error?: QueryFailure
         progress?: { done: number; total: number }
       }
     } = {
       wanted: 0,
-      value: {},
+      value: { loading: true },
     }
     const listeners = new Set<() => void>()
     const update = () => {
@@ -298,16 +299,21 @@ export function useListView(query: SearchQuery, pages: number) {
       const progress = channels[0]?.getStatus().queryProgress
       state.value =
         error?.phase === "error"
-          ? { error: error.error }
+          ? { ...value, error: error.error, loading: false }
           : complete.length === wanted && first && coherent
             ? {
+                loading: false,
                 view: {
                   ...first,
                   page: { ...first.page, items: complete.flatMap((view) => view.page.items) },
                   faces: complete.flatMap((view) => view.faces),
                 },
               }
-            : { ...(value.error ? {} : value), ...(progress ? { progress } : {}) }
+            : {
+                ...(value.view ? { view: value.view } : {}),
+                loading: true,
+                ...(progress ? { progress } : {}),
+              }
       for (const listener of listeners) listener()
     }
     const request = (channel: SearchChannel, page: number) => {
@@ -344,7 +350,9 @@ export function useListView(query: SearchQuery, pages: number) {
         if (changed) update()
       },
       retry: () => {
-        channels.slice(0, state.wanted).forEach(request)
+        channels.slice(0, state.wanted).forEach((channel, page) => {
+          if (channel.getStatus().result.phase === "error") request(channel, page)
+        })
       },
       release: lifecycle.release,
     }
