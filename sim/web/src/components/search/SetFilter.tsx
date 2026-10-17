@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { SearchOptions } from "../../data"
 import type { NameSource } from "../../domain/nameDisplay"
 import type { TextLang } from "../../domain/search"
-import { setLabel } from "../../domain/sets"
+import { setCaption, setLabel } from "../../domain/sets"
 import { FacetFilter } from "./FacetFilter"
 import { Toggle } from "./FilterControls"
 
@@ -34,7 +34,7 @@ export function SetFilter({
     code: set.code,
     publicCode: set.publicCode ?? set.code,
     kind: set.kind,
-    label: `${set.publicCode ?? set.code} ${setLabel(set.name, textLang).text}`,
+    label: setCaption(set, textLang).text,
     fullWidth: true,
   }))
   const kindOrder = ["booster", "collaboration", "special_pack", "promo", "deck", "special"]
@@ -90,7 +90,7 @@ export function SetFilter({
         <Toggle
           pressed={selected.includes(promo.code)}
           disabled={!counts}
-          label={`${promo.publicCode ?? promo.code} ${setLabel(promo.name, textLang).text}`}
+          label={setCaption(promo, textLang).text}
           title={setLabel(promo.name, textLang).text}
           onClick={() => {
             toggleSet(promo.code)

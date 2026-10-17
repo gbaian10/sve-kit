@@ -1,4 +1,4 @@
-import { Layers, Shuffle, SlidersHorizontal } from "lucide-react"
+import { Shuffle, SlidersHorizontal } from "lucide-react"
 import {
   type KeyboardEvent,
   useEffect,
@@ -314,15 +314,11 @@ export function HomeSearch({
       </div>
       <nav
         aria-label={t("home.shortcuts")}
-        className="grid w-full grid-cols-3 gap-2 lg:flex lg:w-auto"
+        className="grid w-full grid-cols-2 gap-2 lg:flex lg:w-auto"
       >
         <RouterLink to={editionUrl("/cards", edition)} className={SHORTCUT}>
           <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">{t("home.shortcut.advanced")}</span>
-        </RouterLink>
-        <RouterLink to={editionUrl("/sets", edition)} className={SHORTCUT}>
-          <Layers className="size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">{t("home.shortcut.sets")}</span>
         </RouterLink>
         <button
           type="button"

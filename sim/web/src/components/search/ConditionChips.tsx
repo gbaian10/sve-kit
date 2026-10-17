@@ -16,6 +16,8 @@ export interface ConditionChipsProps {
   readonly rarityLabel: (code: string) => string
   readonly typeLabel: (code: string) => string
   readonly setLabel: (code: string) => string
+  /** A set implied by the page's path (`/sets/:code`): kept in the query, shown as no chip. */
+  readonly impliedSet?: string | undefined
   /** The sub-values the panel offers under each parent (`pr`, `token`, `leader`), as tokens. */
   readonly groups: Readonly<Record<string, readonly string[]>>
   readonly onChange: (next: QueryState) => void
@@ -46,6 +48,7 @@ export function ConditionChips({
   rarityLabel,
   typeLabel,
   setLabel,
+  impliedSet,
   groups,
   onChange,
   onClear,
@@ -135,11 +138,13 @@ export function ConditionChips({
       ...typeChip(token),
       without: { ...query, types: without(query.types, token) },
     })),
-    ...query.sets.map((code) => ({
-      key: `set:${code}`,
-      label: setLabel(code),
-      without: { ...query, sets: query.sets.filter((other) => other !== code) },
-    })),
+    ...query.sets
+      .filter((code) => code !== impliedSet)
+      .map((code) => ({
+        key: `set:${code}`,
+        label: setLabel(code),
+        without: { ...query, sets: query.sets.filter((other) => other !== code) },
+      })),
     // The "one per card" switch is display, but the maintainer wants it removable from here too.
     ...(query.unit === "card"
       ? [

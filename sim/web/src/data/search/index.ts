@@ -10,7 +10,7 @@ import {
 } from "../../domain/query/model"
 import { UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
-import { datedSets, type PackCounts, packCounts, recentSets } from "../../domain/sets"
+import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
 import { badgeOf, type CardSummary, catalogCards } from "../catalog"
 import {
   arrayValue,
@@ -844,21 +844,12 @@ export class SearchIndex {
     }
   }
 
-  /** Each matching card once, and how many of them have a name translation in `language`. */
-  count(query: SearchQuery, language: TextLang): PackCounts {
-    return packCounts(
-      this.matches(query).map((printing) => {
-        const summary = this.printings.summary[printing] ?? 0
-        const name = summary
-          ? (this.summaries.row(summary - 1) as unknown as CardSummary).name
-          : undefined
-        return {
-          key: this.pool.get(this.cards.id[this.printings.card[printing] ?? 0] ?? 0),
-          translated: Boolean(name?.translations[language]),
-          lowConfidence: name?.translationQuality?.[language]?.lowConfidence ?? false,
-        }
-      }),
+  /** Each matching card once, whatever number of its printings match. */
+  count(query: SearchQuery): PackCounts {
+    const cards = new Set(
+      this.matches(query).map((printing) => this.cards.id[this.printings.card[printing] ?? 0]),
     )
+    return { cards: cards.size }
   }
 
   neighbours(

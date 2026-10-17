@@ -2123,16 +2123,16 @@ describe("set releases and counts", () => {
     for (const index of [created, new SearchIndex(created.encode(), "en")]) {
       expect(index.releases.find((set) => set.code === "bp01")?.releasedOn).toBe("2026-02-01")
       expect(index.releases.find((set) => set.code === "sd01")?.releasedOn).toBe("2026-05-01")
-      expect(
-        index.count({ state: { ...CARD_QUERY, sets: ["bp01"] }, edition: "en" }, "zh-Hant"),
-      ).toEqual({ cards: 15, translated: 14, proofreading: 0 })
-      expect(
-        index.count({ state: { ...CARD_QUERY, sets: ["sd01"] }, edition: "en" }, "zh-Hant"),
-      ).toEqual({ cards: 2, translated: 2, proofreading: 0 })
+      expect(index.count({ state: { ...CARD_QUERY, sets: ["bp01"] }, edition: "en" })).toEqual({
+        cards: 15,
+      })
+      expect(index.count({ state: { ...CARD_QUERY, sets: ["sd01"] }, edition: "en" })).toEqual({
+        cards: 2,
+      })
     }
   })
 
-  it("counts each card of a set once with its name translations, and returns no cards", async () => {
+  it("counts each card of a set once, and returns no cards", async () => {
     const served = origin()
     const baseline = createSnapshotClient(base, { fetch: served.fetcher })
     await baseline.load()
@@ -2155,40 +2155,23 @@ describe("set releases and counts", () => {
       const summary = printing && catalog.summary(printing.id)
       return summary ? [summary.name] : []
     })
-    const expected = (language: "zh-Hant" | "en") => {
-      const translated = cards.filter((name) => name.translations[language])
-      return {
-        cards: cards.length,
-        translated: translated.length,
-        proofreading: translated.filter(
-          (name) => name.translationQuality?.[language]?.lowConfidence,
-        ).length,
-      }
-    }
-    // Synthetic names: every zh-Hant one is confident, English drafts without a counterpart are not.
-    expect(expected("zh-Hant")).toMatchObject({ proofreading: 0 })
-    expect(expected("zh-Hant").translated).toBeGreaterThan(0)
-    expect(expected("en").proofreading).toBeGreaterThan(0)
-
     const h = harness(served)
     h.session.load(base, "jp", "preview")
     await h.settled()
     const state = { ...CARD_QUERY, sets: ["bp01"] }
-    for (const language of ["zh-Hant", "en"] as const) {
-      h.channel.count({ state, edition: "jp" }, language)
-      await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
-      const result = h.status().result
-      if (result.phase !== "complete") throw new Error("missing counts")
-      expect(result.counts).toEqual(expected(language))
-      expect(result.page).toEqual({ total: cards.length, offset: 0, items: [] })
-    }
+    h.channel.count({ state, edition: "jp" })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("missing counts")
+    expect(result.counts).toEqual({ cards: cards.length })
+    expect(result.page).toEqual({ total: cards.length, offset: 0, items: [] })
     // Printings of one card in the set still count it once.
     h.channel.search({ state: { ...state, unit: "printing" }, edition: "jp", limit: 1 })
     await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
     const listed = h.status().result
     if (listed.phase !== "complete") throw new Error("missing printings")
     expect(listed.page.total).toBeGreaterThan(cards.length)
-    h.channel.count({ state: { ...state, unit: "printing" }, edition: "jp" }, "zh-Hant")
+    h.channel.count({ state: { ...state, unit: "printing" }, edition: "jp" })
     await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
     const printings = h.status().result
     if (printings.phase !== "complete") throw new Error("missing counts")

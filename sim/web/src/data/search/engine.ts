@@ -335,7 +335,7 @@ export class SearchEngine {
             event = {
               kind: "count-result",
               ...identity,
-              counts: index.count(request.query, request.language),
+              counts: index.count(request.query),
             }
           } else if (request.kind === "neighbours" && index) {
             event = {

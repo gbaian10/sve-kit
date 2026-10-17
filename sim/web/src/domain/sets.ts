@@ -8,6 +8,67 @@ export function setLabel(name: NameSource, lang: TextLang): DisplayedText {
   return translated ? { text: translated, lang } : name.original
 }
 
+export interface SetCaption {
+  /** The public code to show before the name, or null when the name already starts with it. */
+  readonly code: string | null
+  readonly name: DisplayedText
+  /** Code and name as one string, for labels that take plain text. */
+  readonly text: string
+}
+
+// One caption rule for every list, dropdown, header and chip (maintainer, 2026-10-18): a name that
+// already starts with the public code is shown alone, so the code is never printed twice.
+export function setCaption(
+  set: { readonly code: string; readonly publicCode?: string; readonly name: NameSource },
+  lang: TextLang,
+): SetCaption {
+  const publicCode = set.publicCode ?? set.code
+  const name = setLabel(set.name, lang)
+  const code = name.text.startsWith(publicCode) ? null : publicCode
+  return { code, name, text: code === null ? name.text : `${code} ${name.text}` }
+}
+
+// The kinds with a section of their own on `/sets` (architecture §2.1); every other kind, known or
+// not, lands in "decks and special products" so a new kind in the snapshot is never dropped.
+const MAIN_SET_KINDS = ["booster", "collaboration", "special_pack", "promo"] as const
+export type MainSetKind = (typeof MAIN_SET_KINDS)[number]
+
+export interface GroupedSets<T> {
+  readonly main: ReadonlyMap<MainSetKind, readonly T[]>
+  readonly other: readonly T[]
+}
+
+function isMainSetKind(kind: string | undefined): kind is MainSetKind {
+  return (MAIN_SET_KINDS as readonly string[]).includes(kind ?? "")
+}
+
+/** The `sets.kind` copy key for a family kind; kinds the copy does not know fall to "other". */
+export function setKindKey(kind: string | undefined): MainSetKind | "deck" | "special" | "other" {
+  if (isMainSetKind(kind) || kind === "deck" || kind === "special") return kind
+  return "other"
+}
+
+/** Splits sets into the main sections (in `MAIN_SET_KINDS` order, present kinds only) and the rest. */
+export function groupSets<T extends { readonly kind?: string }>(
+  sets: readonly T[],
+): GroupedSets<T> {
+  const main = new Map<MainSetKind, T[]>()
+  const other: T[] = []
+  for (const set of sets) {
+    if (isMainSetKind(set.kind)) {
+      const bucket = main.get(set.kind)
+      if (bucket) bucket.push(set)
+      else main.set(set.kind, [set])
+    } else other.push(set)
+  }
+  const ordered = new Map<MainSetKind, readonly T[]>()
+  for (const kind of MAIN_SET_KINDS) {
+    const bucket = main.get(kind)
+    if (bucket) ordered.set(kind, bucket)
+  }
+  return { main: ordered, other }
+}
+
 // The home page's set entries (#519). Product release dates only order sets and are shown; they
 // never decide which printings a set holds (`set=` stays on the printing's home set).
 export interface SetFacts {
@@ -63,37 +124,7 @@ export function recentSets<T extends SetFacts & { readonly releasedOn: string }>
     .slice(0, limit)
 }
 
-export interface PackCard {
-  /** One card, whatever printing represents it. */
-  readonly key: string
-  /** Has a name translation in the counted language, low confidence included. */
-  readonly translated: boolean
-  readonly lowConfidence: boolean
-}
-
 export interface PackCounts {
+  /** Distinct cards among the matching printings. */
   readonly cards: number
-  readonly translated: number
-  /** Translated cards whose name translation still awaits proofreading. */
-  readonly proofreading: number
-}
-
-/** Counts each card once, so several printings of a card in the set never inflate the totals. */
-export function packCounts(items: readonly PackCard[]): PackCounts {
-  const cards = new Map<string, { translated: boolean; lowConfidence: boolean }>()
-  for (const item of items) {
-    const known = cards.get(item.key)
-    cards.set(item.key, {
-      translated: (known?.translated ?? false) || item.translated,
-      lowConfidence: (known?.lowConfidence ?? false) || (item.translated && item.lowConfidence),
-    })
-  }
-  let translated = 0
-  let proofreading = 0
-  for (const card of cards.values()) {
-    if (!card.translated) continue
-    translated += 1
-    if (card.lowConfidence) proofreading += 1
-  }
-  return { cards: cards.size, translated, proofreading }
 }
