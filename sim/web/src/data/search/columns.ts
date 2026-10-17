@@ -164,6 +164,24 @@ export interface ColumnEdit {
   readonly changes: Readonly<Record<string, JsonValue | undefined>>
 }
 
+// Packed cells allow floats, unlike snapshot canonical JSON.
+function sameJson(a: JsonValue, b: JsonValue): boolean {
+  if (a === b) return true
+  if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false
+  if (Array.isArray(a))
+    return (
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((item, i) => sameJson(item, b[i] ?? null))
+    )
+  if (Array.isArray(b)) return false
+  const keys = Object.keys(a)
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => Object.hasOwn(b, key) && sameJson(a[key] ?? null, b[key] ?? null))
+  )
+}
+
 /** Each append keeps its own block, so ingesting a file never reallocates earlier files. */
 export class Columns {
   private readonly pool: StringPool
@@ -231,9 +249,14 @@ export class Columns {
       for (const name of names) {
         const column = { kinds: new Uint8Array(rows.length), values: new Uint32Array(rows.length) }
         rows.forEach((row, ordinal) => {
-          if (Object.hasOwn(row.changes, name)) this.write(column, ordinal, name, row.changes[name])
+          const source = row.block.columns.get(name)
+          const value = row.changes[name]
+          const reuse =
+            source?.kinds[row.offset] === 4 &&
+            value !== undefined &&
+            sameJson(this.cell(source, row.offset), value)
+          if (Object.hasOwn(row.changes, name) && !reuse) this.write(column, ordinal, name, value)
           else {
-            const source = row.block.columns.get(name)
             column.kinds[ordinal] = source?.kinds[row.offset] ?? 0
             column.values[ordinal] = source?.values[row.offset] ?? 0
           }
