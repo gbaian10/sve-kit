@@ -19,6 +19,17 @@ _NC_OCCURRENCES = 4
 _DIGIT = r"(?:N(?![A-Za-z])|[0-9０-９]+)"
 
 
+def is_construction_fragment(part: SourcePart, field: SourceField | None) -> bool:
+    """A negated name fragment is not the complete name of a constructed card."""
+    return (
+        field is not None
+        and field.source.field == "section"
+        and part.source_span.role == "body"
+        and part.canonical_source
+        == r"カード名に『X』を含まないカードは、メインデッキやエボルヴデッキにそれぞれN枚までしか入れられない。"
+    )
+
+
 def repair_candidate(
     raw: str, part: SourcePart, candidate: Candidate, field: SourceField | None
 ) -> Candidate:

@@ -105,6 +105,50 @@ _COST_HEAD = re.compile(
 _PARENTS = re.compile(
     r"出たとき|置かれたとき|戻ったとき|加えたとき|捨てたとき|プレイしたとき|攻撃したとき|破壊されたとき|消滅したとき|出るたび|置かれるたび|このターン中に|ターン中|場にいる限り|場にある限り|いたなら|履歴|受け取った|出たカード|置いたカード"
 )
+_N3_TRAIT = r"[^、。:：『』{}「」【】\s・]+・"
+_N3_FLAT_FILTERS = (
+    (
+        "C02",
+        re.compile(
+            r"(?:自分|相手)の(?:(?:墓場|場|EXエリア)(?:の|にある|に))?"
+            r"(?P<np>(?:"
+            + _N3_TRAIT
+            + r"|\{[^{}]+\})(?:カード|フォロワー))が?N(?:枚|体)以上か"
+        ),
+    ),
+    (
+        "S04",
+        re.compile(
+            r"自分のデッキの上N枚を見る。その中から、(?P<np>"
+            + _N3_TRAIT
+            + r"カード)N枚を公開してデッキの上に置いてよい。残りを好きな順にデッキの下に置く。"
+        ),
+    ),
+    (
+        "S08",
+        re.compile(
+            r"自分の場か自分のEXエリアの(?P<np>"
+            + _N3_TRAIT
+            + r"トークン)N枚を選ぶ(?=[。、]|$)"
+        ),
+    ),
+    (
+        "P02",
+        re.compile(
+            r"【融合】(?P<np>元のコストN以上の"
+            + _N3_TRAIT
+            + r"カード)N枚:これは「これをプレイする際、コストを-Nする」を持つ。"
+        ),
+    ),
+    (
+        "P03",
+        re.compile(
+            r"EXエリアの(?P<np>"
+            + _N3_TRAIT
+            + r"トークン)N枚を消滅し、手札のこれをEXエリアに置く:"
+        ),
+    ),
+)
 
 
 @dataclass(frozen=True)
@@ -237,6 +281,7 @@ def operands(text: str) -> tuple[tuple[Operand, ...], tuple[Attempt, ...]]:
     registry.phases()
     registry.costs()
     registry.class_tokens()
+    registry.flat_filters()
     return tuple(registry.found), tuple(registry.attempts)
 
 
@@ -272,6 +317,33 @@ class _Registry:
                     ),
                 )
             )
+
+    def flat_filters(self) -> None:
+        for row, pattern in _N3_FLAT_FILTERS:
+            for match in pattern.finditer(self.text):
+                prefix = self.text[: match.start()]
+                if prefix.count("「") != prefix.count("」"):
+                    continue
+                np = noun(match["np"], match.start("np"))
+                if np is None:
+                    token = re.fullmatch(
+                        r"(?P<trait>[^・]+)・(?P<token>トークン)", match["np"]
+                    )
+                    if token is None:
+                        continue
+                    offset = match.start("np")
+                    np = Noun(
+                        _span(match, "np"),
+                        "card",
+                        tuple(
+                            Filter(kind, token[kind], _span(token, kind, offset))
+                            for kind in ("trait", "token")
+                        ),
+                        True,
+                    )
+                self.found.append(
+                    Operand("N3-FLAT." + row, _span(match, "np"), noun=np)
+                )
 
     def unions(self) -> None:
         text, found, attempts = self.text, self.found, self.attempts

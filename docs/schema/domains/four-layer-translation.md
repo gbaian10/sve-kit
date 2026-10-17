@@ -1233,7 +1233,8 @@ descriptor ID 可以把原文字面編進構造而不留槽，所以全部 provi
 支付完成結果是 `ReceiptId<payment_complete>`；兩者的時點與型別維持分開。
 這些接線不執行付款、歷史、名稱規則或入場來源求值；lowering／runtime 仍須各自驗收。
 新中文 target 仍經相同 required 閉包與 annotation renderer；缺選詞保持具名問題，
-不以 Literal 或 optional 隱藏。正式切換及中文重對齊由後續流程處理。
+不以 Literal 或 optional 隱藏。中文重對齊仍須通過相同來源驗證與 renderer，
+不因來源辨識完成而啟用。
 
 ### 11.12 v4 有限來源形狀與構築上限
 
@@ -1263,3 +1264,8 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 存在比較沿 `QuantitySpec/existence_count`。新角色只有 §4.1 的兩個構築上限角色；
 所有數值域維持非負安全整數。新來源辨識只建立必要葉與正常 binding，
 缺少繁中 target 仍回報缺稿，不能以來源解鎖宣稱整欄中文完成。
+
+有限 flat 篩選中的 trait、明示 card／kind 與 token 仍須有 required 葉；
+其來源拼字留在 canonical，沿既有型別與引用域驗回位置，不為了新增葉重寫骨架。
+缺少必要 trait／card 概念時保留 `missing_n3_filter_concept`，不能略過該葉完成 binding。
+構築限制中被否定的名稱片段使用 `CardName/name_fragment`，不標為完整名稱引用。

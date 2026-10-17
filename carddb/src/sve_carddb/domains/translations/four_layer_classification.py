@@ -33,7 +33,10 @@ from sve_carddb.contracts.source_binding import (
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_n1_leaves import DOMAINS as N1_DOMAINS
-from sve_carddb.domains.translations.four_layer_n3_numbers import repair_candidate
+from sve_carddb.domains.translations.four_layer_n3_numbers import (
+    is_construction_fragment,
+    repair_candidate,
+)
 from sve_carddb.domains.translations.four_layer_normalizer import (
     VERSION,
     SourcePart,
@@ -466,6 +469,8 @@ class Classifier:
                     else category
                 )
             )
+            if category == "card_name" and is_construction_fragment(part, field):
+                role = "name_fragment"
         elif hint.target is not None and hint.target.get("kind") == "vocabulary":
             kind, code = (
                 hint.target.get("vocabulary_kind"),

@@ -146,6 +146,13 @@ def test_sealed_body_shape_binds_and_rejects_wrong_units(
     frame, binding = derived.bind(0)
     derived.verify_binding(raw, engine, frame, binding)
     assert role in {s.role for s in frame.leaf_schema.slots}
+    if case in {"C02", "S04", "S08", "P02", "P03"}:
+        assert "trait" in {s.role for s in frame.leaf_schema.slots}
+    if case in {"S08", "P03"}:
+        assert "token_filter" in {s.role for s in frame.leaf_schema.slots}
+        assert all(s.type != "CardKind" for s in frame.leaf_schema.slots)
+    if case in {"C02", "S04", "P02"}:
+        assert "rule_term" in {s.role for s in frame.leaf_schema.slots}
     assert frame.semantic_variant.state == "pending"
     bad = re.sub(r"([0-9０-９]+)(?:体|枚|つ)", r"\1人", raw)
     rejected = derive_source(bad, source(bad), engine)
@@ -261,6 +268,11 @@ def test_construction_and_continuation_shapes_bind_only_complete_guards(
     if case == "748-S04":
         assert sum(s.role == "threshold" for s in frame.leaf_schema.slots) == 4
         assert all(s.role != "read_value" for s in frame.leaf_schema.slots)
+    if case == "748-S03":
+        assert (
+            next(s for s in frame.leaf_schema.slots if s.type == "CardName").role
+            == "name_fragment"
+        )
     malformed = raw.replace(bad, "仮不明")
     rejected = derive_source(malformed, source(malformed, field), engine)
     assert any(p.issues for p in rejected.recognized) or all(
@@ -301,3 +313,16 @@ def test_or_left_existence_accepts_its_explicit_locative(engine: Classifier) -> 
     frame, binding = derived.bind(0)
     derived.verify_binding(raw, engine, frame, binding)
     assert "existence_count" in {slot.role for slot in frame.leaf_schema.slots}
+
+
+def test_flat_filter_cannot_hide_a_missing_required_trait(engine: Classifier) -> None:
+    raw = "自分の場か自分のEXエリアの仮族・トークン２枚を選ぶ。"
+    without_trait = classifier(
+        tuple(t for t in engine.terms.values() if t.category != "trait"),
+        engine.rules.enabled(),
+        vocabulary=engine.references.vocabulary,
+    )
+    derived = derive_source(raw, source(raw), without_trait)
+    assert "missing_n3_filter_concept" in derived.recognized[0].issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        derived.bind(0)
