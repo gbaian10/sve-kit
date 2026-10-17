@@ -242,6 +242,27 @@ export function inlineThemeBoot(): Plugin {
 }
 
 const { cdn: cdnDir, preview: previewDir } = snapshotRoots(process.env)
+const devHttps = process.env["SVE_DEV_HTTPS"] === "1"
+const tlsCertPath = process.env["SVE_DEV_TLS_CERT"]
+const tlsKeyPath = process.env["SVE_DEV_TLS_KEY"]
+let tlsCertificate: { cert: Buffer; key: Buffer } | undefined
+
+if (devHttps && (tlsCertPath !== undefined || tlsKeyPath !== undefined)) {
+  if (tlsCertPath === undefined || tlsKeyPath === undefined) {
+    throw new Error("SVE_DEV_TLS_CERT and SVE_DEV_TLS_KEY must be set together")
+  }
+  if (!path.isAbsolute(tlsCertPath) || !path.isAbsolute(tlsKeyPath)) {
+    throw new Error("SVE_DEV_TLS_CERT and SVE_DEV_TLS_KEY must be absolute paths")
+  }
+  try {
+    tlsCertificate = {
+      cert: readFileSync(tlsCertPath),
+      key: readFileSync(tlsKeyPath),
+    }
+  } catch (cause) {
+    throw new Error("Unable to read SVE_DEV_TLS_CERT or SVE_DEV_TLS_KEY", { cause })
+  }
+}
 
 export default defineConfig({
   build: { license: { fileName: "third-party-licenses.md" } },
@@ -254,15 +275,15 @@ export default defineConfig({
   plugins: [
     buildIdPlugin(BUILD_INPUTS),
     inlineThemeBoot(),
-    // A LAN address over plain HTTP is not a secure context: no WebCrypto or CacheStorage, so
-    // every load would fail verification and never cache. `dev:lan` serves a self-signed HTTPS.
-    ...(process.env["SVE_DEV_HTTPS"] === "1" ? [basicSsl()] : []),
+    // LAN requests need a secure context for snapshot verification and offline caching.
+    ...(devHttps && tlsCertificate === undefined ? [basicSsl()] : []),
     react(),
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),
     serveSnapshotRoot("/cdn-preview", previewDir),
   ],
   server: {
+    ...(tlsCertificate === undefined ? {} : { https: tlsCertificate }),
     fs: {
       allow: [
         searchForWorkspaceRoot(process.cwd()),
@@ -270,6 +291,9 @@ export default defineConfig({
         path.resolve(import.meta.dirname, "../../tests/fixtures"),
       ],
     },
+  },
+  preview: {
+    ...(tlsCertificate === undefined ? {} : { https: tlsCertificate }),
   },
   worker: {
     plugins: () => [buildIdPlugin(BUILD_INPUTS)],

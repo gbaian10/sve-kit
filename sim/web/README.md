@@ -14,8 +14,10 @@ run on the Bun runtime (see Known issues).
 cd sim/web
 bun install
 bun run dev                     # http://localhost:5173, synthetic fixture under /cdn
-bun run dev:lan                 # HTTPS on the LAN (self-signed); plain HTTP by IP has no WebCrypto or cache
+bun run dev:lan                 # HTTPS on the LAN (self-signed by default); plain HTTP by IP has no WebCrypto or cache
 ```
+
+Set `SVE_DEV_TLS_CERT` and `SVE_DEV_TLS_KEY` to absolute paths to use a certificate issued by a locally trusted CA, such as a mkcert certificate for a LAN IP. For example: `SVE_DEV_TLS_CERT=/path/to/cert.pem SVE_DEV_TLS_KEY=/path/to/key.pem bun run dev:lan`.
 
 ### Real data (4.0.0 preview export)
 
