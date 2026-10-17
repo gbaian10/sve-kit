@@ -156,6 +156,26 @@ describe("CardsPage", () => {
       listScroll: { top: 240, left: 120 },
     })
   })
+  it("resets list scroll on a sort change and restores the previous query on back", async () => {
+    const { router } = await open("/cards?view=list")
+    const root = document.querySelector<HTMLElement>("[data-list-scroll]")
+    if (!root) throw new Error("missing list scrollport")
+    root.scrollTop = 240
+    root.scrollLeft = 120
+    fireEvent.scroll(root)
+    await userEvent.click(await screen.findByRole("button", { name: "消費" }))
+    await screen.findByRole("columnheader", { name: "消費" })
+    await waitFor(() => {
+      expect(document.querySelector<HTMLElement>("[data-list-scroll]")?.scrollTop).toBe(0)
+    })
+    expect(document.querySelector<HTMLElement>("[data-list-scroll]")?.scrollLeft).toBe(0)
+    await act(() => router.navigate(-1))
+    await waitFor(() => {
+      expect(document.querySelector<HTMLElement>("[data-list-scroll]")?.scrollTop).toBe(240)
+    })
+    expect(document.querySelector<HTMLElement>("[data-list-scroll]")?.scrollLeft).toBe(120)
+  })
+
   it("synchronizes header sorting, direction and the toolbar through the URL", async () => {
     const { router } = await open("/cards?class=bishop&view=list")
     const user = userEvent.setup()

@@ -8,7 +8,14 @@ import {
   useState,
 } from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router"
+import {
+  NavigationType,
+  useLocation,
+  useNavigate,
+  useNavigationType,
+  useParams,
+  useSearchParams,
+} from "react-router"
 
 import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
 import {
@@ -34,7 +41,7 @@ import { Button } from "../../components/ui/Button"
 import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
-import { type CardSummary, type ImageSource, type SearchQuery } from "../../data"
+import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -55,6 +62,24 @@ const DEBOUNCE_MS = 150
 
 function cardPath(summary: CardSummary): string {
   return printingPath(summary)
+}
+
+function createCellReader(nameOf: (summary: CardSummary) => GridCell["name"]) {
+  const cells = new WeakMap<SearchPage["items"][number], GridCell>()
+  return (item: SearchPage["items"][number]): GridCell | undefined => {
+    if (!item.summary) return undefined
+    const existing = cells.get(item)
+    if (existing) return existing
+    const cell = {
+      key: item.key,
+      summary: item.summary,
+      name: nameOf(item.summary),
+      to: cardPath(item.summary),
+      state: null,
+    }
+    cells.set(item, cell)
+    return cell
+  }
 }
 
 // The URL holds committed conditions; the input draft drives independent Worker suggestions.
@@ -85,6 +110,7 @@ export function CardsPage() {
   const restoreScroll = useRef(entry.scrollY)
   const navigate = useNavigate()
   const location = useLocation()
+  const navigationType = useNavigationType()
   const recent = useRecent()
 
   // The typed text is a draft on top of one history entry: any navigation (commit, back, forward)
@@ -110,6 +136,7 @@ export function CardsPage() {
   }
 
   const commit = (next: QueryState) => {
+    updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
     setEdit(null)
     setParams(urlParams(next))
   }
@@ -183,34 +210,45 @@ export function CardsPage() {
     retry: retryView,
   } = useListView(searchQuery, pages)
   const page = listView?.page ?? null
+  const positionQuery = JSON.stringify([location.pathname, conditionsKey, edition])
+  const positionRef = useRef({ query: positionQuery, key: location.key })
+  useLayoutEffect(() => {
+    const previous = positionRef.current
+    const changedQuery = previous.query !== positionQuery
+    const returning = navigationType === NavigationType.Pop && previous.key !== location.key
+    if (changedQuery || returning) {
+      listScroll.current =
+        navigationType === NavigationType.Pop
+          ? (entry.listScroll ?? { top: 0, left: 0 })
+          : { top: 0, left: 0 }
+      restoreScroll.current = navigationType === NavigationType.Pop ? (entry.scrollY ?? 0) : 0
+      const container = imageRoot.current?.querySelector<HTMLElement>("[data-list-scroll]")
+      if (container) {
+        container.scrollTop = listScroll.current.top
+        container.scrollLeft = listScroll.current.left
+      }
+    }
+    positionRef.current = { query: positionQuery, key: location.key }
+  }, [positionQuery, location.key, navigationType, entry.listScroll, entry.scrollY, imageRoot])
   useLayoutEffect(() => {
     if (!page || pageLoading || restoreScroll.current === undefined) return
     window.scrollTo(0, restoreScroll.current)
     restoreScroll.current = undefined
-  }, [page, pageLoading])
-  const cells: GridCell[] = useMemo(() => {
-    if (!page) return []
-    return page.items.flatMap((item) => {
-      if (!item.summary) return []
-      const state: CardEntryState = {
-        // The card page rebuilds the sequence from this string alone, so a set page names its set.
-        background: code ? querySearch(searchState) : location.search,
-        ...routeState(item.summary),
-        source: "results",
-        pages,
-        resultKey: item.key,
-      }
-      return [
-        {
-          key: item.key,
-          summary: item.summary,
-          name: nameOf(item.summary),
-          to: cardPath(item.summary),
-          state,
-        },
-      ]
-    })
-  }, [page, location.search, code, searchState, pages, nameOf])
+  }, [page, pageLoading, positionQuery, location.key])
+  const cellOf = useMemo(() => createCellReader(nameOf), [nameOf])
+  const cells: GridCell[] = useMemo(
+    () =>
+      page?.items.flatMap((item) => {
+        const cell = cellOf(item)
+        return cell ? [cell] : []
+      }) ?? [],
+    [page, cellOf],
+  )
+  const background = code ? querySearch(searchState) : location.search
+  const openContextRef = useRef({ pages, updateEntry, background })
+  useLayoutEffect(() => {
+    openContextRef.current = { pages, updateEntry, background }
+  }, [pages, updateEntry, background])
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
@@ -272,22 +310,26 @@ export function CardsPage() {
     inputRef.current?.blur()
     commit({ ...query, text: input })
   }
-  const openCell = useCallback(
-    (cell: GridCell) => {
-      // The anchor goes on the list's own entry first; the cell then pushes the card entry.
-      updateEntry({
-        anchor: cell.key,
-        pages,
-        listScroll: listScroll.current,
-        scrollY: window.scrollY,
-      })
-      recentStore.push(cell.summary.printingId)
-    },
-    [updateEntry, pages],
-  )
+  const openCell = useCallback((cell: GridCell): CardEntryState => {
+    const current = openContextRef.current
+    current.updateEntry({
+      anchor: cell.key,
+      pages: current.pages,
+      listScroll: listScroll.current,
+      scrollY: window.scrollY,
+    })
+    recentStore.push(cell.summary.printingId)
+    return {
+      background: current.background,
+      ...routeState(cell.summary),
+      source: "results",
+      pages: current.pages,
+      resultKey: cell.key,
+    }
+  }, [])
 
   const loadNextPage = useCallback(() => {
-    updateEntry({ pages: pages + 1 })
+    updateEntry({ pages: pages + 1, listScroll: listScroll.current, scrollY: window.scrollY })
   }, [updateEntry, pages])
 
   const quickBar: QuickBarClass[] = useMemo(
@@ -319,6 +361,7 @@ export function CardsPage() {
   const pagination =
     page && page.total > 0 ? (
       <PaginationTail
+        automatic={prefs.infiniteScroll}
         requestKey={JSON.stringify([conditionsKey, edition, pages])}
         total={page.total}
         hasMore={page.items.length < page.total}
@@ -542,8 +585,8 @@ export function CardsPage() {
                     if (sort) commit({ ...query, sort })
                   }}
                 >
-                  {QUERY_SORTS.filter((sort) => sort !== "date").map((sort) => (
-                    <option key={sort} value={sort}>
+                  {QUERY_SORTS.map((sort) => (
+                    <option key={sort} value={sort} disabled={sort === "date"}>
                       {t(`results.sortBy.${sort}`)}
                     </option>
                   ))}
@@ -568,10 +611,11 @@ export function CardsPage() {
                 options={VIEW_MODES.map((value) => ({ value, label: t(`options.view.${value}`) }))}
                 value={view}
                 onChange={(next) => {
+                  updateEntry({ pages, listScroll: listScroll.current, scrollY: window.scrollY })
                   prefsStore.set({ viewMode: next })
                   setEdit(null)
                   setParams(urlParams({ ...query, view: next }), {
-                    state: { ...entry, listScroll: listScroll.current },
+                    state: { ...entry, listScroll: listScroll.current, scrollY: window.scrollY },
                     preventScrollReset: true,
                   })
                 }}

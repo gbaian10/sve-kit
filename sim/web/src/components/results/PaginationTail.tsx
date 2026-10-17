@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../ui/Button"
 
 interface PaginationTailProps {
+  readonly automatic?: boolean
   readonly requestKey: string
   readonly total: number
   readonly hasMore: boolean
@@ -16,6 +17,7 @@ interface PaginationTailProps {
 /** One paging trigger for both the page viewport and the narrow list's scrollport. */
 export function PaginationTail({
   requestKey,
+  automatic = true,
   total,
   hasMore,
   loading,
@@ -28,7 +30,14 @@ export function PaginationTail({
   const requested = useRef<string | null>(null)
   useEffect(() => {
     const node = sentinel.current
-    if (!node || !hasMore || loading || failed || typeof IntersectionObserver === "undefined")
+    if (
+      !node ||
+      !automatic ||
+      !hasMore ||
+      loading ||
+      failed ||
+      typeof IntersectionObserver === "undefined"
+    )
       return
     let observer: IntersectionObserver | undefined
     let active = true
@@ -58,7 +67,7 @@ export function PaginationTail({
       observer?.disconnect()
       window.removeEventListener("resize", observe)
     }
-  }, [requestKey, hasMore, loading, failed, onMore])
+  }, [requestKey, automatic, hasMore, loading, failed, onMore])
   return (
     <div
       ref={sentinel}
@@ -77,6 +86,10 @@ export function PaginationTail({
         <span role="status">{t("results.loadingMore")}</span>
       ) : !hasMore ? (
         <span>{t("results.allLoaded", { count: total })}</span>
+      ) : !automatic ? (
+        <Button size="sm" onClick={onMore}>
+          {t("results.loadMore")}
+        </Button>
       ) : null}
     </div>
   )

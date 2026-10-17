@@ -33,6 +33,14 @@ export default {
     view: { grid: "Images", table: "Table", list: "List" },
   },
   settings: {
+    infiniteScroll: "Infinite scroll",
+    infiniteScrollHint: "Load the next page near the end of results. Turn off to use Load more.",
+    resetDefaults: "Restore defaults",
+    resetTitle: "Restore default settings?",
+    resetHint:
+      "Reset all display and advanced settings. Downloaded data and recent cards are kept.",
+    resetCancel: "Cancel",
+
     advanced: "Advanced settings",
     preloadPrintings: "Preload all printings",
     preloadPrintingsHint:
@@ -135,7 +143,14 @@ export default {
     countUnit: "cards",
     sort: "Sort",
     columns: { number: "Number", name: "Name", effect: "Card text" },
-    sortBy: { no: "Number", name: "Name", cost: "Cost", atk: "Attack", def: "Health" },
+    sortBy: {
+      date: "Date",
+      no: "Number",
+      name: "Name",
+      cost: "Cost",
+      atk: "Attack",
+      def: "Defense",
+    },
     descending: "Descending",
     view: "View",
     abilityPreview: "Ability preview, incomplete",
@@ -155,6 +170,8 @@ export default {
       unit: "unit",
       sort: "sort",
     },
+    loadMore: "Load more",
+    listLabel: "Card list",
     loadingMore: "Loading more cards",
     allLoaded: "All {{count}} cards",
     empty: "No matching cards",

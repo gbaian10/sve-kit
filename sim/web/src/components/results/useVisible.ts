@@ -28,6 +28,10 @@ function release(): void {
 }
 
 function createObserver(): IntersectionObserver {
+  const node = callbacks.keys().next().value
+  const container = node?.closest<HTMLElement>("[data-list-scroll]")
+  const root = container && getComputedStyle(container).overflowY === "auto" ? container : null
+  const margin = root?.clientHeight ?? window.innerHeight
   return new IntersectionObserver(
     (entries) => {
       for (const entry of entries)
@@ -41,7 +45,7 @@ function createObserver(): IntersectionObserver {
       // A single intersection delivery can cover a whole screen of expensive previews.
       if (timer === undefined) activate()
     },
-    { rootMargin: `${String(window.innerHeight)}px 0px ${String(window.innerHeight)}px 0px` },
+    { root, rootMargin: `${String(margin)}px 0px ${String(margin)}px 0px` },
   )
 }
 
@@ -56,11 +60,11 @@ function observe(node: Element, onSeen: (visible: boolean) => void): () => void 
     onSeen(true)
     return () => undefined
   }
+  callbacks.set(node, onSeen)
   if (!observer) {
     observer = createObserver()
     window.addEventListener("resize", resize)
   }
-  callbacks.set(node, onSeen)
   observer.observe(node)
   return () => {
     callbacks.delete(node)

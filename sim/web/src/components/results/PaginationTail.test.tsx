@@ -112,3 +112,21 @@ it("observes the narrow list scrollport instead of the page", async () => {
   )
   expect(root?.root).toBe(document.querySelector("[data-list-scroll]"))
 })
+
+it("uses a manual load button when infinite scroll is disabled", async () => {
+  const onMore = vi.fn()
+  await renderInRouter(
+    <PaginationTail
+      automatic={false}
+      requestKey="manual"
+      total={120}
+      hasMore
+      loading={false}
+      failed={false}
+      onMore={onMore}
+      onRetry={vi.fn()}
+    />,
+  )
+  await userEvent.click(screen.getByRole("button", { name: "載入更多" }))
+  expect(onMore).toHaveBeenCalledOnce()
+})

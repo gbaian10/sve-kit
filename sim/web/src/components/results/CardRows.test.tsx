@@ -1,4 +1,4 @@
-import { act, screen, waitFor, within } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -174,7 +174,7 @@ describe("spreadsheet list", () => {
     expect(rows[2]).toHaveTextContent("效果無法載入")
     expect(rows[3]).toHaveTextContent("卡文未定")
     expect(rows[4]?.querySelector("[data-list-effect-text]")).toHaveTextContent(/^$/u)
-    expect(vi.mocked(useAbilityPreview).mock.calls.some(([id]) => id === "unknown")).toBe(false)
+    expect(vi.mocked(useAbilityPreview).mock.calls.some(([id]) => id === "unknown")).toBe(true)
     expect(document.querySelector("[data-image-printing], [data-image-state]")).toBeNull()
     expect(screen.queryByRole("img")).not.toBeInTheDocument()
   })
@@ -296,4 +296,24 @@ it("keeps a large loaded list bounded and replaces its visible rows when the pag
     "aria-rowindex",
     "202",
   )
+})
+
+it("preserves a text selection instead of opening a row and exposes translation notices", async () => {
+  const onOpen = vi.fn()
+  await renderInRouter(
+    <CardList
+      cells={[{ ...cell, name: { ...cell.name, missingTranslation: true } }]}
+      onOpen={onOpen}
+    />,
+  )
+  expect(screen.getByRole("img", { name: "尚無譯名" })).toHaveAttribute("title", "尚無譯名")
+  const selection = window.getSelection()
+  const name = screen.getByRole("link")
+  const range = document.createRange()
+  range.selectNodeContents(name)
+  selection?.removeAllRanges()
+  selection?.addRange(range)
+  fireEvent.click(screen.getByText("BP-SYNTHETIC"), { detail: 1 })
+  expect(onOpen).not.toHaveBeenCalled()
+  selection?.removeAllRanges()
 })

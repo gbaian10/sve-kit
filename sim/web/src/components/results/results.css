@@ -32,11 +32,16 @@
   contain-intrinsic-block-size: auto 140px;
 }
 
-/* Desktop headers follow the page; narrow layouts retain a scrollport for frozen columns. */
+/* Only the phone needs a horizontal scrollport and a frozen name column. */
 :where([data-list-scroll]) {
   isolation: isolate;
   border: 1px solid var(--color-border-strong);
   border-radius: 4px;
+  scroll-padding-top: 48px;
+}
+
+html:has([data-card-list]) {
+  scroll-padding-top: 48px;
 }
 
 :where([data-card-list]) {
@@ -79,28 +84,26 @@
 }
 
 :where([data-card-list] th button) {
+  position: relative;
   width: 100%;
   height: 100%;
   text-align: inherit;
   cursor: pointer;
 }
 
-:where([data-card-list] th:first-child),
-:where([data-card-list] td:first-child) {
-  left: 0;
+:where([data-sort-label]) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-:where([data-card-list] th:nth-child(2)),
-:where([data-card-list] td:nth-child(2)) {
-  left: 132px;
-}
-
-:where([data-card-list] td:nth-child(-n + 2)) {
-  z-index: 1;
-}
-
-:where([data-card-list] th:nth-child(-n + 2)) {
-  z-index: 4;
+:where([data-sort-arrow]) {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  font-size: 10px;
+  line-height: 1;
 }
 
 :where([data-card-list] [data-list-number]) {
@@ -132,6 +135,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+:where([data-card-list] th:nth-child(n + 3):nth-child(-n + 5)) {
+  padding-inline: 4px;
+}
+
 :where([data-card-list] tbody tr) {
   cursor: pointer;
 }
@@ -156,33 +163,50 @@
   border-bottom: 0;
 }
 
-@media (width < 600px) {
+@media (600px <= width < 1000px) {
   :where([data-list-number-col]) {
     width: 112px;
   }
 
   :where([data-list-name-col]) {
-    width: 164px;
-  }
-
-  :where([data-card-list] th:nth-child(2)),
-  :where([data-card-list] td:nth-child(2)) {
-    left: 112px;
+    width: 176px;
   }
 }
 
-@media (width < 1000px) {
-  :where([data-card-list] td:nth-child(-n + 2)) {
-    position: sticky;
-  }
-
+@media (width < 600px) {
   :where([data-list-scroll]) {
     overflow: auto;
     max-height: 70dvh;
   }
 
   :where([data-card-list]) {
-    min-width: 884px;
+    min-width: 600px;
+  }
+
+  :where([data-list-number-col]) {
+    width: 84px;
+  }
+
+  :where([data-list-name-col]) {
+    width: 124px;
+  }
+
+  :where([data-list-stat-col]) {
+    width: 60px;
+  }
+
+  :where([data-card-list] th:nth-child(2)),
+  :where([data-card-list] td:nth-child(2)) {
+    position: sticky;
+    left: 0;
+  }
+
+  :where([data-card-list] td:nth-child(2)) {
+    z-index: 1;
+  }
+
+  :where([data-card-list] th:nth-child(2)) {
+    z-index: 4;
   }
 }
 

@@ -45,9 +45,13 @@ function RowLink({
       data-class={classStyle(cell.summary.classCode)}
       onClick={(event: MouseEvent<HTMLAnchorElement>) => {
         if (!isPlainClick(event)) return
+        if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
+          event.preventDefault()
+          return
+        }
         event.preventDefault()
-        onOpen(cell, event)
-        void navigate(cell.to, { state: cell.state })
+        const state = onOpen(cell, event) ?? cell.state
+        void navigate(cell.to, { state })
       }}
       className={cn(
         "flex items-center gap-3 border-b border-border text-text-1 hover:bg-surface-2",
@@ -68,7 +72,7 @@ function PreviewStatus({
   readonly labels: ResultLabels
 }) {
   return (
-    <span role={phase === "pending" ? "status" : undefined} className="text-13 text-text-3">
+    <span role={phase === "pending" ? "status" : undefined} className="text-13 text-text-3 italic">
       {phase === "error" ? labels.effectUnavailable : labels.effectPending}
     </span>
   )
@@ -247,7 +251,7 @@ const TableRow = memo(function TableRow({
             />
           ) : (
             <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
-              <span className="text-13 text-text-3">{labels.effectPending}</span>
+              <span className="text-13 text-text-3 italic">{labels.effectPending}</span>
               <span className="text-11 text-text-3">{labels.abilityPreview}</span>
             </span>
           )}
@@ -315,6 +319,7 @@ const ListRow = memo(function ListRow({
       data-highlighted={highlighted || undefined}
       onClick={(event) => {
         if (event.target instanceof Element && event.target.closest("a")) return
+        if (window.getSelection()?.isCollapsed === false) return
         link.current?.click()
       }}
     >
@@ -331,9 +336,13 @@ const ListRow = memo(function ListRow({
           title={cell.name.primary.text}
           onClick={(event) => {
             if (!isPlainClick(event)) return
+            if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
+              event.preventDefault()
+              return
+            }
             event.preventDefault()
-            onOpen(cell, event)
-            void navigate(cell.to, { state: cell.state })
+            const state = onOpen(cell, event) ?? cell.state
+            void navigate(cell.to, { state })
           }}
           onKeyDown={(event) => {
             if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return
@@ -348,6 +357,7 @@ const ListRow = memo(function ListRow({
             }
           }}
         >
+          <NameNotices name={cell.name} labels={labels} compact />
           {cell.name.primary.text}
           {cell.name.secondary && (
             <>
@@ -367,9 +377,10 @@ const ListRow = memo(function ListRow({
       <td data-list-stat="">{cell.summary.defense ?? labels.noValue}</td>
       <td data-list-effect="">
         <span data-list-effect-text="">
-          {cell.summary.wordingPending ? (
-            <span>{labels.wordingPending}</span>
-          ) : seen ? (
+          {cell.summary.wordingPending && (
+            <Badge className="mr-2 align-middle">{labels.wordingPending}</Badge>
+          )}
+          {seen ? (
             <EffectPreview
               printingId={cell.summary.printingId}
               faceId={cell.summary.faceId}
@@ -378,7 +389,9 @@ const ListRow = memo(function ListRow({
               singleLine
             />
           ) : (
-            <span data-preview="waiting">{labels.effectPending}</span>
+            <span data-preview="waiting" className="text-text-3 italic">
+              {labels.effectPending}
+            </span>
           )}
         </span>
       </td>
@@ -429,7 +442,7 @@ export function CardList({
         data-card-list=""
         data-loaded-count={cells.length}
         aria-rowcount={cells.length + 1}
-        aria-label={labels.t("results.view")}
+        aria-label={labels.t("results.listLabel")}
       >
         <colgroup>
           <col data-list-number-col="" />
@@ -446,8 +459,10 @@ export function CardList({
                 aria-sort={sort === key ? (descending ? "descending" : "ascending") : "none"}
               >
                 <button type="button" onClick={() => onSort?.(key)}>
-                  {label}
-                  <span aria-hidden="true">{sort === key ? (descending ? " ↓" : " ↑") : ""}</span>
+                  <span data-sort-label="">{label}</span>
+                  <span data-sort-arrow="" aria-hidden="true">
+                    {sort === key ? (descending ? " ↓" : " ↑") : ""}
+                  </span>
                 </button>
               </th>
             ))}

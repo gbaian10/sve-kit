@@ -23,7 +23,7 @@ export interface CardGridProps {
   readonly cells: readonly GridCell[]
   readonly images: ImageIndex | undefined
   /** Called before the router navigates, so the list can record its anchor. */
-  readonly onOpen: (cell: GridCell, event: MouseEvent<HTMLAnchorElement>) => void
+  readonly onOpen: (cell: GridCell, event: MouseEvent<HTMLAnchorElement>) => unknown
   /** Cell to highlight briefly after returning from a card. */
   readonly anchor?: string
 }
@@ -32,16 +32,32 @@ export interface CardGridProps {
 export function NameNotices({
   name,
   labels,
+  compact = false,
 }: {
   readonly name: DisplayedName
   readonly labels: ResultLabels
+  readonly compact?: boolean
 }) {
-  if (!name.missingTranslation && !name.lowConfidence && !name.jpSource) return null
+  const notices = [
+    name.missingTranslation ? labels.noTranslation : undefined,
+    name.lowConfidence ? labels.translationProofreading : undefined,
+    name.jpSource ? labels.jpSource : undefined,
+  ].filter((notice) => notice !== undefined)
+  if (notices.length === 0) return null
+  if (compact)
+    return (
+      <span
+        role="img"
+        aria-label={notices.join(" · ")}
+        title={notices.join(" · ")}
+        className="mr-1 inline-block size-2 rounded-full border border-border-strong align-middle"
+      />
+    )
   return (
     <span className="flex flex-wrap gap-x-2 text-11 text-text-3">
-      {name.missingTranslation && <span>{labels.noTranslation}</span>}
-      {name.lowConfidence && <span>{labels.translationProofreading}</span>}
-      {name.jpSource && <span>{labels.jpSource}</span>}
+      {notices.map((notice) => (
+        <span key={notice}>{notice}</span>
+      ))}
     </span>
   )
 }
@@ -78,9 +94,13 @@ const CardCell = memo(function CardCell({
       data-result-key={cell.key}
       onClick={(event) => {
         if (!isPlainClick(event)) return
+        if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
+          event.preventDefault()
+          return
+        }
         event.preventDefault()
-        onOpen(cell, event)
-        void navigate(cell.to, { state: cell.state })
+        const state = onOpen(cell, event) ?? cell.state
+        void navigate(cell.to, { state })
       }}
       className={cn(
         "flex flex-col gap-1.5 rounded-card text-text-1 hover:opacity-90",

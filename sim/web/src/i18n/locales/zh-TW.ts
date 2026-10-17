@@ -31,6 +31,13 @@ const zhTW = {
     view: { grid: "卡圖", table: "表格", list: "清單" },
   },
   settings: {
+    infiniteScroll: "無限捲動",
+    infiniteScrollHint: "接近列表底部時自動載入；關閉後改用「載入更多」。",
+    resetDefaults: "恢復預設",
+    resetTitle: "恢復預設設定？",
+    resetHint: "將顯示與進階設定全部恢復為預設值。已下載資料與最近查看會保留。",
+    resetCancel: "取消",
+
     advanced: "進階設定",
     preloadPrintings: "預先下載所有版次",
     preloadPrintingsHint:
@@ -131,7 +138,7 @@ const zhTW = {
     countUnit: "張卡片",
     sort: "排序",
     columns: { number: "卡號", name: "名稱", effect: "卡文" },
-    sortBy: { no: "卡號", name: "名稱", cost: "消費", atk: "攻擊力", def: "生命值" },
+    sortBy: { date: "日期", no: "卡號", name: "名稱", cost: "消費", atk: "攻擊力", def: "生命值" },
     descending: "降冪",
     view: "檢視",
     abilityPreview: "能力預覽・未完整",
@@ -151,6 +158,8 @@ const zhTW = {
       unit: "每格單位",
       sort: "排序",
     },
+    loadMore: "載入更多",
+    listLabel: "卡片清單",
     loadingMore: "載入更多卡片中",
     allLoaded: "共 {{count}} 張",
     empty: "沒有符合的卡",
