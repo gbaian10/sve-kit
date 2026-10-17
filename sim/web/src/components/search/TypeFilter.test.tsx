@@ -117,7 +117,18 @@ it("orders the chips, names the token chip Token and keeps its kinds behind the 
     within(row)
       .getAllByRole("button")
       .map((button) => button.getAttribute("aria-label")),
-  ).toEqual(["從者", "法術", "護符", "Token", "Token的細項", "主戰者", "主戰者的細項", "EP", "SEP"])
+  ).toEqual([
+    "清除類型",
+    "從者",
+    "法術",
+    "護符",
+    "Token",
+    "Token的細項",
+    "主戰者",
+    "主戰者的細項",
+    "EP",
+    "SEP",
+  ])
   expect(screen.queryByText("衍生物")).not.toBeInTheDocument()
   const parent = within(row).getByRole("button", { name: "Token" })
   expect(parent).toHaveAttribute("aria-pressed", "mixed")

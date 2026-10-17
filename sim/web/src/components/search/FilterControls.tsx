@@ -1,4 +1,5 @@
 import { type ReactNode, useId } from "react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "../ui/cn"
 
@@ -47,19 +48,38 @@ export function Toggle({
   )
 }
 
+// A section with a selection shows "clear" beside its title (the maintainer's choice over an
+// "all" button: nothing selected already means all). The header keeps one fixed height so the
+// button appearing or vanishing never moves the chips below.
 export function Section({
   title,
+  onClear,
   children,
 }: {
   readonly title: string
+  /** Clears this section only; given while it has a selection. */
+  readonly onClear?: (() => void) | undefined
   readonly children: ReactNode
 }) {
+  const { t } = useTranslation()
   const id = useId()
   return (
     <div role="group" aria-labelledby={id} className="flex flex-col gap-1.5">
-      <p id={id} className="text-12 font-semibold text-text-2">
-        {title}
-      </p>
+      <div className="flex h-4 items-center gap-2 leading-4">
+        <p id={id} className="text-12 font-semibold text-text-2">
+          {title}
+        </p>
+        {onClear && (
+          <button
+            type="button"
+            aria-label={t("filters.clearSection", { section: title })}
+            onClick={onClear}
+            className="h-4 rounded-sm px-1 text-12 font-semibold text-accent-text hover:bg-surface-2"
+          >
+            {t("filters.clear")}
+          </button>
+        )}
+      </div>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   )

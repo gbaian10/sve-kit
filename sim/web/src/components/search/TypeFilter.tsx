@@ -2,11 +2,8 @@ import { useTranslation } from "react-i18next"
 
 import type { SearchOptions } from "../../data"
 import type { TextLang } from "../../domain/search"
+import { LEADER_FRAMES, TOKEN_TYPES, TYPE_ORDER } from "../../domain/typeFilter"
 import { type FacetChip, FacetChips } from "./FacetChips"
-
-const TYPE_ORDER = ["follower", "spell", "amulet", "token", "leader", "ep", "sep"] as const
-const TOKEN_TYPES = ["follower", "spell", "amulet", "crest", "equipment"] as const
-const LEADER_FRAMES = ["gold", "white", "unknown"] as const
 
 export function TypeFilter({
   options,

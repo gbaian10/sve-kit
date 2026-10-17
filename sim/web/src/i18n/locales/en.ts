@@ -147,9 +147,12 @@ export default {
     rows: "Rows",
     rowPerCard: "One row per card",
     rowPerPrinting: "One row per printing",
-    clearAll: "Clear all",
     details: "{{label}} details",
     chipTitle: "{{label}} ({{count}})",
+    clear: "Clear",
+    clearSection: "Clear {{section}}",
+    statChip: "{{section}} {{value}}",
+    subChip: "{{parent}} · {{child}}",
   },
   typeFilter: {
     label: "Type",

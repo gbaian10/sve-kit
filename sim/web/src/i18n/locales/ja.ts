@@ -149,9 +149,12 @@ export default {
     rows: "行の単位",
     rowPerCard: "カードごとに1行",
     rowPerPrinting: "版ごとに1行",
-    clearAll: "すべて解除",
     details: "{{label}}の内訳",
     chipTitle: "{{label}}（{{count}}）",
+    clear: "解除",
+    clearSection: "{{section}}を解除",
+    statChip: "{{section}} {{value}}",
+    subChip: "{{parent}}・{{child}}",
   },
   typeFilter: {
     label: "タイプ",

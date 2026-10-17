@@ -490,12 +490,13 @@ describe("CardsPage", () => {
       expect(panel).toBeVisible()
       expect(panel).not.toContainElement(classRow)
       expect(prefsStore.get().filterPanelOpen).toBe(true)
-      expect(within(conditions).queryByRole("button", { name: "清除" })).not.toBeInTheDocument()
+      // The chip row stays the one clear entry; the panel has none of its own.
+      expect(within(conditions).getByRole("button", { name: "清除" })).toBeVisible()
       expect(
-        within(screen.getByRole("region", { name: "篩選條件" })).getByRole("button", {
-          name: "清除全部",
+        within(screen.getByRole("region", { name: "篩選條件" })).queryByRole("button", {
+          name: /^清除/u,
         }),
-      ).toBeVisible()
+      ).not.toBeInTheDocument()
       await userEvent.click(button)
       expect(button).toHaveAttribute("aria-expanded", "false")
       expect(panel).not.toBeVisible()
@@ -553,14 +554,94 @@ describe("CardsPage", () => {
         "true",
       )
       expect(screen.getByRole("button", { name: "主教" })).toHaveAttribute("aria-pressed", "true")
-      const panel = screen.getByRole("region", { name: "篩選條件" })
-      await userEvent.click(within(panel).getByRole("button", { name: "清除全部" }))
+      const conditions = screen.getByRole("group", { name: "目前條件" })
+      await userEvent.click(within(conditions).getByRole("button", { name: "清除" }))
       expect(router.state.location.search).toBe("")
       expect(within(cost).getByRole("button", { name: "2" })).toHaveAttribute(
         "aria-pressed",
         "false",
       )
-      expect(within(panel).queryByRole("button", { name: "清除全部" })).not.toBeInTheDocument()
+      expect(screen.queryByRole("group", { name: "目前條件" })).not.toBeInTheDocument()
+    })
+
+    it("lists every panel condition as a removable chip in panel order", async () => {
+      const { router } = await open(
+        "/cards?class=bishop&cost=1,7&atk=10&rarity=bronze,pr,pr:gr&type=follower,token,leader:gold,token:spell",
+      )
+      const conditions = screen.getByRole("group", { name: "目前條件" })
+      const chips = () =>
+        within(conditions)
+          .getAllByRole("button", { name: /^移除條件/u })
+          .map((button) => button.getAttribute("aria-label")?.replace(/^移除條件[：:]?\s*/u, ""))
+      await waitFor(() => {
+        expect(chips()).toEqual([
+          "主教",
+          "消費 1",
+          "消費 7+",
+          "攻擊力 10+",
+          "PR",
+          "PR（GR）",
+          "銅",
+          "從者",
+          "Token",
+          "Token・法術",
+          "主戰者・金框",
+        ])
+      })
+      // The whole-PR chip is the grey badge; the appearance chip its own badge; the fixture's "銅"
+      // is not a ladder code (no badge, sorted after PR like in the panel) and stays text.
+      const prChip = within(conditions).getByRole("button", { name: "移除條件：PR" }).parentElement
+      expect(prChip?.querySelector("img")).toHaveAttribute("alt", "PR")
+      const search = () => new URLSearchParams(router.state.location.search)
+      await userEvent.click(within(conditions).getByRole("button", { name: "移除條件：消費 7+" }))
+      expect(search().get("cost")).toBe("1")
+      expect(search().get("class")).toBe("bishop")
+      expect(search().get("atk")).toBe("10")
+      await userEvent.click(within(conditions).getByRole("button", { name: "移除條件：PR（GR）" }))
+      expect(search().get("rarity")).toBe("bronze,pr")
+      await userEvent.click(
+        within(conditions).getByRole("button", { name: "移除條件：Token・法術" }),
+      )
+      expect(chips()).not.toContain("Token・法術")
+      expect(chips()).toContain("Token")
+      // The set dropdown's choice gets a chip with the dropdown's own wording.
+      await userEvent.click(screen.getByRole("button", { name: /卡包/u }))
+      const first = screen.getAllByRole("checkbox", { name: /^BP01 / })[0]
+      if (!first) throw new Error("missing set")
+      await userEvent.click(first)
+      expect(chips().at(-1)).toBe(first.getAttribute("aria-label"))
+    })
+
+    it("shows a clear button only beside a section with a selection and clears that section alone", async () => {
+      const { router } = await open("/cards?cost=2,7&rarity=bronze")
+      const cost = screen.getByRole("group", { name: "消費" })
+      const rarity = screen.getByRole("group", { name: "稀有度" })
+      expect(within(cost).getByRole("button", { name: "清除消費" })).toBeVisible()
+      expect(within(rarity).getByRole("button", { name: "清除稀有度" })).toBeVisible()
+      expect(
+        within(screen.getByRole("group", { name: "攻擊力" })).queryByRole("button", {
+          name: /^清除/u,
+        }),
+      ).not.toBeInTheDocument()
+      expect(
+        within(screen.getByRole("group", { name: "卡面版本" })).queryByRole("button", {
+          name: /^清除/u,
+        }),
+      ).not.toBeInTheDocument()
+      await userEvent.click(within(cost).getByRole("button", { name: "清除消費" }))
+      expect(router.state.location.search).toBe("?rarity=bronze")
+      expect(within(cost).queryByRole("button", { name: "清除消費" })).not.toBeInTheDocument()
+      expect(within(cost).getByRole("button", { name: "2" })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      )
+      expect(within(rarity).getByRole("button", { name: "銅" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
+      await userEvent.click(within(rarity).getByRole("button", { name: "清除稀有度" }))
+      expect(router.state.location.search).toBe("")
+      expect(within(rarity).queryByRole("button", { name: "清除稀有度" })).not.toBeInTheDocument()
     })
 
     it("switches the row unit and the card edition from the panel", async () => {

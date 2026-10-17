@@ -1,3 +1,5 @@
+import { BADGE_STYLES } from "./rarityBadges"
+
 export const UNRATED_RARITY = "unrated"
 
 // The maintainer's chip order: the rarity ladder low to high, PR after the printed rarities.
@@ -10,6 +12,25 @@ export function orderRarities<T extends { readonly code: string }>(rarities: rea
     return index === -1 ? RARITY_ORDER.length : index
   }
   return [...rarities].sort((a, b) => rank(a.code) - rank(b.code))
+}
+
+/** Selected rarity tokens (`lg`, `pr`, `pr:gr`, `unrated`) in the filter's display order. */
+export function orderRarityTokens(tokens: readonly string[]): string[] {
+  const key = (token: string): [number, number] => {
+    if (token === UNRATED_RARITY) return [RARITY_ORDER.length + 1, 0]
+    const [code = "", style] = token.split(":")
+    const index = RARITY_ORDER.indexOf(code)
+    const styles: readonly string[] = [...BADGE_STYLES, "unknown"]
+    return [
+      index === -1 ? RARITY_ORDER.length : index,
+      style === undefined ? -1 : styles.indexOf(style),
+    ]
+  }
+  return [...tokens].sort((a, b) => {
+    const [pa, ca] = key(a)
+    const [pb, cb] = key(b)
+    return pa - pb || ca - cb
+  })
 }
 
 export function toggleFacet(

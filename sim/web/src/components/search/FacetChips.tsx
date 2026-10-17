@@ -14,6 +14,7 @@ import { toggleFacet } from "../../domain/rarityFilter"
 import { cn } from "../ui/cn"
 import { FacetCheckbox } from "./FacetFilter"
 import { Section, Toggle } from "./FilterControls"
+import { popoverAlignment } from "./popover-placement"
 
 export interface FacetChipOption {
   readonly code: string
@@ -65,12 +66,32 @@ function ChipPopover({
       document.removeEventListener("keydown", onKeyDown)
     }
   }, [open])
-  // A chip near the right edge opens its popover leftwards so it stays inside the viewport.
+  // A chip near the right edge opens its popover leftwards so it stays inside the viewport. The
+  // side is derived from the anchor (a panel already hung from one side would always "fit"), and
+  // redone whenever the viewport or the chip row's wrapping changes while it is open.
   useLayoutEffect(() => {
-    if (!open || !panel.current) return
-    const rect = panel.current.getBoundingClientRect()
-    setAlignEnd(rect.width > 0 && rect.right > document.documentElement.clientWidth)
+    if (!open || !root.current || !panel.current) return
+    const anchor = root.current
+    const place = () => {
+      const rect = anchor.getBoundingClientRect()
+      setAlignEnd(
+        popoverAlignment({
+          anchorLeft: rect.left,
+          anchorRight: rect.right,
+          panelWidth: panel.current?.offsetWidth ?? 0,
+          viewportWidth: document.documentElement.clientWidth,
+        }) === "end",
+      )
+    }
+    place()
     panel.current.querySelector<HTMLElement>("input")?.focus()
+    window.addEventListener("resize", place)
+    const observer = new ResizeObserver(place)
+    if (anchor.parentElement) observer.observe(anchor.parentElement)
+    return () => {
+      window.removeEventListener("resize", place)
+      observer.disconnect()
+    }
   }, [open])
   return (
     <div ref={root} className="relative inline-flex">
@@ -126,7 +147,16 @@ export function FacetChips({
 }) {
   const { t } = useTranslation()
   return (
-    <Section title={title}>
+    <Section
+      title={title}
+      onClear={
+        selected.length > 0
+          ? () => {
+              onChange([])
+            }
+          : undefined
+      }
+    >
       {items.map((item) => {
         const children = item.children ?? []
         const all =

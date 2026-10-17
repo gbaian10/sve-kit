@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 import { COST_CAP, type QueryState, STAT_CAP, toggleValue } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
-import { Button } from "../ui/Button"
 import { Section, Toggle } from "./FilterControls"
 
 export interface FilterPanelProps {
@@ -16,8 +15,6 @@ export interface FilterPanelProps {
   readonly onEditionChange: (edition: Region) => void
   /** The facet rows (rarity, type, set) rendered between the stats and the row unit. */
   readonly facets: ReactNode
-  /** Shown while any condition is set; clears every condition. */
-  readonly onClearAll?: (() => void) | undefined
 }
 
 const EDITIONS = ["jp", "en"] as const
@@ -25,7 +22,8 @@ const range = (cap: number) => Array.from({ length: cap + 1 }, (_, value) => val
 
 // Every button applies at once (the maintainer chose the reference site's behaviour over the
 // drafted "apply" step); the panel only renders the committed state it is given. The class row
-// lives outside the panel so it stays visible while this is collapsed.
+// lives outside the panel so it stays visible while this is collapsed, and the condition chip row
+// below the panel is the one place that clears everything.
 export function FilterPanel({
   id,
   open,
@@ -34,7 +32,6 @@ export function FilterPanel({
   edition,
   onEditionChange,
   facets,
-  onClearAll,
 }: FilterPanelProps) {
   const { t } = useTranslation()
   const stat = (
@@ -43,7 +40,16 @@ export function FilterPanel({
     cap: number,
     values: readonly number[],
   ) => (
-    <Section title={title}>
+    <Section
+      title={title}
+      onClear={
+        values.length > 0
+          ? () => {
+              onChange({ ...query, [field]: [] })
+            }
+          : undefined
+      }
+    >
       {range(cap).map((value) => (
         <Toggle
           key={value}
@@ -64,13 +70,6 @@ export function FilterPanel({
       aria-label={t("filters.panel")}
       className="flex flex-col gap-3 rounded-block border border-border bg-surface-1 p-3"
     >
-      {onClearAll && (
-        <div className="flex justify-end">
-          <Button size="sm" variant="ghost" className="text-accent-text" onClick={onClearAll}>
-            {t("filters.clearAll")}
-          </Button>
-        </div>
-      )}
       <Section title={t("filters.edition")}>
         {EDITIONS.map((code) => (
           <Toggle

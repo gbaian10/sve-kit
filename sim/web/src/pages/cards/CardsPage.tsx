@@ -38,6 +38,7 @@ import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
+import { ConditionChips } from "../../components/search/ConditionChips"
 import { FilterPanel } from "../../components/search/FilterPanel"
 import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
@@ -46,7 +47,6 @@ import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
-import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
@@ -543,13 +543,6 @@ export function CardsPage() {
         onChange={commit}
         edition={edition}
         onEditionChange={commitEdition}
-        onClearAll={
-          hasConditions
-            ? () => {
-                commit(DEFAULT_QUERY)
-              }
-            : undefined
-        }
         facets={
           <>
             <RarityFilter
@@ -587,47 +580,31 @@ export function CardsPage() {
           </>
         }
       />
-      {hasConditions && (
-        <div
-          role="group"
-          aria-label={t("results.conditions")}
-          className="flex flex-wrap items-center gap-2"
-        >
-          {query.text !== "" && (
-            <Chip
-              removeLabel={t("results.removeCondition", { label: query.text })}
-              onRemove={() => {
-                commit({ ...query, text: "" })
-              }}
-            >
-              {query.text}
-            </Chip>
-          )}
-          {query.classes.map((code) => (
-            <Chip
-              key={code}
-              removeLabel={t("results.removeCondition", { label: classLabel(code) })}
-              onRemove={() => {
-                commit(toggleClass(query, code))
-              }}
-            >
-              {classLabel(code)}
-            </Chip>
-          ))}
-          {/* One clear entry per screen: the open panel has "clear all" at its top. */}
-          {!panelOpen && (
-            <button
-              type="button"
-              onClick={() => {
-                commit(DEFAULT_QUERY)
-              }}
-              className="h-8 rounded-pill px-2 text-13 font-semibold text-accent-text hover:bg-surface-2"
-            >
-              {t("results.clearConditions")}
-            </button>
-          )}
-        </div>
-      )}
+      <ConditionChips
+        query={query}
+        edition={edition}
+        classLabel={classLabel}
+        rarityLabel={(code) => {
+          const option = rarities?.find((item) => item.code === code)
+          return option
+            ? (option.name.translations[textLang] ?? option.name.original.text)
+            : code.toUpperCase()
+        }}
+        typeLabel={(code) => {
+          const option = printingOptions?.type.types.find((item) => item.code === code)
+          return option ? (option.name.translations[textLang] ?? option.name.original.text) : code
+        }}
+        setLabel={(code) => {
+          const option = sets?.find((item) => item.code === code)
+          return option
+            ? `${option.publicCode ?? option.code} ${option.name.translations[textLang] ?? option.name.original.text}`
+            : code
+        }}
+        onChange={commit}
+        onClear={() => {
+          commit(DEFAULT_QUERY)
+        }}
+      />
       {unsupported && (
         <Notice
           tone="warning"
