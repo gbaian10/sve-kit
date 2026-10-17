@@ -229,7 +229,9 @@ quota accounting can be much larger than their bodies. Failures never fall back 
 Using `crossOrigin="anonymous"` together with CDN CORS headers is a follow-up: the CDN must
 first serve the required headers, otherwise adding the attribute would break image loading.
 The application currently leaves the attribute unset. A browser that cannot register the
-module Service Worker continues through normal HTTP loading; CacheStorage is optional.
+Service Worker continues through normal HTTP loading; CacheStorage is optional. The bundled
+image worker uses classic registration so its script request includes the authentication cookie
+in Chromium.
 
 After the catalog is ready, background work downloads **metadata bytes**, not all image
 blobs, only when persistent storage is available. Storage loss
