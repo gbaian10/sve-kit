@@ -49,8 +49,9 @@ root and the badge switches roots by hand. Only two derived flags reach browser 
 
 `bun test` is Bun's own test runner and ignores the Vitest config. Always use `bun run test`.
 
-The pre-commit hooks run Prettier, ESLint and Stylelint on changed files; the pre-push hook runs
-the full `tsc -b`. Vitest is a manual hook (`pre-commit run --hook-stage manual web-test`); CI runs
+The pre-commit hooks run Prettier, ESLint and Stylelint on changed files; the pre-push hook checks
+types with `bun --check` (Bun's TypeScript-Go checker, under a second), while CI keeps `tsc -b` as the
+gate. Vitest is a manual hook (`pre-commit run --hook-stage manual web-test`); CI runs
 the whole `bun run check` on every web change.
 
 ## Theme tokens
