@@ -136,29 +136,66 @@ def test_missing_retained_member_stops_before_deletion(
     assert STRAY in state.objects
 
 
-def test_index_change_stops_deletion(
+@pytest.mark.parametrize("kind", ["snapshot", "images"])
+@pytest.mark.parametrize("change_index", [False, True])
+def test_batches_delete_and_stop_if_index_changes(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
-    monkeypatch: pytest.MonkeyPatch,
+    kind: str,
+    change_index: bool,
 ) -> None:
     store, state, _ = remote
-    three_versions(images, roots, store)
-    for number in range(2):
-        state.objects[f"images/card_s/99{number}.webp"] = Stored(
-            b"stray", '"stray"', IMAGE_HEADERS
-        )
-    original = store.delete
-
-    def delete_then_change(key: str) -> None:
-        original(key)
+    export(images, roots, step=0)
+    upload(store, load_export(roots.preview))
+    state.page_size = 1000
+    collector = gc.collect if kind == "snapshot" else gc.collect_images
+    namespaces = SNAPSHOT_PREFIXES if kind == "snapshot" else IMAGE_PREFIXES
+    keys = {
+        f"snapshots/blobs/{number:064x}.json"
+        if kind == "snapshot"
+        else f"images/card_s/{10000 + number}.webp"
+        for number in range(2500)
+    }
+    state.objects.update({key: Stored(b"stray", '"stray"', {}) for key in keys})
+    candidates = collector(store, namespaces, execute=False)["candidates"]
+    assert isinstance(candidates, list)
+    before = set(state.objects)
+    progress: list[str] = []
+    if change_index:
         old = state.objects[INDEX]
-        state.objects[INDEX] = Stored(old.raw, '"changed"', old.headers)
-
-    monkeypatch.setattr(store, "delete", delete_then_change)
-    with pytest.raises(ExportError, match=r"^GC version index changed; run it again$"):
-        gc.collect_images(store, IMAGE_PREFIXES, execute=True)
-    assert len([k for k in state.objects if k.startswith("images/card_s/99")]) == 1
+        state.index_after_delete = Stored(old.raw, '"changed"', old.headers)
+        with pytest.raises(
+            ExportError, match=r"^GC version index changed; run it again$"
+        ):
+            collector(store, namespaces, execute=True, progress=progress.append)
+        deleted = candidates[:1000]
+        assert [len(batch) for batch in state.delete_batches] == [1000]
+        assert progress == [
+            f"GC: {len(candidates)} candidates",
+            f"GC: 1000/{len(candidates)} deleted",
+        ]
+    else:
+        result = collector(store, namespaces, execute=True, progress=progress.append)
+        deleted = candidates
+        assert result["deleted"] == candidates
+        assert [len(batch) for batch in state.delete_batches] == [
+            1000,
+            1000,
+            len(candidates) - 2000,
+        ]
+        assert progress == [
+            f"GC: {len(candidates)} candidates",
+            f"GC: 1000/{len(candidates)} deleted",
+            f"GC: 2000/{len(candidates)} deleted",
+            f"GC: {len(candidates)}/{len(candidates)} deleted",
+        ]
+    assert set(state.objects) == before - set(deleted)
+    state.index_after_delete = None
+    assert (
+        collector(store, namespaces, execute=True)["deleted"]
+        == candidates[len(deleted) :]
+    )
 
 
 @pytest.mark.parametrize("case", ["no-index", "irregular"])
@@ -180,11 +217,13 @@ def test_refuses_bucket_without_index_or_with_irregular_keys(
     assert not any(op == "DELETE" for op, _key, _ in state.operations)
 
 
+@pytest.mark.parametrize("kind", ["snapshot", "images"])
 def test_cli_dry_run_lists_and_execute_deletes(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
     monkeypatch: pytest.MonkeyPatch,
+    kind: str,
 ) -> None:
     store, state, transport = remote
     three_versions(images, roots, store)
@@ -199,12 +238,23 @@ def test_cli_dry_run_lists_and_execute_deletes(
     monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
     target = ["--account-id", ACCOUNT, "--bucket", BUCKET]
-    common = ["images", "gc", "--namespace", "images/card_s/", *target]
+    namespace = "images/card_s/" if kind == "images" else "snapshots/blobs/"
+    common = [kind, "gc", "--namespace", namespace, *target]
     dry = CliRunner().invoke(app, common)
     assert dry.exit_code == 0, dry.output
-    assert json.loads(dry.output)["candidates"] == [STRAY]
+    candidates = json.loads(dry.stdout)["candidates"]
+    assert candidates
+    assert dry.stderr == f"GC: {len(candidates)} candidates\n"
     assert STRAY in state.objects
     done = CliRunner().invoke(app, [*common, "--execute"])
     assert done.exit_code == 0, done.output
-    assert json.loads(done.output)["deleted"] == [STRAY]
-    assert STRAY not in state.objects
+    assert json.loads(done.stdout)["deleted"] == candidates
+    assert done.stderr == (
+        f"GC: {len(candidates)} candidates\n"
+        f"GC: {len(candidates)}/{len(candidates)} deleted\n"
+    )
+    assert not set(candidates).intersection(state.objects)
+    empty = CliRunner().invoke(app, [*common, "--execute"])
+    assert empty.exit_code == 0, empty.output
+    assert json.loads(empty.stdout)["deleted"] == []
+    assert empty.stderr == "GC: 0 candidates\n"

@@ -37,6 +37,7 @@ PUBLIC_PREFIXES = frozenset(
 SNAPSHOT_PREFIXES = frozenset(p for p in PUBLIC_PREFIXES if p.startswith("snapshots/"))
 IMAGE_PREFIXES = PUBLIC_PREFIXES - SNAPSHOT_PREFIXES
 MAX_OBJECT = 128 * 1024 * 1024
+MAX_DELETE_BATCH = 1000
 
 
 @dataclass(frozen=True, repr=False)
@@ -145,17 +146,28 @@ class R2Store:
                     "R2 image PUT failed; rerun the same image input"
                 ) from None
 
-    def delete(self, key: str) -> None:
-        """GC alone deletes; R2 does not promise If-Match on DeleteObject."""
-        if not any(key.startswith(p) for p in PUBLIC_PREFIXES) or not (
-            JSON_KEY.fullmatch(key) or IMAGE_KEY.fullmatch(key)
+    def delete_many(self, keys: list[str]) -> None:
+        """Delete one public-only batch; validate every key before sending it."""
+        if not 1 <= len(keys) <= MAX_DELETE_BATCH:
+            raise ExportError("Deletion batch requires 1 to 1000 keys")
+        if any(
+            not any(key.startswith(p) for p in PUBLIC_PREFIXES)
+            or not (JSON_KEY.fullmatch(key) or IMAGE_KEY.fullmatch(key))
+            for key in keys
         ):
             raise ExportError("Deletion key is outside the public namespaces")
-        with self._operation(key):
+        with self._operation(""):
             try:
-                self.client.delete_object(Bucket=self.bucket, Key=key)
+                response = self.client.delete_objects(
+                    Bucket=self.bucket,
+                    Delete={"Objects": [{"Key": key} for key in keys], "Quiet": True},
+                )
             except ClientError:
                 raise ExportError("R2 DELETE failed; inspect before retry") from None
+            if errors := response.get("Errors"):
+                raise ExportError(
+                    f"R2 DELETE failed for {len(errors)} objects; inspect and rerun GC"
+                )
 
     def keys(self, prefix: str) -> tuple[str, ...]:
         """Bounded SDK ListObjectsV2 pagination only in public namespaces."""

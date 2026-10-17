@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import RLock, Thread
 from typing import TYPE_CHECKING, override
 from urllib.parse import parse_qs, parse_qsl, quote, unquote, urlsplit
+from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- only parses synthetic SDK requests on loopback
 from xml.sax.saxutils import escape
 
 import httpx
@@ -38,6 +39,9 @@ class ServerState:
     fail_put: int | None = None
     fail_key: str | None = None
     delete_status: int | None = None
+    delete_errors: set[str] = field(default_factory=set)
+    delete_batches: list[list[str]] = field(default_factory=list)
+    index_after_delete: Stored | None = None
     page_size: int = 2
     error_body: bytes = b"synthetic-secret synthetic-access Signature=DO-NOT-LOG"
 
@@ -150,6 +154,9 @@ class Handler(BaseHTTPRequestHandler):
             if self.command == "GET" and "list-type" in parse_qs(split.query):
                 self.listing(parse_qs(split.query))
                 return
+            if self.command == "POST" and split.query == "delete":
+                self.delete_objects(raw)
+                return
             obj = state.objects.get(key)
             if self.command == "GET":
                 if obj is None:
@@ -158,15 +165,41 @@ class Handler(BaseHTTPRequestHandler):
                     self.respond(200, obj.raw, obj.headers | {"etag": obj.etag})
             elif self.command == "PUT":
                 self.put_object(key, raw, headers)
-            elif self.command == "DELETE":
-                state.operations.append(("DELETE", key, headers.get("if-match")))
-                if state.delete_status is not None:
-                    self.respond(state.delete_status, state.error_body)
-                    return
-                state.objects.pop(key, None)
-                self.respond(204)
             else:
                 self.respond(405)
+
+    def delete_objects(self, raw: bytes) -> None:
+        state = self.state
+        root = ET.fromstring(raw)  # ruff: ignore[suspicious-xml-element-tree-usage] -- trusted synthetic SDK payload
+        namespace = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
+        keys = [node.text or "" for node in root.findall("s3:Object/s3:Key", namespace)]
+        assert 1 <= len(keys) <= 1000
+        assert root.findtext("s3:Quiet", namespaces=namespace) == "true"
+        state.delete_batches.append(keys)
+        state.operations.extend(("DELETE", key, None) for key in keys)
+        if state.delete_status is not None:
+            self.respond(state.delete_status, state.error_body)
+            return
+        errors = ""
+        for key in keys:
+            if key in state.delete_errors:
+                errors += (
+                    "<Error><Key>"
+                    + escape(key)
+                    + "</Key><Code>AccessDenied</Code><Message>synthetic-secret</Message></Error>"
+                )
+            else:
+                state.objects.pop(key, None)
+        if state.index_after_delete is not None:
+            state.objects["snapshots/versions/index.json"] = state.index_after_delete
+        self.respond(
+            200,
+            (
+                '<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
+                + errors
+                + "</DeleteResult>"
+            ).encode(),
+        )
 
     def put_object(self, key: str, raw: bytes, headers: dict[str, str]) -> None:
         state = self.state
@@ -224,7 +257,7 @@ class Handler(BaseHTTPRequestHandler):
 
     do_GET = dispatch  # ruff: ignore[mixed-case-variable-in-class-scope] -- BaseHTTPRequestHandler method dispatch name
     do_PUT = dispatch  # ruff: ignore[mixed-case-variable-in-class-scope] -- BaseHTTPRequestHandler method dispatch name
-    do_DELETE = dispatch  # ruff: ignore[mixed-case-variable-in-class-scope] -- BaseHTTPRequestHandler method dispatch name
+    do_POST = dispatch  # ruff: ignore[mixed-case-variable-in-class-scope] -- BaseHTTPRequestHandler method dispatch name
 
 
 class Loopback(httpx.BaseTransport):

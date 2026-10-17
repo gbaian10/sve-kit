@@ -290,7 +290,7 @@ def test_delete_refuses_non_public_keys_before_http(
     with pytest.raises(
         ExportError, match=r"^Deletion key is outside the public namespaces$"
     ):
-        store.delete(key)
+        store.delete_many([KEY, key])
     assert state.requests == []
 
 
@@ -299,6 +299,33 @@ def test_delete_removes_one_public_object_without_condition(
 ) -> None:
     store, state, _ = remote
     state.objects[KEY] = Stored(b"x", '"x"', META)
-    store.delete(KEY)
+    store.delete_many([KEY])
     assert KEY not in state.objects
     assert state.operations == [("DELETE", KEY, None)]
+
+
+@pytest.mark.parametrize("count", [0, 1001])
+def test_delete_refuses_invalid_batch_size_before_http(
+    remote: tuple[R2Store, ServerState, Loopback], count: int
+) -> None:
+    store, state, _ = remote
+    with pytest.raises(ExportError, match="requires 1 to 1000 keys"):
+        store.delete_many([KEY] * count)
+    assert state.requests == []
+
+
+def test_delete_reports_partial_errors_and_rerun_removes_remaining_objects(
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    other = "images/card_s/999.webp"
+    state.objects.update({key: Stored(b"x", '"x"', META) for key in (KEY, other)})
+    state.delete_errors.add(other)
+    with pytest.raises(
+        ExportError, match=r"^R2 DELETE failed for 1 objects; inspect and rerun GC$"
+    ):
+        store.delete_many([KEY, other])
+    assert set(state.objects) == {other}
+    state.delete_errors.clear()
+    store.delete_many([other])
+    assert not state.objects
