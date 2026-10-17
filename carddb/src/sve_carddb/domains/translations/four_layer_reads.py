@@ -1,4 +1,4 @@
-"""Sealed preparation reads require both a local definition and supported use points."""
+"""Sealed source reads require both a local definition and supported use points."""
 
 import re
 from dataclasses import replace
@@ -55,7 +55,7 @@ _ROW = "N2-B11.current_zone_count"
 def prepare_reads(
     raw: str, derived: SourceAnalysis, classifier: Classifier
 ) -> SourceAnalysis:
-    """Change only preparation body parts; pending whole-line semantics stay pending."""
+    """Change only body parts; pending whole-line semantics stay pending."""
     parts = list(derived.field.parts)
     recognized = list(derived.recognized)
     rows = list(derived.registry_rows)

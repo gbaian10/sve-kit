@@ -161,9 +161,7 @@ class DerivedField:
             {**classifier.domains, DOMAIN_CODE: DOMAIN, **registry.domains},
             normalizer_version=VERSION,
         )
-        reconstructed = bind_recognized(
-            frame, self.derived.field, part, found, mixed=True
-        )
+        reconstructed = bind_recognized(frame, self.derived.field, part, found)
         if (
             reconstructed != binding
             or frame.semantic_variant != expected_frame.semantic_variant
@@ -202,7 +200,6 @@ def derive_source(
     """Apply every sealed family through the sole production source entry."""
     from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- providers share this source construction type
 
-    families = (FAMILY,)
     derived = analyze_source(raw, source, classifier, context=context)
     derived = prepare_capacities(raw, derived, classifier)
     derived = prepare_parameters(raw, derived, classifier)
@@ -222,15 +219,13 @@ def derive_source(
             derived.field.parts, derived.original.parts, derived.recognized, strict=True
         )
     )
-    prepared = DerivedField(derived, interfaces)
-    if len({family.name for family in families}) != len(families):
-        raise ValueError("Source family names must be unique")
-    for family in families:
-        prepared = family.prepare(raw, prepared, classifier, context)
+    prepared = FAMILY.prepare(
+        raw, DerivedField(derived, interfaces), classifier, context
+    )
     if len(prepared.interfaces) != len(prepared.derived.field.parts):
         raise ValueError("Source interfaces must preserve source part order")
     if prepared.mode_rules and len(prepared.mode_rules) != len(
         prepared.derived.field.parts
     ):
         raise ValueError("Mode rules must preserve source part order")
-    return replace(prepared, families=families)
+    return replace(prepared, families=(FAMILY,))

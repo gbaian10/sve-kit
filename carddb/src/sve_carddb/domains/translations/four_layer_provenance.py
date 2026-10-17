@@ -1,4 +1,4 @@
-"""Sealed entry provenance and play-origin conditions for explicit N2 preparation."""
+"""Sealed entry provenance and play-origin conditions."""
 
 import re
 from dataclasses import dataclass, field, replace

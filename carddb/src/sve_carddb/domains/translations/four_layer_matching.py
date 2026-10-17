@@ -67,7 +67,7 @@ class Frames:
         candidates = self.index.get(_key(candidate_frame), ())
         matches = []
         for frame in candidates:
-            binding = bind_recognized(frame, field, part, recognized, mixed=True)
+            binding = bind_recognized(frame, field, part, recognized)
             if binding is not None:
                 matches.append(Matched(frame, binding))
         if len(matches) > 1:
@@ -92,8 +92,6 @@ def bind_recognized(
     field: SourceField,
     part: SourcePart,
     recognized: Recognized,
-    *,
-    mixed: bool = False,
 ) -> SourceBinding | None:
     """Map complete signatures and construction order, including independent omitted operands."""
     expected_omitted = tuple(s for s in recognized.schema.slots if not s.occurrences)
@@ -120,7 +118,7 @@ def bind_recognized(
         _signature(slot) != _signature(expected[pos]) for pos, slot in actual.items()
     ):
         return None
-    if mixed and not _mixed_names(recognized, actual, omitted_names):
+    if not _mixed_names(recognized, actual, omitted_names):
         return None
     values: dict[str, TypedValue] = {}
     occurrences: list[LeafOccurrence] = []
@@ -139,7 +137,7 @@ def bind_recognized(
             return None
         name = mapped.pop()
         value = recognized.values[occurrence.slot]
-        if mixed and isinstance(value, (Expression, ContextExpression, PredicateExpr)):
+        if isinstance(value, (Expression, ContextExpression, PredicateExpr)):
             value = value.model_copy(
                 update={"leaves": tuple(omitted_names[n] for n in value.leaves)}
             )

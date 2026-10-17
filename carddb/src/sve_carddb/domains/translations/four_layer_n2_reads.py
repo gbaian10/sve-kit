@@ -1,4 +1,4 @@
-"""Explicit A1/A4 preparation family; production and default preparation stay unchanged."""
+"""A1 reads and A4 declared X as one family of the integrated source construction."""
 
 from dataclasses import replace
 from typing import TYPE_CHECKING

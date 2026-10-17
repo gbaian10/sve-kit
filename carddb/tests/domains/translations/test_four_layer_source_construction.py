@@ -199,7 +199,7 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
     renamed = renamed.model_copy(
         update={"id": "frame:" + checksum, "content_hash": checksum}
     )
-    binding = bind_recognized(renamed, field, field.parts[0], found, mixed=True)
+    binding = bind_recognized(renamed, field, field.parts[0], found)
     assert binding is not None
     field.parts[0].verify(
         "甲乙",
@@ -214,7 +214,6 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
         "actual_first",
         "actual_second",
     ]
-    assert bind_recognized(renamed, field, field.parts[0], found) is None
     wrong = renamed.model_copy(
         update={
             "leaf_schema": LeafSchema(
@@ -228,7 +227,7 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
             )
         }
     )
-    assert bind_recognized(wrong, field, field.parts[0], found, mixed=True) is None
+    assert bind_recognized(wrong, field, field.parts[0], found) is None
     ambiguous = replace(
         found,
         schema=LeafSchema(
@@ -251,9 +250,7 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
             for index, occurrence in enumerate(found.occurrences[:3])
         ),
     )
-    assert (
-        bind_recognized(renamed, field, field.parts[0], ambiguous, mixed=True) is None
-    )
+    assert bind_recognized(renamed, field, field.parts[0], ambiguous) is None
     # Matching synthetic evidence cannot authorize an unsealed source relation.
     with pytest.raises(ValueError, match="complete current source construction"):
         prepared.verify("甲乙", classifier(), renamed, binding)

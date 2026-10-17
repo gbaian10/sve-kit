@@ -1,4 +1,4 @@
-"""Source-scoped mode history and conditional cross-line choices for preparation only."""
+"""Source-scoped mode history and conditional cross-line choices."""
 
 import re
 from dataclasses import dataclass, replace

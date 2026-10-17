@@ -251,7 +251,7 @@ class Classifier:
             raise ValueError("Binding borrows another exact owner field")
         if frame.source.normalizer_version != VERSION:
             raise ValueError("Unsupported four-layer normalizer version")
-        from sve_carddb.domains.translations.four_layer_derivation import derive_source  # ruff: ignore[import-outside-top-level] -- defer the preparation dependency to its existing B boundary
+        from sve_carddb.domains.translations.four_layer_derivation import derive_source  # ruff: ignore[import-outside-top-level] -- source derivation depends on the classifier type
 
         derived = derive_source(raw, field.source, self, context=context)
         if field != derived.field:

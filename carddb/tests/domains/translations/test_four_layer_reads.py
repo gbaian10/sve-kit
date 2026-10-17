@@ -140,7 +140,6 @@ def test_repeated_x_keeps_print_order_and_rebinds_expression_actual_names() -> N
             prepared.derived.field,
             prepared.derived.field.parts[0],
             prepared.derived.recognized[0],
-            mixed=True,
         )
         is None
     )
@@ -166,7 +165,6 @@ def test_repeated_x_keeps_print_order_and_rebinds_expression_actual_names() -> N
         prepared.derived.field,
         prepared.derived.field.parts[0],
         prepared.derived.recognized[0],
-        mixed=True,
     )
     assert rebound is not None
     prepared.verify(raw, engine, renamed, rebound)

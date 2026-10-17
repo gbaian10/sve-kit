@@ -1,4 +1,4 @@
-"""Shared lexical boundaries for the explicitly enabled preparation families."""
+"""Shared lexical boundaries for the integrated source families."""
 
 import re
 

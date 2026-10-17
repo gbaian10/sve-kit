@@ -1,4 +1,4 @@
-"""Sealed payment, die, header and reminder sources for isolated N2 preparation."""
+"""Sealed payment, die, header and reminder sources."""
 
 import re
 import unicodedata

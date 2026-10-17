@@ -174,8 +174,15 @@ def test_selected_sentence_rejects_missing_or_unused_expression_wording(
         )
 
 
-@pytest.mark.parametrize("bad", ["unknown", "unused", "formal"])
-def test_unselected_variant_is_statically_checked(bad: str) -> None:
+@pytest.mark.parametrize(
+    ("bad", "error"),
+    [
+        ("unknown", "unknown source expression"),
+        ("unused", "Unused expression"),
+        ("formal", "unknown leaf"),
+    ],
+)
+def test_unselected_variant_is_statically_checked(bad: str, error: str) -> None:
     _, _, expressions = sample()
     case = contract_case("A1")
     item = case.item
@@ -205,9 +212,7 @@ def test_unselected_variant_is_statically_checked(bad: str) -> None:
             },
         },
     }
-    with pytest.raises(
-        ValueError, match=r"unknown source expression|Unused expression|unknown leaf"
-    ):
+    with pytest.raises(ValueError, match=error):
         from_files(
             (
                 file(

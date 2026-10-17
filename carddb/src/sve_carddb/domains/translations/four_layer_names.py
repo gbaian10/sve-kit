@@ -575,7 +575,7 @@ def prepare_names(
     classifier: Classifier,
     context: CardContext | None,
 ) -> DerivedField:
-    """Keep all new descriptors behind the explicit family preparation callback."""
+    """Register new descriptors only through this family callback, not shared modules."""
     del context
     derived = prepared.derived
     source = derived.field.source
