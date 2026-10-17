@@ -1,5 +1,6 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { useTranslation } from "react-i18next"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { useAbilityPreview } from "../../app/snapshot"
@@ -33,6 +34,8 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+const classLabel = () => "中立"
+
 const cell: GridCell = {
   key: "c:synthetic",
   to: "/cards/BP-SYNTHETIC",
@@ -55,9 +58,9 @@ const cell: GridCell = {
 describe("row costs", () => {
   it("shows a plain numeric list cost and the table stat line", async () => {
     const props = { cells: [cell], onOpen: vi.fn() }
-    const { unmount } = await renderInRouter(<CardList {...props} />)
+    const { unmount } = await renderInRouter(<CardList classLabel={classLabel} {...props} />)
     expect(screen.getByText("15")).toBeVisible()
-    expect(screen.queryByRole("img")).not.toBeInTheDocument()
+    expect(document.querySelector("[data-image-printing], [data-image-state]")).toBeNull()
     expect(screen.getByRole("link")).toHaveAttribute("href", "/cards/BP-SYNTHETIC")
     unmount()
     await renderInRouter(<CardTable {...props} images={undefined} artOf={() => undefined} />)
@@ -124,7 +127,7 @@ it("updates table labels and fallback thumbnails on language changes while retai
 })
 
 describe("spreadsheet list", () => {
-  it("renders seven columns, explicit states, full one-line text and absent stats without card images", async () => {
+  it("renders eight columns, explicit states, full one-line text and absent stats without card images", async () => {
     vi.stubGlobal("IntersectionObserver", undefined)
     const states = ["ready", "pending", "error", "unknown", "blank"]
     const cells = states.map((state) => ({
@@ -159,10 +162,10 @@ describe("spreadsheet list", () => {
           ? { phase: "error", error: { kind: "query-failed", message: "synthetic failure" } }
           : { phase: "pending" },
     )
-    await renderInRouter(<CardList cells={cells} onOpen={vi.fn()} />)
+    await renderInRouter(<CardList classLabel={classLabel} cells={cells} onOpen={vi.fn()} />)
     expect(
       screen.getAllByRole("columnheader").map((column) => column.getAttribute("aria-label")),
-    ).toEqual(["卡號", "稀有度", "名稱", "消費", "攻擊力", "生命值", "卡文"])
+    ).toEqual(["卡號", "名稱", "稀有度", "職業", "消費", "攻擊力", "生命值", "卡文"])
     const rows = screen.getAllByRole("row").slice(1)
     expect(rows[0]).toHaveTextContent("First synthetic ability. Second synthetic ability.")
     expect(within(rows[0] ?? document.body).getAllByText("—")).toHaveLength(2)
@@ -172,11 +175,10 @@ describe("spreadsheet list", () => {
     expect(rows[4]?.querySelector("[data-list-effect-text]")).toHaveTextContent(/^$/u)
     expect(vi.mocked(useAbilityPreview).mock.calls.some(([id]) => id === "unknown")).toBe(true)
     expect(document.querySelector("[data-image-printing], [data-image-state]")).toBeNull()
-    expect(screen.queryByRole("img")).not.toBeInTheDocument()
   })
 
   it("waits until rows enter the viewport before requesting ability previews", async () => {
-    await renderInRouter(<CardList cells={[cell]} onOpen={vi.fn()} />)
+    await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
     expect(useAbilityPreview).not.toHaveBeenCalled()
     expect(document.querySelector('[data-preview="waiting"]')).not.toBeNull()
   })
@@ -189,7 +191,7 @@ describe("spreadsheet list", () => {
       to: "/cards/next",
       name: { ...cell.name, primary: { lang: "en", text: "Next synthetic" } },
     }
-    await renderInRouter(<CardList cells={[cell, next]} onOpen={onOpen} />)
+    await renderInRouter(<CardList classLabel={classLabel} cells={[cell, next]} onOpen={onOpen} />)
     const user = userEvent.setup()
     const links = screen.getAllByRole("link")
     links[0]?.focus()
@@ -226,7 +228,7 @@ it.each(["list", "table"] as const)(
       const prefs = usePrefs()
       const named = { ...cell, name: displayName(source, "zh-TW", prefs.nameDisplay) }
       return view === "list" ? (
-        <CardList cells={[named]} onOpen={vi.fn()} />
+        <CardList classLabel={classLabel} cells={[named]} onOpen={vi.fn()} />
       ) : (
         <CardTable cells={[named]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />
       )
@@ -262,7 +264,7 @@ it("keeps a large loaded list bounded and replaces its visible rows when the pag
     key: `window-${String(index)}`,
     to: `/cards/window-${String(index)}`,
   }))
-  await renderInRouter(<CardList cells={cells} onOpen={vi.fn()} />)
+  await renderInRouter(<CardList classLabel={classLabel} cells={cells} onOpen={vi.fn()} />)
   const table = screen.getByRole("table")
   expect(table).toHaveAttribute("data-loaded-count", "600")
   expect(table).toHaveAttribute("aria-rowcount", "601")
@@ -299,6 +301,7 @@ it("preserves a text selection instead of opening a row and exposes translation 
   const onOpen = vi.fn()
   await renderInRouter(
     <CardList
+      classLabel={classLabel}
       cells={[{ ...cell, name: { ...cell.name, missingTranslation: true } }]}
       onOpen={onOpen}
     />,
@@ -321,7 +324,7 @@ it.each(["list", "table"] as const)(
     const premium = { ...cell, summary: { ...cell.summary, rarityCode: "sr", premium: true } }
     await renderInRouter(
       view === "list" ? (
-        <CardList cells={[premium]} onOpen={vi.fn()} />
+        <CardList classLabel={classLabel} cells={[premium]} onOpen={vi.fn()} />
       ) : (
         <CardTable cells={[premium]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />
       ),
@@ -330,8 +333,8 @@ it.each(["list", "table"] as const)(
     expect(document.querySelectorAll("[data-rarity-badges] img")).toHaveLength(1)
     if (view === "list") {
       const headers = screen.getAllByRole("columnheader")
-      expect(headers[1]).toHaveTextContent("稀有度")
-      expect(headers[1]?.querySelector("button:not([data-column-resize])")).toBeNull()
+      expect(headers[2]).toHaveTextContent("稀有度")
+      expect(headers[2]?.querySelector("button:not([data-column-resize])")).toBeNull()
       expect(document.querySelector("[data-list-rarity] img")).not.toBeNull()
       expect(document.querySelector("[data-image-state], [data-image-printing]")).toBeNull()
     }
@@ -342,12 +345,12 @@ it("hides matching headers and cells, keeps an identity column, and preserves ro
   await renderInRouter(
     <>
       <ListColumnPicker />
-      <CardList cells={[cell]} onOpen={vi.fn()} />
+      <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />
     </>,
   )
   const user = userEvent.setup()
   await user.click(screen.getByText("顯示欄位", { selector: "summary" }))
-  for (const name of ["稀有度", "消費", "攻擊力", "生命值"]) {
+  for (const name of ["稀有度", "職業", "消費", "攻擊力", "生命值"]) {
     await user.click(screen.getByRole("checkbox", { name }))
   }
   expect(screen.getAllByRole("columnheader")).toHaveLength(3)
@@ -364,7 +367,9 @@ it("hides matching headers and cells, keeps an identity column, and preserves ro
 })
 
 it("resizes a column by keyboard, persists it on reload, and restores the default", async () => {
-  const { unmount } = await renderInRouter(<CardList cells={[cell]} onOpen={vi.fn()} />)
+  const { unmount } = await renderInRouter(
+    <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+  )
   const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
   const heading = handle.parentElement
   if (!heading) throw new Error("missing heading")
@@ -374,7 +379,7 @@ it("resizes a column by keyboard, persists it on reload, and restores the defaul
   expect(prefsStore.get().listWidths.name).toBe(202)
   unmount()
   prefsStore.reload()
-  await renderInRouter(<CardList cells={[cell]} onOpen={vi.fn()} />)
+  await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
   expect(screen.getByRole("table").style.getPropertyValue("--list-user-name")).toBe("202px")
   act(() => {
     prefsStore.set(DEFAULT_PREFS)
@@ -383,7 +388,7 @@ it("resizes a column by keyboard, persists it on reload, and restores the defaul
 })
 
 it("previews a drag locally and persists once when released", async () => {
-  await renderInRouter(<CardList cells={[cell]} onOpen={vi.fn()} />)
+  await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
   const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
   const heading = handle.parentElement
   if (!heading) throw new Error("missing heading")
@@ -408,5 +413,118 @@ it("previews a drag locally and persists once when released", async () => {
   } finally {
     unsubscribe()
     writes.mockRestore()
+  }
+})
+
+it("shows only class icons with localized accessible names including neutral, and hides their column", async () => {
+  function Example() {
+    const { t } = useTranslation()
+    return (
+      <>
+        <ListColumnPicker />
+        <CardList classLabel={() => t("search.neutral")} cells={[cell]} onOpen={vi.fn()} />
+      </>
+    )
+  }
+  const { i18n } = await renderRoutes([{ path: "*", element: <Example /> }])
+  expect(screen.getByRole("img", { name: "中立" })).toHaveAttribute("title", "中立")
+  expect(document.querySelector("[data-list-class]")).toHaveTextContent(/^$/u)
+  expect(document.querySelector("[data-list-class] img")).toHaveAttribute(
+    "src",
+    expect.stringContaining("neutral"),
+  )
+  await act(async () => {
+    await i18n.changeLanguage("ja")
+  })
+  expect(screen.getByRole("img", { name: "ニュートラル" })).toHaveAttribute("title", "ニュートラル")
+  await act(async () => {
+    await i18n.changeLanguage("en")
+  })
+  expect(screen.getByRole("img", { name: "Neutral" })).toHaveAttribute("title", "Neutral")
+  expect(
+    screen
+      .getByRole("columnheader", { name: "Class" })
+      .querySelector("button:not([data-column-resize])"),
+  ).toBeNull()
+  await userEvent.click(screen.getByText("Visible columns", { selector: "summary" }))
+  await userEvent.click(screen.getByRole("checkbox", { name: "Class" }))
+  expect(document.querySelector("[data-list-class]")).toBeNull()
+  expect(screen.queryByRole("columnheader", { name: "Class" })).not.toBeInTheDocument()
+})
+
+it("reorders from the picker keyboard and keeps focus and cells in the same order", async () => {
+  await renderInRouter(
+    <>
+      <ListColumnPicker />
+      <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />
+    </>,
+  )
+  await userEvent.click(screen.getByText("顯示欄位", { selector: "summary" }))
+  const handle = screen.getByRole("button", { name: "調整「職業」順序（↑／↓ 移動）" })
+  handle.focus()
+  await userEvent.keyboard("{ArrowUp}")
+  expect(handle).toHaveFocus()
+  expect(
+    screen.getAllByRole("columnheader").map((header) => header.getAttribute("aria-label")),
+  ).toEqual(["卡號", "名稱", "職業", "稀有度", "消費", "攻擊力", "生命值", "卡文"])
+  expect(
+    within(screen.getAllByRole("cell")[2] ?? document.body).getByRole("img", { name: "中立" }),
+  ).toBeVisible()
+  expect(
+    screen.getAllByRole("checkbox").map((checkbox) => checkbox.closest("label")?.textContent),
+  ).toEqual(["卡號", "名稱", "職業", "稀有度", "消費", "攻擊力", "生命值", "卡文"])
+  await userEvent.keyboard("{ArrowDown}")
+  expect(prefsStore.get().listOrder).toEqual(DEFAULT_PREFS.listOrder)
+})
+
+it("keeps short header clicks sortable and commits a header drag only on release", async () => {
+  const onSort = vi.fn()
+  await renderInRouter(
+    <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} onSort={onSort} />,
+  )
+  vi.stubGlobal("matchMedia", () => ({ matches: true }))
+  const headings = screen.getAllByRole("columnheader")
+  headings.forEach((heading, index) => {
+    vi.spyOn(heading, "getBoundingClientRect").mockReturnValue({
+      left: index * 100,
+      right: (index + 1) * 100,
+    } as DOMRect)
+  })
+  const button = screen.getByRole("button", { name: "名稱" })
+  Object.defineProperty(button, "setPointerCapture", { value: vi.fn() })
+  Object.defineProperty(button, "releasePointerCapture", { value: vi.fn() })
+  const writes = vi.spyOn(Storage.prototype, "setItem")
+  try {
+    fireEvent.pointerDown(button, { pointerId: 1, isPrimary: true, button: 0, clientX: 120 })
+    fireEvent.pointerMove(button, { pointerId: 1, clientX: 122 })
+    fireEvent.pointerUp(button, { pointerId: 1 })
+    fireEvent.click(button, { detail: 1 })
+    expect(onSort).toHaveBeenCalledWith("name")
+    onSort.mockClear()
+    fireEvent.pointerDown(button, { pointerId: 2, isPrimary: true, button: 0, clientX: 120 })
+    for (let x = 130; x < 500; x += 10) fireEvent.pointerMove(button, { pointerId: 2, clientX: x })
+    expect(writes).not.toHaveBeenCalled()
+    expect(document.querySelector('[data-list-heading="cost"]')).toHaveAttribute(
+      "data-drop",
+      "after",
+    )
+    fireEvent.pointerUp(button, { pointerId: 2 })
+    fireEvent.click(button, { detail: 1 })
+    expect(onSort).not.toHaveBeenCalled()
+    expect(writes).toHaveBeenCalledTimes(1)
+    expect(prefsStore.get().listOrder).toEqual([
+      "number",
+      "rarity",
+      "class",
+      "cost",
+      "name",
+      "attack",
+      "defense",
+      "effect",
+    ])
+    expect(screen.getAllByRole("cell")[4]).toHaveTextContent("Synthetic name")
+  } finally {
+    writes.mockRestore()
+    vi.unstubAllGlobals()
   }
 })

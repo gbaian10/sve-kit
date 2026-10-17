@@ -6,8 +6,11 @@ import {
   DEFAULT_LIST_VISIBILITY,
   isListVisibility,
   isListWidths,
+  LIST_COLUMNS,
+  type ListColumn,
   type ListVisibility,
   type ListWidths,
+  sanitizeListOrder,
 } from "./list-columns"
 
 export const PREFS_KEY = "sve-kit:prefs"
@@ -45,6 +48,7 @@ export interface Prefs {
   readonly viewMode: ViewMode
   readonly listWidths: ListWidths
   readonly listVisibility: ListVisibility
+  readonly listOrder: readonly ListColumn[]
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -65,6 +69,7 @@ export const DEFAULT_PREFS: Prefs = {
   viewMode: "grid",
   listWidths: {},
   listVisibility: DEFAULT_LIST_VISIBILITY,
+  listOrder: LIST_COLUMNS,
 }
 
 function oneOf<T extends string | number>(values: readonly T[]): (value: unknown) => value is T {
@@ -85,26 +90,31 @@ const isEditionSwitches = (value: unknown): value is Readonly<Record<CardEdition
   value !== null &&
   CARD_EDITIONS.every((edition) => isBoolean((value as Record<string, unknown>)[edition]))
 
-type Guards = { readonly [K in keyof Prefs]: (value: unknown) => value is Prefs[K] }
+type Sanitizers = { readonly [K in keyof Prefs]: (value: unknown) => Prefs[K] }
 
-const guards: Guards = {
-  uiLanguage: isNullableUiLanguage,
-  cardEdition: isCardEdition,
-  showOtherEdition: isEditionSwitches,
-  nameDisplay: isTextDisplay,
-  effectLanguage: isTextDisplay,
-  infiniteScroll: isBoolean,
-  preloadPrintings: isBoolean,
-  preloadNeighbours: isBoolean,
-  symbolLabels: isBoolean,
-  termEmphasis: isBoolean,
-  theme: isThemePref,
-  accent: isNullableAccent,
-  banRegion: isCardEdition,
-  gridDensity: isGridDensity,
-  viewMode: isViewMode,
-  listWidths: isListWidths,
-  listVisibility: isListVisibility,
+function withDefault<T>(guard: (value: unknown) => value is T, fallback: T): (value: unknown) => T {
+  return (value) => (guard(value) ? value : fallback)
+}
+
+const sanitizers: Sanitizers = {
+  uiLanguage: withDefault(isNullableUiLanguage, DEFAULT_PREFS.uiLanguage),
+  cardEdition: withDefault(isCardEdition, DEFAULT_PREFS.cardEdition),
+  showOtherEdition: withDefault(isEditionSwitches, DEFAULT_PREFS.showOtherEdition),
+  nameDisplay: withDefault(isTextDisplay, DEFAULT_PREFS.nameDisplay),
+  effectLanguage: withDefault(isTextDisplay, DEFAULT_PREFS.effectLanguage),
+  infiniteScroll: withDefault(isBoolean, DEFAULT_PREFS.infiniteScroll),
+  preloadPrintings: withDefault(isBoolean, DEFAULT_PREFS.preloadPrintings),
+  preloadNeighbours: withDefault(isBoolean, DEFAULT_PREFS.preloadNeighbours),
+  symbolLabels: withDefault(isBoolean, DEFAULT_PREFS.symbolLabels),
+  termEmphasis: withDefault(isBoolean, DEFAULT_PREFS.termEmphasis),
+  theme: withDefault(isThemePref, DEFAULT_PREFS.theme),
+  accent: withDefault(isNullableAccent, DEFAULT_PREFS.accent),
+  banRegion: withDefault(isCardEdition, DEFAULT_PREFS.banRegion),
+  gridDensity: withDefault(isGridDensity, DEFAULT_PREFS.gridDensity),
+  viewMode: withDefault(isViewMode, DEFAULT_PREFS.viewMode),
+  listWidths: withDefault(isListWidths, DEFAULT_PREFS.listWidths),
+  listVisibility: withDefault(isListVisibility, DEFAULT_PREFS.listVisibility),
+  listOrder: sanitizeListOrder,
 }
 
 type StorageSource = Storage | (() => Storage) | undefined
@@ -122,8 +132,7 @@ function sanitize(raw: unknown): Prefs {
   if (record["v"] !== PREFS_VERSION) return DEFAULT_PREFS
   const prefs: Record<string, unknown> = {}
   for (const key of Object.keys(DEFAULT_PREFS) as (keyof Prefs)[]) {
-    const value = record[key]
-    prefs[key] = guards[key](value) ? value : DEFAULT_PREFS[key]
+    prefs[key] = sanitizers[key](record[key])
   }
   return prefs as unknown as Prefs
 }

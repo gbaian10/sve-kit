@@ -158,7 +158,8 @@ const zhTW = {
     sort: "排序",
     visibleColumns: "顯示欄位",
     resizeColumn: "調整「{{column}}」欄寬",
-    columns: { rarity: "稀有度", number: "卡號", name: "名稱", effect: "卡文" },
+    reorderColumn: "調整「{{column}}」順序（↑／↓ 移動）",
+    columns: { class: "職業", rarity: "稀有度", number: "卡號", name: "名稱", effect: "卡文" },
     sortBy: {
       date: "發售日",
       no: "卡號",

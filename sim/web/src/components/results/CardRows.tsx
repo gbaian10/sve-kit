@@ -5,6 +5,7 @@ import {
   type RefObject,
   useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -16,13 +17,13 @@ import { classStyle } from "../../domain/classes"
 import type { QueryState } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import {
-  LIST_COLUMNS,
   LIST_MIN_WIDTHS,
   type ListColumn,
   type ListVisibility,
   prefsStore,
   usePrefs,
 } from "../../settings"
+import { CLASS_ICON } from "../card/classIcons"
 import { InlineText } from "../card/InlineText"
 import { RarityBadges } from "../card/RarityBadges"
 import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
@@ -34,6 +35,7 @@ import { ArtThumb } from "./ArtThumb"
 import { type CardGridProps, type GridCell, NameNotices } from "./CardGrid"
 import { type ResultLabels, useResultLabels } from "./labels"
 import { isPlainClick } from "./plain-click"
+import { useColumnReorder } from "./useColumnReorder"
 import { useRowWindow } from "./useRowWindow"
 import { useVisible } from "./useVisible"
 
@@ -308,6 +310,7 @@ interface ListScrollPosition {
 }
 
 interface CardListProps extends Omit<CardRowsProps, "images" | "artOf"> {
+  readonly classLabel: (code: string | null) => string
   readonly footer?: React.ReactNode
   readonly sort?: QueryState["sort"]
   readonly descending?: boolean
@@ -322,6 +325,8 @@ const ListRow = memo(function ListRow({
   labels,
   rowIndex,
   visibility,
+  columns,
+  classLabel,
 }: {
   readonly cell: GridCell
   readonly onOpen: CardRowsProps["onOpen"]
@@ -329,6 +334,8 @@ const ListRow = memo(function ListRow({
   readonly labels: ResultLabels
   readonly rowIndex: number
   readonly visibility: ListVisibility
+  readonly columns: readonly ListColumn[]
+  readonly classLabel: string
 }) {
   const row = useRef<HTMLTableRowElement>(null)
   const link = useRef<HTMLAnchorElement>(null)
@@ -393,42 +400,80 @@ const ListRow = memo(function ListRow({
         link.current?.click()
       }}
     >
-      {visibility.number && (
-        <td data-list-number="">
-          {visibility.name ? <span>{cell.summary.cardNo}</span> : navigationLink}
-        </td>
-      )}
-      {visibility.rarity && (
-        <td data-list-rarity="">
-          <RarityBadges {...cell.summary} />
-        </td>
-      )}
-      {visibility.name && <td data-list-name="">{navigationLink}</td>}
-      {visibility.cost && <td data-list-stat="">{cell.summary.cost ?? labels.noValue}</td>}
-      {visibility.attack && <td data-list-stat="">{cell.summary.attack ?? labels.noValue}</td>}
-      {visibility.defense && <td data-list-stat="">{cell.summary.defense ?? labels.noValue}</td>}
-      {visibility.effect && (
-        <td data-list-effect="">
-          <span data-list-effect-text="">
-            {cell.summary.wordingPending && (
-              <Badge className="mr-2 align-middle">{labels.wordingPending}</Badge>
-            )}
-            {seen ? (
-              <EffectPreview
-                printingId={cell.summary.printingId}
-                faceId={cell.summary.faceId}
-                edition={cell.summary.region}
-                labels={labels}
-                singleLine
-              />
-            ) : (
-              <span data-preview="waiting" className="text-text-3 italic">
-                {labels.effectPending}
-              </span>
-            )}
-          </span>
-        </td>
-      )}
+      {columns.map((column) => {
+        switch (column) {
+          case "number":
+            return (
+              <td key={column} data-list-number="">
+                {visibility.name ? <span>{cell.summary.cardNo}</span> : navigationLink}
+              </td>
+            )
+          case "rarity":
+            return (
+              <td key={column} data-list-rarity="">
+                <RarityBadges {...cell.summary} />
+              </td>
+            )
+          case "name":
+            return (
+              <td key={column} data-list-name="">
+                {navigationLink}
+              </td>
+            )
+          case "class":
+            return (
+              <td key={column} data-list-class="">
+                <img
+                  src={CLASS_ICON[classStyle(cell.summary.classCode)]}
+                  alt={classLabel}
+                  title={classLabel}
+                  className="mx-auto block size-6 object-contain"
+                />
+              </td>
+            )
+          case "cost":
+            return (
+              <td key={column} data-list-stat="">
+                {cell.summary.cost ?? labels.noValue}
+              </td>
+            )
+          case "attack":
+            return (
+              <td key={column} data-list-stat="">
+                {cell.summary.attack ?? labels.noValue}
+              </td>
+            )
+          case "defense":
+            return (
+              <td key={column} data-list-stat="">
+                {cell.summary.defense ?? labels.noValue}
+              </td>
+            )
+          case "effect":
+            return (
+              <td key={column} data-list-effect="">
+                <span data-list-effect-text="">
+                  {cell.summary.wordingPending && (
+                    <Badge className="mr-2 align-middle">{labels.wordingPending}</Badge>
+                  )}
+                  {seen ? (
+                    <EffectPreview
+                      printingId={cell.summary.printingId}
+                      faceId={cell.summary.faceId}
+                      edition={cell.summary.region}
+                      labels={labels}
+                      singleLine
+                    />
+                  ) : (
+                    <span data-preview="waiting" className="text-text-3 italic">
+                      {labels.effectPending}
+                    </span>
+                  )}
+                </span>
+              </td>
+            )
+        }
+      })}
     </tr>
   )
 })
@@ -442,12 +487,14 @@ export function CardList({
   onSort,
   scrollPositionRef,
   footer,
+  classLabel,
 }: CardListProps) {
   const labels = useResultLabels()
   const scroll = useRef<HTMLDivElement>(null)
   const body = useRef<HTMLTableSectionElement>(null)
   const windowed = useRowWindow(body, cells.length)
-  const { listVisibility, listWidths } = usePrefs()
+  const { listVisibility, listWidths, listOrder } = usePrefs()
+  const reorder = useColumnReorder("horizontal")
   const tableId = useId()
   const [overflow, setOverflow] = useState(false)
   useLayoutEffect(() => {
@@ -470,11 +517,15 @@ export function CardList({
     scroll.current.scrollTop = scrollPositionRef.current.top
     scroll.current.scrollLeft = scrollPositionRef.current.left
   }, [overflow, scrollPositionRef])
-  const columns = LIST_COLUMNS.filter((column) => listVisibility[column])
+  const columns = useMemo(
+    () => listOrder.filter((column) => listVisibility[column]),
+    [listOrder, listVisibility],
+  )
   const names = {
     number: labels.t("results.columns.number"),
     rarity: labels.t("results.columns.rarity"),
     name: labels.t("results.columns.name"),
+    class: labels.t("results.columns.class"),
     cost: labels.stats.cost,
     attack: labels.stats.attack,
     defense: labels.stats.defense,
@@ -482,6 +533,7 @@ export function CardList({
   }
   const sorts = { number: "no", name: "name", cost: "cost", attack: "atk", defense: "def" } as const
   const style = {
+    "--class-column-min-width": `${String(LIST_MIN_WIDTHS.class)}px`,
     "--rarity-column-min-width": `${String(RARITY_COLUMN_MIN_WIDTH)}px`,
     "--rarity-badge-height": `${String(RARITY_BADGE_HEIGHT)}px`,
     ...Object.fromEntries(
@@ -525,9 +577,12 @@ export function CardList({
           ))}
         </colgroup>
         <thead>
-          <tr aria-rowindex={1}>
+          <tr aria-rowindex={1} data-column-order="">
             {columns.map((column) => {
-              const key = column === "rarity" || column === "effect" ? null : sorts[column]
+              const key =
+                column === "rarity" || column === "effect" || column === "class"
+                  ? null
+                  : sorts[column]
               const label = names[column]
               const title =
                 column === "cost" ? (
@@ -539,6 +594,7 @@ export function CardList({
                   <img
                     src={column === "attack" ? ATTACK_ICON : DEFENSE_ICON}
                     alt=""
+                    draggable={false}
                     className="mx-auto size-4"
                   />
                 ) : (
@@ -547,6 +603,15 @@ export function CardList({
               return (
                 <th
                   key={column}
+                  {...reorder.bindings(column)}
+                  data-order-column={column}
+                  data-drop={
+                    reorder.insertion?.column === column
+                      ? reorder.insertion.after
+                        ? "after"
+                        : "before"
+                      : undefined
+                  }
                   data-list-heading={column}
                   scope="col"
                   aria-label={label}
@@ -602,6 +667,8 @@ export function CardList({
               labels={labels}
               rowIndex={windowed.start + index}
               visibility={listVisibility}
+              columns={columns}
+              classLabel={classLabel(cell.summary.classCode)}
             />
           ))}
           {windowed.after > 0 && (
@@ -644,7 +711,9 @@ function ColumnResize({
     const heading = handleRef.current?.parentElement
     if (!heading) return
     const text =
-      column === "rarity" ? heading.querySelector<HTMLElement>("[data-list-heading-label]") : null
+      column === "rarity" || column === "class"
+        ? heading.querySelector<HTMLElement>("[data-list-heading-label]")
+        : null
     const update = () => {
       let minimum = LIST_MIN_WIDTHS[column]
       if (text) {
@@ -658,7 +727,7 @@ function ColumnResize({
         minimum = Math.max(minimum, Math.ceil(text.getBoundingClientRect().width + edges))
         heading
           .closest("table")
-          ?.style.setProperty("--rarity-column-min-width", `${String(minimum)}px`)
+          ?.style.setProperty(`--${column}-column-min-width`, `${String(minimum)}px`)
       }
       const width = Math.round(heading.getBoundingClientRect().width)
       setMeasured((previous) =>

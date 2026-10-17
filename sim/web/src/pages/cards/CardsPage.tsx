@@ -388,7 +388,10 @@ export function CardsPage() {
       }),
     [classes, textLang, t],
   )
-  const classLabel = (code: string) => quickBar.find((item) => item.code === code)?.label ?? code
+  const classLabel = (code: string | null) =>
+    code === null
+      ? t("search.neutral")
+      : (quickBar.find((item) => item.code === code)?.label ?? code)
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
   const view = chosenView ?? prefs.viewMode
@@ -698,6 +701,7 @@ export function CardsPage() {
           )}
           {view === "list" && (
             <CardList
+              classLabel={classLabel}
               footer={pagination}
               sort={query.sort}
               descending={query.order === "desc"}
