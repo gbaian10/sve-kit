@@ -781,88 +781,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:0b1208e091dd6577bc9872f3239f5870e0b22e191283486b3c6385b4c49f2b5e
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}從下列抉擇'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 項。上限所依據的數值為「
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 」。【
-          - kind: LeafRef
-            slot: leaf_7
-          - kind: Literal
-            text: 】選擇
-          - kind: LeafRef
-            slot: leaf_8
-          - kind: LeafRef
-            slot: leaf_9
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_11
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_10
-          - kind: Literal
-            text: 。使其消失。【
-          - kind: LeafRef
-            slot: leaf_12
-          - kind: Literal
-            text: 】這張卡片具有【
-          - kind: LeafRef
-            slot: leaf_13
-          - kind: Literal
-            text: 】。【
-          - kind: LeafRef
-            slot: leaf_14
-          - kind: Literal
-            text: 】自己的主戰者{
-          - kind: LeafRef
-            slot: leaf_15
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_16
-          - kind: Literal
-            text: 。抽
-          - kind: LeafRef
-            slot: leaf_17
-          - kind: Literal
-            text: 張卡片。
-      expression_targets:
-        count.current_zone.owner.zone.card.trait.v1:
-          format: 1
-          nodes:
-            - kind: LeafRef
-              slot: owner
-            - kind: LeafRef
-              slot: zone
-            - kind: Literal
-              text: 上的
-            - kind: LeafRef
-              slot: trait
-            - kind: Literal
-              text: ・
-            - kind: LeafRef
-              slot: card
-            - kind: Literal
-              text: 張數
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:73ef324c9ff19cc1f025e54bcf607178fb8968e28c2f59f0deb3a9500969059b
       lang: zh-Hant
       target:
@@ -1378,11 +1296,11 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}每位玩家保留自身戰場上的'
+            text: '}各玩家保留自身戰場上的'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 個從者，並將除此之外的自身戰場上的全部從者放置到
+            text: 個從者，並將其以外的自身戰場上的全部從者放置到
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
