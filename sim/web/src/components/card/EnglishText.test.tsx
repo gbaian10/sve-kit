@@ -1,6 +1,5 @@
 import { act, screen } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 
 import fixture from "../../../../../tests/fixtures/snapshot-contract/v3/english-native.json"
 import { createAnnotatedTextResolver, objectValue } from "../../data"
@@ -47,14 +46,9 @@ describe("English whole-field display exceptions", () => {
     expect(missing?.selection).toBeUndefined()
   })
 
-  it("shows pending proofreading and copies the complete exception without EN emphasis", async () => {
+  it("shows pending proofreading and the complete exception without EN emphasis", async () => {
     const { client, owner } = await englishOrigin()
     await client.load()
-    const copy = vi.fn().mockResolvedValue(undefined)
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText: copy },
-    })
     prefsStore.set({ effectLanguage: "both" })
     const { container } = await renderInRouter(
       <CardText edition="en" client={client} owner={owner} field="effect" />,
@@ -64,8 +58,6 @@ describe("English whole-field display exceptions", () => {
     expect(screen.getByText(/待校對/)).toBeVisible()
     expect(screen.getByText(/機器譯文/)).toHaveTextContent("非官方")
     expect(container.querySelector("strong")).toBeNull()
-    await userEvent.click(screen.getByRole("button", { name: "複製文字" }))
-    expect(copy).toHaveBeenLastCalledWith("合成規則😀。")
     act(() => {
       prefsStore.set({ termEmphasis: false })
     })
@@ -76,18 +68,11 @@ describe("English whole-field display exceptions", () => {
   it("shows the complete EN fallback and missing label for an untranslated English field", async () => {
     const { client, owner } = await englishOrigin()
     await client.load()
-    const copy = vi.fn().mockResolvedValue(undefined)
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText: copy },
-    })
     const { container } = await renderInRouter(
       <CardText edition="en" client={client} owner={owner} field="name" />,
     )
     expect(await screen.findByText("Reskin")).toBeVisible()
     expect(screen.getByText("缺少此語言譯文")).toBeVisible()
     expect(container.querySelector("strong")).toBeNull()
-    await userEvent.click(screen.getByRole("button", { name: "複製文字" }))
-    expect(copy).toHaveBeenLastCalledWith("Reskin")
   })
 })

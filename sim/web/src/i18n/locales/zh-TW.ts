@@ -223,9 +223,6 @@ const zhTW = {
     currentText: "目前卡文",
     printedText: "印刷卡文",
     translationMissing: "缺少此語言譯文",
-    copyText: "複製文字",
-    textCopied: "已複製文字",
-    textCopyFailed: "無法複製文字，請檢查瀏覽器權限。",
     field: { name: "名稱", effect: "效果", flavor: "風味文字" },
     translationOrigin: { official: "官方譯文", project: "專案譯文", machine: "機器譯文" },
     translationAuthority: {

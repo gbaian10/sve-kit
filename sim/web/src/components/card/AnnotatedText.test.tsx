@@ -193,14 +193,9 @@ describe("annotation presentation", () => {
       term_id: "king",
     })
   })
-  it("renders and copies the actual native C/P/R text while the preference changes only emphasis", async () => {
+  it("renders the actual native C/P/R text while the preference changes only emphasis", async () => {
     const { client } = await annotatedOrigin()
     await client.load()
-    const copy = vi.fn().mockResolvedValue(undefined)
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText: copy },
-    })
     const { container } = await renderInRouter(
       <CardText
         edition="jp"
@@ -213,8 +208,6 @@ describe("annotation presentation", () => {
     await screen.findByText("translation")
     expect(container.querySelector("strong")?.textContent).toBe("Synthetic")
     expect(screen.getByText(/專案譯文/)).toHaveTextContent("非官方")
-    await userEvent.click(screen.getByRole("button", { name: "複製文字" }))
-    expect(copy).toHaveBeenLastCalledWith("Synthetic translation")
     await userEvent.click(screen.getByRole("button", { name: "Synthetic" }))
     expect(screen.getByRole("complementary", { name: "查看術語說明" })).toBeVisible()
     act(() => {
@@ -224,8 +217,6 @@ describe("annotation presentation", () => {
       expect(container.querySelector("strong")).toBeNull()
     })
     expect(screen.getByRole("button", { name: "Synthetic" })).toBeVisible()
-    await userEvent.click(screen.getByRole("button", { name: "複製文字" }))
-    expect(copy).toHaveBeenLastCalledWith("Synthetic translation")
     const value = await createAnnotatedTextResolver(client).resolve(
       { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
       "zh-Hant",

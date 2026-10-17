@@ -234,9 +234,6 @@ export default {
     currentText: "Current",
     printedText: "Printed",
     translationMissing: "Translation missing in this language",
-    copyText: "Copy text",
-    textCopied: "Text copied",
-    textCopyFailed: "Could not copy text. Check your browser permissions.",
     field: { name: "Name", effect: "Effect", flavor: "Flavor" },
     translationOrigin: {
       official: "Official translation",

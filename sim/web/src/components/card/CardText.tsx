@@ -1,4 +1,3 @@
-import { Copy } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { useAnnotatedText } from "../../app/snapshot"
@@ -11,12 +10,9 @@ import {
 import type { NameDisplay } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
 import { usePrefs } from "../../settings"
-import { Button } from "../ui/Button"
-import { useToast } from "../ui/toast-context"
 import { AnnotatedText } from "./AnnotatedText"
 import { useTextLanguage } from "./text-language"
 import { TextPurposeStatus } from "./TextPurposeStatus"
-import { plainText } from "./textSymbols"
 import { TranslationSourceLine } from "./TranslationSourceLine"
 
 // Effect text is the reason the page exists: 16px at line-height 1.75, full width (design 06).
@@ -42,7 +38,6 @@ export function CardText({
   readonly label?: string | undefined
 }) {
   const { t } = useTranslation()
-  const toast = useToast()
   const prefs = usePrefs()
   const language = useTextLanguage()
   const { readiness, value } = useAnnotatedText(
@@ -76,19 +71,6 @@ export function CardText({
   const showTranslated = mode !== "original" && value.translated !== undefined
   // The printed state describes the printed name and effect, never the flavor.
   const printedState = field === "flavor" ? undefined : value.printedState
-  const copyText = async () => {
-    const text = plainText(
-      stringValue(
-        (mode !== "original" && value.translated ? value.translated : value.original).unit["text"],
-      ),
-    )
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.show({ message: t("card.textCopied") })
-    } catch {
-      toast.show({ message: t("card.textCopyFailed") })
-    }
-  }
   const heading = label ?? (field === "section" ? t("card.originalText") : t(`card.field.${field}`))
   return (
     <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
@@ -151,10 +133,6 @@ export function CardText({
         stringValue(value.original.unit["lang"]) !== language && (
           <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
         )}
-      <Button size="sm" onClick={() => void copyText()}>
-        <Copy className="size-4" aria-hidden="true" />
-        {t("card.copyText")}
-      </Button>
     </section>
   )
 }
