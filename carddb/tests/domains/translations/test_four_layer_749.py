@@ -34,12 +34,12 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     target_dependencies,
     verify_quantities,
 )
-from sve_carddb.domains.translations.four_layer_n3_context import CHOICE_DOMAIN
 from sve_carddb.domains.translations.four_layer_n3_events import HOLDER_REVISIONS
 from sve_carddb.domains.translations.four_layer_n3_ports import (
     verify_counter_witness,
     verify_pool_allocation,
 )
+from sve_carddb.domains.translations.four_layer_n3_shapes import CHOICE_DOMAIN
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Label,
@@ -395,6 +395,7 @@ def test_holder_policy_does_not_apply_to_other_revisions(engine: Classifier) -> 
 @pytest.mark.parametrize(
     ("case", "before", "after"),
     [
+        ("P02", "10枚まで探す", "9枚まで探す"),
         ("P01", "9枚", "8枚"),
         ("P01-pair", "1枚", "2枚"),
         ("P03", "3枚", "4枚"),
@@ -437,6 +438,9 @@ def test_each_sealed_numeric_guard(
         ("X02", "自分の場", "自分の墓場"),
         ("X02", "仮族・カード", "未知族・カード"),
         ("X02", "仮族・カード", "仮族・フォロワー"),
+        ("H04", "仮土片", "仮甲"),
+        ("R01", "自分のデッキ", "{起動}自分のデッキ"),
+        ("R01", "手札をすべて捨てる。", "手札をすべて捨てた。"),
         ("R02", "そのダメージ", "それの体力"),
         ("A01", "これの", "相手の"),
     ],
@@ -558,8 +562,19 @@ def _labels(
     return labels
 
 
-@pytest.mark.parametrize("mode", ["pool", "receipt", "capture", "pair", "actor"])
-def test_pool_verifier_rejects_wrong_connections(mode: str, engine: Classifier) -> None:
+@pytest.mark.parametrize(
+    ("mode", "error"),
+    [
+        ("pool", "Remainder refers to another pool"),
+        ("receipt", "Pool requires its same-operation receipt export"),
+        ("capture", "capture"),
+        ("pair", "Pool export/import pair differs in identity or evidence"),
+        ("actor", "Capacity placement requires one live source actor"),
+    ],
+)
+def test_pool_verifier_rejects_wrong_connections(
+    mode: str, error: str, engine: Classifier
+) -> None:
 
     _, raw, ordinal = next(c for c in CASES if c[0] == "P03")
     found = derive(raw, engine)
@@ -601,7 +616,7 @@ def test_pool_verifier_rejects_wrong_connections(mode: str, engine: Classifier) 
             "exports": () if mode == "pair" else frame.projection.exports,
         }
     )
-    with pytest.raises(ValueError, match=r".+"):
+    with pytest.raises(ValueError, match=error):
         verify_pool_allocation(
             frame.model_copy(update={"projection": projection}), binding
         )
@@ -634,3 +649,104 @@ def test_context_domain_cannot_borrow_a_constant_or_other_provider(
     bad = binding.model_copy(update={"values": {**binding.values, slot.name: invalid}})
     with pytest.raises(ValueError, match="Context choice"):
         verify_quantities(frame, bad, scopes={}, registry=found.registry)
+
+
+@pytest.mark.parametrize(
+    "origin",
+    ["holder", "event_subject", "selection", "direct_ability_source", "pool_remainder"],
+)
+@pytest.mark.parametrize("pool", [None, "pool_provider"])
+@pytest.mark.parametrize("placement", [None, "placement_receipt"])
+def test_object_set_remainder_contract(
+    origin: str, pool: str | None, placement: str | None
+) -> None:
+    document = {
+        "kind": "ObjectSet",
+        "objects": ({"object_id": "object:synthetic", "generation": 0},),
+        "origin": origin,
+        "pool": pool,
+        "placement": placement,
+    }
+    valid = (
+        (pool is not None and placement is not None)
+        if origin == "pool_remainder"
+        else pool is None and placement is None
+    )
+    if valid:
+        assert ObjectSetRef.model_validate(document).origin == origin
+    else:
+        with pytest.raises(
+            ValueError,
+            match="Pool remainder requires exactly its pool and placement ports",
+        ):
+            ObjectSetRef.model_validate(document)
+
+
+@pytest.mark.parametrize(
+    ("source_kind", "members", "receipt", "error"),
+    [
+        ("generated", (("name_a", "count_a"),), None, None),
+        ("generated", (("name_a", "count_a"), ("name_b", "count_b")), None, None),
+        ("generated", (), None, "Generated pool requires one or two name/count pairs"),
+        (
+            "generated",
+            (("name_a", "count_a"), ("name_b", "count_b"), ("name_c", "count_c")),
+            None,
+            "Generated pool requires one or two name/count pairs",
+        ),
+        (
+            "generated",
+            (("name_a", "count_a"),),
+            "receipt_a",
+            "Generated pool requires one or two name/count pairs",
+        ),
+        (
+            "generated",
+            (("name_a", "name_a"),),
+            None,
+            "Pool members must remain distinct",
+        ),
+        (
+            "generated",
+            (("name_a", "count_a"), ("name_a", "count_b")),
+            None,
+            "Pool members must remain distinct",
+        ),
+        ("search_result", (), "receipt_a", None),
+        ("search_result", (), None, "Search pool requires exactly one objects receipt"),
+        (
+            "search_result",
+            (("name_a", "count_a"),),
+            "receipt_a",
+            "Search pool requires exactly one objects receipt",
+        ),
+    ],
+)
+def test_pool_context_contract(
+    source_kind: str,
+    members: tuple[tuple[str, str], ...],
+    receipt: str | None,
+    error: str | None,
+) -> None:
+    document = {
+        "kind": "PoolContext",
+        "pool_id": "pool:synthetic",
+        "source_kind": source_kind,
+        "members": members,
+        "receipt": receipt,
+        "scope": "ability_1",
+    }
+    if error is None:
+        assert PoolContext.model_validate(document).members == members
+    else:
+        with pytest.raises(ValueError, match=error):
+            PoolContext.model_validate(document)
+
+
+def test_discard_definition_must_precede_deck_limit(engine: Classifier) -> None:
+    _, raw, _ = next(c for c in CASES if c[0] == "R01")
+    definition = "Xは「これによって捨てた手札の枚数+1」である。"
+    found = derive(raw.replace(definition, "") + definition, engine)
+    assert found.recognized[0].issues or not any(
+        r.startswith("N3-749") for r in found.derived.registry_rows[0]
+    )

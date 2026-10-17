@@ -18,6 +18,10 @@ from sve_carddb.domains.translations.four_layer_context import (
     Parameter,
     typed_import,
 )
+from sve_carddb.domains.translations.four_layer_n3_shapes import (
+    CHOICE_DOMAIN,
+    CHOSEN_X_EXPRESSION,
+)
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import Frame
@@ -32,7 +36,6 @@ _DIE = Parameter(
 )
 _ZONE_ARITY = 4
 
-CHOICE_DOMAIN = "quantity.choice_mode_count.context.v1"
 CHOICE_ZONE_EXPRESSION = "count.current_zone.owner.zone.card.trait.v1"
 DOMAINS = {
     CHOICE_DOMAIN: QuantityDomain(
@@ -40,7 +43,7 @@ DOMAINS = {
         modes=("up_to",),
         imports=(),
         expressions=(CHOICE_ZONE_EXPRESSION,),
-        context_expressions=("read.parameter.chosen_x.v1",),
+        context_expressions=(CHOSEN_X_EXPRESSION,),
     )
 }
 
@@ -67,7 +70,7 @@ def verify_context_choice(
             GlossaryReference(kind="glossary", key="term:object.card"),
         ):
             raise ValueError("Context choice counts self battlefield trait cards")
-    elif expr.expression_id != "read.parameter.chosen_x.v1":
+    elif expr.expression_id != CHOSEN_X_EXPRESSION:
         raise ValueError("Context choice cannot consume history, offset or arithmetic")
     choices = [
         p

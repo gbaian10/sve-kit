@@ -22,7 +22,6 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.contracts.n0 import SAFE_INTEGER
-from sve_carddb.domains.translations.four_layer_749_references import required_words
 from sve_carddb.domains.translations.four_layer_context import DEFAULT_REGISTRY
 from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_event_preparation import (
@@ -41,6 +40,7 @@ from sve_carddb.domains.translations.four_layer_n3_ports import (
     pool_interface,
     stack_interface,
 )
+from sve_carddb.domains.translations.four_layer_n3_required_words import required_words
 from sve_carddb.domains.translations.four_layer_normalizer import SourceField
 
 if TYPE_CHECKING:

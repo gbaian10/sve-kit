@@ -8,6 +8,18 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 DIGIT = r"(?:N(?![A-Za-z])|[0-9０-９]+)"
+FUSION_MAX = 2
+CHOICE_DOMAIN = "quantity.choice_mode_count.context.v1"
+CHOSEN_X_EXPRESSION = "read.parameter.chosen_x.v1"
+ABILITY_REPLAY = re.compile(
+    r"これの(?:【進化時】|{進化時})能力(?P<n>" + DIGIT + r")つをプレイする。$"
+)
+EX_COUNTER_SUBJECT = r"(?P<owner>自分)の(?P<zone>EXエリア)のカード(?P<count>N)枚"
+EX_COUNTER_READ = re.compile(
+    EX_COUNTER_SUBJECT
+    + r"の情熱(?P<counter>カウンター)(?P<read>が)(?P<n>N)個(?P<compare>以上)なら、"
+)
+
 NumberRule = tuple[str, str | None]
 
 

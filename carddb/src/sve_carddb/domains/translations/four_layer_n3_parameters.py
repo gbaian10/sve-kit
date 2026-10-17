@@ -16,13 +16,14 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.domains.translations.four_layer_ability import ABILITY_HEAD
 from sve_carddb.domains.translations.four_layer_event_preparation import origins
 from sve_carddb.domains.translations.four_layer_n2_read_sources import ReadSources
-from sve_carddb.domains.translations.four_layer_n3_context import (
+from sve_carddb.domains.translations.four_layer_n3_context import CHOICE_ZONE_EXPRESSION
+from sve_carddb.domains.translations.four_layer_n3_shapes import (
     CHOICE_DOMAIN,
-    CHOICE_ZONE_EXPRESSION,
+    CHOSEN_X_EXPRESSION,
+    FUSION_MAX,
 )
 from sve_carddb.domains.translations.recognition.provenance import merged
 
-_FUSION_MAX = 2
 _MODE_COUNT = 3
 
 if TYPE_CHECKING:
@@ -38,7 +39,7 @@ def _fusion(builder: Builder) -> bool:
         match is None
         or builder.number(Span(start=match.start("cost"), end=match.end("cost"))) != 1
         or builder.number(Span(start=match.start("upper"), end=match.end("upper")))
-        != _FUSION_MAX
+        != FUSION_MAX
     ):
         return False
     if builder.scope(match.start()) != builder.scope(match.end() - 1):
@@ -74,7 +75,7 @@ def _fusion(builder: Builder) -> bool:
         match.start(),
     )
     value = builder.expression(
-        "read.parameter.chosen_x.v1",
+        CHOSEN_X_EXPRESSION,
         (),
         tuple(
             Span(start=match.start(g), end=match.end(g))
@@ -171,7 +172,7 @@ def _choice_provider(
         (n, v)
         for n, v in builder.found.values.items()
         if isinstance(v, ContextExpression)
-        and v.expression_id == "read.parameter.chosen_x.v1"
+        and v.expression_id == CHOSEN_X_EXPRESSION
         and any(
             o.slot == n and o.raw_spans == origins(builder.original, use)
             for o in builder.found.occurrences

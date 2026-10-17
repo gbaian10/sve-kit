@@ -29,6 +29,7 @@ from sve_carddb.domains.translations.four_layer_context import (
     visible,
 )
 from sve_carddb.domains.translations.four_layer_errors import MissingValueError
+from sve_carddb.domains.translations.four_layer_n3_shapes import CHOICE_DOMAIN
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 if TYPE_CHECKING:
@@ -210,7 +211,6 @@ def _verify_expression(
     expr = value.expr if isinstance(value, QuantitySpec) else value
     if isinstance(value, QuantitySpec):
         from sve_carddb.domains.translations.four_layer_n3_context import (  # ruff: ignore[import-outside-top-level] -- avoids a descriptor/registry cycle
-            CHOICE_DOMAIN,
             verify_context_choice,
         )
 
@@ -400,9 +400,7 @@ def verify_target_shape(
             identifiers.add(expr.expression_id)
             if expr.expression_id in translations:
                 expander.expand(expr, frame.leaf_schema, lang, forms, frame=frame)
-        elif slot.type in {"QuantityExpr", "PredicateExpr"} or slot.domain.values == (
-            "quantity.choice_mode_count.context.v1",
-        ):
+        elif slot.type in {"QuantityExpr", "PredicateExpr"} or slot.domain.values == ():
             # B11 operands are supplied by the binding rather than embedded in the frame.
             incomplete = True
             possible.update(

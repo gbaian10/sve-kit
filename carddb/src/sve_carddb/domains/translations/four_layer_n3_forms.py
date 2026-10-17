@@ -4,7 +4,7 @@ import re
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import CardNameReference, Span
-from sve_carddb.domains.translations.four_layer_n3_shapes import DIGIT
+from sve_carddb.domains.translations.four_layer_n3_shapes import ABILITY_REPLAY, DIGIT
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_n3_sources import Builder
@@ -73,6 +73,25 @@ def _pool(builder: Builder) -> str | None:
     return None
 
 
+def _discard_limit(builder: Builder) -> bool:
+    text = builder.text
+    discard = re.search(r"手札[^。{}【】]*捨てる", text)
+    definition = re.search(r"Xは「[^「」]+」である。", text)
+    limit = re.search(r"自分のデッキが" + _NUMBER + r"枚以下", text)
+    if discard is None or definition is None or limit is None:
+        return False
+    if (
+        discard.end() <= definition.start() < definition.end() <= limit.start()
+        and builder.scope(discard.start())
+        == builder.scope(definition.start())
+        == builder.scope(limit.start())
+        and builder.number(Span(start=limit.start("n"), end=limit.end("n"))) == 1
+    ):
+        builder.numeric(limit, "n", "existence_count", "up_to")
+        return True
+    return False
+
+
 def _body(builder: Builder) -> str | None:
     text = builder.text
     amount = re.search(
@@ -88,17 +107,9 @@ def _body(builder: Builder) -> str | None:
     ):
         builder.numeric(amount, "n", "counter_amount", "up_to")
         return "H02"
-    if "Xは「" in text and "手札" in text and "捨て" in text:
-        limit = re.search(r"自分のデッキが" + _NUMBER + r"枚以下", text)
-        if (
-            limit
-            and builder.number(Span(start=limit.start("n"), end=limit.end("n"))) == 1
-        ):
-            builder.numeric(limit, "n", "existence_count", "up_to")
-            return "R01"
-    amount = re.search(
-        r"これの(?:【進化時】|{進化時})能力" + _NUMBER + r"つをプレイする。$", text
-    )
+    if _discard_limit(builder):
+        return "R01"
+    amount = ABILITY_REPLAY.search(text)
     if (
         amount
         and builder.number(Span(start=amount.start("n"), end=amount.end("n"))) == 1

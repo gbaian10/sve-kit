@@ -15,6 +15,7 @@ from sve_carddb.contracts.four_layer import (
     VocabularyReference,
 )
 from sve_carddb.domains.translations.four_layer_n3_ports import holder
+from sve_carddb.domains.translations.four_layer_n3_shapes import EX_COUNTER_READ
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_n3_sources import Builder
@@ -22,7 +23,6 @@ if TYPE_CHECKING:
 _DAMAGE_THRESHOLD = 5
 _DIE_MAX = 6
 
-HOLDER_DECISION = "https://github.com/gbaian10/sve-kit/issues/749"
 HOLDER_REVISIONS = frozenset(
     {
         "rev:v1:1eff100048852acfaf5c23647df5a4a5cd0c755a137f1149784fe25d7c2e59d0",
@@ -46,10 +46,7 @@ def _ex_counters(builder: Builder) -> bool:
         or owner.revision_id not in HOLDER_REVISIONS
     ):
         return False
-    first = re.search(
-        r"自分のEXエリアのカード(?P<count>N)枚の情熱(?P<counter>カウンター)(?P<read>が)(?P<n>N)個(?P<compare>以上)なら、",
-        builder.text,
-    )
+    first = EX_COUNTER_READ.search(builder.text)
     if first is None:
         return False
     seconds = tuple(
@@ -81,7 +78,7 @@ def _ex_counters(builder: Builder) -> bool:
     builder.numeric(first, "count", "count")
     provider = Span(start=first.start(), end=first.end("counter"))
     subject = builder.port(
-        "ex_passion_749_highest_satisfied_witness",
+        "highest_satisfied_holder",
         ObjectSetRef(kind="ObjectSet", objects=(holder(builder),), origin="selection"),
         "live",
         provider,

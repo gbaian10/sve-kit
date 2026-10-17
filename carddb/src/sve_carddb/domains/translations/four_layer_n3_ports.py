@@ -23,6 +23,7 @@ from sve_carddb.domains.translations.four_layer_event_preparation import (
     origins,
 )
 from sve_carddb.domains.translations.four_layer_n3_forms import POOL_FIRST, POOL_SECOND
+from sve_carddb.domains.translations.four_layer_n3_shapes import ABILITY_REPLAY
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -141,9 +142,7 @@ def pool_interface(builder: Builder, family: str) -> bool:
 
 def ability_interface(builder: Builder) -> bool:
     """Preserve the current holder and evolve ability source selection."""
-    match = re.search(
-        r"これの(?:【進化時】|{進化時})能力Nつをプレイする。$", builder.text
-    )
+    match = ABILITY_REPLAY.search(builder.text)
     if match is None:
         return False
     span = Span(start=match.start(), end=match.end())

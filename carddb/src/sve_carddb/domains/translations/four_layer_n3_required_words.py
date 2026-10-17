@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import Span, VocabularyReference
 from sve_carddb.domains.translations.four_layer_event_preparation import origins
+from sve_carddb.domains.translations.four_layer_n3_shapes import EX_COUNTER_SUBJECT
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_n3_sources import Builder
@@ -88,7 +89,7 @@ def required_words(builder: Builder, family: str) -> None:
 
 
 def _witness_subject(builder: Builder) -> None:
-    match = re.search(r"(?P<owner>自分)の(?P<zone>EXエリア)のカードN枚", builder.text)
+    match = re.search(EX_COUNTER_SUBJECT, builder.text)
     if match is None:
         return
     owner = builder.scalar(
@@ -113,10 +114,7 @@ def _witness_subject(builder: Builder) -> None:
         or getattr(item.value, "key", None) == "term:object.card"
     )
     for i, port in enumerate(builder.ports):
-        if (
-            port.source_role == "ex_passion_749_highest_satisfied_witness"
-            and port.evidence is not None
-        ):
+        if port.source_role == "highest_satisfied_holder" and port.evidence is not None:
             builder.ports[i] = port.model_copy(
                 update={
                     "evidence": port.evidence.model_copy(

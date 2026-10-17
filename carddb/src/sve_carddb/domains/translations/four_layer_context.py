@@ -22,6 +22,11 @@ from sve_carddb.contracts.four_layer import (
     Signature,
 )
 from sve_carddb.contracts.source_binding import PreparationDomain
+from sve_carddb.domains.translations.four_layer_n3_shapes import (
+    CHOICE_DOMAIN,
+    CHOSEN_X_EXPRESSION,
+    FUSION_MAX,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -39,7 +44,6 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceBinding, TypedValue
     from sve_carddb.domains.translations.four_layer_expressions import Definition
 
-_FUSION_MAX = 2
 
 _ALIAS = "read.quantity.v1"
 
@@ -468,7 +472,7 @@ def _read(
             "read.object.counter.v1": ("V.counter",),
             "read.faceup_evolve.count.v1": ("V.zone-count", "V.state", "X.aggregate"),
             "read.quantity.v1": ("V.binding",),
-            "read.parameter.chosen_x.v1": ("D.play-param", "V.binding"),
+            CHOSEN_X_EXPRESSION: ("D.play-param", "V.binding"),
         }[id_],
         scalable=True,
     )
@@ -541,7 +545,7 @@ _READS = (
     ),
     _read("read.quantity.v1", "operand", (), (_VALUE,)),
     _read(
-        "read.parameter.chosen_x.v1",
+        CHOSEN_X_EXPRESSION,
         "declared_x",
         (
             ImportSignature(
@@ -738,9 +742,9 @@ def _slot_matches(
 ) -> bool:
     if slot.type == "QuantitySpec":
         return (slot.domain.values, slot.role, expr.expression_id) == (
-            ("quantity.choice_mode_count.context.v1",),
+            (CHOICE_DOMAIN,),
             "choice_mode_count",
-            "read.parameter.chosen_x.v1",
+            CHOSEN_X_EXPRESSION,
         )
     return (slot.type, slot.domain.values, slot.role) == (
         "QuantityExpr" if rule.result_type == "Nat" else "PredicateExpr",
@@ -788,8 +792,8 @@ def _sealed_operands(
         value = binding.values[expr.leaves[0]]
         if (
             not isinstance(value, ContextExpression)
-            or value.expression_id != "read.parameter.chosen_x.v1"
-            or binding.values[expr.leaves[1]] != _FUSION_MAX
+            or value.expression_id != CHOSEN_X_EXPRESSION
+            or binding.values[expr.leaves[1]] != FUSION_MAX
         ):
             raise ValueError("Sealed upper bound requires chosen X and threshold two")
 

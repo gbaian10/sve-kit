@@ -34,6 +34,7 @@ from sve_carddb.domains.translations.four_layer_n2_read_descriptors import (
     PARAMETERS,
     REGISTRY,
 )
+from sve_carddb.domains.translations.four_layer_n3_shapes import CHOSEN_X_EXPRESSION
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.recognition.provenance import merged
 
@@ -1368,9 +1369,7 @@ class ReadSources:
                 provider,
                 uses[0].start,
             )
-            self._expression(
-                "read.parameter.chosen_x.v1", (), tuple(uses), {"value": port}
-            )
+            self._expression(CHOSEN_X_EXPRESSION, (), tuple(uses), {"value": port})
             if "下記からX個までチョイスする。" in text:
                 labels = tuple(_MODE.finditer(self._text, colon, region.end))
                 values = [

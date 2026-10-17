@@ -15,6 +15,7 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.contracts.source_binding import SourceSpan, TracePiece, verify_partition
 from sve_carddb.core.json import digest
 from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER
+from sve_carddb.domains.translations.four_layer_n3_shapes import CHOICE_DOMAIN
 from sve_carddb.domains.translations.recognition.provenance import Unit, merged, nfkc
 
 if TYPE_CHECKING:
@@ -381,7 +382,7 @@ def source_trace(
 def _context_choice_use(
     slot: LeafSlot, value: TypedValue | None, spelling: str
 ) -> bool:
-    if slot.domain.values != ("quantity.choice_mode_count.context.v1",):
+    if slot.domain.values != (CHOICE_DOMAIN,):
         return False
     if (
         not isinstance(value, QuantitySpec)
