@@ -11,17 +11,19 @@ import {
 import { UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
-import { badgeOf, type CardSummary, catalogCards } from "../catalog"
+import { badgeOf, type CardSummary, catalogCards, nameOf } from "../catalog"
 import {
   arrayValue,
   integerValue,
   type JsonObject,
+  type JsonValue,
   objectValue,
   stringValue,
 } from "../format-v3/json"
+import type { CardIndex } from "../store"
 import type { BootstrapColumns } from "./bootstrap"
 import { cardNumberOrder } from "./card-number-order"
-import { Columns, StringPool } from "./columns"
+import { type ColumnEdit, Columns, StringPool } from "./columns"
 import { pack, unpack } from "./image"
 
 export interface SearchQuery {
@@ -164,20 +166,7 @@ interface Parts {
   readonly targets: Columns
 }
 
-function build(bootstrap: BootstrapColumns, edition: Region): Parts {
-  const pool = new StringPool()
-  const summaryColumns = new Columns(pool)
-  const index = bootstrap.index()
-  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
-  const familyCodes = new Map(
-    index.families.flatMap(
-      (row) =>
-        [
-          [stringValue(row["id"]), stringValue(row["code"])],
-          [stringValue(row["public_code"]), stringValue(row["code"])],
-        ] as [string, string][],
-    ),
-  )
+function optionOf(index: CardIndex, row: JsonObject, field: string): SearchOption {
   const label = (row: JsonObject, field: string): CardSummary["name"] => {
     const unit = index.textUnit(stringValue(row[field]))
     const translations: Partial<Record<TextLang, string>> = {}
@@ -196,7 +185,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       translations,
     }
   }
-  const option = (row: JsonObject, field: string): SearchOption => ({
+  return {
     id:
       typeof row["id"] === "string"
         ? row["id"]
@@ -205,15 +194,24 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     ...(typeof row["public_code"] === "string" ? { publicCode: row["public_code"] } : {}),
     ...(typeof row["kind"] === "string" ? { kind: row["kind"] } : {}),
     name: label(row, field),
-  })
+  }
+}
+
+function optionsOf(
+  bootstrap: BootstrapColumns,
+  index: CardIndex,
+  edition: Region,
+  typeCounts: Record<string, number>,
+  setCounts: Record<string, number>,
+): { options: SearchOptions; releases: SetRelease[] } {
+  const printingRows = bootstrap.rows("printing")
   const editionOwners = new Set(
-    bootstrap
-      .rows("printing")
+    printingRows
       .filter((row) => row["region"] === edition)
       .map((row) => stringValue(row["home_set_id"])),
   )
   const rarityCounts: Record<string, number> = {}
-  for (const row of bootstrap.rows("printing")) {
+  for (const row of printingRows) {
     // Locator-only rows do not yet carry an official classification.
     if (row["region"] !== edition || !Object.hasOwn(row, "rarity_code")) continue
     const official = typeof row["rarity_code"] === "string" ? row["rarity_code"] : ""
@@ -224,10 +222,9 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       rarityCounts[child] = (rarityCounts[child] ?? 0) + 1
     }
   }
-  const typeCounts: Record<string, number> = {}
   const releases: SetRelease[] = datedSets(
     index.families.map((row) => ({
-      ...option(row, "name_unit_id"),
+      ...optionOf(index, row, "name_unit_id"),
       publicCode: stringValue(row["public_code"]),
       kind: stringValue(row["kind"]),
     })),
@@ -241,6 +238,79 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     })),
     edition,
   )
+  const types = bootstrap
+    .rows("vocabulary")
+    .filter(
+      (row) =>
+        (row["kind"] === "type" || (row["kind"] === "special_kind" && row["code"] === "token")) &&
+        row["active"] === true &&
+        (typeCounts[stringValue(row["code"])] ?? 0) > 0,
+    )
+    .map((row) => optionOf(index, row, "label_unit_id"))
+  const setOptions = index.families
+    .filter((row) => editionOwners.has(stringValue(row["id"])))
+    .map((row) => ({
+      ...optionOf(index, row, "name_unit_id"),
+      publicCode: stringValue(row["public_code"]),
+      kind: stringValue(row["kind"]),
+    }))
+    .sort(
+      (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
+    )
+  const promoSets = setOptions.filter((set) => set.kind === "promo")
+  const promoLeader = uniquePromoLeader(promoSets, setCounts)
+  const recentSet = recentSets(
+    releases.filter((release) => editionOwners.has(release.id)),
+    1,
+  )[0]
+  const options: SearchOptions = {
+    rarityCounts,
+    typeCounts,
+    types,
+    prBadgeStyles: [
+      ...new Set(
+        printingRows
+          .filter((row) => row["region"] === edition && row["rarity_code"] === "pr")
+          .map((row) => badgeOf(row)?.style ?? "unknown"),
+      ),
+    ],
+    rarities: bootstrap
+      .rows("vocabulary")
+      .filter((row) => row["kind"] === "rarity" && row["active"] === true)
+      .map((row) => optionOf(index, row, "label_unit_id")),
+    classes: bootstrap
+      .rows("vocabulary")
+      .filter((row) => row["kind"] === "class" && row["active"] === true)
+      .map((row) => optionOf(index, row, "label_unit_id")),
+    sets: setOptions,
+    quickSets: {
+      ...(recentSet ? { recent: recentSet } : {}),
+      ...(promoLeader ? { promo: promoLeader } : {}),
+    },
+    setCounts,
+  }
+  return { options, releases }
+}
+
+function artOf(row: JsonObject | undefined): string {
+  const first = Array.isArray(row?.["faces"]) ? row["faces"][0] : undefined
+  return first ? stringValue(objectValue(first)["art_id"] ?? "") : ""
+}
+
+function build(bootstrap: BootstrapColumns, edition: Region): Parts {
+  const pool = new StringPool()
+  const summaryColumns = new Columns(pool)
+  const index = bootstrap.index()
+  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
+  const familyCodes = new Map(
+    index.families.flatMap(
+      (row) =>
+        [
+          [stringValue(row["id"]), stringValue(row["code"])],
+          [stringValue(row["public_code"]), stringValue(row["code"])],
+        ] as [string, string][],
+    ),
+  )
   const targets = new Columns(pool)
   let targetBatch: JsonObject[] = []
   const cards = uintColumns(CARD_COLUMNS)
@@ -251,6 +321,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
   const attacks: number[] = []
   const defenses: number[] = []
   const setCounts: Record<string, number> = {}
+  const typeCounts: Record<string, number> = {}
   let batch: CardSummary[] = []
   let summaryCount = 0
   const intern = (value: string | null | undefined) => pool.intern(value ?? "")
@@ -277,12 +348,8 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       const fullPrinting = index.printing(printing.id)
       const front = index.facesOf(entry.cardId)[0]
       const revision = front ? index.displayRevision(stringValue(front["id"]), edition) : undefined
-      const arts = (row: JsonObject | undefined) => {
-        const first = Array.isArray(row?.["faces"]) ? row["faces"][0] : undefined
-        return first ? stringValue(objectValue(first)["art_id"] ?? "") : ""
-      }
-      const art = arts(fullPrinting)
-      const defaultArt = arts(index.printing(entry.defaultPrinting[edition] ?? ""))
+      const art = artOf(fullPrinting)
+      const defaultArt = artOf(index.printing(entry.defaultPrinting[edition] ?? ""))
       const type = typeof revision?.["type_code"] === "string" ? revision["type_code"] : ""
       printings.type.push(intern(type))
       if (type) typeCounts[type] = (typeCounts[type] ?? 0) + 1
@@ -354,58 +421,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     }
     cards.default.push(preferred)
   }
-  const types = bootstrap
-    .rows("vocabulary")
-    .filter(
-      (row) =>
-        (row["kind"] === "type" || (row["kind"] === "special_kind" && row["code"] === "token")) &&
-        row["active"] === true &&
-        (typeCounts[stringValue(row["code"])] ?? 0) > 0,
-    )
-    .map((row) => option(row, "label_unit_id"))
-  const setOptions = index.families
-    .filter((row) => editionOwners.has(stringValue(row["id"])))
-    .map((row) => ({
-      ...option(row, "name_unit_id"),
-      publicCode: stringValue(row["public_code"]),
-      kind: stringValue(row["kind"]),
-    }))
-    .sort(
-      (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
-    )
-  const promoSets = setOptions.filter((set) => set.kind === "promo")
-  const promoLeader = uniquePromoLeader(promoSets, setCounts)
-  const recentSet = recentSets(
-    releases.filter((release) => editionOwners.has(release.id)),
-    1,
-  )[0]
-  const options: SearchOptions = {
-    rarityCounts,
-    typeCounts,
-    types,
-    prBadgeStyles: [
-      ...new Set(
-        bootstrap
-          .rows("printing")
-          .filter((row) => row["region"] === edition && row["rarity_code"] === "pr")
-          .map((row) => badgeOf(row)?.style ?? "unknown"),
-      ),
-    ],
-    rarities: bootstrap
-      .rows("vocabulary")
-      .filter((row) => row["kind"] === "rarity" && row["active"] === true)
-      .map((row) => option(row, "label_unit_id")),
-    classes: bootstrap
-      .rows("vocabulary")
-      .filter((row) => row["kind"] === "class" && row["active"] === true)
-      .map((row) => option(row, "label_unit_id")),
-    sets: setOptions,
-    quickSets: {
-      ...(recentSet ? { recent: recentSet } : {}),
-      ...(promoLeader ? { promo: promoLeader } : {}),
-    },
-    setCounts,
-  }
+  const { options, releases } = optionsOf(bootstrap, index, edition, typeCounts, setCounts)
   summaryColumns.append(batch as unknown as JsonObject[])
   targets.append(targetBatch)
   cards.printingStart.push(printings.id.length)
@@ -521,20 +537,20 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
 /** Matching reads scalar columns; summaries are decoded only for the requested page. */
 export class SearchIndex {
   private readonly pool: StringPool
-  private readonly summaries: Columns
+  private summaries: Columns
   private readonly cards: Record<(typeof CARD_COLUMNS)[number], Uint32Array>
-  private readonly printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
+  private printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
   private readonly names: Uint32Array
   private readonly aliases: Uint32Array
-  private readonly order: Uint32Array
-  private readonly costs: Float64Array
-  private readonly attacks: Float64Array
-  private readonly defenses: Float64Array
+  private order: Uint32Array
+  private costs: Float64Array
+  private attacks: Float64Array
+  private defenses: Float64Array
   private readonly sets: ReadonlySet<string>
-  readonly options: SearchOptions
-  readonly releases: readonly SetRelease[]
+  private optionsValue: SearchOptions
+  private releasesValue: readonly SetRelease[]
   private readonly targetGroups = new Map<string, number[]>()
-  private readonly targets: Columns
+  private targets: Columns
   private readonly faceCards = new Map<string, string>()
   private readonly edition: Region
 
@@ -553,9 +569,22 @@ export class SearchIndex {
     this.defenses = parts.defenses
     this.order = parts.order
     this.sets = parts.sets
-    this.options = parts.options
-    this.releases = parts.releases
+    this.optionsValue = parts.options
+    this.releasesValue = parts.releases
     this.targets = parts.targets
+    this.indexTargets()
+  }
+
+  get options(): SearchOptions {
+    return this.optionsValue
+  }
+  get releases(): readonly SetRelease[] {
+    return this.releasesValue
+  }
+
+  private indexTargets(): void {
+    this.targetGroups.clear()
+    this.faceCards.clear()
     for (let ordinal = 0; ordinal < this.targets.length; ordinal += 1) {
       const id = stringValue(this.targets.value(ordinal, "printingId"))
       const group = this.targetGroups.get(id) ?? []
@@ -565,6 +594,168 @@ export class SearchIndex {
         stringValue(this.targets.value(ordinal, "faceId")),
         stringValue(this.targets.value(ordinal, "cardId")),
       )
+    }
+  }
+
+  /** Locators already enumerate the printing IDs; completion replaces their metadata only. */
+  completePrintings(bootstrap: BootstrapColumns): void {
+    const index = bootstrap.index()
+    const slots = new Map(
+      Array.from(this.printings.id, (id, ordinal) => [this.pool.get(id), ordinal]),
+    )
+    const familyCodes = new Map(
+      index.families.map((row) => [stringValue(row["id"]), stringValue(row["code"])]),
+    )
+    const entries: { row: JsonObject; old: number; card: number }[] = []
+    const defaults = new Uint32Array(this.cards.default.length)
+    for (let card = 0; card < this.cards.id.length; card++) {
+      const id = this.pool.get(this.cards.id[card] ?? 0)
+      const rows = index.printingsOf(id).filter((row) => row["region"] === this.edition)
+      if (
+        rows.length !==
+        (this.cards.printingStart[card + 1] ?? 0) - (this.cards.printingStart[card] ?? 0)
+      )
+        throw new Error("printing closure changes catalog membership")
+      const preferred = ((index.card(id)?.["regions"] ?? []) as JsonObject[]).find(
+        (row) => row["region"] === this.edition,
+      )?.["default_printing_id"]
+      defaults[card] = entries.length
+      for (const row of rows) {
+        const old = slots.get(stringValue(row["id"]))
+        if (old === undefined || this.printings.card[old] !== card)
+          throw new Error("printing closure is missing its catalog locator")
+        if (row["id"] === preferred) defaults[card] = entries.length
+        entries.push({ row, old, card })
+      }
+    }
+    const permutation = entries.map((entry) => entry.old)
+    const printings = Object.fromEntries(
+      PRINTING_COLUMNS.map((name) => [
+        name,
+        Uint32Array.from(permutation, (old) => this.printings[name][old] ?? 0),
+      ]),
+    ) as Parts["printings"]
+    const summaryBatches: ColumnEdit[][] = []
+    const targetBatches: ColumnEdit[][] = []
+    let summaries: ColumnEdit[] = [],
+      targets: ColumnEdit[] = []
+    let summaryCount = 0
+    const typeCounts: Record<string, number> = {},
+      setCounts: Record<string, number> = {}
+    const rarities = new Map<string, JsonValue | undefined>()
+    this.pool.reopen()
+    try {
+      for (const [ordinal, { row, old, card }] of entries.entries()) {
+        const id = stringValue(row["id"])
+        const cardId = this.pool.get(this.cards.id[card] ?? 0)
+        const cardRow = index.card(cardId)
+        const preferred = ((cardRow?.["regions"] ?? []) as JsonObject[]).find(
+          (region) => region["region"] === this.edition,
+        )?.["default_printing_id"]
+        const art = artOf(row),
+          defaultArt = artOf(index.printing(typeof preferred === "string" ? preferred : ""))
+        const frame =
+          typeof row["leader_name_frame"] === "string" ? row["leader_name_frame"] : "unknown"
+        const official = typeof row["rarity_code"] === "string" ? row["rarity_code"] : ""
+        const cardNo = stringValue(row["card_no"]),
+          key = cardNoKey(cardNo, this.sets)
+        const owner = stringValue(row["home_set_id"]),
+          code = familyCodes.get(owner)
+        const intern = (value: string | undefined | null) => this.pool.intern(value ?? "")
+        printings.lookup[ordinal] = intern(cardNoLookupKey(cardNo, this.sets))
+        printings.flat[ordinal] = intern(normalizeText(cardNo))
+        printings.set[ordinal] = intern(key?.set)
+        printings.number[ordinal] = intern(key?.number)
+        printings.owner[ordinal] = intern(code)
+        printings.leaderFrame[ordinal] = intern(frame)
+        printings.rarity[ordinal] = intern(official)
+        printings.badge[ordinal] = intern(badgeOf(row)?.style ?? "unknown")
+        printings.art[ordinal] = intern(art || id)
+        printings.alt[ordinal] = Number(!!art && !!defaultArt && art !== defaultArt)
+        if (code !== undefined) setCounts[code] = (setCounts[code] ?? 0) + 1
+        const type = this.pool.get(printings.type[ordinal] ?? 0)
+        if (type) typeCounts[type] = (typeCounts[type] ?? 0) + 1
+        if (printings.token[ordinal]) {
+          typeCounts["token"] = (typeCounts["token"] ?? 0) + 1
+          typeCounts[`token:${type}`] = (typeCounts[`token:${type}`] ?? 0) + 1
+        }
+        if (type === "leader")
+          typeCounts[`leader:${frame}`] = (typeCounts[`leader:${frame}`] ?? 0) + 1
+        const summary = this.printings.summary[old] ?? 0
+        if (summary) {
+          if (!rarities.has(official)) {
+            const vocabulary = index.vocabulary("rarity", official)
+            rarities.set(
+              official,
+              vocabulary ? (nameOf(index, vocabulary, "label") as unknown as JsonValue) : undefined,
+            )
+          }
+          const intId = typeof row["int_id"] === "number" ? row["int_id"] : undefined
+          summaries.push({
+            source: summary - 1,
+            changes: {
+              cardNo,
+              route: { cardOwner: stringValue(cardRow?.["home_set_id"]), printingOwner: owner },
+              intId,
+              cardNoState:
+                typeof row["card_no_state"] === "string" ? row["card_no_state"] : undefined,
+              rarityCode:
+                typeof row["rarity_code"] === "string"
+                  ? row["rarity_code"]
+                  : row["rarity_raw"] === "-"
+                    ? "-"
+                    : null,
+              rarityBadge: badgeOf(row),
+              premium: typeof row["premium"] === "boolean" ? row["premium"] : null,
+              rarity: rarities.get(official),
+            },
+          })
+          printings.summary[ordinal] = ++summaryCount
+          for (const source of this.targetGroups.get(id) ?? [])
+            targets.push({
+              source,
+              changes: {
+                intId: intId ?? 0,
+                owner,
+                rarityCode: typeof row["rarity_code"] === "string" ? row["rarity_code"] : undefined,
+              },
+            })
+          if (targets.length >= 256) {
+            targetBatches.push(targets)
+            targets = []
+          }
+          if (summaries.length >= 256) {
+            summaryBatches.push(summaries)
+            summaries = []
+          }
+        }
+      }
+      summaryBatches.push(summaries)
+      targetBatches.push(targets)
+      const completedSummaries = this.summaries.remap(summaryBatches)
+      const completedTargets = this.targets.remap(targetBatches)
+      const { options, releases } = optionsOf(bootstrap, index, this.edition, typeCounts, setCounts)
+      const order = cardNumberOrder(
+        entries.map(({ card }, ordinal) => ({
+          lookup: this.pool.get(printings.lookup[ordinal] ?? 0),
+          flat: this.pool.get(printings.flat[ordinal] ?? 0),
+          printingId: this.pool.get(printings.id[ordinal] ?? 0),
+          cardId: this.pool.get(this.cards.id[card] ?? 0),
+        })),
+      )
+      this.costs = Float64Array.from(permutation, (old) => this.costs[old] ?? Number.NaN)
+      this.attacks = Float64Array.from(permutation, (old) => this.attacks[old] ?? Number.NaN)
+      this.defenses = Float64Array.from(permutation, (old) => this.defenses[old] ?? Number.NaN)
+      this.cards.default = defaults
+      this.printings = printings
+      this.summaries = completedSummaries
+      this.targets = completedTargets
+      this.order = order
+      this.optionsValue = options
+      this.releasesValue = releases
+      this.indexTargets()
+    } finally {
+      this.pool.seal()
     }
   }
 

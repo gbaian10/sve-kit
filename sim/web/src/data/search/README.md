@@ -56,6 +56,13 @@ Switching to another edition takes the same stored path. A later check that find
 active version unchanged carries the index over to the new generation without rebuilding;
 completed channel answers stay until the manifest, root or edition they came from changes.
 
+The initial search index uses bootstrap locators, so initial results do not wait for background
+printing downloads. Completion keeps the same index and its name, alias and card columns.
+It permutes packed summary/image-target cells into the completed printing order and updates
+printing metadata, scalar filters, representative printings, ranks, options and releases.
+The locator contract fixes printing membership; a closure that changes it is rejected before
+replacing the initial columns. Both stages can be persisted and restored with the same layout.
+
 Cache identity includes root, manifest hash, reader build and local format. View slots also
 include the normalizer version, selected-region policy and complete query. Multilingual
 names avoid a separate language-specific record. Index format is 4; view format is 2;

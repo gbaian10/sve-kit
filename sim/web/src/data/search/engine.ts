@@ -727,7 +727,7 @@ export class SearchEngine {
       catalogWork("seal", () => bootstrap?.seal())
       const stagingAllocation = bootstrap.allocation()
       const sealedBootstrap = bootstrap
-      let index = catalogWork(
+      const index = catalogWork(
         "SearchIndex",
         () => new SearchIndex(sealedBootstrap, request.edition),
       )
@@ -821,11 +821,9 @@ export class SearchEngine {
           catalogWork("background:seal", () => {
             background.seal()
           })
-          index = catalogWork(
-            "background:SearchIndex",
-            () => new SearchIndex(background, request.edition),
-          )
-          active.index = index
+          catalogWork("background:SearchIndex", () => {
+            index.completePrintings(background)
+          })
           active.memory.clear()
           active.building.clear()
           printingsApplied = true
