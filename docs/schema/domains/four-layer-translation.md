@@ -186,6 +186,8 @@ N0 原以全庫版本 `four-layer-jp-v1` 封版，該版已不再接受（見 §
 | Nat | resource_amount | 明示資源量或付款量；0..上限；種類與付款／恢復時點留 canonical。 |
 | Nat | cost_value、stat_value | 明示費用／攻擊／體力值及已辨識 header 欄位；0..上限。 |
 | Nat | threshold | 主體、比較子、原始／目前值明確的費用、資源、指示物、種類數或生命門檻；0..上限。 |
+| Nat | construction_copy_limit | 構築時同名卡片的張數上限；0..安全整數上限。主牌堆、進化牌堆或兩者各自的限制保持來源字面。 |
+| Nat | construction_name_kind_limit | 構築時不同卡名的種類上限；0..安全整數上限。本版起始護符來源另限明示值 1，不等於只能放一張。 |
 | Nat | arithmetic_multiplier、group_divisor | 已辨識倍數／每組基數；1..上限，不執行整個算式。 |
 | Nat | stat_delta_magnitude、cost_delta_magnitude、resource_delta_magnitude、damage_delta_magnitude、counter_delta_magnitude | 明示正負號構造的非負幅度；0..上限；sign、種類及讀值時點留 canonical。 |
 | Ordinal | choice_index、card_index、repeat_index、turn_index、deck_index | 唯一完整引介的選項／卡片／次數／回合／牌堆序號；1..上限；跨行選項只保留經完整 owner／欄位／能力作用域守衛的序號，不產 ChoiceContext port。 |
@@ -214,7 +216,7 @@ N0 原以全庫版本 `four-layer-jp-v1` 封版，該版已不再接受（見 §
 
 ### 4.2 N0 整段語義構造登錄
 
-N0 的 resolved key、來源 role、投影及能力作用域只由來源語義分類產生；B 以現行 v3 來源推導重放比對，不另設版本登錄。
+N0 的 resolved key、來源 role、投影及能力作用域只由來源語義分類產生；B 以 v3 來源推導重放比對，不另設版本登錄。
 未知 key、role／投影錯配或額外作用域均拒絕；未知完整語法維持 occurrence-scoped pending。
 
 | key | role | projection_kind | 獨立 ability scope 數 |
@@ -236,7 +238,7 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 
 ### 4.3 N1 正式來源登錄
 
-`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v3`；正式 compile、authored reader 與 DB reader 只接受 v3，不保留舊版 reader。
+`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v4`；正式 compile、authored reader 與 DB reader 只接受 v4，不保留舊版 reader。
 N0 的來源構造與數值規則是 N1 明列的既有基礎；歷史對帳使用切換前已保存的 N0 建置資料，不從新 frame 反推舊版。
 此入口沿相同 source units、分段、catalog、數值規則及來源驗證邊界產葉，不另建來源驗證器。
 只擴充精確 face_revision／printing_face 的 effect／section 中 role=body 的部分；name、label、layout、reminder、token_header
@@ -262,7 +264,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v3 來源推導。
+這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v4 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -378,7 +380,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v3。
+renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v4。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
 
 | ID | signature（name:type/role） | rule／cases |
@@ -767,12 +769,12 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。
 
-## 11. v3 來源推導與 expression 呈現
+## 11. v4 來源推導與 expression 呈現
 
 `four_layer_derivation.derive_source(raw, source, classifier)` 產生 `DerivedField`，
-由其 `bind` 建立 `four-layer-jp-v3` 身分；`verify` 從原始來源重新推導，
+由其 `bind` 建立 `four-layer-jp-v4` 身分；`verify` 從原始來源重新推導，
 再驗完整 frame、binding、語義及接口。正式 compile、classifier、authored 與
-SQLite 來源契約只接受 v3，沒有可選家族或舊版執行入口。
+SQLite 來源契約只接受 v4，沒有可選家族或舊版執行入口。
 
 此接口只在正式來源辨識上依序套用已封版的容量、具名參數與區域計數／SEP 規則，
 最後依最終葉建構常數選項接口；共用型別不授予其他來源句型。
@@ -784,7 +786,7 @@ SQLite 來源契約只接受 v3，沒有可選家族或舊版執行入口。
 常數選項接口僅描述同一片段、同能力中已有唯一在前 intro、常數 choice_mode_count 與
 按印刷次序連續 1..K 的 choice_index。沿既有完整欄位的 choice 守衛，所有 intro／序號
 均須已具 typed 葉且無來源問題；跨片段、孤兒、歧義及缺卡名／數值前置者不加接口。
-`DerivedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v3 frame／binding
+`DerivedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v4 frame／binding
 並附接口，接口沿既有 `interface_key` 獨立驗證，不進 frame hash；`verify` 從原文重建後比對。
 `choice` 能力 scope 匯出
 `ChoiceContext/choice_mode_count`，依印刷序的 `choice_1`…`choice_K` branch scope
@@ -1194,7 +1196,7 @@ EntryFact 的持久連接、Unknown、來源快照／LKI、授予能力持有者
 
 `four_layer_integrated.FAMILY` 由唯一正式入口 `derive_source` 啟用。它依來源依賴執行歷史、
 入場／打出來源、名稱、合計、讀值／支付 X，最後接選項 consumer；
-authored 只載入正式 v3 定義與譯文，來源家族由來源推導決定。
+authored 只載入正式 v4 定義與譯文，來源家族由來源推導決定。
 整合 registry 沿各家族的閉域簽章，不另建 parser 或常數域。
 
 同一來源構造只由一個 provider 擁有：
@@ -1231,4 +1233,48 @@ descriptor ID 可以把原文字面編進構造而不留槽，所以全部 provi
 支付完成結果是 `ReceiptId<payment_complete>`；兩者的時點與型別維持分開。
 這些接線不執行付款、歷史、名稱規則或入場來源求值；lowering／runtime 仍須各自驗收。
 新中文 target 仍經相同 required 閉包與 annotation renderer；缺選詞保持具名問題，
-不以 Literal 或 optional 隱藏。正式切換及中文重對齊由後續流程處理。
+不以 Literal 或 optional 隱藏。中文重對齊仍須通過相同來源驗證與 renderer，
+不因來源辨識完成而啟用。
+
+### 11.12 v4 有限來源形狀與構築上限
+
+正式來源版本為 `four-layer-jp-v4`。既有 N0／N1／N2 仍經同一 `derive_source`，
+沒有按家族混用版本的入口。`four_layer_n3_numbers` 只在完整卡片效果／section 的
+具名形狀及同欄提醒 anchor 內補數值證據，不登錄新的 expression、Form 或 DSL 語義。
+lexical numeric veto 只有在整體來源守衛成立且無其他問題時才能解除；原先的低信心、
+整段 semantic pending、譯文來源與審閱資格不因此改變。
+
+| 來源家族 | 有限接受形狀與保留界線 |
+| --- | --- |
+| N01～N03 | 二／三枝、純擇一或純並列的具名生成，每枝獨立明示數值且同單位；各自生成則沿既有不限名稱數的單一 count 與單一印刷 occurrence。完整掃描清單，拒絕長清單尾段或混合連接的新增生成。既有 compound action 接受域不收窄。 |
+| D01～D02 | 單名稱的戰場／EX 替代目的地，及三名稱各自生成的有限雙目的地。完整目的地片語固定在 canonical，不借選取來源的 ZoneSet 域。 |
+| R01～R03 | 緊鄰、同能力、唯一具名生成或抽牌的明示數量替換。至多替換只放寬具名生成，另驗採用種類與單位；非搜尋的其他動作仍拒絕至多替換。精確存在條件、原張數與替代張數各自保留。替換句後可接同能力的後續句。 |
+| C01～C03 | 完整名稱的現時存在量、OR 左側單 trait／class 的至少門檻、完整墓場集合及明示單一玩家。等於與至少不互換；OR 右側既有葉不重編。 |
+| S01～S03、S10 | 具名／明示種類的有限選取與戰場省略、兩名稱共享總數、兩種具名物件各自數量。名稱的種類證據取全部確認採用的同名定義；不同印刷來源可供相同完整名稱，異種或缺失證據仍拒絕。不從單位推種類，不新增省略玩家或區域葉。 |
+| S04～S09、S11 | 檢視後公開留頂、表向進化牌堆翻面、墓場與消失區共同具名選取、各玩家留下數量、場與 EX 的 trait/token 選取、手牌置入牌堆二端擇一、具名進化牌堆打出。每形各驗局部完整動作；不新增通用多區域、端點或任意張數域。 |
+| P01～P03 | 明示追加費用、Fusion 的有限材料與引號能力減費、EX token 消滅連用後接手牌本物件移動的成本鏈。材料數、原費用門檻與減費幅度分槽，不建立付款結果或跨能力 receipt。 |
+| T01、L01 | 在場期間 class/token 靜態集合只新增明示 token 葉；不推 follower。精確存在條件後的頻率沿既有 duration_count／repeat_count，原條件葉保留。 |
+| 構築張數上限 | 完整名稱主牌堆上限、既有本物件進化牌堆上限、排除單名稱片段後各牌堆分別上限，統一用 construction_copy_limit。各牌堆字面保留，單一印刷數字不偽造多個 occurrence。 |
+| 起始護符提醒 | 同欄標記後、明示一種不同名稱的構築上限，使用 construction_name_kind_limit；完整 Nat 域與來源限值分開。 |
+| 四段原費用種類門檻 | 同一進化時能力、完整首段主語、嚴格遞增的四段累計條件；四個數字沿 threshold，不新增 read_value。 |
+| 十費用逐項支付 | 僅依序明列 1..10，每費用各一張；十個 cost_value 與單一 count 使用完整 Nat 域，完整 tuple 與一張由來源守衛限定，不壓成總張數。 |
+| 提醒及幅度承接 | 課程 1 的具名 EX 消滅付款；同欄兩段 NC 累加提醒並逐組驗正文參數；同一打出成本的三段 SC 替換減幅；承受對手能力傷害的明示減幅。保留提醒 Unicode、符號、引號及累加／替換字面，不跨能力承接。 |
+
+生成、直接移動與支付沿 `Nat/count`，選取及至多沿 `QuantitySpec/selection_count`，
+存在比較沿 `QuantitySpec/existence_count`。新角色只有 §4.1 的兩個構築上限角色；
+所有數值域維持非負安全整數。新來源辨識只建立必要葉與正常 binding，
+缺少繁中 target 仍回報缺稿，不能以來源解鎖宣稱整欄中文完成。
+
+有限 flat 篩選中的 trait、明示 card／kind 與 token 仍須有 required 葉；
+其來源拼字留在 canonical，沿既有型別與引用域驗回位置，不為了新增葉重寫骨架。
+缺少必要 trait／card 概念時保留 `missing_n3_filter_concept`，不能略過該葉完成 binding。
+構築限制中被否定的名稱片段使用 `CardName/name_fragment`，不標為完整名稱引用。
+
+`four_layer_n3_references` 在完整構築限制、四段種類數條件、十費用支付、
+三段 SC 替換減費、承受能力傷害及三種提醒內補齊已封的固定詞彙引用。
+玩家／區域詞彙沿既有 `Concept/rule_term`，明示卡種沿 `CardKind/filter_kind`；
+已有結構葉持有的位置仍由原葉負責，不建立重疊來源。
+起始護符沿 `term:object.start_amulet` 的 rule_term 類別，兩個構築牌堆位置分別引用，
+提醒維持 raw Unicode，不開放 N1 的玩家／區域推導。
+只有明列詞彙及完整來源守衛可產葉；未登錄或類別不符保留
+`missing_n3_required_reference`，不建立可用 binding。

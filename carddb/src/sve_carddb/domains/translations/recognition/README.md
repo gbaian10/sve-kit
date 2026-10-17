@@ -43,7 +43,7 @@ recognition rules. N1 source semantics belongs to #380/#499.
 
 `four_layer_derivation.derive_source` is the production source entry point. It
 uses the current source partitions, Unicode units and adopted classifier catalog.
-Its frames use `four-layer-jp-v3`, the single version accepted by the production
+Its frames use `four-layer-jp-v4`, the single version accepted by the production
 authored and DB readers. The normal build derives N1 source fields before matching
 frames. Frozen N0 lexical and numeric rules remain the registered foundation,
 without a second production reader.

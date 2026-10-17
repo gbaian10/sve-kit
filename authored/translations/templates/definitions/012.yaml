@@ -3,11 +3,11 @@ kind: translation_shard
 records:
   - kind: sentence_template
     data:
-      id: frame:1822a0ed8491b7b41badc77c15c283fa3044ccc12d1dd1c3d7c07ada054eaea8
+      id: frame:80f5874661bb0f6a66815c2502f6155e6f005f2e98892dd219a6db820a3e1617
       source:
         source_lang: ja
         canonical_hash: 07509adfefbada4e4e90a4f4af09e33426a891387162edff686ea4f3e5d85504
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -44,15 +44,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1822a0ed8491b7b41badc77c15c283fa3044ccc12d1dd1c3d7c07ada054eaea8
+      content_hash: 80f5874661bb0f6a66815c2502f6155e6f005f2e98892dd219a6db820a3e1617
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:184055082dfef0fa5b7d4bb5ffa7480e0150860e56ec096a6840689c7e0e9ea2
+      id: frame:cb691c7cd26dd3e4fa9bf9a0e784cf67da840d1660899573967dd225a12f0962
       source:
         source_lang: ja
         canonical_hash: 05bca978bd6d46c87facea5cfab5cc6625e5c9b36258891ed8014022fae1b39c
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: reminder
       semantic_variant:
         state: pending
@@ -89,14 +89,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 184055082dfef0fa5b7d4bb5ffa7480e0150860e56ec096a6840689c7e0e9ea2
+      content_hash: cb691c7cd26dd3e4fa9bf9a0e784cf67da840d1660899573967dd225a12f0962
   - kind: sentence_template
     data:
-      id: frame:184708bd6d06f44e6b5efe087b7d5dd744cf6b82df071004c30cd2ebc9b3c591
+      id: frame:7e808e07921dec8e73bef5f7a4ec18a3ba07198a7c3e8881a2759e5ce56065d2
       source:
         source_lang: ja
         canonical_hash: aa1b562141a6e01a70b6d05a4285e6c81de2c27f24776894fb0a39b46dd7b743
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -133,14 +133,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 184708bd6d06f44e6b5efe087b7d5dd744cf6b82df071004c30cd2ebc9b3c591
+      content_hash: 7e808e07921dec8e73bef5f7a4ec18a3ba07198a7c3e8881a2759e5ce56065d2
   - kind: sentence_template
     data:
-      id: frame:184977d831c1203d2d2314a3e877ed3de74bcdf133ff071b8d8b7040c81bca1c
+      id: frame:02c3dab8670020dc10b888d5b2fe883678af2bea4cde27c0eefe0ae4bbf9890b
       source:
         source_lang: ja
         canonical_hash: 5fa19e2064ad038731d81f6d16f9ce3878d54c8a5c2e32b24ad4977890a1548e
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -177,14 +177,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 184977d831c1203d2d2314a3e877ed3de74bcdf133ff071b8d8b7040c81bca1c
+      content_hash: 02c3dab8670020dc10b888d5b2fe883678af2bea4cde27c0eefe0ae4bbf9890b
   - kind: sentence_template
     data:
-      id: frame:18514141449c66f3401a649500060543af2d4e84e9b576e91beb02b2141c20b1
+      id: frame:b3eb1f4230c9c1ad5b5b46eb94e14c59d4c181306de023fe1ec7610e607c244d
       source:
         source_lang: ja
         canonical_hash: e7d40552a816c82aca8a78287ede6e947503dced437c34248840cb38eb5c7bd5
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -222,14 +222,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18514141449c66f3401a649500060543af2d4e84e9b576e91beb02b2141c20b1
+      content_hash: b3eb1f4230c9c1ad5b5b46eb94e14c59d4c181306de023fe1ec7610e607c244d
   - kind: sentence_template
     data:
-      id: frame:18641938d8f082718a0fbd66e3403b66cbf9c6336c0c0aa1e2b612bc40d352c8
+      id: frame:bd0795e603fbfa4657162dfca3d75f4220d968a32dc012a6e30dc8e9fa261f2b
       source:
         source_lang: ja
         canonical_hash: ed62551c97537238348a90256435db544105c558a94291da36163b64516a140e
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -279,8 +279,8 @@ records:
               leaves:
                 - leaf_2
               imports:
-                entry_fact: p2_provenance_0_fact
                 entry_subject: p2_provenance_0_subject
+                entry_fact: p2_provenance_0_fact
               scope: read_ability_1.body_condition
           - name: leaf_2
             type: ZoneSet
@@ -333,6 +333,7 @@ records:
                 subject:
                   object_id: source:6bb0b3286909a5f0f883b36da8e508c6a0725fa842179a731461e66db544971c
                   generation: 0
+                direct_ability_source:
               source_leaves: []
           - name: p2_provenance_0_subject
             type: ObjectSet
@@ -360,15 +361,15 @@ records:
                 origin: holder
               source_leaves: []
         exports: []
-      content_hash: 18641938d8f082718a0fbd66e3403b66cbf9c6336c0c0aa1e2b612bc40d352c8
+      content_hash: bd0795e603fbfa4657162dfca3d75f4220d968a32dc012a6e30dc8e9fa261f2b
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:186ee5fa12db09ebe34ade12e82dc8dd8b7a884d9a2195b15fc18a394f3bd5ef
+      id: frame:dc2b96590910aaa3a2981219c3d7d730f1163bcc742db90c7225171b7fefb44f
       source:
         source_lang: ja
         canonical_hash: facd69f8c1c4401559bae74430ef8211762a73aa047d0608d92dc0cd62d0415b
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -405,14 +406,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 186ee5fa12db09ebe34ade12e82dc8dd8b7a884d9a2195b15fc18a394f3bd5ef
+      content_hash: dc2b96590910aaa3a2981219c3d7d730f1163bcc742db90c7225171b7fefb44f
   - kind: sentence_template
     data:
-      id: frame:188310bd95d5c5abbe2698da60bab8df3ce126c1df4ac1567d11f8f68deb7323
+      id: frame:af9ee8e87c1f3422ce38ce9c8f9946ded65d2acdc10da12bf32db566c2da58d9
       source:
         source_lang: ja
         canonical_hash: c5956ea58b481b79e713a470ad8e7b5bcca3887ea1a11e75a809679c81b59236
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -497,14 +498,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 188310bd95d5c5abbe2698da60bab8df3ce126c1df4ac1567d11f8f68deb7323
+      content_hash: af9ee8e87c1f3422ce38ce9c8f9946ded65d2acdc10da12bf32db566c2da58d9
   - kind: sentence_template
     data:
-      id: frame:1889df1963c2ad9a41b95764193c4b1d022ca1a8693eded33ee2f1b048aee0d9
+      id: frame:4ff49e54f386df6e63ad8f36a917488b033ec66683169fff6174ed36a65cbbca
       source:
         source_lang: ja
         canonical_hash: aa1b562141a6e01a70b6d05a4285e6c81de2c27f24776894fb0a39b46dd7b743
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -541,14 +542,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1889df1963c2ad9a41b95764193c4b1d022ca1a8693eded33ee2f1b048aee0d9
+      content_hash: 4ff49e54f386df6e63ad8f36a917488b033ec66683169fff6174ed36a65cbbca
   - kind: sentence_template
     data:
-      id: frame:1890fe797295bf01a0a6db32b3a3d8037bb0c4d504ed1d2577565a0329b963bf
+      id: frame:14b21f5b795328d7798ffba489914eabfe376542a4c4a436881b1c3b21b4ccec
       source:
         source_lang: ja
         canonical_hash: 8363e9d1ea6b919c68264971723cbc2cc278c70c1044f43f6729e48238fabe8e
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -645,15 +646,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1890fe797295bf01a0a6db32b3a3d8037bb0c4d504ed1d2577565a0329b963bf
+      content_hash: 14b21f5b795328d7798ffba489914eabfe376542a4c4a436881b1c3b21b4ccec
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:189442b9988bde27fb3d11aa68dffcf15ef00abe1d48be90f55b23fdd9d92200
+      id: frame:34bc448702d8829b37cc22c94f44cdb6d08fa3cb6fa12061fe5190d8904a812e
       source:
         source_lang: ja
         canonical_hash: 8f78bae00dc502f5f518b3b4dca204447a259a61c04feb02a99fb131fe052c07
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -714,14 +715,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 189442b9988bde27fb3d11aa68dffcf15ef00abe1d48be90f55b23fdd9d92200
+      content_hash: 34bc448702d8829b37cc22c94f44cdb6d08fa3cb6fa12061fe5190d8904a812e
   - kind: sentence_template
     data:
-      id: frame:189f1a849d826bfd2c382982265c8e8e3850f89cb98e6da0fd6cc7959f1cfc33
+      id: frame:c5adf74c71d1eadd06e0114d45fb0b3349cddc07d157b515c5f5b9e8e3c4fb37
       source:
         source_lang: ja
         canonical_hash: 06d63255c17e33c9690c3d6196f01040badc6c6875550a9fcd685f09787020dd
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -850,14 +851,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 189f1a849d826bfd2c382982265c8e8e3850f89cb98e6da0fd6cc7959f1cfc33
+      content_hash: c5adf74c71d1eadd06e0114d45fb0b3349cddc07d157b515c5f5b9e8e3c4fb37
   - kind: sentence_template
     data:
-      id: frame:18a3fa4a9412ad170b1664307ae9ba1914da78da8f847397542f0f52273aaa03
+      id: frame:3b7fdc5db9a5e0925b41ea8a000c9ee87e7ffc905e34f73cc956267c1a78ce19
       source:
         source_lang: ja
         canonical_hash: c2cbe8e1e568dbbd31a9b0f80a6108ee9294039e54587b1a2edaa8a8a5b6f79a
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -985,14 +986,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18a3fa4a9412ad170b1664307ae9ba1914da78da8f847397542f0f52273aaa03
+      content_hash: 3b7fdc5db9a5e0925b41ea8a000c9ee87e7ffc905e34f73cc956267c1a78ce19
   - kind: sentence_template
     data:
-      id: frame:18ab7f653672254327c9f2aad3a9f2d0b4332ee419f8d58f497f92357cebde92
+      id: frame:1b952781b4ffe3b6ad8cad7807e3ec8e0a62cf8c4a107eeb8a841bb71b223dca
       source:
         source_lang: ja
         canonical_hash: c3f0e3b5f1ed0d156dd30b57132e6bac3275bf073751d572809b89aeabf4a633
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1053,15 +1054,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18ab7f653672254327c9f2aad3a9f2d0b4332ee419f8d58f497f92357cebde92
+      content_hash: 1b952781b4ffe3b6ad8cad7807e3ec8e0a62cf8c4a107eeb8a841bb71b223dca
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:18afc58657bdb75cb700d231dd3098bccff348afb8417048468ff1b58b0acedd
+      id: frame:601558bee5cd125474c962339dc0c0c2da771855aaf99fdd49fad5c44fc5c458
       source:
         source_lang: ja
         canonical_hash: 7cd5755bb90315393246f8b6e18732f7bd052e22fdf637e368102f6aa17680e3
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1110,14 +1111,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18afc58657bdb75cb700d231dd3098bccff348afb8417048468ff1b58b0acedd
+      content_hash: 601558bee5cd125474c962339dc0c0c2da771855aaf99fdd49fad5c44fc5c458
   - kind: sentence_template
     data:
-      id: frame:18b4eddfda696883fc0ebeeff378a4d45e0592da0de4d5c652e5fd95aae7c12b
+      id: frame:ba179da47e93e4f2affd18efc37fedad1e383aef5bda7f28fe974c2d05a66122
       source:
         source_lang: ja
         canonical_hash: 2e758ea5ee01c307e64a31a4ac49c6a00b798e79516217ede8df3900367d8d8d
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1236,14 +1237,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18b4eddfda696883fc0ebeeff378a4d45e0592da0de4d5c652e5fd95aae7c12b
+      content_hash: ba179da47e93e4f2affd18efc37fedad1e383aef5bda7f28fe974c2d05a66122
   - kind: sentence_template
     data:
-      id: frame:18c0582a6cbfc598bd4f671d898d49b323dd7266506e56958996b624e86bd695
+      id: frame:4ccf22a70e761a6da3a694528c3e85b6ae6943b186c1335710bb896d6c5c3e51
       source:
         source_lang: ja
         canonical_hash: b0fb7958724877a2a7c1c5504fd0fce60ab5ff6d5fca65e781fd47d62aa466f1
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1292,8 +1293,8 @@ records:
               leaves:
                 - leaf_2
               imports:
-                entry_fact: p2_provenance_0_fact
                 entry_subject: p2_provenance_0_subject
+                entry_fact: p2_provenance_0_fact
               scope: read_ability_1.ability_availability
           - name: leaf_2
             type: ZoneSet
@@ -1349,6 +1350,7 @@ records:
                 subject:
                   object_id: source:b34c5f7a3aeecd626c71e07f743afa2ebecd6fe460f10ef2b418b667d59a40b8
                   generation: 0
+                direct_ability_source:
               source_leaves: []
           - name: p2_provenance_0_subject
             type: ObjectSet
@@ -1376,14 +1378,14 @@ records:
                 origin: holder
               source_leaves: []
         exports: []
-      content_hash: 18c0582a6cbfc598bd4f671d898d49b323dd7266506e56958996b624e86bd695
+      content_hash: 4ccf22a70e761a6da3a694528c3e85b6ae6943b186c1335710bb896d6c5c3e51
   - kind: sentence_template
     data:
-      id: frame:18ca0693c5130400f795e1f622c6dce3b8479cc5ebc3f37490d3dc6cfbc372b5
+      id: frame:95664d28a17c035badd2d04acf997be862afccb234ff997f5fb92bdf4085e7c4
       source:
         source_lang: ja
         canonical_hash: 6a4dd201564431605bf19bb8d5c973638f1fdf638c628fe920b791a12438311b
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1443,14 +1445,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18ca0693c5130400f795e1f622c6dce3b8479cc5ebc3f37490d3dc6cfbc372b5
+      content_hash: 95664d28a17c035badd2d04acf997be862afccb234ff997f5fb92bdf4085e7c4
   - kind: sentence_template
     data:
-      id: frame:18ddf167523ac13d06a0d43e273b08dca4b50f377172f7b186ddfbebc3ffcd39
+      id: frame:8fed856e5e8a98a16ccc3aabc7715390da0e1830f02c4216f061fd0aa0d91ee6
       source:
         source_lang: ja
         canonical_hash: 67bf2eaba586c21eb79efceadc0af3287a0510e8bcdef4be80610457c73380f5
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1499,14 +1501,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18ddf167523ac13d06a0d43e273b08dca4b50f377172f7b186ddfbebc3ffcd39
+      content_hash: 8fed856e5e8a98a16ccc3aabc7715390da0e1830f02c4216f061fd0aa0d91ee6
   - kind: sentence_template
     data:
-      id: frame:18e209c7dae9733f2cca6702030dfa5751efa550db2ae6329083ad7a19f5b3c8
+      id: frame:2408582136eebff2f13cb7c5c90c464490a8f148a68f9005f7c0727101ee9e1f
       source:
         source_lang: ja
         canonical_hash: d0025f8bcfd740a1b4e056362d3bc998229cf8e6c95dd73dca3569fbdd4b23b9
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1603,15 +1605,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18e209c7dae9733f2cca6702030dfa5751efa550db2ae6329083ad7a19f5b3c8
+      content_hash: 2408582136eebff2f13cb7c5c90c464490a8f148a68f9005f7c0727101ee9e1f
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:18e72db118921852d8b5372b8a32a4a09cd4d06ddb356aa3e8ce54c79380fcda
+      id: frame:9a1bebea7cd9236500180b3a1f2287d20f636d9c269830b9ce5e60c025d4b334
       source:
         source_lang: ja
         canonical_hash: 74db3dae86d2ebf88778ef55432cbad7224c344e5560d2fbd8f1bd581b6c503d
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1708,14 +1710,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18e72db118921852d8b5372b8a32a4a09cd4d06ddb356aa3e8ce54c79380fcda
+      content_hash: 9a1bebea7cd9236500180b3a1f2287d20f636d9c269830b9ce5e60c025d4b334
   - kind: sentence_template
     data:
-      id: frame:18ff305b41d9174b560de8eaad519a81644376ee477e058e301d6acd02d09657
+      id: frame:975ca89ecfb703420f996bc32d74f3b00b41021c3474f292498a3f0c47bf911e
       source:
         source_lang: ja
         canonical_hash: cc9af9e8908b519d212f6b57799f79ff58a99e52932177b2d263d25fa280a701
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -1810,15 +1812,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 18ff305b41d9174b560de8eaad519a81644376ee477e058e301d6acd02d09657
+      content_hash: 975ca89ecfb703420f996bc32d74f3b00b41021c3474f292498a3f0c47bf911e
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:193aba0fc9e2cb79d85c71165445b790210b56de821b1efda998052c01fa14d5
+      id: frame:7e23495c34a5bbe591a6f97acb824f4302126e16cd544fc75d59f2beef1b489b
       source:
         source_lang: ja
         canonical_hash: d71fb7a90d04137beb205d8166828040730326b97b7742f38c8d773ae84fa944
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2032,14 +2034,14 @@ records:
             type: ChoiceContext
             source_role: choice_mode_count
             scope: read_ability_0
-      content_hash: 193aba0fc9e2cb79d85c71165445b790210b56de821b1efda998052c01fa14d5
+      content_hash: 7e23495c34a5bbe591a6f97acb824f4302126e16cd544fc75d59f2beef1b489b
   - kind: sentence_template
     data:
-      id: frame:1949df23fd8463b0b1e93915358366ae57c6e34e9d4f483601e78bd7650842d3
+      id: frame:efc15fb2f4c3cc9701d4207cf09056bcc9d0a77af29bd686f73a2bbfaecf54e7
       source:
         source_lang: ja
         canonical_hash: 829c947fddd34dd68ecb5edbadee330994e242b9270330ff221c61b706f4d394
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: reminder
       semantic_variant:
         state: pending
@@ -2065,15 +2067,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1949df23fd8463b0b1e93915358366ae57c6e34e9d4f483601e78bd7650842d3
+      content_hash: efc15fb2f4c3cc9701d4207cf09056bcc9d0a77af29bd686f73a2bbfaecf54e7
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:194ea12ce832677a619376adeaf4253a47c78fa61250f65febdc31305e958d0b
+      id: frame:eefcf8574158fce1804f29f6b68c28b42c740432d3f6e7929819b4414a799ff7
       source:
         source_lang: ja
         canonical_hash: 3af71866f9f1944976e24b754c29521f82bd591ad5b225861e66371db0b218db
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2134,14 +2136,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 194ea12ce832677a619376adeaf4253a47c78fa61250f65febdc31305e958d0b
+      content_hash: eefcf8574158fce1804f29f6b68c28b42c740432d3f6e7929819b4414a799ff7
   - kind: sentence_template
     data:
-      id: frame:196daab222277d23a3ebb91970df8acf549ec7db502041bb38ab7fd9485cc349
+      id: frame:3dd7faf4e78d1605cb3e231f370a8cf8ecf0aee29472ae1e340d572a6b82636c
       source:
         source_lang: ja
         canonical_hash: 4c542f11eabd6a1e46140237d1f295525e0403b5a5e1cafc6628f46f67689248
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2226,15 +2228,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 196daab222277d23a3ebb91970df8acf549ec7db502041bb38ab7fd9485cc349
+      content_hash: 3dd7faf4e78d1605cb3e231f370a8cf8ecf0aee29472ae1e340d572a6b82636c
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:1977a4a776e5e733a3aa1334f18a268d4deda391243af4a070cc93105f69e5ce
+      id: frame:c6c7d24a1abe5f08fd3d4006ac4525f3d2dfb0a1ebaa8ca2a5ab192c636d4bda
       source:
         source_lang: ja
         canonical_hash: 31952e86bcb4cc92db5ee16ac2b15a081188254ff773de2303bb9955172cae94
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2318,14 +2320,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1977a4a776e5e733a3aa1334f18a268d4deda391243af4a070cc93105f69e5ce
+      content_hash: c6c7d24a1abe5f08fd3d4006ac4525f3d2dfb0a1ebaa8ca2a5ab192c636d4bda
   - kind: sentence_template
     data:
-      id: frame:1979594a3ba8b2e835dcb0f27fdd4082e8fca5e2355afe33740bb865d03ec81e
+      id: frame:c83bf3e4f766974813394580ffb13e258de9538a9712bd06cac933ef022d5f63
       source:
         source_lang: ja
         canonical_hash: 725e1aace83ddfa154120cb62085bd6cf7a4b2f2acd2aea89d80ad2f6883ebca
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2363,14 +2365,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1979594a3ba8b2e835dcb0f27fdd4082e8fca5e2355afe33740bb865d03ec81e
+      content_hash: c83bf3e4f766974813394580ffb13e258de9538a9712bd06cac933ef022d5f63
   - kind: sentence_template
     data:
-      id: frame:197ae390288daac52d4c9b3a7ab71e300af9ff3b707990c67c87f447200d04cd
+      id: frame:16518d8f401ad6008b135d7d41acb9517a69293c02f37009b871969273f2fcdb
       source:
         source_lang: ja
         canonical_hash: 88960094d03d7a65eb6682ee655bdd191e3d1351d97e6172d246ed94eb5a5f8a
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2419,14 +2421,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 197ae390288daac52d4c9b3a7ab71e300af9ff3b707990c67c87f447200d04cd
+      content_hash: 16518d8f401ad6008b135d7d41acb9517a69293c02f37009b871969273f2fcdb
   - kind: sentence_template
     data:
-      id: frame:197b27a8a02c9af92fb38e07bcf474f3f3f108f1e07f0a0440e468278f5d0af6
+      id: frame:983d08b794de00e57d6400822231def4b419c57ff6dff7620548ca5b9017af83
       source:
         source_lang: ja
         canonical_hash: 93da3cbeb9ef0fa327f2ad06b97496f33d7bc1f408eb28efc83f9b5495ad4cbc
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2535,14 +2537,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 197b27a8a02c9af92fb38e07bcf474f3f3f108f1e07f0a0440e468278f5d0af6
+      content_hash: 983d08b794de00e57d6400822231def4b419c57ff6dff7620548ca5b9017af83
   - kind: sentence_template
     data:
-      id: frame:1995cff6a6ee79e53fa5d72d03083d1696d69284bff42fe85a46b062b9f4f6a4
+      id: frame:75f3d946d5ec7c476eedc2364c8379f9f96271c5a5ce496fcbbda6081b447fb8
       source:
         source_lang: ja
         canonical_hash: 9d9e482df673180af673ea8ff556047881e4ea2eb1afe6bc36ff98ec0dc92cab
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2650,14 +2652,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1995cff6a6ee79e53fa5d72d03083d1696d69284bff42fe85a46b062b9f4f6a4
+      content_hash: 75f3d946d5ec7c476eedc2364c8379f9f96271c5a5ce496fcbbda6081b447fb8
   - kind: sentence_template
     data:
-      id: frame:19a2dc5bfef92ec4f67668fbdc4aebb4a2a5d562603dfb37c1a783bb4b27f102
+      id: frame:9357e101888291ed248165d142423a7097624d0cfee76635bfb26594c61fbfb7
       source:
         source_lang: ja
         canonical_hash: cc547ec254d7574da36d23c064f3b19850c1a2a4f19649bee170890dc08a6ee6
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2788,14 +2790,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 19a2dc5bfef92ec4f67668fbdc4aebb4a2a5d562603dfb37c1a783bb4b27f102
+      content_hash: 9357e101888291ed248165d142423a7097624d0cfee76635bfb26594c61fbfb7
   - kind: sentence_template
     data:
-      id: frame:19a6c4141a7101cf3bade459fc6082f6949e7a43fa78e721a63e8ea7086fe715
+      id: frame:be3bcc7af6793788b9d1f0d2a3f4d9e2f80192ca034ea17dce1b82b2e2560d96
       source:
         source_lang: ja
         canonical_hash: 6f0b8aa223f73fdf03efd19a6688c902857caec98584cbc6919f8189178df58d
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2844,14 +2846,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 19a6c4141a7101cf3bade459fc6082f6949e7a43fa78e721a63e8ea7086fe715
+      content_hash: be3bcc7af6793788b9d1f0d2a3f4d9e2f80192ca034ea17dce1b82b2e2560d96
   - kind: sentence_template
     data:
-      id: frame:19aa7eece30e5e54ab3e994bbc982f61e40f6b541e9930fbfc84b7a1db32a785
+      id: frame:fbe1ba0d1cf95a1abe805975dd59d640e80e21e9d0cbee9d19ef37cb2c9a3ffe
       source:
         source_lang: ja
         canonical_hash: e792d1892c3ad8c72195911cd6123c01a24488d74d155727c7555f2876c7aea3
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2900,15 +2902,15 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 19aa7eece30e5e54ab3e994bbc982f61e40f6b541e9930fbfc84b7a1db32a785
+      content_hash: fbe1ba0d1cf95a1abe805975dd59d640e80e21e9d0cbee9d19ef37cb2c9a3ffe
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:19ab315e557dfb5e2517e3a7352d73d879bacfa078c4a2054be70be961c93acd
+      id: frame:e50d54dbf988a71cd084fc93ae01329ef4f9869bd78953b0b5a8207cedadd07e
       source:
         source_lang: ja
         canonical_hash: 5d405ee4cbfd99298f1c49f14fc11dc692e42c67f422e4096d6908d48ae76ec2
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -2969,14 +2971,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 19ab315e557dfb5e2517e3a7352d73d879bacfa078c4a2054be70be961c93acd
+      content_hash: e50d54dbf988a71cd084fc93ae01329ef4f9869bd78953b0b5a8207cedadd07e
   - kind: sentence_template
     data:
-      id: frame:19b8bc08b7d763b86fa90751eb615f43f7dc45c15df127c7d9957e113da54b93
+      id: frame:9e19868a97e0e1537e85afa967f746b20838f1ffed562b54c5c59e64b509caac
       source:
         source_lang: ja
         canonical_hash: 48d3f39d2170526e5dc308bc2a36a9fb204b1670150d20bb5e73349b0ca6843a
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -3048,14 +3050,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 19b8bc08b7d763b86fa90751eb615f43f7dc45c15df127c7d9957e113da54b93
+      content_hash: 9e19868a97e0e1537e85afa967f746b20838f1ffed562b54c5c59e64b509caac
   - kind: sentence_template
     data:
-      id: frame:19d81ba2d1048d179c83a9aaeeb466ed9c1a21b8f2ee2761558c3b453077c83f
+      id: frame:c770be710b76fa6babe004cf2ad5984acf63e614e480b97cbdf69e4f7ef1f4bb
       source:
         source_lang: ja
         canonical_hash: cfbf2d79a096a1731336f9042183929394005dd1673c70660eb1b8d6ff38bb8a
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -3081,14 +3083,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 19d81ba2d1048d179c83a9aaeeb466ed9c1a21b8f2ee2761558c3b453077c83f
+      content_hash: c770be710b76fa6babe004cf2ad5984acf63e614e480b97cbdf69e4f7ef1f4bb
   - kind: sentence_template
     data:
-      id: frame:19d8e9df8a8e561c2765abbbcc006a16e563a0a3bdb46fb6c4e581b350ebcfd6
+      id: frame:4a13744cc553a052817076adb99f47befaf4d0ba7d0c53f4f7670af0260c537a
       source:
         source_lang: ja
         canonical_hash: 5ebfe1627e8c267f24633d5fdcf73beeddeb92e717582c5405ad1490c09492ec
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -3295,14 +3297,14 @@ records:
                 origin: holder
               source_leaves: []
         exports: []
-      content_hash: 19d8e9df8a8e561c2765abbbcc006a16e563a0a3bdb46fb6c4e581b350ebcfd6
+      content_hash: 4a13744cc553a052817076adb99f47befaf4d0ba7d0c53f4f7670af0260c537a
   - kind: sentence_template
     data:
-      id: frame:19dc685bcb1861924266e818c7e49b30cd978b59e0d104e99d9afd49270242fc
+      id: frame:0950523a53b9815f909bb35b0e3e9aefd1604c60e48a56f0a3b019a7c8ac925b
       source:
         source_lang: ja
         canonical_hash: 88960094d03d7a65eb6682ee655bdd191e3d1351d97e6172d246ed94eb5a5f8a
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -3351,14 +3353,14 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 19dc685bcb1861924266e818c7e49b30cd978b59e0d104e99d9afd49270242fc
+      content_hash: 0950523a53b9815f909bb35b0e3e9aefd1604c60e48a56f0a3b019a7c8ac925b
   - kind: sentence_template
     data:
-      id: frame:1a018d00b975dc1ca4c2749d0de923e85060384a07bab03d1ebc296f67bc9d5a
+      id: frame:8212a9bfbe1db17ce3d40fe6145735d75f72e5e5eedb780f59782b9e39a6a9e0
       source:
         source_lang: ja
         canonical_hash: a6edb064be0441607c45484e7794997461a6b4ed05169e8408d934b4620e4804
-        normalizer_version: four-layer-jp-v3
+        normalizer_version: four-layer-jp-v4
       role: body
       semantic_variant:
         state: pending
@@ -3444,4 +3446,4 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1a018d00b975dc1ca4c2749d0de923e85060384a07bab03d1ebc296f67bc9d5a
+      content_hash: 8212a9bfbe1db17ce3d40fe6145735d75f72e5e5eedb780f59782b9e39a6a9e0

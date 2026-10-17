@@ -215,10 +215,14 @@ def _source_additions(
     for operand in accepted:
         evidence = filters(operand, classifier)
         if evidence is None:
+            if operand.row.startswith("N3-FLAT."):
+                issues.add("missing_n3_filter_concept")
             continue
         kept.append(operand)
         additions.extend(structural(operand, part.canonical_source))
         selected, failed = evidence
+        if operand.row.startswith("N3-FLAT."):
+            selected = [replace(item, abstract=False) for item in selected]
         additions.extend(selected)
         issues.update(failed)
         for hint in hints:

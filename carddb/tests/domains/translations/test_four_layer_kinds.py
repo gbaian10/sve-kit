@@ -1,5 +1,6 @@
 """Name and token-trait kind evidence is independent of the written classifier."""
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -123,3 +124,25 @@ def test_adopted_named_kind_uses_its_own_frozen_definition(tmp_path: Path) -> No
         write(root, {"translations/glossary/defs/000.yaml": envelope([record])})
         other_snapshot = load_glossary(root)
         assert adopted_kinds(db, other_snapshot, fixture.sources()).named == ()
+
+
+@pytest.mark.parametrize("adopted", [False, True])
+def test_named_kind_can_use_a_different_confirmed_printing_of_the_exact_name(
+    tmp_path: Path, *, adopted: bool
+) -> None:
+    fixture = make_fixture(tmp_path, dual=True)
+    primary = replace(fixture, others=())
+    record = term("name.alternate_printing", category="card_name")
+    data = record["data"]
+    assert isinstance(data, dict)
+    data["source_ref"] = fixture.others[0][3].model_dump(mode="json")
+    root = tmp_path / "authored"
+    write(root, {"translations/glossary/defs/000.yaml": envelope([record])})
+    snapshot = load_glossary(root)
+    with template().copy() as db:
+        if adopted:
+            primary.publish(db)
+        facts = adopted_kinds(db, snapshot, fixture.sources())
+        assert facts.named == (
+            (("term:name.alternate_printing", "follower"),) if adopted else ()
+        )

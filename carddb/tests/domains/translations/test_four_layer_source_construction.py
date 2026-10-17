@@ -1,4 +1,4 @@
-"""Production v3 reconstructs source evidence and rejects unsupported versions."""
+"""Production v4 reconstructs source evidence and rejects unsupported versions."""
 
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -40,7 +40,7 @@ def test_preparation_preserves_existing_pure_omitted_owner_bindings() -> None:
     prepared.verify(raw, engine, frame, binding)
 
 
-def test_production_reconstructs_v3_from_complete_source() -> None:
+def test_production_reconstructs_v4_from_complete_source() -> None:
     raw = "自分の手札のカード２枚を選ぶ。"
     engine = classifier()
     prepared = derive_source(raw, source(raw), engine)
@@ -72,7 +72,9 @@ def test_production_reconstructs_v3_from_complete_source() -> None:
         )
 
 
-@pytest.mark.parametrize("version", ["four-layer-jp-v2", "four-layer-jp-v999"])
+@pytest.mark.parametrize(
+    "version", ["four-layer-jp-v2", "four-layer-jp-v3", "four-layer-jp-v999"]
+)
 def test_production_authored_and_binding_entry_reject_preparation_versions(
     version: str,
 ) -> None:

@@ -16,7 +16,19 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.recognition.references import References
     from sve_carddb.domains.translations.sources import Sources
 
-_NAMED = re.compile(r"(?:^|[。:：}】])(?:自分|相手)の場の『(?P<name>X)』(?:を|が)?$")
+_NAMED = re.compile(
+    r"(?:^|[。、:：}】])(?:自分|相手)の(?:(?P<zone>場|EXエリア)の)?(?:進化前の)?"
+    r"(?:進化していない)?(?P<names>『X』(?:(?:か|と|や)『X』)?)(?:を|が)?$"
+)
+_COORDINATE_NAMED = re.compile(
+    r"(?:^|[。、:：}】])自分の場の『X』N(?:体|つ)と『(?P<name>X)』(?:を|が)?$"
+)
+_GRAVE_BANISH_NAMED = re.compile(
+    r"(?:^|[。、:：}】])自分の墓場や自分の消滅領域の『(?P<name>X)』(?:を|が)?$"
+)
+_REPLACEMENT_NAMED = re.compile(
+    r"(?:^|[。、:：}】])(?P<names>『X』)N(?:枚|体|つ)(?:を)?(?:場に)?出す。[^。]*代わりに$"
+)
 _TOKEN_TRAIT = re.compile(
     r"(?:^|[。:：}】])(?:自分|相手)の場の(?P<trait>[^。:：・]+)・トークン(?:を|が)?$"
 )
@@ -32,20 +44,49 @@ class KindFacts:
     ) -> CountContext | None:
         """A missing or heterogeneous definition stays unresolved; no classifier supplies kind."""
         before = part.canonical_source[:end]
-        if match := _NAMED.search(before):
-            spelling = "".join(
-                raw[s.start : s.end] for s in part.units[match.start("name")].origins
+        if (
+            match := _NAMED.search(before)
+            or _COORDINATE_NAMED.search(before)
+            or _GRAVE_BANISH_NAMED.search(before)
+            or _REPLACEMENT_NAMED.search(before)
+        ):
+            positions = (
+                (
+                    match.start("names") + name.start()
+                    for name in re.finditer(r"X", match["names"])
+                )
+                if "names" in match.re.groupindex
+                else (match.start("name"),)
             )
-            resolution = refs.quoted(spelling)
-            if resolution.target is None:
-                return None
-            term_id = resolution.target.get("id")
-            kinds = {kind for identifier, kind in self.named if identifier == term_id}
+            kinds = set()
+            for position in positions:
+                spelling = "".join(
+                    raw[s.start : s.end] for s in part.units[position].origins
+                )
+                resolution = refs.quoted(spelling)
+                if resolution.target is None:
+                    return None
+                term_id = resolution.target.get("id")
+                evidence = {
+                    kind for identifier, kind in self.named if identifier == term_id
+                }
+                if len(evidence) != 1:
+                    return None
+                kinds.update(evidence)
+            zone = (
+                "ex" if match.groupdict().get("zone") == "EXエリア" else "battlefield"
+            )
+            if match.re is _GRAVE_BANISH_NAMED:
+                zone = "graveyard"
             if len(kinds) == 1:
                 return CountContext(
-                    "select.unrestricted.v1",
+                    "select.ex_unrestricted.v1"
+                    if zone == "ex"
+                    else "select.unrestricted.v1",
                     kinds.pop(),
-                    ("battlefield",),
+                    ("banished", "graveyard")
+                    if match.re is _GRAVE_BANISH_NAMED
+                    else (zone,),
                     frozenset({False, True}),
                     "cardinality",
                 )
@@ -118,19 +159,13 @@ def _named_kinds(
         location = re.fullmatch(r"/faces/(?P<ordinal>0|[1-9][0-9]*)/name", ref.locator)
         if location is None:
             continue
-        candidates = tuple(
-            revision
-            for revision in catalog.revisions
-            if revision["source_id"] == ref.source_version_id
-            and catalog.faces[revision["face_id"]]["ordinal"]
-            == int(location["ordinal"])
-        )
-        if not candidates:
+        if ref.source_version_id not in sources.batch(ref.batch_id).entries:
             continue
         lang, spelling, source = sources.text(ref)
         if lang != "ja" or source.id != ref.source_version_id:
             raise ValueError("Named counted-kind source must be Japanese")
-        for revision in candidates:
+        # A concept may cite another printing of the same name; retain every adopted kind.
+        for revision in catalog.revisions:
             unit = catalog.units[revision["name_unit_id"]]
             if unit["text"] == spelling:
                 named.add((data.id, catalog.kind(revision["type_code"])))

@@ -391,7 +391,11 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
             "existence_count",
             "枚",
         ),
-        ("仮。これはエボルヴデッキに２枚まで入れることができる。", "threshold", "枚"),
+        (
+            "仮。これはエボルヴデッキに２枚まで入れることができる。",
+            "construction_copy_limit",
+            "枚",
+        ),
         ("仮。自分の他の仮族・カードが２枚なら、仮。", "existence_count", "枚"),
         (
             "仮。自分のデッキをシャッフルし、上X枚を見る。その中から、フォロワー２枚まで場に出してよい。",

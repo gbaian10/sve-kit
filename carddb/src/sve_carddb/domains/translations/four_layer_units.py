@@ -79,6 +79,16 @@ for _kind in ("follower", "spell", "amulet", "card", "spell_or_amulet", "crest")
 _RULES[
     CountContext("select.card.v1", "card", ("battlefield",), False, "cardinality")
 ] = frozenset({"枚"})
+for _kind in ("card", "follower", "spell", "amulet"):
+    _RULES[
+        CountContext(
+            "select.unrestricted.v1",
+            _kind,
+            ("banished", "graveyard"),
+            _ALL_TOKENS,
+            "cardinality",
+        )
+    ] = frozenset({"枚"})
 
 _RULES[
     CountContext(
@@ -148,7 +158,7 @@ _TRAIT = (
 )
 _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
-    r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
+    r"他の|表向きの|裏向きの|進化していない|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
     r"(?:【[^【】]+】(?:や|か)?)+を持つ|トリガーを持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
     r"それぞれカード名が異なる|トークンでない|土の印・|消滅させたフォロワーと同名の|(?:これ|それ)によって破壊した|"
     r"\{[^{}]+\}(?:を持つ|である|でない|の|・)?|" + _TRAIT + r")*"
@@ -214,7 +224,7 @@ _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
 _COLLECTION = re.compile(
     _ONSET
-    + r"(?:(?:自分|相手|自身|お互い|それ(?:のプレイヤー)?)の)?(?:現在の)?(?P<zone>墓場|手札|消滅領域)(?:が|に)?$"
+    + r"(?:(?:自分|相手|自身|お互い|それ(?:のプレイヤー)?)の)?(?:現在の)?(?P<zone>墓場|手札|消滅領域)(?:が|に|の枚数が)?$"
 )
 _LOOK_SELECTION = re.compile(
     _ONSET
@@ -320,7 +330,7 @@ def compound_selection(after: str, before: str = "") -> tuple[str, bool] | None:
     second = count_context(match["next"])
     if second is None and (first := count_context(before)) is not None:
         second = _shared_set(first, match["next"])
-    if second is None:
+    if second is None and match["next"] != "『X』":
         return None
     return match["unit"], bool(match["limit"])
 
@@ -346,6 +356,25 @@ def compound_action(after: str, before: str) -> tuple[str, bool] | None:
         if not tail.startswith(("か", "と")):
             return None
         first, tail = context, tail[1:]
+    return None
+
+
+def named_emission(before: str, after: str) -> str | None:
+    """Validate the entire new emission; a long or mixed list cannot match by its tail."""
+    text = before + "N" + after
+    number = len(before)
+    action = re.compile(
+        r"(?:^|[。、:：}】])(?P<items>『X』N(?P<unit>枚|体|つ)"
+        r"(?P<connector>か|と)『X』N(?P=unit)(?:(?P=connector)『X』N(?P=unit))?)"
+        r"(?:を)?(?:場に出す|出す|EXエリアに置く|場に出してよい|出してよい|EXエリアに置いてよい)"
+        r"(?=[。:：、）)\n]|$)"
+    )
+    for match in action.finditer(text):
+        prefix = text[: match.start("items")]
+        if match.start("items") <= number < match.end("items") and prefix.count(
+            "「"
+        ) == prefix.count("」"):
+            return match["unit"]
     return None
 
 
@@ -401,6 +430,41 @@ def _derived_context(before: str) -> CountContext | None:
 def number_context(before: str, after: str) -> CountContext | None:
     """An EX deployment has its own unit rule, without changing general selection."""
     context = count_context(before)
+    if (
+        context is None
+        and re.search(r"(?:^|[。、:：}】])フォロワー$", before)
+        and re.match(r"^体(?:を)?選(?:ぶ|び|んで)(?=[。、]|$)", after)
+    ):
+        return CountContext(
+            "select.unrestricted.v1",
+            "follower",
+            ("battlefield",),
+            _ALL_TOKENS,
+            "cardinality",
+        )
+    if (
+        context is None
+        and re.search(r"各プレイヤーは、自身の場のフォロワー$", before)
+        and re.match(r"^体を残し、", after)
+    ):
+        return CountContext(
+            "select.unrestricted.v1",
+            "follower",
+            ("battlefield",),
+            _ALL_TOKENS,
+            "cardinality",
+        )
+    if context is None and re.search(
+        r"(?:^|[。、:：}】])自分の場か(?:自分の)?EXエリアの" + _TRAIT + r"トークン$",
+        before,
+    ):
+        return CountContext(
+            "select.union_unrestricted.v1",
+            "card",
+            ("battlefield", "ex"),
+            _ALL_TOKENS,
+            "union_cardinality",
+        )
     if (
         context is not None
         and context.counted_object == "follower"

@@ -14,6 +14,7 @@ from sve_carddb.domains.translations.four_layer_conditions import (
     existence_context,
     selection_context,
 )
+from sve_carddb.domains.translations.four_layer_n3_numbers import number_rule
 from sve_carddb.domains.translations.four_layer_reminders import (
     mandatory_selection_context,
 )
@@ -24,6 +25,7 @@ from sve_carddb.domains.translations.four_layer_units import (
     count_context,
     field_filter,
     fusion_material,
+    named_emission,
     number_context,
     source_unit,
     written_card_np,
@@ -213,7 +215,20 @@ def recognize_number(
         return None
     before = part.canonical_source[: hint.occurrence.start]
     after = part.canonical_source[hint.occurrence.end :]
-    number = _recognize(raw, hint, before, after)
+    number = (
+        _recognize(raw, hint, before, after)
+        if not re.match(r"^(?:枚|体|つ)以上か", after)
+        or _filtered_or_reference(before, references)
+        else None
+    )
+    rule = number_rule(raw, part, hint, field)
+    if number is None and rule is not None:
+        role, unit = rule
+        number = (
+            _quantity(role, hint.value, "枚", "at_least")
+            if role == "existence_count"
+            else Number("Nat", role, hint.value, unit)
+        )
     reminder_context = mandatory_selection_context(raw, part, hint.value, field)
     if number is None and reminder_context is not None:
         number = _quantity("selection_count", hint.value, "枚")
@@ -236,6 +251,8 @@ def recognize_number(
         "selection_count",
         "existence_count",
     }:
+        if rule == ("existence_count", "枚"):
+            return number
         replacement = replacement_action(before, after)
         counted = (
             reminder_context
@@ -260,6 +277,29 @@ def recognize_number(
         ):
             return None
     return number
+
+
+def _filtered_or_reference(before: str, references: SourceReferences | None) -> bool:
+    match = re.search(
+        r"(?:^|[。、:：}】]|は)(?:自分|相手)の(?:(?:墓場|場|EXエリア)(?:の|にある|に))?"
+        r"(?:(?P<trait>[^、。:：『』{}「」・]+)・|\{(?P<class>[^{}]+)\})"
+        r"(?:カード|フォロワー)(?:が)?$",
+        before,
+    )
+    if match is None or references is None:
+        return False
+    if match["trait"]:
+        return (
+            len(
+                [
+                    identifier
+                    for identifier, category in references.terms.get(match["trait"], ())
+                    if category == "trait"
+                ]
+            )
+            == 1
+        )
+    return not references.proposed_vocabulary("class", match["class"]).issues
 
 
 def number_issue(
@@ -399,6 +439,9 @@ def _generic_number(
     if counter := (
         _counter_number(value, before, after)
         or _event_count_number(value, before, after)
+        or _emission_number(value, before, after)
+        or _inspected_top_number(value, before, after)
+        or _local_action_number(value, before, after)
         or _complete_action_number(value, before, after)
         or _replacement_number(value, before, after)
         or _compound_existence_number(value, before, after)
@@ -446,6 +489,23 @@ def _replacement_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _compound_existence_number(value: int, before: str, after: str) -> Number | None:
+    if (
+        re.match(
+            r"^(?:枚|体|つ)以上か(?:自分|相手)の(?:墓場|場|EXエリア)(?:の|にある)[^。:：N]+N(?:枚|体|つ)以上なら(?:使える)?"
+            + _END,
+            after,
+        )
+        and count_context(before) is not None
+    ):
+        return _quantity("existence_count", value, after[0], "at_least")
+    if count_context(before) is not None and re.match(
+        r"^(?:枚|体|つ)以上か「カード名に『X』を含むフォロワー」がいる限り、", after
+    ):
+        return _quantity("existence_count", value, after[0], "at_least")
+    if re.search(r"この能力は自分の墓場が$", before) and re.match(
+        r"^枚以上あり、自分の場に『X』がいないなら使える" + _END, after
+    ):
+        return _quantity("existence_count", value, "枚", "at_least")
     match = re.match(
         r"^枚以上で(?:自分|相手)の(?P<np>[^。:：]+?フォロワー)が"
         r"場(?:か|から)墓場に置かれたとき" + _END,
@@ -457,6 +517,71 @@ def _compound_existence_number(value: int, before: str, after: str) -> Number | 
         and written_card_np(match["np"])
     ):
         return _quantity("existence_count", value, "枚", "at_least")
+    return None
+
+
+def _emission_number(value: int, before: str, after: str) -> Number | None:
+    if unit := named_emission(before, after):
+        return Number("Nat", "count", value, unit)
+    if (
+        re.search(r"(?:^|[。、:：}】])(?:『X』)+$", before)
+        and re.match(r"^枚ずつEXエリアに置(?:く|いてよい)" + _END, after)
+    ) or (
+        re.search(r"(?:^|[。、:：}】])(?:『X』){3}$", before)
+        and re.match(r"^枚ずつ場やEXエリアに置いてよい" + _END, after)
+    ):
+        return Number("Nat", "count", value, "枚")
+    if re.search(r"(?:^|[。、:：}】])『X』$", before) and re.match(
+        r"^枚を場かEXエリアに置いてよい" + _END, after
+    ):
+        return Number("Nat", "count", value, "枚")
+    if re.search(
+        r"(?:^|[。、:：}】])自分のエボルヴデッキの『X』$", before
+    ) and re.match(r"^枚をプレイしてよい" + _END, after):
+        return Number("Nat", "count", value, "枚")
+    return None
+
+
+def _inspected_top_number(value: int, before: str, after: str) -> Number | None:
+    if (
+        re.search(
+            r"(?:^|[。、:：}】])自分のデッキの上N枚を見る。その中から、[^。:：N]+カード$",
+            before,
+        )
+        and count_context(before) is not None
+        and after
+        == r"枚を公開してデッキの上に置いてよい。残りを好きな順にデッキの下に置く。"
+    ):
+        return _quantity("selection_count", value, "枚")
+    return None
+
+
+def _local_action_number(value: int, before: str, after: str) -> Number | None:
+    payment = re.search(
+        r"(?:^|[。])これをプレイする際、追加コストとして場の(?P<items>『X』N体と『X』N体)をアクトする"
+        + _END,
+        before + "N" + after,
+    )
+    if payment is not None and payment.start("items") <= len(before) < payment.end(
+        "items"
+    ):
+        return Number("Nat", "count", value, "体")
+    if re.search(
+        r"(?:^|[。、:：}】])(?:自分|相手)の手札(?:のカード|を)?$", before
+    ) and re.match(r"^枚を(?:自分の)?デッキの上か下に置く" + _END, after):
+        return Number("Nat", "count", value, "枚")
+    if re.search(r"各プレイヤーは、自身の場のフォロワー$", before) and re.match(
+        r"^体を残し、", after
+    ):
+        return _quantity("selection_count", value, "体")
+    if re.search(
+        r"これをプレイする際、追加コストとしてEXエリアのカード$", before
+    ) and re.match(r"^枚を消滅する" + _END, after):
+        return Number("Nat", "count", value, "枚")
+    if re.search(
+        r"(?:^|[。、:：}】])EXエリアの[^。:：]+・トークン$", before
+    ) and re.match(r"^枚を消滅し、手札のこれをEXエリアに置く:", after):
+        return Number("Nat", "count", value, "枚")
     return None
 
 
@@ -489,7 +614,7 @@ def _set_number(value: int, before: str, after: str) -> Number | None:
     if before.endswith("これはエボルヴデッキに") and re.match(
         r"^枚まで入れることができる" + _END, after
     ):
-        return Number("Nat", "threshold", value, "枚")
+        return Number("Nat", "construction_copy_limit", value, "枚")
     if re.search(r"(?:カード名|好きな数)$", before) and re.match(
         r"^つを指定する" + _END, after
     ):
@@ -506,7 +631,7 @@ def _set_number(value: int, before: str, after: str) -> Number | None:
     ):
         return Number("Nat", "group_divisor", value, after[0])
     if re.search(r"(?:自分|相手)プレイヤー$", before) and re.match(
-        r"^人(?:は(?:手札を公開する|下記からNつチョイスする)|の場のカードがN枚以上なら)"
+        r"^人(?:は(?:手札を公開する|下記からNつチョイスする)|の場の(?:カード|フォロワー)がN(?:枚|体)以上なら)"
         + _END,
         after,
     ):
@@ -530,7 +655,7 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
     ):
         return Number("Nat", "count", value, match["unit"])
     if count_context(before) is not None and re.match(
-        r"^枚を(?:表向き|裏向き)にする" + _END, after
+        r"^枚を(?:表向き|裏向き)に(?:する|してよい)" + _END, after
     ):
         return Number("Nat", "count", value, "枚")
     return (
@@ -669,8 +794,11 @@ def _payment_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _counter_number(value: int, before: str, after: str) -> Number | None:
-    if fusion_material(before) and re.match(
-        r"^枚:これに融合カウンターN個を置く" + _END, after
+    if fusion_material(before) and (
+        re.match(
+            r"^枚:これは「これをプレイする際、コストを-Nする」を持つ" + _END, after
+        )
+        or re.match(r"^枚:これに融合カウンターN個を置く" + _END, after)
     ):
         return Number("Nat", "count", value, "枚")
     if (
@@ -749,7 +877,8 @@ def _frequency_introduction(before: str) -> bool:
     if before.endswith("この能力は"):
         return True
     condition = re.search(
-        r"この能力は(?P<np>[^。:：]+)N(?P<unit>枚|体|つ|回)(?:以上|以下)なら、$", before
+        r"この能力は(?P<np>[^。:：]+)N(?P<unit>枚|体|つ|回)(?:以上|以下)?なら、$",
+        before,
     )
     if condition is None:
         return False

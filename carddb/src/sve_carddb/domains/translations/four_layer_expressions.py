@@ -231,7 +231,7 @@ def target_dependencies(
         )
         for value in binding.values.values()
     ):
-        raise ValueError("Expression target dependencies require a v3 frame")
+        raise ValueError("Expression target dependencies require a v4 frame")
     dependencies = {}
     for name, value in binding.values.items():
         expr = value.expr if isinstance(value, QuantitySpec) else value

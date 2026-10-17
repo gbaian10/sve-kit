@@ -690,12 +690,12 @@ def test_generated_strict_code_patterns_compile_and_reject_trailing_newlines() -
     source: dict[str, JsonValue] = {
         "source_lang": "ja",
         "canonical_hash": "0" * 64,
-        "normalizer_version": "four-layer-jp-v3",
+        "normalizer_version": "four-layer-jp-v4",
     }
     rules.validate("FrameSource", source)
     with pytest.raises(ValidationError):
         rules.validate(
-            "FrameSource", source | {"normalizer_version": "four-layer-jp-v3\n"}
+            "FrameSource", source | {"normalizer_version": "four-layer-jp-v4\n"}
         )
     rules.validate("FormCases", {"value": [{"kind": "Label", "arg": "count"}]})
     with pytest.raises(ValidationError):
