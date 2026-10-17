@@ -1,4 +1,4 @@
-"""Finite N2 parameter forms admitted only by the preparation renderer."""
+"""Finite parameter forms with complete typed presentation arguments."""
 
 from sve_carddb.contracts.four_layer import FormDefinition, LabelPart, LiteralNode
 
@@ -18,7 +18,7 @@ def validate_parameter_form(form: FormDefinition) -> None:
     """Every argument is rendered through its typed leaf, including necessary labels."""
     signature = _SIGNATURES.get(form.id)
     if signature is None or form.rule != form.id + ".v1":
-        raise ValueError("Unknown preparation parameter form")
+        raise ValueError("Unknown parameter form")
     if {a.name: (a.type, a.role) for a in form.signature} != signature or set(
         form.cases
     ) != {"default"}:

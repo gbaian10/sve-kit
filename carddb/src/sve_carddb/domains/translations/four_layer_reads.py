@@ -1,4 +1,4 @@
-"""Sealed preparation reads require both a local definition and supported use points."""
+"""Sealed source reads require both a local definition and supported use points."""
 
 import re
 from dataclasses import replace
@@ -28,11 +28,11 @@ from sve_carddb.domains.translations.recognition.provenance import merged
 if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import LeafType
     from sve_carddb.contracts.source_binding import TypedValue
+    from sve_carddb.domains.translations.four_layer_analysis import SourceAnalysis
     from sve_carddb.domains.translations.four_layer_classification import (
         Classifier,
         Recognized,
     )
-    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
 
 _DEFINITION = re.compile(
@@ -53,9 +53,9 @@ _ROW = "N2-B11.current_zone_count"
 
 
 def prepare_reads(
-    raw: str, derived: DerivedField, classifier: Classifier
-) -> DerivedField:
-    """Change only preparation body parts; pending whole-line semantics stay pending."""
+    raw: str, derived: SourceAnalysis, classifier: Classifier
+) -> SourceAnalysis:
+    """Change only body parts; pending whole-line semantics stay pending."""
     parts = list(derived.field.parts)
     recognized = list(derived.recognized)
     rows = list(derived.registry_rows)

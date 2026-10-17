@@ -568,7 +568,7 @@ def test_annotation_concept_category_and_current_emphasis_are_checked(
         read_annotation(db, selected.id)
 
 
-@pytest.mark.parametrize("version", ["four-layer-jp-v3", "four-layer-jp-v999"])
+@pytest.mark.parametrize("version", ["four-layer-jp-v2", "four-layer-jp-v999"])
 def test_sqlite_source_contract_rejects_nonproduction_versions(
     stored: tuple[Database, Frame, SourceBinding], version: str
 ) -> None:
@@ -586,7 +586,7 @@ def test_sqlite_source_contract_rejects_nonproduction_versions(
         )
 
 
-def test_sqlite_v2_projection_does_not_admit_choice_context_ports(
+def test_sqlite_v3_projection_admits_typed_choice_context_ports(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
     db, frame, _ = stored
@@ -601,7 +601,10 @@ def test_sqlite_v2_projection_does_not_admit_choice_context_ports(
             }
         ],
     }
-    with pytest.raises(ValidationError), db.transaction():
+    with db.transaction():
         db.update(
             "sentence_template", {"id": frame.id}, {"projection": Json(projection)}
         )
+    assert db.select("sentence_template", ("projection",), where={"id": frame.id})[
+        0
+    ].values["projection"] == Json(projection)

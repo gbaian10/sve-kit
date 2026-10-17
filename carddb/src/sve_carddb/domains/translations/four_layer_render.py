@@ -1,6 +1,6 @@
 """Render typed source bindings without parsing placeholders or rediscovering references."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.contracts.annotations import (
@@ -35,6 +35,18 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.translations.four_layer_context import DEFAULT_REGISTRY
+from sve_carddb.domains.translations.four_layer_errors import MissingValueError
+from sve_carddb.domains.translations.four_layer_expressions import (
+    DOMAIN,
+    DOMAIN_CODE,
+    ExpressionTargets,
+    target_dependencies,
+    verify_expression_selection,
+    verify_quantities,
+)
+from sve_carddb.domains.translations.four_layer_integrated import FAMILY
+from sve_carddb.domains.translations.four_layer_n2_forms import validate_parameter_form
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -90,6 +102,7 @@ class SelectedTarget:
     origin: Literal["official", "project", "machine"] = "project"
     low_confidence: bool = False
     variant_key: str = "default"
+    expression_targets: Mapping[str, Target] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -156,10 +169,6 @@ class Rendered:
 class Result:
     rendered: Rendered | None
     issues: tuple[str, ...]
-
-
-class MissingValueError(Exception):
-    """Only absent usable values cause whole-field fallback; invalid structure still fails."""
 
 
 # Role signatures are closed even when several IDs share one presentation rule.
@@ -271,6 +280,9 @@ def validate_form(form: FormDefinition) -> None:
     elif form.rule == "quantity.constant_value.v1":
         _constant_form(form)
         cases = frozenset({"default"})
+    elif form.id in {"earth_rite.display", "dice.interval"}:
+        validate_parameter_form(form)
+        cases = frozenset({"default"})
     else:
         raise ValueError("Unknown four-layer form rule or ID")
     if set(form.cases) != cases:
@@ -355,6 +367,7 @@ class Renderer:
         *,
         domains: Mapping[str, ClosedDomain] | None = None,
     ) -> None:
+        self.registry = DEFAULT_REGISTRY.extend(FAMILY.descriptors)
         self.labels = dict(labels)
         self.code_references: dict[tuple[LeafType, str], Reference] = {
             (type_name, code): GlossaryReference(kind="glossary", key="term:" + term)
@@ -362,7 +375,7 @@ class Renderer:
             for code, term in codes.items()
         } | dict(code_references)
         self.forms = dict(forms)
-        self.domains = dict(domains or {})
+        self.domains = {**(domains or {}), DOMAIN_CODE: DOMAIN, **self.registry.domains}
         for key, value in self.labels.items():
             if key != (canonical(value.reference.model_dump(mode="json")), value.lang):
                 raise ValueError(
@@ -373,17 +386,45 @@ class Renderer:
                 raise ValueError("Selected form key differs from its identity")
             validate_form(selected_form.definition)
 
-    def expression_target(  # ruff: ignore[no-self-use] -- preparation overrides this presentation hook
+    def expression_target(
         self,
-        _item: BoundTarget,
-        _expr: Expression | ContextExpression | PredicateExpr,
-        _lang: str,
+        item: BoundTarget,
+        expr: Expression | ContextExpression | PredicateExpr,
+        lang: str,
     ) -> SelectedTarget:
-        """Only the isolated preparation renderer supplies finite expression targets."""
-        raise MissingValueError("unsupported_quantity_presentation")
+        """Expression wording follows the selected sentence, including pinned variants."""
+        assert item.selected is not None
+        targets = ExpressionTargets(
+            {
+                (identifier, lang): SelectedTarget(
+                    target, item.selected.origin, item.selected.low_confidence
+                )
+                for identifier, target in item.selected.expression_targets.items()
+            },
+            registry=self.registry,
+        )
+        return targets.expand(
+            expr,
+            item.frame.leaf_schema,
+            lang,
+            {key: form.definition for key, form in self.forms.items()},
+            frame=item.frame,
+            binding=item.binding,
+        )
 
     def references(self, item: BoundTarget, name: str) -> tuple[Reference, ...]:
         """Resolve codes and references without searching translated text."""
+        value = item.binding.values.get(name)
+        expr = value.expr if isinstance(value, QuantitySpec) else value
+        if isinstance(expr, (Expression, ContextExpression, PredicateExpr)):
+            dependencies = target_dependencies(
+                item.frame, item.binding, registry=self.registry
+            )
+            return tuple(
+                ref
+                for actual in dependencies.get(name, ())
+                for ref in self.references(item, actual)
+            )
         slot = next(s for s in item.frame.leaf_schema.slots if s.name == name)
         value = item.binding.values.get(name)
         if isinstance(
@@ -425,15 +466,23 @@ class Renderer:
                     result.add((slot.name, slot.role, key))
         return frozenset(result)
 
-    def verify_target(  # ruff: ignore[no-self-use] -- preparation supplies expression dependencies
+    def verify_target(
         self,
         item: BoundTarget,
         lang: str,
         forms: Mapping[tuple[str, str], FormDefinition],
     ) -> None:
-        """Keep production target usage independent of preparation expression bindings."""
+        """Check required usage through the selected source-bound expression graph."""
         assert item.selected is not None
-        item.selected.target.verify(item.frame.leaf_schema, lang, forms)
+        verify_quantities(item.frame, item.binding, scopes={}, registry=self.registry)
+        item.selected.target.verify(
+            item.frame.leaf_schema,
+            lang,
+            forms,
+            dependencies=target_dependencies(
+                item.frame, item.binding, registry=self.registry
+            ),
+        )
 
     def render(
         self, context_id: str, lang: str, plan: tuple[BoundTarget, ...]
@@ -448,6 +497,17 @@ class Renderer:
             self.verify_target(item, lang, definitions)
         output = _Output(self, lang)
         try:
+            for item in plan:
+                assert item.selected is not None
+                verify_expression_selection(
+                    item.frame,
+                    item.binding,
+                    item.selected.target,
+                    item.selected.expression_targets,
+                    lang,
+                    definitions,
+                    registry=self.registry,
+                )
             for item in _assembly(plan):
                 assert item.selected is not None
                 output.dependencies.append(
@@ -465,6 +525,10 @@ class Renderer:
                         | {"source_hash": item.binding.source.source_hash},
                         "target": item.selected.target.model_dump(mode="json"),
                         "variant_key": item.selected.variant_key,
+                        "expression_targets": {
+                            name: target.model_dump(mode="json")
+                            for name, target in item.selected.expression_targets.items()
+                        },
                         "origin": item.selected.origin,
                         "low_confidence": item.selected.low_confidence,
                         "source_low_confidence": item.source_low_confidence,

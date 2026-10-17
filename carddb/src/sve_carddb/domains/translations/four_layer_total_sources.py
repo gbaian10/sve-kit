@@ -26,9 +26,9 @@ from sve_carddb.domains.translations.four_layer_ability import (
     ABILITY_HEAD,
     OPTION_LABEL,
 )
+from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf, leaf
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
-from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 from sve_carddb.domains.translations.four_layer_totals import (
     DESCRIPTORS,
     NOUNS,
@@ -44,8 +44,8 @@ if TYPE_CHECKING:
         Classifier,
         Recognized,
     )
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 _PAIR_SIZE = 2
@@ -886,10 +886,10 @@ def _apply(
 
 def prepare_totals(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     classifier: Classifier,
     _context: CardContext | None,
-) -> PreparedField:
+) -> DerivedField:
     """Family callbacks reconstruct from raw source; target wording never grants acceptance."""
     derived = prepared.derived
     if derived.field.source.field not in {"effect", "section"} or not isinstance(
@@ -939,4 +939,4 @@ def prepare_totals(
     )
 
 
-FAMILY = PreparationFamily("A8-A10", DESCRIPTORS, prepare_totals)
+FAMILY = SourceFamily("A8-A10", DESCRIPTORS, prepare_totals)

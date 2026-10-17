@@ -457,7 +457,7 @@ def test_battlefield_named_card_does_not_infer_kind_from_its_unit() -> None:
     assert found.issues == ("n0_numeric_construction_unresolved",)
 
 
-@pytest.mark.parametrize("version", ["four-layer-jp-v1", "four-layer-jp-v3", "unknown"])
+@pytest.mark.parametrize("version", ["four-layer-jp-v1", "four-layer-jp-v2", "unknown"])
 def test_classifier_rejects_unsupported_versions_at_bind_and_verify(
     version: str,
 ) -> None:

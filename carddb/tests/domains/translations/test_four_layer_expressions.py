@@ -28,7 +28,6 @@ from sve_carddb.domains.translations.four_layer_expressions import (
     DOMAIN,
     DOMAIN_CODE,
     ExpressionTargets,
-    PreparationRenderer,
     definition,
     verify_import,
     verify_quantities,
@@ -41,8 +40,9 @@ from sve_carddb.domains.translations.four_layer_render import (
 )
 
 from . import test_four_layer_render
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import classifier
-from .test_four_layer_preparation import mixed_case
+from .test_four_layer_source_construction import mixed_case
 
 EXPRESSION_ID = "count.current_zone.owner.zone.v1"
 
@@ -97,7 +97,9 @@ def sample() -> tuple[BoundTarget, Renderer, ExpressionTargets]:
         format=1,
         nodes=(LeafRef(kind="LeafRef", slot="count"),),
     )
-    item = BoundTarget(frame, binding, SelectedTarget(target))
+    item = BoundTarget(
+        frame, binding, SelectedTarget(target, origin="machine", low_confidence=True)
+    )
     refs = Renderer({}, {}, {}).code_references
     labels = {}
     entries: tuple[tuple[LeafType, str, str], ...] = (
@@ -132,8 +134,10 @@ def test_expression_formals_bind_different_actual_names_and_propagate_render_evi
     None
 ):
     item, renderer, targets = sample()
-    prepared = PreparationRenderer(renderer, targets)
-    result = prepared.render("ctx:synthetic", "zh-Hant", (item,))
+    prepared = renderer
+    result = prepared.render(
+        "ctx:synthetic", "zh-Hant", expression_plan((item,), targets)
+    )
     assert result.rendered is not None
     assert result.rendered.text == "自己的手牌張數"
     assert result.rendered.low_confidence
@@ -149,8 +153,9 @@ def test_expression_formals_bind_different_actual_names_and_propagate_render_evi
     )
     assert len(result.rendered.annotation.occurrences) == 2
     assert prepared.required_references(item, "zh-Hant")
-    with pytest.raises(ValueError, match="required"):
-        renderer.render("ctx:synthetic", "zh-Hant", (item,))
+    assert renderer.render("ctx:synthetic", "zh-Hant", (item,)).issues == (
+        "missing_expression_translation",
+    )
     explicit = replace(
         item,
         selected=SelectedTarget(
@@ -164,10 +169,10 @@ def test_expression_formals_bind_different_actual_names_and_propagate_render_evi
         ),
     )
     assert renderer.render("ctx:synthetic", "zh-Hant", (explicit,)).issues == (
-        "unsupported_quantity_presentation",
+        "missing_expression_translation",
     )
-    missing = PreparationRenderer(renderer, ExpressionTargets({})).render(
-        "ctx:synthetic", "zh-Hant", (item,)
+    missing = renderer.render(
+        "ctx:synthetic", "zh-Hant", expression_plan((item,), ExpressionTargets({}))
     )
     assert missing.issues == ("missing_expression_translation",)
 
@@ -222,8 +227,7 @@ def test_constant_domains_do_not_accept_new_expression_values() -> None:
     slot = item.frame.leaf_schema.slots[-1]
     expr = item.binding.values["count"]
     verify_value(slot, expr, {DOMAIN_CODE: DOMAIN})
-    with pytest.raises(ValueError, match="Unknown"):
-        verify_value(slot, expr, classifier().domains)
+    verify_value(slot, expr, classifier().domains)
     with pytest.raises(ValueError, match="Unknown"):
         definition(
             Expression(
@@ -386,7 +390,9 @@ def test_offset_is_a_typed_magnitude_and_unsealed_target_shapes_are_rejected() -
             )
         }
     )
-    with pytest.raises(ValueError, match="requires a v3"):
-        PreparationRenderer(renderer, ExpressionTargets({})).render(
-            "ctx:synthetic", "zh-Hant", (replace(item, frame=old_frame),)
+    with pytest.raises(ValueError, match="require a v3"):
+        renderer.render(
+            "ctx:synthetic",
+            "zh-Hant",
+            expression_plan((replace(item, frame=old_frame),), ExpressionTargets({})),
         )

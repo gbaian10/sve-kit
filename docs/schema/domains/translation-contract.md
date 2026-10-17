@@ -61,9 +61,9 @@ concept_evidence 的 concept_note 可省略，只保留有實際內容的說明�
 | glossary_emphasis_choice | term_id | `term_id,value` |
 | symbol_localization_choice | symbol_id,lang | `symbol_id,lang,symbol_basis,value,concept_evidence`，完整值依[記號文案契約](catalog-route-adoption.md#6-卡文記號與三語文案) |
 | sentence_template | id | 四層 Frame：`id,source,role,semantic_variant,leaf_schema,projection,content_hash`，見[共用契約 §3](four-layer-translation.md#3-frame-與語義身分) |
-| template_translation | template_id,lang | `template_id,lang,target`，target 為 Literal／LeafRef／Form／NP 節點 |
+| template_translation | template_id,lang | `template_id,lang,target,expression_targets`，target 為 Literal／LeafRef／Form／NP 節點 |
 | template_translation_candidate | source_kind,candidate_id,lang | `source_kind,candidate_id,lang,text,normalized_hash,role,reasons`，未啟用原稿依 §2.1 |
-| template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,target` |
+| template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,target,expression_targets` |
 | translation_form | id,lang | `id,lang,signature,rule,cases`，見[共用契約 §5](four-layer-translation.md#5-targetform-與部分-np) |
 | glossary_choice_variant | term_id,lang,variant_key | `term_id,lang,variant_key,value,concept_evidence`（選填 `source_claim`） |
 | context_assignment | owner,field,ordinal | `owner,field,ordinal,source_hash,variant,concept_key,reason` |
@@ -78,6 +78,14 @@ owner／field／ordinal 的組合及來源雜湊由本次有效身分與原文�
 同名不代表同概念。region-reviews 中的 region_text_review／region_divergence 同時控制 DSL／機制，
 封套尚未落地，見 §7.1；保留 build-db §5 的決定及 freshness 檢查，不轉成本節 record；區域核對的獨立讀取不得忽略它們。
 counterpart 仍須兩側精確原文及有效同卡／面關係。
+
+`expression_targets` 為句子自己的 `{expression_id:Target}`，可省略空集合；語言、origin 與
+low_confidence 沿用同一筆 record。它與主 Target 組成完整稿件，重複鍵拒絕，不能依檔案順序覆蓋。
+pin 選 variant 時完整替換兩者，不繼承 default map，也不借用其他句子或語言。
+同一 ID 在同句多次呼叫共用這份呈現；需要不同稿卻無法保留既有引用時明確報衝突，不自動選稿。
+主 Target 可達的 expression（含 wrapper 與 import source leaves）才可帶稿；缺稿整欄退回，
+未知 ID、未用稿或壞形參拒絕，所有語言及未啟用 variant 亦須通過可靜態判定的檢查。
+詳見[共用契約 §11.2／§11.5](four-layer-translation.md#112-有限-expression-與來源綁定)。
 
 translation_override 的 pin 以 templates=`[{template_id,lang,variant_key}]`、
 terms=`[{term_id,lang,variant_key}]` 指明可重用的當前譯文／選詞；variant_key=default 指一般 record（card_name 則取當次有效 label），
@@ -177,7 +185,7 @@ layout 不含待翻語義，可機械生成固定模板；reminder/token_header 
 依計數物、所在區域集合與數量角色查表並驗回原文單位；NFKC、別名及省略均留 trace。
 renderer 與 DSL 使用同一份通過檢查的值，NP 只組合引用，不建立重疊的第二份來源槽。
 N1 正式入口使用同版 derive_source／來源驗證，固定結構由版本決定；既有可選辨識仍尊重 enabled／low_confidence。
-正式 workflow／authored 與 DB reader 只接受 four-layer-jp-v2；renderer v3 的形式、必要引用及複合區域成員呈現參與實際 render 相依。
+正式 workflow／authored 與 DB reader 只接受 four-layer-jp-v3；renderer v3 的形式、必要引用及複合區域成員呈現參與實際 render 相依。
 NC／SC 門檻能力名的繁中一律呈現死靈充能／魔力連鎖全名，並經能力名葉引用輸出；不能把必要能力名引用藏回 Literal。
 同一 G10 source_zone 的兩區與共同 owner 使用封閉 source_union Form，來源範圍、必要引用及逐成員位置依四層契約，不新增自由字串參數。
 

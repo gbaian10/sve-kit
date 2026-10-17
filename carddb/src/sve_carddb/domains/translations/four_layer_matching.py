@@ -11,7 +11,6 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical
-from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -40,15 +39,13 @@ def _key(frame: Frame) -> bytes:
             "role": frame.role,
             "semantic_variant": frame.semantic_variant.model_dump(mode="json"),
             "projection": frame.projection.model_dump(mode="json"),
+            "mode_rules": [r.model_dump(mode="json") for r in frame.mode_rules],
         }
     )
 
 
 class Frames:
-    def __init__(
-        self, frames: Iterable[Frame], *, normalizer_version: str = VERSION
-    ) -> None:
-        self.normalizer_version = normalizer_version
+    def __init__(self, frames: Iterable[Frame]) -> None:
         self.index: dict[bytes, list[Frame]] = {}
         identifiers = set()
         for frame in frames:
@@ -66,9 +63,7 @@ class Frames:
         field = derived.field
         part = field.parts[ordinal]
         recognized = derived.recognized[ordinal]
-        candidate_frame, _ = recognized.bind(
-            field.source, part, normalizer_version=self.normalizer_version
-        )
+        candidate_frame, _ = derived.bind(ordinal)
         candidates = self.index.get(_key(candidate_frame), ())
         matches = []
         for frame in candidates:
@@ -97,8 +92,6 @@ def bind_recognized(
     field: SourceField,
     part: SourcePart,
     recognized: Recognized,
-    *,
-    mixed: bool = False,
 ) -> SourceBinding | None:
     """Map complete signatures and construction order, including independent omitted operands."""
     expected_omitted = tuple(s for s in recognized.schema.slots if not s.occurrences)
@@ -125,7 +118,7 @@ def bind_recognized(
         _signature(slot) != _signature(expected[pos]) for pos, slot in actual.items()
     ):
         return None
-    if mixed and not _mixed_names(recognized, actual, omitted_names):
+    if not _mixed_names(recognized, actual, omitted_names):
         return None
     values: dict[str, TypedValue] = {}
     occurrences: list[LeafOccurrence] = []
@@ -144,7 +137,7 @@ def bind_recognized(
             return None
         name = mapped.pop()
         value = recognized.values[occurrence.slot]
-        if mixed and isinstance(value, (Expression, ContextExpression, PredicateExpr)):
+        if isinstance(value, (Expression, ContextExpression, PredicateExpr)):
             value = value.model_copy(
                 update={"leaves": tuple(omitted_names[n] for n in value.leaves)}
             )

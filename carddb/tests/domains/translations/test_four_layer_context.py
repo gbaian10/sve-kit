@@ -1,7 +1,7 @@
 """Public contracts reject semantic guesses while preserving normal presentation evidence."""
 
 from dataclasses import replace
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import pytest
 
@@ -22,19 +22,12 @@ from sve_carddb.contracts.four_layer import (
     Port,
     PortEvidence,
     PredicateExpr,
-    Projection,
     ReceiptRef,
     Scope,
     Span,
     Target,
-    hash_payload,
 )
-from sve_carddb.contracts.source_binding import (
-    LeafOccurrence,
-    QuantityDomain,
-    TypedValue,
-    verify_value,
-)
+from sve_carddb.contracts.source_binding import QuantityDomain, TypedValue, verify_value
 from sve_carddb.domains.translations.four_layer_context import (
     DEFAULT_REGISTRY,
     Descriptor,
@@ -44,24 +37,14 @@ from sve_carddb.domains.translations.four_layer_context import (
 )
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
-    PreparationRenderer,
     target_dependencies,
     verify_quantities,
-)
-from sve_carddb.domains.translations.four_layer_preparation import (
-    PreparationFamily,
-    PreparedField,
-    derive_preparation,
 )
 from sve_carddb.domains.translations.four_layer_render import SelectedTarget
 
 from .context_fixtures import ContractCase, contract_case
-from .test_four_layer_classification import classifier, source
+from .expression_fixtures import expression_plan
 from .test_four_layer_expressions import EXPRESSION_ID, sample
-
-if TYPE_CHECKING:
-    from sve_carddb.domains.translations.four_layer_classification import Classifier
-    from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 
 @pytest.mark.parametrize("family", ["A1", "A2", "A3", "A11"])
@@ -72,8 +55,8 @@ def test_cross_family_contracts_render_and_satisfy_required_closure(
     item = case.item
     verify_quantities(item.frame, item.binding, scopes={})
     verify_mode_count(case.mode_rule, item.frame, item.binding)
-    rendered = PreparationRenderer(case.renderer, case.targets).render(
-        "synthetic", "zh-Hant", (item,)
+    rendered = case.renderer.render(
+        "synthetic", "zh-Hant", expression_plan((item,), case.targets)
     )
     assert rendered.rendered is not None
     assert rendered.rendered.text.startswith("測試") or "測試" in rendered.rendered.text
@@ -280,8 +263,10 @@ def test_expression_targets_reject_unused_formals_and_missing_required_source_im
         Target(format=1, nodes=(LiteralNode(kind="Literal", text="藏起來源"),))
     )
     with pytest.raises(ValueError, match="required"):
-        PreparationRenderer(case.renderer, ExpressionTargets(targets)).render(
-            "synthetic", "zh-Hant", (case.item,)
+        case.renderer.render(
+            "synthetic",
+            "zh-Hant",
+            expression_plan((case.item,), ExpressionTargets(targets)),
         )
     item = replace(
         case.item,
@@ -290,8 +275,8 @@ def test_expression_targets_reject_unused_formals_and_missing_required_source_im
         ),
     )
     with pytest.raises(ValueError, match="required"):
-        PreparationRenderer(case.renderer, case.targets).render(
-            "synthetic", "zh-Hant", (item,)
+        case.renderer.render(
+            "synthetic", "zh-Hant", expression_plan((item,), case.targets)
         )
 
 
@@ -451,8 +436,8 @@ def test_single_multiplier_is_shared_by_current_and_history_reads(
             )
         ),
     )
-    result = PreparationRenderer(case.renderer, targets).render(
-        "synthetic", "zh-Hant", (item,)
+    result = case.renderer.render(
+        "synthetic", "zh-Hant", expression_plan((item,), targets)
     )
     assert result.rendered is not None
     assert result.rendered.text.endswith("乘2")
@@ -802,105 +787,3 @@ def test_receipt_imports_declare_their_result_kind() -> None:
             "ability",
             replace(receipt, receipt_result="amount"),
         )
-
-
-def test_family_adapter_adds_typed_structure_without_changing_shared_registration() -> (
-    None
-):
-    raw = "仮が手札から来ていたなら、カードを1枚引く。"
-    case = contract_case("A11")
-    schema = {s.name: s for s in case.item.frame.leaf_schema.slots}
-
-    def prepare(
-        _raw: str,
-        prepared: PreparedField,
-        _classifier: Classifier,
-        _context: CardContext | None,
-    ) -> PreparedField:
-        derived = prepared.derived
-        part, found = derived.field.parts[0], derived.recognized[0]
-        start = part.canonical_source.index("手札")
-        key = prepared.bind(0)[1].occurrence_key()
-        zone = schema["from"].model_copy(
-            update={"occurrences": (Span(start=start, end=start + 2),)}
-        )
-        explicit = LeafOccurrence(
-            slot="from",
-            ordinal=0,
-            raw_spans=(Span(start=raw.index("手札"), end=raw.index("手札") + 2),),
-            canonical_spans=zone.occurrences,
-            source_unit=None,
-            source_presence="explicit",
-            resolution_rule=None,
-        )
-        omitted = explicit.model_copy(
-            update={
-                "slot": "condition",
-                "raw_spans": (),
-                "canonical_spans": (),
-                "source_presence": "omitted",
-                "resolution_rule": "entry.self.from_zone.eq.v1",
-            }
-        )
-        recognized = replace(
-            found,
-            schema=LeafSchema(
-                format=2,
-                slots=(
-                    zone,
-                    *found.schema.slots,
-                    schema["condition"].model_copy(update={"required": False}),
-                ),
-            ),
-            values={**found.values, **case.item.binding.values},
-            occurrences=(explicit, *found.occurrences, omitted),
-        )
-        ports = tuple(
-            p.model_copy(
-                update={"evidence": p.evidence.model_copy(update={"source": key})}
-            )
-            for p in case.item.frame.projection.imports
-            if p.evidence is not None
-        )
-        interface = Projection(
-            projection_kind="pending",
-            discriminator=None,
-            scopes=case.item.frame.projection.scopes,
-            imports=ports,
-            exports=(),
-        )
-        return replace(
-            prepared,
-            derived=replace(derived, recognized=(recognized,)),
-            interfaces=(interface,),
-            mode_rules=((case.mode_rule,),),
-        )
-
-    own = Descriptor(
-        "synthetic.family.read.v1",
-        "quantity.synthetic.v1",
-        "read_value",
-        "Nat",
-        "card_count",
-        (),
-        (),
-        "synthetic",
-        ("V.read",),
-    )
-    family = PreparationFamily("synthetic", (own,), prepare)
-    engine = classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(family,))
-    frame, binding = prepared.bind(0)
-    prepared.verify(raw, engine, frame, binding)
-    assert frame.mode_rules == (case.mode_rule,)
-    assert replace(prepared, mode_rules=()).bind(0)[0].id != frame.id
-    forged = binding.model_copy(
-        update={"values": binding.values | {"from": ("graveyard",)}}
-    )
-    forged = forged.model_copy(update={"id": "bind:" + hash_payload(forged.payload())})
-    with pytest.raises(ValueError, match="differs"):
-        prepared.verify(raw, engine, frame, forged)
-    assert own.id in prepared.registry.descriptors
-    assert own.id not in DEFAULT_REGISTRY.descriptors
-    with pytest.raises(ValueError, match="unique"):
-        derive_preparation(raw, source(raw), engine, families=(family, family))

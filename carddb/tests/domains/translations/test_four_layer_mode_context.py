@@ -1,7 +1,7 @@
 """Mode preparation proves source reachability without implementing runtime history."""
 
 from dataclasses import replace
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import pytest
 
@@ -9,6 +9,7 @@ from sve_carddb.contracts.four_layer import (
     ChoiceContext,
     Constant,
     LeafRef,
+    LinkedCondition,
     LiteralNode,
     PendingCondition,
     PredicateExpr,
@@ -18,14 +19,17 @@ from sve_carddb.contracts.four_layer import (
     Target,
 )
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_context import verify_mode_count
+from sve_carddb.domains.translations.four_layer_derivation import (
+    DerivedField,
+    derive_source,
+)
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
-    PreparationRenderer,
     verify_quantities,
 )
 from sve_carddb.domains.translations.four_layer_mode_context import FAMILY, mode_sources
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Label,
@@ -35,20 +39,18 @@ from sve_carddb.domains.translations.four_layer_render import (
 from sve_carddb.domains.translations.four_layer_semantics import Classified
 
 from .context_fixtures import contract_case
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import source
 from .test_four_layer_n1 import n1_classifier
-
-if TYPE_CHECKING:
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
 
 _INTRO = "下記から1つチョイスする。"
 _CONDITION = "自分の墓場が8枚以上なら、代わりに2つまで。"
 _OPTIONS = "【1】仮甲。【2】仮乙。"
 
 
-def prepare(raw: str) -> PreparedField:
+def prepare(raw: str) -> DerivedField:
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), engine)
     for index, found in enumerate(prepared.derived.recognized):
         assert not found.issues
         prepared.verify(raw, engine, *prepared.bind(index))
@@ -69,20 +71,15 @@ def test_cross_line_choice_keeps_constants_and_exact_source_edges() -> None:
     assert isinstance(intro.alternative.expr, Constant)
     assert intro.alternative.expr.value == 2
     assert isinstance(intro.condition, ResolvedCondition)
-    assert isinstance(options.condition, PendingCondition)
-    assert options.condition.source_span == group.condition
+    assert isinstance(options.condition, LinkedCondition)
+    assert options.condition.condition == intro.condition
     assert prepared.interfaces[0] == prepared.interfaces[2]
-    ordinary = derive_preparation(raw, source(raw), n1_classifier())
-    assert ordinary.mode_rules == ()
-    assert ordinary.derived != prepared.derived
 
 
 @pytest.mark.parametrize(
     ("condition", "reason"),
     [
         ("自分の場に仮の存在がいるなら、", "unsealed_source"),
-        ("これが墓場から場に出ていたなら、", "missing_provider"),
-        ("このターン、自分の場のフォロワーが進化していたなら、", "missing_provider"),
         ("このターン、相手のフォロワーが場に出ていたなら、", "unsealed_source"),
     ],
 )
@@ -106,7 +103,7 @@ def test_faceup_evolve_condition_reuses_the_counted_operands() -> None:
         + "自分のエボルヴデッキの表向きの『仮場手札自分』が8枚以上なら、代わりに2つまで。\n"
         + _OPTIONS
     )
-    plain = derive_preparation(raw, source(raw), n1_classifier()).derived.recognized[0]
+    plain = analyze_source(raw, source(raw), n1_classifier()).recognized[0]
     prepared = prepare(raw)
     (rule,) = prepared.mode_rules[0]
     assert isinstance(rule.condition, ResolvedCondition)
@@ -152,7 +149,7 @@ def test_faceup_evolve_condition_reuses_the_counted_operands() -> None:
     ],
 )
 def test_neighboring_choice_shapes_are_not_admitted(raw: str) -> None:
-    prepared = derive_preparation(raw, source(raw), n1_classifier(), families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), n1_classifier())
     assert mode_sources(raw, prepared) == ()
     assert not any(prepared.mode_rules)
 
@@ -177,9 +174,7 @@ def test_optional_payment_is_linked_only_to_the_adjacent_unique_producer() -> No
     assert payment in prepared.interfaces[0].exports
     assert isinstance(prepared.mode_rules[2][0].condition, ResolvedCondition)
     missing_raw = raw.replace("+7してよい", "+6してよい")
-    missing = derive_preparation(
-        missing_raw, source(missing_raw), n1_classifier(), families=(FAMILY,)
-    )
+    missing = derive_source(missing_raw, source(missing_raw), n1_classifier())
     assert (
         mode_sources(raw.replace("+7してよい", "+6してよい"), missing)[0].cost is None
     )
@@ -307,9 +302,7 @@ def test_finite_condition_renders_its_required_operands_with_annotations() -> No
         binding,
         target=target,
     )
-    result = PreparationRenderer(renderer, targets).render(
-        "synthetic", "zh-Hant", (item,)
-    )
+    result = renderer.render("synthetic", "zh-Hant", expression_plan((item,), targets))
     assert result.rendered is not None
     assert "自己墓場至少8以上" in result.rendered.text
     assert len(result.rendered.annotation.occurrences) == 2
@@ -320,9 +313,7 @@ def test_finite_condition_renders_its_required_operands_with_annotations() -> No
         ),
     )
     with pytest.raises(ValueError, match="required"):
-        PreparationRenderer(renderer, targets).render(
-            "synthetic", "zh-Hant", (missing,)
-        )
+        renderer.render("synthetic", "zh-Hant", expression_plan((missing,), targets))
 
 
 def test_leader_life_condition_does_not_borrow_a_card_set_owner_role() -> None:
@@ -353,7 +344,8 @@ def test_leader_life_condition_does_not_borrow_a_card_set_owner_role() -> None:
 
 def test_mode_family_preserves_existing_semantics_and_projection_kind() -> None:
     raw = _INTRO + _CONDITION + "\n" + _OPTIONS
-    original = derive_preparation(raw, source(raw), n1_classifier())
+    base = analyze_source(raw, source(raw), n1_classifier())
+    original = DerivedField(base, tuple(None for _ in base.field.parts))
     projection = Projection(
         projection_kind="ability_body",
         discriminator="synthetic.existing.v1",
@@ -424,7 +416,7 @@ def test_optional_cost_cannot_borrow_an_ambiguous_or_quoted_producer(
     prefix: str, reason: str
 ) -> None:
     raw = prefix + _INTRO + "コストを+7したなら、代わりに2つまで。\n" + _OPTIONS
-    prepared = derive_preparation(raw, source(raw), n1_classifier(), families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), n1_classifier())
     (group,) = mode_sources(raw, prepared)
     assert group.cost is None
     rules = [rule for rs in prepared.mode_rules for rule in rs]

@@ -279,7 +279,7 @@ def test_current_source_rejects_unregistered_or_mismatched_semantic_descriptor(
     message = (
         "Binding differs from replayed exact source partition"
         if mutation == "role"
-        else "N1 binding differs from the complete current source construction"
+        else "Binding differs from the complete current source construction"
     )
     with pytest.raises(ValueError, match=message):
         engine.verify(raw, field, part, changed, binding, context=facts)

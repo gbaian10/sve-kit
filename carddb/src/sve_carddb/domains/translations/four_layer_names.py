@@ -37,8 +37,8 @@ from sve_carddb.domains.translations.four_layer_context import (
     ImportSignature,
     Parameter,
 )
+from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_history import name_filter_spans
-from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 from sve_carddb.domains.translations.recognition.provenance import merged
 
 if TYPE_CHECKING:
@@ -48,8 +48,8 @@ if TYPE_CHECKING:
         Classifier,
         Recognized,
     )
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 
@@ -571,11 +571,11 @@ def _names(builder: _Builder) -> None:
 
 def prepare_names(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     classifier: Classifier,
     context: CardContext | None,
-) -> PreparedField:
-    """Keep all new descriptors behind the explicit family preparation callback."""
+) -> DerivedField:
+    """Register new descriptors only through this family callback, not shared modules."""
     del context
     derived = prepared.derived
     source = derived.field.source
@@ -667,4 +667,4 @@ def prepare_names(
     )
 
 
-FAMILY = PreparationFamily("names", DESCRIPTORS, prepare_names)
+FAMILY = SourceFamily("names", DESCRIPTORS, prepare_names)

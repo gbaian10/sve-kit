@@ -1,4 +1,4 @@
-"""Preparation remains isolated from production admission and source verification."""
+"""Production v3 reconstructs source evidence and rejects unsupported versions."""
 
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -17,15 +17,12 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.contracts.source_binding import LeafOccurrence
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_authored import from_files
 from sve_carddb.domains.translations.four_layer_classification import Recognized
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
-from sve_carddb.domains.translations.four_layer_normalizer import (
-    PREPARATION_VERSION,
-    VERSION,
-)
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
+from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 from .test_four_layer_classification import classifier, source
 from .test_four_layer_n1 import n1_classifier
@@ -37,29 +34,20 @@ if TYPE_CHECKING:
 def test_preparation_preserves_existing_pure_omitted_owner_bindings() -> None:
     raw = "自分の墓場のフォロワー７枚を選び、手札に加える。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     assert any(o.source_presence == "omitted" for o in binding.occurrences)
     prepared.verify(raw, engine, frame, binding)
 
 
-def test_preparation_reconstructs_v3_while_production_stays_v2() -> None:
+def test_production_reconstructs_v3_from_complete_source() -> None:
     raw = "自分の手札のカード２枚を選ぶ。"
     engine = classifier()
-    old = derive_source(raw, source(raw), engine)
-    prepared = derive_preparation(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
-    assert old.bind(0)[0].source.normalizer_version == VERSION
-    assert frame.source.normalizer_version == PREPARATION_VERSION
+    assert frame.source.normalizer_version == VERSION
     prepared.verify(raw, engine, frame, binding)
-    with pytest.raises(ValueError, match="Unsupported"):
-        engine.verify(
-            raw, prepared.derived.field, prepared.derived.field.parts[0], frame, binding
-        )
-    with pytest.raises(ValueError, match="Unsupported"):
-        old.verify_binding(raw, engine, frame, binding)
-    with pytest.raises(ValueError, match="explicit v3"):
-        prepared.verify(raw, engine, *old.bind(0))
+    engine.verify(raw, prepared.field, prepared.field.parts[0], frame, binding)
     with pytest.raises(ValueError, match="outside"):
         prepared.verify(raw, engine, frame, binding.model_copy(update={"ordinal": 99}))
     changed = replace(prepared, derived=replace(prepared.derived, recognized=()))
@@ -84,16 +72,16 @@ def test_preparation_reconstructs_v3_while_production_stays_v2() -> None:
         )
 
 
-@pytest.mark.parametrize("version", [PREPARATION_VERSION, "four-layer-jp-v999"])
+@pytest.mark.parametrize("version", ["four-layer-jp-v2", "four-layer-jp-v999"])
 def test_production_authored_and_binding_entry_reject_preparation_versions(
     version: str,
 ) -> None:
     raw = "自分の手札のカード２枚を選ぶ。"
-    old = derive_source(raw, source(raw), classifier())
+    old = analyze_source(raw, source(raw), classifier())
     found = old.recognized[0]
     with pytest.raises(ValueError, match="Unsupported"):
         found.bind(old.field.source, old.field.parts[0], normalizer_version=version)
-    frame, _ = old.bind(0)
+    frame, _ = old.recognized[0].bind(old.field.source, old.field.parts[0])
     frame = frame.model_copy(
         update={
             "source": frame.source.model_copy(update={"normalizer_version": version})
@@ -108,13 +96,11 @@ def test_production_authored_and_binding_entry_reject_preparation_versions(
             ],
         }
     )
-    with pytest.raises(ValueError, match="Unsupported"):
+    with pytest.raises(ValueError, match="normalizer version"):
         from_files((("translations/templates/definitions/001.yaml", content, content),))
-    if version != PREPARATION_VERSION:
+    if version != VERSION:
         with pytest.raises(ValueError, match="Unsupported"):
-            found.bind_version(
-                old.field.source, old.field.parts[0], normalizer_version=version
-            )
+            found.bind(old.field.source, old.field.parts[0], normalizer_version=version)
 
 
 def test_choice_context_is_only_a_port_with_the_existing_four_fields() -> None:
@@ -142,7 +128,7 @@ def test_choice_context_is_only_a_port_with_the_existing_four_fields() -> None:
 
 def mixed_case() -> tuple[Recognized, Frame]:
     raw = "甲乙"
-    prepared = derive_preparation(raw, source(raw), classifier())
+    prepared = derive_source(raw, source(raw), classifier())
     frame, _ = prepared.bind(0)
     slots = tuple(
         LeafSlot(
@@ -196,7 +182,7 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
     None
 ):
     found, frame = mixed_case()
-    prepared = derive_preparation("甲乙", source("甲乙"), classifier())
+    prepared = derive_source("甲乙", source("甲乙"), classifier())
     field = prepared.derived.field
     renamed = frame.model_copy(
         update={
@@ -213,14 +199,14 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
     renamed = renamed.model_copy(
         update={"id": "frame:" + checksum, "content_hash": checksum}
     )
-    binding = bind_recognized(renamed, field, field.parts[0], found, mixed=True)
+    binding = bind_recognized(renamed, field, field.parts[0], found)
     assert binding is not None
     field.parts[0].verify(
         "甲乙",
         renamed,
         binding,
         classifier().domains,
-        normalizer_version=PREPARATION_VERSION,
+        normalizer_version=VERSION,
     )
     assert [o.slot for o in binding.occurrences] == [
         "actual_first",
@@ -228,7 +214,6 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
         "actual_first",
         "actual_second",
     ]
-    assert bind_recognized(renamed, field, field.parts[0], found) is None
     wrong = renamed.model_copy(
         update={
             "leaf_schema": LeafSchema(
@@ -242,7 +227,7 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
             )
         }
     )
-    assert bind_recognized(wrong, field, field.parts[0], found, mixed=True) is None
+    assert bind_recognized(wrong, field, field.parts[0], found) is None
     ambiguous = replace(
         found,
         schema=LeafSchema(
@@ -265,18 +250,16 @@ def test_mixed_occurrences_follow_explicit_operand_mapping_even_when_values_matc
             for index, occurrence in enumerate(found.occurrences[:3])
         ),
     )
-    assert (
-        bind_recognized(renamed, field, field.parts[0], ambiguous, mixed=True) is None
-    )
+    assert bind_recognized(renamed, field, field.parts[0], ambiguous) is None
     # Matching synthetic evidence cannot authorize an unsealed source relation.
-    with pytest.raises(ValueError, match="exact source construction"):
+    with pytest.raises(ValueError, match="complete current source construction"):
         prepared.verify("甲乙", classifier(), renamed, binding)
 
 
-def test_production_v2_authored_does_not_admit_choice_context_ports() -> None:
+def test_production_authored_admits_typed_choice_context_ports() -> None:
     raw = "自分の手札のカード２枚を選ぶ。"
-    derived = derive_source(raw, source(raw), classifier())
-    frame, _ = derived.bind(0)
+    derived = analyze_source(raw, source(raw), classifier())
+    frame, _ = derived.recognized[0].bind(derived.field.source, derived.field.parts[0])
     frame = frame.model_copy(
         update={
             "projection": frame.projection.model_copy(
@@ -303,5 +286,6 @@ def test_production_v2_authored_does_not_admit_choice_context_ports() -> None:
             ],
         }
     )
-    with pytest.raises(ValueError, match="Unsupported"):
-        from_files((("translations/templates/definitions/001.yaml", content, content),))
+    assert from_files(
+        (("translations/templates/definitions/001.yaml", content, content),)
+    ).records

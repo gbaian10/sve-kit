@@ -72,6 +72,7 @@ class Controls:
                 r.origin,
                 r.low_confidence,
                 r.data.variant_key if isinstance(r, TargetVariantRecord) else "default",
+                r.data.expression_targets,
             )
             for r in inputs.records
             if isinstance(r, (TargetRecord, TargetVariantRecord))

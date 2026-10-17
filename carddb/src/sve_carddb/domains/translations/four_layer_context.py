@@ -1,4 +1,4 @@
-"""Closed preparation descriptors shared by independently implemented source families."""
+"""Closed source descriptors shared by independently implemented source families."""
 
 from dataclasses import dataclass
 from types import MappingProxyType

@@ -32,6 +32,7 @@ from sve_carddb.domains.translations.english_records import (
     EnglishUseRecord,
 )
 from sve_carddb.domains.translations.four_layer_candidates import CandidateRecord
+from sve_carddb.domains.translations.four_layer_expressions import verify_target_shape
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_render import validate_form
 from sve_carddb.domains.translations.glossary.records import (
@@ -82,6 +83,7 @@ class TemplateTarget(RecordData):
     template_id: FrameId
     lang: Lang
     target: Target
+    expression_targets: dict[Code, Target] = Field(default_factory=dict)
 
 
 class TargetRecord(_Record[TemplateTarget]):
@@ -399,14 +401,6 @@ def _references(records: tuple[Record, ...], locations: Mapping[str, str]) -> No
                     raise ValueError(
                         "Unsupported four-layer authored normalizer version"
                     )
-                if any(
-                    port.type == "ChoiceContext"
-                    for port in (
-                        *record.data.projection.imports,
-                        *record.data.projection.exports,
-                    )
-                ):
-                    raise ValueError("Unsupported four-layer authored port type")
             elif isinstance(record, FormRecord):
                 validate_form(record.data)
             elif isinstance(record, (TargetRecord, TargetVariantRecord)):
@@ -417,7 +411,13 @@ def _references(records: tuple[Record, ...], locations: Mapping[str, str]) -> No
                     raise ValueError(
                         "Target language must differ from frame source language"
                     )
-                record.data.target.verify(frame.leaf_schema, record.data.lang, forms)
+                verify_target_shape(
+                    frame,
+                    record.data.target,
+                    record.data.expression_targets,
+                    record.data.lang,
+                    forms,
+                )
             elif isinstance(record, MatchRecord):
                 _match_references(record.data, frames)
 

@@ -11,9 +11,9 @@ from sve_carddb.contracts.four_layer import (
     Target,
 )
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Label,
@@ -27,10 +27,10 @@ from .test_four_layer_classification import classifier, source
 def test_constant_choice_changes_only_the_interface_and_preserves_target() -> None:
     raw = "下記から１つチョイスする。【１】仮。【２】別。"
     engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
-    old = derive_source(raw, source(raw), engine)
-    prepared = derive_preparation(raw, source(raw), engine)
+    old = analyze_source(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
-    prior, prior_binding = old.bind(0)
+    prior, prior_binding = old.recognized[0].bind(old.field.source, old.field.parts[0])
     assert frame.leaf_schema == prior.leaf_schema
     assert binding.values == prior_binding.values
     assert binding.occurrences == prior_binding.occurrences
@@ -95,8 +95,8 @@ def test_constant_choice_changes_only_the_interface_and_preserves_target() -> No
 )
 def test_unsealed_choice_connections_gain_no_interface(raw: str) -> None:
     engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
-    old = derive_source(raw, source(raw), engine)
-    prepared = derive_preparation(raw, source(raw), engine)
+    old = analyze_source(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     assert prepared.derived == old
     assert not any(prepared.interfaces)
 
@@ -105,9 +105,9 @@ def test_capacity_keeps_named_kind_literal_and_requires_counter_label() -> None:
     raw = "これに仮印カウンターは３個まで置ける。"
     counter = GlossaryReference(kind="glossary", key="term:object.counter")
     engine = classifier((Term(counter.key, "rule_term", "カウンター"),))
-    old = derive_source(raw, source(raw), engine)
+    old = analyze_source(raw, source(raw), engine)
     assert old.recognized[0].issues
-    prepared = derive_preparation(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     roles = {s.role: s.name for s in frame.leaf_schema.slots}
     assert binding.values[roles["counter_capacity"]] == 3
@@ -142,7 +142,7 @@ def test_capacity_keeps_named_kind_literal_and_requires_counter_label() -> None:
         .rendered
         is None
     )
-    missing = derive_preparation(raw, source(raw), classifier())
+    missing = derive_source(raw, source(raw), classifier())
     with pytest.raises(ValueError, match="Unresolved"):
         missing.bind(0)
 
@@ -158,6 +158,6 @@ def test_capacity_keeps_named_kind_literal_and_requires_counter_label() -> None:
 )
 def test_capacity_does_not_authorize_other_holders_or_amounts(raw: str) -> None:
     engine = classifier((Term("term:object.counter", "rule_term", "カウンター"),))
-    assert derive_preparation(raw, source(raw), engine).derived == derive_source(
+    assert derive_source(raw, source(raw), engine).derived == analyze_source(
         raw, source(raw), engine
     )

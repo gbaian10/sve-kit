@@ -18,16 +18,15 @@ from sve_carddb.contracts.four_layer import (
     PredicateExpr,
     Target,
 )
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_classification import Classifier, Term
 from sve_carddb.domains.translations.four_layer_context import verify_mode_count
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
-    PreparationRenderer,
     verify_quantities,
 )
 from sve_carddb.domains.translations.four_layer_history import HISTORY_FAMILY
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
 from sve_carddb.domains.translations.four_layer_provenance import PROVENANCE_FAMILY
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
@@ -36,6 +35,7 @@ from sve_carddb.domains.translations.four_layer_render import (
 )
 from sve_carddb.domains.translations.recognition.rules import Rule
 
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import source
 from .test_four_layer_expressions import sample
 from .test_four_layer_n1 import n1_classifier
@@ -43,7 +43,7 @@ from .test_four_layer_n1 import n1_classifier
 if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import Frame
     from sve_carddb.contracts.source_binding import SourceBinding
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
 
 FAMILIES = (HISTORY_FAMILY, PROVENANCE_FAMILY)
 
@@ -80,10 +80,10 @@ def event_classifier() -> Classifier:
     return Classifier(terms, replace(base.references, terms=expected), rules)
 
 
-def prepared_case(raw: str) -> tuple[PreparedField, Frame, SourceBinding]:
+def prepared_case(raw: str) -> tuple[DerivedField, Frame, SourceBinding]:
     """Use the same derive/bind/verify entry that private frozen fields use."""
     engine = event_classifier()
-    prepared = derive_preparation(raw, source(raw), engine, families=FAMILIES)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     frame.verify(prepared.derived.field.parts[0].canonical_source)
@@ -130,8 +130,7 @@ def test_entry_and_play_sources_are_distinct(clause: str, descriptor: str) -> No
     )
     assert all(s.required for s in frame.leaf_schema.slots)
     assert frame.semantic_variant.state == "pending"
-    old = derive_source(raw, source(raw), event_classifier())
-    assert old == derive_preparation(raw, source(raw), event_classifier()).derived
+    old = analyze_source(raw, source(raw), event_classifier())
     assert prepared.derived != old
 
 
@@ -252,7 +251,7 @@ def test_granted_history_keeps_its_own_query_scope() -> None:
         "それは「【攻撃時】７枚引く。それに「このターン中に自分のリーダーの体力が減少した回数」と同じダメージ」を持つ。"
     )
     expr = next(v for v in binding.values.values() if isinstance(v, ContextExpression))
-    assert "granted_" in expr.scope
+    assert "grant_" in expr.scope
     assert (
         next(
             p
@@ -268,18 +267,16 @@ def test_granted_history_keeps_its_own_query_scope() -> None:
     [
         (
             "下記から１つチョイスする。【1】７枚引く。【2】このターン、自分がスペルをプレイしていたなら、９枚引く。",
-            "p2.ability_0.mode_",
+            "read_ability_0_mode_",
         ),
         (
             "{ファンファーレ}これの{進化}コストを０にする。このターン、自分がスペルをプレイしていたなら、７枚引く。",
-            "p2.ability_0.body_condition",
+            "read_ability_0.body_condition",
         ),
     ],
 )
 def test_scope_follows_ability_heads_and_numbered_options(raw: str, scope: str) -> None:
-    prepared = derive_preparation(
-        raw, source(raw), event_classifier(), families=FAMILIES
-    )
+    prepared = derive_source(raw, source(raw), event_classifier())
     expr = next(
         v
         for v in prepared.derived.recognized[0].values.values()
@@ -350,10 +347,8 @@ def test_event_import_rejects_wrong_or_ambiguous_evidence(mode: str) -> None:
 )
 def test_neighboring_unsealed_sources_remain_unchanged(raw: str) -> None:
     engine = event_classifier()
-    base = derive_preparation(raw, source(raw), engine)
-    assert base == replace(
-        derive_preparation(raw, source(raw), engine, families=FAMILIES), families=()
-    )
+    base = derive_source(raw, source(raw), engine)
+    assert base == replace(derive_source(raw, source(raw), engine))
 
 
 def test_required_zone_renders_through_the_predicate_with_annotation() -> None:
@@ -396,10 +391,12 @@ def test_required_zone_renders_through_the_predicate_with_annotation() -> None:
         },
         registry=prepared.registry,
     )
-    result = PreparationRenderer(renderer, targets).render(
+    result = renderer.render(
         "ctx:synthetic",
         "zh-Hant",
-        (BoundTarget(frame, binding, SelectedTarget(target)),),
+        expression_plan(
+            (BoundTarget(frame, binding, SelectedTarget(target)),), targets
+        ),
     )
     assert result.rendered is not None
     assert "手牌" in result.rendered.text
@@ -419,9 +416,7 @@ def test_excluded_execution_and_ability_availability_are_source_properties() -> 
 
 def test_later_entry_condition_does_not_capture_preceding_action() -> None:
     raw = "自分の場のフォロワー１体を選ぶ。それに７ダメージ。これが手札から場に出ていたなら、９枚引く。"
-    prepared = derive_preparation(
-        raw, source(raw), event_classifier(), families=FAMILIES
-    )
+    prepared = derive_source(raw, source(raw), event_classifier())
     found = prepared.derived.recognized[0]
     name = next(n for n, v in found.values.items() if isinstance(v, PredicateExpr))
     spans = [s for o in found.occurrences if o.slot == name for s in o.raw_spans]
@@ -479,9 +474,7 @@ def test_real_source_predicate_can_feed_the_mode_contract() -> None:
 
 def test_event_subject_without_unique_enter_trigger_stays_pending() -> None:
     raw = "それが墓場から場に出ていたなら、７枚引く。"
-    prepared = derive_preparation(
-        raw, source(raw), event_classifier(), families=FAMILIES
-    )
+    prepared = derive_source(raw, source(raw), event_classifier())
     assert (
         "missing_unique_entry_event_provider" in prepared.derived.recognized[0].issues
     )
@@ -513,7 +506,7 @@ def test_event_subject_without_unique_enter_trigger_stays_pending() -> None:
 def test_missing_required_concepts_never_fall_back_to_active_literal_bindings(
     raw: str, reason: str
 ) -> None:
-    prepared = derive_preparation(raw, source(raw), n1_classifier(), families=FAMILIES)
+    prepared = derive_source(raw, source(raw), n1_classifier())
     assert reason in prepared.derived.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved"):
         prepared.bind(0)

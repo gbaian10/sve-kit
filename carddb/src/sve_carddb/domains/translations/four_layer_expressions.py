@@ -1,16 +1,19 @@
-"""Closed preparation expressions and positional, typed presentation arguments."""
+"""Closed source expressions and positional, typed presentation arguments."""
 
 from dataclasses import dataclass, replace
+from functools import cache
 from types import MappingProxyType
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import (
     Bound,
     ContextExpression,
+    Domain,
     Expression,
     FormNode,
     LeafRef,
     LeafSchema,
+    LeafSlot,
     LiteralNode,
     PredicateExpr,
     QuantitySpec,
@@ -25,12 +28,8 @@ from sve_carddb.domains.translations.four_layer_context import (
     verify_mode_count,
     visible,
 )
-from sve_carddb.domains.translations.four_layer_n2_forms import validate_parameter_form
-from sve_carddb.domains.translations.four_layer_normalizer import PREPARATION_VERSION
-from sve_carddb.domains.translations.four_layer_render import (
-    MissingValueError,
-    Renderer,
-)
+from sve_carddb.domains.translations.four_layer_errors import MissingValueError
+from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -38,19 +37,12 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import (
         FormDefinition,
         Frame,
-        LeafSlot,
         LeafType,
         Node,
         Projection,
-        Reference,
     )
     from sve_carddb.contracts.source_binding import SourceBinding
-    from sve_carddb.domains.translations.four_layer_render import (
-        BoundTarget,
-        Form,
-        Result,
-        SelectedTarget,
-    )
+    from sve_carddb.domains.translations.four_layer_render import SelectedTarget
 
 _ARGUMENTS: Mapping[str, tuple[LeafType, str]] = {
     "owner": ("Player", "player.relative.v1"),
@@ -156,7 +148,7 @@ DOMAIN = QuantityDomain(
 def definition(expr: Expression) -> Definition:
     """Unknown expression IDs cannot acquire meaning from a translated target."""
     if expr.expression_id not in DEFINITIONS:
-        raise ValueError("Unknown preparation expression ID")
+        raise ValueError("Unknown source expression ID")
     return DEFINITIONS[expr.expression_id]
 
 
@@ -231,8 +223,14 @@ def _verify_expression(
 def target_dependencies(
     frame: Frame, binding: SourceBinding, *, registry: Registry = DEFAULT_REGISTRY
 ) -> dict[str, tuple[str, ...]]:
-    """Only preparation targets inherit usage through source-bound expression actuals."""
-    if frame.source.normalizer_version != PREPARATION_VERSION:
+    """Targets inherit usage through source-bound expression actuals."""
+    if frame.source.normalizer_version != VERSION and any(
+        isinstance(
+            value.expr if isinstance(value, QuantitySpec) else value,
+            (Expression, ContextExpression, PredicateExpr),
+        )
+        for value in binding.values.values()
+    ):
         raise ValueError("Expression target dependencies require a v3 frame")
     dependencies = {}
     for name, value in binding.values.items():
@@ -257,26 +255,28 @@ class ExpressionTargets:
             key[0] not in DEFINITIONS and key[0] not in registry.descriptors
             for key in self.targets
         ):
-            raise ValueError("Target selects an unknown preparation expression")
+            raise ValueError("Target selects an unknown source expression")
 
     def import_arguments(
         self,
         expr: ContextExpression | PredicateExpr,
         schema: LeafSchema,
         frame: Frame | None,
-        binding: SourceBinding | None,
     ) -> dict[str, LeafSlot]:
         """Imported source leaves remain required, typed presentation formals."""
-        if frame is None or binding is None:
+        if frame is None:
             raise ValueError("Context presentation requires source-bound imports")
         arguments = {}
         for signature in self.registry.definition(expr).imports:
             port = next(
-                p
-                for p in frame.projection.imports
-                if p.name == expr.imports[signature.name]
+                (
+                    p
+                    for p in frame.projection.imports
+                    if p.name == expr.imports[signature.name]
+                ),
+                None,
             )
-            if port.evidence is None:
+            if port is None or port.evidence is None:
                 raise ValueError("Context presentation lacks assigned provider")
             for index, name in enumerate(port.evidence.source_leaves):
                 arguments[f"{signature.name}.{index}"] = next(
@@ -295,13 +295,15 @@ class ExpressionTargets:
         binding: SourceBinding | None = None,
     ) -> SelectedTarget:
         """Use normal Target validation on formals, then substitute actual slot names."""
+        if binding is not None and frame is None:
+            raise ValueError("Source-bound presentation requires its frame")
         arguments = (
             definition(expr).arguments(expr, schema)
             if isinstance(expr, Expression)
             else self.registry.definition(expr).arguments(expr, schema)
         )
         if isinstance(expr, (ContextExpression, PredicateExpr)):
-            arguments.update(self.import_arguments(expr, schema, frame, binding))
+            arguments.update(self.import_arguments(expr, schema, frame))
         selected = self.targets.get((expr.expression_id, lang))
         if selected is None:
             raise MissingValueError("missing_expression_translation")
@@ -343,90 +345,128 @@ class ExpressionTargets:
         return replace(selected, target=Target(format=1, nodes=tuple(nodes)))
 
 
-class PreparationRenderer(Renderer):
-    def __init__(
-        self,
-        renderer: Renderer,
-        targets: ExpressionTargets,
-        *,
-        preparation_forms: Mapping[tuple[str, str], Form] | None = None,
-    ) -> None:
-        super().__init__(
-            renderer.labels,
-            renderer.code_references,
-            renderer.forms,
-            domains=renderer.domains,
-        )
-        for key, form in (preparation_forms or {}).items():
-            if key != (form.definition.id, form.definition.lang) or key in self.forms:
-                raise ValueError("Preparation form key conflicts with its identity")
-            validate_parameter_form(form.definition)
-            self.forms[key] = form
-        self.expression_targets = targets
+@cache
+def _source_registry() -> Registry:
+    from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- source construction imports this module
 
-    @override
-    def expression_target(
-        self,
-        item: BoundTarget,
-        expr: Expression | ContextExpression | PredicateExpr,
-        lang: str,
-    ) -> SelectedTarget:
-        """Keep preparation expression selections outside production renderer inputs."""
-        return self.expression_targets.expand(
-            expr,
-            item.frame.leaf_schema,
-            lang,
-            {key: form.definition for key, form in self.forms.items()},
-            frame=item.frame,
-            binding=item.binding,
-        )
+    return DEFAULT_REGISTRY.extend(FAMILY.descriptors)
 
-    @override
-    def verify_target(
-        self,
-        item: BoundTarget,
-        lang: str,
-        forms: Mapping[tuple[str, str], FormDefinition],
-    ) -> None:
-        """Expression translations must present all formals, so their actuals count as used."""
-        assert item.selected is not None
-        item.selected.target.verify(
-            item.frame.leaf_schema,
-            lang,
-            forms,
-            dependencies=target_dependencies(
-                item.frame, item.binding, registry=self.expression_targets.registry
-            ),
-        )
 
-    @override
-    def references(self, item: BoundTarget, name: str) -> tuple[Reference, ...]:
-        """Expression operands contribute their normal required reference closure."""
-        value = item.binding.values.get(name)
+def verify_target_shape(
+    frame: Frame,
+    target: Target,
+    translations: Mapping[str, Target],
+    lang: str,
+    forms: Mapping[tuple[str, str], FormDefinition],
+) -> None:
+    """Inactive wording must satisfy every constraint already fixed by its frame."""
+    from sve_carddb.domains.translations.four_layer_render import SelectedTarget  # ruff: ignore[import-outside-top-level] -- the renderer imports expression validation
+
+    registry = _source_registry()
+    expander = ExpressionTargets(
+        {
+            (identifier, lang): SelectedTarget(value)
+            for identifier, value in translations.items()
+        },
+        registry=registry,
+    )
+    used = target.referenced_slots(frame.leaf_schema, lang, forms)
+    slots = {s.name: s for s in frame.leaf_schema.slots}
+    dependencies: dict[str, tuple[str, ...]] = {}
+    identifiers: set[str] = set()
+    possible: set[str] = set()
+    pending = list(used)
+    incomplete = False
+    while pending:
+        name = pending.pop()
+        slot = slots[name]
+        expr = slot.expression
+        actuals: tuple[str, ...] = ()
+        if expr is not None:
+            arguments = registry.definition(expr).arguments(expr, frame.leaf_schema)
+            arguments.update(expander.import_arguments(expr, frame.leaf_schema, frame))
+            actuals = tuple(s.name for s in arguments.values())
+            identifiers.add(expr.expression_id)
+            if expr.expression_id in translations:
+                expander.expand(expr, frame.leaf_schema, lang, forms, frame=frame)
+        elif slot.type in {"QuantityExpr", "PredicateExpr"}:
+            # B11 operands are supplied by the binding rather than embedded in the frame.
+            incomplete = True
+            possible.update(
+                DEFINITIONS
+                if DOMAIN_CODE in slot.domain.values
+                else registry.descriptors
+            )
+        dependencies[name] = actuals
+        pending.extend(set(actuals) - used)
+        used.update(actuals)
+    if not incomplete:
+        target.verify(frame.leaf_schema, lang, forms, dependencies=dependencies)
+    if set(translations) - identifiers - possible:
+        raise ValueError("Unused expression translation")
+    for identifier, translated in translations.items():
+        if any(
+            not isinstance(n, (LiteralNode, LeafRef, FormNode))
+            for n in translated.nodes
+        ):
+            raise ValueError("Expression targets allow only Literal LeafRef and Form")
+        if identifier in DEFINITIONS:
+            _verify_b11_target(identifier, translated, lang, forms)
+
+
+def _verify_b11_target(
+    identifier: str,
+    target: Target,
+    lang: str,
+    forms: Mapping[tuple[str, str], FormDefinition],
+) -> None:
+    formal = LeafSchema(
+        format=2,
+        slots=tuple(
+            LeafSlot(
+                name=p.name,
+                type=p.type,
+                role=p.role,
+                required=True,
+                occurrences=(),
+                domain=(
+                    Domain(values=(), min=0, max=9007199254740991)
+                    if p.type == "Nat"
+                    else Domain(values=(_ARGUMENTS[p.name][1],), min=None, max=None)
+                ),
+            )
+            for p in DEFINITIONS[identifier].signature
+        ),
+    )
+    target.verify(formal, lang, forms)
+
+
+def verify_expression_selection(  # ruff: ignore[too-many-arguments] -- binding-dependent closure and its sentence-owned wording share the render boundary
+    frame: Frame,
+    binding: SourceBinding,
+    target: Target,
+    translations: Mapping[str, Target],
+    lang: str,
+    forms: Mapping[tuple[str, str], FormDefinition],
+    *,
+    registry: Registry = DEFAULT_REGISTRY,
+) -> None:
+    """Only expressions reachable from this selected sentence may carry wording."""
+    dependencies = target_dependencies(frame, binding, registry=registry)
+    used = target.referenced_slots(frame.leaf_schema, lang, forms)
+    pending = list(used)
+    identifiers = set()
+    while pending:
+        name = pending.pop()
+        value = binding.values[name]
         expr = value.expr if isinstance(value, QuantitySpec) else value
         if isinstance(expr, (Expression, ContextExpression, PredicateExpr)):
-            dependencies = target_dependencies(
-                item.frame, item.binding, registry=self.expression_targets.registry
-            )
-            return tuple(
-                ref
-                for actual in dependencies.get(name, ())
-                for ref in self.references(item, actual)
-            )
-        return super().references(item, name)
-
-    @override
-    def render(
-        self, context_id: str, lang: str, plan: tuple[BoundTarget, ...]
-    ) -> Result:
-        """Validate the preparation dependency graph once at the rendering boundary."""
-        for item in plan:
-            if item.frame.source.normalizer_version != PREPARATION_VERSION:
-                raise ValueError("Preparation rendering requires a v3 frame")
-            verify_quantities(
-                item.frame,
-                item.binding,
-                scopes={},
-                registry=self.expression_targets.registry,
-            )
-        return super().render(context_id, lang, plan)
+            identifiers.add(expr.expression_id)
+        for actual in dependencies.get(name, ()):
+            if actual not in used:
+                used.add(actual)
+                pending.append(actual)
+    if set(translations) - identifiers:
+        raise ValueError("Unused expression translation")
+    if identifiers - set(translations):
+        raise MissingValueError("missing_expression_translation")

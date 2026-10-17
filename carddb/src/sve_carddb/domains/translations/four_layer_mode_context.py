@@ -1,4 +1,4 @@
-"""Source-scoped mode history and conditional cross-line choices for preparation only."""
+"""Source-scoped mode history and conditional cross-line choices."""
 
 import re
 from dataclasses import dataclass, replace
@@ -37,10 +37,10 @@ from sve_carddb.domains.translations.four_layer_context import (
     ImportSignature,
     Parameter,
 )
+from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.four_layer_normalizer import SourceField
-from sve_carddb.domains.translations.four_layer_preparation import PreparationFamily
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import ConditionSlot, LeafType
@@ -49,8 +49,8 @@ if TYPE_CHECKING:
         Classifier,
         Recognized,
     )
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 _DIGIT = r"[0-9０-９]+"
@@ -260,7 +260,7 @@ def _unique_intro(masked: str, intro: re.Match[str]) -> bool:
 def _mode_source(
     raw: str,
     masked: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     lines: tuple[re.Match[str], ...],
     index: int,
 ) -> ModeSource | None:
@@ -323,7 +323,7 @@ def _mode_source(
     )
 
 
-def mode_sources(raw: str, prepared: PreparedField) -> tuple[ModeSource, ...]:
+def mode_sources(raw: str, prepared: DerivedField) -> tuple[ModeSource, ...]:
     """Reject orphan, ambiguous, nested and foreign-ability choices before assigning edges."""
     source = prepared.derived.field.source
     if source.field not in {"effect", "section"} or not isinstance(
@@ -752,7 +752,7 @@ def _numbers(
 
 def _issues(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     index: int,
     leaves: list[Leaf],
     classifier: Classifier,
@@ -798,7 +798,7 @@ def _issues(
 
 def _updated(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     index: int,
     additions: list[Leaf],
     classifier: Classifier,
@@ -859,7 +859,7 @@ def _updated(
     return updated, replace(result, values=values, schema=schema), registry_rows, names
 
 
-def _provider_scope(prepared: PreparedField, group: ModeSource) -> str | None:
+def _provider_scope(prepared: DerivedField, group: ModeSource) -> str | None:
     if group.condition is None:
         return None
     scopes = {
@@ -881,7 +881,7 @@ def _provider_scope(prepared: PreparedField, group: ModeSource) -> str | None:
 
 
 def _interface(
-    prepared: PreparedField,
+    prepared: DerivedField,
     group: ModeSource,
     index: int,
     scope: str,
@@ -974,10 +974,10 @@ def _interface(
 
 def prepare_modes(
     raw: str,
-    prepared: PreparedField,
+    prepared: DerivedField,
     classifier: Classifier,
     context: CardContext | None,
-) -> PreparedField:
+) -> DerivedField:
     """Attach only proved source edges; runtime history and payment timing remain unresolved."""
     del context
     parts = list(prepared.derived.field.parts)
@@ -1063,4 +1063,4 @@ def prepare_modes(
     )
 
 
-FAMILY = PreparationFamily("A6_A7", DESCRIPTORS, prepare_modes)
+FAMILY = SourceFamily("A6_A7", DESCRIPTORS, prepare_modes)

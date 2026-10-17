@@ -1,5 +1,7 @@
 """Sealed local reads preserve exact uses, required references and production behavior."""
 
+from dataclasses import replace
+
 import pytest
 
 from sve_carddb.contracts.four_layer import (
@@ -15,14 +17,13 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_expressions import (
     ExpressionTargets,
-    PreparationRenderer,
     target_dependencies,
 )
 from sve_carddb.domains.translations.four_layer_matching import bind_recognized
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Label,
@@ -30,6 +31,7 @@ from sve_carddb.domains.translations.four_layer_render import (
     SelectedTarget,
 )
 
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import source
 from .test_four_layer_n1 import n1_classifier
 
@@ -82,8 +84,8 @@ def test_count_uses_only_sealed_typed_reads(
 ) -> None:
     raw = f"それにXダメージ。Xは「{definition}」である。"
     engine = n1_classifier()
-    old = derive_source(raw, source(raw), engine)
-    prepared = derive_preparation(raw, source(raw), engine)
+    old = analyze_source(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     expr = next(v for v in binding.values.values() if isinstance(v, Expression))
@@ -102,7 +104,7 @@ def test_count_uses_only_sealed_typed_reads(
 def test_repeated_x_keeps_print_order_and_rebinds_expression_actual_names() -> None:
     raw = "元のコストX以下を選ぶ。それにXダメージ。Xは「自分の手札の枚数」である。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     expr_name = next(n for n, v in binding.values.items() if isinstance(v, Expression))
@@ -138,7 +140,6 @@ def test_repeated_x_keeps_print_order_and_rebinds_expression_actual_names() -> N
             prepared.derived.field,
             prepared.derived.field.parts[0],
             prepared.derived.recognized[0],
-            mixed=True,
         )
         is None
     )
@@ -164,7 +165,6 @@ def test_repeated_x_keeps_print_order_and_rebinds_expression_actual_names() -> N
         prepared.derived.field,
         prepared.derived.field.parts[0],
         prepared.derived.recognized[0],
-        mixed=True,
     )
     assert rebound is not None
     prepared.verify(raw, engine, renamed, rebound)
@@ -189,7 +189,7 @@ def test_repeated_x_keeps_print_order_and_rebinds_expression_actual_names() -> N
 def test_sep_explicit_zero_is_a_threshold(condition: str) -> None:
     raw = f"自分のSEPが０{condition}7枚引く。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, engine, frame, binding)
     slot = next(s for s in frame.leaf_schema.slots if s.role == "threshold")
@@ -198,7 +198,7 @@ def test_sep_explicit_zero_is_a_threshold(condition: str) -> None:
     assert slot.domain.min == 0
     assert not any(s.type == "Player" for s in frame.leaf_schema.slots)
     assert "自分のSEPがN" in prepared.derived.field.parts[0].canonical_source
-    assert derive_source(raw, source(raw), engine).recognized[0].issues
+    assert analyze_source(raw, source(raw), engine).recognized[0].issues
 
 
 @pytest.mark.parametrize(
@@ -216,16 +216,23 @@ def test_sep_explicit_zero_is_a_threshold(condition: str) -> None:
         "相手のSEPが0なら、7枚引く。",
     ],
 )
-def test_neighboring_unsealed_sources_keep_their_v2_payload(raw: str) -> None:
+def test_neighboring_unsealed_reads_stay_outside_the_count_expression_domain(
+    raw: str,
+) -> None:
     engine = n1_classifier()
-    old = derive_source(raw, source(raw), engine)
-    assert derive_preparation(raw, source(raw), engine).derived == old
+    old = analyze_source(raw, source(raw), engine)
+    after = derive_source(raw, source(raw), engine).derived
+    if after != old:
+        assert after.recognized[0].semantics is None
+        assert not any(
+            isinstance(v, Expression) for v in after.recognized[0].values.values()
+        )
 
 
 def test_missing_card_name_cannot_be_replaced_by_a_literal_count() -> None:
     raw = "X枚引く。Xは「自分の場の『未採用の仮名』の数」である。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     assert "missing_card_name_concept" in prepared.derived.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved"):
         prepared.bind(0)
@@ -237,7 +244,7 @@ def test_prepared_count_renders_through_normal_labels_and_annotation_paths(  # r
 ) -> None:
     raw = "X枚引く。Xは「自分の消滅領域の枚数" + ("-7" if offset else "") + "」である。"
     engine = n1_classifier()
-    prepared = derive_preparation(raw, source(raw), engine)
+    prepared = derive_source(raw, source(raw), engine)
     frame, binding = prepared.bind(0)
     name, expr = next(
         (n, v) for n, v in binding.values.items() if isinstance(v, Expression)
@@ -289,11 +296,11 @@ def test_prepared_count_renders_through_normal_labels_and_annotation_paths(  # r
         labels[canonical(reference.model_dump(mode="json")), "zh-Hant"] = Label(
             reference, "zh-Hant", text, "project", False, True
         )
-    renderer = PreparationRenderer(
-        Renderer(labels, {}, {}, domains=engine.domains), expression
+    renderer = Renderer(labels, {}, {}, domains=engine.domains)
+    item = BoundTarget(frame, binding, replace(selected, low_confidence=True))
+    result = renderer.render(
+        "ctx:synthetic", "zh-Hant", expression_plan((item,), expression)
     )
-    item = BoundTarget(frame, binding, selected)
-    result = renderer.render("ctx:synthetic", "zh-Hant", (item,))
     assert result.rendered is not None
     assert result.rendered.text == (
         "抽取與自己的消失區張數" + ("減去7" if offset else "") + "相同張數的卡片。"
@@ -312,17 +319,23 @@ def test_prepared_count_renders_through_normal_labels_and_annotation_paths(  # r
         nodes=tuple(LeafRef(kind="LeafRef", slot=n) for n in expr.leaves),
     )
     with pytest.raises(ValueError, match="required"):
-        prepared.verify(raw, engine, frame, binding, target=missing_expression)
+        prepared.verify(
+            raw, engine, frame, binding, target=missing_expression, forms={}
+        )
     with pytest.raises(ValueError, match="required"):
         renderer.render(
             "ctx:synthetic",
             "zh-Hant",
-            (BoundTarget(frame, binding, SelectedTarget(missing_expression)),),
+            expression_plan(
+                (BoundTarget(frame, binding, SelectedTarget(missing_expression)),),
+                expression,
+            ),
         )
     with pytest.raises(ValueError, match="required"):
         selected.target.verify(frame.leaf_schema, "zh-Hant", {})
-    with pytest.raises(ValueError, match="required"):
-        base.render("ctx:synthetic", "zh-Hant", (item,))
+    assert base.render("ctx:synthetic", "zh-Hant", (item,)).issues == (
+        "missing_expression_translation",
+    )
     old_frame = frame.model_copy(
         update={
             "source": frame.source.model_copy(
@@ -337,9 +350,18 @@ def test_prepared_count_renders_through_normal_labels_and_annotation_paths(  # r
     missing_actual = binding.model_copy(update={"values": values})
     with pytest.raises(ValueError, match="missing actual"):
         renderer.render(
-            "ctx:synthetic", "zh-Hant", (BoundTarget(frame, missing_actual, selected),)
+            "ctx:synthetic",
+            "zh-Hant",
+            expression_plan(
+                (BoundTarget(frame, missing_actual, selected),), expression
+            ),
         )
     with pytest.raises(ValueError, match="missing required leaf values"):
         prepared.verify(raw, engine, frame, missing_actual, target=selected.target)
     renderer.labels.clear()
-    assert renderer.render("ctx:synthetic", "zh-Hant", (item,)).rendered is None
+    assert (
+        renderer.render(
+            "ctx:synthetic", "zh-Hant", expression_plan((item,), expression)
+        ).rendered
+        is None
+    )

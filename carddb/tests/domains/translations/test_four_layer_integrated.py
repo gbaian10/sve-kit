@@ -23,12 +23,9 @@ from sve_carddb.contracts.four_layer import (
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations import four_layer_integrated, four_layer_names
 from sve_carddb.domains.translations.four_layer_context import verify_mode_count
-from sve_carddb.domains.translations.four_layer_expressions import (
-    ExpressionTargets,
-    PreparationRenderer,
-)
-from sve_carddb.domains.translations.four_layer_integrated import FAMILY, verify_claims
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
+from sve_carddb.domains.translations.four_layer_expressions import ExpressionTargets
+from sve_carddb.domains.translations.four_layer_integrated import verify_claims
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Label,
@@ -36,18 +33,19 @@ from sve_carddb.domains.translations.four_layer_render import (
     SelectedTarget,
 )
 
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import source
 from .test_four_layer_event_sources import event_classifier
 from .test_four_layer_names import engine
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Classifier
-    from sve_carddb.domains.translations.four_layer_preparation import PreparedField
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
 
 
-def prepare(raw: str, classifier: Classifier | None = None) -> PreparedField:
+def prepare(raw: str, classifier: Classifier | None = None) -> DerivedField:
     parser = classifier or engine()
-    prepared = derive_preparation(raw, source(raw), parser, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), parser)
     for i, found in enumerate(prepared.derived.recognized):
         assert not found.issues
         frame, binding = prepared.bind(i)
@@ -280,7 +278,7 @@ def test_second_encoding_of_an_owned_construction_is_rejected(
         order = (history, entry, totals, names, *rest)
         monkeypatch.setattr(four_layer_integrated, "PROVIDERS", order)
     with pytest.raises(ValueError, match="one source construction twice"):
-        derive_preparation(raw, source(raw), engine(), families=(FAMILY,))
+        derive_source(raw, source(raw), engine())
 
 
 def test_linked_condition_rejects_a_different_source_occurrence() -> None:
@@ -351,14 +349,17 @@ def test_composed_aggregate_renders_required_traits_in_complete_chinese_field() 
     )
     parser = engine()
     prepared.verify(raw, parser, frame, binding, target=target)
-    renderer = PreparationRenderer(
-        Renderer(
-            labels, {}, {}, domains={**parser.domains, **prepared.registry.domains}
-        ),
-        ExpressionTargets(selections, registry=prepared.registry),
+    renderer = Renderer(
+        labels, {}, {}, domains={**parser.domains, **prepared.registry.domains}
     )
     item = BoundTarget(frame, binding, SelectedTarget(target))
-    result = renderer.render("ctx:synthetic", "zh-Hant", (item,)).rendered
+    result = renderer.render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan(
+            (item,), ExpressionTargets(selections, registry=prepared.registry)
+        ),
+    ).rendered
     assert result is not None
     assert result.text.startswith("若")
     assert result.text.endswith("以上，執行合成處理。")
@@ -368,11 +369,14 @@ def test_composed_aggregate_renders_required_traits_in_complete_chinese_field() 
         k for k, label in labels.items() if label.reference.kind == "glossary"
     )
     without = {k: value for k, value in labels.items() if k != missing}
-    missing_result = PreparationRenderer(
-        Renderer(
-            without, {}, {}, domains={**parser.domains, **prepared.registry.domains}
+    missing_result = Renderer(
+        without, {}, {}, domains={**parser.domains, **prepared.registry.domains}
+    ).render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan(
+            (item,), ExpressionTargets(selections, registry=prepared.registry)
         ),
-        ExpressionTargets(selections, registry=prepared.registry),
-    ).render("ctx:synthetic", "zh-Hant", (item,))
+    )
     assert missing_result.rendered is None
     assert missing_result.issues

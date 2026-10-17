@@ -2,7 +2,7 @@
 
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Final, Literal
 from unicodedata import normalize
 
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec, Span
@@ -22,14 +22,12 @@ if TYPE_CHECKING:
     )
 
 __all__ = (
-    "PREPARATION_VERSION",
     "VERSION",
     "SourceField",
     "SourcePart",
     "normalize_source",
 )
-VERSION = "four-layer-jp-v2"
-PREPARATION_VERSION = "four-layer-jp-v3"
+VERSION: Final = "four-layer-jp-v3"
 _NAME = re.compile(r"『[^』]*』")
 _REMINDER = re.compile(r"（[^（）]*）")
 _NUMBER = re.compile(r"[0-9０-９]+")
@@ -54,7 +52,7 @@ class SourcePart:
         normalizer_version: str = VERSION,
     ) -> None:
         """Only replayed source coordinates authorize an authored frame or stored binding."""
-        if normalizer_version not in {VERSION, PREPARATION_VERSION} or (
+        if normalizer_version != VERSION or (
             frame.source.normalizer_version != normalizer_version
         ):
             raise ValueError("Unsupported four-layer normalizer version")
@@ -74,10 +72,10 @@ class SourcePart:
             if (
                 occurrence.source_presence == "omitted"
                 and slots[occurrence.slot].occurrences
-                and normalizer_version == VERSION
+                and slots[occurrence.slot].type in {"Nat", "Ordinal", "QuantitySpec"}
             ):
                 raise ValueError(
-                    "Explicit source leaf cannot have an omitted occurrence"
+                    "Explicit numeric source leaf cannot have an omitted occurrence"
                 )
             origins = merged(
                 tuple(
@@ -135,11 +133,7 @@ class SourcePart:
                     "TokenStatus",
                     "CardKind",
                     "Concept",
-                    *(
-                        {"QuantityExpr"}
-                        if frame.source.normalizer_version == PREPARATION_VERSION
-                        else set()
-                    ),
+                    "QuantityExpr",
                 }
                 if unit.transformation == "leaf"
                 else None

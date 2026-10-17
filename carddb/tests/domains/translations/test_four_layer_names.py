@@ -14,13 +14,10 @@ from sve_carddb.contracts.four_layer import (
     Target,
 )
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_analysis import analyze_source
 from sve_carddb.domains.translations.four_layer_classification import Classifier, Term
-from sve_carddb.domains.translations.four_layer_expressions import (
-    ExpressionTargets,
-    PreparationRenderer,
-)
-from sve_carddb.domains.translations.four_layer_names import FAMILY
-from sve_carddb.domains.translations.four_layer_preparation import derive_preparation
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
+from sve_carddb.domains.translations.four_layer_expressions import ExpressionTargets
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Label,
@@ -28,6 +25,7 @@ from sve_carddb.domains.translations.four_layer_render import (
     SelectedTarget,
 )
 
+from .expression_fixtures import expression_plan
 from .test_four_layer_classification import source
 from .test_four_layer_n1 import n1_classifier
 
@@ -70,8 +68,8 @@ def engine() -> Classifier:
 )
 def test_name_relations_have_typed_source_ports(raw: str, identifier: str) -> None:
     classifier = engine()
-    before = derive_preparation(raw, source(raw), classifier)
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    before = analyze_source(raw, source(raw), classifier)
+    prepared = derive_source(raw, source(raw), classifier)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, classifier, frame, binding)
     expr = next(
@@ -82,8 +80,7 @@ def test_name_relations_have_typed_source_ports(raw: str, identifier: str) -> No
     assert expr.expression_id == identifier
     assert bool(isinstance(expr, ContextExpression)) == ("distinct_count" in identifier)
     assert all(p.evidence is not None for p in frame.projection.imports)
-    assert before == derive_preparation(raw, source(raw), classifier)
-    assert prepared.derived.recognized[0].schema != before.derived.recognized[0].schema
+    assert prepared.derived.recognized[0].schema != before.recognized[0].schema
 
 
 def test_ambiguous_or_cross_ability_receipt_remains_pending() -> None:
@@ -96,7 +93,7 @@ def test_ambiguous_or_cross_ability_receipt_remains_pending() -> None:
             prefix
             + "自分のデッキから「公開したフォロワーと同名のフォロワー」7枚を探す。"
         )
-        prepared = derive_preparation(raw, source(raw), engine(), families=(FAMILY,))
+        prepared = derive_source(raw, source(raw), engine())
         assert (
             "name_source_missing_or_ambiguous" in prepared.derived.recognized[0].issues
         )
@@ -105,7 +102,7 @@ def test_ambiguous_or_cross_ability_receipt_remains_pending() -> None:
 def test_fragments_render_with_required_reference_annotation() -> None:  # ruff: ignore[too-many-locals] -- keep source, dependency closure and normal rendering in one case
     raw = "自分の墓場の「カード名に『仮場手札自分』を含むフォロワー」7枚を選ぶ。"
     classifier = engine()
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), classifier)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, classifier, frame, binding)
     fragment = next(s for s in frame.leaf_schema.slots if s.role == "name_fragment")
@@ -157,9 +154,11 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
         {("name.contains.fragment.v1", "zh-Hant"): expression},
         registry=prepared.registry,
     )
-    presenter = PreparationRenderer(renderer, targets)
+    presenter = renderer
     result = presenter.render(
-        "ctx:synthetic", "zh-Hant", (BoundTarget(frame, binding, selected),)
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
     )
     assert result.rendered is not None
     assert "名稱含有測試片段" in result.rendered.text
@@ -173,14 +172,14 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
         ),
     )
     with pytest.raises(ValueError, match="required"):
-        prepared.verify(raw, classifier, frame, binding, target=invalid)
+        prepared.verify(raw, classifier, frame, binding, target=invalid, forms={})
 
 
 def test_two_traits_are_independent_operands() -> None:
     raw = "自分のデッキから仮族・仮別族・フォロワー7枚を探す。"
     classifier = engine()
-    before = derive_preparation(raw, source(raw), classifier).derived.recognized[0]
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    before = derive_source(raw, source(raw), classifier).derived.recognized[0]
+    prepared = derive_source(raw, source(raw), classifier)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, classifier, frame, binding)
     expr = next(v for v in binding.values.values() if isinstance(v, PredicateExpr))
@@ -205,8 +204,8 @@ def test_two_traits_are_independent_operands() -> None:
 def test_unsealed_trait_combinations_keep_the_original_preparation(noun: str) -> None:
     raw = f"自分のデッキから{noun}7枚を探す。"
     classifier = engine()
-    before = derive_preparation(raw, source(raw), classifier)
-    after = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    before = derive_source(raw, source(raw), classifier)
+    after = derive_source(raw, source(raw), classifier)
     assert after.derived == before.derived
     assert after.interfaces == before.interfaces
 
@@ -214,7 +213,7 @@ def test_unsealed_trait_combinations_keep_the_original_preparation(noun: str) ->
 def test_departed_event_subject_uses_lki_instead_of_a_selection() -> None:
     raw = "自分のトークン・カードが場を離れたとき、それと同名のカード7枚をEXエリアに置く。"
     classifier = engine()
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), classifier)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, classifier, frame, binding)
     expr = next(v for v in binding.values.values() if isinstance(v, PredicateExpr))
@@ -229,7 +228,7 @@ def test_departed_event_subject_uses_lki_instead_of_a_selection() -> None:
 def test_finite_fragment_or_preserves_repeated_operands() -> None:
     raw = "自分のデッキから「カード名に『仮場手札自分』か『仮場手札自分』を含むフォロワー」7枚を探す。"
     classifier = engine()
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), classifier)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, classifier, frame, binding)
     expr = next(v for v in binding.values.values() if isinstance(v, PredicateExpr))
@@ -242,7 +241,7 @@ def test_finite_fragment_or_preserves_repeated_operands() -> None:
 def test_missing_fragment_has_no_literal_or_optional_escape() -> None:
     raw = "自分のデッキから「カード名に『未採用の仮片段』を含むフォロワー」7枚を探す。"
     classifier = engine()
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), classifier)
     assert "missing_or_ambiguous_name_operand" in prepared.derived.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved"):
         prepared.bind(0)
@@ -259,7 +258,7 @@ def test_missing_kind_keeps_the_two_trait_source_pending() -> None:
         base.rules,
     )
     raw = "自分のデッキから仮族・仮別族・カード7枚を探す。"
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), classifier)
     assert "missing_name_filter_kind" in prepared.derived.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved"):
         prepared.bind(0)
@@ -268,7 +267,7 @@ def test_missing_kind_keeps_the_two_trait_source_pending() -> None:
 def test_repeated_holder_relations_share_one_source_object() -> None:
     raw = "自分のデッキから「これと同名を除く仮族・カード」7枚を探す。自分の墓場の「これと同名でない仮族・カード」7枚を選ぶ。"
     classifier = engine()
-    prepared = derive_preparation(raw, source(raw), classifier, families=(FAMILY,))
+    prepared = derive_source(raw, source(raw), classifier)
     frame, binding = prepared.bind(0)
     prepared.verify(raw, classifier, frame, binding)
     ports = frame.projection.imports

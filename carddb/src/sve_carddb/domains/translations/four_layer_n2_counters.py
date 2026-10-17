@@ -17,8 +17,8 @@ from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf, leaf
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 
 if TYPE_CHECKING:
+    from sve_carddb.domains.translations.four_layer_analysis import SourceAnalysis
     from sve_carddb.domains.translations.four_layer_classification import Classifier
-    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
 
 _CAPACITY = re.compile(
     r"これに(?P<name>[^。:：、{}【】「」『』\s]+)カウンターは(?P<value>N)個まで置ける。"
@@ -26,8 +26,8 @@ _CAPACITY = re.compile(
 
 
 def prepare_capacities(
-    raw: str, derived: DerivedField, classifier: Classifier
-) -> DerivedField:
+    raw: str, derived: SourceAnalysis, classifier: Classifier
+) -> SourceAnalysis:
     """Keep the named kind literal and retain the existing counter reference."""
     if derived.field.source.field not in {"effect", "section"} or not isinstance(
         derived.field.source.owner, (FaceRevisionOwner, PrintingFaceOwner)
