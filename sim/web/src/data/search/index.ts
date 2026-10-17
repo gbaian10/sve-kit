@@ -31,6 +31,8 @@ interface SearchOption {
   readonly name: CardSummary["name"]
 }
 export interface SearchOptions {
+  readonly types: readonly SearchOption[]
+  readonly typeCounts: Readonly<Record<string, number>>
   readonly prBadgeStyles: readonly string[]
   readonly rarityCounts: Readonly<Record<string, number>>
   readonly rarities: readonly SearchOption[]
@@ -96,8 +98,10 @@ const PRINTING_COLUMNS = [
   "card",
   "summary",
   "type",
+  "token",
   "rarity",
   "badge",
+  "leaderFrame",
   "art",
   "alt",
 ] as const
@@ -109,7 +113,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 10
+export const INDEX_IMAGE_FORMAT = 14
 
 interface Parts {
   readonly pool: StringPool
@@ -186,31 +190,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       rarityCounts[child] = (rarityCounts[child] ?? 0) + 1
     }
   }
-  const options: SearchOptions = {
-    rarityCounts,
-    prBadgeStyles: [
-      ...new Set(
-        bootstrap
-          .rows("printing")
-          .filter((row) => row["region"] === edition && row["rarity_code"] === "pr")
-          .map((row) => badgeOf(row)?.style ?? "unknown"),
-      ),
-    ],
-    rarities: bootstrap
-      .rows("vocabulary")
-      .filter((row) => row["kind"] === "rarity" && row["active"] === true)
-      .map((row) => option(row, "label_unit_id")),
-    classes: bootstrap
-      .rows("vocabulary")
-      .filter((row) => row["kind"] === "class" && row["active"] === true)
-      .map((row) => option(row, "label_unit_id")),
-    sets: index.families
-      .filter((row) => editionOwners.has(stringValue(row["id"])))
-      .map((row) => option(row, "name_unit_id"))
-      .sort(
-        (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
-      ),
-  }
+  const typeCounts: Record<string, number> = {}
   const releases: SetRelease[] = datedSets(
     index.families.map((row) => ({
       ...option(row, "name_unit_id"),
@@ -266,9 +246,25 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       }
       const art = arts(fullPrinting)
       const defaultArt = arts(index.printing(entry.defaultPrinting[edition] ?? ""))
-      printings.type.push(
-        intern(typeof revision?.["type_code"] === "string" ? revision["type_code"] : ""),
-      )
+      const type = typeof revision?.["type_code"] === "string" ? revision["type_code"] : ""
+      printings.type.push(intern(type))
+      if (type) typeCounts[type] = (typeCounts[type] ?? 0) + 1
+      const token = arrayValue(revision?.["special_kinds"] ?? []).includes("token")
+      printings.token.push(Number(token))
+      if (token) {
+        typeCounts["token"] = (typeCounts["token"] ?? 0) + 1
+        const child = `token:${type}`
+        typeCounts[child] = (typeCounts[child] ?? 0) + 1
+      }
+      const leaderFrame =
+        typeof fullPrinting?.["leader_name_frame"] === "string"
+          ? fullPrinting["leader_name_frame"]
+          : "unknown"
+      printings.leaderFrame.push(intern(leaderFrame))
+      if (type === "leader") {
+        const child = `leader:${leaderFrame}`
+        typeCounts[child] = (typeCounts[child] ?? 0) + 1
+      }
       printings.rarity.push(
         intern(
           typeof fullPrinting?.["rarity_code"] === "string" ? fullPrinting["rarity_code"] : "",
@@ -316,6 +312,42 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       }
     }
     cards.default.push(preferred)
+  }
+  const types = bootstrap
+    .rows("vocabulary")
+    .filter(
+      (row) =>
+        (row["kind"] === "type" || (row["kind"] === "special_kind" && row["code"] === "token")) &&
+        row["active"] === true &&
+        (typeCounts[stringValue(row["code"])] ?? 0) > 0,
+    )
+    .map((row) => option(row, "label_unit_id"))
+  const options: SearchOptions = {
+    rarityCounts,
+    typeCounts,
+    types,
+    prBadgeStyles: [
+      ...new Set(
+        bootstrap
+          .rows("printing")
+          .filter((row) => row["region"] === edition && row["rarity_code"] === "pr")
+          .map((row) => badgeOf(row)?.style ?? "unknown"),
+      ),
+    ],
+    rarities: bootstrap
+      .rows("vocabulary")
+      .filter((row) => row["kind"] === "rarity" && row["active"] === true)
+      .map((row) => option(row, "label_unit_id")),
+    classes: bootstrap
+      .rows("vocabulary")
+      .filter((row) => row["kind"] === "class" && row["active"] === true)
+      .map((row) => option(row, "label_unit_id")),
+    sets: index.families
+      .filter((row) => editionOwners.has(stringValue(row["id"])))
+      .map((row) => option(row, "name_unit_id"))
+      .sort(
+        (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
+      ),
   }
   summaryColumns.append(batch as unknown as JsonObject[])
   targets.append(targetBatch)
@@ -530,7 +562,16 @@ export class SearchIndex {
       (!state.sets.length ||
         state.sets.includes(this.pool.get(this.printings.owner[printing] ?? 0))) &&
       (!state.types.length ||
-        state.types.includes(this.pool.get(this.printings.type[printing] ?? 0))) &&
+        state.types.some((token) => {
+          const type = this.pool.get(this.printings.type[printing] ?? 0)
+          if (token === "token") return this.printings.token[printing] === 1
+          if (token.startsWith("token:"))
+            return this.printings.token[printing] === 1 && token === `token:${type}`
+          return token.startsWith("leader:")
+            ? type === "leader" &&
+                token === `leader:${this.pool.get(this.printings.leaderFrame[printing] ?? 0)}`
+            : token === type
+        })) &&
       (!state.rarities.length ||
         state.rarities.some((rarity) => {
           const official = this.pool.get(this.printings.rarity[printing] ?? 0)

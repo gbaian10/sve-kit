@@ -16,8 +16,8 @@ function Harness({ initial = [] }: { readonly initial?: string[] }) {
           { code: "pr", label: "PR" },
         ]}
         options={{
-          styles: ["bronze", "none", "unknown"],
-          counts: { sp: 1, pr: 6, "pr:bronze": 3, "pr:none": 2, "pr:unknown": 1, unrated: 4 },
+          styles: ["br", "none", "unknown"],
+          counts: { sp: 1, pr: 6, "pr:br": 3, "pr:none": 2, "pr:unknown": 1, unrated: 4 },
         }}
         selected={selected}
         onChange={onChange}
@@ -34,23 +34,23 @@ describe("rarity checkbox tree", () => {
     const group = screen.getByRole("group", { name: "稀有度" })
     const parent = within(group).getByRole("checkbox", { name: "PR" })
     expect(parent).toHaveAccessibleDescription("6")
-    expect(within(group).queryByRole("checkbox", { name: "PR（銀）" })).not.toBeInTheDocument()
+    expect(within(group).queryByRole("checkbox", { name: "PR（SR）" })).not.toBeInTheDocument()
     await userEvent.click(parent)
     expect(screen.getByLabelText("selection")).toHaveTextContent(/^pr$/u)
-    expect(within(group).getByRole("checkbox", { name: "PR（銅）" })).toBeChecked()
+    expect(within(group).getByRole("checkbox", { name: "PR（BR）" })).toBeChecked()
     await userEvent.click(within(group).getByRole("checkbox", { name: "PR（無標籤）" }))
     expect(parent).toBePartiallyChecked()
     expect(parent).toHaveAttribute("aria-checked", "mixed")
     await userEvent.click(within(group).getByRole("checkbox", { name: "SP" }))
     await userEvent.click(within(group).getByRole("checkbox", { name: "無分類" }))
-    expect(screen.getByLabelText("selection")).toHaveTextContent("pr:bronze,pr:unknown,sp,unrated")
+    expect(screen.getByLabelText("selection")).toHaveTextContent("pr:br,pr:unknown,sp,unrated")
     await userEvent.click(parent)
     expect(screen.getByLabelText("selection")).toHaveTextContent("pr,sp,unrated")
     await userEvent.click(parent)
     expect(screen.getByLabelText("selection")).toHaveTextContent("sp,unrated")
   })
-  it("supports keyboard expansion and checkbox toggling from a legacy partial selection", async () => {
-    await renderInRouter(<Harness initial={["pr:bronze"]} />)
+  it("supports keyboard expansion and checkbox toggling from a partial selection", async () => {
+    await renderInRouter(<Harness initial={["pr:br"]} />)
     const button = screen.getByRole("button", { name: /稀有度/u })
     button.focus()
     await userEvent.keyboard("{Enter}")
@@ -58,7 +58,7 @@ describe("rarity checkbox tree", () => {
     await userEvent.tab()
     expect(screen.getByRole("checkbox", { name: "SP" })).toHaveFocus()
     await userEvent.keyboard(" ")
-    expect(screen.getByLabelText("selection")).toHaveTextContent("pr:bronze,sp")
+    expect(screen.getByLabelText("selection")).toHaveTextContent("pr:br,sp")
     expect(screen.getByRole("checkbox", { name: "PR" })).toBePartiallyChecked()
   })
 })

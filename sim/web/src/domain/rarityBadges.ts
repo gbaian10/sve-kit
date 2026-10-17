@@ -3,15 +3,7 @@ import type { Region } from "./search"
 export const RARITY_BADGE_HEIGHT = 11
 export const RARITY_COLUMN_MIN_WIDTH = Math.ceil((RARITY_BADGE_HEIGHT * 56) / 21) + 10
 
-export const BADGE_STYLES = [
-  "bronze",
-  "silver",
-  "gold",
-  "red",
-  "pastel",
-  "rainbow",
-  "none",
-] as const
+export const BADGE_STYLES = ["br", "sr", "gr", "lg", "sl", "sp", "none"] as const
 type BadgeStyle = (typeof BADGE_STYLES)[number]
 export type RarityBadge = { readonly style: BadgeStyle; readonly text?: string }
 
@@ -34,25 +26,25 @@ const BASE_BADGES = {
 } as const
 const EN_BADGES = { br: "br-en", sr: "sr-en", gr: "gr-en", lg: "lg-en", ur: "ur-en" } as const
 const APPEARANCE_BADGES = {
-  "bronze:BR": "br",
-  "bronze:B": "br-en",
-  "bronze:PR": "pr-bronze",
-  "silver:SR": "sr",
-  "silver:S": "sr-en",
-  "silver:PR": "pr-silver",
-  "gold:GR": "gr",
-  "gold:G": "gr-en",
-  "gold:PR": "pr-gold",
-  "red:LG": "lg",
-  "red:L": "lg-en",
-  "red:PR": "pr-red",
-  "pastel:SL": "sl",
-  "pastel:UR": "ur",
-  "pastel:U": "ur-en",
-  "pastel:PR": "pr-pastel",
-  "rainbow:SP": "sp",
-  "rainbow:SSP": "ssp",
-  "rainbow:PR": "pr-rainbow",
+  "br:BR": "br",
+  "br:B": "br-en",
+  "br:PR": "pr-bronze",
+  "sr:SR": "sr",
+  "sr:S": "sr-en",
+  "sr:PR": "pr-silver",
+  "gr:GR": "gr",
+  "gr:G": "gr-en",
+  "gr:PR": "pr-gold",
+  "lg:LG": "lg",
+  "lg:L": "lg-en",
+  "lg:PR": "pr-red",
+  "sl:SL": "sl",
+  "sl:UR": "ur",
+  "sl:U": "ur-en",
+  "sl:PR": "pr-pastel",
+  "sp:SP": "sp",
+  "sp:SSP": "ssp",
+  "sp:PR": "pr-rainbow",
 } as const
 export type RarityBadgeAsset =
   | (typeof BASE_BADGES)[keyof typeof BASE_BADGES]

@@ -26,7 +26,7 @@ def test_appearance_does_not_change_official_rarity(tmp_path: Path) -> None:
     records = load_badges(
         authored(
             tmp_path,
-            "- printing_id: printing\n  region: jp\n  card_no: TEST-001\n  style: bronze\n  text: BR\n",
+            "- printing_id: printing\n  region: jp\n  card_no: TEST-001\n  style: br\n  text: BR\n",
         )
     )
     with create_database(compile_t0()) as db:
@@ -47,9 +47,7 @@ def test_appearance_does_not_change_official_rarity(tmp_path: Path) -> None:
         assert printing["rarity_badge_text"] == "BR"
 
 
-@pytest.mark.parametrize(
-    "style", ["bronze", "silver", "gold", "red", "pastel", "rainbow", "none"]
-)
+@pytest.mark.parametrize("style", ["br", "sr", "gr", "lg", "sl", "sp", "none"])
 def test_styles_and_absent_text(tmp_path: Path, style: str) -> None:
     text = "" if style == "none" else "  text: PR\n"
     records = load_badges(
@@ -66,10 +64,10 @@ def test_styles_and_absent_text(tmp_path: Path, style: str) -> None:
     "fields",
     [
         "style: unknown",
-        "style: gold",
+        "style: gr",
         "style: none\n  text: PR",
         "style: none\n  extra: true",
-        "style: none\n  style: gold",
+        "style: none\n  style: gr",
     ],
 )
 def test_rejects_invalid_records(tmp_path: Path, fields: str) -> None:

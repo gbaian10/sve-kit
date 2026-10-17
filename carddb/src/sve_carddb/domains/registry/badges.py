@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database
 
 FILE = "catalog/rarity-badges.yaml"
-BadgeStyle = Literal["bronze", "silver", "gold", "red", "pastel", "rainbow", "none"]
+BadgeStyle = Literal["br", "sr", "gr", "lg", "sl", "sp", "none"]
 
 
 class BadgeRecord(RecordData):

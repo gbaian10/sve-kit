@@ -583,14 +583,30 @@ def test_adopted_badge_survives_projection_export_and_reader() -> None:
             db.update(
                 "printing",
                 {"id": "printing"},
-                {"rarity_badge_style": "bronze", "rarity_badge_text": "BR"},
+                {"rarity_badge_style": "br", "rarity_badge_text": "BR"},
             )
         projection = projected(db)
         printing = projection.tables["printing"][0]
-        assert printing["rarity_badge"] == {"style": "bronze", "text": "BR"}
+        assert printing["rarity_badge"] == {"style": "br", "text": "BR"}
         assert printing["rarity_code"] is None
         projection = replace(projection, tables=projection.tables | media_rows())
         prepared = prepare_media(projection, None, revision=1).projection
         ownership = Ownership.from_database(db, projection)
         exported = export_snapshot(prepared, ownership, BATCH)
+        exported.verify(prepared)
+
+
+@pytest.mark.parametrize("frame", ["gold", "white", None])
+def test_leader_frame_survives_projection_export_and_reader(frame: str | None) -> None:
+    with create_database(schema()) as db:
+        with db.transaction():
+            populate(db)
+            db.update("printing", {"id": "printing"}, {"leader_name_frame": frame})
+        projection = projected(db)
+        assert projection.tables["printing"][0]["leader_name_frame"] == frame
+        projection = replace(projection, tables=projection.tables | media_rows())
+        prepared = prepare_media(projection, None, revision=1).projection
+        exported = export_snapshot(
+            prepared, Ownership.from_database(db, projection), BATCH
+        )
         exported.verify(prepared)

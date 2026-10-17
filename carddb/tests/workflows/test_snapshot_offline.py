@@ -71,6 +71,9 @@ def prepared(
     (repo / "carddb/src/sve_carddb").mkdir(parents=True)
     (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
     (repo / "authored/catalog").mkdir()
+    (repo / "authored/catalog/leader-name-frames.yaml").write_text(
+        "format: 1\nkind: printing_leader_name_frames\nrecords: []\n"
+    )
     (repo / "authored/catalog/rarity-badges.yaml").write_text(
         "format: 1\nkind: printing_rarity_badges\nrecords: []\n"
     )

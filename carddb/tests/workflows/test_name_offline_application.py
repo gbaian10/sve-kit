@@ -50,6 +50,11 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
     write(root / "authored", {})
     install(
         root / "authored",
+        "catalog/leader-name-frames.yaml",
+        {"format": 1, "kind": "printing_leader_name_frames", "records": []},
+    )
+    install(
+        root / "authored",
         "catalog/rarity-badges.yaml",
         {"format": 1, "kind": "printing_rarity_badges", "records": []},
     )

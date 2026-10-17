@@ -96,7 +96,7 @@ describe("catalog", () => {
                 ...row,
                 rarity_code: "sp",
                 premium: true,
-                rarity_badge: { style: "rainbow", text: "PR" },
+                rarity_badge: { style: "sp", text: "PR" },
               }
             : row,
         ),
@@ -105,7 +105,7 @@ describe("catalog", () => {
     expect(createCatalog(modified).summary("p:bp01-001")).toMatchObject({
       rarityCode: "sp",
       premium: true,
-      rarityBadge: { style: "rainbow", text: "PR" },
+      rarityBadge: { style: "sp", text: "PR" },
     })
     expect(catalog.summary("p:bp01-001")?.rarityBadge).toBeNull()
   })

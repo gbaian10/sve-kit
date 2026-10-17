@@ -22,7 +22,7 @@ import {
 import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
 import {
   useListView,
-  useRarityOptions,
+  usePrintingOptions,
   useRecentSummaries,
   useRouteEdition,
   useSearch,
@@ -42,6 +42,7 @@ import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
 import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
+import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
 import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
@@ -98,7 +99,7 @@ export function CardsPage() {
   const [params, setParams] = useSearchParams()
   const { code } = useParams()
   const { sets, rarities } = useSetOptions()
-  const rarityOptions = useRarityOptions()
+  const printingOptions = usePrintingOptions()
   const set = code ? sets?.find((set) => set.publicCode === code) : undefined
   const query = useMemo(() => {
     const parsed = parseQuery(params)
@@ -507,17 +508,27 @@ export function CardsPage() {
           }}
         />
       )}
-      <RarityFilter
-        rarities={(rarities ?? []).map((rarity) => ({
-          code: rarity.code,
-          label: rarity.name.translations[textLang] ?? rarity.name.original.text,
-        }))}
-        options={rarityOptions}
-        selected={query.rarities}
-        onChange={(rarities) => {
-          commit({ ...query, rarities })
-        }}
-      />
+      <div className="flex flex-wrap items-start gap-2">
+        <TypeFilter
+          options={printingOptions?.type}
+          textLang={textLang}
+          selected={query.types}
+          onChange={(types) => {
+            commit({ ...query, types })
+          }}
+        />
+        <RarityFilter
+          rarities={(rarities ?? []).map((rarity) => ({
+            code: rarity.code,
+            label: rarity.name.translations[textLang] ?? rarity.name.original.text,
+          }))}
+          options={printingOptions?.rarity}
+          selected={query.rarities}
+          onChange={(rarities) => {
+            commit({ ...query, rarities })
+          }}
+        />
+      </div>
       {hasConditions && (
         <div
           role="group"
