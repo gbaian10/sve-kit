@@ -43,13 +43,22 @@ afterEach(() => {
   recentStore.clear()
 })
 
-async function open(path = "/cards") {
+async function open(path = "/cards", { panel = true } = {}) {
   // jsdom reports en-US; the assertions below read the Traditional Chinese copy.
-  prefsStore.set({ uiLanguage: "zh-TW" })
+  prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: panel })
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
-  // The quick bar appears once the snapshot has loaded, whatever the results are.
-  await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
+  // The class buttons appear once the snapshot has loaded, whatever the results are; a collapsed
+  // panel hides them, so that case waits for the result count instead.
+  if (panel) await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
+  else await screen.findByText("個版次", {}, { timeout: 4000 })
   return rendered
+}
+
+/** The result count beside the filter button, once the current page has arrived. */
+async function expectCount(total: number) {
+  await waitFor(() => {
+    expect(screen.getByText("個版次")).toHaveTextContent(`${String(total)} 個版次`)
+  })
 }
 
 describe("CardsPage", () => {
@@ -457,5 +466,119 @@ describe("CardsPage", () => {
     expect(await screen.findByText("沒有符合的卡")).toBeInTheDocument()
     await user.keyboard("{Enter}")
     expect(router.state.location.search).toBe("?q=nothing-here")
+  })
+
+  describe("filter panel", () => {
+    it("expands from the search bar button, takes no space while collapsed and remembers the choice", async () => {
+      await open("/cards?class=bishop", { panel: false })
+      const button = screen.getByRole("button", { name: "篩選" })
+      expect(button).toHaveAttribute("aria-expanded", "false")
+      // Collapsed: the condition chips keep the only clear entry on screen.
+      const conditions = screen.getByRole("group", { name: "目前條件" })
+      expect(within(conditions).getByRole("button", { name: "清除" })).toBeVisible()
+      const panel = document.getElementById(button.getAttribute("aria-controls") ?? "")
+      expect(panel).not.toBeNull()
+      expect(panel).not.toBeVisible()
+      expect(screen.queryByRole("button", { name: "精靈" })).not.toBeInTheDocument()
+      await userEvent.click(button)
+      expect(button).toHaveAttribute("aria-expanded", "true")
+      expect(panel).toBeVisible()
+      expect(screen.getByRole("button", { name: "精靈" })).toBeVisible()
+      expect(prefsStore.get().filterPanelOpen).toBe(true)
+      expect(within(conditions).queryByRole("button", { name: "清除" })).not.toBeInTheDocument()
+      expect(
+        within(screen.getByRole("region", { name: "篩選條件" })).getByRole("button", {
+          name: "清除全部",
+        }),
+      ).toBeVisible()
+      await userEvent.click(button)
+      expect(button).toHaveAttribute("aria-expanded", "false")
+      expect(panel).not.toBeVisible()
+      expect(prefsStore.get().filterPanelOpen).toBe(false)
+    })
+
+    it("unions the values of one stat, intersects stats and writes both to the URL", async () => {
+      const { router } = await open()
+      const user = userEvent.setup()
+      const cost = screen.getByRole("group", { name: "消費" })
+      const attack = screen.getByRole("group", { name: "攻擊力" })
+      const one = within(cost).getByRole("button", { name: "1" })
+      const two = within(cost).getByRole("button", { name: "2" })
+      await user.click(one)
+      expect(router.state.location.search).toBe("?cost=1")
+      expect(one).toHaveAttribute("aria-pressed", "true")
+      await expectCount(5)
+      await user.click(two)
+      expect(router.state.location.search).toBe("?cost=1%2C2")
+      await expectCount(12)
+      await user.click(one)
+      expect(router.state.location.search).toBe("?cost=2")
+      expect(one).toHaveAttribute("aria-pressed", "false")
+      await expectCount(7)
+      await user.click(within(attack).getByRole("button", { name: "1" }))
+      expect(router.state.location.search).toBe("?cost=2&atk=1")
+      await expectCount(1)
+      await user.click(within(attack).getByRole("button", { name: "1" }))
+      await user.click(within(attack).getByRole("button", { name: "0" }))
+      expect(router.state.location.search).toBe("?cost=2&atk=0")
+      expect(await screen.findByText("沒有符合的卡")).toBeVisible()
+    })
+
+    it("restores every button from the URL and clears all conditions at once", async () => {
+      const { router } = await open("/cards?cost=2,7&atk=1&def=10&class=bishop")
+      const cost = screen.getByRole("group", { name: "消費" })
+      const defense = screen.getByRole("group", { name: "生命值" })
+      expect(within(cost).getByRole("button", { name: "2" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
+      expect(within(cost).getByRole("button", { name: "7+" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
+      expect(within(cost).getByRole("button", { name: "3" })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      )
+      expect(
+        within(screen.getByRole("group", { name: "攻擊力" })).getByRole("button", { name: "1" }),
+      ).toHaveAttribute("aria-pressed", "true")
+      expect(within(defense).getByRole("button", { name: "10+" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
+      expect(screen.getByRole("button", { name: "主教" })).toHaveAttribute("aria-pressed", "true")
+      const panel = screen.getByRole("region", { name: "篩選條件" })
+      await userEvent.click(within(panel).getByRole("button", { name: "清除全部" }))
+      expect(router.state.location.search).toBe("")
+      expect(within(cost).getByRole("button", { name: "2" })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      )
+      expect(within(panel).queryByRole("button", { name: "清除全部" })).not.toBeInTheDocument()
+    })
+
+    it("switches the row unit and the card edition from the panel", async () => {
+      const { router } = await open()
+      const user = userEvent.setup()
+      const rows = screen.getByRole("group", { name: "每列單位" })
+      expect(within(rows).getByRole("button", { name: "每個版次一行" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
+      await user.click(within(rows).getByRole("button", { name: "每張卡一行" }))
+      expect(router.state.location.search).toBe("?unit=card")
+      await waitFor(() => {
+        expect(screen.getByText("張卡片")).toBeInTheDocument()
+      })
+      const edition = screen.getByRole("group", { name: "卡面版本" })
+      expect(within(edition).getByRole("button", { name: "日版" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      )
+      await user.click(within(edition).getByRole("button", { name: "英版" }))
+      expect(router.state.location.search).toBe("?unit=card&ed=en")
+      expect(prefsStore.get().cardEdition).toBe("en")
+    })
   })
 })

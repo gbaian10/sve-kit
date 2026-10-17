@@ -519,6 +519,7 @@ function useSummaryImages(result: SearchChannelStatus["previous"], edition: Regi
         rarityCounts: {},
         types: [],
         typeCounts: {},
+        setCounts: {},
       },
       faces,
     })
@@ -562,6 +563,7 @@ export function useSetOptions() {
   })
   return {
     sets: view?.options.sets,
+    setCounts: view?.options.setCounts,
     classes: view?.options.classes,
     rarities: view?.options.rarities,
     result,

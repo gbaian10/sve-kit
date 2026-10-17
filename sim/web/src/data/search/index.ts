@@ -1,6 +1,13 @@
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { normalizeText } from "../../domain/normalize"
-import { DEFAULT_QUERY, NEUTRAL_CLASS, type QueryState } from "../../domain/query/model"
+import {
+  COST_CAP,
+  DEFAULT_QUERY,
+  NEUTRAL_CLASS,
+  type QueryState,
+  STAT_CAP,
+  statSelected,
+} from "../../domain/query/model"
 import { UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, packCounts } from "../../domain/sets"
@@ -38,6 +45,8 @@ export interface SearchOptions {
   readonly rarities: readonly SearchOption[]
   readonly classes: readonly SearchOption[]
   readonly sets: readonly SearchOption[]
+  /** Printings per home-set family code in this edition, for the set filter's counts. */
+  readonly setCounts: Readonly<Record<string, number>>
 }
 /** A set with its first day-precision release in the index's edition. */
 export interface SetRelease extends SearchOption {
@@ -113,7 +122,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 14
+export const INDEX_IMAGE_FORMAT = 15
 
 interface Parts {
   readonly pool: StringPool
@@ -124,6 +133,8 @@ interface Parts {
   readonly aliases: Uint32Array
   readonly order: Uint32Array
   readonly costs: Float64Array
+  readonly attacks: Float64Array
+  readonly defenses: Float64Array
   readonly sets: ReadonlySet<string>
   readonly options: SearchOptions
   readonly releases: readonly SetRelease[]
@@ -214,6 +225,9 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
   const names: number[] = []
   const aliases: number[] = []
   const costs: number[] = []
+  const attacks: number[] = []
+  const defenses: number[] = []
+  const setCounts: Record<string, number> = {}
   let batch: CardSummary[] = []
   let summaryCount = 0
   const intern = (value: string | null | undefined) => pool.intern(value ?? "")
@@ -281,10 +295,14 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       printings.set.push(intern(printing.key?.set))
       printings.number.push(intern(printing.key?.number))
       const owner = index.printing(printing.id)?.["home_set_id"]
-      printings.owner.push(intern(typeof owner === "string" ? familyCodes.get(owner) : undefined))
+      const ownerCode = typeof owner === "string" ? familyCodes.get(owner) : undefined
+      printings.owner.push(intern(ownerCode))
+      if (ownerCode !== undefined) setCounts[ownerCode] = (setCounts[ownerCode] ?? 0) + 1
       printings.card.push(card)
       printings.summary.push(summary ? ++summaryCount : 0)
       costs.push(summary?.cost ?? Number.NaN)
+      attacks.push(summary?.attack ?? Number.NaN)
+      defenses.push(summary?.defense ?? Number.NaN)
       if (summary) {
         batch.push(summary)
         const row = index.printing(printing.id)
@@ -348,6 +366,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       .sort(
         (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
       ),
+    setCounts,
   }
   summaryColumns.append(batch as unknown as JsonObject[])
   targets.append(targetBatch)
@@ -371,6 +390,8 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       })),
     ),
     costs: Float64Array.from(costs),
+    attacks: Float64Array.from(attacks),
+    defenses: Float64Array.from(defenses),
     sets,
     options,
     releases,
@@ -403,6 +424,8 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
   const names = take(Uint32Array)
   const aliases = take(Uint32Array)
   const costs = take(Float64Array)
+  const attacks = take(Float64Array)
+  const defenses = take(Float64Array)
   const order = take(Uint32Array)
   const readColumns = (value: unknown) =>
     Columns.restore(
@@ -447,6 +470,8 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
     names,
     aliases,
     costs,
+    attacks,
+    defenses,
     order,
     sets: new Set(arrayValue(image["sets"]).map((value) => stringValue(value))),
     options,
@@ -465,6 +490,8 @@ export class SearchIndex {
   private readonly aliases: Uint32Array
   private readonly order: Uint32Array
   private readonly costs: Float64Array
+  private readonly attacks: Float64Array
+  private readonly defenses: Float64Array
   private readonly sets: ReadonlySet<string>
   readonly options: SearchOptions
   readonly releases: readonly SetRelease[]
@@ -484,6 +511,8 @@ export class SearchIndex {
     this.names = parts.names
     this.aliases = parts.aliases
     this.costs = parts.costs
+    this.attacks = parts.attacks
+    this.defenses = parts.defenses
     this.order = parts.order
     this.sets = parts.sets
     this.options = parts.options
@@ -531,6 +560,8 @@ export class SearchIndex {
         this.names,
         this.aliases,
         this.costs,
+        this.attacks,
+        this.defenses,
         this.order,
         ...blocks.flatMap(({ columns }) => columns.flatMap(([, kinds, values]) => [kinds, values])),
         ...this.targets
@@ -583,16 +614,12 @@ export class SearchIndex {
               : rarity === official
         })) &&
       (!state.altArtOnly || this.printings.alt[printing] === 1)
-    const upper = state.cost.max !== undefined && state.cost.max < 7 ? state.cost.max : undefined
-    const costAllowed = (printing: number) => {
-      const cost = this.costs[printing] ?? Number.NaN
-      return (
-        (state.cost.min === undefined && upper === undefined) ||
-        (!Number.isNaN(cost) &&
-          (state.cost.min === undefined || cost >= state.cost.min) &&
-          (upper === undefined || cost <= upper))
-      )
-    }
+    // Stats come from the opened printing's summary; a selection within one stat is a union and
+    // the three stats intersect.
+    const statsAllowed = (printing: number) =>
+      statSelected(state.cost, COST_CAP, this.costs[printing]) &&
+      statSelected(state.attack, STAT_CAP, this.attacks[printing]) &&
+      statSelected(state.defense, STAT_CAP, this.defenses[printing])
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (eligible && !eligible.has(this.pool.get(this.cards.id[card] ?? 0))) continue
       if (
@@ -611,7 +638,7 @@ export class SearchIndex {
                 this.textRank(this.aliases, this.cards.aliasStart, card, flat),
               )
         for (let p = start; p < end; p += 1) {
-          if (!allowed(p) || !costAllowed(p)) continue
+          if (!allowed(p) || !statsAllowed(p)) continue
           let rank = nameRank
           if (state.text !== "") {
             if (!flat) continue
@@ -690,7 +717,7 @@ export class SearchIndex {
           printing = representative
         }
       }
-      if (!costAllowed(printing)) continue
+      if (!statsAllowed(printing)) continue
       buckets[rank]?.push(printing)
     }
     const byNumber = (a: number, b: number) => (this.order[a] ?? 0) - (this.order[b] ?? 0)
@@ -933,6 +960,8 @@ export class SearchIndex {
           this.names,
           this.aliases,
           this.costs,
+          this.attacks,
+          this.defenses,
           this.order,
         ].reduce((total, value) => total + value.byteLength, 0),
       stringBytes: this.pool.bytes(),

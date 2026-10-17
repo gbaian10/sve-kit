@@ -276,7 +276,7 @@ The files are canonical JSON and are excluded from Prettier.
 ## Search and the card list
 
 `/cards` is described by its URL alone (`docs/sim/web-architecture.md` §2.1): `src/domain/query/`
-holds the state, the codec (`q class cost type mech set rarity alt unit sort view`; defaults are
+holds the state, the codec (`q class cost atk def type mech set rarity alt unit sort order view`; defaults are
 never written) and nothing else. Matching lives in `src/domain/search.ts` as pure functions over
 `SearchEntry` rows that `src/data/catalog.ts` flattens from the bootstrap: card-number exact/loose
 hit (`bp01-51`, `BP01 051`, `BP01-051EN`) > number prefix (`bp01-5` lists BP01-050…) > name prefix
@@ -298,7 +298,8 @@ Each grid cell shows the name with the card number at the right of the same line
 2026-09-29), then the translation line when the name display asks for one. The `view` URL
 parameter (else the `viewMode` preference) picks the grid, the table rows (48×67 thumbnail, stats,
 a two-line effect preview labelled as incomplete) or the list rows (52px, class-coloured edge);
-the control row holds the result count, a sort placeholder and the view switch.
+the result count sits beside the search bar's filter button; the control row holds the sort
+control and the view switch.
 
 List views become usable after the selected region's whole catalog is verified and indexed in
 the Worker. `useListView` publishes names and numbers independently of image metadata;
