@@ -69,6 +69,7 @@ export default {
     title: "Account and settings",
     display: "Display",
     effectLanguage: "Effect text",
+    showFlavorText: "Show flavor text",
     termEmphasis: "Bold terms",
     termEmphasisHint: "Changes display while keeping text and references",
     symbolLabels: "Label symbols",

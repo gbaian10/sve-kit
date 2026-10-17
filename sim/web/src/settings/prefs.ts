@@ -39,6 +39,7 @@ export interface Prefs {
   readonly preloadPrintings: boolean
   readonly preloadNeighbours: boolean
   readonly symbolLabels: boolean
+  readonly showFlavorText: boolean
   readonly termEmphasis: boolean
   readonly theme: ThemePref
   /** null = the theme's default accent. */
@@ -61,6 +62,7 @@ export const DEFAULT_PREFS: Prefs = {
   preloadPrintings: false,
   preloadNeighbours: false,
   symbolLabels: false,
+  showFlavorText: true,
   termEmphasis: true,
   theme: "system",
   accent: null,
@@ -106,6 +108,7 @@ const sanitizers: Sanitizers = {
   preloadPrintings: withDefault(isBoolean, DEFAULT_PREFS.preloadPrintings),
   preloadNeighbours: withDefault(isBoolean, DEFAULT_PREFS.preloadNeighbours),
   symbolLabels: withDefault(isBoolean, DEFAULT_PREFS.symbolLabels),
+  showFlavorText: withDefault(isBoolean, DEFAULT_PREFS.showFlavorText),
   termEmphasis: withDefault(isBoolean, DEFAULT_PREFS.termEmphasis),
   theme: withDefault(isThemePref, DEFAULT_PREFS.theme),
   accent: withDefault(isNullableAccent, DEFAULT_PREFS.accent),

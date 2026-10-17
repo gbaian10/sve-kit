@@ -10,6 +10,7 @@ import {
 import type { NameDisplay } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
 import { usePrefs } from "../../settings"
+import { cn } from "../ui/cn"
 import { AnnotatedText } from "./AnnotatedText"
 import { useTextLanguage } from "./text-language"
 import { TextPurposeStatus } from "./TextPurposeStatus"
@@ -17,6 +18,8 @@ import { TranslationSourceLine } from "./TranslationSourceLine"
 
 // Effect text is the reason the page exists: 16px at line-height 1.75, full width (design 06).
 const BODY = "text-16 leading-effect"
+const TEXT_BOX =
+  "rounded-block border border-border bg-surface-1 px-3 py-2.5 text-14 leading-effect text-text-2"
 
 export function CardText({
   client,
@@ -69,12 +72,19 @@ export function CardText({
   const showOriginal =
     mode !== "translated" || !value.translated || value.selection?.["basis"] === "jp_source"
   const showTranslated = mode !== "original" && value.translated !== undefined
+  const boxed = field !== "name" && !(showOriginal && showTranslated)
   // The printed state describes the printed name and effect, never the flavor.
   const printedState = field === "flavor" ? undefined : value.printedState
   const heading = label ?? (field === "section" ? t("card.originalText") : t(`card.field.${field}`))
   return (
-    <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
-      <h3 className="text-13 font-semibold text-text-3">{heading}</h3>
+    <section
+      className={cn("mt-3 space-y-2", boxed && TEXT_BOX)}
+      aria-label={heading}
+      data-field={field}
+    >
+      <h3 className={boxed ? "text-12 text-text-3" : "text-13 font-semibold text-text-3"}>
+        {heading}
+      </h3>
       {printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
       {printedState === "unknown" && <p className="text-13">{t("card.printedUnconfirmed")}</p>}
       <TextPurposeStatus readiness={readiness} />
@@ -108,7 +118,7 @@ export function CardText({
       )}
       {/* Beside a translation the original is the reference copy: boxed and quieter, same flow. */}
       {showOriginal && showTranslated && (
-        <div className="rounded-block border border-border bg-surface-1 px-3 py-2.5 text-14 leading-effect text-text-2">
+        <div className={TEXT_BOX}>
           <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
           <AnnotatedText
             value={value.original}
