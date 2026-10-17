@@ -320,8 +320,13 @@ export default {
       collaboration: "コラボパック",
       special_pack: "スペシャルパック",
       promo: "PR",
+      deck: "構築済みデッキ",
+      special: "特別商品",
+      other: "その他の商品",
     },
     specialProducts: "構築済みデッキ・特別商品",
+    switchEdition: "{{edition}}を見る",
+    empty: "この版にはまだ表示できるカードパックがありません。",
   },
   cardPage: {
     switchingCard: "カードを切り替え中…",

@@ -322,8 +322,13 @@ export default {
       collaboration: "Collaborations",
       special_pack: "Special packs",
       promo: "Promos",
+      deck: "Decks",
+      special: "Special products",
+      other: "Other products",
     },
     specialProducts: "Decks and special products",
+    switchEdition: "Show the {{edition}} edition",
+    empty: "This edition has no sets to list yet.",
   },
   cardPage: {
     switchingCard: "Switching card…",

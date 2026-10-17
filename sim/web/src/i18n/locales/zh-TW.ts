@@ -296,8 +296,18 @@ const zhTW = {
   },
   sets: {
     notFound: "找不到這個卡包",
-    kind: { booster: "補充包", collaboration: "合作包", special_pack: "特殊卡包", promo: "PR" },
+    kind: {
+      booster: "補充包",
+      collaboration: "合作包",
+      special_pack: "特殊卡包",
+      promo: "PR",
+      deck: "牌組",
+      special: "特別商品",
+      other: "其他商品",
+    },
     specialProducts: "牌組與特別商品",
+    switchEdition: "改看{{edition}}",
+    empty: "這個版本還沒有可列出的卡包。",
   },
   cardPage: {
     switchingCard: "切換卡片中…",

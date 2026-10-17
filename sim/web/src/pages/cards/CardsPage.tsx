@@ -47,13 +47,14 @@ import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
+import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
-import { formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
+import { editionUrl, formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
 import {
   activeFilterCount,
   DEFAULT_QUERY,
@@ -65,10 +66,11 @@ import {
 } from "../../domain/query/model"
 import { prStyleTokens } from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
-import { setLabel } from "../../domain/sets"
+import { setCaption } from "../../domain/sets"
 import { leaderFrameTokens, tokenKindTokens } from "../../domain/typeFilter"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
+import { SetHeader } from "../sets/SetHeader"
 
 const DEBOUNCE_MS = 150
 
@@ -407,8 +409,14 @@ export function CardsPage() {
     code === null
       ? t("search.neutral")
       : (quickBar.find((item) => item.code === code)?.label ?? code)
-  const filterCount = activeFilterCount(query)
-  const hasConditions = query.text !== "" || query.classes.length > 0 || filterCount > 0
+  // A set page's own set is the page, not a condition: it gets no chip and no badge count, and
+  // removing it from the chips is not offered (the path would imply it again at once).
+  const chipConditions = set
+    ? { ...query, sets: query.sets.filter((item) => item !== set.code) }
+    : query
+  const filterCount = activeFilterCount(chipConditions)
+  const hasConditions =
+    chipConditions.text !== "" || chipConditions.classes.length > 0 || filterCount > 0
   const panelOpen = prefs.filterPanelOpen
   const resultCount =
     page !== null ? (
@@ -449,12 +457,28 @@ export function CardsPage() {
     ) : null
 
   if (code && !set) {
+    // The set list only holds this edition's families, so the code may well exist in the other
+    // edition (an EN-only product opened under JP): offer that switch instead of a dead end.
+    const otherEdition: Region = edition === "jp" ? "en" : "jp"
     return (
       <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
         <h1 className="text-20 font-semibold">{code}</h1>
         <StatusStrip readiness={readiness} />
         {sets ? (
-          <Notice tone="info" role="status">
+          <Notice
+            tone="info"
+            role="status"
+            actions={
+              <>
+                <Link to={editionUrl(location.pathname, otherEdition)} className="text-13">
+                  {t("sets.switchEdition", { edition: t(`options.edition.${otherEdition}`) })}
+                </Link>
+                <Link to={editionUrl("/sets", edition)} className="text-13">
+                  {t("home.sets.all")}
+                </Link>
+              </>
+            }
+          >
             {t("sets.notFound")}
           </Notice>
         ) : (
@@ -466,8 +490,8 @@ export function CardsPage() {
 
   return (
     <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
-      {code ? (
-        <h1 className="text-20 font-semibold">{set ? setLabel(set.name, textLang).text : code}</h1>
+      {set ? (
+        <SetHeader set={set} edition={edition} textLang={textLang} locale={uiLanguage} />
       ) : (
         <h1 className="sr-only">{t("pages.cards")}</h1>
       )}
@@ -539,7 +563,7 @@ export function CardsPage() {
       )}
       {/* The chip row sits with the class row, above the panel, so it stays in view either way. */}
       <ConditionChips
-        query={query}
+        query={chipConditions}
         edition={edition}
         classLabel={classLabel}
         rarityLabel={(code) => {
@@ -554,9 +578,7 @@ export function CardsPage() {
         }}
         setLabel={(code) => {
           const option = sets?.find((item) => item.code === code)
-          return option
-            ? `${option.publicCode ?? option.code} ${setLabel(option.name, textLang).text}`
-            : code
+          return option ? setCaption(option, textLang).text : code
         }}
         groups={{
           pr: prStyleTokens(printingOptions?.rarity.styles ?? []),
