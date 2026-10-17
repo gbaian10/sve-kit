@@ -161,6 +161,8 @@ export default {
     allPrintingsLoaded: "All {{count}} printings",
     countUnit: "cards",
     sort: "Sort",
+    visibleColumns: "Visible columns",
+    resizeColumn: "Resize {{column}} column",
     columns: { rarity: "Rarity", number: "Number", name: "Name", effect: "Card text" },
     sortBy: {
       date: "Date",

@@ -156,6 +156,8 @@ const zhTW = {
     allPrintingsLoaded: "共 {{count}} 個版次",
     countUnit: "張卡片",
     sort: "排序",
+    visibleColumns: "顯示欄位",
+    resizeColumn: "調整「{{column}}」欄寬",
     columns: { rarity: "稀有度", number: "卡號", name: "名稱", effect: "卡文" },
     sortBy: {
       date: "發售日",

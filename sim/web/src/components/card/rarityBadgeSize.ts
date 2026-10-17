@@ -1,2 +1,1 @@
-export const RARITY_BADGE_HEIGHT = 11
-export const RARITY_COLUMN_MIN_WIDTH = Math.ceil((RARITY_BADGE_HEIGHT * 56) / 21) + 10
+export { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../../domain/rarityBadges"

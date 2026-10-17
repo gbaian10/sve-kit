@@ -120,6 +120,10 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     viewMode: "list",
     showOtherEdition: { jp: true, en: false },
   })
+  prefsStore.set({
+    listWidths: { name: 280 },
+    listVisibility: { ...DEFAULT_PREFS.listVisibility, rarity: false },
+  })
   await renderInRouter(<SettingsPage />)
   await userEvent.click(screen.getByRole("button", { name: "恢復預設" }))
   await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "取消" }))

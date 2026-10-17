@@ -8,6 +8,7 @@ import { DEFAULT_PREFS, prefsStore, usePrefs } from "../../settings"
 import { renderInRouter, renderRoutes } from "../../test-utils"
 import type { GridCell } from "./CardGrid"
 import { CardList, CardTable } from "./CardRows"
+import { ListColumnPicker } from "./ListColumnPicker"
 
 vi.mock("../../app/snapshot", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../app/snapshot")>()),
@@ -159,15 +160,9 @@ describe("spreadsheet list", () => {
           : { phase: "pending" },
     )
     await renderInRouter(<CardList cells={cells} onOpen={vi.fn()} />)
-    expect(screen.getAllByRole("columnheader").map((column) => column.textContent)).toEqual([
-      "卡號 ↑",
-      "稀有度",
-      "名稱",
-      "消費",
-      "攻擊力",
-      "生命值",
-      "卡文",
-    ])
+    expect(
+      screen.getAllByRole("columnheader").map((column) => column.getAttribute("aria-label")),
+    ).toEqual(["卡號", "稀有度", "名稱", "消費", "攻擊力", "生命值", "卡文"])
     const rows = screen.getAllByRole("row").slice(1)
     expect(rows[0]).toHaveTextContent("First synthetic ability. Second synthetic ability.")
     expect(within(rows[0] ?? document.body).getAllByText("—")).toHaveLength(2)
@@ -336,9 +331,82 @@ it.each(["list", "table"] as const)(
     if (view === "list") {
       const headers = screen.getAllByRole("columnheader")
       expect(headers[1]).toHaveTextContent("稀有度")
-      expect(headers[1]?.querySelector("button")).toBeNull()
+      expect(headers[1]?.querySelector("button:not([data-column-resize])")).toBeNull()
       expect(document.querySelector("[data-list-rarity] img")).not.toBeNull()
       expect(document.querySelector("[data-image-state], [data-image-printing]")).toBeNull()
     }
   },
 )
+
+it("hides matching headers and cells, keeps an identity column, and preserves row navigation", async () => {
+  await renderInRouter(
+    <>
+      <ListColumnPicker />
+      <CardList cells={[cell]} onOpen={vi.fn()} />
+    </>,
+  )
+  const user = userEvent.setup()
+  await user.click(screen.getByText("顯示欄位", { selector: "summary" }))
+  for (const name of ["稀有度", "消費", "攻擊力", "生命值"]) {
+    await user.click(screen.getByRole("checkbox", { name }))
+  }
+  expect(screen.getAllByRole("columnheader")).toHaveLength(3)
+  expect(screen.getAllByRole("cell")).toHaveLength(3)
+  expect(screen.getByRole("columnheader", { name: "卡文" })).toBeVisible()
+  await user.click(screen.getByRole("checkbox", { name: "名稱" }))
+  expect(screen.getByRole("checkbox", { name: "卡號" })).toBeDisabled()
+  expect(screen.getByRole("link", { name: "BP-SYNTHETIC" })).toHaveAttribute("href", cell.to)
+  expect(screen.getByRole("table")).toHaveAttribute("data-frozen-column", "number")
+  await user.click(screen.getByRole("checkbox", { name: "名稱" }))
+  await user.click(screen.getByRole("checkbox", { name: "卡號" }))
+  expect(screen.getByRole("checkbox", { name: "名稱" })).toBeDisabled()
+  expect(screen.getByRole("table")).toHaveAttribute("data-frozen-column", "name")
+})
+
+it("resizes a column by keyboard, persists it on reload, and restores the default", async () => {
+  const { unmount } = await renderInRouter(<CardList cells={[cell]} onOpen={vi.fn()} />)
+  const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
+  const heading = handle.parentElement
+  if (!heading) throw new Error("missing heading")
+  vi.spyOn(heading, "getBoundingClientRect").mockReturnValue({ width: 192 } as DOMRect)
+  handle.focus()
+  await userEvent.keyboard("{ArrowRight}")
+  expect(prefsStore.get().listWidths.name).toBe(202)
+  unmount()
+  prefsStore.reload()
+  await renderInRouter(<CardList cells={[cell]} onOpen={vi.fn()} />)
+  expect(screen.getByRole("table").style.getPropertyValue("--list-user-name")).toBe("202px")
+  act(() => {
+    prefsStore.set(DEFAULT_PREFS)
+  })
+  expect(screen.getByRole("table").style.getPropertyValue("--list-user-name")).toBe("")
+})
+
+it("previews a drag locally and persists once when released", async () => {
+  await renderInRouter(<CardList cells={[cell]} onOpen={vi.fn()} />)
+  const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
+  const heading = handle.parentElement
+  if (!heading) throw new Error("missing heading")
+  vi.spyOn(heading, "getBoundingClientRect").mockReturnValue({ width: 192 } as DOMRect)
+  Object.defineProperty(handle, "setPointerCapture", { value: vi.fn() })
+  Object.defineProperty(handle, "releasePointerCapture", { value: vi.fn() })
+  const writes = vi.spyOn(Storage.prototype, "setItem")
+  const notified = vi.fn()
+  const unsubscribe = prefsStore.subscribe(notified)
+  try {
+    fireEvent.pointerDown(handle, { pointerId: 1, button: 0, clientX: 100 })
+    for (let move = 1; move <= 100; move += 1) {
+      fireEvent.pointerMove(handle, { pointerId: 1, clientX: 100 + move })
+    }
+    expect(screen.getByRole("table").style.getPropertyValue("--list-user-name")).toBe("292px")
+    expect(writes).not.toHaveBeenCalled()
+    expect(notified).not.toHaveBeenCalled()
+    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 200 })
+    expect(writes).toHaveBeenCalledTimes(1)
+    expect(notified).toHaveBeenCalledTimes(1)
+    expect(prefsStore.get().listWidths.name).toBe(292)
+  } finally {
+    unsubscribe()
+    writes.mockRestore()
+  }
+})

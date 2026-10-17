@@ -33,7 +33,7 @@
   contain-intrinsic-block-size: auto 140px;
 }
 
-/* Only the phone needs a horizontal scrollport and a frozen name column. */
+/* Oversized custom columns scroll inside the table; the phone also freezes its identity column. */
 :where([data-list-scroll]) {
   isolation: isolate;
   border: 1px solid var(--color-border-strong);
@@ -51,23 +51,66 @@ html:has([data-card-list]) {
   border-spacing: 0;
   border-collapse: separate;
   font-size: 13px;
+
+  --list-size-number: var(--list-user-number, 132px);
+  --list-size-rarity: max(var(--list-user-rarity, 0px), var(--rarity-column-min-width));
+  --list-size-name: var(--list-user-name, 192px);
+  --list-size-cost: var(--list-user-cost, 44px);
+  --list-size-attack: var(--list-user-attack, 44px);
+  --list-size-defense: var(--list-user-defense, 44px);
+  --list-size-effect: var(--list-user-effect, 200px);
 }
 
-:where([data-list-number-col]) {
-  width: 132px;
+:where([data-list-col="number"]) {
+  width: var(--list-size-number);
 }
 
-:where([data-list-rarity-col]) {
-  /* Let the single-line heading and badge minimum determine this column. */
-  width: 1px;
+:where([data-list-col="rarity"]) {
+  width: var(--list-size-rarity);
 }
 
-:where([data-list-name-col]) {
-  width: 192px;
+:where([data-list-col="name"]) {
+  width: var(--list-size-name);
 }
 
-:where([data-list-stat-col]) {
-  width: 68px;
+:where([data-list-col="cost"]) {
+  width: var(--list-size-cost);
+}
+
+:where([data-list-col="attack"]) {
+  width: var(--list-size-attack);
+}
+
+:where([data-list-col="defense"]) {
+  width: var(--list-size-defense);
+}
+
+:where([data-list-overflow]) {
+  overflow: auto;
+  max-height: 70dvh;
+}
+
+:where([data-column-resize]) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
+  width: 9px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  appearance: none;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+:where([data-column-resize]:focus-visible) {
+  outline: 2px solid var(--color-text-1);
+  outline-offset: -2px;
 }
 
 :where([data-card-list] th),
@@ -89,7 +132,7 @@ html:has([data-card-list]) {
   font-weight: 600;
 }
 
-:where([data-card-list] th button) {
+:where([data-card-list] th button:not([data-column-resize])) {
   position: relative;
   width: 100%;
   height: 100%;
@@ -119,6 +162,7 @@ html:has([data-card-list]) {
 }
 
 :where([data-list-number] > span),
+:where([data-list-number] > a),
 :where([data-list-name] a),
 :where([data-list-effect-text]) {
   display: block;
@@ -128,8 +172,27 @@ html:has([data-card-list]) {
 }
 
 :where([data-card-list] td:not([data-list-rarity])) {
-  /* Truncated card content must not widen the intrinsic table columns. */
+  /* Keep long card content from enlarging the intrinsic columns. */
   max-width: 0;
+}
+
+:where([data-card-list] [data-list-rarity]),
+:where([data-list-heading="rarity"]) {
+  padding-inline: 4px;
+}
+
+:where([data-list-heading="rarity"]) {
+  min-width: var(--rarity-column-min-width);
+  font-size: var(--rarity-badge-height);
+  line-height: 1;
+}
+
+:where([data-list-heading="rarity"] [data-list-heading-label]) {
+  display: inline-block;
+}
+
+:where([data-list-heading="effect"]) {
+  min-width: var(--list-size-effect);
 }
 
 :where([data-list-name] a) {
@@ -141,26 +204,19 @@ html:has([data-card-list]) {
 }
 
 :where([data-card-list] [data-list-rarity]),
-:where([data-card-list] th:nth-child(2)),
+:where([data-list-heading="rarity"]),
 :where([data-card-list] [data-list-stat]),
-:where([data-card-list] th:nth-child(n + 4):nth-child(-n + 6)) {
+:where([data-list-heading="cost"]),
+:where([data-list-heading="attack"]),
+:where([data-list-heading="defense"]) {
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
-:where([data-card-list] th:nth-child(n + 4):nth-child(-n + 6)) {
+:where([data-list-heading="cost"]),
+:where([data-list-heading="attack"]),
+:where([data-list-heading="defense"]) {
   padding-inline: 4px;
-}
-
-:where([data-card-list] [data-list-rarity]),
-:where([data-card-list] th:nth-child(2)) {
-  padding-inline: 4px;
-}
-
-:where([data-card-list] th:nth-child(2)) {
-  min-width: var(--rarity-column-min-width);
-  font-size: var(--rarity-badge-height);
-  line-height: 1;
 }
 
 :where([data-card-list] tbody tr) {
@@ -188,12 +244,9 @@ html:has([data-card-list]) {
 }
 
 @media (600px <= width < 1000px) {
-  :where([data-list-number-col]) {
-    width: 112px;
-  }
-
-  :where([data-list-name-col]) {
-    width: 176px;
+  :where([data-card-list]) {
+    --list-size-number: var(--list-user-number, 112px);
+    --list-size-name: var(--list-user-name, 176px);
   }
 }
 
@@ -204,43 +257,30 @@ html:has([data-card-list]) {
   }
 
   :where([data-card-list]) {
-    --list-min-width: 704px;
-    --list-number-width: 84px;
-    --list-stat-width: 60px;
-
-    min-width: var(--list-min-width);
+    --list-size-number: 84px;
+    --list-size-rarity: var(--rarity-column-min-width);
+    --list-size-name: 124px;
+    --list-size-cost: 44px;
+    --list-size-attack: 44px;
+    --list-size-defense: 44px;
+    --list-size-effect: 200px;
   }
 
-  :where([data-list-number-col]) {
-    width: var(--list-number-width);
+  :where([data-column-resize]) {
+    display: none;
   }
 
-  :where([data-list-name-col]) {
-    width: auto;
-  }
-
-  :where([data-list-stat-col]) {
-    width: var(--list-stat-width);
-  }
-
-  :where([data-list-effect-col]) {
-    /* Leave 228px for the intrinsic rarity column and the frozen name column. */
-    width: calc(
-      var(--list-min-width) - var(--list-number-width) - 228px - 3 * var(--list-stat-width)
-    );
-  }
-
-  :where([data-card-list] th:nth-child(3)),
-  :where([data-card-list] td:nth-child(3)) {
+  :where([data-frozen-column="name"] [data-list-name]),
+  :where([data-frozen-column="name"] [data-list-heading="name"]),
+  :where([data-frozen-column="number"] [data-list-number]),
+  :where([data-frozen-column="number"] [data-list-heading="number"]) {
     position: sticky;
     left: 0;
-  }
-
-  :where([data-card-list] td:nth-child(3)) {
     z-index: 1;
   }
 
-  :where([data-card-list] th:nth-child(3)) {
+  :where([data-frozen-column="name"] [data-list-heading="name"]),
+  :where([data-frozen-column="number"] [data-list-heading="number"]) {
     z-index: 4;
   }
 }
