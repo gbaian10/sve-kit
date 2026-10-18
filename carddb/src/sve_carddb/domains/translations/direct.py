@@ -108,11 +108,6 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
                 "origin": origin,
                 "low_confidence": low_confidence,
                 **({"source_id": source_id} if source_id is not None else {}),
-                **(
-                    {"authority": authority}
-                    if set(owner) == {"keyword_id"} and source_id is not None
-                    else {}
-                ),
             }
         )
     )[7:]

@@ -12,7 +12,7 @@ from typer.testing import CliRunner
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.cli import app
-from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import InputRecord
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.build import build as build_identity
@@ -20,6 +20,7 @@ from sve_carddb.domains.registry.inputs import Card, Mapping
 from sve_carddb.domains.registry.review import InitDecisions
 from sve_carddb.domains.registry.review import Inputs as IdentityInputs
 from sve_carddb.domains.registry.storage import Index, plan_files, write_files
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import Scope, seal_batch
 from sve_carddb.parse.pages import extract_en, extract_jp, official_en, official_jp
@@ -75,7 +76,13 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
                 "state": "confirmed",
                 "note": "Synthetic mapping.",
             },
-            "records": [],
+            "records": [
+                {
+                    "id": "kw:synthetic",
+                    "code": "synthetic",
+                    "term_id": "term:keyword.synthetic",
+                }
+            ],
         },
     )
     install(
@@ -87,6 +94,11 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
         case.case.root,
         "catalog/rarity-badges.yaml",
         {"format": 1, "kind": "printing_rarity_badges", "records": []},
+    )
+    install(
+        case.case.root,
+        "translations/parameter-rules/current.yaml",
+        {"format": 2, "kind": "template_parameter_rules", "rules": []},
     )
     store = _store(case.case.repository.parent / "translation-sources")
     shutil.copytree(case.archive, store.root, dirs_exist_ok=True)
@@ -167,9 +179,9 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
             "locator": locator,
             "text_hash": digest(text.encode()),
         }
-    definition = term("rule.synthetic")
+    definition = term("keyword.synthetic", category="keyword")
     object_value(definition["data"])["source_ref"] = references["term"]
-    selected = choice("rule.synthetic")
+    selected = choice("keyword.synthetic")
     chosen = object_value(selected["data"])
     chosen["value"] = {
         "kind": "source",
@@ -196,7 +208,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
     return replace(case, archive=store.root)
 
 
-def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore[too-many-locals] -- full native CLI binds real synthetic identities, current catalog and frozen regional sources
+def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore[too-many-locals,too-many-statements] -- full native CLI binds real synthetic identities, current catalog, mechanics and frozen regional sources
     baseline: VocabularyCase, tmp_path: Path, mocker: MockerFixture
 ) -> None:
     prepare = mocker.spy(offline, "_prepare_catalog")
@@ -310,6 +322,28 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     assert manifest["format_version"] == "4.0.0"
     assert manifest["data_as_of"] == "2026-10-01"
     assert manifest["regions"] == ["en", "jp"]
+    joined = read_snapshot(
+        manifest,
+        {
+            str(object_value(raw)["key"]): (
+                tmp_path / "preview" / str(object_value(raw)["path"])
+            ).read_bytes()
+            for raw in array(manifest["files"])
+        },
+    )
+    assert len(joined["keyword"]) == 1
+    assert joined["keyword"][0]["id"] == "kw:synthetic"
+    assert joined["keyword"][0]["translations"]
+    assert not joined["mechanic_projection"]
+    assert not joined["card_mechanic_coverage"]
+    report = object_value(parse((tmp_path / "bundle/report.json").read_bytes()))
+    mechanism = object_value(report["mechanics"])
+    assert mechanism["keywords"] == 1
+    assert mechanism["projection_rows"] == mechanism["coverage_rows"] == 0
+    assert (
+        mechanism["description"]
+        == "Self keyword declarations: body parts containing only keywords."
+    )
     record = InputRecord.model_validate_json(
         (tmp_path / "bundle/inputs.json").read_bytes()
     )
@@ -318,7 +352,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         "translation_evidence",
     }
     with open_database(
-        compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence")),
+        compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence", "keyword")),
         tmp_path / "bundle/build.sqlite",
     ) as db:
         assert len(db.rows("card")) == 2

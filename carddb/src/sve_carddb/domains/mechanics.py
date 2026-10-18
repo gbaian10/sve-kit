@@ -1,8 +1,8 @@
-"""Derive sparse H1 labels from exact current source owners, independently of rendering."""
+"""Derive self keyword declarations from exact current owners, independently of rendering."""
 
 from collections import Counter
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Literal, cast
 
 from pydantic import Field, JsonValue, ValidationError, field_validator, model_validator
 
@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database, Value
     from sve_carddb.domains.translations.four_layer_classification import Classifier
+    from sve_carddb.domains.translations.models import Origin
     from sve_carddb.domains.translations.sources import Sources
 
 FILE = "rules/keyword-registry.yaml"
@@ -129,7 +130,12 @@ class Settings:
     authored_revision: str
 
 
-def _adoption(db: Database, decision: Adoption, source_id: str) -> None:
+def _adoption(
+    db: Database,
+    decision: Adoption,
+    source_id: str,
+    category: Literal["keyword_mapping", "mechanic_suppression"],
+) -> None:
     insert_exact(
         db,
         "decision",
@@ -137,7 +143,7 @@ def _adoption(db: Database, decision: Adoption, source_id: str) -> None:
             "id": decision.id,
             "state": decision.state,
             "scope": "record",
-            "category": "keyword_mapping",
+            "category": category,
             "note": decision.note,
         },
         ("id",),
@@ -156,7 +162,7 @@ def _adoption(db: Database, decision: Adoption, source_id: str) -> None:
     )
 
 
-def _register(db: Database, inputs: Inputs, revision: str) -> None:
+def _register(db: Database, inputs: Inputs, revision: str) -> str:
     source_id = (
         "authored:mechanics:"
         + digest(canonical([revision, FILE, digest(inputs.exact)]))[7:]
@@ -174,7 +180,7 @@ def _register(db: Database, inputs: Inputs, revision: str) -> None:
         },
         ("id",),
     )
-    _adoption(db, inputs.registry.decision, source_id)
+    _adoption(db, inputs.registry.decision, source_id, "keyword_mapping")
     terms = {str(row.values["id"]): row.values for row in db.rows("glossary_term")}
     interner = TextInterner(db)
     for keyword in inputs.registry.records:
@@ -211,11 +217,7 @@ def _register(db: Database, inputs: Inputs, revision: str) -> None:
                 lang=str(value["lang"]),
                 source_unit_id=source_unit,
                 text=str(value["text"]),
-                origin="official"
-                if value["origin"] == "official"
-                else "machine"
-                if value["origin"] == "machine"
-                else "project",
+                origin=cast("Origin", value["origin"]),
                 low_confidence=value["low_confidence"] is True
                 or term["low_confidence"] is True,
                 semantic_variant="keyword:" + keyword.id,
@@ -223,8 +225,7 @@ def _register(db: Database, inputs: Inputs, revision: str) -> None:
                 if value["source_id"] is None
                 else str(value["source_id"]),
             )
-    for suppression in inputs.registry.suppressions:
-        _adoption(db, suppression.decision, source_id)
+    return source_id
 
 
 def producer_version(inputs: Inputs, classifier: Classifier) -> str:
@@ -366,7 +367,9 @@ def project_current(  # ruff: ignore[complex-structure] -- exact freshness and c
         ):
             continue
         if value["state"] != "partial":
-            raise ValueError("The H1 producer only accepts partial mechanism coverage")
+            raise ValueError(
+                "The self keyword declaration producer only accepts partial mechanism coverage"
+            )
         partial.setdefault((str(value["card_id"]), str(value["scope"])), set()).add(
             str(value["keyword_id"])
         )
@@ -386,11 +389,11 @@ def project_current(  # ruff: ignore[complex-structure] -- exact freshness and c
         )
 
 
-def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] -- one owner-checked H1 pass retains all rejection reasons without render dependencies
+def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] -- one owner-checked declaration pass retains all rejection reasons without render dependencies
     db: Database, inputs: Inputs, settings: Settings
 ) -> dict[str, JsonValue]:
-    """H1 proves positive declarations; every other relation remains incomplete."""
-    _register(db, inputs, settings.authored_revision)
+    """Self keyword declarations prove has; every other relation stays incomplete."""
+    registry_source_id = _register(db, inputs, settings.authored_revision)
     hashes = source_bundles(db)
     version = producer_version(inputs, settings.classifier)
     keywords = {record.term_id: record.id for record in inputs.registry.records}
@@ -443,7 +446,7 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] 
                     or not isinstance(concept, GlossaryReference)
                 ):
                     raise ValueError(
-                        "H1 declaration requires only typed keyword concepts"
+                        "Self keyword declaration requires only typed keyword concepts"
                     )
                 keyword = keywords.get(concept.key)
                 if keyword is None:
@@ -511,6 +514,12 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] 
         ):
             reasons["stale_suppression"] += 1
             continue
+        _adoption(
+            db,
+            suppression.decision,
+            registry_source_id,
+            "mechanic_suppression",
+        )
         db.insert(
             "mechanic_override",
             {
@@ -526,6 +535,7 @@ def apply(  # ruff: ignore[complex-structure,too-many-locals,too-many-branches] 
     project_current(db, hashes, version)
     return {
         "adapter": ADAPTER,
+        "description": "Self keyword declarations: body parts containing only keywords.",
         "producer_version": version,
         "keywords": len(keywords),
         "positive_tags": len(tags),

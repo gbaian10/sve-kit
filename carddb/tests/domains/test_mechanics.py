@@ -13,6 +13,8 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains import mechanics
 from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.registry.records import FaceData
+from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.four_layer_classification import Term
 
@@ -61,15 +63,35 @@ def case(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     raw: str,
+    *,
+    back: str | None = None,
 ) -> Generator[tuple[Database, mechanics.Inputs, mechanics.Settings, str]]:
+    html = digital_link_import_fixtures.RAW
+    if back is not None:
+        start = html.index(b'<div class="cardlist-Detail_Box_Inner">')
+        end = html.index(b"\n<!--") - len(b"</div>")
+        face = html[start:end]
+        html = (
+            html[:start]
+            + face
+            + face.replace(b"Synthetic rule.", back.encode())
+            + html[end:]
+        )
     monkeypatch.setattr(
         digital_link_import_fixtures,
         "RAW",
-        digital_link_import_fixtures.RAW.replace(
-            b"Synthetic rule.", raw.replace("\n", "<br>").encode()
-        ),
+        html.replace(b"Synthetic rule.", raw.replace("\n", "<br>").encode()),
     )
     fixture = make_fixture(tmp_path)
+    faces = sorted(
+        (
+            r.data
+            for r in load_registry(fixture.root / "authored").records.values()
+            if isinstance(r.data, FaceData) and r.data.card_id == fixture.card.id
+        ),
+        key=lambda face: face.ordinal,
+    )
+    fixture = replace(fixture, face=faces[0])
     inputs = mechanics.Inputs(registry(), canonical(registry().model_dump(mode="json")))
     engine = classifier(
         (
@@ -99,6 +121,33 @@ def case(
                     "basis": "latest_observed_no_errata",
                 },
             )
+            if back is not None:
+                db.insert("face", faces[1].model_dump(mode="json", round_trip=True))
+                revision = db.select(
+                    "face_revision",
+                    db.columns("face_revision"),
+                    where={"id": "link-revision"},
+                )[0].values
+                db.insert(
+                    "face_revision",
+                    dict(revision)
+                    | {
+                        "id": "back-revision",
+                        "face_id": faces[1].id,
+                        "effect_unit_id": TextInterner(db).intern(
+                            LocalizedText(lang="ja", text=back)
+                        ),
+                    },
+                )
+                db.insert(
+                    "face_current",
+                    {
+                        "face_id": faces[1].id,
+                        "region": "jp",
+                        "revision_id": "back-revision",
+                        "basis": "latest_observed_no_errata",
+                    },
+                )
             for term in engine.terms.values():
                 db.insert(
                     "glossary_term",
@@ -140,6 +189,7 @@ def case(
         ("【合成甲】【合成乙】", {"kw:test-a", "kw:test-b"}),
         ("【合成甲】\nSynthetic undecoded effect.", {"kw:test-a"}),
         ("それは【合成甲】を持つ。", set()),
+        ("これは【合成甲】を失う。", set()),
         ("【合成甲】を持つフォロワーを選ぶ。", set()),
         ("「【合成甲】」を持つ。", set()),
         ("【未知合成】", set()),
@@ -262,7 +312,7 @@ def test_suppression_is_exact_and_does_not_clear_partial_coverage(
         assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
 
 
-def test_second_source_deduplicates_and_unchecked_sections_stay_partial(
+def test_duplicate_positive_evidence_deduplicates_and_stays_partial(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -295,6 +345,72 @@ def test_second_source_deduplicates_and_unchecked_sections_stay_partial(
             )
         assert len(db.rows("mechanic_projection")) == 1
         assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
+
+
+def test_keyword_only_in_token_section_does_not_mark_the_original_card(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, "Synthetic undecoded effect.") as (
+        db,
+        inputs,
+        settings,
+        _,
+    ):
+        with db.transaction():
+            unit = TextInterner(db).intern(LocalizedText(lang="ja", text="【合成甲】"))
+            db.insert(
+                "face_text_section",
+                {
+                    "revision_id": "link-revision",
+                    "ordinal": 0,
+                    "text_unit_id": unit,
+                    "kind": "token_definition",
+                },
+            )
+            mechanics.apply(db, inputs, settings)
+        assert not db.rows("card_mechanic")
+        assert not db.rows("mechanic_projection")
+        assert not db.rows("card_mechanic_coverage")
+
+
+def test_only_the_back_face_declaration_marks_the_card(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, "Synthetic front effect.", back="【合成甲】") as (
+        db,
+        inputs,
+        settings,
+        cid,
+    ):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+        projection = db.rows("mechanic_projection")
+        assert len(projection) == 1
+        assert projection[0].values["card_id"] == cid
+        assert projection[0].values["keyword_id"] == "kw:test-a"
+        assert projection[0].values["relations"] == Json(["has"])
+
+
+def test_changing_only_the_other_face_invalidates_the_card_bundle(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, "【合成甲】", back="Synthetic back effect.") as (
+        db,
+        inputs,
+        settings,
+        cid,
+    ):
+        with db.transaction():
+            mechanics.apply(db, inputs, settings)
+        before = mechanics.source_bundles(db)[cid]
+        with db.transaction():
+            unit = TextInterner(db).intern(
+                LocalizedText(lang="ja", text="Changed synthetic back effect.")
+            )
+            db.update(
+                "face_revision", {"id": "back-revision"}, {"effect_unit_id": unit}
+            )
+        assert mechanics.source_bundles(db)[cid] != before
 
 
 def test_borrowed_source_text_fails_even_when_it_is_a_keyword(
@@ -514,7 +630,11 @@ def test_authored_exact_suppression_and_stale_suppression_are_imported_separatel
             ),
         )
         stale = exact.model_copy(
-            update={"id": "override:stale", "target_tag_id": "mechanic:retired"}
+            update={
+                "id": "override:stale",
+                "target_tag_id": "mechanic:retired",
+                "decision": exact.decision.model_copy(update={"id": "decision:stale"}),
+            }
         )
         changed = replace(
             inputs,
@@ -526,6 +646,14 @@ def test_authored_exact_suppression_and_stale_suppression_are_imported_separatel
             report = mechanics.apply(db, changed, settings)
         assert object_value(report["reasons"])["stale_suppression"] == 1
         assert len(db.rows("mechanic_override")) == 1
+        decisions = {str(row.values["id"]): row.values for row in db.rows("decision")}
+        assert decisions["mapping:synthetic"]["category"] == "keyword_mapping"
+        assert decisions["decision:correction"]["category"] == "mechanic_suppression"
+        assert "decision:stale" not in decisions
+        assert all(
+            row.values["decision_id"] != "decision:stale"
+            for row in db.rows("decision_source")
+        )
         assert not db.rows("mechanic_projection")
         assert db.rows("card_mechanic_coverage")[0].values["complete_all"] is False
 

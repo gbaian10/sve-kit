@@ -587,6 +587,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
             )
             mark("db: flavor + templates (translations)")
+            if translation is None and mechanics.registry.records:
+                raise ValueError(
+                    "Keyword registration requires adopted glossary inputs"
+                )
             mechanic_report = (
                 None
                 if translation is None or not mechanics.registry.records
@@ -607,11 +611,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     ),
                 )
             )
-            if translation is None and mechanics.registry.records:
-                raise ValueError(
-                    "Keyword registration requires adopted glossary inputs"
-                )
-            mark("db: mechanic H1 projection")
+            mark("db: self keyword declaration projection")
             link_uses = () if link_result is None else link_result.record.uses
             ruling_report = write_rulings(db, rulings, inputs.revision)
             name_uses = () if name_result is None else name_result.record.uses
