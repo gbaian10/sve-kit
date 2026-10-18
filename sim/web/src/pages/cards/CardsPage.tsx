@@ -47,12 +47,15 @@ import type { OpenOutcome } from "../../components/results/plain-click"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { ConditionChips } from "../../components/search/ConditionChips"
+import { vocabularyOptionLabel } from "../../components/search/facet-labels"
 import { FilterPanel } from "../../components/search/FilterPanel"
+import { LocationFilter } from "../../components/search/LocationFilter"
 import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
 import { SetFilter } from "../../components/search/SetFilter"
 import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
+import { TraitFilter } from "../../components/search/TraitFilter"
 import { TypeFilter } from "../../components/search/TypeFilter"
 import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
@@ -61,6 +64,7 @@ import { Segmented } from "../../components/ui/Segmented"
 import { type CardSummary, type ImageSource, type SearchPage, type SearchQuery } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
+import { leaderFrameTokens, tokenKindTokens } from "../../domain/deckLocation"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { editionUrl, formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
 import {
@@ -75,7 +79,6 @@ import {
 import { prStyleTokens } from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
 import { setCaption } from "../../domain/sets"
-import { leaderFrameTokens, tokenKindTokens } from "../../domain/typeFilter"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 import { SetHeader } from "../sets/SetHeader"
@@ -643,14 +646,18 @@ export function CardsPage() {
           const option = printingOptions?.type.types.find((item) => item.code === code)
           return option ? (option.name.translations[textLang] ?? option.name.original.text) : code
         }}
+        traitLabel={(code) => {
+          const option = printingOptions?.trait.traits.find((item) => item.code === code)
+          return option ? vocabularyOptionLabel(option.name, textLang) : code
+        }}
         setLabel={(code) => {
           const option = sets?.find((item) => item.code === code)
           return option ? setCaption(option, textLang).text : code
         }}
         groups={{
           pr: prStyleTokens(printingOptions?.rarity.styles ?? []),
-          token: tokenKindTokens(printingOptions?.type.typeCounts ?? {}),
-          leader: leaderFrameTokens(printingOptions?.type.typeCounts ?? {}),
+          token: tokenKindTokens(printingOptions?.location.counts ?? {}),
+          leader: leaderFrameTokens(printingOptions?.location.counts ?? {}),
         }}
         onChange={commit}
         onClear={() => {
@@ -684,6 +691,22 @@ export function CardsPage() {
               selected={query.types}
               onChange={(types) => {
                 commit({ ...query, types })
+              }}
+            />
+            <LocationFilter
+              options={printingOptions?.location}
+              textLang={textLang}
+              selected={query.locations}
+              onChange={(locations) => {
+                commit({ ...query, locations })
+              }}
+            />
+            <TraitFilter
+              options={printingOptions?.trait}
+              textLang={textLang}
+              selected={query.traits}
+              onChange={(traits) => {
+                commit({ ...query, traits })
               }}
             />
             {/* A set page's set comes from its path, so the dropdown would only show one choice. */}

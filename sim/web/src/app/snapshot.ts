@@ -520,6 +520,9 @@ function useSummaryImages(result: SearchChannelStatus["previous"], edition: Regi
         rarityCounts: {},
         types: [],
         typeCounts: {},
+        locationCounts: {},
+        traits: [],
+        traitCounts: {},
         setCounts: {},
       },
       faces,
@@ -584,6 +587,8 @@ export function usePrintingOptions() {
     ? {
         rarity: { styles: view.options.prBadgeStyles, counts: view.options.rarityCounts },
         type: { types: view.options.types, typeCounts: view.options.typeCounts },
+        location: { types: view.options.types, counts: view.options.locationCounts },
+        trait: { traits: view.options.traits, counts: view.options.traitCounts },
       }
     : undefined
 }

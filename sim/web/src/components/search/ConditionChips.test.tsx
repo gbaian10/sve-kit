@@ -23,7 +23,8 @@ function Harness({ initial }: { readonly initial: string }) {
         edition="jp"
         classLabel={(code) => code}
         rarityLabel={(code) => code.toUpperCase()}
-        typeLabel={(code) => ({ leader: "主戰者", spell: "法術", follower: "從者" })[code] ?? code}
+        typeLabel={(code) => ({ spell: "法術", follower: "從者" })[code] ?? code}
+        traitLabel={(code) => ({ pixie: "妖精" })[code] ?? code}
         setLabel={(code) => code}
         groups={GROUPS}
         onChange={setQuery}
@@ -68,11 +69,22 @@ describe("condition chips for grouped values", () => {
 
   it("keeps one chip per sub-value while the selection is partial, each removable alone", async () => {
     await renderInRouter(<Harness initial="type=leader:gold,token:spell&rarity=pr:gr" />)
-    expect(chips()).toEqual(["PR（GR）", "Token・法術", "主戰者・金框"])
+    expect(chips()).toEqual(["PR（GR）", "主戰者・金框", "Token・法術"])
     await userEvent.click(screen.getByRole("button", { name: "移除條件：Token・法術" }))
     expect(chips()).toEqual(["PR（GR）", "主戰者・金框"])
-    expect(url()).toBe("type=leader:gold&rarity=pr:gr")
+    // Location tokens read from an older `type=` URL are written back as `loc=`.
+    expect(url()).toBe("loc=leader:gold&rarity=pr:gr")
     await userEvent.click(screen.getByRole("button", { name: "移除條件：PR（GR）" }))
-    expect(url()).toBe("type=leader:gold")
+    expect(url()).toBe("loc=leader:gold")
+  })
+
+  it("lists deck locations after types and traits after them, each removable alone", async () => {
+    await renderInRouter(<Harness initial="type=spell&loc=main,evolve&trait=pixie,unknown" />)
+    expect(chips()).toEqual(["法術", "主牌組", "進化", "妖精", "unknown"])
+    await userEvent.click(screen.getByRole("button", { name: "移除條件：主牌組" }))
+    expect(url()).toBe("type=spell&loc=evolve&trait=pixie,unknown")
+    await userEvent.click(screen.getByRole("button", { name: "移除條件：妖精" }))
+    expect(url()).toBe("type=spell&loc=evolve&trait=unknown")
+    expect(chips()).toEqual(["法術", "進化", "unknown"])
   })
 })

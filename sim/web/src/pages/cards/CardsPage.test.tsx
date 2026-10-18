@@ -598,8 +598,8 @@ describe("CardsPage", () => {
           "PR",
           "銅",
           "從者",
-          "Token",
           "主戰者・金框",
+          "Token",
           "同一張卡只顯示一次",
         ])
       })
@@ -616,7 +616,9 @@ describe("CardsPage", () => {
       await userEvent.click(within(conditions).getByRole("button", { name: "移除條件：PR" }))
       expect(search().get("rarity")).toBe("bronze")
       await userEvent.click(within(conditions).getByRole("button", { name: "移除條件：Token" }))
-      expect(search().get("type")).toBe("follower,leader:gold")
+      // Deck locations read from the older `type=` URL are written back as `loc=`.
+      expect(search().get("type")).toBe("follower")
+      expect(search().get("loc")).toBe("leader:gold")
       expect(chips(conditions)).not.toContain("Token")
       await userEvent.click(
         within(conditions).getByRole("button", { name: "移除條件：同一張卡只顯示一次" }),

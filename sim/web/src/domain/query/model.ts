@@ -28,7 +28,12 @@ export interface QueryState {
   readonly attack: readonly number[]
   /** Selected defense values (0–10, 10 = 10 or more); empty means any. */
   readonly defense: readonly number[]
+  /** Printed types (`follower`, `spell`, `amulet`); empty means any type. */
   readonly types: readonly string[]
+  /** Deck locations (`main`, `evolve`, `token:spell`, `leader:gold`, …); empty means any. */
+  readonly locations: readonly string[]
+  /** Trait vocabulary codes; a card with any selected trait passes. */
+  readonly traits: readonly string[]
   /** Keyword ids not listed are "either". */
   readonly mechanics: Readonly<Record<string, MechanicState>>
   readonly sets: readonly string[]
@@ -48,6 +53,8 @@ export const DEFAULT_QUERY: QueryState = {
   attack: [],
   defense: [],
   types: [],
+  locations: [],
+  traits: [],
   mechanics: {},
   sets: [],
   rarities: [],
@@ -64,6 +71,8 @@ export function activeFilterCount(state: QueryState): number {
     (state.attack.length > 0 ? 1 : 0) +
     (state.defense.length > 0 ? 1 : 0) +
     (state.types.length > 0 ? 1 : 0) +
+    (state.locations.length > 0 ? 1 : 0) +
+    (state.traits.length > 0 ? 1 : 0) +
     (Object.keys(state.mechanics).length > 0 ? 1 : 0) +
     (state.sets.length > 0 ? 1 : 0) +
     (state.rarities.length > 0 ? 1 : 0) +

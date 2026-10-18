@@ -7,7 +7,7 @@ describe("query codec", () => {
   it("reads every parameter and ignores unknown values", () => {
     const state = parseQuery(
       new URLSearchParams(
-        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&unit=art&sort=cost&view=table",
+        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&loc=token:spell,main&trait=pixie,Bad!&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&unit=art&sort=cost&view=table",
       ),
     )
     expect(state).toEqual({
@@ -17,6 +17,8 @@ describe("query codec", () => {
       attack: [0, 10],
       defense: [4],
       types: ["spell"],
+      locations: ["main", "token:spell"],
+      traits: ["pixie"],
       mechanics: { "kw:a": "not", "kw:b": "has" },
       sets: ["set:bp01"],
       rarities: ["gold"],
@@ -27,6 +29,21 @@ describe("query codec", () => {
     })
     expect(parseQuery(new URLSearchParams("unit=nope&sort=nope&view=nope&alt=0"))).toEqual(
       DEFAULT_QUERY,
+    )
+  })
+
+  it("reads deck locations out of older type URLs and writes them back as loc", () => {
+    const state = parseQuery(
+      new URLSearchParams("type=token,leader:gold,ep,spell,follower&loc=main,leader:gold"),
+    )
+    expect(state.types).toEqual(["follower", "spell"])
+    expect(state.locations).toEqual(["ep", "leader:gold", "main", "token"])
+    expect(formatQuery(state).toString()).toBe(
+      "type=follower%2Cspell&loc=ep%2Cleader%3Agold%2Cmain%2Ctoken",
+    )
+    expect(parseQuery(formatQuery(state))).toEqual(state)
+    expect(querySearch({ ...DEFAULT_QUERY, traits: ["machina", "pixie"] })).toBe(
+      "?trait=machina%2Cpixie",
     )
   })
 
@@ -96,6 +113,14 @@ describe("query codec", () => {
         unit: "art",
       }),
     ).toBe(4)
+    expect(
+      activeFilterCount({
+        ...DEFAULT_QUERY,
+        locations: ["main"],
+        traits: ["pixie"],
+        types: ["spell"],
+      }),
+    ).toBe(3)
   })
 
   it("toggles a stat value and keeps the list in numeric order", () => {

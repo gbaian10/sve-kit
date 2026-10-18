@@ -1,11 +1,13 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
+import { orderLocationTokens } from "../../domain/deckLocation"
 import { COST_CAP, type QueryState, STAT_CAP, toggleClass } from "../../domain/query/model"
 import { orderRarityTokens, UNRATED_RARITY } from "../../domain/rarityFilter"
 import type { Region } from "../../domain/search"
 import { orderTypeTokens } from "../../domain/typeFilter"
 import { Chip } from "../ui/Chip"
+import { locationLabel } from "./facet-labels"
 import { prBadgeVisual, prStyleLabel, prStyleVisual, rarityBadgeVisual } from "./rarityVisuals"
 
 export interface ConditionChipsProps {
@@ -15,6 +17,7 @@ export interface ConditionChipsProps {
   readonly classLabel: (code: string) => string
   readonly rarityLabel: (code: string) => string
   readonly typeLabel: (code: string) => string
+  readonly traitLabel: (code: string) => string
   readonly setLabel: (code: string) => string
   /** A set implied by the page's path (`/sets/:code`): kept in the query, shown as no chip. */
   readonly impliedSet?: string | undefined
@@ -47,6 +50,7 @@ export function ConditionChips({
   classLabel,
   rarityLabel,
   typeLabel,
+  traitLabel,
   setLabel,
   impliedSet,
   groups,
@@ -78,20 +82,11 @@ export function ConditionChips({
       ? selected.filter((value) => value !== token && !value.startsWith(`${token}:`))
       : selected.filter((value) => value !== token)
   const sub = (parent: string, child: string) => t("filters.subChip", { parent, child })
-  const typeChip = (token: string): Pick<Condition, "label"> => {
+  const locationChip = (token: string): Pick<Condition, "label"> => {
     const [code = "", child] = token.split(":")
-    const parent = code === "token" ? t("typeFilter.token") : typeLabel(code)
+    const parent = locationLabel(t, code)
     if (child === undefined) return { label: parent }
-    return {
-      label: sub(
-        parent,
-        code === "leader"
-          ? child === "gold" || child === "white" || child === "unknown"
-            ? t(`typeFilter.${child}`)
-            : child
-          : typeLabel(child),
-      ),
-    }
+    return { label: sub(parent, code === "token" ? typeLabel(child) : locationLabel(t, token)) }
   }
   const rarityChip = (token: string): Pick<Condition, "label" | "content"> => {
     if (token === UNRATED_RARITY) return { label: t("rarityBadge.unrated") }
@@ -133,10 +128,20 @@ export function ConditionChips({
       ...rarityChip(token),
       without: { ...query, rarities: without(query.rarities, token) },
     })),
-    ...collapse(orderTypeTokens(query.types)).map((token) => ({
-      key: `type:${token}`,
-      ...typeChip(token),
-      without: { ...query, types: without(query.types, token) },
+    ...orderTypeTokens(query.types).map((code) => ({
+      key: `type:${code}`,
+      label: typeLabel(code),
+      without: { ...query, types: query.types.filter((other) => other !== code) },
+    })),
+    ...collapse(orderLocationTokens(query.locations)).map((token) => ({
+      key: `loc:${token}`,
+      ...locationChip(token),
+      without: { ...query, locations: without(query.locations, token) },
+    })),
+    ...query.traits.map((code) => ({
+      key: `trait:${code}`,
+      label: traitLabel(code),
+      without: { ...query, traits: query.traits.filter((other) => other !== code) },
     })),
     ...query.sets
       .filter((code) => code !== impliedSet)
