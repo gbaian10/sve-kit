@@ -828,7 +828,7 @@ function snapshotClient(
             ...values.flat().filter((fragment) => !present.has(fragment.identity)),
           ],
         }
-        await prepareCatalog(supplemented, check)
+        await prepareCatalog(supplemented, check, false)
         check()
         loaded = supplemented
         if (status.state === "ready") set({ ...status })

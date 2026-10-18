@@ -362,9 +362,10 @@ describe("catalog preparation at client publication boundaries", () => {
       served = origin(),
       client = createSnapshotClient(base, { fetch: served.fetch, cacheStorage: memoryCache() })
     await client.load()
+    clock.measures.length = 0
     const before = ready(client),
       published = observed(client),
-      gate = clock.hold()
+      gate = clock.hold("sve:catalog:catalogOf")
     const printing = client.prefetchPrintings?.()
     await gate.entered
     expect(client.snapshot()).toBe(before)
@@ -374,6 +375,8 @@ describe("catalog preparation at client publication boundaries", () => {
     const after = ready(client)
     expect(after.printingReady).toBe(true)
     expect(published).toEqual([after])
+    expect(clock.measures.some((entry) => entry.name === "sve:catalog:catalogOf")).toBe(true)
+    expect(clock.measures.some((entry) => entry.name === "sve:catalog:validate")).toBe(false)
     expect(catalogOf(after).summary("p:bp01-002-alt")?.cardNo).toBe("BP01-002a")
     await client.prefetchPrintings?.()
     expect(published).toEqual([after])
