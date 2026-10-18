@@ -726,7 +726,7 @@ def test_source_structure_changes_identity_and_v2_rejects_preparation_values() -
     assert frame.payload("synthetic") != changed.payload("synthetic")
     document = changed.model_dump()
     document["source"]["normalizer_version"] = "four-layer-jp-v2"
-    with pytest.raises(ValueError, match="requires a v5"):
+    with pytest.raises(ValueError, match="requires a v6"):
         type(frame).model_validate(document)
     read = contract_case("A1").item.binding.values["read"]
     slot = next(
