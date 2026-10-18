@@ -292,6 +292,8 @@ export function CardText({
       <TextPurposeStatus readiness={readiness} />
       {translating ? (
         <>
+          {/* The source line sits under the heading (#521); only a section of different quality gets its own. */}
+          {value.translated && sharedLine && <TranslationSourceLine value={value} />}
           <div className={cn(BODY, "space-y-2")}>
             {value.translated ? (
               <AnnotatedText
@@ -307,7 +309,6 @@ export function CardText({
             {effectMissing}
             {sectionTexts("translated")}
           </div>
-          {value.translated && sharedLine && <TranslationSourceLine value={value} />}
           {boxMissing}
           {value.selection?.["basis"] === "jp_source" &&
             readiness.source === "ready" &&

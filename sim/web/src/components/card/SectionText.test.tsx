@@ -147,7 +147,12 @@ describe("sections under the effect in the Traditional Chinese interface", () =>
     expect(within(translated).getAllByText(/譯文 · /)).toHaveLength(1)
     const line = within(translated).getByText(/專案譯文/)
     expect(line).toHaveTextContent("專案譯文 · 非官方")
-    expect(rule?.compareDocumentPosition(line)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    // The shared source line sits under the heading, before the effect and its sections.
+    const first = translated.querySelector('p[lang="zh-Hant"]')
+    if (!first) throw new Error("translation missing")
+    expect(line.compareDocumentPosition(first)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    if (!rule) throw new Error("section missing")
+    expect(line.compareDocumentPosition(rule)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
     expect(rule).not.toContainElement(line)
     const original = originalBox(region)
     expect(paragraphs(original, "ja")).toEqual(["Synthetic text", "Synthetic text"])

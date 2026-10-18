@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react"
+import { act, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -185,13 +185,124 @@ describe("annotation presentation", () => {
     expect(rendered.container.querySelector("strong")).toBeNull()
     expect(screen.getByRole("button", { name: "手牌の王" })).toBeVisible()
     await userEvent.click(screen.getByRole("button", { name: "手牌の王" }))
-    expect(screen.getByRole("complementary", { name: "查看術語說明" })).toHaveTextContent(
-      "尚無公開說明",
-    )
+    const entry = screen.getByRole("complementary", { name: "查看術語說明" })
+    expect(entry).toHaveTextContent("卡名引用")
+    expect(entry).toHaveTextContent("尚未連結到卡片")
+    expect(entry).not.toHaveTextContent("尚無公開說明")
+    expect(within(entry).queryByRole("link")).not.toBeInTheDocument()
     expect(value.annotation.occurrences[0]?.reference).toEqual({
       kind: "card_name",
       term_id: "king",
     })
+  })
+  it("links a confirmed card-name target to the card's own route", async () => {
+    const value = {
+      unit: { text: "手牌の王", lang: "ja" },
+      annotation: {
+        occurrences: [
+          {
+            ordinal: 0,
+            reference: { kind: "card_name", term_id: "king" },
+            ranges: [{ start: 0, end: 4 }],
+            bold: true,
+          },
+        ],
+      },
+    }
+    const context: SelectedText = {
+      original: value,
+      concepts: [
+        { id: "king", category: "card_name", explanations: [], card_ids: ["c:king", "c:other"] },
+        { id: "unrelated", category: "card_name", explanations: [], card_ids: ["c:unrelated"] },
+      ],
+      explanations: [],
+      cards: [
+        {
+          cardId: "c:king",
+          intId: 7,
+          cardNo: "BP01-001",
+          cardNoState: "official",
+          region: "jp",
+          name: { lang: "ja", text: "手牌の王" },
+        },
+        {
+          cardId: "c:other",
+          intId: 42,
+          cardNo: "_provisional",
+          cardNoState: "provisional",
+          region: "en",
+        },
+        {
+          cardId: "c:unrelated",
+          intId: 9,
+          cardNo: "BP01-009",
+          cardNoState: "official",
+          region: "jp",
+        },
+      ],
+    }
+    await renderInRouter(<AnnotatedText value={value} context={context} emphasis={true} />)
+    await userEvent.click(screen.getByRole("button", { name: "手牌の王" }))
+    const entry = screen.getByRole("complementary", { name: "查看術語說明" })
+    expect(entry).toHaveTextContent("卡名引用")
+    expect(entry).not.toHaveTextContent("尚未連結到卡片")
+    const links = within(entry).getAllByRole("link")
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/cards/BP01-001",
+      "/cards/_provisional/42",
+    ])
+    expect(links[0]?.closest("li")).toHaveTextContent("手牌の王")
+    expect(links[0]?.closest("li")).toHaveTextContent("JP")
+    expect(links[1]?.closest("li")).toHaveTextContent("EN")
+    expect(entry).not.toHaveTextContent("BP01-009")
+  })
+  it("names each glossary category and keeps a null bold unemphasised", async () => {
+    const value = {
+      unit: { text: "妖精妖精", lang: "ja" },
+      annotation: {
+        occurrences: [
+          {
+            ordinal: 0,
+            reference: { kind: "card_name", term_id: "term:name.fairy" },
+            ranges: [{ start: 0, end: 2 }],
+            bold: true,
+          },
+          {
+            ordinal: 1,
+            reference: { kind: "glossary", key: "term:trait.pixie" },
+            ranges: [{ start: 2, end: 4 }],
+            bold: null,
+          },
+        ],
+      },
+    }
+    const context: SelectedText = {
+      original: value,
+      concepts: [
+        { id: "term:name.fairy", category: "card_name", explanations: [], card_ids: [] },
+        { id: "term:trait.pixie", category: "trait", explanations: [], card_ids: [] },
+      ],
+      explanations: [],
+      cards: [],
+    }
+    const { container } = await renderInRouter(
+      <AnnotatedText value={value} context={context} emphasis={true} />,
+    )
+    // The same word twice: the first is the card name, the second the trait; only the first is bold.
+    const buttons = screen.getAllByRole("button", { name: "妖精" })
+    expect(buttons).toHaveLength(2)
+    expect(container.querySelectorAll("strong")).toHaveLength(1)
+    expect(buttons[0]).toContainElement(container.querySelector("strong"))
+    await userEvent.click(buttons[1] as HTMLElement)
+    let entry = screen.getByRole("complementary", { name: "查看術語說明" })
+    expect(entry).toHaveTextContent("類型")
+    expect(entry).toHaveTextContent("尚無公開說明")
+    expect(entry).not.toHaveTextContent("尚未連結到卡片")
+    await userEvent.click(buttons[0] as HTMLElement)
+    entry = screen.getByRole("complementary", { name: "查看術語說明" })
+    expect(entry).toHaveTextContent("卡名引用")
+    expect(entry).toHaveTextContent("尚未連結到卡片")
+    expect(entry).not.toHaveTextContent("尚無公開說明")
   })
   it("renders the actual native C/P/R text while the preference changes only emphasis", async () => {
     const { client } = await annotatedOrigin()

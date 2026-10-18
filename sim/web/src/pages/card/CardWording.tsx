@@ -177,6 +177,13 @@ export function CardWording({
   readonly entry: unknown
 }) {
   const { t } = useTranslation()
+  // Without an adopted current the name, values and wording follow a provisional revision.
+  const provisionalNote = (wording?.["display"] as Row | undefined)?.["basis"] ===
+    "latest_known_release" && (
+    <p role="note" className="mt-3 text-12 text-text-3">
+      {t("card.wording.provisional")}
+    </p>
+  )
   const grouped = new Map<string | null, Candidate["printings"][number][]>()
   for (const row of (wording?.["candidates"] ?? []) as Row[]) {
     const id = stringValue(row["printing_id"])
@@ -218,39 +225,48 @@ export function CardWording({
     basisPrinting
   ) {
     return (
-      <PrintingWording
-        key={printingId}
-        client={client}
-        edition={edition}
-        ownRevisionId={ownId}
-        translationRevisionId={displayId}
-        basisPrinting={basisPrinting}
-        catalog={catalog}
-        faceId={stringValue(revision?.["face_id"] ?? "")}
-        entry={entry}
-      />
+      <>
+        {provisionalNote}
+        <PrintingWording
+          key={printingId}
+          client={client}
+          edition={edition}
+          ownRevisionId={ownId}
+          translationRevisionId={displayId}
+          basisPrinting={basisPrinting}
+          catalog={catalog}
+          faceId={stringValue(revision?.["face_id"] ?? "")}
+          entry={entry}
+        />
+      </>
     )
   }
   if (!wording)
     return displayId ? (
-      <CardText
-        client={client}
-        edition={edition}
-        owner={{ kind: "face_revision", id: displayId }}
-        field="effect"
-      />
+      <>
+        {provisionalNote}
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: displayId }}
+          field="effect"
+        />
+      </>
     ) : (
       <p className="mt-3 text-14 text-text-2">{t("card.wording.unavailable")}</p>
     )
   if (ownId)
     return (
-      <CardText
-        client={client}
-        edition={edition}
-        owner={{ kind: "face_revision", id: ownId }}
-        field="effect"
-        display="original"
-      />
+      <>
+        {provisionalNote}
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: ownId }}
+          field="effect"
+          display="original"
+        />
+      </>
     )
   return (
     <section className="mt-4 space-y-2" aria-label={t("card.wording.different")}>
