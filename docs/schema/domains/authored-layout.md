@@ -33,6 +33,7 @@
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md) |
 | 提案 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 | 定案（技術契約） | 查卡 keyword 登錄與 manual H1 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；沿既有投影，只產 has／partial，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
+| 定案（內部候選格式） | 效果分類與來源範圍 | `rules/classifications/<owner>/<sequence>.yaml`，`format: 1, kind: effect_classification_shard`；只保存候選，見[效果分類候選](effect-classifications.md)，不作 DSL 或公開搜尋選項 |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 
@@ -57,7 +58,7 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 | ruling | 2 |
 | registry_index、catalog_adoption_shard、display_override_shard | 2 |
 | digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules | 2 |
-| effect_set、keyword_registry、engine_rules、flavor_translation_shard、image_crop_overrides | 1 |
+| effect_set、keyword_registry、engine_rules、flavor_translation_shard、image_crop_overrides、effect_classification_shard | 1 |
 
 `effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，未來正式 DSL 使用另一 kind 或入口。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
 
