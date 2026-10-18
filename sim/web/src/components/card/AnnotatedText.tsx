@@ -1,12 +1,11 @@
 import { X } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { type ReactNode, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useImageIndex } from "../../app/snapshot"
 import {
   type AnnotatedText as TextValue,
   arrayValue,
-  canonicalText,
   type CardSummary,
   type JsonObject,
   type SelectedText,
@@ -16,6 +15,8 @@ import {
 } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import { displayName } from "../../domain/nameDisplay"
+import { editionUrl, querySearch } from "../../domain/query/codec"
+import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
@@ -74,93 +75,152 @@ function layOut(
   return segments
 }
 
-const CATEGORIES = ["keyword", "ability", "trait", "rule_term", "card_name"] as const
-type Category = (typeof CATEGORIES)[number]
-
-interface Entry {
-  readonly kind: "card_name" | "glossary"
-  readonly category: Category | undefined
-  readonly cards: readonly CardSummary[]
-  readonly explanations: SelectedText["explanations"]
-}
+/** What a reference does when followed; null leaves the text as it is (bold or not). */
+type Action =
+  | { readonly kind: "card"; readonly cards: readonly CardSummary[] }
+  | { readonly kind: "trait"; readonly code: string }
 
 /**
- * What a reference opens, or null when nothing public backs it yet: only confirmed card-name
- * targets and glossary terms with a public explanation become entries, so the text highlights
- * exactly the references a reader can follow and lights up more as the data fills in.
+ * The one place that decides a reference's behaviour (maintainer, 2026-10-19): a card name with
+ * confirmed targets opens its card, a trait opens the list filtered by it, and keywords, abilities,
+ * rule terms and vocabulary stay text. More references light up as the data behind them fills in.
  */
-function entryOf(reference: JsonObject, context: SelectedText): Entry | null {
+function actionOf(reference: JsonObject, context: SelectedText): Action | null {
   const kind = reference["kind"]
   if (kind !== "card_name" && kind !== "glossary") return null
-  const concept = context.concepts.find(
-    (row) => row["id"] === reference[kind === "card_name" ? "term_id" : "key"],
-  )
+  const id = reference[kind === "card_name" ? "term_id" : "key"]
+  const concept = context.concepts.find((row) => row["id"] === id)
   if (!concept) return null
-  const category = CATEGORIES.find((value) => value === concept["category"])
-  const cards =
-    kind === "card_name"
-      ? context.cards.filter((card) => arrayValue(concept["card_ids"]).includes(card.cardId))
-      : []
-  const explanations = arrayValue(concept["explanations"])
-    .map((ref) =>
-      context.explanations.find((value) => canonicalText(value.reference) === canonicalText(ref)),
+  if (kind === "card_name") {
+    const cards = context.cards.filter((card) =>
+      arrayValue(concept["card_ids"]).includes(card.cardId),
     )
-    .filter((value) => value !== undefined)
-  if (cards.length === 0 && explanations.length === 0) return null
-  return { kind, category, cards, explanations }
+    return cards.length > 0 ? { kind: "card", cards } : null
+  }
+  if (concept["category"] !== "trait" || typeof id !== "string") return null
+  // Trait concepts carry the vocabulary code the list filters by; an unlisted code stays text.
+  const code = id.replace(/^term:trait\./u, "")
+  const listed = context.vocabulary?.some((row) => row.kind === "trait" && row.code === code)
+  return code !== id && listed ? { kind: "trait", code } : null
 }
 
 function LinkedCard({
   card,
   edition,
   images,
+  size,
 }: {
   readonly card: CardSummary
   readonly edition: Region
   readonly images: ReturnType<typeof useImageIndex>
+  readonly size: "preview" | "row"
 }) {
   const prefs = usePrefs()
   const name = displayName(card.name, currentUiLanguage(prefs.uiLanguage), prefs.nameDisplay)
   return (
-    <li>
-      <Link
-        to={printingPath(card)}
-        className="flex items-center gap-2.5 rounded-control p-1 text-text-1 hover:bg-surface-3 hover:no-underline"
-      >
-        <CardImage
-          summary={card}
-          name={name.primary}
-          images={images}
-          alt="decorative"
-          sizes="40px"
-          className="w-10 shrink-0"
-        />
-        <span className="flex min-w-0 flex-col leading-tight">
-          <span lang={name.primary.lang} className="text-14 font-medium">
-            {name.primary.text}
-          </span>
-          {name.secondary && (
-            <span lang={name.secondary.lang} className="text-12 text-text-2">
-              {name.secondary.text}
-            </span>
-          )}
-          <span className="font-mono text-12 text-text-3">
-            {card.cardNo}
-            {card.region !== edition && ` · ${card.region.toUpperCase()}`}
-          </span>
+    <>
+      <CardImage
+        summary={card}
+        name={name.primary}
+        images={images}
+        alt="decorative"
+        sizes={size === "preview" ? "96px" : "40px"}
+        className={size === "preview" ? "w-24 shrink-0" : "w-10 shrink-0"}
+      />
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span lang={name.primary.lang} className="text-14 font-medium">
+          {name.primary.text}
         </span>
-      </Link>
-    </li>
+        {name.secondary && (
+          <span lang={name.secondary.lang} className="text-12 text-text-2">
+            {name.secondary.text}
+          </span>
+        )}
+        <span className="font-mono text-12 text-text-3">
+          {card.cardNo}
+          {card.region !== edition && ` · ${card.region.toUpperCase()}`}
+        </span>
+      </span>
+    </>
   )
 }
 
-function ReferenceEntry({
-  entry,
+/** Where a hovered card-name reference wants its preview, relative to the text block. */
+interface Preview {
+  readonly card: CardSummary
+  readonly left: number
+  readonly top: number
+}
+
+/** A card-name reference: hover previews the card, a click goes to it or lists several. */
+function CardReference({
+  cards,
+  onPreview,
+  onList,
+  children,
+}: {
+  readonly cards: readonly CardSummary[]
+  readonly onPreview: (preview: Preview | null) => void
+  readonly onList: () => void
+  readonly children: ReactNode
+}) {
+  const single = cards.length === 1 ? cards[0] : undefined
+  const underline = "cursor-pointer text-inherit underline decoration-dotted underline-offset-4"
+  // Hover and focus on the control preview the card; touch has no hover and just follows it.
+  // The preview holds block elements, so it is positioned from here but rendered outside the <p>.
+  const show = (event: { currentTarget: Element }) => {
+    if (!single) return
+    const anchor = event.currentTarget.getBoundingClientRect()
+    const block = event.currentTarget.closest("[data-annotated]")?.getBoundingClientRect()
+    onPreview({
+      card: single,
+      left: anchor.left - (block?.left ?? 0),
+      top: anchor.bottom - (block?.top ?? 0),
+    })
+  }
+  const hide = () => {
+    onPreview(null)
+  }
+  const hovering = { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide }
+  return single ? (
+    <Link to={printingPath(single)} className={cn(underline, "hover:no-underline")} {...hovering}>
+      {children}
+    </Link>
+  ) : (
+    <button type="button" className={cn("inline", underline)} onClick={onList} {...hovering}>
+      {children}
+    </button>
+  )
+}
+
+function CardPreview({
+  preview,
+  client,
+  edition,
+}: {
+  readonly preview: Preview
+  readonly client: SnapshotClient
+  readonly edition: Region
+}) {
+  const images = useImageIndex(client, true)
+  return (
+    <div
+      role="tooltip"
+      style={{ left: preview.left, top: preview.top }}
+      className="absolute z-20 mt-1 flex w-max max-w-72 items-center gap-2.5 rounded-block border border-border bg-surface-1 p-2 shadow-lg"
+    >
+      <LinkedCard card={preview.card} edition={edition} images={images} size="preview" />
+    </div>
+  )
+}
+
+function CardList({
+  cards,
   client,
   edition,
   onClose,
 }: {
-  readonly entry: Entry
+  readonly cards: readonly CardSummary[]
   readonly client: SnapshotClient
   readonly edition: Region
   readonly onClose: () => void
@@ -179,15 +239,9 @@ function ReferenceEntry({
       document.removeEventListener("keydown", onKeyDown)
     }
   }, [onClose])
-  const heading =
-    entry.kind === "card_name"
-      ? t("card.reference.cardName")
-      : entry.category
-        ? t(`card.reference.category.${entry.category}`)
-        : undefined
   return (
     <aside
-      aria-label={t("card.annotationReference")}
+      aria-label={t("card.reference.cardName")}
       className="relative mt-2 rounded-block bg-surface-2 p-3 pr-11"
     >
       <button
@@ -199,37 +253,19 @@ function ReferenceEntry({
       >
         <X className="size-4.5" aria-hidden="true" />
       </button>
-      {heading !== undefined && <p className="text-12 text-text-3">{heading}</p>}
-      {entry.cards.length > 0 && (
-        <ul className="mt-1 flex flex-col gap-1">
-          {entry.cards.map((card) => (
-            <LinkedCard key={card.printingId} card={card} edition={edition} images={images} />
-          ))}
-        </ul>
-      )}
-      {entry.explanations.map((value) => (
-        <div key={canonicalText(value.reference)}>
-          {value.reference["kind"] === "ruling_revision" && (
-            <>
-              <p>
-                {t("card.projectRuling")} ·{" "}
-                {value.row["strength"] === "official"
-                  ? t("card.rulingOfficial")
-                  : value.row["strength"] === "generalized"
-                    ? t("card.rulingGeneralized")
-                    : value.row["strength"] === "inferred"
-                      ? t("card.rulingInferred")
-                      : t("card.rulingUndecided")}
-              </p>
-              {value.row["review_state"] === "needs_review" && <p>{t("card.rulingNeedsReview")}</p>}
-              {value.row["review_state"] === "superseded" && <p>{t("card.rulingSuperseded")}</p>}
-            </>
-          )}
-          <p lang={stringValue(value.unit["lang"])} className="whitespace-pre-wrap">
-            {stringValue(value.unit["text"])}
-          </p>
-        </div>
-      ))}
+      <p className="text-12 text-text-3">{t("card.reference.cardName")}</p>
+      <ul className="mt-1 flex flex-col gap-1">
+        {cards.map((card) => (
+          <li key={card.printingId}>
+            <Link
+              to={printingPath(card)}
+              className="flex items-center gap-2.5 rounded-control p-1 text-text-1 hover:bg-surface-3 hover:no-underline"
+            >
+              <LinkedCard card={card} edition={edition} images={images} size="row" />
+            </Link>
+          </li>
+        ))}
+      </ul>
     </aside>
   )
 }
@@ -252,21 +288,21 @@ export function AnnotatedText({
   readonly annotationReady?: boolean
   /** Loads the small card images of linked cards. */
   readonly client: SnapshotClient
-  /** The edition shown; a linked card of another edition is tagged. */
+  /** The edition shown: lists filter in it, and a linked card of the other edition is tagged. */
   readonly edition: Region
   readonly className?: string
 }) {
   const { t } = useTranslation()
-  const [reference, setReference] = useState<JsonObject | null>(null)
+  const [list, setList] = useState<readonly CardSummary[] | null>(null)
+  const [preview, setPreview] = useState<Preview | null>(null)
   const Text = heading ? "h2" : "p"
   const text = stringValue(value.unit["text"])
   const segments = useMemo(
     () => layOut(text, annotationReady ? textRuns(value) : [{ text }]),
     [text, value, annotationReady],
   )
-  const entry = annotationReady && reference ? entryOf(reference, context) : null
   return (
-    <div>
+    <div className="relative" data-annotated>
       <Text lang={stringValue(value.unit["lang"])} className={cn("whitespace-pre-wrap", className)}>
         {segments.map((segment, index) => {
           const content =
@@ -277,32 +313,49 @@ export function AnnotatedText({
             ) : (
               segment.text
             )
-          const openable =
-            annotationReady && segment.reference !== null && entryOf(segment.reference, context)
-          return openable ? (
-            <button
-              key={index}
-              type="button"
-              className="inline cursor-pointer text-inherit underline decoration-dotted underline-offset-4"
-              title={t("card.annotationReference")}
-              onClick={() => {
-                setReference(segment.reference)
-              }}
-            >
-              {content}
-            </button>
-          ) : (
-            <span key={index}>{content}</span>
-          )
+          const action =
+            annotationReady && segment.reference !== null
+              ? actionOf(segment.reference, context)
+              : null
+          if (action?.kind === "card")
+            return (
+              <CardReference
+                key={index}
+                cards={action.cards}
+                onPreview={setPreview}
+                onList={() => {
+                  setList(action.cards)
+                }}
+              >
+                {content}
+              </CardReference>
+            )
+          if (action?.kind === "trait")
+            return (
+              <Link
+                key={index}
+                to={editionUrl(
+                  `/cards${querySearch({ ...DEFAULT_QUERY, traits: [action.code] })}`,
+                  edition,
+                )}
+                title={t("card.reference.filterTrait")}
+                data-reference="trait"
+                className="border-b border-accent text-inherit hover:bg-accent-soft hover:no-underline"
+              >
+                {content}
+              </Link>
+            )
+          return <span key={index}>{content}</span>
         })}
       </Text>
-      {entry && (
-        <ReferenceEntry
-          entry={entry}
+      {preview && <CardPreview preview={preview} client={client} edition={edition} />}
+      {list && (
+        <CardList
+          cards={list}
           client={client}
           edition={edition}
           onClose={() => {
-            setReference(null)
+            setList(null)
           }}
         />
       )}

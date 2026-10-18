@@ -1,5 +1,4 @@
 import { screen } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it } from "vitest"
 
 import fixture from "../../../../../tests/fixtures/snapshot-contract/v3/whole-name-native.json"
@@ -37,9 +36,9 @@ describe("CardNameHeading", () => {
     expect(heading).toHaveAttribute("lang", "zh-Hant")
     expect(screen.queryByText("Catalog stand-in")).not.toBeInTheDocument()
     expect(screen.getByText(/專案譯文/)).toHaveTextContent("非官方")
-    // The whole-name concept reference stays an operable explanation entry inside the heading.
-    await userEvent.click(screen.getByRole("button", { name: "Synthetic translation" }))
-    expect(screen.getByRole("complementary")).toBeInTheDocument()
+    // The whole-name keyword concept is emphasised only; keywords have no entry to open.
+    expect(heading.querySelector("strong")).toHaveTextContent("Synthetic")
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
   it("adds the original line in `both` mode and keeps the original alone in `original` mode", async () => {
