@@ -542,7 +542,6 @@ interface CardContext {
   readonly card: Card
   readonly owner: Owner
   readonly encodeImage: ImageEncoder
-  readonly cards?: readonly Card[]
   readonly images: Map<string, Uint8Array>
   readonly seed: number
   readonly vocabulary: Vocabulary

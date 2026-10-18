@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
-import { expect, it } from "vitest"
+import { expect, it, vi } from "vitest"
 
 import { formatQuery, parseQuery } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
@@ -99,4 +99,40 @@ it("disables EN when the edition's coverage is unknown, even with a selected URL
   expect(within(group).getByText("English edition is not tagged yet")).toBeVisible()
   expect(within(group).getByRole("button", { name: "守護" })).toBeDisabled()
   expect(within(group).getByRole("button", { name: "疾走" })).toBeDisabled()
+})
+
+it("keeps keyword chips in place and disabled until tagging finishes", async () => {
+  const onChange = vi.fn()
+  const props = { edition: "jp" as const, textLang: "zh-Hant" as const, selected: {}, onChange }
+  function LoadingHarness() {
+    const [coverage, setCoverage] = useState<"pending" | "partial">("pending")
+    return (
+      <>
+        <KeywordFilter {...props} options={{ keywords, coverage }} />
+        <button
+          type="button"
+          onClick={() => {
+            setCoverage("partial")
+          }}
+        >
+          完成標註
+        </button>
+      </>
+    )
+  }
+  await renderInRouter(<LoadingHarness />)
+  const ward = screen.getByRole("button", { name: "守護" })
+  const storm = screen.getByRole("button", { name: "疾馳" })
+  expect(ward).toBeDisabled()
+  expect(storm).toBeDisabled()
+  expect(screen.getByRole("status")).toHaveTextContent("標註載入中")
+  await userEvent.click(ward)
+  expect(onChange).not.toHaveBeenCalled()
+  await userEvent.click(screen.getByRole("button", { name: "完成標註" }))
+  expect(screen.getByRole("button", { name: "守護" })).toBe(ward)
+  expect(screen.getByRole("button", { name: "疾馳" })).toBe(storm)
+  expect(ward).toBeEnabled()
+  expect(storm).toBeEnabled()
+  await userEvent.click(ward)
+  expect(onChange).toHaveBeenCalledWith({ "kw:ward": "has" })
 })

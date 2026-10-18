@@ -219,7 +219,7 @@ const zhTW = {
       types: "種類",
       rarities: "稀有度",
       altArtOnly: "只看異畫",
-      mechanics: "機制",
+      mechanics: "關鍵字",
       unit: "每格單位",
       sort: "排序",
     },

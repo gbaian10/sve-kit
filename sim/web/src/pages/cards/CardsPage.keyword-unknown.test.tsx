@@ -30,10 +30,17 @@ afterAll(() => {
 })
 
 describe("filter panel", () => {
-  it("explains unsupported English keyword links with the panel collapsed", async () => {
-    prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: false })
-    await renderRoutes(routes, { initialEntries: ["/cards?ed=en&mech=kw%3Award"] })
-    expect(await screen.findByRole("alert")).toHaveTextContent("這些條件還不能套用：機制")
-    expect(screen.queryByText("0 個版次")).not.toBeInTheDocument()
-  })
+  it.each([
+    ["zh-TW", "這些條件還不能套用：關鍵字"],
+    ["ja", "まだ適用できない条件：キーワード"],
+    ["en", "These conditions cannot be applied yet: Keywords"],
+  ] as const)(
+    "explains unsupported English keyword links in %s with the panel collapsed",
+    async (language, notice) => {
+      prefsStore.set({ uiLanguage: language, filterPanelOpen: false })
+      await renderRoutes(routes, { initialEntries: ["/cards?ed=en&mech=kw%3Award"], language })
+      expect(await screen.findByRole("alert")).toHaveTextContent(notice)
+      expect(screen.queryByText("0 個版次")).not.toBeInTheDocument()
+    },
+  )
 })

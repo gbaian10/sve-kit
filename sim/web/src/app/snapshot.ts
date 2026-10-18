@@ -591,10 +591,7 @@ export function usePrintingOptions() {
         type: { types: view.options.types, typeCounts: view.options.typeCounts },
         location: { types: view.options.types, counts: view.options.locationCounts },
         trait: { traits: view.options.traits, counts: view.options.traitCounts },
-        keyword:
-          view.options.keywordCoverage === "pending"
-            ? undefined
-            : { keywords: view.options.keywords, coverage: view.options.keywordCoverage },
+        keyword: { keywords: view.options.keywords, coverage: view.options.keywordCoverage },
       }
     : undefined
 }

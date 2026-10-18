@@ -231,7 +231,7 @@ export default {
       types: "card type",
       rarities: "rarity",
       altArtOnly: "alternate art only",
-      mechanics: "mechanics",
+      mechanics: "Keywords",
       unit: "unit",
       sort: "sort",
     },

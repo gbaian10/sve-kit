@@ -500,7 +500,7 @@ export function CardsPage() {
               : t("results.countUnit")}
         </p>
         {Object.keys(query.mechanics).length > 0 &&
-          printingOptions?.keyword?.coverage === "partial" && (
+          printingOptions?.keyword.coverage === "partial" && (
             <p className="text-11">{t("filters.keywordIncomplete")}</p>
           )}
       </div>
@@ -679,7 +679,7 @@ export function CardsPage() {
           return option ? vocabularyOptionLabel(option.name, textLang) : code
         }}
         keywordLabel={(id) => {
-          const option = printingOptions?.keyword?.keywords.find((item) => item.id === id)
+          const option = printingOptions?.keyword.keywords.find((item) => item.id === id)
           return option ? vocabularyOptionLabel(option.name, textLang) : id
         }}
         setLabel={(code) => {

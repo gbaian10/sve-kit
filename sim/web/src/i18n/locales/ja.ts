@@ -237,7 +237,7 @@ export default {
       types: "カード種類",
       rarities: "レアリティ",
       altArtOnly: "別イラストのみ",
-      mechanics: "メカニクス",
+      mechanics: "キーワード",
       unit: "表示単位",
       sort: "並び順",
     },
