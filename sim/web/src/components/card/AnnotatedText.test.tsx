@@ -389,6 +389,103 @@ describe("annotation presentation", () => {
     expect(screen.getByRole("tooltip")).toHaveTextContent("BP01-001 · JP")
   })
 
+  it("re-derives an open multi-card list and a direct link when the edition changes", async () => {
+    const value = cardName("手牌の王", "king")
+    const both = (cardId: string, no: string) => [
+      summary({ cardId, printingId: `p:${no}-jp`, cardNo: no, region: "jp" }),
+      summary({ cardId, printingId: `p:${no}-en`, cardNo: `${no}EN`, region: "en" }),
+    ]
+    const context: SelectedText = {
+      original: value,
+      concepts: [
+        { id: "king", category: "card_name", explanations: [], card_ids: ["c:king", "c:second"] },
+      ],
+      explanations: [],
+      cards: [...both("c:king", "BP01-001"), ...both("c:second", "BP01-002")],
+    }
+    const snapshotClient = await client()
+    function Harness() {
+      const [edition, setEdition] = useState<"jp" | "en">("jp")
+      return (
+        <>
+          <button
+            onClick={() => {
+              setEdition((value) => (value === "jp" ? "en" : "jp"))
+            }}
+          >
+            switch edition
+          </button>
+          <AnnotatedText
+            value={value}
+            context={context}
+            emphasis={true}
+            client={snapshotClient}
+            edition={edition}
+          />
+        </>
+      )
+    }
+    await renderInRouter(<Harness />)
+    const hrefs = () =>
+      within(screen.getByRole("complementary"))
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href"))
+    await userEvent.click(screen.getByRole("button", { name: "手牌の王" }))
+    expect(hrefs()).toEqual(["/cards/BP01-001", "/cards/BP01-002"])
+    await userEvent.click(screen.getByRole("button", { name: "switch edition" }))
+    expect(hrefs()).toEqual(["/cards/BP01-001EN", "/cards/BP01-002EN"])
+    expect(screen.getByRole("complementary")).not.toHaveTextContent("· EN")
+    await userEvent.click(screen.getByRole("button", { name: "switch edition" }))
+    expect(hrefs()).toEqual(["/cards/BP01-001", "/cards/BP01-002"])
+  })
+
+  it("drops an open list whose reference stops listing several cards, without moving focus", async () => {
+    const value = cardName("手牌の王", "king")
+    const two = [
+      summary({ cardId: "c:king", printingId: "p:king", cardNo: "BP01-001", region: "jp" }),
+      summary({ cardId: "c:second", printingId: "p:second", cardNo: "BP01-002", region: "jp" }),
+    ]
+    const concept = {
+      id: "king",
+      category: "card_name",
+      explanations: [],
+      card_ids: ["c:king", "c:second"],
+    }
+    const snapshotClient = await client()
+    function Harness() {
+      const [cards, setCards] = useState(two)
+      return (
+        <>
+          <button
+            onClick={() => {
+              setCards(two.slice(0, 1))
+            }}
+          >
+            narrow
+          </button>
+          <AnnotatedText
+            value={value}
+            context={{ original: value, concepts: [concept], explanations: [], cards }}
+            emphasis={true}
+            client={snapshotClient}
+            edition="jp"
+          />
+        </>
+      )
+    }
+    await renderInRouter(<Harness />)
+    await userEvent.click(screen.getByRole("button", { name: "手牌の王" }))
+    expect(screen.getByRole("complementary")).toBeVisible()
+    const narrow = screen.getByRole("button", { name: "narrow" })
+    await userEvent.click(narrow)
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "手牌の王" })).toHaveAttribute(
+      "href",
+      "/cards/BP01-001",
+    )
+    expect(narrow).toHaveFocus()
+  })
+
   it("links a listed trait to the filtered list and leaves other glossary terms as text", async () => {
     const value = {
       unit: { text: "妖精殺手の守護者", lang: "ja" },

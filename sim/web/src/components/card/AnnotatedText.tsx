@@ -342,18 +342,26 @@ export function AnnotatedText({
 }) {
   const { t } = useTranslation()
   const tooltipId = useId()
+  // Only the opened reference is kept: its cards follow the current context and edition, so an
+  // edition switch while the list is open re-derives the representatives instead of showing stale ones.
   const [list, setList] = useState<{
-    readonly cards: readonly CardSummary[]
+    readonly reference: JsonObject
     readonly trigger: HTMLElement
   } | null>(null)
   const [preview, setPreview] = useState<Preview | null>(null)
-  // Closing the list hands focus back to the reference that opened it.
+  // Closing by × or Escape hands focus back to the reference that opened the list.
   const closeList = useCallback(() => {
     setList((open) => {
       open?.trigger.focus()
       return null
     })
   }, [])
+  const listAction = list ? actionOf(list.reference, context, edition) : null
+  const listCards =
+    listAction?.kind === "card" && listAction.cards.length > 1 ? listAction.cards : null
+  // A reference that no longer lists several cards drops its list while rendering (React's
+  // "adjust state from props" form); navigation keeps focus where it is.
+  if (list && !listCards) setList(null)
   const Text = heading ? "h2" : "p"
   const text = stringValue(value.unit["text"])
   const segments = useMemo(
@@ -385,7 +393,7 @@ export function AnnotatedText({
                 tooltipId={preview?.index === index ? tooltipId : undefined}
                 onPreview={setPreview}
                 onList={(trigger) => {
-                  setList({ cards: action.cards, trigger })
+                  setList({ reference: segment.reference ?? {}, trigger })
                 }}
               >
                 {content}
@@ -411,8 +419,8 @@ export function AnnotatedText({
       {preview && (
         <CardPreview id={tooltipId} preview={preview} client={client} edition={edition} />
       )}
-      {list && (
-        <CardList cards={list.cards} client={client} edition={edition} onClose={closeList} />
+      {listCards && (
+        <CardList cards={listCards} client={client} edition={edition} onClose={closeList} />
       )}
     </div>
   )
