@@ -1,5 +1,14 @@
 import { X } from "lucide-react"
-import { type ReactNode, useEffect, useMemo, useState } from "react"
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useTranslation } from "react-i18next"
 
 import { useImageIndex } from "../../app/snapshot"
@@ -80,20 +89,28 @@ type Action =
   | { readonly kind: "card"; readonly cards: readonly CardSummary[] }
   | { readonly kind: "trait"; readonly code: string }
 
-/**
- * The one place that decides a reference's behaviour (maintainer, 2026-10-19): a card name with
- * confirmed targets opens its card, a trait opens the list filtered by it, and keywords, abilities,
- * rule terms and vocabulary stay text. More references light up as the data behind them fills in.
- */
-function actionOf(reference: JsonObject, context: SelectedText): Action | null {
+/** One printing per linked card: the shown edition's, else whichever the snapshot holds. */
+function representatives(cards: readonly CardSummary[], edition: Region): CardSummary[] {
+  const byCard = new Map<string, CardSummary>()
+  for (const card of cards) {
+    const current = byCard.get(card.cardId)
+    if (!current || (current.region !== edition && card.region === edition))
+      byCard.set(card.cardId, card)
+  }
+  return [...byCard.values()]
+}
+
+// Only references a reader can follow get a control (maintainer, 2026-10-19); the rest stay text.
+function actionOf(reference: JsonObject, context: SelectedText, edition: Region): Action | null {
   const kind = reference["kind"]
   if (kind !== "card_name" && kind !== "glossary") return null
   const id = reference[kind === "card_name" ? "term_id" : "key"]
   const concept = context.concepts.find((row) => row["id"] === id)
   if (!concept) return null
   if (kind === "card_name") {
-    const cards = context.cards.filter((card) =>
-      arrayValue(concept["card_ids"]).includes(card.cardId),
+    const cards = representatives(
+      context.cards.filter((card) => arrayValue(concept["card_ids"]).includes(card.cardId)),
+      edition,
     )
     return cards.length > 0 ? { kind: "card", cards } : null
   }
@@ -145,8 +162,9 @@ function LinkedCard({
   )
 }
 
-/** Where a hovered card-name reference wants its preview, relative to the text block. */
+/** A hovered card-name reference and where its preview goes, relative to the text block. */
 interface Preview {
+  readonly index: number
   readonly card: CardSummary
   readonly left: number
   readonly top: number
@@ -154,25 +172,30 @@ interface Preview {
 
 /** A card-name reference: hover previews the card, a click goes to it or lists several. */
 function CardReference({
+  index,
   cards,
+  tooltipId,
   onPreview,
   onList,
   children,
 }: {
+  readonly index: number
   readonly cards: readonly CardSummary[]
+  /** The preview's id while this reference is the one showing it. */
+  readonly tooltipId: string | undefined
   readonly onPreview: (preview: Preview | null) => void
-  readonly onList: () => void
+  readonly onList: (trigger: HTMLElement) => void
   readonly children: ReactNode
 }) {
   const single = cards.length === 1 ? cards[0] : undefined
   const underline = "cursor-pointer text-inherit underline decoration-dotted underline-offset-4"
-  // Hover and focus on the control preview the card; touch has no hover and just follows it.
   // The preview holds block elements, so it is positioned from here but rendered outside the <p>.
   const show = (event: { currentTarget: Element }) => {
     if (!single) return
     const anchor = event.currentTarget.getBoundingClientRect()
     const block = event.currentTarget.closest("[data-annotated]")?.getBoundingClientRect()
     onPreview({
+      index,
       card: single,
       left: anchor.left - (block?.left ?? 0),
       top: anchor.bottom - (block?.top ?? 0),
@@ -183,31 +206,56 @@ function CardReference({
   }
   const hovering = { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide }
   return single ? (
-    <Link to={printingPath(single)} className={cn(underline, "hover:no-underline")} {...hovering}>
+    <Link
+      to={printingPath(single)}
+      className={cn(underline, "hover:no-underline")}
+      aria-describedby={tooltipId}
+      {...hovering}
+    >
       {children}
     </Link>
   ) : (
-    <button type="button" className={cn("inline", underline)} onClick={onList} {...hovering}>
+    <button
+      type="button"
+      className={cn("inline", underline)}
+      onClick={(event) => {
+        onList(event.currentTarget)
+      }}
+      {...hovering}
+    >
       {children}
     </button>
   )
 }
 
 function CardPreview({
+  id,
   preview,
   client,
   edition,
 }: {
+  readonly id: string
   readonly preview: Preview
   readonly client: SnapshotClient
   readonly edition: Region
 }) {
   const images = useImageIndex(client, true)
+  const ref = useRef<HTMLDivElement>(null)
+  const [left, setLeft] = useState(preview.left)
+  // A reference near the end of a line would push the preview past the block: keep it inside.
+  useLayoutEffect(() => {
+    const node = ref.current
+    const block = node?.closest("[data-annotated]")
+    if (!node || !block) return
+    setLeft(Math.max(0, Math.min(preview.left, block.clientWidth - node.offsetWidth)))
+  }, [preview])
   return (
     <div
+      ref={ref}
+      id={id}
       role="tooltip"
-      style={{ left: preview.left, top: preview.top }}
-      className="absolute z-20 mt-1 flex w-max max-w-72 items-center gap-2.5 rounded-block border border-border bg-surface-1 p-2 shadow-lg"
+      style={{ left, top: preview.top }}
+      className="absolute z-20 mt-1 flex w-max max-w-full items-center gap-2.5 rounded-block border border-border bg-surface-1 p-2 shadow-lg"
     >
       <LinkedCard card={preview.card} edition={edition} images={images} size="preview" />
     </div>
@@ -293,8 +341,19 @@ export function AnnotatedText({
   readonly className?: string
 }) {
   const { t } = useTranslation()
-  const [list, setList] = useState<readonly CardSummary[] | null>(null)
+  const tooltipId = useId()
+  const [list, setList] = useState<{
+    readonly cards: readonly CardSummary[]
+    readonly trigger: HTMLElement
+  } | null>(null)
   const [preview, setPreview] = useState<Preview | null>(null)
+  // Closing the list hands focus back to the reference that opened it.
+  const closeList = useCallback(() => {
+    setList((open) => {
+      open?.trigger.focus()
+      return null
+    })
+  }, [])
   const Text = heading ? "h2" : "p"
   const text = stringValue(value.unit["text"])
   const segments = useMemo(
@@ -315,16 +374,18 @@ export function AnnotatedText({
             )
           const action =
             annotationReady && segment.reference !== null
-              ? actionOf(segment.reference, context)
+              ? actionOf(segment.reference, context, edition)
               : null
           if (action?.kind === "card")
             return (
               <CardReference
                 key={index}
+                index={index}
                 cards={action.cards}
+                tooltipId={preview?.index === index ? tooltipId : undefined}
                 onPreview={setPreview}
-                onList={() => {
-                  setList(action.cards)
+                onList={(trigger) => {
+                  setList({ cards: action.cards, trigger })
                 }}
               >
                 {content}
@@ -339,7 +400,6 @@ export function AnnotatedText({
                   edition,
                 )}
                 title={t("card.reference.filterTrait")}
-                data-reference="trait"
                 className="border-b border-accent text-inherit hover:bg-accent-soft hover:no-underline"
               >
                 {content}
@@ -348,16 +408,11 @@ export function AnnotatedText({
           return <span key={index}>{content}</span>
         })}
       </Text>
-      {preview && <CardPreview preview={preview} client={client} edition={edition} />}
+      {preview && (
+        <CardPreview id={tooltipId} preview={preview} client={client} edition={edition} />
+      )}
       {list && (
-        <CardList
-          cards={list}
-          client={client}
-          edition={edition}
-          onClose={() => {
-            setList(null)
-          }}
-        />
+        <CardList cards={list.cards} client={client} edition={edition} onClose={closeList} />
       )}
     </div>
   )

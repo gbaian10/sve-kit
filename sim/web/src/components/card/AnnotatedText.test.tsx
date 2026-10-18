@@ -254,8 +254,18 @@ describe("annotation presentation", () => {
     expect(preview).toHaveTextContent("手牌之王")
     expect(preview).toHaveTextContent("BP01-001")
     expect(preview).not.toHaveTextContent("JP")
+    expect(preview.closest("p")).toBeNull()
     expect(preview.querySelector("[data-image-printing='p:king']")).toBeInTheDocument()
+    // The link describes itself by the preview only while the preview is up.
+    expect(preview.id).not.toBe("")
+    expect(link).toHaveAttribute("aria-describedby", preview.id)
     await userEvent.unhover(link)
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    expect(link).not.toHaveAttribute("aria-describedby")
+    await userEvent.tab()
+    expect(link).toHaveFocus()
+    expect(link).toHaveAttribute("aria-describedby", screen.getByRole("tooltip").id)
+    await userEvent.tab()
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
     await userEvent.click(link)
     expect(router.state.location.pathname).toBe("/cards/BP01-001")
@@ -319,12 +329,64 @@ describe("annotation presentation", () => {
     expect(within(list).getAllByRole("link")[0]).toHaveTextContent("手牌の王")
     expect(within(list).getAllByRole("link")[0]).not.toHaveTextContent("手牌之王")
     expect(within(list).queryByText("關閉說明")).not.toBeInTheDocument()
+    // Closing by × or by Escape from inside the list hands focus back to the reference.
+    const trigger = screen.getByRole("button", { name: "手牌の王" })
     await userEvent.click(within(list).getByRole("button", { name: "關閉說明" }))
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
-    await userEvent.click(screen.getByRole("button", { name: "手牌の王" }))
-    expect(screen.getByRole("complementary")).toBeVisible()
+    expect(trigger).toHaveFocus()
+    await userEvent.click(trigger)
+    const reopened = screen.getByRole("complementary")
+    expect(reopened).toBeVisible()
+    within(reopened).getByRole("button", { name: "關閉說明" }).focus()
     await userEvent.keyboard("{Escape}")
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+  })
+
+  it("treats one card with printings in both editions as one target, preferring the shown edition", async () => {
+    const value = cardName("手牌の王", "king")
+    const cards = [
+      summary({ cardId: "c:king", printingId: "p:jp", cardNo: "BP01-001", region: "jp" }),
+      summary({ cardId: "c:king", printingId: "p:en", cardNo: "BP01-001EN", region: "en" }),
+    ]
+    const context: SelectedText = {
+      original: value,
+      concepts: [{ id: "king", category: "card_name", explanations: [], card_ids: ["c:king"] }],
+      explanations: [],
+      cards,
+    }
+    const snapshotClient = await client()
+    const rendered = await renderInRouter(
+      <AnnotatedText
+        value={value}
+        context={context}
+        emphasis={true}
+        client={snapshotClient}
+        edition="en"
+      />,
+    )
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "手牌の王" })).toHaveAttribute(
+      "href",
+      "/cards/BP01-001EN",
+    )
+    // Without a printing in the shown edition, the other edition's stands in.
+    rendered.unmount()
+    await renderInRouter(
+      <AnnotatedText
+        value={value}
+        context={{ ...context, cards: cards.slice(0, 1) }}
+        emphasis={true}
+        client={snapshotClient}
+        edition="en"
+      />,
+    )
+    expect(screen.getByRole("link", { name: "手牌の王" })).toHaveAttribute(
+      "href",
+      "/cards/BP01-001",
+    )
+    await userEvent.hover(screen.getByRole("link", { name: "手牌の王" }))
+    expect(screen.getByRole("tooltip")).toHaveTextContent("BP01-001 · JP")
   })
 
   it("links a listed trait to the filtered list and leaves other glossary terms as text", async () => {
@@ -378,8 +440,7 @@ describe("annotation presentation", () => {
     expect(links).toHaveLength(1)
     expect(links[0]).toHaveTextContent("妖精")
     expect(links[0]).toHaveAttribute("href", "/cards?trait=pixie&ed=en")
-    expect(links[0]).toHaveAttribute("data-reference", "trait")
-    expect(links[0]).not.toHaveClass("decoration-dotted")
+    expect(links[0]).toHaveAccessibleDescription("查看這個類型的卡")
     expect(links[0]?.querySelector("strong")).toBeNull()
     // The unlisted trait and the ability stay bold text without any control.
     expect([...container.querySelectorAll("strong")].map((node) => node.textContent)).toEqual([
