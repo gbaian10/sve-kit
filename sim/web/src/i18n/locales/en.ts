@@ -138,7 +138,7 @@ export default {
     keywordLoading: "Loading tags",
     keywordEnglishUnknown: "English edition is not tagged yet",
     keywordUnknown: "Tagging has not started",
-    keywordPartial: "Matches any keyword; tagging is incomplete and may miss cards",
+    keywordPartial: "Any keyword; incomplete tags may miss cards",
     keywordAny: "Matches any selected keyword",
     keywordHas: "Keyword: {{label}}",
     keywordNot: "Without keyword: {{label}}",
