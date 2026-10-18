@@ -35,7 +35,21 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 妖精・}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: '・從者進入自己的戰場時，使其{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 。}]
+        nodes:
+          - kind: Literal
+            text: 妖精・
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: ・從者進入自己的戰場時，使其{
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation

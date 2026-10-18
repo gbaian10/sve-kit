@@ -403,7 +403,17 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 只要這張卡片在戰場上或EX區中，自己戰場上的全部妖精・}, {kind: LeafRef, slot: token_24}, {kind: Literal, text: ・從者就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】。}]
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片在戰場上或EX區中，自己戰場上的全部妖精・
+          - kind: LeafRef
+            slot: token_24
+          - kind: Literal
+            text: ・從者就具有【
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 】。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -540,7 +550,19 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: LeafRef, slot: token_5}, {kind: Literal, text: ・從者進入自己的戰場時，選擇敵方戰場上的}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 個從者。給予其}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 點傷害。}]
+        nodes:
+          - kind: LeafRef
+            slot: token_5
+          - kind: Literal
+            text: ・從者進入自己的戰場時，選擇敵方戰場上的
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 個從者。給予其
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 點傷害。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -580,7 +602,21 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 只要這張卡片在戰場上，自己戰場上的全部妖精・}, {kind: LeafRef, slot: token_18}, {kind: Literal, text: 就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】【}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 】。}]
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片在戰場上，自己戰場上的全部妖精・
+          - kind: LeafRef
+            slot: token_18
+          - kind: Literal
+            text: 就具有【
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 】【
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 】。
       expression_targets: {}
   - origin: machine
     kind: template_translation

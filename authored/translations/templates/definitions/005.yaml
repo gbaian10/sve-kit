@@ -2160,7 +2160,19 @@ records:
               end: 41
       leaf_schema:
         format: 2
-        slots: [{name: token_15, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 15, end: 19}]}]
+        slots:
+          - name: token_15
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 15
+                end: 19
       projection:
         projection_kind: pending
         discriminator:

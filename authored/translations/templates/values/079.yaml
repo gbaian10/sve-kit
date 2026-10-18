@@ -81,7 +81,37 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 選擇自己戰場上的}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 個原始消費}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 以下的超克・}, {kind: LeafRef, slot: token_17}, {kind: Literal, text: ・從者。召喚}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 個}, {kind: LeafRef, slot: name_4}, {kind: Literal, text: 的超克・}, {kind: LeafRef, slot: token_42}, {kind: Literal, text: ・從者到}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 上。}]
+        nodes:
+          - kind: Literal
+            text: 選擇自己戰場上的
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 個原始消費
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 以下的超克・
+          - kind: LeafRef
+            slot: token_17
+          - kind: Literal
+            text: ・從者。召喚
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: name_4
+          - kind: Literal
+            text: 的超克・
+          - kind: LeafRef
+            slot: token_42
+          - kind: Literal
+            text: ・從者到
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 上。
       expression_targets:
         name.relative.objects.equal.v1:
           format: 1

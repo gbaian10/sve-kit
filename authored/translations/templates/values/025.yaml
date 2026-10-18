@@ -272,7 +272,33 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 自己的回合中，自己的}, {kind: LeafRef, slot: token_11}, {kind: Literal, text: ・從者從戰場被放置到墓場時，選擇敵方戰場上的}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '個從者。使其{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}-'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: '/{'}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: '}-'}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 。}]
+        nodes:
+          - kind: Literal
+            text: 自己的回合中，自己的
+          - kind: LeafRef
+            slot: token_11
+          - kind: Literal
+            text: ・從者從戰場被放置到墓場時，選擇敵方戰場上的
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 個從者。使其{
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}-'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: /{
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: '}-'
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -502,7 +528,21 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 只要這張卡片存在，自己戰場上的全部妖精・}, {kind: LeafRef, slot: token_16}, {kind: Literal, text: 就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】【}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 】。}]
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片存在，自己戰場上的全部妖精・
+          - kind: LeafRef
+            slot: token_16
+          - kind: Literal
+            text: 就具有【
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 】【
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 】。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -944,7 +984,21 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 選擇自己戰場上的}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 個妖精・}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: 。給予敵方戰場上的全部從者等同於「}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 」的傷害。}]
+        nodes:
+          - kind: Literal
+            text: 選擇自己戰場上的
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 個妖精・
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 。給予敵方戰場上的全部從者等同於「
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 」的傷害。
       expression_targets:
         read.selected.attack.v1:
           format: 1

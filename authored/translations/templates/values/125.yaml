@@ -582,7 +582,39 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}將這張卡片{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}、將戰場或EX區的'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 張魔界・}, {kind: LeafRef, slot: token_23}, {kind: Literal, text: 放置到墓場：選擇}, {kind: LeafRef, slot: leaf_3}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 上的}, {kind: LeafRef, slot: leaf_6}, {kind: Literal, text: 個}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: 。將其破壞。}]
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}將這張卡片{'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}、將戰場或EX區的'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 張魔界・
+          - kind: LeafRef
+            slot: token_23
+          - kind: Literal
+            text: 放置到墓場：選擇
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 上的
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 。將其破壞。
       expression_targets: {}
   - origin: machine
     kind: template_translation

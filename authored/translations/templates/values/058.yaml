@@ -239,7 +239,36 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 選擇自己戰場上任意數量的妖精・}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: '。本回合，其具有「{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}將這張卡片{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}：選擇敵方戰場上的'}, {kind: Form, form_id: quantity.selection_count.value, args: {quantity: {slot: leaf_2}}}, {kind: Literal, text: 個從者。給予其}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 點傷害。給予其主戰者}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 點傷害」。}]
+        nodes:
+          - kind: Literal
+            text: 選擇自己戰場上任意數量的妖精・
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 。本回合，其具有「{
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}將這張卡片{'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}：選擇敵方戰場上的'
+          - kind: Form
+            form_id: quantity.selection_count.value
+            args:
+              quantity:
+                slot: leaf_2
+          - kind: Literal
+            text: 個從者。給予其
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 點傷害。給予其主戰者
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 點傷害」。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -1002,7 +1031,25 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}'}, {kind: LeafRef, slot: token_11}, {kind: Literal, text: '・從者進入自己的戰場時，自己的主戰者{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 。}]
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}'
+          - kind: LeafRef
+            slot: token_11
+          - kind: Literal
+            text: ・從者進入自己的戰場時，自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation

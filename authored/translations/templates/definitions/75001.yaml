@@ -2906,7 +2906,85 @@ records:
               end: 59
       leaf_schema:
         format: 2
-        slots: [{name: leaf_0, type: Player, role: counted_owner, domain: {values: [player.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 10, end: 18}]}, {name: leaf_1, type: ZoneSet, role: counted_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 19, end: 27}]}, {name: name_4, type: PredicateExpr, role: selection_name_constraint, domain: {values: [predicate.selection.distinct_name.v1], min: null, max: null}, required: true, occurrences: [{start: 33, end: 41}], expression: {kind: predicate, expression_id: name.selection.distinct.v1, leaves: [], imports: {objects: names_port_b7343eaf23598b03}, scope: read_ability_0}}, {name: token_44, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 44, end: 48}]}, {name: leaf_2, type: QuantitySpec, role: existence_count, domain: {values: [quantity.existence_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 56, end: 57}]}, {name: leaf_3, type: Nat, role: cost_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 68, end: 69}]}]
+        slots:
+          - name: leaf_0
+            type: Player
+            role: counted_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 10
+                end: 18
+          - name: leaf_1
+            type: ZoneSet
+            role: counted_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 19
+                end: 27
+          - name: name_4
+            type: PredicateExpr
+            role: selection_name_constraint
+            domain:
+              values:
+                - predicate.selection.distinct_name.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 33
+                end: 41
+            expression:
+              kind: predicate
+              expression_id: name.selection.distinct.v1
+              leaves: []
+              imports:
+                objects: names_port_b7343eaf23598b03
+              scope: read_ability_0
+          - name: token_44
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 44
+                end: 48
+          - name: leaf_2
+            type: QuantitySpec
+            role: existence_count
+            domain:
+              values:
+                - quantity.existence_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 56
+                end: 57
+          - name: leaf_3
+            type: Nat
+            role: cost_delta_magnitude
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 68
+                end: 69
       projection:
         projection_kind: pending
         discriminator:

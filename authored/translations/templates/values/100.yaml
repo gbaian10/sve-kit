@@ -330,7 +330,45 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 召喚}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 個『}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 』到}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 上。自己戰場上的全部妖精・}, {kind: LeafRef, slot: token_26}, {kind: Literal, text: ・從者具有【}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 】【}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 】。【}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: ' '}, {kind: LeafRef, slot: leaf_6}, {kind: Literal, text: 】抽}, {kind: LeafRef, slot: leaf_7}, {kind: Literal, text: 張卡片。}]
+        nodes:
+          - kind: Literal
+            text: 召喚
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 個『
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 』到
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 上。自己戰場上的全部妖精・
+          - kind: LeafRef
+            slot: token_26
+          - kind: Literal
+            text: ・從者具有【
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 】【
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 】。【
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: ' '
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 】抽
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 張卡片。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -524,7 +562,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -1045,7 +1089,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation

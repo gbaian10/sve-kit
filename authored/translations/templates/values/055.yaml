@@ -1135,7 +1135,33 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}自己的EX區中的全部妖精・'}, {kind: LeafRef, slot: token_21}, {kind: Literal, text: '・從者{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: '/{'}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 。}]
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}自己的EX區中的全部妖精・'
+          - kind: LeafRef
+            slot: token_21
+          - kind: Literal
+            text: ・從者{
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: /{
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation

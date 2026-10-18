@@ -695,7 +695,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 只要這張卡片在戰場上，自己戰場上的全部}, {kind: LeafRef, slot: token_15}, {kind: Literal, text: ・從者就不會受到能力傷害。}]
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片在戰場上，自己戰場上的全部
+          - kind: LeafRef
+            slot: token_15
+          - kind: Literal
+            text: ・從者就不會受到能力傷害。
       expression_targets: {}
   - origin: machine
     kind: template_translation

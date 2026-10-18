@@ -933,7 +933,50 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}使EX區中的'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 張妖精・}, {kind: LeafRef, slot: token_18}, {kind: Literal, text: 消失：查看}, {kind: LeafRef, slot: leaf_2}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 的}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 張卡片。可以從其中公開}, {kind: Form, form_id: quantity.selection_count.value, args: {quantity: {slot: leaf_6}}}, {kind: Literal, text: '張{'}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: '}卡片，並加入'}, {kind: LeafRef, slot: leaf_7}, {kind: Literal, text: 。將其餘卡片以任意順序放置到}, {kind: LeafRef, slot: leaf_8}, {kind: Literal, text: 。}]
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}使EX區中的'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 張妖精・
+          - kind: LeafRef
+            slot: token_18
+          - kind: Literal
+            text: 消失：查看
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 張卡片。可以從其中公開
+          - kind: Form
+            form_id: quantity.selection_count.value
+            args:
+              quantity:
+                slot: leaf_6
+          - kind: Literal
+            text: 張{
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: '}卡片，並加入'
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 。將其餘卡片以任意順序放置到
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation

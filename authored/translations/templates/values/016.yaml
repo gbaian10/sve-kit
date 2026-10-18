@@ -497,7 +497,21 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 【進化時】將自己的EX區中的}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 張妖精・}, {kind: LeafRef, slot: token_17}, {kind: Literal, text: ・從者召喚到}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 上。}]
+        nodes:
+          - kind: Literal
+            text: 【進化時】將自己的EX區中的
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 張妖精・
+          - kind: LeafRef
+            slot: token_17
+          - kind: Literal
+            text: ・從者召喚到
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 上。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -732,7 +746,29 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 妖精・}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: '進入自己的戰場時，使其{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '/{'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 。}]
+        nodes:
+          - kind: Literal
+            text: 妖精・
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 進入自己的戰場時，使其{
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: /{
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation

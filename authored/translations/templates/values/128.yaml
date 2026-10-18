@@ -975,7 +975,25 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 只要這張卡片存在，自己使用禁忌・}, {kind: LeafRef, slot: token_14}, {kind: Literal, text: 時，若其為本回合使用的第}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 張禁忌・}, {kind: LeafRef, slot: token_40}, {kind: Literal, text: ，則消費-}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 。}]
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片存在，自己使用禁忌・
+          - kind: LeafRef
+            slot: token_14
+          - kind: Literal
+            text: 時，若其為本回合使用的第
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 張禁忌・
+          - kind: LeafRef
+            slot: token_40
+          - kind: Literal
+            text: ，則消費-
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -1742,7 +1760,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -2164,7 +2188,17 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 只要這張卡片存在，自己戰場上的全部龍裔・}, {kind: LeafRef, slot: token_16}, {kind: Literal, text: 就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】。}]
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片存在，自己戰場上的全部龍裔・
+          - kind: LeafRef
+            slot: token_16
+          - kind: Literal
+            text: 就具有【
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 】。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -2388,7 +2422,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -2562,7 +2602,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -2993,7 +3039,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     note: 2026-10-18 對照日文確認；完整日文與渲染全文對照一致；禁止攻擊的主語、條件與期間保留。敵方沿 P0 既有寫法涵蓋敵方主戰者與從者，官方 FAQ Q546 已明確其範圍。source_claim：https://shadowverse-evolve.com/cardlist/?cardno=BP03-P31&faq=
@@ -3277,7 +3329,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -3918,7 +3976,64 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}{消費'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}：選擇'}, {kind: LeafRef, slot: leaf_2}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 上的}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: 個}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 。給予其與其主戰者}, {kind: LeafRef, slot: leaf_6}, {kind: Literal, text: 點傷害。}, {kind: LeafRef, slot: leaf_7}, {kind: LeafRef, slot: leaf_8}, {kind: Literal, text: 上有}, {kind: Form, form_id: quantity.existence_count.value, args: {quantity: {slot: leaf_9}}}, {kind: Literal, text: 個以上的「}, {kind: LeafRef, slot: name_12}, {kind: Literal, text: 的士兵・}, {kind: LeafRef, slot: token_99}, {kind: Literal, text: ・從者」時，才可以使用這個能力，並且在}, {kind: LeafRef, slot: leaf_10}, {kind: Literal, text: 回合中可以使用}, {kind: LeafRef, slot: leaf_11}, {kind: Literal, text: 次。}]
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}{消費'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}：選擇'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 上的
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: Literal
+            text: 。給予其與其主戰者
+          - kind: LeafRef
+            slot: leaf_6
+          - kind: Literal
+            text: 點傷害。
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: Literal
+            text: 上有
+          - kind: Form
+            form_id: quantity.existence_count.value
+            args:
+              quantity:
+                slot: leaf_9
+          - kind: Literal
+            text: 個以上的「
+          - kind: LeafRef
+            slot: name_12
+          - kind: Literal
+            text: 的士兵・
+          - kind: LeafRef
+            slot: token_99
+          - kind: Literal
+            text: ・從者」時，才可以使用這個能力，並且在
+          - kind: LeafRef
+            slot: leaf_10
+          - kind: Literal
+            text: 回合中可以使用
+          - kind: LeafRef
+            slot: leaf_11
+          - kind: Literal
+            text: 次。
       expression_targets:
         name.selection.distinct.v1:
           format: 1

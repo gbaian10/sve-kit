@@ -1393,7 +1393,95 @@ records:
               end: 58
       leaf_schema:
         format: 2
-        slots: [{name: leaf_0, type: Nat, role: repeat_count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 6, end: 7}]}, {name: leaf_1, type: Nat, role: cost_value, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 14, end: 15}]}, {name: token_19, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 19, end: 23}]}, {name: name_4, type: PredicateExpr, role: name_relation, domain: {values: [predicate.name.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 36, end: 41}], expression: {kind: predicate, expression_id: name.relative.event_subject.equal.v1, leaves: [], imports: {objects: names_port_e5a0896458b69b6d}, scope: read_ability_0}}, {name: token_42, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 42, end: 46}]}, {name: leaf_2, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 50, end: 51}]}, {name: leaf_3, type: ZoneSet, role: destination_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 53, end: 61}]}]
+        slots:
+          - name: leaf_0
+            type: Nat
+            role: repeat_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 6
+                end: 7
+          - name: leaf_1
+            type: Nat
+            role: cost_value
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 14
+                end: 15
+          - name: token_19
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 19
+                end: 23
+          - name: name_4
+            type: PredicateExpr
+            role: name_relation
+            domain:
+              values:
+                - predicate.name.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 36
+                end: 41
+            expression:
+              kind: predicate
+              expression_id: name.relative.event_subject.equal.v1
+              leaves: []
+              imports:
+                objects: names_port_e5a0896458b69b6d
+              scope: read_ability_0
+          - name: token_42
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 42
+                end: 46
+          - name: leaf_2
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 50
+                end: 51
+          - name: leaf_3
+            type: ZoneSet
+            role: destination_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 53
+                end: 61
       projection:
         projection_kind: pending
         discriminator:

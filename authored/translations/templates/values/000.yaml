@@ -245,7 +245,54 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}{消費'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}：給予敵方的全部主戰者'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 點傷害。抽}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 張卡片。}, {kind: LeafRef, slot: leaf_4}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: 上有}, {kind: Form, form_id: quantity.existence_count.value, args: {quantity: {slot: leaf_6}}}, {kind: Literal, text: 個以上的「}, {kind: LeafRef, slot: name_9}, {kind: Literal, text: 的士兵・}, {kind: LeafRef, slot: token_72}, {kind: Literal, text: ・從者」時，才可以使用這個能力，並且在}, {kind: LeafRef, slot: leaf_7}, {kind: Literal, text: 回合中可以使用}, {kind: LeafRef, slot: leaf_8}, {kind: Literal, text: 次。}]
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}{消費'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: '}：給予敵方的全部主戰者'
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 點傷害。抽
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 張卡片。
+          - kind: LeafRef
+            slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_5
+          - kind: Literal
+            text: 上有
+          - kind: Form
+            form_id: quantity.existence_count.value
+            args:
+              quantity:
+                slot: leaf_6
+          - kind: Literal
+            text: 個以上的「
+          - kind: LeafRef
+            slot: name_9
+          - kind: Literal
+            text: 的士兵・
+          - kind: LeafRef
+            slot: token_72
+          - kind: Literal
+            text: ・從者」時，才可以使用這個能力，並且在
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 回合中可以使用
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: Literal
+            text: 次。
       expression_targets:
         name.selection.distinct.v1:
           format: 1
@@ -1292,7 +1339,13 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
+        nodes:
+          - kind: Literal
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation

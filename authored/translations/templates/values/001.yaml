@@ -1178,7 +1178,25 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}【融合】'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 張非}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: 的從者：在這張卡片上放置}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 個融合指示物。}]
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}【融合】'
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 張非
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 的從者：在這張卡片上放置
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 個融合指示物。
       expression_targets: {}
   - origin: machine
     kind: template_translation

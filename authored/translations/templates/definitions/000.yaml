@@ -758,7 +758,141 @@ records:
               end: 154
       leaf_schema:
         format: 2
-        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 3}]}, {name: leaf_1, type: Nat, role: cost_value, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 8, end: 9}]}, {name: leaf_2, type: Nat, role: damage_amount, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 22, end: 23}]}, {name: leaf_3, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 28, end: 29}]}, {name: leaf_4, type: Player, role: counted_owner, domain: {values: [player.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 38, end: 46}]}, {name: leaf_5, type: ZoneSet, role: counted_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 47, end: 55}]}, {name: name_9, type: PredicateExpr, role: selection_name_constraint, domain: {values: [predicate.selection.distinct_name.v1], min: null, max: null}, required: true, occurrences: [{start: 61, end: 69}], expression: {kind: predicate, expression_id: name.selection.distinct.v1, leaves: [], imports: {objects: names_port_6575d7d055a979f4}, scope: read_ability_1}}, {name: token_72, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 72, end: 76}]}, {name: leaf_6, type: QuantitySpec, role: existence_count, domain: {values: [quantity.existence_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 84, end: 85}]}, {name: leaf_7, type: Nat, role: duration_count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 91, end: 92}]}, {name: leaf_8, type: Nat, role: repeat_count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 96, end: 97}]}]
+        slots:
+          - name: leaf_0
+            type: Concept
+            role: ability
+            domain:
+              values:
+                - concept.ability.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 1
+                end: 3
+          - name: leaf_1
+            type: Nat
+            role: cost_value
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 8
+                end: 9
+          - name: leaf_2
+            type: Nat
+            role: damage_amount
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 22
+                end: 23
+          - name: leaf_3
+            type: Nat
+            role: count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 28
+                end: 29
+          - name: leaf_4
+            type: Player
+            role: counted_owner
+            domain:
+              values:
+                - player.relative.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 38
+                end: 46
+          - name: leaf_5
+            type: ZoneSet
+            role: counted_zone
+            domain:
+              values:
+                - zone.single.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 47
+                end: 55
+          - name: name_9
+            type: PredicateExpr
+            role: selection_name_constraint
+            domain:
+              values:
+                - predicate.selection.distinct_name.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 61
+                end: 69
+            expression:
+              kind: predicate
+              expression_id: name.selection.distinct.v1
+              leaves: []
+              imports:
+                objects: names_port_6575d7d055a979f4
+              scope: read_ability_1
+          - name: token_72
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 72
+                end: 76
+          - name: leaf_6
+            type: QuantitySpec
+            role: existence_count
+            domain:
+              values:
+                - quantity.existence_count.constant.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 84
+                end: 85
+          - name: leaf_7
+            type: Nat
+            role: duration_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 91
+                end: 92
+          - name: leaf_8
+            type: Nat
+            role: repeat_count
+            domain:
+              values: []
+              min: 0
+              max: 9007199254740991
+            required: true
+            occurrences:
+              - start: 96
+                end: 97
       projection:
         projection_kind: pending
         discriminator:
@@ -4016,7 +4150,19 @@ records:
               end: 91
       leaf_schema:
         format: 2
-        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
+        slots:
+          - name: token_7
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 7
+                end: 11
       projection:
         projection_kind: pending
         discriminator:

@@ -453,7 +453,37 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 每回合}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 次，自己的原始消費為}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 的}, {kind: LeafRef, slot: token_19}, {kind: Literal, text: ・卡片離開戰場時，召喚}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 張}, {kind: LeafRef, slot: name_4}, {kind: Literal, text: 的}, {kind: LeafRef, slot: token_42}, {kind: Literal, text: ・卡片到}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 上。}]
+        nodes:
+          - kind: Literal
+            text: 每回合
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 次，自己的原始消費為
+          - kind: LeafRef
+            slot: leaf_1
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: token_19
+          - kind: Literal
+            text: ・卡片離開戰場時，召喚
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 張
+          - kind: LeafRef
+            slot: name_4
+          - kind: Literal
+            text: 的
+          - kind: LeafRef
+            slot: token_42
+          - kind: Literal
+            text: ・卡片到
+          - kind: LeafRef
+            slot: leaf_3
+          - kind: Literal
+            text: 上。
       expression_targets:
         name.relative.event_subject.equal.v1:
           format: 1

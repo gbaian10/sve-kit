@@ -120,7 +120,17 @@ records:
       lang: zh-Hant
       target:
         format: 1
-        nodes: [{kind: Literal, text: 只要這張卡片存在，自己的全部妖精・}, {kind: LeafRef, slot: token_14}, {kind: Literal, text: 就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】。}]
+        nodes:
+          - kind: Literal
+            text: 只要這張卡片存在，自己的全部妖精・
+          - kind: LeafRef
+            slot: token_14
+          - kind: Literal
+            text: 就具有【
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: 】。
       expression_targets: {}
   - origin: machine
     kind: template_translation
