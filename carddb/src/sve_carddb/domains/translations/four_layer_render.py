@@ -25,6 +25,7 @@ from sve_carddb.contracts.four_layer import (
     LeafType,
     LiteralNode,
     PredicateExpr,
+    QuantityPlaceholderPart,
     QuantitySpec,
     QuantityValuePart,
     SlotRef,
@@ -62,7 +63,7 @@ if TYPE_CHECKING:
         TypedValue,
     )
 
-RENDERER_VERSION = "four-layer-renderer-v3"
+RENDERER_VERSION = "four-layer-renderer-v4"
 ZONE_CASES = frozenset(
     {"battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand", "banish", "mixed"}
 )
@@ -281,9 +282,11 @@ def validate_form(form: FormDefinition) -> None:
             )
         cases = frozenset({"default"})
         _literal_cases(form)
-    elif form.rule == "quantity.constant_value.v1":
-        _constant_form(form)
-        cases = frozenset({"default"})
+    elif (
+        form.rule == "quantity.constant_value.v1"
+        or form.id == "quantity.choice_mode_count.placeholder"
+    ):
+        cases = _quantity_form(form, signature)
     elif form.id in {"earth_rite.display", "dice.interval"}:
         validate_parameter_form(form)
         cases = frozenset({"default"})
@@ -360,6 +363,35 @@ def _literal_cases(form: FormDefinition) -> None:
         not isinstance(p, LiteralNode) for parts in form.cases.values() for p in parts
     ):
         raise ValueError("Classifier and separator forms supply only language literals")
+
+
+def _quantity_form(
+    form: FormDefinition, signature: Mapping[str, tuple[str, str]]
+) -> frozenset[str]:
+    if form.rule == "quantity.constant_value.v1":
+        _constant_form(form)
+        return frozenset({"default"})
+    if (
+        form.rule != "quantity.choice_mode_count.placeholder.v1"
+        or signature
+        != {
+            "quantity": ("QuantitySpec", "choice_mode_count"),
+            "definition": ("QuantityExpr", "count_expression"),
+        }
+        or not any(
+            isinstance(part, LiteralNode) for part in form.cases.get("up_to", ())
+        )
+        or tuple(
+            part
+            for part in form.cases.get("up_to", ())
+            if not isinstance(part, LiteralNode)
+        )
+        != (QuantityPlaceholderPart(kind="QuantityPlaceholder", arg="quantity"),)
+    ):
+        raise ValueError(
+            "Quantity placeholder requires its exact paired signature and part"
+        )
+    return frozenset({"up_to"})
 
 
 class Renderer:
@@ -550,8 +582,10 @@ class Renderer:
                     )
                 )
                 output.actual.clear()
+                output.placeholder_pairs.clear()
                 for index, node in enumerate(item.selected.target.nodes):
                     output.node(item, node, (index,))
+                output.close_placeholders(item)
                 # Closing after the nodes keeps the first fallback reason in target order.
                 if self.required_references(item, lang) - output.actual:
                     raise ValueError("Target is missing necessary concept references")
@@ -588,6 +622,7 @@ class _Output:
         self.quality: list[tuple[str, bool]] = []
         self.issues: set[str] = set()
         self.actual: set[tuple[str, str, bytes]] = set()
+        self.placeholder_pairs: list[tuple[str, str]] = []
 
     def node(self, item: BoundTarget, node: Node, path: tuple[int, ...]) -> None:
         if isinstance(node, LiteralNode):
@@ -797,10 +832,14 @@ class _Output:
                 else:
                     raise TypeError("QuantityValue requires a constant quantity")
                 self.record_leaf(item, name, (*path, index), start)
+            elif isinstance(part, QuantityPlaceholderPart):
+                self.quantity_placeholder(item, node, (*path, index))
             elif isinstance(part, LiteralNode):
                 self.text += part.text
 
     def form_case(self, item: BoundTarget, node: FormNode, form: FormDefinition) -> str:
+        if form.rule == "quantity.choice_mode_count.placeholder.v1":
+            return "up_to"
         if form.rule == "zone.case.v2":
             zone = self.value(item, node.args["zone"].slot)
             if not isinstance(zone, tuple):
@@ -812,6 +851,37 @@ class _Output:
                 self.value(item, node.args["zone"].slot),
             )
         return "battlefield" if form.rule == "zone.source_union.v1" else "default"
+
+    def quantity_placeholder(
+        self, item: BoundTarget, node: FormNode, path: tuple[int, ...]
+    ) -> None:
+        name = node.args["quantity"].slot
+        definition = node.args["definition"].slot
+        quantity = self.value(item, name)
+        if (
+            not isinstance(quantity, QuantitySpec)
+            or quantity.mode != "up_to"
+            or not isinstance(quantity.expr, Expression)
+            or self.value(item, definition) != quantity.expr
+        ):
+            raise ValueError(
+                "Quantity placeholder requires an up_to expression and equal definition"
+            )
+        start = len(self.text)
+        self.text += "X"
+        self.record_leaf(item, name, path, start)
+        self.placeholder_pairs.append((name, definition))
+
+    def close_placeholders(self, item: BoundTarget) -> None:
+        for quantity, definition in self.placeholder_pairs:
+            role = next(
+                s.role for s in item.frame.leaf_schema.slots if s.name == quantity
+            )
+            self.actual.update(
+                (quantity, role, reference)
+                for name, _, reference in tuple(self.actual)
+                if name == definition
+            )
 
     def source_union(
         self,

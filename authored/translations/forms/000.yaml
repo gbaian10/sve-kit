@@ -118,3 +118,16 @@ records:
           - {kind: ZoneMember, arg: zone}
         separator:
           - {kind: Literal, text: 與}
+  - kind: translation_form
+    origin: machine
+    data:
+      id: quantity.choice_mode_count.placeholder
+      lang: zh-Hant
+      signature:
+        - {name: quantity, type: QuantitySpec, role: choice_mode_count}
+        - {name: definition, type: QuantityExpr, role: count_expression}
+      rule: quantity.choice_mode_count.placeholder.v1
+      cases:
+        up_to:
+          - {kind: Literal, text: 至多}
+          - {kind: QuantityPlaceholder, arg: quantity}

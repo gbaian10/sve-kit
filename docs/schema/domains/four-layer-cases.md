@@ -82,7 +82,7 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | FL-017／np_source_existence_rejected、np_owner_zone_role_mismatch、np_destination_owner_rejected | 未列 tuple、owner／zone 錯配及 destination_owner 拒絕 |
 | FL-017／np_source_owner_only_possessive、np_counted_owner_only_selection、np_counted_owner_only_existence | 區域在 NP 外引用，NP 使用具角色所有格與唯一 counted_zone 量詞語境；owner range 不含「的」 |
 | FL-017／np_counted_owner_only_missing_form | 缺所有格整欄 fallback，不輸出半句 |
-| FL-015／renderer_v3_dependencies | 相同 N0 來源／target 的 renderer v2→v3 更新 dependency／tr，frame／binding／annotation 不變 |
+| FL-015／renderer_version_dependencies | 相同 N0 來源／target 的 renderer v3→v4 更新 dependency／tr，frame／binding／annotation 不變 |
 
 上述新增 30 筆矩陣案例由 `test_four_layer_cases.py` 的原有共用 adapter 執行；
 `test_four_layer_n1_forms.py` 的正常來源、完整 filter、品質、範圍與派送行為測試保留。

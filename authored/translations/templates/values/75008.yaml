@@ -1,0 +1,90 @@
+format: 3
+kind: translation_shard
+records:
+  - origin: machine
+    kind: template_translation
+    data:
+      template_id: frame:23b4aba60565f1ce99a893726a7bc5d65a1a22af4f39a40454a9706462bfff1a
+      lang: zh-Hant
+      target:
+        format: 1
+        nodes:
+          - kind: Literal
+            text: '{'
+          - kind: LeafRef
+            slot: leaf_0
+          - kind: Literal
+            text: '}從下列抉擇'
+          - kind: Form
+            form_id: quantity.choice_mode_count.placeholder
+            args:
+              quantity:
+                slot: leaf_1
+              definition:
+                slot: leaf_2
+          - kind: Literal
+            text: 項。X為「
+          - kind: LeafRef
+            slot: leaf_2
+          - kind: Literal
+            text: 」。【
+          - kind: LeafRef
+            slot: leaf_7
+          - kind: Literal
+            text: 】選擇
+          - kind: LeafRef
+            slot: leaf_8
+          - kind: LeafRef
+            slot: leaf_9
+          - kind: Literal
+            text: 上的
+          - kind: LeafRef
+            slot: leaf_11
+          - kind: Literal
+            text: 個
+          - kind: LeafRef
+            slot: leaf_10
+          - kind: Literal
+            text: 。使其消失。【
+          - kind: LeafRef
+            slot: leaf_12
+          - kind: Literal
+            text: 】這張卡片具有【
+          - kind: LeafRef
+            slot: leaf_13
+          - kind: Literal
+            text: 】。【
+          - kind: LeafRef
+            slot: leaf_14
+          - kind: Literal
+            text: 】自己的主戰者{
+          - kind: LeafRef
+            slot: leaf_15
+          - kind: Literal
+            text: '}+'
+          - kind: LeafRef
+            slot: leaf_16
+          - kind: Literal
+            text: 。抽
+          - kind: LeafRef
+            slot: leaf_17
+          - kind: Literal
+            text: 張卡片。
+      expression_targets:
+        count.current_zone.owner.zone.card.trait.v1:
+          format: 1
+          nodes:
+            - kind: LeafRef
+              slot: owner
+            - kind: LeafRef
+              slot: zone
+            - kind: Literal
+              text: 上的
+            - kind: LeafRef
+              slot: trait
+            - kind: Literal
+              text: ・
+            - kind: LeafRef
+              slot: card
+            - kind: Literal
+              text: 張數

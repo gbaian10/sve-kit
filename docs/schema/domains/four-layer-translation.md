@@ -264,7 +264,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v6 來源推導。
+這裡記錄來源型別含義；renderer 自 v3 起已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v6 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -365,13 +365,22 @@ NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只
 | lang | Lang；和 target 相同 | A/B/C；錯語言；FL-012 |
 | signature | 除 zone.union_separator 外非空 `{name:Code,type:TypeName,role:Code}` 陣列，name 唯一，type 引用 §4 葉型別，role 引用其角色 | A/B；參數不合；FL-004／FL-012 |
 | rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/C；未知或超域；FL-012 |
-| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`／`{kind:ZoneMember,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
+| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`／`{kind:QuantityPlaceholder,arg:Code}`／`{kind:ZoneMember,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
 
 QuantityValue 的 arg 必指本形式簽章中的 QuantitySpec，僅在 `quantity.constant_value.v1` 使用，輸入 expr 必為 constant。
 它只輸出 UInt 的十進位字串，不輸出 mode、單位或概念位置；all／any、bound／expression 均不適用。
 N0 的 `quantity.<role>.value` form 只有對應 role 的單一 QuantitySpec 參數、default 分支及一個 QuantityValue。
 arg 沿同一來源葉驗證，計入 required 引用閉包、render 依賴及來源／target occurrence；mode 仍由來源構造驗證。
 機械轉換保留原 target 的固定數量修飾，只替換原數字 placeholder，不從中文反推 mode、單位、值或來源位置。
+
+QuantityPlaceholder 僅屬於 `quantity.choice_mode_count.placeholder`／`quantity.choice_mode_count.placeholder.v1`，
+簽章恰為 quantity:QuantitySpec/choice_mode_count 與 definition:QuantityExpr/count_expression，只有 up_to case。
+arg 必為 quantity，只輸出字面 X 並記該槽的 leaf output／來源 occurrence；mode 詞由該語言 cases 的 Literal 提供。
+quantity 必須是 up_to Expression，definition 須與 quantity.expr 完整相等，包括有序葉身分；constant、bound、ContextExpression 不適用。
+同一 target 在 placeholder 之外必有直接 LeafRef(definition)，由 target 形狀驗證於 authored 載入及 render 前檢查；定義句可在 X 之前或之後。
+全部頂層節點呈現成功後，才把 definition 已呈現的引用按 quantity 的槽名與角色補記實際引用，避免重複展開計數句；任一節點失敗會先拒絕或整欄 fallback。
+X 本身不產生概念 annotation；概念與加粗範圍保留在定義句。缺必要選詞仍整欄 fallback。
+直接 LeafRef 由 target 形狀驗證，其餘數量配對與引用補記由 renderer 負責；不另驗來源的 owner／能力／分枝、ChoiceContext 或選項數，那些仍由正式 producer 的 binding 驗證負責。
 
 rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章合法域，不能把選詞或語義值複製到規則內。
 例如 zone.locative 的 hand／battlefield 分支各組合 Label 與「中」／「上」；三個 quantity.classifier.* 形式依計數語境選中文量詞分支。
@@ -380,11 +389,14 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v6。
+renderer 使用 `four-layer-renderer-v4`；正式來源 workflow、authored 與 DB reader 採 v6。
+renderer 版本參與所有呈現依賴鍵，包含數位名稱政策；因此既有 translation ID 會重算。
+render-v3 的內容 hash recipe 與公共快照 wire 保持原契約。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
 
 | ID | signature（name:type/role） | rule／cases |
 | --- | --- | --- |
+| quantity.choice_mode_count.placeholder | quantity:QuantitySpec/choice_mode_count；definition:QuantityExpr/count_expression | quantity.choice_mode_count.placeholder.v1；up_to；QuantityPlaceholder配獨立LeafRef定義 |
 | zone.locative；zone.ablative | zone:ZoneSet/source_zone | zone.case.v2；七區域＋mixed |
 | zone.counted_locative | zone:ZoneSet/counted_zone | zone.case.v2；七區域＋mixed |
 | zone.allative | zone:ZoneSet/destination_zone | zone.case.v2；七區域＋mixed |
@@ -593,6 +605,7 @@ NP 範圍不是 annotation，卡名內的同字不另套術語 annotation。form
 先排除由來源規則產生、required=false 且 occurrences=[] 的純省略槽，其值仍必須存在。
 其餘明示結構／required 葉、四種門檻能力名，以及該用途實際選中的 label／variant 的 emphasis=true 或 origin=project／machine 都須引用。
 A 只計 LeafRef、Form 的實際 Label／QuantityValue／ZoneMember 與 NP 展開的輸出；形式的讀值參數不等於呈現引用。
+QuantityPlaceholder 只消耗 quantity 槽，不代用 definition；其必要概念須依上述獨立定義句的成功渲染補記。
 E−A 必須為空；同字不同角色、卡名內同字與另一槽的引用不能補洞。重複呈現各保留 node_path／occurrence。
 缺必要或實際使用選詞沿 missing_term_translation 整欄 fallback；有 target 但漏 E 是結構錯誤，不能改叫缺譯。
 未用的純省略 label 不加品質或 fallback 依賴；emphasis／origin 是 render 條件，不入 frame hash。
