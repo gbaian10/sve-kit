@@ -80,7 +80,9 @@ interface QueryState {
   cost: number[]; // 選取的消費值，0–10，10 代表 ≥10；空陣列＝不限
   attack: number[]; // 選取的攻擊力值，0–10，10 代表 ≥10
   defense: number[]; // 選取的生命值，0–10，10 代表 ≥10
-  types: TypeCode[];
+  types: TypeCode[]; // 印刷類型（從者／法術／護符）
+  locations: string[]; // 牌組位置：main、evolve、advance、leader、leader:<框>、token、token:<類型>、ep、sep
+  traits: TraitCode[]; // 特性 vocabulary code，選到任一即符合
   mechanics: Record<KeywordId, "has" | "not">; // 沒列＝不管
   sets: SetCode[];
   rarities: RarityCode[];
@@ -91,7 +93,8 @@ interface QueryState {
 }
 ```
 
-`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type mech set rarity alt unit sort order view`）之間互轉：
+`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech set rarity alt unit sort order view`）之間互轉：
+牌組位置原本放在 `type`，`type` 裡出現的位置 token（`token`、`token:spell`、`leader:gold`、`ep`、`sep`）仍會讀成 `loc`，寫回時只寫 `loc`；
 `set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code；`cost`、`atk`、`def` 是逗號分隔的數值清單，
 同一統計值內取聯集、不同統計值之間取交集。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
 `view` 是例外：URL 有帶就照 URL；沒帶就用偏好 `viewMode`；使用者切換檢視時同時寫 URL 與偏好。

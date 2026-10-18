@@ -131,6 +131,9 @@ function answerViews(
         options: {
           types: [],
           typeCounts: {},
+          locationCounts: {},
+          traits: [],
+          traitCounts: {},
           classes,
           sets: [],
           quickSets: {},
@@ -585,7 +588,10 @@ it("keeps rarity and type lists pending independently of the basic set and class
         page: { total: 0, offset: 0, items: [] },
         options: {
           types: [],
-          typeCounts: { leader: 2, "leader:gold": 2 },
+          typeCounts: { leader: 2 },
+          locationCounts: { leader: 2, "leader:gold": 2 },
+          traits: [],
+          traitCounts: {},
           classes: [],
           sets: [],
           quickSets: {},
@@ -604,6 +610,8 @@ it("keeps rarity and type lists pending independently of the basic set and class
   answer(rarity, ["br", "unknown"])
   expect(result.current.options).toEqual({
     rarity: { styles: ["br", "unknown"], counts: { pr: 2 } },
-    type: { types: [], typeCounts: { leader: 2, "leader:gold": 2 } },
+    type: { types: [], typeCounts: { leader: 2 } },
+    location: { types: [], counts: { leader: 2, "leader:gold": 2 } },
+    trait: { traits: [], counts: {} },
   })
 })

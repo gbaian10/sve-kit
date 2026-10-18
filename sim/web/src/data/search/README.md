@@ -7,8 +7,11 @@ and query ID; old replies cannot replace current results. Suggestions preserve e
 identity and name/alias ranking. Missing recent IDs explicitly return `not-in-edition`.
 
 Search supports card/printing units, text, classes, printing home-set family codes and the cost, attack
-and defense value selections (the last button collects every value at or above it). Types, rarities,
-mechanics, alternate-art filtering, the art unit and other sorting return `unsupported-query`.
+and defense value selections (the last button collects every value at or above it), printed types,
+deck locations (`main`, `evolve`, `advance`, `leader[:frame]`, `token[:type]`, `ep`, `sep`; special
+kinds and traits come from the front face's revision shown in the edition, the leader frame from the
+printing) and traits. Values within one row union; rows intersect. Mechanics and release-date sorting
+return `unsupported-query`.
 The list shows only cards released in the selected edition. Names remain multilingual, and
 UI language is independent of card edition. Card detail retains its on-demand compatibility
 path; only the card page starts the full snapshot client.

@@ -70,6 +70,11 @@ export function compareSearchIndexes(actual: SearchApi, expected: SearchApi, edi
     ...expected.options.classes.map((option) => ({ classes: [option.code] })),
     ...expected.options.sets.map((option) => ({ sets: [option.code] })),
     ...Object.keys(expected.options.typeCounts).map((type) => ({ types: [type] })),
+    ...Object.keys(expected.options.locationCounts).map((token) => ({ locations: [token] })),
+    { locations: ["main", "token"] },
+    ...Object.keys(expected.options.traitCounts).map((trait) => ({ traits: [trait] })),
+    { traits: Object.keys(expected.options.traitCounts).slice(0, 2) },
+    { traits: ["synthetic-missing-trait"] },
     ...Object.keys(expected.options.rarityCounts).map((rarity) => ({ rarities: [rarity] })),
     ...texts.map((text) => ({ text })),
   ]

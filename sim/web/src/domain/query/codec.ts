@@ -1,3 +1,4 @@
+import { isLocationToken } from "../deckLocation"
 import { compareCodePoints } from "../normalize"
 import {
   COST_CAP,
@@ -10,11 +11,19 @@ import {
   VIEW_MODES,
 } from "./model"
 
-// URL parameters: q class cost atk def type mech set rarity alt unit sort order view. Lists are comma
-// separated, de-duplicated and sorted so equal states always give equal URLs; unknown values are
-// dropped rather than failing, because URLs arrive from anywhere. `cost`, `atk` and `def` list the
-// selected values; the cap (7 for cost, 10 for attack and defense) means that value or more.
-const LIST_PARAMS = { classes: "class", types: "type", sets: "set", rarities: "rarity" } as const
+// URL parameters: q class cost atk def type loc trait mech set rarity alt unit sort order view. Lists
+// are comma separated, de-duplicated and sorted so equal states always give equal URLs; unknown
+// values are dropped rather than failing, because URLs arrive from anywhere. `cost`, `atk` and `def`
+// list the selected values; the cap (7 for cost, 10 for attack and defense) means that value or more.
+// Deck locations used to live in `type`, so location tokens found there still read as `loc`.
+const LIST_PARAMS = {
+  classes: "class",
+  types: "type",
+  locations: "loc",
+  traits: "trait",
+  sets: "set",
+  rarities: "rarity",
+} as const
 const VALUE_PARAMS = {
   cost: ["cost", COST_CAP],
   attack: ["atk", STAT_CAP],
@@ -60,13 +69,18 @@ function parseMechanics(text: string | null): Record<string, MechanicState> {
 
 export function parseQuery(params: URLSearchParams): QueryState {
   const view = oneOf(params.get("view"), VIEW_MODES)
+  const typed = list(params, LIST_PARAMS.types)
   return {
     text: params.get("q")?.trim() ?? "",
     classes: list(params, LIST_PARAMS.classes),
     cost: values(params, VALUE_PARAMS.cost[0], VALUE_PARAMS.cost[1]),
     attack: values(params, VALUE_PARAMS.attack[0], VALUE_PARAMS.attack[1]),
     defense: values(params, VALUE_PARAMS.defense[0], VALUE_PARAMS.defense[1]),
-    types: list(params, LIST_PARAMS.types),
+    types: typed.filter((token) => !isLocationToken(token)),
+    locations: [
+      ...new Set([...list(params, LIST_PARAMS.locations), ...typed.filter(isLocationToken)]),
+    ].sort(compareCodePoints),
+    traits: list(params, LIST_PARAMS.traits),
     mechanics: parseMechanics(params.get("mech")),
     sets: list(params, LIST_PARAMS.sets),
     rarities: list(params, LIST_PARAMS.rarities),

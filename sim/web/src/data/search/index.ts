@@ -41,7 +41,13 @@ interface SearchOption {
 }
 export interface SearchOptions {
   readonly types: readonly SearchOption[]
+  /** Printings per printed type code in this edition. */
   readonly typeCounts: Readonly<Record<string, number>>
+  /** Printings per deck location token (`main`, `token:spell`, `leader:gold`, …). */
+  readonly locationCounts: Readonly<Record<string, number>>
+  readonly traits: readonly SearchOption[]
+  /** Printings per trait code in this edition. */
+  readonly traitCounts: Readonly<Record<string, number>>
   readonly prBadgeStyles: readonly string[]
   readonly rarityCounts: Readonly<Record<string, number>>
   readonly rarities: readonly SearchOption[]
@@ -121,7 +127,16 @@ export class SearchQueryError extends Error {
   }
 }
 
-const CARD_COLUMNS = ["id", "class", "default", "printingStart", "nameStart", "aliasStart"] as const
+const CARD_COLUMNS = [
+  "id",
+  "class",
+  "default",
+  "printingStart",
+  "nameStart",
+  "aliasStart",
+  "traitStart",
+  "kinds",
+] as const
 const PRINTING_COLUMNS = [
   "id",
   "lookup",
@@ -147,7 +162,95 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 16
+export const INDEX_IMAGE_FORMAT = 17
+
+// Card-level special kinds, packed into the `kinds` column; Token stays per printing.
+const KIND_EVOLVE = 1
+const KIND_ADVANCE = 2
+
+/** What decides a printing's deck locations: its type, special kinds and leader frame. */
+interface DeckKinds {
+  readonly type: string
+  readonly token: boolean
+  readonly frame: string
+  readonly evolve: boolean
+  readonly advance: boolean
+}
+
+// A printing can hold several locations (an evolved Token is both); "main" means none of the others.
+function hasLocation(kinds: DeckKinds, token: string): boolean {
+  switch (token) {
+    case "main":
+      return (
+        !kinds.evolve &&
+        !kinds.advance &&
+        !kinds.token &&
+        kinds.type !== "leader" &&
+        kinds.type !== "ep" &&
+        kinds.type !== "sep"
+      )
+    case "evolve":
+      return kinds.evolve
+    case "advance":
+      return kinds.advance
+    case "token":
+      return kinds.token
+    case "leader":
+      return kinds.type === "leader"
+    case "ep":
+    case "sep":
+      return kinds.type === token
+    default:
+      if (token.startsWith("token:")) return kinds.token && token === `token:${kinds.type}`
+      if (token.startsWith("leader:"))
+        return kinds.type === "leader" && token === `leader:${kinds.frame}`
+      return false
+  }
+}
+
+/** Every location token a printing counts under. */
+function locationTokens(kinds: DeckKinds): string[] {
+  return [
+    "main",
+    "evolve",
+    "advance",
+    "leader",
+    `leader:${kinds.frame}`,
+    "token",
+    `token:${kinds.type}`,
+    "ep",
+    "sep",
+  ].filter((token) => hasLocation(kinds, token))
+}
+
+function tally(counts: Record<string, number>, keys: readonly string[]): void {
+  for (const key of keys) counts[key] = (counts[key] ?? 0) + 1
+}
+
+/** Printings per filter value, built the same way at index build and at printing completion. */
+interface FacetCounts {
+  readonly typeCounts: Record<string, number>
+  readonly locationCounts: Record<string, number>
+  readonly traitCounts: Record<string, number>
+  readonly setCounts: Record<string, number>
+}
+const facetCounts = (): FacetCounts => ({
+  typeCounts: {},
+  locationCounts: {},
+  traitCounts: {},
+  setCounts: {},
+})
+function countPrinting(
+  counts: FacetCounts,
+  kinds: DeckKinds,
+  traits: readonly string[],
+  setCode: string | undefined,
+): void {
+  if (kinds.type) tally(counts.typeCounts, [kinds.type])
+  tally(counts.locationCounts, locationTokens(kinds))
+  tally(counts.traitCounts, traits)
+  if (setCode !== undefined) tally(counts.setCounts, [setCode])
+}
 
 interface Parts {
   readonly pool: StringPool
@@ -156,6 +259,7 @@ interface Parts {
   readonly printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
   readonly names: Uint32Array
   readonly aliases: Uint32Array
+  readonly traits: Uint32Array
   readonly order: Uint32Array
   readonly costs: Float64Array
   readonly attacks: Float64Array
@@ -201,9 +305,9 @@ function optionsOf(
   bootstrap: BootstrapColumns,
   index: CardIndex,
   edition: Region,
-  typeCounts: Record<string, number>,
-  setCounts: Record<string, number>,
+  counts: FacetCounts,
 ): { options: SearchOptions; releases: SetRelease[] } {
+  const { typeCounts, locationCounts, traitCounts, setCounts } = counts
   const printingRows = bootstrap.rows("printing")
   const editionOwners = new Set(
     printingRows
@@ -238,15 +342,18 @@ function optionsOf(
     })),
     edition,
   )
-  const types = bootstrap
-    .rows("vocabulary")
-    .filter(
-      (row) =>
-        (row["kind"] === "type" || (row["kind"] === "special_kind" && row["code"] === "token")) &&
-        row["active"] === true &&
-        (typeCounts[stringValue(row["code"])] ?? 0) > 0,
-    )
-    .map((row) => optionOf(index, row, "label_unit_id"))
+  const vocabulary = (kind: string, counts: Record<string, number>) =>
+    bootstrap
+      .rows("vocabulary")
+      .filter(
+        (row) =>
+          row["kind"] === kind &&
+          row["active"] === true &&
+          (counts[stringValue(row["code"])] ?? 0) > 0,
+      )
+      .map((row) => optionOf(index, row, "label_unit_id"))
+  const types = vocabulary("type", typeCounts)
+  const traits = vocabulary("trait", traitCounts)
   const setOptions = index.families
     .filter((row) => editionOwners.has(stringValue(row["id"])))
     .map((row) => ({
@@ -267,6 +374,9 @@ function optionsOf(
     rarityCounts,
     typeCounts,
     types,
+    locationCounts,
+    traits,
+    traitCounts,
     prBadgeStyles: [
       ...new Set(
         printingRows
@@ -317,11 +427,11 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
   const printings = uintColumns(PRINTING_COLUMNS)
   const names: number[] = []
   const aliases: number[] = []
+  const traits: number[] = []
   const costs: number[] = []
   const attacks: number[] = []
   const defenses: number[] = []
-  const setCounts: Record<string, number> = {}
-  const typeCounts: Record<string, number> = {}
+  const counts = facetCounts()
   let batch: CardSummary[] = []
   let summaryCount = 0
   const intern = (value: string | null | undefined) => pool.intern(value ?? "")
@@ -341,34 +451,32 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     cards.aliasStart.push(aliases.length)
     names.push(...entry.names.map((name) => intern(name.normalized)))
     aliases.push(...entry.aliases.map((name) => intern(name.normalized)))
+    // Type, traits and special kinds come from the front face's revision shown in this edition.
+    const front = index.facesOf(entry.cardId)[0]
+    const revision = front ? index.displayRevision(stringValue(front["id"]), edition) : undefined
+    const type = typeof revision?.["type_code"] === "string" ? revision["type_code"] : ""
+    const special = arrayValue(revision?.["special_kinds"] ?? [])
+    const token = special.includes("token")
+    const evolve = special.includes("evolve")
+    const advance = special.includes("advance")
+    const cardTraits = arrayValue(revision?.["traits"] ?? []).map((value) => stringValue(value))
+    cards.kinds.push((evolve ? KIND_EVOLVE : 0) | (advance ? KIND_ADVANCE : 0))
+    cards.traitStart.push(traits.length)
+    traits.push(...cardTraits.map(intern))
     let preferred = printings.id.length
     for (const printing of entry.printings) {
       if (printing.id === entry.defaultPrinting[edition]) preferred = printings.id.length
       const summary = summaries.find((value) => value.printingId === printing.id)
       const fullPrinting = index.printing(printing.id)
-      const front = index.facesOf(entry.cardId)[0]
-      const revision = front ? index.displayRevision(stringValue(front["id"]), edition) : undefined
       const art = artOf(fullPrinting)
       const defaultArt = artOf(index.printing(entry.defaultPrinting[edition] ?? ""))
-      const type = typeof revision?.["type_code"] === "string" ? revision["type_code"] : ""
       printings.type.push(intern(type))
-      if (type) typeCounts[type] = (typeCounts[type] ?? 0) + 1
-      const token = arrayValue(revision?.["special_kinds"] ?? []).includes("token")
       printings.token.push(Number(token))
-      if (token) {
-        typeCounts["token"] = (typeCounts["token"] ?? 0) + 1
-        const child = `token:${type}`
-        typeCounts[child] = (typeCounts[child] ?? 0) + 1
-      }
       const leaderFrame =
         typeof fullPrinting?.["leader_name_frame"] === "string"
           ? fullPrinting["leader_name_frame"]
           : "unknown"
       printings.leaderFrame.push(intern(leaderFrame))
-      if (type === "leader") {
-        const child = `leader:${leaderFrame}`
-        typeCounts[child] = (typeCounts[child] ?? 0) + 1
-      }
       printings.rarity.push(
         intern(
           typeof fullPrinting?.["rarity_code"] === "string" ? fullPrinting["rarity_code"] : "",
@@ -387,7 +495,12 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       const owner = index.printing(printing.id)?.["home_set_id"]
       const ownerCode = typeof owner === "string" ? familyCodes.get(owner) : undefined
       printings.owner.push(intern(ownerCode))
-      if (ownerCode !== undefined) setCounts[ownerCode] = (setCounts[ownerCode] ?? 0) + 1
+      countPrinting(
+        counts,
+        { type, token, frame: leaderFrame, evolve, advance },
+        cardTraits,
+        ownerCode,
+      )
       printings.card.push(card)
       printings.summary.push(summary ? ++summaryCount : 0)
       costs.push(summary?.cost ?? Number.NaN)
@@ -421,12 +534,13 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     }
     cards.default.push(preferred)
   }
-  const { options, releases } = optionsOf(bootstrap, index, edition, typeCounts, setCounts)
+  const { options, releases } = optionsOf(bootstrap, index, edition, counts)
   summaryColumns.append(batch as unknown as JsonObject[])
   targets.append(targetBatch)
   cards.printingStart.push(printings.id.length)
   cards.nameStart.push(names.length)
   cards.aliasStart.push(aliases.length)
+  cards.traitStart.push(traits.length)
   pool.seal()
   return {
     pool,
@@ -435,6 +549,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     printings: seal(printings),
     names: Uint32Array.from(names),
     aliases: Uint32Array.from(aliases),
+    traits: Uint32Array.from(traits),
     order: cardNumberOrder(
       printings.id.map((id, ordinal) => ({
         lookup: pool.get(printings.lookup[ordinal] ?? 0),
@@ -477,6 +592,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
   const printings = columns(PRINTING_COLUMNS)
   const names = take(Uint32Array)
   const aliases = take(Uint32Array)
+  const traits = take(Uint32Array)
   const costs = take(Float64Array)
   const attacks = take(Float64Array)
   const defenses = take(Float64Array)
@@ -523,6 +639,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
     printings,
     names,
     aliases,
+    traits,
     costs,
     attacks,
     defenses,
@@ -542,6 +659,7 @@ export class SearchIndex {
   private printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
   private readonly names: Uint32Array
   private readonly aliases: Uint32Array
+  private readonly traits: Uint32Array
   private order: Uint32Array
   private costs: Float64Array
   private attacks: Float64Array
@@ -564,6 +682,7 @@ export class SearchIndex {
     this.printings = parts.printings
     this.names = parts.names
     this.aliases = parts.aliases
+    this.traits = parts.traits
     this.costs = parts.costs
     this.attacks = parts.attacks
     this.defenses = parts.defenses
@@ -643,8 +762,7 @@ export class SearchIndex {
     let summaries: ColumnEdit[] = [],
       targets: ColumnEdit[] = []
     let summaryCount = 0
-    const typeCounts: Record<string, number> = {},
-      setCounts: Record<string, number> = {}
+    const counts = facetCounts()
     const rarities = new Map<string, JsonValue | undefined>()
     this.pool.reopen()
     try {
@@ -673,15 +791,19 @@ export class SearchIndex {
         printings.badge[ordinal] = intern(badgeOf(row)?.style ?? "unknown")
         printings.art[ordinal] = intern(art || id)
         printings.alt[ordinal] = Number(!!art && !!defaultArt && art !== defaultArt)
-        if (code !== undefined) setCounts[code] = (setCounts[code] ?? 0) + 1
-        const type = this.pool.get(printings.type[ordinal] ?? 0)
-        if (type) typeCounts[type] = (typeCounts[type] ?? 0) + 1
-        if (printings.token[ordinal]) {
-          typeCounts["token"] = (typeCounts["token"] ?? 0) + 1
-          typeCounts[`token:${type}`] = (typeCounts[`token:${type}`] ?? 0) + 1
-        }
-        if (type === "leader")
-          typeCounts[`leader:${frame}`] = (typeCounts[`leader:${frame}`] ?? 0) + 1
+        const bits = this.cards.kinds[card] ?? 0
+        countPrinting(
+          counts,
+          {
+            type: this.pool.get(printings.type[ordinal] ?? 0),
+            token: printings.token[ordinal] === 1,
+            frame,
+            evolve: (bits & KIND_EVOLVE) !== 0,
+            advance: (bits & KIND_ADVANCE) !== 0,
+          },
+          this.traitsOf(card),
+          code,
+        )
         const summary = this.printings.summary[old] ?? 0
         if (summary) {
           if (!rarities.has(official)) {
@@ -735,7 +857,7 @@ export class SearchIndex {
       targetBatches.push(targets)
       const completedSummaries = this.summaries.remap(summaryBatches)
       const completedTargets = this.targets.remap(targetBatches)
-      const { options, releases } = optionsOf(bootstrap, index, this.edition, typeCounts, setCounts)
+      const { options, releases } = optionsOf(bootstrap, index, this.edition, counts)
       const order = cardNumberOrder(
         entries.map(({ card }, ordinal) => ({
           lookup: this.pool.get(printings.lookup[ordinal] ?? 0),
@@ -789,6 +911,7 @@ export class SearchIndex {
         ...PRINTING_COLUMNS.map((name) => this.printings[name]),
         this.names,
         this.aliases,
+        this.traits,
         this.costs,
         this.attacks,
         this.defenses,
@@ -823,16 +946,13 @@ export class SearchIndex {
       (!state.sets.length ||
         state.sets.includes(this.pool.get(this.printings.owner[printing] ?? 0))) &&
       (!state.types.length ||
-        state.types.some((token) => {
-          const type = this.pool.get(this.printings.type[printing] ?? 0)
-          if (token === "token") return this.printings.token[printing] === 1
-          if (token.startsWith("token:"))
-            return this.printings.token[printing] === 1 && token === `token:${type}`
-          return token.startsWith("leader:")
-            ? type === "leader" &&
-                token === `leader:${this.pool.get(this.printings.leaderFrame[printing] ?? 0)}`
-            : token === type
-        })) &&
+        state.types.includes(this.pool.get(this.printings.type[printing] ?? 0))) &&
+      (!state.locations.length ||
+        state.locations.some((token) => hasLocation(this.kindsOf(printing), token))) &&
+      (!state.traits.length ||
+        this.traitsOf(this.printings.card[printing] ?? 0).some((trait) =>
+          state.traits.includes(trait),
+        )) &&
       (!state.rarities.length ||
         state.rarities.some((rarity) => {
           const official = this.pool.get(this.printings.rarity[printing] ?? 0)
@@ -1153,6 +1273,25 @@ export class SearchIndex {
         ]
       }),
     }
+  }
+
+  private kindsOf(printing: number): DeckKinds {
+    const bits = this.cards.kinds[this.printings.card[printing] ?? 0] ?? 0
+    return {
+      type: this.pool.get(this.printings.type[printing] ?? 0),
+      token: this.printings.token[printing] === 1,
+      frame: this.pool.get(this.printings.leaderFrame[printing] ?? 0),
+      evolve: (bits & KIND_EVOLVE) !== 0,
+      advance: (bits & KIND_ADVANCE) !== 0,
+    }
+  }
+
+  private traitsOf(card: number): string[] {
+    const start = this.cards.traitStart[card] ?? 0
+    const end = this.cards.traitStart[card + 1] ?? start
+    const codes: string[] = []
+    for (let i = start; i < end; i += 1) codes.push(this.pool.get(this.traits[i] ?? 0))
+    return codes
   }
 
   private textRank(values: Uint32Array, offsets: Uint32Array, card: number, flat: string): number {

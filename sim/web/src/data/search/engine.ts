@@ -188,7 +188,7 @@ export class SearchEngine {
               request.kind === "neighbours" ||
               request.kind === "count") &&
             (request.query.state.rarities.length ||
-              request.query.state.types.some((type) => type.startsWith("leader:")) ||
+              request.query.state.locations.some((token) => token.startsWith("leader:")) ||
               request.query.state.altArtOnly ||
               request.query.state.unit === "art")
           )

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { cardNoKey } from "../../domain/cardNo"
+import { LOCATION_ORDER } from "../../domain/deckLocation"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import { apply } from "../../domain/search"
 import { memoryCache } from "../../test-utils/cache"
@@ -11,6 +12,7 @@ import { createCatalog } from "../catalog"
 import type { Fetcher } from "../cdn"
 import { createSnapshotClient } from "../client"
 import {
+  arrayValue,
   canonical,
   integerValue,
   type JsonObject,
@@ -2581,8 +2583,8 @@ it("filters leader frames per printing, intersects rarity and restores the index
   columns.seal()
   const created = new SearchIndex(columns, "jp")
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
-    const search = (types: readonly string[], rarities: readonly string[] = []) =>
-      index.search({ ...query, state: { ...DEFAULT_QUERY, types, rarities }, limit: 100 })
+    const search = (locations: readonly string[], rarities: readonly string[] = []) =>
+      index.search({ ...query, state: { ...DEFAULT_QUERY, locations, rarities }, limit: 100 })
     expect(search(["leader"]).total).toBe(expected.length)
     expect(search(["leader:gold", "leader:white"]).total).toBe(expected.length)
     expect(
@@ -2605,11 +2607,16 @@ it("filters leader frames per printing, intersects rarity and restores the index
         .map((item) => item.id)
         .sort(),
     )
-    expect(search(["follower"]).total).toBe(0)
+    expect(search(["main"]).total).toBe(0)
+    expect(
+      index.search({ ...query, state: { ...DEFAULT_QUERY, types: ["follower"] }, limit: 100 })
+        .total,
+    ).toBe(0)
     expect(index.options.types.map((type) => type.code)).toEqual(["leader"])
-    expect(index.options.typeCounts["leader:gold"]).toBe(
+    expect(index.options.locationCounts["leader:gold"]).toBe(
       expected.filter((item) => item.frame === "gold").length,
     )
+    expect(index.options.locationCounts["main"]).toBeUndefined()
   }
 })
 
@@ -2695,23 +2702,127 @@ it("selects Token by special kind and unions it with followers after index resto
   columns.seal()
   const created = new SearchIndex(columns, "jp")
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
-    const ids = (types: readonly string[]) =>
+    const ids = (state: Partial<typeof DEFAULT_QUERY>) =>
       index
-        .search({ ...query, state: { ...DEFAULT_QUERY, types }, limit: 1000 })
+        .search({ ...query, state: { ...DEFAULT_QUERY, ...state }, limit: 1000 })
         .items.map((item) => item.printingId)
         .sort()
-    expect(ids(["token"])).toEqual(expectedTokens)
-    expect(ids(["token:spell"])).toEqual(expectedSpells)
-    expect(ids(["token:follower", "token:spell", "token:amulet"])).toEqual(expectedTokens)
-    expect(ids(["follower", "token:spell"])).toEqual(
-      [...new Set([...expectedFollowers, ...expectedSpells])].sort(),
+    const all = ids({})
+    expect(ids({ locations: ["token"] })).toEqual(expectedTokens)
+    expect(ids({ locations: ["token:spell"] })).toEqual(expectedSpells)
+    expect(ids({ locations: ["token:follower", "token:spell", "token:amulet"] })).toEqual(
+      expectedTokens,
     )
-    expect(ids(["follower"])).toEqual(expectedFollowers)
-    expect(ids(["follower", "token"])).toEqual(
-      [...new Set([...expectedFollowers, ...expectedTokens])].sort(),
+    // Rows intersect: a Token spell is still a spell, and a follower Token is still a follower.
+    expect(ids({ types: ["spell"], locations: ["token"] })).toEqual(expectedSpells)
+    expect(ids({ types: ["follower"] })).toEqual(expectedFollowers)
+    expect(ids({ types: ["follower"], locations: ["token"] })).toEqual(
+      expectedFollowers.filter((id) => expectedTokens.includes(id)),
     )
-    expect(index.options.typeCounts["token"]).toBe(expectedTokens.length)
-    expect(index.options.types.find((type) => type.code === "token")?.kind).toBe("special_kind")
+    // "main" is everything outside the other locations, so every row together covers the fixture
+    // and no Token is in the main deck.
+    expect(ids({ locations: [...LOCATION_ORDER] })).toEqual(all)
+    const main = ids({ locations: ["main"] })
+    expect(main.length).toBeGreaterThan(0)
+    expect(main.some((id) => expectedTokens.includes(id))).toBe(false)
+    expect(index.options.locationCounts["token"]).toBe(expectedTokens.length)
+    expect(index.options.locationCounts["main"]).toBe(main.length)
+    expect(index.options.typeCounts["token"]).toBeUndefined()
+    expect(index.options.types.find((type) => type.code === "token")).toBeUndefined()
+  }
+})
+
+it("filters evolve and advance by special kind and traits by the card's vocabulary codes", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  // The shared fixture types evolved followers instead of marking the special kind; give every
+  // such face the kind, mark one spell as advance, and read the traits the fixture already has.
+  const evolveFaces = new Set<string>(),
+    advanceFaces = new Set<string>()
+  const traitFaces = new Map<string, string[]>()
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        if (fragment.table !== "face_revision") return row
+        const face = stringValue(row["face_id"])
+        traitFaces.set(
+          face,
+          arrayValue(row["traits"] ?? []).map((value) => stringValue(value)),
+        )
+        if (row["type_code"] === "evolved") {
+          evolveFaces.add(face)
+          return { ...row, type_code: "follower", special_kinds: ["evolve"] }
+        }
+        if (row["type_code"] === "spell" && advanceFaces.size === 0) {
+          advanceFaces.add(face)
+          return { ...row, special_kinds: ["advance"] }
+        }
+        return row
+      }),
+    })),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const page = (state: Partial<typeof DEFAULT_QUERY>) =>
+      index.search({ ...query, state: { ...DEFAULT_QUERY, ...state }, limit: 1000 }).items
+    const ids = (state: Partial<typeof DEFAULT_QUERY>) =>
+      page(state)
+        .map((item) => item.printingId)
+        .sort()
+    const all = page({})
+    const faceOf = (printingId: string) =>
+      all.find((item) => item.printingId === printingId)?.summary?.faceId ?? ""
+    const expectedEvolve = all
+      .filter((item) => evolveFaces.has(item.summary?.faceId ?? ""))
+      .map((item) => item.printingId)
+      .sort()
+    const expectedAdvance = all
+      .filter((item) => advanceFaces.has(item.summary?.faceId ?? ""))
+      .map((item) => item.printingId)
+      .sort()
+    expect(expectedEvolve.length).toBeGreaterThan(0)
+    expect(expectedAdvance.length).toBeGreaterThan(0)
+    expect(ids({ locations: ["evolve"] })).toEqual(expectedEvolve)
+    expect(ids({ locations: ["advance"] })).toEqual(expectedAdvance)
+    expect(ids({ locations: ["evolve", "advance"] })).toEqual(
+      [...expectedEvolve, ...expectedAdvance].sort(),
+    )
+    // Evolved followers are followers for the type row, and never in the main deck.
+    expect(ids({ types: ["follower"], locations: ["evolve"] })).toEqual(expectedEvolve)
+    expect(ids({ types: ["spell"], locations: ["evolve"] })).toEqual([])
+    expect(ids({ locations: ["main"] }).some((id) => expectedEvolve.includes(id))).toBe(false)
+    expect(index.options.locationCounts["evolve"]).toBe(expectedEvolve.length)
+    expect(index.options.locationCounts["advance"]).toBe(expectedAdvance.length)
+
+    const traits = index.options.traits.map((trait) => trait.code)
+    expect(traits.length).toBeGreaterThan(1)
+    for (const trait of traits) {
+      const expected = all
+        .filter((item) => traitFaces.get(item.summary?.faceId ?? "")?.includes(trait))
+        .map((item) => item.printingId)
+        .sort()
+      expect(expected.length, trait).toBeGreaterThan(0)
+      expect(ids({ traits: [trait] }), trait).toEqual(expected)
+      expect(index.options.traitCounts[trait], trait).toBe(expected.length)
+    }
+    const [first = "", second = ""] = traits
+    expect(ids({ traits: [first, second] })).toEqual(
+      all
+        .filter((item) => {
+          const codes = traitFaces.get(faceOf(item.printingId)) ?? []
+          return codes.includes(first) || codes.includes(second)
+        })
+        .map((item) => item.printingId)
+        .sort(),
+    )
+    expect(ids({ traits: ["synthetic-missing-trait"] })).toEqual([])
+    expect(index.options.traits.every((trait) => trait.name.original.text !== "")).toBe(true)
   }
 })
 
