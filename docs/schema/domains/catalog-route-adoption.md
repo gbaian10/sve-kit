@@ -220,6 +220,8 @@ concept_evidence 以 name/tooltip/copy_pattern 為鍵；origin 為整筆來源�
 ## 7. 預設版次與稀有度
 
 維護者 2026-10-16 於 #666 決定代表卡先用最低稀有度，取代一般版分類證據選取器。
+2026-10-17 的代表版次決定進一步要求非 PR 優先、PR 最後、卡號最小；
+因此無稀有度排在 PR 之前，取代 10-16 將未知稀有度一律排在已知者之後的規則。
 同卡同區內 confirmed override 優先，其餘依 normalized vocabulary code 的稀有度順序，
 再依永久 `printing.home_set_id` 在該區的最早完整商品發售日，最後原始卡號與 printing ID 升序。
 發售日由 `product_family_member` 所屬同區 product 的 `released_on/date_precision=day` 取得；
@@ -227,19 +229,22 @@ concept_evidence 以 name/tooltip/copy_pattern 為鍵；origin 為整筆來源�
 未知日期排已知之後，month/year 不補成某日。
 
 稀有度配置權威為 [registry.rarity](../../../carddb/src/sve_carddb/domains/registry/rarity.py)，
-順序為 BR、SR、GR、LG、SL、UR、SP、SSP、PR，兩區原標籤正規化後共用 code。
-原值與 premium 仍保留；未知原值、純 premium 與「-」不捏造 code，排已知稀有度之後。
-其中純 premium 已知不是普通版，再排在「-」與未知原值之後，避免 token 等卡改選 premium 版。
+已評級的非 PR 順序為 BR、SR、GR、LG、SL、UR、SP、SSP，兩區原標籤正規化後共用 code。
+完整選取順序為 BR…SSP → 無代碼（「-」或未知原值）→ PR → 純 premium。
+原值與 premium 仍保留；未知原值、純 premium 與「-」不捏造 code。
+其中純 premium 已知不是普通版，排在 PR 之後，避免 token 等卡改選 premium 版。
 已知稀有度內不另依 premium／signed／stamp／frame 篩選或排序，也不從卡號字串猜稀有度。
 
 | method | 選取依據 |
 | --- | --- |
 | override | 有效的當前覆寫，目標在同卡同區展示集合 |
-| lowest_rarity | 所有候選都有已知稀有度，依稀有度、home set 發售日、卡號、ID 選取 |
-| candidate_lowest_rarity | 有已知稀有度候選，但另有未知稀有度競爭者；先從已知者選取 |
-| fallback | 全部候選稀有度未知，純 premium 排後，再依 home set 發售日、卡號、ID 選取；無版次不造 default |
+| lowest_rarity | 所有候選都有已知稀有度，依上述完整順序、home set 發售日、卡號、ID 選取 |
+| candidate_lowest_rarity | 依上述完整順序選中已知稀有度，但仍有無代碼競爭者；同序時依 home set 發售日、卡號、ID 選取 |
+| fallback | 依上述完整順序選中無代碼版次，再依 home set 發售日、卡號、ID 選取；無版次不造 default |
 
-method 記錄排序政策，不證明普通加工或發售日完整。2026-10-01 核可的一般稀有度白名單
+無代碼競爭者直接參與完整排序，不由 method 決定要略過哪些候選；例如 Token 與 PR 並存時選 Token，標 `fallback`。
+`candidate_lowest_rarity` 與 `lowest_rarity` 仍區分是否有無代碼競爭者，不證明普通加工或發售日完整。
+2026-10-01 核可的一般稀有度白名單
 只服務舊選取器，已由本決定取代。加工事實的採納與未知狀態維持原契約，不能由空 stamp 表、
 variant_key=standard 或本次選中的 default 推論普通加工。
 
@@ -301,7 +306,7 @@ P4 繁中介面缺翻譯時先日文、再英文，只影響介面詞彙標籤�
 | 搜尋與記號 | 保留 canonical 優先、多義結果與原記號退回；有限參數、placeholder、完整 token 與 uint 範圍檢查 |
 | 構築名稱 | 保留 exact 名稱、地區與面身分；同名群組不合併 card，未知名稱不能自行猜定 |
 | route／default | 保留完整同卡同區候選與永久 URL 邊界；錯候選、目標或已發布路由改動不得繞過身分修復 |
-| 預設版次 selector | 依 §7 的 vocabulary 稀有度、永久 home set 發售順序與卡號選取，未知稀有度保留 method 區別 |
+| 預設版次 selector | 依 §7 的完整稀有度順序、永久 home set 發售順序與卡號選取，選中無代碼版次標 fallback |
 | 建置交易 | 任一來源或映射驗證失敗整批回滾；未接 offline 的 kind 明確拒絕 |
 
 正式凍結來源匯出與合成測試分開報告；合成成功不等於來源與授權已由維護者確認。

@@ -37,17 +37,20 @@ entries only; it does not claim the first-publication compatibility gate.
 `select_defaults(db)` returns typed `(card_id, region, printing_id, method)` rows
 for snapshot RegionView construction, without changing printing URLs or owners.
 Confirmed same-card/same-region overrides take priority. Remaining printings sort
-by normalized vocabulary rarity (`registry.rarity.RARITY_ORDER`), then the earliest
+by normalized vocabulary rarity (`registry.rarity.RARITY_ORDER`), placing uncoded
+rarity between SSP and PR, then the earliest
 known exact-day product release of their permanent `printing.home_set_id` in that
 region, then raw card number and stable printing ID. Reprint inclusion dates and
 `card.home_set_id` do not change this ordering.
 
-Known rarity codes sort before unknown/uncoded rarity, and among uncoded
-printings a bare premium label sorts last because it is known not to be the plain
-printing. The method is
-`lowest_rarity` when every candidate has a ranked code,
-`candidate_lowest_rarity` when an unknown competitor remains, or `fallback` when
-all candidates have unknown rarity. Missing home release dates sort after known
+The full order is BR through SSP, unknown/uncoded rarity, PR, then bare premium
+labels, following the maintainer's 2026-10-17 representative-printing decision.
+A bare premium label sorts last because it is known not to be the plain printing.
+The method is `lowest_rarity` when every candidate has a ranked code,
+`candidate_lowest_rarity` when the selected printing has a ranked code but an
+uncoded competitor remains, or `fallback` when the selected printing has no code.
+Uncoded competitors participate in this same ordering rather than being skipped.
+Missing home release dates sort after known
 dates; month/year precision is never promoted to a day. These methods identify
 selection policy, without claiming ordinary processing or complete release dates.
 Within a ranked rarity, premium, signed, frame and stamp facts do not add

@@ -186,6 +186,86 @@ def test_bare_premium_sorts_after_an_unranked_plain_printing(
         assert (result.printing_id, result.method) == ("plain", "fallback")
 
 
+@pytest.mark.parametrize(("region", "promo"), [("jp", "PR"), ("en", "Promo")])
+def test_token_precedes_promo_and_uses_lowest_card_number(
+    region: str, promo: str
+) -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            for pid, number, rarity in (
+                ("promo", "SYN-000", promo),
+                ("later-token", "SYN-T03", "-"),
+                ("first-token", "SYN-T01", "-"),
+                ("middle-token", "SYN-T02", "-"),
+            ):
+                printing(db, pid, number, region=region, changes={"rarity_raw": rarity})
+            populate(db)
+        result = select_defaults(db)[0]
+        assert (result.printing_id, result.method) == ("first-token", "fallback")
+
+
+@pytest.mark.parametrize(("region", "promo"), [("jp", "PR"), ("en", "Promo")])
+def test_only_promo_printings_still_choose_lowest_card_number(
+    region: str, promo: str
+) -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            for pid, number in (("later", "SYN-003"), ("first", "SYN-001")):
+                printing(db, pid, number, region=region, changes={"rarity_raw": promo})
+            populate(db)
+        result = select_defaults(db)[0]
+        assert (result.printing_id, result.method) == ("first", "lowest_rarity")
+
+
+@pytest.mark.parametrize(
+    ("region", "ranked", "promo", "premium"),
+    [("jp", "SSP", "PR", "プレミアム"), ("en", "Super Special", "Promo", "Premium")],
+)
+def test_ranked_non_promo_precedes_token_promo_and_bare_premium(
+    region: str, ranked: str, promo: str, premium: str
+) -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            for pid, number, rarity in (
+                ("premium", "SYN-001", premium),
+                ("promo", "SYN-002", promo),
+                ("token", "SYN-003", "-"),
+                ("ranked", "SYN-004", ranked),
+            ):
+                printing(db, pid, number, region=region, changes={"rarity_raw": rarity})
+            populate(db)
+        result = select_defaults(db)[0]
+        assert (result.printing_id, result.method) == (
+            "ranked",
+            "candidate_lowest_rarity",
+        )
+
+
+@pytest.mark.parametrize(
+    ("region", "promo", "premium"),
+    [("jp", "PR", "プレミアム"), ("en", "Promo", "Premium")],
+)
+def test_promo_precedes_bare_premium(region: str, promo: str, premium: str) -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            printing(
+                db, "premium", "SYN-001", region=region, changes={"rarity_raw": premium}
+            )
+            printing(
+                db, "promo", "SYN-002", region=region, changes={"rarity_raw": promo}
+            )
+            populate(db)
+        result = select_defaults(db)[0]
+        assert (result.printing_id, result.method) == (
+            "promo",
+            "candidate_lowest_rarity",
+        )
+
+
 def test_groups_are_scoped_to_card_and_region() -> None:
     with create_database(compile_t0()) as db:
         values = base(db)
