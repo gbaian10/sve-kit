@@ -25,7 +25,7 @@ function stages(edition: Region) {
   for (const file of manifest.files.values()) {
     const target = startup.has(stringValue(file["key"]))
       ? basic
-      : ["print", "product"].includes(stringValue(file["purpose"])) &&
+      : ["print", "product", "engine"].includes(stringValue(file["purpose"])) &&
           (file["region"] === null || file["region"] === edition)
         ? printing
         : undefined
@@ -209,4 +209,65 @@ describe("printing completion without replacing the search index", () => {
     }).toThrow("printing closure changes catalog membership")
     expect(compareSearchIndexes(index, before, "jp").printings).toBeGreaterThan(0)
   })
+})
+
+it("applies keyword unions before grouping and excludes unknown from negative queries", () => {
+  const { basic, printing } = stages("jp")
+  const source = columns(basic)
+  const created = new SearchIndex(source, "jp")
+  source.ingest(printing)
+  source.seal()
+  created.completePrintings(source)
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    expect(index.options.keywordCoverage).toBe("partial")
+    const find = (
+      mechanics: Record<string, "has" | "not">,
+      unit: "printing" | "art" | "card" = "card",
+      extra = {},
+    ) =>
+      index.search({
+        edition: "jp",
+        state: { ...DEFAULT_QUERY, unit, mechanics, ...extra },
+        limit: 100,
+      })
+    const ward = find({ "kw:ward": "has" }).items.map((item) => item.key)
+    expect(ward).toEqual(["c:bp01-011", "c:bp01-031", "c:bp01-051"])
+    const union = find({ "kw:ward": "has", "kw:evolve": "has" }).items.map((item) => item.key)
+    expect(union).toEqual(["c:bp01-011", "c:bp01-030", "c:bp01-031", "c:bp01-051", "c:bp01-081"])
+    const without = find({ "kw:ward": "not" }).items.map((item) => item.key)
+    expect(without).toContain("c:bp01-003")
+    expect(without).not.toContain("c:bp01-040")
+    expect(without).not.toContain("c:bp01-002")
+    expect(without).not.toContain("c:bp01-011")
+    for (const unit of ["printing", "art", "card"] as const) {
+      const page = find({ "kw:fanfare": "has" }, unit, { text: "BP01-021", representative: "high" })
+      expect(page.total).toBe(unit === "card" ? 1 : 2)
+      if (unit === "card") expect(page.items[0]?.printingId).toBe("p:bp01-021")
+      const byName = find({ "kw:fanfare": "has" }, "card", {
+        text: "試作の魔導士",
+        representative: "high",
+      })
+      expect(byName.items[0]?.printingId).toBe("p:bp01-021-sp")
+      const filtered = find({ "kw:fanfare": "has" }, "card", {
+        text: "BP01-021",
+        representative: "high",
+        rarities: ["legend"],
+      })
+      expect(filtered.items[0]?.printingId).toBe("p:bp01-021")
+      expect(page.items.map((item) => item.summary?.cardId)).toEqual(
+        Array.from({ length: page.total }, () => "c:bp01-021"),
+      )
+      expect(find({ "kw:ward": "has" }, unit, { classes: ["witch"] }).total).toBe(0)
+    }
+  }
+  const en = stages("en")
+  const english = new SearchIndex(columns([...en.basic, ...en.printing]), "en")
+  for (const state of ["has", "not"] as const) {
+    const result = english.search({
+      edition: "en",
+      state: { ...DEFAULT_QUERY, unit: "card", mechanics: { "kw:ward": state } },
+      limit: 100,
+    })
+    expect(result.items.map((item) => item.key)).not.toContain("c:bp01-031")
+  }
 })

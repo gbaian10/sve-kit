@@ -49,6 +49,7 @@ import { ClassQuickBar, type QuickBarClass } from "../../components/search/Class
 import { ConditionChips } from "../../components/search/ConditionChips"
 import { vocabularyOptionLabel } from "../../components/search/facet-labels"
 import { FilterPanel } from "../../components/search/FilterPanel"
+import { KeywordFilter } from "../../components/search/KeywordFilter"
 import { LocationFilter } from "../../components/search/LocationFilter"
 import { RarityFilter } from "../../components/search/RarityFilter"
 import { SearchBar } from "../../components/search/SearchBar"
@@ -671,6 +672,10 @@ export function CardsPage() {
           const option = printingOptions?.trait.traits.find((item) => item.code === code)
           return option ? vocabularyOptionLabel(option.name, textLang) : code
         }}
+        keywordLabel={(id) => {
+          const option = printingOptions?.keyword.keywords.find((item) => item.id === id)
+          return option ? vocabularyOptionLabel(option.name, textLang) : id
+        }}
         setLabel={(code) => {
           const option = sets?.find((item) => item.code === code)
           return option ? setCaption(option, textLang).text : code
@@ -728,6 +733,15 @@ export function CardsPage() {
               selected={query.traits}
               onChange={(traits) => {
                 commit({ ...query, traits })
+              }}
+            />
+            <KeywordFilter
+              options={printingOptions?.keyword}
+              textLang={textLang}
+              edition={edition}
+              selected={query.mechanics}
+              onChange={(mechanics) => {
+                commit({ ...query, mechanics })
               }}
             />
             {/* A set page's set comes from its path, so the dropdown would only show one choice. */}

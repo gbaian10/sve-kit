@@ -1,4 +1,9 @@
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
+import {
+  type MechanicCoverage,
+  type MechanicProjection,
+  mechanicState,
+} from "../../domain/mechanics"
 import { normalizeText } from "../../domain/normalize"
 import {
   COST_CAP,
@@ -41,6 +46,8 @@ interface SearchOption {
   readonly name: CardSummary["name"]
 }
 export interface SearchOptions {
+  readonly keywords: readonly SearchOption[]
+  readonly keywordCoverage: "unknown" | "partial" | "complete"
   readonly types: readonly SearchOption[]
   /** Printings per printed type code in this edition. */
   readonly typeCounts: Readonly<Record<string, number>>
@@ -137,6 +144,8 @@ const CARD_COLUMNS = [
   "aliasStart",
   "traitStart",
   "kinds",
+  "present",
+  "absent",
 ] as const
 const PRINTING_COLUMNS = [
   "id",
@@ -163,7 +172,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 17
+export const INDEX_IMAGE_FORMAT = 18
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -345,6 +354,19 @@ function optionsOf(
     1,
   )[0]
   const options: SearchOptions = {
+    keywords: bootstrap.rows("keyword").map((row) =>
+      optionOf(
+        index,
+        {
+          ...row,
+          translations: arrayValue(row["translations"]).filter(
+            (ref) => objectValue(ref)["field"] === "label",
+          ),
+        },
+        "name_unit_id",
+      ),
+    ),
+    keywordCoverage: "unknown",
     rarityCounts,
     typeCounts,
     types,
@@ -381,7 +403,59 @@ function artOf(row: JsonObject | undefined): string {
   return first ? stringValue(objectValue(first)["art_id"] ?? "") : ""
 }
 
+function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
+  const group = (table: string) => {
+    const result = new Map<string, JsonObject[]>()
+    for (const row of bootstrap.rows(table)) {
+      const id = stringValue(row["card_id"])
+      result.set(id, [...(result.get(id) ?? []), row])
+    }
+    return result
+  }
+  const projections = group("mechanic_projection")
+  const coverage = group("card_mechanic_coverage")
+  const support = group("card_engine_support")
+  const keywords = bootstrap.rows("keyword").map((row) => stringValue(row["id"]))
+  const strings = (value: JsonValue | undefined) =>
+    arrayValue(value ?? []).map((id) => stringValue(id))
+  return (cardId: string) => {
+    const projected: MechanicProjection[] = (projections.get(cardId) ?? []).map((row) => ({
+      keywordId: stringValue(row["keyword_id"]),
+      scope: stringValue(row["scope"]),
+      relations: strings(row["relations"]),
+    }))
+    const covered: MechanicCoverage[] = (coverage.get(cardId) ?? []).map((row) => ({
+      scope: stringValue(row["scope"]),
+      completeAll: row["complete_all"] === true,
+      completeMode: stringValue(row["complete_mode"]),
+      completeKeywordIds: strings(row["complete_keyword_ids"]),
+    }))
+    const blocked = (support.get(cardId) ?? []).some((row) =>
+      arrayValue(row["region_blocks"] ?? []).some(
+        (block) => objectValue(block)["region"] === edition,
+      ),
+    )
+    const present: string[] = []
+    const absent: string[] = []
+    for (const keyword of keywords) {
+      const state = mechanicState(keyword, edition, projected, covered, blocked)
+      if (state === "present") present.push(keyword)
+      if (state === "absent") absent.push(keyword)
+    }
+    const annotated =
+      projected.length + covered.length > 0 &&
+      (edition === "jp" ||
+        !blocked ||
+        projected.some((row) => row.scope === "en_override") ||
+        covered.some((row) => row.scope === "en_override"))
+    return { present, absent, annotated, unknown: present.length + absent.length < keywords.length }
+  }
+}
+
 function build(bootstrap: BootstrapColumns, edition: Region): Parts {
+  const membership = mechanicMembership(bootstrap, edition)
+  let knownMechanics = false
+  let unknownMechanics = false
   const pool = new StringPool()
   const summaryColumns = new Columns(pool)
   const index = bootstrap.index()
@@ -417,6 +491,11 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     sets,
     edition,
   )) {
+    const { present, absent, annotated, unknown } = membership(entry.cardId)
+    cards.present.push(pool.encode(present))
+    cards.absent.push(pool.encode(absent))
+    knownMechanics ||= annotated
+    unknownMechanics ||= unknown
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
@@ -541,7 +620,10 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     attacks: Float64Array.from(attacks),
     defenses: Float64Array.from(defenses),
     sets,
-    options,
+    options: {
+      ...options,
+      keywordCoverage: knownMechanics ? (unknownMechanics ? "partial" : "complete") : "unknown",
+    },
     releases,
     targets,
   }
@@ -853,7 +935,20 @@ export class SearchIndex {
       this.summaries = completedSummaries
       this.targets = completedTargets
       this.order = order
-      this.optionsValue = options
+      const membership = mechanicMembership(bootstrap, this.edition)
+      let known = false
+      let unknown = false
+      for (let card = 0; card < this.cards.id.length; card++) {
+        const states = membership(this.pool.get(this.cards.id[card] ?? 0))
+        this.cards.present[card] = this.pool.encode(states.present)
+        this.cards.absent[card] = this.pool.encode(states.absent)
+        known ||= states.annotated
+        unknown ||= states.unknown
+      }
+      this.optionsValue = {
+        ...options,
+        keywordCoverage: known ? (unknown ? "partial" : "complete") : "unknown",
+      }
       this.releasesValue = releases
       this.indexTargets()
     } finally {
@@ -908,7 +1003,12 @@ export class SearchIndex {
       throw new SearchQueryError({ kind: "edition-not-ready", message: "edition is not ready" })
     const state = eligible ? { ...query.state, text: "" } : query.state
     const facets: UnsupportedFacet[] = []
-    if (Object.keys(state.mechanics).length) facets.push("mechanics")
+    if (
+      Object.keys(state.mechanics).some(
+        (id) => !this.options.keywords.some((keyword) => keyword.id === id),
+      )
+    )
+      facets.push("mechanics")
 
     if (facets.length)
       throw new SearchQueryError({
@@ -970,7 +1070,23 @@ export class SearchIndex {
         return 1
       return nameRank
     }
+    const positive = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "has")
+    const negative = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "not")
     for (let card = 0; card < this.cards.id.length; card += 1) {
+      if (
+        positive.length &&
+        !arrayValue(this.pool.decode(this.cards.present[card] ?? 0)).some((id) =>
+          positive.includes(stringValue(id)),
+        )
+      )
+        continue
+      if (
+        negative.length &&
+        !negative.every((id) =>
+          arrayValue(this.pool.decode(this.cards.absent[card] ?? 0)).includes(id),
+        )
+      )
+        continue
       if (eligible && !eligible.has(this.pool.get(this.cards.id[card] ?? 0))) continue
       if (
         state.classes.length &&

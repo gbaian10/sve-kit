@@ -16,10 +16,16 @@ const TABLES = new Set([
   "text_unit",
   "translation",
   "search_alias",
+  "keyword",
+  "mechanic_projection",
+  "card_mechanic_coverage",
+  "card_engine_support",
 ])
 
 const FIELDS: Readonly<Record<string, readonly string[]>> = {
   card: ["id", "home_set_id", "regions"],
+  keyword: ["id", "code", "kind", "name_unit_id", "translations"],
+  card_engine_support: ["card_id", "region_blocks"],
   face: ["id", "card_id", "ordinal", "current", "wording"],
   printing: [
     "id",

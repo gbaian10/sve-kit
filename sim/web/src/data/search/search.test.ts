@@ -2943,3 +2943,41 @@ it("keeps family label translations in set options and releases after index rest
     }
   }
 })
+
+it("loads keyword projections through the Worker and preserves them in a restored index", async () => {
+  const cache = memoryCache()
+  for (let run = 0; run < 2; run++) {
+    const h = harness(origin(), cache)
+    h.session.load(base, "jp", "preview")
+    await h.settled()
+    h.channel.search({ ...query, state: { ...CARD_QUERY, mechanics: { "kw:ward": "has" } } })
+    await h.queried()
+    const result = h.channel.getStatus().result
+    expect(result.phase).toBe("complete")
+    if (result.phase !== "complete") throw new Error("keyword query failed")
+    expect(result.page.items.map((item) => item.key)).toEqual([
+      "c:bp01-011",
+      "c:bp01-031",
+      "c:bp01-051",
+    ])
+    h.session.dispose()
+  }
+})
+
+it("keeps a keyword query pending until its projection and coverage closure completes", async () => {
+  const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>
+    arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "mechanic_projection"),
+  )
+  if (!engineFile) throw new Error("missing mechanic fixture")
+  const h = harness()
+  const release = h.served.hold(stringValue(engineFile["path"]))
+  h.session.load(base, "jp", "preview")
+  await expect.poll(() => h.status().phase, POLL).toBe("ready")
+  h.channel.search({ ...query, state: { ...CARD_QUERY, mechanics: { "kw:ward": "has" } } })
+  await h.queried()
+  expect(h.status().result.phase).toBe("pending")
+  release()
+  await h.settled()
+  expect(h.status().result).toMatchObject({ phase: "complete", page: { total: 3 } })
+  h.session.dispose()
+})

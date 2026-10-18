@@ -129,6 +129,8 @@ function answerViews(
           })),
         },
         options: {
+          keywords: [],
+          keywordCoverage: "unknown",
           types: [],
           typeCounts: {},
           locationCounts: {},
@@ -587,6 +589,8 @@ it("keeps rarity and type lists pending independently of the basic set and class
         query: request.query,
         page: { total: 0, offset: 0, items: [] },
         options: {
+          keywords: [],
+          keywordCoverage: "unknown",
           types: [],
           typeCounts: { leader: 2 },
           locationCounts: { leader: 2, "leader:gold": 2 },
@@ -613,5 +617,6 @@ it("keeps rarity and type lists pending independently of the basic set and class
     type: { types: [], typeCounts: { leader: 2 } },
     location: { types: [], counts: { leader: 2, "leader:gold": 2 } },
     trait: { traits: [], counts: {} },
+    keyword: { keywords: [], coverage: "unknown" },
   })
 })

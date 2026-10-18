@@ -188,6 +188,7 @@ export class SearchEngine {
               request.kind === "neighbours" ||
               request.kind === "count") &&
             (request.query.state.rarities.length ||
+              Object.keys(request.query.state.mechanics).length ||
               request.query.state.locations.some((token) => token.startsWith("leader:")) ||
               request.query.state.altArtOnly ||
               // A merged cell's representative needs every printing's rarity and art (#781).
@@ -797,7 +798,12 @@ export class SearchEngine {
       const backgroundBlobs = new SearchBlobs(request.base, this.backgroundFetch, this.storage)
       const backgroundFiles = [...files.values()].filter(
         (file) =>
-          ["print", "product"].includes(stringValue(file["purpose"])) &&
+          (["print", "product"].includes(stringValue(file["purpose"])) ||
+            arrayValue(file["row_counts"]).some((count) =>
+              ["mechanic_projection", "card_mechanic_coverage", "card_engine_support"].includes(
+                stringValue(arrayValue(count)[0]),
+              ),
+            )) &&
           (file["region"] === null || file["region"] === request.edition),
       )
       let printingsApplied = false
