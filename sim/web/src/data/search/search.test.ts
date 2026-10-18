@@ -2408,6 +2408,43 @@ it("filters official PR by each printing's appearance, independently of printed 
   }
 })
 
+// Merged cells pick their representative from every printing's rarity and number, so the answer
+// waits for the background printing download instead of first showing the locator-stage choice.
+it.each([
+  ["lowest rarity", {}, ["p:sd01-002-bp"]],
+  ["highest rarity", { representative: "high" as const }, ["p:sd01-002-bp"]],
+  // The fixture gives every printing its own art, so the art unit lists both, by number.
+  ["same art", { unit: "art" as const }, ["p:sd01-002-bp", "p:sd01-002"]],
+])("merged cells wait for printing completion (%s)", async (_label, changes, expected) => {
+  const served = origin()
+  const h = harness(served)
+  const print = (built.manifest["files"] as JsonObject[]).find(
+    (file) => file["purpose"] === "print" && file["region"] === "jp",
+  )
+  if (!print) throw new Error("print fixture missing")
+  const release = served.hold(stringValue(print["path"]))
+  // A name query, so every printing of the card is a candidate.
+  const state = { ...CARD_QUERY, ...changes, text: "試作の槍兵" }
+  h.session.load(base, "jp", "preview")
+  h.channel.search({ ...query, state })
+  try {
+    await expect.poll(() => h.status().phase, POLL).toBe("ready")
+    for (let i = 0; i < 5; i += 1) await h.queried()
+    expect(h.status().result.phase).toBe("pending")
+    expect(h.events.filter((event) => event.kind === "result")).toHaveLength(0)
+    release()
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("missing result")
+    // The lowest-numbered printing of this card lives in another set and was a locator until now.
+    expect(result.page.items.map((item) => item.printingId)).toEqual(expected)
+    expect(result.page.items[0]?.summary?.intId).toBe(1004)
+  } finally {
+    release()
+    h.session.dispose()
+  }
+})
+
 it("refreshes a locator-only view after printing metadata arrives and persists the completed badges", async () => {
   const served = origin()
   const storage = memoryCache()

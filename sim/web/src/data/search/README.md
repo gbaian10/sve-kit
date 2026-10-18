@@ -23,8 +23,8 @@ filter and, with text, share the group's best text rank (#781): the PR printing 
 set and one is present, else the lowest or highest rarity on the fixed ladder BR < SR < GR < LG < SL
 < UR < SP < SSP (`domain/representative.ts`; no rarity sits below BR, PR is off the ladder and shown
 only when the group has nothing else), ties going to the earliest card number. A locator whose
-printing metadata has not arrived stands aside while the group has a completed printing; queries
-with a non-default representative choice or the art unit wait for printing completion.
+printing metadata has not arrived stands aside while the group has a completed printing, and
+every merged-unit query waits for printing completion so the first answer is the final one.
 With no search text, card pages order the representative printing's card number;
 printing pages order each printing's own card number, without choosing a representative.
 Its width/case-folded key compares set-code digit runs numerically, then the letter prefix

@@ -190,9 +190,8 @@ export class SearchEngine {
             (request.query.state.rarities.length ||
               request.query.state.locations.some((token) => token.startsWith("leader:")) ||
               request.query.state.altArtOnly ||
-              request.query.state.unit === "art" ||
-              (request.query.state.unit === "card" &&
-                (request.query.state.prFirst || request.query.state.representative !== "low")))
+              // A merged cell's representative needs every printing's rarity and art (#781).
+              request.query.state.unit !== "printing")
           )
             await active.printings
           const index = active.index

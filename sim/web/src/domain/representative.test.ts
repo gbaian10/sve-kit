@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { pickRepresentative, RARITY_LADDER, rarityRank } from "./representative"
+import { pickRepresentative, rarityRank } from "./representative"
 
 interface Printing {
   readonly id: string
@@ -27,13 +27,33 @@ const UR = printing("BP01-U01", "ur", 3)
 const PR = printing("PR-010", "pr", 9)
 
 describe("rarity ladder", () => {
-  it("ranks BR below SSP and everything off the ladder below BR", () => {
-    expect([...RARITY_LADDER].map(rarityRank)).toEqual([0, 1, 2, 3, 4, 5, 6, 7])
-    expect(rarityRank("pr")).toBe(-1)
-    expect(rarityRank("")).toBe(-1)
-    expect(rarityRank("-")).toBe(-1)
-    expect(rarityRank(null)).toBe(-1)
-    expect(rarityRank(undefined)).toBe(-1)
+  // The maintainer's order, written out here rather than read from the module under test.
+  const LADDER = ["BR", "SR", "GR", "LG", "SL", "UR", "SP", "SSP"]
+  const printings = LADDER.map((code, index) => printing(`BP01-${code}`, code.toLowerCase(), index))
+
+  it.each(LADDER.slice(0, -1).map((lower, index) => [lower, LADDER[index + 1] ?? ""]))(
+    "ranks %s below %s",
+    (lower, higher) => {
+      const pair = printings.filter((candidate) => [lower, higher].includes(candidate.id.slice(5)))
+      expect(pick(pair, "low")).toBe(`BP01-${lower}`)
+      expect(pick(pair, "high")).toBe(`BP01-${higher}`)
+      expect(pick([...pair].reverse(), "low")).toBe(`BP01-${lower}`)
+      expect(pick([...pair].reverse(), "high")).toBe(`BP01-${higher}`)
+    },
+  )
+
+  it("spans BR to SSP as a whole", () => {
+    expect(pick([...printings].reverse(), "low")).toBe("BP01-BR")
+    expect(pick(printings, "high")).toBe("BP01-SSP")
+  })
+
+  it("puts everything off the ladder below BR", () => {
+    expect(rarityRank("br")).toBeGreaterThan(rarityRank("pr"))
+    expect(rarityRank("br")).toBeGreaterThan(rarityRank(""))
+    expect(rarityRank("br")).toBeGreaterThan(rarityRank("-"))
+    expect(rarityRank("br")).toBeGreaterThan(rarityRank(null))
+    expect(rarityRank("br")).toBeGreaterThan(rarityRank(undefined))
+    expect(rarityRank("pr")).toBe(rarityRank(""))
   })
 })
 
