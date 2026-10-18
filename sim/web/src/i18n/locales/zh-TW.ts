@@ -262,8 +262,6 @@ const zhTW = {
     annotationReference: "查看術語說明",
     reference: {
       cardName: "卡名引用",
-      unlinked: "尚未連結到卡片",
-      vocabulary: "詞彙",
       category: {
         keyword: "關鍵字",
         ability: "能力",
@@ -281,7 +279,6 @@ const zhTW = {
     rulingNeedsReview: "待重審",
     rulingSuperseded: "已被取代",
     projectRuling: "專案裁定",
-    noExplanation: "尚無公開說明",
     closeReference: "關閉說明",
     jpSource: "依日文原文翻譯",
     sourceArea: "來源與依據",

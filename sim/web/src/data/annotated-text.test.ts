@@ -194,14 +194,23 @@ describe("the native C → P → R annotation slice", () => {
       "zh-Hant",
     )
     expect(value?.concepts.map((concept) => concept["card_ids"])).toEqual([["card"]])
-    expect(value?.cards).toEqual([
+    expect(
+      value?.cards.map((card) => ({
+        cardId: card.cardId,
+        intId: card.intId,
+        cardNo: card.cardNo,
+        cardNoState: card.cardNoState,
+        region: card.region,
+        name: card.name.original.text,
+      })),
+    ).toEqual([
       {
         cardId: "card",
         intId: 20001,
         cardNo: "TEST-001Ⓢa",
         cardNoState: "official",
         region: "jp",
-        name: { lang: "ja", text: stringValue(value?.original.unit["text"]) },
+        name: stringValue(value?.original.unit["text"]),
       },
     ])
   })

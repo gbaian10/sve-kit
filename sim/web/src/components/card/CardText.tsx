@@ -105,7 +105,11 @@ function SectionText({
   sourceLine,
   rule,
   noteMissing,
+  client,
+  edition,
 }: {
+  readonly client: SnapshotClient
+  readonly edition: Region
   readonly state: AnnotatedTextState
   readonly label: string | undefined
   readonly show: "translated" | "original"
@@ -141,6 +145,8 @@ function SectionText({
           context={value}
           emphasis={emphasis}
           annotationReady={readiness.annotations === "ready" || readiness.annotations === "none"}
+          client={client}
+          edition={edition}
         />
         {translated && sourceLine && <TranslationSourceLine value={value} />}
         {show === "translated" &&
@@ -263,6 +269,8 @@ export function CardText({
               sourceLine={!sharedLine}
               rule={index > 0 || !blankEffect}
               noteMissing={anyTranslated}
+              client={client}
+              edition={edition}
             />,
           ]
         : []
@@ -273,6 +281,8 @@ export function CardText({
       context={value}
       emphasis={prefs.termEmphasis}
       annotationReady={annotationReady}
+      client={client}
+      edition={edition}
     />
   )
   const missingNote = <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
@@ -306,6 +316,8 @@ export function CardText({
               context={value}
               emphasis={prefs.termEmphasis}
               annotationReady={annotationReady}
+              client={client}
+              edition={edition}
             />
           </div>,
         ]
@@ -354,6 +366,8 @@ export function CardText({
                 context={value}
                 emphasis={prefs.termEmphasis}
                 annotationReady={annotationReady}
+                client={client}
+                edition={edition}
               />
             ) : (
               effectOriginal

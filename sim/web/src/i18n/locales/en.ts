@@ -278,8 +278,6 @@ export default {
     annotationReference: "View term explanation",
     reference: {
       cardName: "Card name reference",
-      unlinked: "Not linked to a card yet",
-      vocabulary: "Vocabulary",
       category: {
         keyword: "Keyword",
         ability: "Ability",
@@ -297,7 +295,6 @@ export default {
     rulingNeedsReview: "Needs review",
     rulingSuperseded: "Superseded",
     projectRuling: "Project ruling",
-    noExplanation: "No public explanation yet",
     closeReference: "Close explanation",
     jpSource: "Translated from Japanese source",
     sourceArea: "Sources and basis",

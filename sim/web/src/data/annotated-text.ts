@@ -1,3 +1,4 @@
+import { type CardSummary, catalogOf } from "./catalog"
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import { annotationLocations } from "./format-v3/annotation-placement"
 import {
@@ -42,14 +43,7 @@ export interface SelectedText {
     readonly unit: JsonObject
   }[]
   /** The default printing per region of each card a confirmed card-name concept points at. */
-  readonly cards: readonly {
-    readonly cardId: string
-    readonly intId: number
-    readonly cardNo: string
-    readonly cardNoState: string
-    readonly region: string
-    readonly name?: { readonly lang: string; readonly text: string }
-  }[]
+  readonly cards: readonly CardSummary[]
 }
 
 export interface AnnotatedTextResolver {
@@ -638,38 +632,14 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
         .filter((card) =>
           concepts.some((concept) => arrayValue(concept["card_ids"]).includes(card["id"] ?? null)),
         )
-        .flatMap((card) => {
-          const defaults = arrayValue(card["regions"]).map(
-            (value) => objectValue(value)["default_printing_id"],
-          )
-          const front = [...(page.rows.get("face")?.values() ?? [])].find(
-            (face) => face["card_id"] === card["id"] && face["ordinal"] === 0,
-          )
-          return [...(page.rows.get("printing")?.values() ?? [])]
-            .filter((printing) => defaults.includes(printing["id"]))
-            .map((printing) => {
-              const region = stringValue(printing["region"])
-              const current = arrayValue(front?.["current"] ?? [])
-                .map((value) => objectValue(value))
-                .find((entry) => entry["region"] === region)
-              const revision = page.rows
-                .get("face_revision")
-                ?.get(canonicalText([current?.["revision_id"] ?? null]))
-              const unit = page.rows
-                .get("text_unit")
-                ?.get(canonicalText([revision?.["name_unit_id"] ?? null]))
-              return {
-                cardId: stringValue(card["id"]),
-                intId: integerValue(printing["int_id"]),
-                cardNo: stringValue(printing["card_no"]),
-                cardNoState: stringValue(printing["card_no_state"]),
-                region,
-                ...(unit
-                  ? { name: { lang: stringValue(unit["lang"]), text: stringValue(unit["text"]) } }
-                  : {}),
-              }
-            })
-        }),
+        .flatMap((card) =>
+          arrayValue(card["regions"]).flatMap((value) => {
+            const printingId = objectValue(value)["default_printing_id"]
+            const summary =
+              typeof printingId === "string" ? catalogOf(snapshot).summary(printingId) : undefined
+            return summary ? [summary] : []
+          }),
+        ),
     }
   }
   // A text resolves once per snapshot: its result cannot change, and a view that mounts again

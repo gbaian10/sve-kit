@@ -80,6 +80,8 @@ export function CardNameHeading({
         context={value}
         emphasis={emphasis}
         annotationReady={annotationReady}
+        client={client}
+        edition={edition}
         heading
         className={HEADING}
       />
@@ -89,6 +91,8 @@ export function CardNameHeading({
           context={value}
           emphasis={emphasis}
           annotationReady={annotationReady}
+          client={client}
+          edition={edition}
           className="text-14 text-text-2"
         />
       )}

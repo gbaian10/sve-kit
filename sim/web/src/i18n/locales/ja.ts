@@ -280,8 +280,6 @@ export default {
     annotationReference: "用語の説明を見る",
     reference: {
       cardName: "カード名の参照",
-      unlinked: "まだカードに結び付いていません",
-      vocabulary: "語彙",
       category: {
         keyword: "キーワード",
         ability: "能力",
@@ -299,7 +297,6 @@ export default {
     rulingNeedsReview: "再審査が必要",
     rulingSuperseded: "別の裁定に置き換え済み",
     projectRuling: "プロジェクトの裁定",
-    noExplanation: "公開された説明はありません",
     closeReference: "説明を閉じる",
     jpSource: "日本語原文からの訳",
     sourceArea: "出典と根拠",
