@@ -1,3 +1,4 @@
+import { type CardSummary, catalogOf } from "./catalog"
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import { annotationLocations } from "./format-v3/annotation-placement"
 import {
@@ -41,11 +42,8 @@ export interface SelectedText {
     readonly row: JsonObject
     readonly unit: JsonObject
   }[]
-  readonly cards: readonly {
-    readonly cardId: string
-    readonly intId: number
-    readonly cardNo: string
-  }[]
+  /** The default printing per region of each card a confirmed card-name concept points at. */
+  readonly cards: readonly CardSummary[]
 }
 
 export interface AnnotatedTextResolver {
@@ -634,18 +632,14 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
         .filter((card) =>
           concepts.some((concept) => arrayValue(concept["card_ids"]).includes(card["id"] ?? null)),
         )
-        .flatMap((card) => {
-          const defaults = arrayValue(card["regions"]).map(
-            (value) => objectValue(value)["default_printing_id"],
-          )
-          return [...(page.rows.get("printing")?.values() ?? [])]
-            .filter((printing) => defaults.includes(printing["id"]))
-            .map((printing) => ({
-              cardId: stringValue(card["id"]),
-              intId: integerValue(printing["int_id"]),
-              cardNo: stringValue(printing["card_no"]),
-            }))
-        }),
+        .flatMap((card) =>
+          arrayValue(card["regions"]).flatMap((value) => {
+            const printingId = objectValue(value)["default_printing_id"]
+            const summary =
+              typeof printingId === "string" ? catalogOf(snapshot).summary(printingId) : undefined
+            return summary ? [summary] : []
+          }),
+        ),
     }
   }
   // A text resolves once per snapshot: its result cannot change, and a view that mounts again

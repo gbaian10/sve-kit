@@ -19,7 +19,7 @@ import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
 import { CLASS_ICON } from "../../components/card/classIcons"
 import { RarityBadges } from "../../components/card/RarityBadges"
-import { StatLine } from "../../components/card/StatLine"
+import { StatCells } from "../../components/card/StatCells"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
 import { Badge } from "../../components/ui/Badge"
 import { Button } from "../../components/ui/Button"
@@ -423,15 +423,6 @@ export function CardView({
   const label = (kind: VocabularyKind, code: string) =>
     index ? vocabularyLabel(index, kind, code, textLang) : code
   const joiner = t("cardPage.separator")
-  const metaLine = (classCode: string | null | undefined, typeCode: string | null) =>
-    [
-      ...(classCode === undefined
-        ? []
-        : [classCode === null ? t("search.neutral") : label("class", classCode)]),
-      ...(typeCode === null ? [] : [label("type", typeCode)]),
-    ].join(joiner)
-  const traitLabels = (codes: readonly string[]) =>
-    codes.map((code) => label("trait", code)).join(joiner)
 
   if (routeError || (catalog !== null && !printing)) {
     const kind = routeError instanceof CardRouteError ? routeError.kind : undefined
@@ -692,7 +683,7 @@ export function CardView({
                   ? null
                   : undefined
             const typeCode = typeof values?.["type_code"] === "string" ? values["type_code"] : null
-            const traits = traitLabels((values?.["traits"] ?? []) as string[])
+            const traits = (values?.["traits"] ?? []) as string[]
             const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
             const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
             const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
@@ -705,37 +696,64 @@ export function CardView({
                 {faceSummary && name && (
                   <div className="flex flex-col gap-1.5">
                     {ordinal > 0 && <Badge className="self-start">{t("cardPage.backFace")}</Badge>}
-                    {typeof nameRevisionId === "string" ? (
-                      <CardNameHeading
-                        client={client}
-                        edition={region}
-                        resolver={null}
-                        owner={{ kind: "face_revision", id: nameRevisionId }}
-                        fallback={name}
-                      />
-                    ) : (
-                      <PlainNameHeading name={name} />
-                    )}
-                    {(classCode !== undefined ||
-                      typeCode !== null ||
-                      traits !== "" ||
-                      faceSummary.rarityCode) && (
-                      <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-13 text-text-2">
-                        {classCode !== undefined && (
-                          <img
-                            src={CLASS_ICON[classStyle(classCode)]}
-                            alt=""
-                            className="size-4.5"
+                    <div className="flex items-start gap-2">
+                      {classCode !== undefined && (
+                        <img
+                          src={CLASS_ICON[classStyle(classCode)]}
+                          alt=""
+                          className="mt-0.5 size-5 shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        {typeof nameRevisionId === "string" ? (
+                          <CardNameHeading
+                            client={client}
+                            edition={region}
+                            resolver={null}
+                            owner={{ kind: "face_revision", id: nameRevisionId }}
+                            fallback={name}
                           />
+                        ) : (
+                          <PlainNameHeading name={name} />
                         )}
-                        <span>{metaLine(classCode, typeCode)}</span>
-                        <RarityBadges {...faceSummary} />
-                        {traits !== "" && <span className="text-text-3">{traits}</span>}
+                      </div>
+                    </div>
+                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-13 text-text-2">
+                      <RarityBadges {...faceSummary} />
+                      <span className="font-mono tabular-nums">{faceSummary.cardNo}</span>
+                      {classCode !== undefined && (
+                        <span>
+                          {joiner}
+                          {classCode === null ? t("search.neutral") : label("class", classCode)}
+                        </span>
+                      )}
+                    </p>
+                    {(typeCode !== null || traits.length > 0) && (
+                      <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13">
+                        {typeCode !== null && (
+                          <>
+                            <span className="text-text-3">{t("cardPage.cardType")}</span>
+                            <Badge>{label("type", typeCode)}</Badge>
+                          </>
+                        )}
+                        {traits.length > 0 && (
+                          <>
+                            <span className={cn("text-text-3", typeCode !== null && "ml-1.5")}>
+                              {t("cardPage.trait")}
+                            </span>
+                            {traits.map((code) => (
+                              <span
+                                key={code}
+                                className="inline-flex h-6 items-center rounded-pill border border-border px-2 text-12 text-text-2"
+                              >
+                                {label("trait", code)}
+                              </span>
+                            ))}
+                          </>
+                        )}
                       </p>
                     )}
-                    {(cost !== null || attack !== null || defense !== null) && (
-                      <StatLine className="mt-1" cost={cost} attack={attack} defense={defense} />
-                    )}
+                    <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
                     {!frame && ordinal === 0 && navigation && (
                       <div className="mt-2 flex gap-2">{navigation}</div>
                     )}

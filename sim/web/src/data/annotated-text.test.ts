@@ -3,7 +3,13 @@ import { describe, expect, it } from "vitest"
 
 import { annotatedOrigin } from "../test-utils/annotated-snapshot"
 import { createAnnotatedTextResolver, sharedAnnotatedTextResolver } from "./annotated-text"
-import { canonicalText, type JsonObject, objectValue, stringValue } from "./format-v3/json"
+import {
+  arrayValue,
+  canonicalText,
+  type JsonObject,
+  objectValue,
+  stringValue,
+} from "./format-v3/json"
 
 async function historicalCandidateOrigin() {
   const { client } = await annotatedOrigin()
@@ -164,6 +170,49 @@ describe("the native C → P → R annotation slice", () => {
     expect(value?.translation?.["low_confidence"]).toBe(false)
     expect(value?.explanations[0]?.reference).toEqual({ kind: "keyword", id: "keyword" })
     expect(requests).toHaveLength(before)
+  })
+  it("projects a confirmed card-name target with the fields its link and label need", async () => {
+    const { client } = await annotatedOrigin()
+    await client.load()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("synthetic snapshot missing")
+    // The producer confirms the concept-to-card relation; the reader only projects it.
+    for (const fragment of snapshot.bootstrap) {
+      if (fragment.table === "annotation_concept")
+        for (const row of fragment.rows)
+          if (row["id"] === "term") {
+            row["category"] = "card_name"
+            row["card_ids"] = ["card"]
+          }
+      if (fragment.table === "annotation_set")
+        for (const row of fragment.rows)
+          for (const raw of arrayValue(row["occurrences"]))
+            objectValue(raw)["reference"] = { kind: "card_name", term_id: "term" }
+    }
+    const value = await createAnnotatedTextResolver(client).resolve(
+      { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
+      "zh-Hant",
+    )
+    expect(value?.concepts.map((concept) => concept["card_ids"])).toEqual([["card"]])
+    expect(
+      value?.cards.map((card) => ({
+        cardId: card.cardId,
+        intId: card.intId,
+        cardNo: card.cardNo,
+        cardNoState: card.cardNoState,
+        region: card.region,
+        name: card.name.original.text,
+      })),
+    ).toEqual([
+      {
+        cardId: "card",
+        intId: 20001,
+        cardNo: "TEST-001Ⓢa",
+        cardNoState: "official",
+        region: "jp",
+        name: stringValue(value?.original.unit["text"]),
+      },
+    ])
   })
   it("uses the exact effect owner and treats verified absent annotations as empty", async () => {
     const { client, requests } = await annotatedOrigin()

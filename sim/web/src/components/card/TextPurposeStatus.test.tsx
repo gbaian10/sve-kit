@@ -58,10 +58,9 @@ describe("partial text consumers", () => {
           <CardText client={client} owner={owner} edition="jp" field="name" />
         ),
       )
+      // Unverified annotations stay inert: the keyword concept is not emphasised yet.
       expect(screen.getByText("Synthetic translation")).toBeVisible()
-      expect(
-        screen.queryByRole("button", { name: "Synthetic translation" }),
-      ).not.toBeInTheDocument()
+      expect(screen.getByText("Synthetic translation").tagName).not.toBe("STRONG")
       expect(screen.getByText("日文依據載入中")).toHaveAttribute("role", "status")
       expect(screen.getByText("標註載入中")).toHaveAttribute("role", "status")
     },
@@ -81,13 +80,13 @@ describe("partial text consumers", () => {
     expect(screen.getAllByRole("alert")).toHaveLength(2)
     for (const alert of screen.getAllByRole("alert"))
       expect(alert).toHaveTextContent("文字資料無法通過驗證")
-    expect(screen.queryByRole("button", { name: "Synthetic translation" })).not.toBeInTheDocument()
+    expect(screen.getByText("Synthetic translation").tagName).not.toBe("STRONG")
   })
 
   it("restores the explanation entry after annotation readiness", async () => {
     boundary.state = { value, readiness: { ...readiness, source: "none", annotations: "ready" } }
     await renderInRouter(<CardText client={client} owner={owner} edition="jp" field="name" />)
-    expect(screen.getByRole("button", { name: "Synthetic translation" })).toBeVisible()
+    expect(screen.getByText("Synthetic translation").tagName).toBe("STRONG")
     expect(screen.queryByText("標註載入中")).not.toBeInTheDocument()
   })
 

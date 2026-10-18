@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router"
 
 import { useAnnotatedText } from "../../app/snapshot"
 import { CardText } from "../../components/card/CardText"
@@ -119,28 +118,22 @@ function PrintingWording({
         </>
       )}
       {different && showTranslation && (
-        <>
-          <p className="mt-3 text-13 text-text-2">
-            {t("card.wording.translationBasis")}{" "}
-            {basisCardNo && (
-              <Link
-                to={`/cards/${encodeURIComponent(basisCardNo)}`}
-                state={entry}
-                replace
-                className="text-accent-text underline underline-offset-2"
-              >
-                {basisCardNo}
-              </Link>
-            )}
-          </p>
-          <CardText
-            client={client}
-            edition={edition}
-            owner={{ kind: "face_revision", id: translationRevisionId }}
-            field="effect"
-            display="translated"
-          />
-        </>
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: translationRevisionId }}
+          field="effect"
+          display="translated"
+          {...(basisCardNo
+            ? {
+                translationBasis: {
+                  cardNo: basisCardNo,
+                  to: `/cards/${encodeURIComponent(basisCardNo)}`,
+                  state: entry,
+                },
+              }
+            : {})}
+        />
       )}
       <CardText
         client={client}
@@ -177,6 +170,13 @@ export function CardWording({
   readonly entry: unknown
 }) {
   const { t } = useTranslation()
+  // A display without an adopted current: say so, whichever branch shows the printing's own text.
+  const provisionalNote = (wording?.["display"] as Row | undefined)?.["basis"] ===
+    "latest_known_release" && (
+    <p role="note" className="mt-3 text-12 text-text-3">
+      {t("card.wording.provisional")}
+    </p>
+  )
   const grouped = new Map<string | null, Candidate["printings"][number][]>()
   for (const row of (wording?.["candidates"] ?? []) as Row[]) {
     const id = stringValue(row["printing_id"])
@@ -211,13 +211,14 @@ export function CardWording({
       .find((candidate) => candidate.revisionId === displayId)
       ?.printings.find((p) => !undated.includes(p.id))
   const ownId = own.length === 1 ? own[0]?.revisionId : null
+  let body
   if (
     ownId &&
     displayId &&
     (wording?.["classification"] === "same_effect" || display?.["basis"] === "current") &&
     basisPrinting
-  ) {
-    return (
+  )
+    body = (
       <PrintingWording
         key={printingId}
         client={client}
@@ -230,9 +231,8 @@ export function CardWording({
         entry={entry}
       />
     )
-  }
-  if (!wording)
-    return displayId ? (
+  else if (!wording)
+    body = displayId ? (
       <CardText
         client={client}
         edition={edition}
@@ -242,8 +242,8 @@ export function CardWording({
     ) : (
       <p className="mt-3 text-14 text-text-2">{t("card.wording.unavailable")}</p>
     )
-  if (ownId)
-    return (
+  else if (ownId)
+    body = (
       <CardText
         client={client}
         edition={edition}
@@ -252,28 +252,36 @@ export function CardWording({
         display="original"
       />
     )
+  else
+    body = (
+      <section className="mt-4 space-y-2" aria-label={t("card.wording.different")}>
+        <h3 className="text-14 font-semibold">{t("card.wording.different")}</h3>
+        {candidates.length === 0 && <p>{t("card.wording.unavailable")}</p>}
+        {candidates.map((candidate) => {
+          const selected =
+            candidate.revisionId === displayId ||
+            (displayId === undefined && candidates.length === 1)
+          return (
+            <CandidateText
+              key={`${printingId}/${candidate.revisionId ?? "unknown"}`}
+              client={client}
+              edition={edition}
+              candidate={candidate}
+              selected={selected}
+              // With no wording displayed yet, open the one printed on this printing.
+              initiallyOpen={
+                selected ||
+                (displayId === undefined && candidate.printings.some((p) => p.id === printingId))
+              }
+            />
+          )
+        })}
+      </section>
+    )
   return (
-    <section className="mt-4 space-y-2" aria-label={t("card.wording.different")}>
-      <h3 className="text-14 font-semibold">{t("card.wording.different")}</h3>
-      {candidates.length === 0 && <p>{t("card.wording.unavailable")}</p>}
-      {candidates.map((candidate) => {
-        const selected =
-          candidate.revisionId === displayId || (displayId === undefined && candidates.length === 1)
-        return (
-          <CandidateText
-            key={`${printingId}/${candidate.revisionId ?? "unknown"}`}
-            client={client}
-            edition={edition}
-            candidate={candidate}
-            selected={selected}
-            // With no wording displayed yet, open the one printed on this printing.
-            initiallyOpen={
-              selected ||
-              (displayId === undefined && candidate.printings.some((p) => p.id === printingId))
-            }
-          />
-        )
-      })}
-    </section>
+    <>
+      {provisionalNote}
+      {body}
+    </>
   )
 }

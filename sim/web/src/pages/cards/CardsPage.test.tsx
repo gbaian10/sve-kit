@@ -504,7 +504,11 @@ describe("CardsPage", () => {
     await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "nothing-here")
     expect(await screen.findByText("沒有符合的卡")).toBeInTheDocument()
     await user.keyboard("{Enter}")
-    expect(router.state.location.search).toBe("?q=nothing-here")
+    // The message may still belong to the previous keystroke's empty result; an Enter pressed
+    // while the last query is pending is armed and commits once it settles.
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("?q=nothing-here")
+    })
   })
 
   describe("filter panel", () => {
