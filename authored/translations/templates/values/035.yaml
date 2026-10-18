@@ -526,6 +526,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；中文保留完整日文句界，但兩個門檻／分支之間的獨立句是否沿用前一條件仍缺明確裁定。P0 R22 明訂此類階梯中間句保留低信心；不自行補入條件或改為無條件
     kind: template_translation
     data:
       template_id: frame:5565b6db6562f7499e41e7a30ba0cea6ed5f0ab060ffef97a18d0866e6349f12
@@ -889,7 +890,7 @@ records:
             - kind: Literal
               text: 的從者曾攻擊
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；作品名可由萬代南夢宮繁中官方頁確認；作品構築忠實對應タイトル構築，保留對戰開始時點、構築條件及 EX 區數量。source_claim：https://as.idolmaster-official.jp/about/
     kind: template_translation
     data:
       template_id: frame:ccbb065b23c307085d57fb7860b9c0f95553d6dca70466b99b78c6d85dfdd9ec

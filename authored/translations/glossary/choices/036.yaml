@@ -2,7 +2,7 @@ format: 3
 kind: translation_shard
 records:
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；自稱與街上人氣者均保留，自稱的語氣未被刪除
     kind: glossary_choice
     data:
       term_id: term:name.self_proclaimed_fan_favorite
@@ -42,7 +42,7 @@ records:
         text: 兩人的追憶
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；水邊、寧芙的稱號與シャロン音譯完整
     kind: glossary_choice
     data:
       term_id: term:name.sharon_seaside_nymph
@@ -175,7 +175,7 @@ records:
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；全識、六銘傳稱號及シンラ既有音譯保留
     kind: glossary_choice
     data:
       term_id: term:name.shinra_all_discerning

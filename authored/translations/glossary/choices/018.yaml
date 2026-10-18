@@ -2,7 +2,7 @@ format: 3
 kind: translation_shard
 records:
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；グリム・リーパー即死神，不需要另外音譯
     kind: glossary_choice
     data:
       term_id: term:name.grim_reaper
@@ -31,6 +31,7 @@ records:
       concept_evidence: []
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；缺少可核對的臺灣官方或穩定通行名稱來源；凍結數位版無精確同名對應，既有 glossary 亦不足以確認此合作角色／單位的專名
     kind: glossary_choice
     data:
       term_id: term:name.gururubau
@@ -49,7 +50,7 @@ records:
         text: 冥界的催眠術師
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；原文漢字單位名直接轉為繁體
     kind: glossary_choice
     data:
       term_id: term:name.hagoromo_komachi
@@ -164,7 +165,7 @@ records:
         source_urls:
           - https://github.com/Expugn/priconne-database
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；保留天空城的命名意象及敬語前綴的既有呈現
     kind: glossary_choice
     data:
       term_id: term:name.heavenly_castle

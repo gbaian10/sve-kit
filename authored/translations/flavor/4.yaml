@@ -100,7 +100,7 @@ entries:
     lang: zh-Hant
     text: "◆伊波與禽兜的混合粉　症狀：口渴、痙攣、全身劇痛\n【合格】一名　　【備註】祝賀新首領的誕生"
     origin: machine
-    low_confidence: true
+    low_confidence: true  # note: 2026-10-18 對照後保留低信心；症狀與人數均正確，但イポ／禽兜的藥材所指及既有繁中名稱缺可靠對照；目前伊波為暫時音譯
   - source_hash: sha256:425604ca57d664542b6294a1f0f82266160e8a43c6828495e95bdc41e231cdd1
     lang: zh-Hant
     text: "——其為《隱者》，所示為《深慮》。\n慎重、冷靜、沉著，給予煩惱之人建言。"

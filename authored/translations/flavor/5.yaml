@@ -180,7 +180,7 @@ entries:
     lang: zh-Hant
     text: "裂空之槍，蔽空之翼。其名法露特，天空的霸者。\n「有本事就擊落吾之暗黑雙翼！」"
     origin: machine
-    low_confidence: true
+    low_confidence: false  # note: 2026-10-18 對照日文確認；法露特沿既有 glossary 及數位版角色選詞；裂空之槍、蔽空之翼與挑釁語氣完整
   - source_hash: sha256:555a3271d2371dbfc7a54de863a905e360ddfb7a5b20e8259830f68cb04796db
     lang: zh-Hant
     text: "變不回人類，哭了兩天臥床不起。\n第三天，在太陽底下睡著了。心想，好像也沒差吧。"
@@ -365,7 +365,7 @@ entries:
     lang: zh-Hant
     text: 阿賴耶，看著，沉下去。你的，真正的。
     origin: machine
-    low_confidence: true
+    low_confidence: true  # note: 2026-10-18 對照後保留低信心；來源刻意斷句；沈む的主語與貴方の、本当に的省略成分不明，缺角色敘事上下文，現譯可能誤加命令語氣
   - source_hash: sha256:58e5c3e980a43650cded6792bf53b183763aec7c58e72e9c167d0a046a4f9967
     lang: zh-Hant
     text: "對人再更溫柔一點吧！\n——安息的繼承者‧希彌佳"

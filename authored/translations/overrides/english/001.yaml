@@ -2,8 +2,7 @@ format: 3
 kind: translation_shard
 records:
   - origin: machine
-    low_confidence: true
-    note: 卡名新譯：稱號「災厄的魔女」為本輪新譯；藝名依協調者決定保留原文 Millie Parfait
+    note: 卡名新譯：稱號「災厄的魔女」為本輪新譯；藝名依協調者決定保留原文 Millie Parfait；2026-10-18 對照英文確認；Witch of Calamity的稱號語義完整；藝名依既有維護者決定保留原文，並核對 NIJISANJI 官方藝人頁。source_claim：https://www.nijisanji.jp/en/talents/l/millie-parfait
     kind: english_exception_target
     data:
       id: english.name.35452d2c4d71f5a90c20d707
@@ -135,7 +134,7 @@ records:
           text: 鐵壁要塞
   - origin: machine
     low_confidence: true
-    note: 新譯；專名音譯，無數位版或既有譯名可對照
+    note: 新譯；專名音譯，無數位版或既有譯名可對照；2026-10-18 對照後保留低信心；稱號語義可對照英文，但專名尚無既有 glossary 或凍結數位版繁中對應可證實；仍缺可靠的角色譯名來源，不自行定案音譯
     kind: english_exception_target
     data:
       id: english.name.47b48e430837cd356a11e99c
@@ -157,7 +156,7 @@ records:
           text: 傳說揭幕
   - origin: machine
     low_confidence: true
-    note: 新譯；專名音譯，無數位版或既有譯名可對照
+    note: 新譯；專名音譯，無數位版或既有譯名可對照；2026-10-18 對照後保留低信心；稱號語義可對照英文，但專名尚無既有 glossary 或凍結數位版繁中對應可證實；仍缺可靠的角色譯名來源，不自行定案音譯
     kind: english_exception_target
     data:
       id: english.name.a9d86dd192f3c7366746628a
@@ -278,8 +277,7 @@ records:
         - kind: Literal
           text: 芙琳蒂
   - origin: machine
-    low_confidence: true
-    note: 卡名新譯：稱號「肆虐的創造主」為本輪新譯；角色名以 LeafRef 引用已採納的 term:name.berufometto_name_fragment「貝爾弗特」，隨片段選詞更新；整名仍為機器新譯
+    note: 卡名新譯：稱號「肆虐的創造主」為本輪新譯；角色名以 LeafRef 引用已採納的 term:name.berufometto_name_fragment「貝爾弗特」，隨片段選詞更新；整名仍為機器新譯；2026-10-18 對照英文確認；Ravaging Creator譯為肆虐的創造主忠實；Belphomet以 LeafRef 沿用既有貝爾弗特，沒有另造角色名
     kind: english_exception_target
     data:
       id: english.name.9916e569da7e44c09be54b25
@@ -395,8 +393,7 @@ records:
         - kind: Literal
           text: 雅典娜
   - origin: machine
-    low_confidence: true
-    note: 新譯；角色名沿既有「緋紅抗戰者‧莫諾」，若日文與「悠久的緋紅‧莫諾」同名則應改用該名
+    note: 新譯；角色名沿既有「緋紅抗戰者‧莫諾」，若日文與「悠久的緋紅‧莫諾」同名則應改用該名；2026-10-18 對照英文確認；Everlasting Garnet作為英文獨立稱號可譯永恆的緋紅，Mono沿既有莫諾；沒有同卡日文來源，不以其他數位卡的完整稱號覆蓋本卡
     kind: english_exception_target
     data:
       id: english.name.580ea9e5389deb4c24aa9f77
@@ -418,7 +415,7 @@ records:
           text: 審判的聖女‧萊娜
   - origin: machine
     low_confidence: true
-    note: 新譯；Garula 推定為迦樓羅（Garuda），無數位版或既有譯名可對照
+    note: 新譯；Garula 推定為迦樓羅（Garuda），無數位版或既有譯名可對照；2026-10-18 對照後保留低信心；Ruler of Storms的稱號明確，但 Garula 與既有迦樓羅角色的同一性尚缺可靠來源；不能只以 Garuda 的相近拼法確認
     kind: english_exception_target
     data:
       id: english.name.8b9e3b110f6df7f5e74bd0a6
@@ -470,7 +467,7 @@ records:
           text: 高階牧師
   - origin: machine
     low_confidence: true
-    note: 新譯；專名音譯，無數位版或既有譯名可對照
+    note: 新譯；專名音譯，無數位版或既有譯名可對照；2026-10-18 對照後保留低信心；稱號語義可對照英文，但專名尚無既有 glossary 或凍結數位版繁中對應可證實；仍缺可靠的角色譯名來源，不自行定案音譯
     kind: english_exception_target
     data:
       id: english.name.fcd8b50db735da22b25cbe15
@@ -502,7 +499,7 @@ records:
           text: 詠唱：聖獅之牙
   - origin: machine
     low_confidence: true
-    note: 新譯；專名音譯，無數位版或既有譯名可對照
+    note: 新譯；專名音譯，無數位版或既有譯名可對照；2026-10-18 對照後保留低信心；稱號語義可對照英文，但專名尚無既有 glossary 或凍結數位版繁中對應可證實；仍缺可靠的角色譯名來源，不自行定案音譯
     kind: english_exception_target
     data:
       id: english.name.0c48a03670b3e43491404c68
@@ -633,8 +630,7 @@ records:
         - kind: Literal
           text: 神話戰劍
   - origin: machine
-    low_confidence: true
-    note: 新譯；角色名沿既有「煌擊戰士‧貝魯」，稱號為新譯
+    note: 新譯；角色名沿既有「煌擊戰士‧貝魯」，稱號為新譯；2026-10-18 對照英文確認；Luxheart Champion的煌心勇者保留光輝與勇者稱號，Bayle沿既有煌擊戰士‧貝魯的角色片段，不另創譯名
     kind: english_exception_target
     data:
       id: english.name.18fd0484b4aa4be49b4d75ca
@@ -785,7 +781,7 @@ records:
           text: 雷鳴軍神‧福尼加爾
   - origin: machine
     low_confidence: true
-    note: 新譯；Vidar 依北歐神名音譯，無數位版或既有譯名可對照
+    note: 新譯；Vidar 依北歐神名音譯，無數位版或既有譯名可對照；2026-10-18 對照後保留低信心；稱號語義可對照英文，但專名尚無既有 glossary 或凍結數位版繁中對應可證實；仍缺可靠的角色譯名來源，不自行定案音譯
     kind: english_exception_target
     data:
       id: english.name.15169f1cc97ce07cc575f0fe
@@ -952,7 +948,7 @@ records:
           slot: name.unicorn
   - origin: machine
     low_confidence: true
-    note: 新譯；Soul Devil 可能另有既定譯名
+    note: 新譯；Soul Devil 可能另有既定譯名；2026-10-18 對照後保留低信心；New Year稱號沒有疑義；Soul Devil尚缺可確認是否沿用已有角色／單位譯名的可靠來源，保留直譯及低信心
     kind: english_exception_target
     data:
       id: english.name.a00c98a1594ead09cee0ac69
@@ -1984,8 +1980,7 @@ records:
         - kind: Literal
           text: 。將其破壞。
   - origin: machine
-    low_confidence: true
-    note: 「攻擊敵方」沿子句58寫法，英文 enemies 指敵方主戰者與從者；X 的「剩餘的敵方玩家」為多人對戰新用語；Follower Strike 的條件涵蓋整段，中文以「若攻擊對象為從者，則…，且…」併句，避免後句被讀成無條件
+    note: 「攻擊敵方」沿子句58寫法，英文 enemies 指敵方主戰者與從者；X 的「剩餘的敵方玩家」為多人對戰新用語；Follower Strike 的條件涵蓋整段，中文以「若攻擊對象為從者，則…，且…」併句，避免後句被讀成無條件；2026-10-18 對照英文確認；英文 enemies 的攻擊範圍含主戰者與從者，沿 P0 的敵方用詞；X 保留尚未出局的敵方玩家計數。各攻擊觸發與整段持續期間均保留，未改變 Follower Strike 條件範圍
     kind: english_exception_target
     data:
       id: english.effect.e7328bbe2dbd45ded8214fec
@@ -2044,8 +2039,7 @@ records:
         - kind: Literal
           text: ，則這張卡片進化。
   - origin: machine
-    low_confidence: true
-    note: 「攻擊敵方」沿子句58寫法，英文 enemies 指敵方主戰者與從者；X 的「剩餘的敵方玩家」為多人對戰新用語
+    note: 「攻擊敵方」沿子句58寫法，英文 enemies 指敵方主戰者與從者；X 的「剩餘的敵方玩家」為多人對戰新用語；2026-10-18 對照英文確認；英文 enemies 的攻擊範圍含主戰者與從者，沿 P0 的敵方用詞；X 保留尚未出局的敵方玩家計數。各攻擊觸發與整段持續期間均保留，未改變 Follower Strike 條件範圍
     kind: english_exception_target
     data:
       id: english.effect.cd8893b3e08400abc21e17d3
@@ -4331,8 +4325,7 @@ records:
         - kind: Literal
           text: 使用這張卡片。
   - origin: machine
-    low_confidence: true
-    note: 沿子句58：「無法攻擊敵方」的「敵方」可能被讀成只指主戰者；英文 enemies 指敵方主戰者與從者
+    note: 沿子句58：「無法攻擊敵方」的「敵方」可能被讀成只指主戰者；英文 enemies 指敵方主戰者與從者；2026-10-18 對照英文確認；英文禁止全部 enemies，中文沿 P0 的無法攻擊敵方；未窄化成只禁止攻擊主戰者，其他能力與期限完整
     kind: english_exception_target
     data:
       id: english.effect.64cdb23abd5878dc3c75f179
@@ -4385,8 +4378,7 @@ records:
         - kind: Literal
           text: '}+4。抽2張卡片。'
   - origin: machine
-    low_confidence: true
-    note: 沿子句58：「無法攻擊敵方」的「敵方」可能被讀成只指主戰者；英文 enemies 指敵方主戰者與從者
+    note: 沿子句58：「無法攻擊敵方」的「敵方」可能被讀成只指主戰者；英文 enemies 指敵方主戰者與從者；2026-10-18 對照英文確認；英文禁止全部 enemies，中文沿 P0 的無法攻擊敵方；未窄化成只禁止攻擊主戰者，其他能力與期限完整
     kind: english_exception_target
     data:
       id: english.effect.0e89d18cfb601ab8ce1b7abd
@@ -5585,8 +5577,7 @@ records:
         - kind: Literal
           text: "】進行攻擊。\n這張卡片給予敵方的主戰者傷害時，自己的PP全部回復。"
   - origin: machine
-    low_confidence: true
-    note: 「can't attack its owner」以「無法攻擊其所有者」直譯；實際應指所有者的主戰者，無既有寫法可對照
+    note: 「can't attack its owner」沿原文概括譯為「無法攻擊其所有者」；2026-10-18 對照英文確認；原註對僅指主戰者的推測已排除：官方 FAQ Q1369／Q1370 證實同時禁止攻擊其所有者的主戰者及其戰場上的從者；保留對所有者的概括禁止，不改成只指主戰者。source_claim：https://en.shadowverse-evolve.com/cards/?cardno=GFD02-007EN&expansion=GFD02&view=text
     kind: english_exception_target
     data:
       id: english.effect.633d1906dbd9b4abf39fc164
@@ -6791,7 +6782,7 @@ records:
           text: 須未達上限）
   - origin: machine
     low_confidence: true
-    note: 拍賣規則句為新句型且無既有譯法；成交後「放置到EX區」等句是否同受「若成交」約束，英文以句界分開，中文照句界保留
+    note: 拍賣規則句為新句型且無既有譯法；成交後「放置到EX區」等句是否同受「若成交」約束，英文以句界分開，中文照句界保留；2026-10-18 對照後保留低信心；官方 FAQ Q2204 已證實流標時卡片留在手牌，但未釐清流標時後續加生命值與抽牌是否仍執行；仍缺此條件作用域的明確裁定。中文保留來源句界，不自行擴縮條件。source_claim：https://en.shadowverse-evolve.com/cards/?cardno=GFE01-014EN&expansion=GFE01&view=image
     kind: english_exception_target
     data:
       id: english.effect.4324f29b0098eb8cb797284f

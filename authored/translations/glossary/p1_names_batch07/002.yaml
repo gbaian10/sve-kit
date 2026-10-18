@@ -11,14 +11,20 @@ records:
         text: 黑色破壞的創造物
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.blood_queen_vampy
       lang: zh-Hant
       value:
         kind: authored
-        text: 鮮血女王‧凡碧
+        text: 血色女王‧班比
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -129,14 +135,20 @@ records:
         text: 飢餓的光輝
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.kind_queen_vampy
       lang: zh-Hant
       value:
         kind: authored
-        text: 仁慈女王‧凡碧
+        text: 仁慈女王‧班比
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -238,14 +250,20 @@ records:
         text: 奧契絲
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.phantom_duo_bunny_baron
       lang: zh-Hant
       value:
         kind: authored
-        text: 幻影雙人組‧邦尼＆巴隆
+        text: 幻影拍檔‧峇妮與峇儂
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -356,7 +374,7 @@ records:
         text: 白色破壞的創造物
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；片段與凍結數位版的同角色名稱一致，沿既有枷薇
     kind: glossary_choice
     data:
       term_id: term:name.zwei_name_fragment
@@ -364,4 +382,10 @@ records:
       value:
         kind: authored
         text: 枷薇
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結數位版的同名或同角色片段，沿用既有繁中選詞；不主張為官方 SVE 譯名。
       concept_evidence: []

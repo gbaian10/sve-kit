@@ -2,7 +2,7 @@ format: 3
 kind: translation_shard
 records:
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；E保留字母；アラーマー為警報者，與既有稱號結構相符
     kind: glossary_choice
     data:
       term_id: term:name.emergency_alarmer
@@ -48,7 +48,7 @@ records:
         text: 魔法之靴
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；ミヒライテ是見開いて的片假名寫法，睜開雙眼保留命令語意
     kind: glossary_choice
     data:
       term_id: term:name.enlightenment
@@ -158,7 +158,7 @@ records:
         source_urls:
           - https://gnn.gamer.com.tw/detail.php?sn=312315
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；賑やか為熱鬧，食卓為餐桌，修飾關係完整
     kind: glossary_choice
     data:
       term_id: term:name.ever_lively_table
@@ -186,7 +186,7 @@ records:
         text: EP
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；穿り為挖掘、啄挖；鴉維持烏鴉意象
     kind: glossary_choice
     data:
       term_id: term:name.exhumation_crow

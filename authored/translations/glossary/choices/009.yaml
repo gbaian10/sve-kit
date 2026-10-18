@@ -41,7 +41,7 @@ records:
         text: 死角的觀測員
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；原文漢字名稱直接轉為繁體，無語義或角色名歧義
     kind: glossary_choice
     data:
       term_id: term:name.blossoms_advance
@@ -61,6 +61,7 @@ records:
       concept_evidence: []
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；缺少可核對的臺灣官方或穩定通行名稱來源；凍結數位版無精確同名對應，既有 glossary 亦不足以確認此合作角色／單位的專名
     kind: glossary_choice
     data:
       term_id: term:name.blue_storm_dragon_maelstrom
@@ -80,7 +81,7 @@ records:
       source_claim:
         source_work: Cardfight Vanguard
         source_urls: []
-  - low_confidence: true
+  - note: 2026-10-18 對照日文確認；ブランニュー・ビート為 Brand New Beat 的音譯，既有字形忠實
     kind: glossary_choice
     data:
       term_id: term:name.brand_new_beat
@@ -101,7 +102,7 @@ records:
         kind: authored
         text: 極限突破
       concept_evidence: []
-  - low_confidence: true
+  - note: 2026-10-18 對照日文確認；原文已用 BRIGHT:LIGHTS，完整保留
     kind: glossary_choice
     data:
       term_id: term:name.bright_lights
@@ -135,7 +136,7 @@ records:
         source_urls:
           - https://gametora.com/zh-tw/umamusume/supports
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；管理者的稱號及兔子意象均保留，沒有另換人名
     kind: glossary_choice
     data:
       term_id: term:name.bunny_eared_administrator

@@ -69,6 +69,7 @@ records:
       concept_evidence: []
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；凍結數位版無精確同名對應；尚缺可確認專名漢字、譯音或作品梗的可靠來源，不能只憑片假名或字面拆詞確認
     kind: glossary_choice
     data:
       term_id: term:name.ginne_bewitching_courtesan
@@ -105,7 +106,7 @@ records:
         text: 格里札雷
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；キラデコ是閃亮裝飾的造語，パレード為遊行；星號及完整命名意象保留，並未涉及人物姓名
     kind: glossary_choice
     data:
       term_id: term:name.glitz_glam_parade
@@ -136,7 +137,7 @@ records:
         text: 啃咬之鼠
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；女神、朝霞與海的場景均保留
     kind: glossary_choice
     data:
       term_id: term:name.goddess_by_the_sunlit_sea

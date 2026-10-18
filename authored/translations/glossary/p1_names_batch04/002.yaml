@@ -47,14 +47,20 @@ records:
         text: 受詛咒之影‧瓦伊迪
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.demon_beater
       lang: zh-Hant
       value:
         kind: authored
-        text: 惡魔打擊手
+        text: 惡魔鼓手
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -66,14 +72,20 @@ records:
         text: 龍蛇
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.dry_severance_nectar
       lang: zh-Hant
       value:
         kind: authored
-        text: 乾絕的甘露
+        text: 涸絕的甘露
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -121,14 +133,20 @@ records:
         text: 金色的威信‧琉米歐爾
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.great_thief_jiemon
       lang: zh-Hant
       value:
         kind: authored
-        text: 天下的大盜‧治右衛門
+        text: 天下大盜賊‧治右衛門
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -149,7 +167,7 @@ records:
         text: 獄炎龍
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；片段與凍結數位版的同角色名稱一致，沿既有卡托司瑞德
     kind: glossary_choice
     data:
       term_id: term:name.kattosuroto_name_fragment
@@ -157,6 +175,12 @@ records:
       value:
         kind: authored
         text: 卡托司瑞德
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結數位版的同名或同角色片段，沿用既有繁中選詞；不主張為官方 SVE 譯名。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -195,7 +219,7 @@ records:
         text: 魔導列車
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；與凍結數位版精確同名，圓滾滾與數字完整一致
     kind: glossary_choice
     data:
       term_id: term:name.manmaru_number_two
@@ -203,6 +227,12 @@ records:
       value:
         kind: authored
         text: 圓滾滾2號
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結數位版的同名或同角色片段，沿用既有繁中選詞；不主張為官方 SVE 譯名。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice

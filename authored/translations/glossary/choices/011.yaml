@@ -2,7 +2,7 @@ format: 3
 kind: translation_shard
 records:
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；教室與白百合意象完整保留
     kind: glossary_choice
     data:
       term_id: term:name.classroom_lily
@@ -114,7 +114,7 @@ records:
         text: Cool耳環
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；クール作為作品類型名沿既有 Cool；pendant 統一為墜飾
     kind: glossary_choice
     data:
       term_id: term:name.cool_pendant
@@ -124,7 +124,7 @@ records:
         text: Cool墜飾
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；クール作為作品類型名沿既有 Cool；tiara 與同組統一為后冠
     kind: glossary_choice
     data:
       term_id: term:name.cool_tiara
