@@ -25,10 +25,16 @@ describe("SettingsPage", () => {
         name: "兩者",
       }),
     )
+    await userEvent.click(
+      within(screen.getByRole("radiogroup", { name: "單卡開啟方式" })).getByRole("radio", {
+        name: "中間彈出",
+      }),
+    )
     expect(readPrefs()).toMatchObject({
       symbolLabels: true,
       banRegion: "en",
       effectLanguage: "both",
+      cardOpenMode: "modal",
     })
     expect(screen.getByRole("switch", { name: "圖示旁附名稱" })).toHaveAttribute(
       "aria-checked",

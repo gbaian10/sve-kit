@@ -220,6 +220,8 @@ describe("CardsPage", () => {
   })
 
   it("keeps a set page's own set out of its URL but in the sequence a card walks", async () => {
+    // Cards open as pages here; the in-place panel and modal have their own tests.
+    prefsStore.set({ cardOpenMode: "page" })
     const { router } = await open("/sets/BP01")
     const user = userEvent.setup()
     const openFirst = async () => {
@@ -355,6 +357,7 @@ describe("CardsPage", () => {
   })
 
   it("marks alias hits, shows all with the see-all link and keeps the text on back", async () => {
+    prefsStore.set({ cardOpenMode: "page" })
     const { router } = await open()
     const user = userEvent.setup()
     const input = screen.getByRole("combobox", { name: "搜尋卡片" })

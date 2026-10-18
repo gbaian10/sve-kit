@@ -9,7 +9,14 @@ import { SettingRow } from "../../components/ui/SettingRow"
 import { Switch } from "../../components/ui/Switch"
 import { THEME_PREFS } from "../../domain/theme"
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
-import { CARD_EDITIONS, DEFAULT_PREFS, prefsStore, TEXT_DISPLAYS, usePrefs } from "../../settings"
+import {
+  CARD_EDITIONS,
+  CARD_OPEN_MODES,
+  DEFAULT_PREFS,
+  prefsStore,
+  TEXT_DISPLAYS,
+  usePrefs,
+} from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { StorageSettings } from "./StorageSettings"
 
@@ -95,6 +102,22 @@ export function SettingsPage() {
             label={t("settings.symbolLabels")}
             checked={prefs.symbolLabels}
             onChange={(symbolLabels) => prefsStore.set({ symbolLabels })}
+          />
+        </SettingRow>
+        <SettingRow
+          className={ROW}
+          label={t("settings.cardOpenMode")}
+          hint={t("settings.cardOpenModeHint")}
+        >
+          <Segmented
+            size="sm"
+            label={t("settings.cardOpenMode")}
+            options={CARD_OPEN_MODES.map((value) => ({
+              value,
+              label: t(`options.cardOpenMode.${value}`),
+            }))}
+            value={prefs.cardOpenMode}
+            onChange={(cardOpenMode) => prefsStore.set({ cardOpenMode })}
           />
         </SettingRow>
         <SettingRow className={ROW} label={t("account.appearance")}>

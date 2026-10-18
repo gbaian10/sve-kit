@@ -9,7 +9,7 @@ import { CardImage } from "../card/CardImage"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { type ResultLabels, useResultLabels } from "./labels"
-import { isPlainClick } from "./plain-click"
+import { activateCell, type OpenOutcome } from "./plain-click"
 
 export interface GridCell {
   readonly key: string
@@ -22,10 +22,12 @@ export interface GridCell {
 export interface CardGridProps {
   readonly cells: readonly GridCell[]
   readonly images: ImageIndex | undefined
-  /** Called before the router navigates, so the list can record its anchor. */
-  readonly onOpen: (cell: GridCell, event: MouseEvent<HTMLAnchorElement>) => unknown
+  /** Called before the router navigates, so the list can record its anchor or open the card in place. */
+  readonly onOpen: (cell: GridCell, event: MouseEvent<HTMLAnchorElement>) => OpenOutcome | undefined
   /** Cell to highlight briefly after returning from a card. */
   readonly anchor?: string
+  /** Cell whose card is open beside or over the results. */
+  readonly selected?: string
 }
 
 /** Translation notices shared by the grid cell and the row shells; empty when there is none. */
@@ -73,12 +75,14 @@ const CardCell = memo(function CardCell({
   images,
   onOpen,
   highlighted,
+  selected,
   labels,
 }: {
   readonly cell: GridCell
   readonly images: ImageIndex | undefined
   readonly onOpen: CardGridProps["onOpen"]
   readonly highlighted: boolean
+  readonly selected: boolean
   readonly labels: ResultLabels
 }) {
   const navigate = useNavigate()
@@ -92,19 +96,14 @@ const CardCell = memo(function CardCell({
     <a
       href={href}
       data-result-key={cell.key}
+      aria-current={selected ? "true" : undefined}
       onClick={(event) => {
-        if (!isPlainClick(event)) return
-        if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
-          event.preventDefault()
-          return
-        }
-        event.preventDefault()
-        const state = onOpen(cell, event) ?? cell.state
-        void navigate(cell.to, { state })
+        activateCell(event, cell, onOpen, navigate)
       }}
       className={cn(
         "flex flex-col gap-1.5 rounded-card text-text-1 hover:opacity-90",
         highlighted && "ring-2 ring-text-1 ring-offset-2 ring-offset-bg",
+        selected && "ring-2 ring-accent ring-offset-2 ring-offset-bg",
       )}
     >
       <CardImage
@@ -144,25 +143,30 @@ const CardCell = memo(function CardCell({
   )
 })
 
-export function CardGrid({ cells, images, onOpen, anchor }: CardGridProps) {
+export function CardGrid({ cells, images, onOpen, anchor, selected }: CardGridProps) {
   const labels = useResultLabels()
   return (
-    // One column count drives both the grid and the off-screen height estimate in results.css.
-    <ul
-      data-view="grid"
-      className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] md:[--result-columns:4] lg:[--result-columns:5] xl:[--result-columns:6]"
-    >
-      {cells.map((cell) => (
-        <li key={cell.key} className="min-w-0">
-          <CardCell
-            cell={cell}
-            images={images}
-            onOpen={onOpen}
-            highlighted={anchor === cell.key}
-            labels={labels}
-          />
-        </li>
-      ))}
-    </ul>
+    // One column count drives both the grid and the off-screen height estimate in results.css. The
+    // count follows the width the grid gets (the card drawer narrows it), not the viewport: 2 on
+    // phones, 4 from 600 wide, 5 on desktop, 6 from 1440.
+    <div className="@container">
+      <ul
+        data-view="grid"
+        className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] @min-[520px]:[--result-columns:4] @min-[840px]:[--result-columns:5] @min-[1100px]:[--result-columns:6]"
+      >
+        {cells.map((cell) => (
+          <li key={cell.key} className="min-w-0">
+            <CardCell
+              cell={cell}
+              images={images}
+              onOpen={onOpen}
+              highlighted={anchor === cell.key}
+              selected={selected === cell.key}
+              labels={labels}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

@@ -13,6 +13,7 @@ import { type Accent, ACCENTS, resolveTheme, THEME_PREFS } from "../../domain/th
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
 import {
   CARD_EDITIONS,
+  CARD_OPEN_MODES,
   prefsStore,
   showsOtherEdition,
   TEXT_DISPLAYS,
@@ -230,6 +231,18 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           onChange={(effectLanguage) => prefsStore.set({ effectLanguage })}
         />
       </SettingRow>
+      <SettingRow size="sm" label={t("settings.cardOpenMode")}>
+        <Segmented
+          size="sm"
+          label={t("settings.cardOpenMode")}
+          options={CARD_OPEN_MODES.map((value) => ({
+            value,
+            label: t(`options.cardOpenMode.${value}`),
+          }))}
+          value={prefs.cardOpenMode}
+          onChange={(cardOpenMode) => prefsStore.set({ cardOpenMode })}
+        />
+      </SettingRow>
       <SettingRow size="sm" label={t("account.uiLanguage")}>
         <Segmented
           size="sm"
@@ -308,7 +321,7 @@ export function AccountMenuButton() {
         className={cn(
           "m-0 rounded-block border border-border bg-surface-1 p-0 text-text-1 shadow-lg",
           POPOVER_SUPPORTED ? "inset-auto" : "fixed z-50",
-          "top-14 right-4 lg:right-6",
+          "top-14 right-[calc(1rem+var(--drawer-width,0px))] lg:right-[calc(1.5rem+var(--drawer-width,0px))]",
         )}
       >
         <AccountMenuPanel onNavigate={close} />

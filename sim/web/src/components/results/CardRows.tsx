@@ -34,7 +34,7 @@ import { cn } from "../ui/cn"
 import { ArtThumb } from "./ArtThumb"
 import { type CardGridProps, type GridCell, NameNotices } from "./CardGrid"
 import { type ResultLabels, useResultLabels } from "./labels"
-import { isPlainClick } from "./plain-click"
+import { activateCell } from "./plain-click"
 import { useColumnReorder } from "./useColumnReorder"
 import { useRowWindow } from "./useRowWindow"
 import { useVisible } from "./useVisible"
@@ -48,12 +48,14 @@ function RowLink({
   cell,
   onOpen,
   highlighted,
+  selected,
   className,
   children,
 }: {
   readonly cell: GridCell
   readonly onOpen: CardGridProps["onOpen"]
   readonly highlighted: boolean
+  readonly selected: boolean
   readonly className: string
   readonly children: React.ReactNode
 }) {
@@ -64,19 +66,14 @@ function RowLink({
       href={href}
       data-result-key={cell.key}
       data-class={classStyle(cell.summary.classCode)}
+      aria-current={selected ? "true" : undefined}
       onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-        if (!isPlainClick(event)) return
-        if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
-          event.preventDefault()
-          return
-        }
-        event.preventDefault()
-        const state = onOpen(cell, event) ?? cell.state
-        void navigate(cell.to, { state })
+        activateCell(event, cell, onOpen, navigate)
       }}
       className={cn(
         "flex items-center gap-3 border-b border-border text-text-1 hover:bg-surface-2",
         highlighted && "ring-2 ring-text-1 ring-inset",
+        selected && "bg-accent-soft ring-2 ring-accent ring-inset",
         className,
       )}
     >
@@ -206,6 +203,7 @@ const TableRow = memo(function TableRow({
   images,
   onOpen,
   highlighted,
+  selected,
   artOf,
   labels,
 }: {
@@ -213,6 +211,7 @@ const TableRow = memo(function TableRow({
   readonly images: CardRowsProps["images"]
   readonly onOpen: CardRowsProps["onOpen"]
   readonly highlighted: boolean
+  readonly selected: boolean
   readonly artOf: CardRowsProps["artOf"]
   readonly labels: ResultLabels
 }) {
@@ -220,7 +219,13 @@ const TableRow = memo(function TableRow({
   const seen = useVisible(ref)
   return (
     <li ref={ref} className="min-w-0">
-      <RowLink cell={cell} onOpen={onOpen} highlighted={highlighted} className="flex-wrap py-2">
+      <RowLink
+        cell={cell}
+        onOpen={onOpen}
+        highlighted={highlighted}
+        selected={selected}
+        className="flex-wrap py-2"
+      >
         <ArtThumb
           summary={cell.summary}
           name={cell.name.primary}
@@ -285,7 +290,7 @@ const TableRow = memo(function TableRow({
   )
 })
 
-export function CardTable({ cells, images, onOpen, anchor, artOf }: CardRowsProps) {
+export function CardTable({ cells, images, onOpen, anchor, selected, artOf }: CardRowsProps) {
   const labels = useResultLabels()
   return (
     <ul data-view="table" className="flex flex-col">
@@ -296,6 +301,7 @@ export function CardTable({ cells, images, onOpen, anchor, artOf }: CardRowsProp
           images={images}
           onOpen={onOpen}
           highlighted={anchor === cell.key}
+          selected={selected === cell.key}
           artOf={artOf}
           labels={labels}
         />
@@ -322,6 +328,7 @@ const ListRow = memo(function ListRow({
   cell,
   onOpen,
   highlighted,
+  selected,
   labels,
   rowIndex,
   visibility,
@@ -331,6 +338,7 @@ const ListRow = memo(function ListRow({
   readonly cell: GridCell
   readonly onOpen: CardRowsProps["onOpen"]
   readonly highlighted: boolean
+  readonly selected: boolean
   readonly labels: ResultLabels
   readonly rowIndex: number
   readonly visibility: ListVisibility
@@ -350,15 +358,9 @@ const ListRow = memo(function ListRow({
       data-row-name=""
       lang={cell.name.primary.lang}
       title={cell.name.primary.text}
+      aria-current={selected ? "true" : undefined}
       onClick={(event) => {
-        if (!isPlainClick(event)) return
-        if (event.detail > 0 && window.getSelection()?.isCollapsed === false) {
-          event.preventDefault()
-          return
-        }
-        event.preventDefault()
-        const state = onOpen(cell, event) ?? cell.state
-        void navigate(cell.to, { state })
+        activateCell(event, cell, onOpen, navigate)
       }}
       onKeyDown={(event) => {
         if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return
@@ -394,6 +396,7 @@ const ListRow = memo(function ListRow({
       aria-rowindex={rowIndex + 2}
       data-class={classStyle(cell.summary.classCode)}
       data-highlighted={highlighted || undefined}
+      data-selected={selected || undefined}
       onClick={(event) => {
         if (event.target instanceof Element && event.target.closest("a")) return
         if (window.getSelection()?.isCollapsed === false) return
@@ -482,6 +485,7 @@ export function CardList({
   cells,
   onOpen,
   anchor,
+  selected,
   sort = "no",
   descending = false,
   onSort,
@@ -670,6 +674,7 @@ export function CardList({
               cell={cell}
               onOpen={onOpen}
               highlighted={anchor === cell.key}
+              selected={selected === cell.key}
               labels={labels}
               rowIndex={windowed.start + index}
               visibility={listVisibility}

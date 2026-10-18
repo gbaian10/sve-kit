@@ -1,16 +1,14 @@
-import { ArrowLeft, ChevronLeft, ChevronRight, Link2 } from "lucide-react"
+import { ArrowLeft, ChevronLeft, ChevronRight, Link2, Maximize2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
+import { Link as RouterLink, type To, useLocation, useNavigate, useParams } from "react-router"
 
-import { type CardContent, cardContentKey, prepareCardContent } from "../../app/card-content"
-import { prefetchCards, type PrefetchTarget, summaryRoute } from "../../app/card-prefetch"
+import type { PrefetchTarget } from "../../app/card-prefetch"
 import { useDialogHistory } from "../../app/dialog-history"
-import { LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
+import { type CardEntryState, LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
 import { useOtherEdition } from "../../app/other-edition"
 import {
   type SearchReadiness,
-  useCardSnapshot,
   useImageIndex,
   useNeighbours,
   useRouteEdition,
@@ -22,7 +20,6 @@ import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNam
 import { CLASS_ICON } from "../../components/card/classIcons"
 import { RarityBadges } from "../../components/card/RarityBadges"
 import { StatLine } from "../../components/card/StatLine"
-import { useTextLanguage } from "../../components/card/text-language"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
 import { Badge } from "../../components/ui/Badge"
 import { Button } from "../../components/ui/Button"
@@ -37,7 +34,6 @@ import {
   type Catalog,
   faceBasics,
   type ImageIndex,
-  locateCard,
   type LocatedCard,
   nameOf,
   type Row,
@@ -56,165 +52,65 @@ import { PageTitle } from "../PageTitle"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
 import { printingGroups } from "./printing-order"
+import { routeInput, useCardContent } from "./useCardContent"
 
 const ICON_BUTTON =
   "flex size-11 shrink-0 items-center justify-center rounded-button text-text-1 hover:bg-surface-2"
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
 const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
 const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
-// Each prepared card keeps its own catalog and text closure (several MB), so only nearby cards stay.
-const PREPARED_CARDS = 4
 
 export function CardPage() {
   const { cardNo, intId } = useParams()
-  const { client, status } = useCardSnapshot()
   const edition = useRouteEdition()
   const location = useLocation()
-  const [attempt, setAttempt] = useState(0)
-  const language = useTextLanguage()
-  const [prepared, setPrepared] = useState(() => new Map<string, CardContent>())
-  const preparedRef = useRef(prepared)
-  const visited = useRef(new Set<string>())
-  const completedEditions = useRef(new Set<string>())
-  useEffect(() => {
-    preparedRef.current = prepared
-  }, [prepared])
   const routeKey = JSON.stringify((location.state as { route?: unknown } | null)?.route ?? null)
-  const input = useMemo<CardRouteInput>(() => {
-    const hint = JSON.parse(routeKey) as {
-      cardId: string
-      printingId: string
-      cardOwner: string
-      printingOwner: string
-      region: Region
-    } | null
-    return {
-      namespace: cardNo === undefined ? "provisional" : "official",
-      key: cardNo ?? intId ?? "",
-      edition,
-      ...(hint ? { hint: { ...hint, id: hint.printingId } } : {}),
-    }
-  }, [routeKey, cardNo, intId, edition])
-  const inputKey = cardContentKey(client, input, language, attempt)
-  const cached = prepared.get(inputKey)
-  const [located, setLocated] = useState<{
-    key: string
-    value?: CardContent
-    error?: unknown
-  } | null>(null)
-  if (cached && located?.key !== inputKey) setLocated({ key: inputKey, value: cached })
-  const manifestHash = client.snapshot()?.manifestHash
-  useEffect(() => {
-    if (!manifestHash || cached) return
-    let active = true
-    const loading = locateCard(client, input).then((value) =>
-      prepareCardContent(client, value, language, IMAGE_SIZES),
-    )
-    void loading.then(
-      (value) => {
-        if (active) {
-          // A failed image index stays uncached so returning to the card retries it.
-          if (!value.images.failed)
-            setPrepared((previous) => {
-              const next = new Map(previous).set(inputKey, value)
-              if (next.size > PREPARED_CARDS) next.delete(next.keys().next().value ?? "")
-              return next
-            })
-          setLocated({ key: inputKey, value })
-        }
-      },
-      (error: unknown) => {
-        if (active) setLocated({ key: inputKey, error })
-      },
-    )
-    return () => {
-      active = false
-    }
-  }, [client, manifestHash, inputKey, input, language, cached])
-  const current = cached !== undefined || located?.key === inputKey
-  const result = cached
-    ? { key: inputKey, value: cached }
-    : current ||
-        (located?.value?.snapshot.manifestHash === manifestHash &&
-          located?.value?.client.base === client.base)
-      ? located
-      : null
-  const pending = !current
-  const [pendingHint, setPendingHint] = useState<string | null>(null)
-  useEffect(() => {
-    if (!pending) return
-    const timer = setTimeout(() => {
-      setPendingHint(inputKey)
-    }, 200)
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [pending, inputKey])
-  useEffect(() => {
-    if (current && result?.value) visited.current.add(inputKey)
-    for (const key of visited.current) if (!prepared.has(key)) visited.current.delete(key)
-  }, [current, result?.value, inputKey, prepared])
-  const onPrefetch = useCallback(
-    (targets: readonly PrefetchTarget[], signal: AbortSignal) => {
-      const protectedKeys = new Set([
-        inputKey,
-        ...targets
-          .filter((target) => target.neighbour)
-          .map(({ summary }) => cardContentKey(client, summaryRoute(summary), language, attempt)),
-      ])
-      return prefetchCards(
-        client,
-        targets.filter(({ summary, neighbour }) => {
-          const key = cardContentKey(client, summaryRoute(summary), language, attempt)
-          return !preparedRef.current.has(key) && (neighbour || !completedEditions.current.has(key))
-        }),
-        language,
-        IMAGE_SIZES,
-        signal,
-        (target, value) => {
-          if (signal.aborted || client.snapshot()?.manifestHash !== manifestHash) return
-          const key = cardContentKey(client, target, language, attempt)
-          completedEditions.current.add(key)
-          setPrepared((previous) => {
-            if (signal.aborted) return previous
-            const next = new Map(previous).set(key, value)
-            while (next.size > PREPARED_CARDS) {
-              const candidates = [...next.keys()].filter(
-                (candidate) => !protectedKeys.has(candidate),
-              )
-              const oldest =
-                candidates.find((candidate) => !visited.current.has(candidate)) ?? candidates[0]
-              if (oldest === undefined) break
-              next.delete(oldest)
-            }
-            return next.has(key) ? next : previous
-          })
-        },
-      )
-    },
-    [client, inputKey, language, attempt, manifestHash],
+  const input = useMemo<CardRouteInput>(
+    () =>
+      routeInput(
+        cardNo === undefined ? "provisional" : "official",
+        cardNo ?? intId ?? "",
+        edition,
+        (JSON.parse(routeKey) as CardEntryState["route"] | null) ?? undefined,
+      ),
+    [routeKey, cardNo, intId, edition],
   )
-  const catalog = result?.value?.catalog ?? null
-  const routeError = result?.error
-  const resolved = result?.value?.printing
-  return (
-    <CardView
-      client={result?.value?.client ?? client}
-      preparedImages={result?.value?.images}
-      onPrefetch={onPrefetch}
-      pending={pending}
-      showPending={pendingHint === inputKey}
-      status={status}
-      catalog={catalog}
-      resolved={resolved}
-      routeError={routeError}
-      onRetry={() => {
-        void client.reload().then(() => {
-          setAttempt((value) => value + 1)
-        })
-      }}
-    />
-  )
+  const content = useCardContent(input)
+  return <CardView {...content} />
+}
+
+/** A printing another link in the overlay points at, with what the link already knows about it. */
+export interface OverlayLinkTarget {
+  readonly cardNo: string
+  readonly cardNoState?: string
+  readonly intId?: number
+  readonly route?: CardEntryState["route"]
+  readonly resultKey?: string
+}
+
+/** The list's panel or modal around the card: same content as the page, other links and chrome. */
+export interface CardFrame {
+  /** What the list knew when it opened the card: background, pages, resultKey, route. */
+  readonly entry: Record<string, unknown>
+  /** The route key shown until the card resolves. */
+  readonly key: string
+  /** Where a link to another printing goes while the overlay stays open. */
+  readonly link: (target: OverlayLinkTarget) => { readonly to: To; readonly state: unknown }
+  readonly onClose: () => void
+}
+
+export interface CardViewProps {
+  readonly client: SnapshotClient
+  readonly status: SnapshotStatus
+  readonly catalog: Catalog | null
+  readonly resolved: LocatedCard["printing"] | undefined
+  readonly onRetry?: () => void
+  readonly routeError?: unknown
+  readonly pending?: boolean
+  readonly showPending?: boolean
+  readonly onPrefetch?: (targets: readonly PrefetchTarget[], signal: AbortSignal) => Promise<void>
+  readonly preparedImages?: ImageIndex | undefined
+  readonly frame?: CardFrame
 }
 
 export function CardView({
@@ -228,18 +124,8 @@ export function CardView({
   showPending = pending,
   preparedImages,
   onPrefetch,
-}: {
-  readonly client: SnapshotClient
-  readonly status: SnapshotStatus
-  readonly catalog: Catalog | null
-  readonly resolved: LocatedCard["printing"] | undefined
-  readonly onRetry?: () => void
-  readonly routeError?: unknown
-  readonly pending?: boolean
-  readonly showPending?: boolean
-  readonly onPrefetch?: (targets: readonly PrefetchTarget[], signal: AbortSignal) => Promise<void>
-  readonly preparedImages?: ImageIndex | undefined
-}) {
+  frame,
+}: CardViewProps) {
   const { t } = useTranslation()
   const { cardNo, intId } = useParams()
   const location = useLocation()
@@ -342,9 +228,10 @@ export function CardView({
   // Opened from a list: back pops to it and previous/next walk that list; opened directly: back
   // is a link to the search page and previous/next walk the snapshot order.
   const entry =
-    typeof location.state === "object" && location.state !== null
+    frame?.entry ??
+    (typeof location.state === "object" && location.state !== null
       ? (location.state as Record<string, unknown>)
-      : null
+      : null)
   const background = typeof entry?.["background"] === "string" ? entry["background"] : null
   const fromList = background !== null
   const pages = typeof entry?.["pages"] === "number" ? Math.max(1, entry["pages"]) : 1
@@ -429,29 +316,55 @@ export function CardView({
     other.catalog,
     printingId,
   ])
-  const canonical = summary
-    ? summary.cardNoState === "provisional"
-      ? printingPath(summary)
-      : `${printingPath(summary)}/${encodeURIComponent(summary.name.original.text)}`
-    : null
+  const canonical =
+    summary && !frame
+      ? summary.cardNoState === "provisional"
+        ? printingPath(summary)
+        : `${printingPath(summary)}/${encodeURIComponent(summary.name.original.text)}`
+      : null
   useEffect(() => {
     if (!pending && canonical && location.pathname !== canonical)
       void navigate(canonical, { replace: true, state: location.state as unknown })
   }, [pending, canonical, summary?.cardNoState, location.pathname, location.state, navigate])
   const open = (target: NonNullable<typeof previous>) => {
     if (target.summary.printingId !== printingId) beginNavigation()
+    if (frame) {
+      const { cardNo, cardNoState, intId } = target.summary
+      const link = frame.link({
+        cardNo,
+        ...(cardNoState === undefined ? {} : { cardNoState }),
+        ...(intId === undefined ? {} : { intId }),
+        ...routeState(target.summary),
+        resultKey: target.key,
+      })
+      void navigate(link.to, { replace: true, state: link.state, preventScrollReset: true })
+      return
+    }
     void navigate(printingPath(target.summary), {
       replace: true,
       state: { ...entry, resultKey: target.key, ...routeState(target.summary) },
+    })
+  }
+  // The page URL the panel's copy button hands out; the page itself copies its own address.
+  const pageUrl = summary
+    ? `${printingPath(summary)}${summary.region === "en" ? "?ed=en" : ""}`
+    : null
+  const openFullPage = () => {
+    if (!summary) return
+    const { overlay: _overlay, ...listEntry } = entry ?? {}
+    void navigate(pageUrl ?? printingPath(summary), {
+      state: { ...listEntry, ...routeState(summary) },
     })
   }
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return
       const target = event.target
+      // The card modal is itself a dialog; only other dialogs (zoom, filters) keep the arrows.
       if (
         target instanceof Element &&
-        target.closest("input, textarea, select, [contenteditable=true], dialog") !== null
+        (target.closest("input, textarea, select, [contenteditable=true]") !== null ||
+          (target.closest("dialog") !== null && target.closest("[data-card-overlay]") === null))
       )
         return
       if (event.key === "ArrowLeft" && previous) open(previous)
@@ -498,7 +411,9 @@ export function CardView({
   })
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      await navigator.clipboard.writeText(
+        frame && pageUrl ? new URL(pageUrl, window.location.href).href : window.location.href,
+      )
       toast.show({ message: t("cardPage.linkCopied") })
     } catch {
       toast.show({ message: t("cardPage.linkCopyFailed") })
@@ -522,15 +437,30 @@ export function CardView({
     const kind = routeError instanceof CardRouteError ? routeError.kind : undefined
     // A key the route contract rejects names no card, the same as an unknown number.
     const missing = kind === "not-found" || kind === "invalid"
+    const title =
+      kind === "needs-update"
+        ? t("cardPage.needsUpdate")
+        : missing
+          ? t("cardPage.notFound")
+          : t("cardPage.routeFailed")
     return (
       <>
-        <PageTitle>
-          {kind === "needs-update"
-            ? t("cardPage.needsUpdate")
-            : missing
-              ? t("cardPage.notFound")
-              : t("cardPage.routeFailed")}
-        </PageTitle>
+        {frame ? (
+          <div className="flex h-13 items-center justify-between gap-1">
+            <h2 className="text-16 font-semibold">{title}</h2>
+            <button
+              type="button"
+              aria-label={t("cardPage.closePanel")}
+              title={t("cardPage.closePanel")}
+              onClick={frame.onClose}
+              className={ICON_BUTTON}
+            >
+              <X className="size-5" aria-hidden="true" />
+            </button>
+          </div>
+        ) : (
+          <PageTitle>{title}</PageTitle>
+        )}
         <p role="alert" className="text-15 text-text-2">
           {missing ? t("cardPage.notFoundHint") : t("cardPage.routeFailedHint")}
         </p>
@@ -575,20 +505,58 @@ export function CardView({
     return { faceId, ordinal, wording, revision, faceSummary, name }
   })
   const zoomedView = views.find((view) => view.faceId === zoomed)
+  const Heading = frame ? "h2" : "h1"
+  const navigation = fromList && (neighbours.result.phase !== "complete" || position >= 0) && (
+    <>
+      <Button
+        data-card-navigation
+        className={cn("h-10 gap-1 px-3 text-14", frame && "flex-1")}
+        disabled={previous === undefined}
+        onClick={() => {
+          if (previous) open(previous)
+        }}
+      >
+        <ChevronLeft className="size-4.5" aria-hidden="true" />
+        {t("cardPage.previous")}
+      </Button>
+      <Button
+        data-card-navigation
+        className={cn("h-10 gap-1 px-3 text-14", frame && "flex-1")}
+        disabled={next === undefined}
+        onClick={() => {
+          if (next) open(next)
+        }}
+      >
+        {t("cardPage.next")}
+        <ChevronRight className="size-4.5" aria-hidden="true" />
+      </Button>
+    </>
+  )
   return (
-    <article aria-busy={pending} className="relative mx-auto w-full max-w-270">
+    <article
+      aria-busy={pending}
+      className={cn("relative w-full", frame ? "flex min-h-full flex-col" : "mx-auto max-w-270")}
+    >
       {pending && showPending && catalog && (
         <p
           role="status"
-          className="pointer-events-none absolute top-13 right-0 z-10 rounded-control bg-surface-2 px-3 py-1 text-13 text-text-2 shadow"
+          className={cn(
+            "pointer-events-none absolute top-13 z-10 rounded-control bg-surface-2 px-3 py-1 text-13 text-text-2 shadow",
+            frame ? "right-4" : "right-0",
+          )}
         >
           {t("cardPage.switchingCard")}
         </p>
       )}
-      <StatusStrip readiness={readiness} />
+      {!frame && <StatusStrip readiness={readiness} />}
       {/* Top row (design 06): back 44, set tag 28, number centred in Plex 600 15px, copy link 44. */}
-      <div className="flex h-13 items-center gap-1">
-        {fromList ? (
+      <div
+        className={cn(
+          "flex h-13 items-center gap-1",
+          frame && "sticky top-0 z-20 bg-surface-1 px-4",
+        )}
+      >
+        {frame ? null : fromList ? (
           <button
             type="button"
             aria-label={t("cardPage.back")}
@@ -617,9 +585,9 @@ export function CardView({
             {setCode}
           </RouterLink>
         )}
-        <h1 className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
-          {resolved?.cardNo ?? cardNo ?? intId}
-        </h1>
+        <Heading className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
+          {resolved?.cardNo ?? frame?.key ?? cardNo ?? intId}
+        </Heading>
         <button
           type="button"
           aria-label={t("cardPage.copyLink")}
@@ -629,10 +597,37 @@ export function CardView({
         >
           <Link2 className="size-5" aria-hidden="true" />
         </button>
+        {frame && (
+          <>
+            <button
+              type="button"
+              aria-label={t("cardPage.fullscreen")}
+              title={t("cardPage.fullscreen")}
+              disabled={!summary}
+              onClick={openFullPage}
+              className={ICON_BUTTON}
+            >
+              <Maximize2 className="size-5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label={t("cardPage.closePanel")}
+              title={t("cardPage.closePanel")}
+              onClick={frame.onClose}
+              className={ICON_BUTTON}
+            >
+              <X className="size-5" aria-hidden="true" />
+            </button>
+          </>
+        )}
       </div>
       {/* Phone and tablet: the large image first, then the text; desktop: a sticky image column. */}
       <div
-        className="lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10"
+        className={cn(
+          frame === undefined && "lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10",
+          // The drawer and the modal are containers: side by side only once they are wide enough.
+          frame !== undefined && "px-4 @4xl:grid @4xl:grid-cols-[280px_minmax(0,1fr)] @4xl:gap-x-6",
+        )}
         onClickCapture={(event) => {
           if (
             pending &&
@@ -644,7 +639,13 @@ export function CardView({
           }
         }}
       >
-        <div className="mt-1 flex flex-col items-center gap-3 lg:sticky lg:top-4 lg:self-start">
+        <div
+          className={cn(
+            "mt-1 flex flex-col items-center gap-3",
+            frame === undefined && "lg:sticky lg:top-4 lg:self-start",
+            frame !== undefined && "@4xl:sticky @4xl:top-13 @4xl:self-start",
+          )}
+        >
           {views.map(
             ({ faceId, ordinal, faceSummary, name }) =>
               faceSummary &&
@@ -659,7 +660,8 @@ export function CardView({
                   }}
                   className={cn(
                     "block rounded-card shadow-lg transition-transform hover:scale-[1.01]",
-                    IMAGE_SLOT,
+                    frame === undefined && IMAGE_SLOT,
+                    frame !== undefined && "w-[64%] max-w-64 @4xl:w-full @4xl:max-w-none",
                   )}
                 >
                   <CardImage
@@ -734,34 +736,9 @@ export function CardView({
                     {(cost !== null || attack !== null || defense !== null) && (
                       <StatLine className="mt-1" cost={cost} attack={attack} defense={defense} />
                     )}
-                    {fromList &&
-                      ordinal === 0 &&
-                      (neighbours.result.phase !== "complete" || position >= 0) && (
-                        <div className="mt-2 flex gap-2">
-                          <Button
-                            data-card-navigation
-                            className="h-10 gap-1 px-3 text-14"
-                            disabled={previous === undefined}
-                            onClick={() => {
-                              if (previous) open(previous)
-                            }}
-                          >
-                            <ChevronLeft className="size-4.5" aria-hidden="true" />
-                            {t("cardPage.previous")}
-                          </Button>
-                          <Button
-                            data-card-navigation
-                            className="h-10 gap-1 px-3 text-14"
-                            disabled={next === undefined}
-                            onClick={() => {
-                              if (next) open(next)
-                            }}
-                          >
-                            {t("cardPage.next")}
-                            <ChevronRight className="size-4.5" aria-hidden="true" />
-                          </Button>
-                        </div>
-                      )}
+                    {!frame && ordinal === 0 && navigation && (
+                      <div className="mt-2 flex gap-2">{navigation}</div>
+                    )}
                   </div>
                 )}
                 {printingId && catalog && (
@@ -828,21 +805,32 @@ export function CardView({
                           typeof row["rarity_code"] === "string"
                             ? label("rarity", row["rarity_code"])
                             : row["rarity_raw"]
+                        const route = {
+                          cardId: stringValue(row["card_id"]),
+                          printingId: id,
+                          cardOwner: stringValue(card?.["home_set_id"]),
+                          printingOwner: stringValue(row["home_set_id"]),
+                          region: printingRegion,
+                        }
+                        const link = frame
+                          ? frame.link({
+                              cardNo: no,
+                              ...(typeof row["card_no_state"] === "string"
+                                ? { cardNoState: row["card_no_state"] }
+                                : {}),
+                              ...(typeof row["int_id"] === "number"
+                                ? { intId: row["int_id"] }
+                                : {}),
+                              route,
+                            })
+                          : { to: path, state: { ...entry, route } }
                         return (
                           <li key={id}>
                             <RouterLink
-                              to={path}
-                              state={{
-                                ...entry,
-                                route: {
-                                  cardId: stringValue(row["card_id"]),
-                                  printingId: id,
-                                  cardOwner: stringValue(card?.["home_set_id"]),
-                                  printingOwner: stringValue(row["home_set_id"]),
-                                  region: printingRegion,
-                                },
-                              }}
+                              to={link.to}
+                              state={link.state}
                               replace
+                              preventScrollReset
                               aria-current={id === printingId ? "page" : undefined}
                               className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
                             >
@@ -860,6 +848,11 @@ export function CardView({
           )}
         </div>
       </div>
+      {frame && navigation && (
+        <div className="sticky bottom-0 z-20 mt-auto flex gap-2 border-t border-border bg-surface-1 px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+          {navigation}
+        </div>
+      )}
       <Dialog
         open={!pending && zoomedView !== undefined}
         onClose={closeZoom}
