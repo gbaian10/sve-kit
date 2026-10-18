@@ -47,7 +47,7 @@ interface SearchOption {
 }
 export interface SearchOptions {
   readonly keywords: readonly SearchOption[]
-  readonly keywordCoverage: "unknown" | "partial" | "complete"
+  readonly keywordCoverage: "pending" | "unknown" | "partial" | "complete"
   readonly types: readonly SearchOption[]
   /** Printings per printed type code in this edition. */
   readonly typeCounts: Readonly<Record<string, number>>
@@ -172,7 +172,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 18
+export const INDEX_IMAGE_FORMAT = 19
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -453,9 +453,6 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
 }
 
 function build(bootstrap: BootstrapColumns, edition: Region): Parts {
-  const membership = mechanicMembership(bootstrap, edition)
-  let knownMechanics = false
-  let unknownMechanics = false
   const pool = new StringPool()
   const summaryColumns = new Columns(pool)
   const index = bootstrap.index()
@@ -491,11 +488,8 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     sets,
     edition,
   )) {
-    const { present, absent, annotated, unknown } = membership(entry.cardId)
-    cards.present.push(pool.encode(present))
-    cards.absent.push(pool.encode(absent))
-    knownMechanics ||= annotated
-    unknownMechanics ||= unknown
+    cards.present.push(pool.encode([]))
+    cards.absent.push(pool.encode([]))
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
@@ -622,7 +616,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     sets,
     options: {
       ...options,
-      keywordCoverage: knownMechanics ? (unknownMechanics ? "partial" : "complete") : "unknown",
+      keywordCoverage: "pending",
     },
     releases,
     targets,
@@ -935,6 +929,18 @@ export class SearchIndex {
       this.summaries = completedSummaries
       this.targets = completedTargets
       this.order = order
+      this.optionsValue = { ...options, keywordCoverage: this.optionsValue.keywordCoverage }
+      this.releasesValue = releases
+      this.indexTargets()
+    } finally {
+      this.pool.seal()
+    }
+  }
+
+  /** Completes only mechanic membership after its independent payload closure is verified. */
+  completeMechanics(bootstrap: BootstrapColumns): void {
+    this.pool.reopen()
+    try {
       const membership = mechanicMembership(bootstrap, this.edition)
       let known = false
       let unknown = false
@@ -946,11 +952,9 @@ export class SearchIndex {
         unknown ||= states.unknown
       }
       this.optionsValue = {
-        ...options,
+        ...this.optionsValue,
         keywordCoverage: known ? (unknown ? "partial" : "complete") : "unknown",
       }
-      this.releasesValue = releases
-      this.indexTargets()
     } finally {
       this.pool.seal()
     }
@@ -1004,9 +1008,12 @@ export class SearchIndex {
     const state = eligible ? { ...query.state, text: "" } : query.state
     const facets: UnsupportedFacet[] = []
     if (
-      Object.keys(state.mechanics).some(
-        (id) => !this.options.keywords.some((keyword) => keyword.id === id),
-      )
+      Object.keys(state.mechanics).length > 0 &&
+      (this.options.keywordCoverage === "unknown" ||
+        this.options.keywordCoverage === "pending" ||
+        Object.keys(state.mechanics).some(
+          (id) => !this.options.keywords.some((keyword) => keyword.id === id),
+        ))
     )
       facets.push("mechanics")
 

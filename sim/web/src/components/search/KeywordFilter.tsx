@@ -25,7 +25,7 @@ export function KeywordFilter({
   readonly onChange: (selected: Readonly<Record<string, MechanicState>>) => void
 }) {
   const { t } = useTranslation()
-  const disabled = !options || options.coverage === "unknown"
+  const disabled = !options || options.coverage === "pending" || options.coverage === "unknown"
   return (
     <Section
       title={t("filters.keywords")}
@@ -54,7 +54,7 @@ export function KeywordFilter({
         </Toggle>
       ))}
       <p className="w-full text-12 text-text-3" role="status">
-        {!options
+        {!options || options.coverage === "pending"
           ? t("filters.keywordLoading")
           : disabled
             ? edition === "en"

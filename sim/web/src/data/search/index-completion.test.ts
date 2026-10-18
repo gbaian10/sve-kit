@@ -8,7 +8,7 @@ import { decodeMessage } from "../format-v3/decode-message"
 import { arrayValue, objectValue, stringValue } from "../format-v3/json"
 import { catalogKeys, type Fragment } from "../format-v3/reader"
 import { BootstrapColumns } from "./bootstrap"
-import { SearchIndex } from "./index"
+import { SearchIndex, SearchQueryError } from "./index"
 import { compareSearchIndexes } from "./test-utils/search-equivalence"
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array()) })
@@ -218,6 +218,7 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
   source.ingest(printing)
   source.seal()
   created.completePrintings(source)
+  created.completeMechanics(source)
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
     expect(index.options.keywordCoverage).toBe("partial")
     const find = (
@@ -239,21 +240,21 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
     expect(without).not.toContain("c:bp01-040")
     expect(without).not.toContain("c:bp01-002")
     expect(without).not.toContain("c:bp01-011")
+    const byName = find({ "kw:fanfare": "has" }, "card", {
+      text: "試作の魔導士",
+      representative: "high",
+    })
+    expect(byName.items[0]?.printingId).toBe("p:bp01-021-sp")
+    const filtered = find({ "kw:fanfare": "has" }, "card", {
+      text: "BP01-021",
+      representative: "high",
+      rarities: ["legend"],
+    })
+    expect(filtered.items[0]?.printingId).toBe("p:bp01-021")
     for (const unit of ["printing", "art", "card"] as const) {
       const page = find({ "kw:fanfare": "has" }, unit, { text: "BP01-021", representative: "high" })
       expect(page.total).toBe(unit === "card" ? 1 : 2)
       if (unit === "card") expect(page.items[0]?.printingId).toBe("p:bp01-021")
-      const byName = find({ "kw:fanfare": "has" }, "card", {
-        text: "試作の魔導士",
-        representative: "high",
-      })
-      expect(byName.items[0]?.printingId).toBe("p:bp01-021-sp")
-      const filtered = find({ "kw:fanfare": "has" }, "card", {
-        text: "BP01-021",
-        representative: "high",
-        rarities: ["legend"],
-      })
-      expect(filtered.items[0]?.printingId).toBe("p:bp01-021")
       expect(page.items.map((item) => item.summary?.cardId)).toEqual(
         Array.from({ length: page.total }, () => "c:bp01-021"),
       )
@@ -261,7 +262,10 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
     }
   }
   const en = stages("en")
-  const english = new SearchIndex(columns([...en.basic, ...en.printing]), "en")
+  const englishSource = columns([...en.basic, ...en.printing])
+  const english = new SearchIndex(englishSource, "en")
+  english.completeMechanics(englishSource)
+  expect(english.options.keywordCoverage).toBe("partial")
   for (const state of ["has", "not"] as const) {
     const result = english.search({
       edition: "en",
@@ -269,5 +273,42 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
       limit: 100,
     })
     expect(result.items.map((item) => item.key)).not.toContain("c:bp01-031")
+    if (state === "has") expect(result.items.map((item) => item.key)).toContain("c:bp01-051")
+  }
+})
+
+it("rejects mechanic queries when every EN shared annotation is blocked", () => {
+  const { basic, printing } = stages("en")
+  const source = columns(
+    [...basic, ...printing].map((fragment) =>
+      fragment.table === "card_engine_support"
+        ? {
+            ...fragment,
+            rows: fragment.rows.map((row) => ({
+              ...row,
+              region_blocks: [{ region: "en", reasons: ["unconfirmed_mapping"] }],
+            })),
+          }
+        : fragment,
+    ),
+  )
+  const index = new SearchIndex(source, "en")
+  index.completeMechanics(source)
+  expect(index.options.keywordCoverage).toBe("unknown")
+  for (const state of ["has", "not"] as const) {
+    try {
+      index.search({
+        edition: "en",
+        state: { ...DEFAULT_QUERY, mechanics: { "kw:ward": state } },
+        limit: 100,
+      })
+      expect.fail("unknown coverage must reject the query")
+    } catch (error) {
+      expect(error).toBeInstanceOf(SearchQueryError)
+      expect((error as SearchQueryError).failure).toMatchObject({
+        kind: "unsupported-query",
+        facets: ["mechanics"],
+      })
+    }
   }
 })

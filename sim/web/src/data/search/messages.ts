@@ -92,7 +92,11 @@ type PurposeResult =
 export type SearchStage = "index" | "manifest" | "config" | "bootstrap" | "search" | "images"
 
 type WorkerEvent =
-  | { readonly kind: "background-ready"; readonly generation: number }
+  | {
+      readonly kind: "background-ready"
+      readonly generation: number
+      readonly purpose: "printings" | "mechanics"
+    }
   | {
       readonly kind: "query-progress"
       readonly generation: number

@@ -83,7 +83,7 @@ interface QueryState {
   types: TypeCode[]; // 印刷類型（從者／法術／護符）
   locations: string[]; // 牌組位置：main、evolve、advance、leader、leader:<框>、token、token:<類型>、ep、sep
   traits: TraitCode[]; // 特性 vocabulary code，選到任一即符合
-  mechanics: Record<KeywordId, "has" | "not">; // 沒列＝不管
+  mechanics: Record<KeywordId, "has" | "not">; // 沒列＝不管；has 取聯集，not 要全部 absent
   sets: SetCode[];
   rarities: RarityCode[];
   altArtOnly: boolean;
@@ -204,9 +204,9 @@ interface QueryState {
 
 ### 4.6 機制三態
 
-`domain/mechanics.ts` 的 `triState(card, keyword, scope)`，依快照格式 §2、§3.1：
+`domain/mechanics.ts` 的 `mechanicState(keywordId, edition, projections, coverage, blocked)`，依快照格式 §2、§3.1：
 
-1. `mechanic_projection` 有該 (card, keyword, scope) → `present`。
+1. `mechanic_projection` 有該 (card, keyword, scope) 且 relations 含 `has` → `present`。
 2. 沒有這張卡該 scope 的 `card_mechanic_coverage` 列 → `unknown`（尚未檢查）。
 3. 有列：先在 keyword universe U 依 `complete_mode` 解出 complete（include＝列表本身；exclude＝U 減列表；`complete_all=true` 時 complete＝U），
    再在 U∖complete 依 `partial_mode` 解出 partial。

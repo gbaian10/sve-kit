@@ -488,16 +488,22 @@ export function CardsPage() {
   const panelOpen = prefs.filterPanelOpen
   const resultCount =
     page !== null ? (
-      <p className="min-w-0 text-right text-13 text-text-2" aria-live="polite">
-        <b className="font-semibold text-text-1 tabular-nums">
-          {new Intl.NumberFormat(uiLanguage).format(page.total)}
-        </b>{" "}
-        {query.unit === "printing"
-          ? t("results.countPrintingUnit")
-          : query.unit === "art"
-            ? t("results.countArtUnit")
-            : t("results.countUnit")}
-      </p>
+      <div className="min-w-0 text-right text-13 text-text-2" aria-live="polite">
+        <p>
+          <b className="font-semibold text-text-1 tabular-nums">
+            {new Intl.NumberFormat(uiLanguage).format(page.total)}
+          </b>{" "}
+          {query.unit === "printing"
+            ? t("results.countPrintingUnit")
+            : query.unit === "art"
+              ? t("results.countArtUnit")
+              : t("results.countUnit")}
+        </p>
+        {Object.keys(query.mechanics).length > 0 &&
+          printingOptions?.keyword?.coverage === "partial" && (
+            <p className="text-11">{t("filters.keywordIncomplete")}</p>
+          )}
+      </div>
     ) : null
   const view = chosenView ?? prefs.viewMode
   const unsupported = queryError?.kind === "unsupported-query"
@@ -673,7 +679,7 @@ export function CardsPage() {
           return option ? vocabularyOptionLabel(option.name, textLang) : code
         }}
         keywordLabel={(id) => {
-          const option = printingOptions?.keyword.keywords.find((item) => item.id === id)
+          const option = printingOptions?.keyword?.keywords.find((item) => item.id === id)
           return option ? vocabularyOptionLabel(option.name, textLang) : id
         }}
         setLabel={(code) => {

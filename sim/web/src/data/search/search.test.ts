@@ -220,7 +220,8 @@ const POLL = { timeout: 10_000 }
 // A card's representative may be a printing from another set, which is a locator until the
 // background printing download lands; `search` channels do not re-run on their own.
 const completions = (events: readonly SearchEvent[]) =>
-  events.filter((event) => event.kind === "background-ready").length
+  events.filter((event) => event.kind === "background-ready" && event.purpose === "mechanics")
+    .length
 
 describe("complete Worker catalog generations", () => {
   it("keeps only the last input and searches once after the whole download", async () => {
@@ -2973,11 +2974,42 @@ it("keeps a keyword query pending until its projection and coverage closure comp
   const release = h.served.hold(stringValue(engineFile["path"]))
   h.session.load(base, "jp", "preview")
   await expect.poll(() => h.status().phase, POLL).toBe("ready")
-  h.channel.search({ ...query, state: { ...CARD_QUERY, mechanics: { "kw:ward": "has" } } })
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, mechanics: { "kw:ward": "has" } } })
   await h.queried()
   expect(h.status().result.phase).toBe("pending")
   release()
   await h.settled()
   expect(h.status().result).toMatchObject({ phase: "complete", page: { total: 3 } })
+  h.session.dispose()
+})
+
+it("finishes printing facets and merged units while mechanic payloads are pending", async () => {
+  const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>
+    arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "mechanic_projection"),
+  )
+  if (!engineFile) throw new Error("missing mechanic fixture")
+  const h = harness()
+  const release = h.served.hold(stringValue(engineFile["path"]))
+  h.session.load(base, "jp", "preview")
+  await expect.poll(() => h.status().phase, POLL).toBe("ready")
+  for (const change of [
+    { rarities: ["legend"] },
+    { altArtOnly: true },
+    { unit: "art" },
+    { unit: "card" },
+  ] as const) {
+    h.channel.view({ ...query, state: { ...DEFAULT_QUERY, ...change } })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("printing query failed")
+    expect(result.page.total).toBeGreaterThan(0)
+    expect(result.view?.options.keywordCoverage).toBe("pending")
+  }
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, mechanics: { "kw:ward": "has" } } })
+  await h.queried()
+  expect(h.status().result.phase).toBe("pending")
+  release()
+  await h.settled()
+  expect(h.status().result.phase).toBe("complete")
   h.session.dispose()
 })
