@@ -1,7 +1,5 @@
-// The deck-location row, in the maintainer's order. Evolve, advance and Token come from the data's
-// special kinds; leader, EP and SEP from the type; "main" is every printing in none of the others.
 // Token and leader keep the sub-values they had under the former type filter (`token:<type>`,
-// `leader:<frame>`), so the tokens older `type=` URLs carry still resolve.
+// `leader:<frame>`), so the location tokens older `type=` URLs carry still resolve.
 export const LOCATION_ORDER = ["main", "evolve", "advance", "leader", "token", "ep", "sep"] as const
 const TOKEN_TYPES = ["follower", "spell", "amulet", "crest", "equipment"] as const
 const LEADER_FRAMES = ["gold", "white", "unknown"] as const

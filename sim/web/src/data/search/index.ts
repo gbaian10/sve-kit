@@ -177,50 +177,24 @@ interface DeckKinds {
   readonly advance: boolean
 }
 
-// A printing can hold several locations (an evolved Token is both); "main" means none of the others.
-function hasLocation(kinds: DeckKinds, token: string): boolean {
-  switch (token) {
-    case "main":
-      return (
-        !kinds.evolve &&
-        !kinds.advance &&
-        !kinds.token &&
-        kinds.type !== "leader" &&
-        kinds.type !== "ep" &&
-        kinds.type !== "sep"
-      )
-    case "evolve":
-      return kinds.evolve
-    case "advance":
-      return kinds.advance
-    case "token":
-      return kinds.token
-    case "leader":
-      return kinds.type === "leader"
-    case "ep":
-    case "sep":
-      return kinds.type === token
-    default:
-      if (token.startsWith("token:")) return kinds.token && token === `token:${kinds.type}`
-      if (token.startsWith("leader:"))
-        return kinds.type === "leader" && token === `leader:${kinds.frame}`
-      return false
-  }
+// Every printing has exactly one parent location, so the row's counts add up to the edition and
+// two parents never share a printing. Combined special kinds (the data has none today) resolve in
+// this fixed order: Token, leader, EP, SEP, evolve, advance, then main for everything else.
+function locationOf(kinds: DeckKinds): string {
+  if (kinds.token) return "token"
+  if (kinds.type === "leader") return "leader"
+  if (kinds.type === "ep" || kinds.type === "sep") return kinds.type
+  if (kinds.evolve) return "evolve"
+  if (kinds.advance) return "advance"
+  return "main"
 }
 
-/** Every location token a printing counts under. */
+/** The parent location a printing counts under, plus its Token kind or leader frame sub-value. */
 function locationTokens(kinds: DeckKinds): string[] {
-  return [
-    "main",
-    "evolve",
-    "advance",
-    "leader",
-    `leader:${kinds.frame}`,
-    "token",
-    `token:${kinds.type}`,
-    "ep",
-    "sep",
-  ].filter((token) => hasLocation(kinds, token))
+  const parent = locationOf(kinds)
+  if (parent === "token") return [parent, `token:${kinds.type}`]
+  if (parent === "leader") return [parent, `leader:${kinds.frame}`]
+  return [parent]
 }
 
 function tally(counts: Record<string, number>, keys: readonly string[]): void {
@@ -948,7 +922,7 @@ export class SearchIndex {
       (!state.types.length ||
         state.types.includes(this.pool.get(this.printings.type[printing] ?? 0))) &&
       (!state.locations.length ||
-        state.locations.some((token) => hasLocation(this.kindsOf(printing), token))) &&
+        locationTokens(this.kindsOf(printing)).some((token) => state.locations.includes(token))) &&
       (!state.traits.length ||
         this.traitsOf(this.printings.card[printing] ?? 0).some((trait) =>
           state.traits.includes(trait),

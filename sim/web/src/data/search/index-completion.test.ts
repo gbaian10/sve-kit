@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { decodeMessage } from "../format-v3/decode-message"
 import { arrayValue, objectValue, stringValue } from "../format-v3/json"
@@ -46,6 +47,90 @@ function columns(fragments: readonly Fragment[]) {
   result.seal()
   return result
 }
+
+const PARENTS = ["main", "evolve", "advance", "leader", "token", "ep", "sep"] as const
+
+// Every printing lands in exactly one parent location, whatever special kinds it combines.
+function expectExclusiveLocations(index: SearchIndex, edition: Region) {
+  const query = (locations: readonly string[]) =>
+    index.search({ edition, state: { ...DEFAULT_QUERY, locations }, limit: 1000 })
+  const total = query([]).total
+  const members = new Map(PARENTS.map((parent) => [parent, query([parent]).items]))
+  for (const [parent, items] of members) {
+    expect(items.length, parent).toBe(index.options.locationCounts[parent] ?? 0)
+    for (const other of PARENTS) {
+      if (other === parent) continue
+      const ids = new Set(members.get(other)?.map((item) => item.printingId))
+      expect(items.filter((item) => ids.has(item.printingId)).length, `${parent} ∩ ${other}`).toBe(
+        0,
+      )
+    }
+  }
+  expect(PARENTS.reduce((sum, parent) => sum + (members.get(parent)?.length ?? 0), 0)).toBe(total)
+  expect(query([...PARENTS]).total).toBe(total)
+  // Sub-values partition their parent the same way.
+  const children = (parent: string) =>
+    Object.entries(index.options.locationCounts)
+      .filter(([token]) => token.startsWith(`${parent}:`))
+      .reduce((sum, [, count]) => sum + count, 0)
+  expect(children("token")).toBe(index.options.locationCounts["token"] ?? 0)
+  expect(children("leader")).toBe(index.options.locationCounts["leader"] ?? 0)
+  return members
+}
+
+describe("deck locations stay exclusive across combined special kinds", () => {
+  it.each(["jp", "en"] as const)(
+    "resolve by priority at build, after restore and after completion for %s",
+    (edition) => {
+      const { basic, printing } = stages(edition)
+      // Give the fixture every combination the data could carry: Token over evolve, evolve over
+      // advance, and a Token or evolve mark on a leader, EP or spell.
+      const seen = new Map<string, number>()
+      const kindsFor = (type: string, region: string): string[] => {
+        const nth = (seen.get(`${type}/${region}`) ?? 0) + 1
+        seen.set(`${type}/${region}`, nth)
+        if (type === "leader") return nth % 2 ? ["token"] : ["evolve"]
+        if (type === "ep" || type === "sep") return ["evolve", "advance"]
+        if (type === "follower") return ["evolve", "token"]
+        if (type === "spell") return nth % 2 ? ["evolve", "advance"] : ["advance"]
+        return []
+      }
+      const combined = basic.map((fragment) =>
+        fragment.table === "face_revision"
+          ? {
+              ...fragment,
+              rows: fragment.rows.map((row) => ({
+                ...row,
+                special_kinds: kindsFor(stringValue(row["type_code"]), stringValue(row["region"])),
+              })),
+            }
+          : fragment,
+      )
+      const source = columns(combined)
+      const index = new SearchIndex(source, edition)
+      const built = expectExclusiveLocations(index, edition)
+      const { locationCounts: counts, typeCounts: types } = index.options
+      // Token wins over evolve: every follower is a Token and none is an evolve card; evolve wins
+      // over advance for the odd spells; EP and SEP keep their type whatever kinds they carry.
+      expect(counts["token:follower"]).toBe(types["follower"])
+      expect((counts["evolve"] ?? 0) + (counts["advance"] ?? 0)).toBe(types["spell"])
+      expect(counts["evolve"]).toBeGreaterThan(0)
+      expect(counts["advance"]).toBeGreaterThan(0)
+      expect((counts["token:leader"] ?? 0) + (counts["leader"] ?? 0)).toBe(types["leader"])
+      expect(counts["token:leader"]).toBeGreaterThan(0)
+      expect(counts["ep"] ?? 0).toBe(types["ep"] ?? 0)
+      expectExclusiveLocations(new SearchIndex(index.encode(), edition), edition)
+      source.ingest(printing)
+      source.seal()
+      index.completePrintings(source)
+      const completed = expectExclusiveLocations(index, edition)
+      expect([...completed.values()].map((items) => items.length)).toEqual(
+        [...built.values()].map((items) => items.length),
+      )
+      expectExclusiveLocations(new SearchIndex(index.encode(), edition), edition)
+    },
+  )
+})
 
 describe("printing completion without replacing the search index", () => {
   it.each(["jp", "en"] as const)("matches a full build and restored image for %s", (edition) => {
