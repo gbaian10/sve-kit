@@ -37,7 +37,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:158c300e7ec340a0c7d170689f34cc9691b8c23fa1ca4c6f8480a57065f0fc09
+      template_id: frame:12741c22004ea822beab10f308884ba4527733d43565170f756394e1cb7ce981
       lang: zh-Hant
       target:
         format: 1
@@ -55,7 +55,11 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 上。自己戰場上的全部人偶・衍生物・從者{
+            text: 上。自己戰場上的全部人偶・
+          - kind: LeafRef
+            slot: token_26
+          - kind: Literal
+            text: ・從者{
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal

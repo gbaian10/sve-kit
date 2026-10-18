@@ -187,3 +187,9 @@ def test_official_reference_ignores_unused_choice_quality_but_keeps_term_quality
     assert label.origin == "official"
     assert label.low_confidence is term_low
     assert label.bold is True
+    original = labels(
+        db, "zh-Hant", {identifier: ReferenceName("新合成官名😀", False)}
+    )[canonical(ref.model_dump(mode="json")), "ja"]
+    assert original.text == "自編名稱"
+    assert original.low_confidence is term_low
+    assert original.bold is True

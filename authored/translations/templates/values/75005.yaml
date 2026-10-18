@@ -719,11 +719,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -953,7 +951,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:aecc065c91671132383f0513b8df491e44d04623d8e71fd78445879003d77c11
+      template_id: frame:7b4daf1e5831d2eb6e434f62bfceda1d841247f0398eb32067783b2dccb92be7
       lang: zh-Hant
       target:
         format: 1
@@ -963,7 +961,11 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}衍生物・從者進入自己的戰場時，選擇敵方戰場上的'
+            text: '}'
+          - kind: LeafRef
+            slot: token_19
+          - kind: Literal
+            text: ・從者進入自己的戰場時，選擇敵方戰場上的
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal

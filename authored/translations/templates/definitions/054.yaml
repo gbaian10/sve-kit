@@ -416,7 +416,7 @@ records:
       content_hash: 48029ba9359321f3231a9770fb5b0e3035ad3a3235562ab4deb5d87304f3b0b5
   - kind: sentence_template
     data:
-      id: frame:fab51f797b35c45bac2dd5f36d7327f8cc19ba73676142159e1484c6f0810e89
+      id: frame:f09d75df1ec87f83e8add13c9fb27e055b4977230f0cfe62f7653cbb20c16ca6
       source:
         source_lang: ja
         canonical_hash: 74d7fa3dcc7bfcfe0779a6f42cb5ed2e4e390efe33c105de29d598d13a6b56c6
@@ -439,14 +439,26 @@ records:
               end: 84
       leaf_schema:
         format: 2
-        slots: []
+        slots:
+          - name: token_8
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 8
+                end: 12
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: fab51f797b35c45bac2dd5f36d7327f8cc19ba73676142159e1484c6f0810e89
+      content_hash: f09d75df1ec87f83e8add13c9fb27e055b4977230f0cfe62f7653cbb20c16ca6
   - kind: sentence_template
     data:
       id: frame:6ddc1fb46bdca8502bc9a5fc66687cded153433dd14495223332ecd632914234
@@ -762,7 +774,7 @@ records:
       content_hash: 2cb2b304077a5c3c307991d84df6cb738a89d37ed40ee6fdfc90a1e8392179df
   - kind: sentence_template
     data:
-      id: frame:cb5f62997a516a7cf921b2bd5209c73c9aa30d34581e3e49ab6b713a01eb1a98
+      id: frame:dbb641a6056c0f5f7b8b046af9b3fd6b347c5d4ed567a2f4235fb12e53828db1
       source:
         source_lang: ja
         canonical_hash: 74d7fa3dcc7bfcfe0779a6f42cb5ed2e4e390efe33c105de29d598d13a6b56c6
@@ -785,14 +797,26 @@ records:
               end: 126
       leaf_schema:
         format: 2
-        slots: []
+        slots:
+          - name: token_8
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 8
+                end: 12
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: cb5f62997a516a7cf921b2bd5209c73c9aa30d34581e3e49ab6b713a01eb1a98
+      content_hash: dbb641a6056c0f5f7b8b046af9b3fd6b347c5d4ed567a2f4235fb12e53828db1
   - origin: machine
     kind: sentence_template
     data:

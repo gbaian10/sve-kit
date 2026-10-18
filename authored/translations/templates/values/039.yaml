@@ -282,13 +282,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:fa384b026a7825bc51ce1af4ff109d0eb5290dcb623b19bdb03b82a0396cb063
+      template_id: frame:f65f3c00df59b514de926df283551fa6df80f2ebab0889130724c6dea1af4b9b
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -362,11 +366,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:

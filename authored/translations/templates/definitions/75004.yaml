@@ -1127,7 +1127,7 @@ records:
           scope: read_ability_0.mode_count
   - kind: sentence_template
     data:
-      id: frame:36f319363869ed4d2ec6b71eb4d3c9ea5abe6f59df33d698222ebe5aba856364
+      id: frame:10117703d44cfa6d0ee3607878b34ce3d063ac6a087894d408e78da586b3856b
       source:
         source_lang: ja
         canonical_hash: 8d6061c1216686fdbfe183e0b55b4bba342df7d97986bef47a9c7246f3ad96ea
@@ -1254,6 +1254,18 @@ records:
             occurrences:
               - start: 34
                 end: 35
+          - name: token_44
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 44
+                end: 48
           - name: leaf_9
             type: Concept
             role: rule_term
@@ -1344,7 +1356,7 @@ records:
                   - mode_2
               source_leaves: []
         exports: []
-      content_hash: 36f319363869ed4d2ec6b71eb4d3c9ea5abe6f59df33d698222ebe5aba856364
+      content_hash: 10117703d44cfa6d0ee3607878b34ce3d063ac6a087894d408e78da586b3856b
       mode_rules:
         - base:
             mode: exact
@@ -4060,7 +4072,7 @@ records:
       content_hash: 518c923add9ec8f9db6e00f325d80db2316db42fa6057ca841e3b7148dfe3316
   - kind: sentence_template
     data:
-      id: frame:79a3cb07036270630519ed35a1b53906eddbd273867581d79e537b7b7fe96c3a
+      id: frame:c30029df5d88bfe2033a1e03a94744bdc49b58042d3b64e92f8b8a5963f294e4
       source:
         source_lang: ja
         canonical_hash: 27729e9c9d62d41df102c0116d9bfd263e9746751c27e74d7c4e6452f48dae75
@@ -4220,6 +4232,18 @@ records:
               imports:
                 objects: names_port_d7c9d6f1a2695326
               scope: read_ability_1
+          - name: token_96
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 96
+                end: 100
           - name: leaf_10
             type: QuantitySpec
             role: existence_count
@@ -4291,7 +4315,7 @@ records:
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: 79a3cb07036270630519ed35a1b53906eddbd273867581d79e537b7b7fe96c3a
+      content_hash: c30029df5d88bfe2033a1e03a94744bdc49b58042d3b64e92f8b8a5963f294e4
   - kind: sentence_template
     data:
       id: frame:03467cf7b8d94e7ff2259f36850ab3a39e2d0b4654aac38a6c5c8feeebfdb454
@@ -4877,7 +4901,7 @@ records:
       content_hash: 3f974057dced04778a889244b44564204dbe5eea16bdaef7fd018d3747ef2ba7
   - kind: sentence_template
     data:
-      id: frame:6160af40f0e4c3cf797678d0bae8e2c9ee0a5314ddd74c15dcb70be3a045e096
+      id: frame:bc634708a3a8ef715c702957b0f3c38b1abb4d3bcbe91b34dde38aee3d8ac799
       source:
         source_lang: ja
         canonical_hash: cf6bda1baff71c478aba9e8bd7b9792955c37dd3375b9e5222bda5ea2e3b85c1
@@ -4990,6 +5014,18 @@ records:
               imports:
                 objects: names_port_b559694f173e8e75
               scope: read_ability_2
+          - name: token_67
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 67
+                end: 71
           - name: leaf_6
             type: QuantitySpec
             role: existence_count
@@ -5064,7 +5100,7 @@ records:
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: 6160af40f0e4c3cf797678d0bae8e2c9ee0a5314ddd74c15dcb70be3a045e096
+      content_hash: bc634708a3a8ef715c702957b0f3c38b1abb4d3bcbe91b34dde38aee3d8ac799
   - kind: sentence_template
     data:
       id: frame:46f98e778f7b7886cbd3e1f7c8db8d3a0dfeead67f1e3f0aaf1ce0d7703f8e19

@@ -364,7 +364,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】指定敵方的
+            text: 】選擇敵方的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -1102,7 +1102,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:a365b756118ff2a81edfe7c0afbb76fda1de3104d1dcc32bd4ebf5ff7247d72c
+      template_id: frame:0c84d247b07e9537859613256dc9fcc5366f5f79c12d69030618ff884a485fa5
       lang: zh-Hant
       target:
         format: 1
@@ -1116,7 +1116,11 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 張非衍生物的從者：在這張卡片上放置
+            text: 張非
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 的從者：在這張卡片上放置
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -1129,13 +1133,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:7578fb78470d6e3840def836baa76a90125c1f25a90f0c277ad4b32d3ceb588e
+      template_id: frame:c107c97606b010d24d4ed0889dfcf2f4afa06baa7dda5c2c9553fb0a7c1451d4
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation

@@ -328,7 +328,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定
+            text: 選擇
           - kind: LeafRef
             slot: leaf_0
           - kind: LeafRef
@@ -345,7 +345,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 。將其返回
+            text: 。使其返回
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -1124,13 +1124,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:5a381efec1a9c25bd44004188a5d3228a2efb7bf280fc7c5fecfbd97e2c5651b
+      template_id: frame:5dcde16a5d837439cd3e8910e65fcab3abf22f13a843e4e0c4d9de13301818b9
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 妖精・衍生物進入自己的戰場時，使其{
+            text: 妖精・
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 進入自己的戰場時，使其{
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal

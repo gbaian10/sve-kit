@@ -375,11 +375,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -744,7 +742,7 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: ，並重置。本回合，其無法攻擊敵方。
+            text: ，並重置。本回合，其無法攻擊。
       expression_targets: {}
   - origin: machine
     kind: template_translation

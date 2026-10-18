@@ -30,11 +30,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -248,15 +246,15 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 』『
+            text: 』、『
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 』『
+            text: 』、『
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 』『
+            text: 』與『
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -971,17 +969,25 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:e172f724c0829de8c87957227d3a4f8425d68d5b436951f058dc5c7cfaa5f40b
+      template_id: frame:cb4d0651c8205b3302081cab2bb76b6715940999b8f5f5876d5d32969af92b89
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 只要這張卡片存在，自己使用禁忌・衍生物時，若其為本回合使用的第
+            text: 只要這張卡片存在，自己使用禁忌・
+          - kind: LeafRef
+            slot: token_14
+          - kind: Literal
+            text: 時，若其為本回合使用的第
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 張禁忌・衍生物，則消費-
+            text: 張禁忌・
+          - kind: LeafRef
+            slot: token_40
+          - kind: Literal
+            text: ，則消費-
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -1118,11 +1124,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -1748,13 +1752,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:1923e08b5b99296afc2c589b205113c76a46ef0b3bce464cac729a7c9861e574
+      template_id: frame:0018183031fa718231482db1981c1a314aa111a171087ce8d37de821f9df2c17
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -1882,11 +1890,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -2172,13 +2178,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:e44a61a7ff37c2df0fb7c2918a074817e4a50594e0724e6949a7df6cc61d8b9f
+      template_id: frame:3a8219496877cbbaf1e112ea889d07b80130c0b3eefaebab06bbb0750edaf0d7
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 只要這張卡片存在，自己戰場上的全部龍裔・衍生物就具有【
+            text: 只要這張卡片存在，自己戰場上的全部龍裔・
+          - kind: LeafRef
+            slot: token_16
+          - kind: Literal
+            text: 就具有【
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -2402,13 +2412,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:3bf07f363ed4c524102dea1ecc06d3663fbecac066cb8c3f0b8165155ba5ce15
+      template_id: frame:cc042d4d14d007cc2a32343340b2153479242d995195221ad9050aa0311b8d5d
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -2578,13 +2592,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:e374d6257cf98f0831e079cdb071d828e7b027df362813bb2b7080f122630d16
+      template_id: frame:e168deb21267d81d779f66b5bdd85dac707733cf621f66087d8f81fb9204d730
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -3011,13 +3029,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:2c3f4550ef25a798744d3eb7934ff68756085fec2c65d9b4365758ede8149791
+      template_id: frame:105836e932c52f1d9dd353416e37e34eac3edf107c16bcd0b9eab904d7f7e55f
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     note: 2026-10-18 對照日文確認；完整日文與渲染全文對照一致；禁止攻擊的主語、條件與期間保留。敵方沿 P0 既有寫法涵蓋敵方主戰者與從者，官方 FAQ Q546 已明確其範圍。source_claim：https://shadowverse-evolve.com/cardlist/?cardno=BP03-P31&faq=
@@ -3029,7 +3051,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 這張卡片無法攻擊敵方。
+            text: 這張卡片無法攻擊。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -3297,13 +3319,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:ac1c2c934b8d2407fdad40c791f6d93e7722e1e8d4455d46030e2f5180df0ac2
+      template_id: frame:62aae4ce7b8e0d835f42678eea2c1e8fe5115bd76fdfa3362bdebaedfe943c71
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -3680,11 +3706,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -3940,7 +3964,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:a357638ca1e5b9463da69180853c14517857a80a65dca00ea5f5275d5e94e9c8
+      template_id: frame:e51603918fee552f07066f3b940942f77273c04c61df6ea6f8bea0210f498d74
       lang: zh-Hant
       target:
         format: 1
@@ -3989,7 +4013,11 @@ records:
           - kind: LeafRef
             slot: name_12
           - kind: Literal
-            text: 的士兵・衍生物・從者」時，才可以使用這個能力，並且在
+            text: 的士兵・
+          - kind: LeafRef
+            slot: token_99
+          - kind: Literal
+            text: ・從者」時，才可以使用這個能力，並且在
           - kind: LeafRef
             slot: leaf_10
           - kind: Literal

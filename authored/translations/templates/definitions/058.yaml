@@ -697,7 +697,7 @@ records:
       content_hash: 26547ed7fdc6dec614cfad629e23c57b785e77731001a7badbac15e63482da0d
   - kind: sentence_template
     data:
-      id: frame:027bc5ba367317abf36427bb0c208f15086097d7f3480f918c16737f12b63f36
+      id: frame:36909c73113ec34d734a92202284474ced3a726be5b6064acf4bd03445e99791
       source:
         source_lang: ja
         canonical_hash: 6971a0d0eda38335b8b19cc5baf02cb61a1cb96c4a77f426671f16531a1ef2d7
@@ -721,6 +721,18 @@ records:
       leaf_schema:
         format: 2
         slots:
+          - name: token_8
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 8
+                end: 12
           - name: leaf_0
             type: Concept
             role: ability
@@ -785,7 +797,7 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 027bc5ba367317abf36427bb0c208f15086097d7f3480f918c16737f12b63f36
+      content_hash: 36909c73113ec34d734a92202284474ced3a726be5b6064acf4bd03445e99791
   - origin: machine
     kind: sentence_template
     data:
@@ -3021,7 +3033,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:688d02d3373955f078576eb87851d9679a0b80de6ef5e4354bf05f8858551059
+      id: frame:1d261e79efec62108ef059a13583d279f633f9c9cb724bb0f086f175cec22589
       source:
         source_lang: ja
         canonical_hash: 21bb0e895e953fac1854b8e3fa0439dd3e8167e302bb2cfaa61fcc36eb0da8db
@@ -3057,6 +3069,18 @@ records:
             occurrences:
               - start: 6
                 end: 10
+          - name: token_11
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 11
+                end: 15
           - name: leaf_1
             type: Concept
             role: rule_term
@@ -3086,7 +3110,7 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 688d02d3373955f078576eb87851d9679a0b80de6ef5e4354bf05f8858551059
+      content_hash: 1d261e79efec62108ef059a13583d279f633f9c9cb724bb0f086f175cec22589
   - kind: sentence_template
     data:
       id: frame:851197c519f26c021e6cbb07d857fbac4a4f70473146eda57104b052673b51cb

@@ -350,11 +350,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -578,7 +576,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:023a52bf56697d9aeaa13fcb062413b5b426fa98d80b80d54825c086aa46c9ae
+      template_id: frame:1de183f71b8f330fc6dcd5b3d14f7bcae3b4d469e41bc9eb363027448bc5d66f
       lang: zh-Hant
       target:
         format: 1
@@ -596,7 +594,11 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 張魔界・衍生物放置到墓場：選擇
+            text: 張魔界・
+          - kind: LeafRef
+            slot: token_23
+          - kind: Literal
+            text: 放置到墓場：選擇
           - kind: LeafRef
             slot: leaf_3
           - kind: LeafRef

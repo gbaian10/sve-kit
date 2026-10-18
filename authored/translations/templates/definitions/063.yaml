@@ -1370,7 +1370,7 @@ records:
       content_hash: 097d5afe1bd4f0a26921805d164bf0d33929146fd1e375b0332e5ce2e5c480d2
   - kind: sentence_template
     data:
-      id: frame:02670565d0733395d2cebf719cb2b61f2a6ae52c820e2359e65dac531aeb88eb
+      id: frame:7f9ef699d9ff3023833562215c8dc250f06f890f32b826509225063f920d1cb6
       source:
         source_lang: ja
         canonical_hash: d96055d35cc273b3c917cbe47f1334725782e26e1b5d952678e0ee7b5aedb3ae
@@ -1416,6 +1416,18 @@ records:
             occurrences:
               - start: 14
                 end: 15
+          - name: token_19
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 19
+                end: 23
           - name: name_4
             type: PredicateExpr
             role: name_relation
@@ -1435,6 +1447,18 @@ records:
               imports:
                 objects: names_port_e5a0896458b69b6d
               scope: read_ability_0
+          - name: token_42
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 42
+                end: 46
           - name: leaf_2
             type: Nat
             role: count
@@ -1495,7 +1519,7 @@ records:
                 origin: event_subject
               source_leaves: []
         exports: []
-      content_hash: 02670565d0733395d2cebf719cb2b61f2a6ae52c820e2359e65dac531aeb88eb
+      content_hash: 7f9ef699d9ff3023833562215c8dc250f06f890f32b826509225063f920d1cb6
   - kind: sentence_template
     data:
       id: frame:5e27c030f444b1c4f0601856fb51fe61dfcdb6a572285aa36dcdd5d829b86d22

@@ -1131,7 +1131,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:647828331fcf9b3b49bdf75d95b6a14a74d0999f4a6d6477f036369d05e210e6
+      template_id: frame:e93e6a74dc34fa841ebfd44412c0aaaf4898b3f81ba85fa74881d1c1bf0025eb
       lang: zh-Hant
       target:
         format: 1
@@ -1141,7 +1141,11 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}自己的EX區中的全部妖精・衍生物・從者{'
+            text: '}自己的EX區中的全部妖精・'
+          - kind: LeafRef
+            slot: token_21
+          - kind: Literal
+            text: ・從者{
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal

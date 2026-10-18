@@ -449,7 +449,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:02670565d0733395d2cebf719cb2b61f2a6ae52c820e2359e65dac531aeb88eb
+      template_id: frame:7f9ef699d9ff3023833562215c8dc250f06f890f32b826509225063f920d1cb6
       lang: zh-Hant
       target:
         format: 1
@@ -463,7 +463,11 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 的衍生物・卡片離開戰場時，召喚
+            text: 的
+          - kind: LeafRef
+            slot: token_19
+          - kind: Literal
+            text: ・卡片離開戰場時，召喚
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -471,7 +475,11 @@ records:
           - kind: LeafRef
             slot: name_4
           - kind: Literal
-            text: 的衍生物・卡片到
+            text: 的
+          - kind: LeafRef
+            slot: token_42
+          - kind: Literal
+            text: ・卡片到
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal

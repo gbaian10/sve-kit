@@ -54,6 +54,18 @@ def labels(
         if (value := payload(row))
     }
     result = {}
+    reference: CardNameReference | GlossaryReference
+    for identifier, term in terms.items():
+        if term["category"] == "card_name":
+            reference = CardNameReference(kind="card_name", term_id=identifier)
+            result[canonical(reference.model_dump(mode="json")), "ja"] = Label(
+                reference,
+                "ja",
+                string(term["source_ja"]),
+                _origin(term["origin"]),
+                bool(term["low_confidence"]),
+                True,
+            )
     for row in db.select(
         "glossary_translation", db.columns("glossary_translation"), where={"lang": lang}
     ):

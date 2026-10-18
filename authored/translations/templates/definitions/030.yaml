@@ -223,7 +223,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:aa1c892022ebfbccc842394c22e67588e4049f5901d72b50b3eb391963c6d5e5
+      id: frame:d97bb8f48a83556a4966d1498ff0b4afd57ff92e9dd5106c95e1f848d313dfb2
       source:
         source_lang: ja
         canonical_hash: 763c65d2a0e5db0ac8d15f99c61b442416c7ceea3a71cc0e642bdaf1a3dfe3c3
@@ -259,6 +259,18 @@ records:
             occurrences:
               - start: 6
                 end: 11
+          - name: token_12
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 12
+                end: 16
           - name: leaf_1
             type: QuantitySpec
             role: selection_count
@@ -277,7 +289,7 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: aa1c892022ebfbccc842394c22e67588e4049f5901d72b50b3eb391963c6d5e5
+      content_hash: d97bb8f48a83556a4966d1498ff0b4afd57ff92e9dd5106c95e1f848d313dfb2
   - kind: sentence_template
     data:
       id: frame:6702b38f97627746203ec71ef2f1db870eaf399bbde7605264ccdd8f23f5ecb9
@@ -2396,7 +2408,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:d7277c76c93c4d93dc930bcfd91c1d6eb5621379aeb95ba2ec4192a7ab63a092
+      id: frame:6ab108692b8b1eb4046d8f43f90b8b969dc223e82fedb539cd5c0fa933dfb72e
       source:
         source_lang: ja
         canonical_hash: 1d40372e3fd5a695102577ada113b827a0676c75467e305e5363cb65f61b4912
@@ -2443,6 +2455,18 @@ records:
             occurrences:
               - start: 8
                 end: 9
+          - name: token_19
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 19
+                end: 23
           - name: leaf_2
             type: Nat
             role: count
@@ -2495,7 +2519,7 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: d7277c76c93c4d93dc930bcfd91c1d6eb5621379aeb95ba2ec4192a7ab63a092
+      content_hash: 6ab108692b8b1eb4046d8f43f90b8b969dc223e82fedb539cd5c0fa933dfb72e
   - kind: sentence_template
     data:
       id: frame:743c3cbffe352a1519cec721b46e2700efee1eac0d4fc5aa085788779dfea071

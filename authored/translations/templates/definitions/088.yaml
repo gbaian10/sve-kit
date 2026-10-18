@@ -3517,7 +3517,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:5a381efec1a9c25bd44004188a5d3228a2efb7bf280fc7c5fecfbd97e2c5651b
+      id: frame:5dcde16a5d837439cd3e8910e65fcab3abf22f13a843e4e0c4d9de13301818b9
       source:
         source_lang: ja
         canonical_hash: 1bbd44e65ad7b1ff52f5607c80d8e00c5860cd9b475fb819dbaffc672b15c360
@@ -3541,6 +3541,18 @@ records:
       leaf_schema:
         format: 2
         slots:
+          - name: token_8
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 8
+                end: 12
           - name: leaf_0
             type: Concept
             role: rule_term
@@ -3570,7 +3582,7 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: 5a381efec1a9c25bd44004188a5d3228a2efb7bf280fc7c5fecfbd97e2c5651b
+      content_hash: 5dcde16a5d837439cd3e8910e65fcab3abf22f13a843e4e0c4d9de13301818b9
   - origin: machine
     kind: sentence_template
     data:

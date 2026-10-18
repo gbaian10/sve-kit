@@ -99,7 +99,19 @@ def test_ambiguous_or_cross_ability_receipt_remains_pending() -> None:
         )
 
 
-def test_fragments_render_with_required_reference_annotation() -> None:  # ruff: ignore[too-many-locals] -- keep source, dependency closure and normal rendering in one case
+@pytest.mark.parametrize(
+    ("translated_fragment", "show_hint"),
+    [
+        ("測試片段", True),
+        ("完全不同的官方譯名", True),
+        ("仮場手札自分", False),
+        ("仮場手札自分 ", True),
+    ],
+)
+def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[too-many-locals] -- keep source, dependency closure and normal rendering in one case
+    translated_fragment: str,
+    show_hint: bool,
+) -> None:
     raw = "自分の墓場の「カード名に『仮場手札自分』を含むフォロワー」7枚を選ぶ。"
     classifier = engine()
     prepared = derive_source(raw, source(raw), classifier)
@@ -109,7 +121,6 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
     predicate = next(
         s for s in frame.leaf_schema.slots if s.role == "name_contains_filter"
     )
-    assert fragment.required
     assert binding.values[fragment.name] == CardNameReference(
         kind="card_name", term_id="term:name.synthetic"
     )
@@ -118,8 +129,11 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
     base = Renderer({}, {}, {}, domains=classifier.domains)
     labels = {
         (canonical(reference.model_dump(mode="json")), "zh-Hant"): Label(
-            reference, "zh-Hant", "測試片段", "project", False, True
-        )
+            reference, "zh-Hant", translated_fragment, "official", True, True
+        ),
+        (canonical(reference.model_dump(mode="json")), "ja"): Label(
+            reference, "ja", "仮場手札自分", "project", False, True
+        ),
     }
     for slot in frame.leaf_schema.slots:
         value = binding.values[slot.name]
@@ -154,15 +168,59 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
         {("name.contains.fragment.v1", "zh-Hant"): expression},
         registry=prepared.registry,
     )
-    presenter = renderer
-    result = presenter.render(
+    result = renderer.render(
         "ctx:synthetic",
         "zh-Hant",
         expression_plan((BoundTarget(frame, binding, selected),), targets),
     )
     assert result.rendered is not None
-    assert "名稱含有測試片段" in result.rendered.text
-    assert result.rendered.annotation.occurrences
+    display = "『仮場手札自分』" + (f"（{translated_fragment}）" if show_hint else "")
+    assert f"名稱含有{display}" in result.rendered.text
+    assert result.rendered.low_confidence is show_hint
+    occurrences = tuple(
+        a for a in result.rendered.annotation.occurrences if a.reference == reference
+    )
+    assert all(a.bold is True for a in occurrences)
+    assert [
+        result.rendered.text[s.start : s.end] for a in occurrences for s in a.ranges
+    ] == (["仮場手札自分", translated_fragment] if show_hint else ["仮場手札自分"])
+    fragment_leaf = next(
+        leaf for leaf in result.rendered.leaves if leaf.slot == fragment.name
+    )
+    assert fragment_leaf.source_ordinals == (0,)
+    assert [result.rendered.text[s.start : s.end] for s in fragment_leaf.ranges] == [
+        display
+    ]
+    renderer.labels[canonical(reference.model_dump(mode="json")), "zh-Hant"] = Label(
+        reference, "zh-Hant", translated_fragment + "新版", "official", False, True
+    )
+    updated = renderer.render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
+    )
+    assert updated.rendered is not None
+    assert updated.rendered.dependency_key != result.rendered.dependency_key
+    del renderer.labels[canonical(reference.model_dump(mode="json")), "zh-Hant"]
+    without_translation = renderer.render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
+    )
+    assert without_translation.rendered is not None
+    assert "名稱含有『仮場手札自分』" in without_translation.rendered.text
+    assert without_translation.rendered.low_confidence is False
+    assert (
+        without_translation.rendered.dependency_key != result.rendered.dependency_key
+    ) is show_hint
+    del renderer.labels[canonical(reference.model_dump(mode="json")), "ja"]
+    missing = renderer.render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
+    )
+    assert missing.rendered is None
+    assert missing.issues == ("missing_term_translation",)
     invalid = Target(
         format=1,
         nodes=tuple(

@@ -428,14 +428,16 @@ records:
       target:
         format: 1
         nodes:
+          - kind: Literal
+            text: 日文
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 不含『
+            text: 不含
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 』的
+            text: 的
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal

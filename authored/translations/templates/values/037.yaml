@@ -340,11 +340,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -390,7 +388,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 。在其玩家的下一個回合中，其無法攻擊敵方。
+            text: 。在其玩家的下一個回合中，其無法攻擊。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -749,7 +747,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:1a3e4367eb70be419070665a0e332d9178a9a9aee69cfa7b7457105d47c66e00
+      template_id: frame:ffd5c19fc5a08a742b40766b97925155d2434504039da8c28135568b1c822e47
       lang: zh-Hant
       target:
         format: 1
@@ -781,7 +779,11 @@ records:
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: 張士兵・衍生物・從者召喚到
+            text: 張士兵・
+          - kind: LeafRef
+            slot: token_62
+          - kind: Literal
+            text: ・從者召喚到
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
@@ -1038,11 +1040,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -1052,7 +1052,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 從下列之中選擇
+            text: 從下列抉擇
           - kind: Form
             form_id: quantity.choice_mode_count.value
             args:
@@ -1063,7 +1063,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】指定自己的
+            text: 】選擇自己的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -1086,13 +1086,15 @@ records:
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: 】指定
+            text: 】選擇
           - kind: LeafRef
             slot: leaf_7
+          - kind: Literal
+            text: 的
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
-            text: 至多
+            text: 中的至多
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -1107,11 +1109,11 @@ records:
           - kind: LeafRef
             slot: leaf_10
           - kind: Literal
-            text: 。將其返回
+            text: 。使其返回
           - kind: LeafRef
             slot: leaf_12
           - kind: Literal
-            text: 並洗牌。抽取
+            text: 並洗牌。抽
           - kind: LeafRef
             slot: leaf_13
           - kind: Literal
@@ -1293,5 +1295,5 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 個其他從者。將其重置。本回合，其無法攻擊敵方。
+            text: 個其他從者。將其重置。本回合，其無法攻擊。
       expression_targets: {}

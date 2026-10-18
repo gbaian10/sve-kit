@@ -596,11 +596,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
         traits.all2.v1:
           format: 1
           nodes:
@@ -1207,13 +1205,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:f69fdd5bd2be07e1c9f7c61732126d0cc0eb7cc7715ec7c2873ece71e27c0d17
+      template_id: frame:0af2edf34d14db8f10844c74e0db6617ea09c5da2d542db79c62a924ddcdfc18
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation

@@ -457,7 +457,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 。在其玩家的下一個回合中，其無法攻擊敵方。
+            text: 。在其玩家的下一個回合中，其無法攻擊。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -914,7 +914,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】這張卡片獲得【
+            text: 】這張卡片具有【
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal

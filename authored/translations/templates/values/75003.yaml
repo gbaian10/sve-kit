@@ -213,11 +213,11 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 』『
+            text: 』、『
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 』『
+            text: 』與『
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -748,11 +748,11 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
             - kind: Literal
-              text: 』的
+              text: 的
   - origin: machine
     kind: template_translation
     data:
@@ -995,11 +995,11 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
             - kind: Literal
-              text: 』的
+              text: 的
   - origin: machine
     kind: template_translation
     data:
@@ -1061,13 +1061,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:dd558cf59d053c9897c1347498ddf48c78aed8399b1cd16d76d444037b8ae956
+      template_id: frame:d13bfc207f322fcf8dee7da8dfc1cb98ace32688ba4b2d7a3dd608d3e49f54c0
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌或牌堆的衍生物移出遊戲）
+            text: （返回手牌或牌堆的
+          - kind: LeafRef
+            slot: token_11
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation

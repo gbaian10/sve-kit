@@ -72,13 +72,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:bd68fe3d8ba5a20f69d1afaeea10d50ed684020bdeec1c8e9fe63539cec7afb7
+      template_id: frame:2563b2a19de08ef163910cddd97f651eb9683d2862f096e16f4c0e8d98754b9f
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 【超進化時】自己戰場上與自己的EX區中的全部妖精・衍生物・從者{
+            text: 【超進化時】自己戰場上與自己的EX區中的全部妖精・
+          - kind: LeafRef
+            slot: token_23
+          - kind: Literal
+            text: ・從者{
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -563,11 +567,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -663,7 +665,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 】指定
+            text: 】選擇
           - kind: LeafRef
             slot: leaf_3
           - kind: LeafRef
@@ -856,11 +858,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:

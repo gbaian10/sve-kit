@@ -310,11 +310,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -350,7 +348,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:36f319363869ed4d2ec6b71eb4d3c9ea5abe6f59df33d698222ebe5aba856364
+      template_id: frame:10117703d44cfa6d0ee3607878b34ce3d063ac6a087894d408e78da586b3856b
       lang: zh-Hant
       target:
         format: 1
@@ -392,7 +390,11 @@ records:
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
-            text: 】自己戰場上的全部士兵・衍生物・從者{
+            text: 】自己戰場上的全部士兵・
+          - kind: LeafRef
+            slot: token_44
+          - kind: Literal
+            text: ・從者{
           - kind: LeafRef
             slot: leaf_9
           - kind: Literal
@@ -1256,7 +1258,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:79a3cb07036270630519ed35a1b53906eddbd273867581d79e537b7b7fe96c3a
+      template_id: frame:c30029df5d88bfe2033a1e03a94744bdc49b58042d3b64e92f8b8a5963f294e4
       lang: zh-Hant
       target:
         format: 1
@@ -1309,7 +1311,11 @@ records:
           - kind: LeafRef
             slot: name_13
           - kind: Literal
-            text: 的士兵・衍生物・從者」時，才可以使用這個能力，並且在
+            text: 的士兵・
+          - kind: LeafRef
+            slot: token_96
+          - kind: Literal
+            text: ・從者」時，才可以使用這個能力，並且在
           - kind: LeafRef
             slot: leaf_11
           - kind: Literal
@@ -1419,7 +1425,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】召喚
+            text: 【進化時】將
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -1427,7 +1433,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 』直到戰場達到上限為止。將其餘卡片放置到
+            text: 』中的卡片召喚到戰場上，直到戰場達到上限為止。將未能召喚的卡片放置到
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -1471,7 +1477,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:6160af40f0e4c3cf797678d0bae8e2c9ee0a5314ddd74c15dcb70be3a045e096
+      template_id: frame:bc634708a3a8ef715c702957b0f3c38b1abb4d3bcbe91b34dde38aee3d8ac799
       lang: zh-Hant
       target:
         format: 1
@@ -1510,7 +1516,11 @@ records:
           - kind: LeafRef
             slot: name_9
           - kind: Literal
-            text: 的士兵・衍生物・從者」時，才可以使用這個能力，並且在
+            text: 的士兵・
+          - kind: LeafRef
+            slot: token_67
+          - kind: Literal
+            text: ・從者」時，才可以使用這個能力，並且在
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal

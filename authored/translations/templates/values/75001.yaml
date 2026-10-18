@@ -475,47 +475,45 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment_0
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_1
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_2
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_3
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_4
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_5
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_6
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_7
             - kind: Literal
-              text: 』、『
+              text: 、
             - kind: LeafRef
               slot: fragment_8
             - kind: Literal
-              text: 』或『
+              text: 或
             - kind: LeafRef
               slot: fragment_9
-            - kind: Literal
-              text: 』
         name.selection.distinct.v1:
           format: 1
           nodes:
@@ -781,7 +779,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:62c60e6128c9803e7f549a3f2f892594476e0542303c9af2519867cc8e96e5cc
+      template_id: frame:6170f99edae20bba78293cd05960e0f98abe0f9851164b8c14ff93203839e15b
       lang: zh-Hant
       target:
         format: 1
@@ -804,7 +802,11 @@ records:
           - kind: LeafRef
             slot: name_4
           - kind: Literal
-            text: 的士兵・衍生物・從者」，則消費-
+            text: 的士兵・
+          - kind: LeafRef
+            slot: token_44
+          - kind: Literal
+            text: ・從者」，則消費-
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -1278,7 +1280,7 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 已橫置的『
+              text: 藉此橫置的『
             - kind: LeafRef
               slot: name
             - kind: Literal
@@ -1440,11 +1442,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -1486,11 +1486,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:

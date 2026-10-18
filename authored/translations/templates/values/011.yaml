@@ -638,13 +638,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:ac42048dd1f38159fa2c67c80312366f19e9353a4bdbad32e9a5f117a5cc9681
+      template_id: frame:ad57436e19e763388bd0ae82999c49b9e4ec890189b049a552c310a6392d6a2c
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation

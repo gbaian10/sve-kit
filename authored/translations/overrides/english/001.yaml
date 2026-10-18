@@ -4325,7 +4325,7 @@ records:
         - kind: Literal
           text: 使用這張卡片。
   - origin: machine
-    note: 沿子句58：「無法攻擊敵方」的「敵方」可能被讀成只指主戰者；英文 enemies 指敵方主戰者與從者；2026-10-18 對照英文確認；英文禁止全部 enemies，中文沿 P0 的無法攻擊敵方；未窄化成只禁止攻擊主戰者，其他能力與期限完整
+    note: 2026-10-18 維護者確認 Q546／Q560 的全部攻擊限制；與日文共用規則一致，譯為「無法攻擊」。
     kind: english_exception_target
     data:
       id: english.effect.64cdb23abd5878dc3c75f179
@@ -4364,7 +4364,7 @@ records:
         - kind: LeafRef
           slot: keyword.ward
         - kind: Literal
-          text: "】\n這張卡片無法攻擊敵方。\n{"
+          text: "】\n這張卡片無法攻擊。\n{"
         - kind: LeafRef
           slot: ability.fanfare
         - kind: Literal
@@ -4378,7 +4378,7 @@ records:
         - kind: Literal
           text: '}+4。抽2張卡片。'
   - origin: machine
-    note: 沿子句58：「無法攻擊敵方」的「敵方」可能被讀成只指主戰者；英文 enemies 指敵方主戰者與從者；2026-10-18 對照英文確認；英文禁止全部 enemies，中文沿 P0 的無法攻擊敵方；未窄化成只禁止攻擊主戰者，其他能力與期限完整
+    note: 2026-10-18 維護者確認 Q546／Q560 的全部攻擊限制；與日文共用規則一致，譯為「無法攻擊」。
     kind: english_exception_target
     data:
       id: english.effect.0e89d18cfb601ab8ce1b7abd
@@ -4400,7 +4400,7 @@ records:
         - kind: LeafRef
           slot: keyword.ward
         - kind: Literal
-          text: "】\n這張卡片無法攻擊敵方。\n{"
+          text: "】\n這張卡片無法攻擊。\n{"
         - kind: LeafRef
           slot: ability.last_words
         - kind: Literal

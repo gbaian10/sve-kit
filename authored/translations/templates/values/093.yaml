@@ -167,7 +167,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 將
+            text: 使
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -179,7 +179,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 返回手牌：指定
+            text: 返回手牌：選擇
           - kind: LeafRef
             slot: leaf_3
           - kind: LeafRef
@@ -1191,13 +1191,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:5c73ba1cda01e47edc9a9b8df53c1a4102377a9df7b0a70bcf29442fe4126990
+      template_id: frame:979edd9f9047565d923e7283160be9ddfa92780d904eaf1144eb210a6d688473
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 妖精・衍生物進入自己的戰場時，使其{
+            text: 妖精・
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 進入自己的戰場時，使其{
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -1278,14 +1282,14 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】指定敵方的
+            text: 【進化時】選擇敵方的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_0
           - kind: Literal
-            text: 個從者。將其返回
+            text: 個從者。使其返回
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -1293,11 +1297,11 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: _
+            text: ' '
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 】抽取
+            text: 】抽
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal

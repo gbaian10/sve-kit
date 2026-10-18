@@ -1124,7 +1124,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 】：指定敵方戰場上的
+            text: 】：選擇敵方戰場上的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -1268,8 +1268,6 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』

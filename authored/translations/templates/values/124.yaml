@@ -596,11 +596,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -929,7 +927,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:336c6f7aa1a9cc3264c6383ab4d21409c77d8dc9ca7ca5f40a546348b8f6c30c
+      template_id: frame:f78cd589f9f11724adc8fa2efd17ece8ce3b865ccfe16bc84ddd41155973f19c
       lang: zh-Hant
       target:
         format: 1
@@ -943,7 +941,11 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 張妖精・衍生物消失：查看
+            text: 張妖精・
+          - kind: LeafRef
+            slot: token_18
+          - kind: Literal
+            text: 消失：查看
           - kind: LeafRef
             slot: leaf_2
           - kind: LeafRef

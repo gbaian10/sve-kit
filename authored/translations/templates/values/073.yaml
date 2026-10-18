@@ -30,13 +30,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:9977261428c31955844db102420e2649f0d8e4888cf5b9c06063412c7a9251b1
+      template_id: frame:5a4fdd6388cc92b61a5bb6c78f8d613c6e92aa566196b322c3d45ee3b0cb373c
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （放置到牌堆的衍生物移出遊戲）
+            text: （放置到牌堆的
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -294,7 +298,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:921ebbc1cfa05321165ae655469339718d510544c6072d6062098317d528fcb5
+      template_id: frame:9ea40299d1d5893c13d416abc806a10378b3bc3171b1504f9449cb874fdb06c9
       lang: zh-Hant
       target:
         format: 1
@@ -304,7 +308,11 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 個妖精・衍生物放置到
+            text: 個妖精・
+          - kind: LeafRef
+            slot: token_23
+          - kind: Literal
+            text: 放置到
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -508,14 +516,14 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定自己的'
+            text: '}選擇自己的'
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_1
           - kind: Literal
-            text: 張其他卡片。將其返回
+            text: 張其他卡片。使其返回
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal

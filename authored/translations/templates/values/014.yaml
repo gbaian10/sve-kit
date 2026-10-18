@@ -523,7 +523,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:eed132c83688729dc8029d385e951fb73eaf8ea4b25bba3c0d3d2473a9eaadcf
+      template_id: frame:35f7ea66bd259cf96d3dfca3467ad104524a0441a5f48a2938217235f58426b8
       lang: zh-Hant
       target:
         format: 1
@@ -533,7 +533,11 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}自己戰場上的全部妖精・衍生物{'
+            text: '}自己戰場上的全部妖精・'
+          - kind: LeafRef
+            slot: token_17
+          - kind: Literal
+            text: '{'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -645,11 +649,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -1056,7 +1058,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】指定
+            text: 】選擇
           - kind: LeafRef
             slot: leaf_2
           - kind: LeafRef

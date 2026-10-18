@@ -493,7 +493,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:2a42e23c70f3d78f89a8fdda4c1c80b457acf8a1f150e40c907e56aed488be2a
+      template_id: frame:401b47ce0df197c6bdb470df8b57eb1c1072eb237ef4af50161a74b5fc40314e
       lang: zh-Hant
       target:
         format: 1
@@ -503,7 +503,11 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 張妖精・衍生物・從者召喚到
+            text: 張妖精・
+          - kind: LeafRef
+            slot: token_17
+          - kind: Literal
+            text: ・從者召喚到
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -729,7 +733,7 @@ records:
           - kind: LeafRef
             slot: leaf_9
           - kind: Literal
-            text: 點傷害。本回合，無法使用這張卡片除{進化}以外的{
+            text: 點傷害。本回合，無法使用這張卡片的{進化}以外的{
           - kind: LeafRef
             slot: leaf_10
           - kind: Literal
@@ -738,13 +742,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:6ba41560fca0e7a11506be48a44c44b4c90b9f97c47f5d45c16e0a74058ab859
+      template_id: frame:9b4c44b369b9304acc606341f8ff855ccfcdc5b211a0c12ac4ed965800d31f34
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 妖精・衍生物進入自己的戰場時，使其{
+            text: 妖精・
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 進入自己的戰場時，使其{
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal

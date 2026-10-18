@@ -1174,7 +1174,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:04af2c32872e5bbfac4c0d1fca2840d7c746c0683f466512994d2b0ce7db1c7a
+      template_id: frame:fd28f8f14da77469293012e41ca71739569a92ad7c59126e3c45aa9771e0745a
       lang: zh-Hant
       target:
         format: 1
@@ -1188,7 +1188,11 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 張非衍生物的從者：在這張卡片上放置
+            text: 張非
+          - kind: LeafRef
+            slot: token_8
+          - kind: Literal
+            text: 的從者：在這張卡片上放置
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal

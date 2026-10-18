@@ -326,7 +326,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:e716c432a4cdeaafd8d23dd2d276a9df7c69d1dd7eb3ce33edef948f954bab00
+      template_id: frame:d5c1f658ebeafcaf27fd78b1d7ed3c750c52b9f895f2029cc018334ebfcdaa05
       lang: zh-Hant
       target:
         format: 1
@@ -344,7 +344,11 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 上。自己戰場上的全部妖精・衍生物・從者具有【
+            text: 上。自己戰場上的全部妖精・
+          - kind: LeafRef
+            slot: token_26
+          - kind: Literal
+            text: ・從者具有【
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -554,13 +558,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:958b1dfccb8bfefa3cd17490ec64f88384b004ccec22e7fb0fe1f0b379e4db14
+      template_id: frame:04143bc4803ab5312e2a42f10c0dc8462b4f653e31c1c32e97405d2fdf579e34
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -733,11 +741,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -1077,13 +1083,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:3d5e0d192843815115355f968bb716a8b42ddd3b8d799d71518615d58fc2de3e
+      template_id: frame:27baeaeb64ebc7c404e840382017a88691d76b78e11654575edcc0c24350ea84
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+            text: （返回手牌的
+          - kind: LeafRef
+            slot: token_7
+          - kind: Literal
+            text: 移出遊戲）
       expression_targets: {}
   - origin: machine
     kind: template_translation

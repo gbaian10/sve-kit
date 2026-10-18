@@ -390,7 +390,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】：這張卡片獲得【
+            text: 】：這張卡片具有【
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -399,13 +399,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:8bcce70a2237c34baccc4a99c26765fba27f886c2b283ec93864759f26d94067
+      template_id: frame:5bd4a8b7c0d20d3d46c79a3da6397ff929b54bcf0d3eb7673ea4e07208d2e4bf
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 只要這張卡片在戰場上或EX區中，自己戰場上的全部妖精・衍生物・從者就具有【
+            text: 只要這張卡片在戰場上或EX區中，自己戰場上的全部妖精・
+          - kind: LeafRef
+            slot: token_24
+          - kind: Literal
+            text: ・從者就具有【
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -542,13 +546,15 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:eb9976a7e32a842574bd5f54b5e8cfd81e473344432ea257e62b8332b5711105
+      template_id: frame:cf439d4c4c012b931c85e50ab5eb3f78778556624b265c1232e393be36f1ad81
       lang: zh-Hant
       target:
         format: 1
         nodes:
+          - kind: LeafRef
+            slot: token_5
           - kind: Literal
-            text: 衍生物・從者進入自己的戰場時，選擇敵方戰場上的
+            text: ・從者進入自己的戰場時，選擇敵方戰場上的
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -592,13 +598,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:7c6e00cdab0076fe8d0ea3ab170ca2330f59012794eab326800b30db8ecbc11e
+      template_id: frame:34d000d9b1d90353d5a960d296a9698d1e9d668f06c0c61c59dfebd13cc2e19a
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 只要這張卡片在戰場上，自己戰場上的全部妖精・衍生物就具有【
+            text: 只要這張卡片在戰場上，自己戰場上的全部妖精・
+          - kind: LeafRef
+            slot: token_18
+          - kind: Literal
+            text: 就具有【
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -936,11 +946,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:

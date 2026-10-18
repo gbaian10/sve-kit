@@ -875,11 +875,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:
@@ -934,7 +932,7 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 。在其玩家的下一個回合中，其無法攻擊敵方。這個能力在
+            text: 。在其玩家的下一個回合中，其無法攻擊。這個能力在
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal

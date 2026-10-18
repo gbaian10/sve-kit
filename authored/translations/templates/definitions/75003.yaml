@@ -3450,7 +3450,7 @@ records:
       content_hash: 501fb0c02d34f8ee59efd0a5c71a0a57056c49ebe0562a364786683914cf9bc6
   - kind: sentence_template
     data:
-      id: frame:dd558cf59d053c9897c1347498ddf48c78aed8399b1cd16d76d444037b8ae956
+      id: frame:d13bfc207f322fcf8dee7da8dfc1cb98ace32688ba4b2d7a3dd608d3e49f54c0
       source:
         source_lang: ja
         canonical_hash: 03ed05374d2f3e6e2f4c1dc61b40f9f95a95255e37b1dedecec0c13fcade3bbb
@@ -3473,14 +3473,26 @@ records:
               end: 88
       leaf_schema:
         format: 2
-        slots: []
+        slots:
+          - name: token_11
+            type: TokenStatus
+            role: token_reference
+            domain:
+              values:
+                - token_status.token.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 11
+                end: 15
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: dd558cf59d053c9897c1347498ddf48c78aed8399b1cd16d76d444037b8ae956
+      content_hash: d13bfc207f322fcf8dee7da8dfc1cb98ace32688ba4b2d7a3dd608d3e49f54c0
   - kind: sentence_template
     data:
       id: frame:cd6a72587dea8c1419518e63da51b394d7b961e86030f541c7be7a56ae1f590f
