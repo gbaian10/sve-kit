@@ -1,4 +1,4 @@
-"""Compose the sealed providers used by the normal v5 source constructor."""
+"""Compose the sealed providers used by the normal v6 source constructor."""
 
 from collections import Counter
 from dataclasses import replace

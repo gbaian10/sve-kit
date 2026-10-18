@@ -320,14 +320,12 @@ def test_construction_and_continuation_shapes_bind_only_complete_guards(
             "term:zone.cemetery",
             "term:object.card",
             "term:rule.original_cost",
-            "term:action.banish",
             "term:rule.cost",
         },
         "748-E01": {
             "term:ability.lesson",
             "term:player.self",
             "term:zone.ex",
-            "term:action.banish",
         },
         "748-E02": {
             "term:ability.necrocharge",
@@ -345,6 +343,11 @@ def test_construction_and_continuation_shapes_bind_only_complete_guards(
     assert required[case] <= {
         v.key for v in binding.values.values() if isinstance(v, GlossaryReference)
     }
+    if case in {"748-S05", "748-E01"}:
+        assert GlossaryReference(kind="glossary", key="term:action.banish") not in (
+            binding.values.values()
+        )
+        assert len(frame.leaf_schema.slots) == (16 if case == "748-S05" else 6)
     malformed = raw.replace(bad, "仮不明")
     rejected = derive_source(malformed, source(malformed, field), engine)
     assert any(p.issues for p in rejected.recognized) or all(

@@ -630,7 +630,7 @@ class Frame(RecordData):
 
     @model_validator(mode="after")
     def _identity(self) -> Self:
-        if self.source.normalizer_version != "four-layer-jp-v5" and (
+        if self.source.normalizer_version != "four-layer-jp-v6" and (
             self.mode_rules
             or any(
                 s.type == "PredicateExpr" or s.expression is not None
