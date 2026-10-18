@@ -1,0 +1,5606 @@
+format: 1
+kind: effect_classification_shard
+namespace: classification-v0
+basis:
+  recipe: v0-classification-candidates-1
+  inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+records:
+  - kind: member
+    id: sha256:4df34b0af0862863ee14b44996074f8fde6dddf07ce2938120ce166a358e5778
+    template: T11d8fa6c04
+    position:
+      card_no: BP14-P21
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:11d8fa6c042d1a5ce8246b7e88583ea6a30d6a43d9cd620fc13b7fe3b1454f47
+    raw_hash: sha256:11d8fa6c042d1a5ce8246b7e88583ea6a30d6a43d9cd620fc13b7fe3b1454f47
+    body_length: 18
+    raw_length: 18
+    token_header_hash:
+    block: sha256:4df34b0af0862863ee14b44996074f8fde6dddf07ce2938120ce166a358e5778
+    evidence_hash: sha256:e17f1163ae72f53bbfb6627909ae559554aeddced30696a5b0c9897554835fbb
+    clauses:
+      - id: sha256:af2828773315208150c30845c5878a2a9753209e9aa9f6b15a9a7014e4e52207
+        template: C11d8fa6c04
+        body:
+          start: 0
+          end: 18
+        raw:
+          start: 0
+          end: 18
+  - kind: member
+    id: sha256:f107ecbc89c76a2a4bfc75124cc6ab1ff10dd89657ab5e8c029eca2af8c714c5
+    template: T23f16a2851
+    position:
+      card_no: BP14-P21
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    raw_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    body_length: 19
+    raw_length: 19
+    token_header_hash:
+    block: sha256:f107ecbc89c76a2a4bfc75124cc6ab1ff10dd89657ab5e8c029eca2af8c714c5
+    evidence_hash: sha256:21ddb8f671e8132c99690d24a5f74ae5c9f01be34f362ad21d7b4fddf89d18eb
+    clauses:
+      - id: sha256:ae69bf5ec72e96cae4ced932963a7864cf642919d4c2fe03f505503d366ceb97
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+  - kind: classification
+    id: T07e543f28c
+    status: candidate
+    family: auto.ex-end-pay-damage-life
+    normalized_hash: sha256:07e543f28cf4133639aaa6942caf24cfd876389c1d1590aabdd84a6366adaabf
+    definition_hash: sha256:b23dd229136ab7ffb9ed6fac60771d2c9cdd437dfccefb56aa6e7a59d44fc617
+    label_hash: sha256:a3bb189b6a1890f9544c2079af12b9263c8d93a7f91e3f3da1df1275ead98771
+    members:
+      - sha256:a2cfd91ec789058717c70dcc096118b6982fc86cfe4770bac8038957e1fe286f
+      - sha256:62ea7888e0cf3c3f5f2bb109b2f271c98b0a04c52e51e545e164b9ebafaf831c
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: ResolutionChoice
+        note_hash:
+    clauses:
+      - id: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.phase
+          - X.predicate
+          - K.pay
+          - D.resolve-choice
+          - I.resource
+          - I.damage
+          - T.player-set
+        author:
+          - A.head.auto
+          - A.cond
+          - A.pay
+          - A.act.damage
+          - A.who
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:22e6201abb3162e06b1c5e0a61808e76b8a48e4e745ea0534ad9ca3302170f69
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.life
+        author:
+          - A.act.life
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+            ability:
+        targets:
+          - clause: sha256:22e6201abb3162e06b1c5e0a61808e76b8a48e4e745ea0534ad9ca3302170f69
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+            ability:
+        targets:
+          - clause: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+            ability:
+        targets:
+          - clause: sha256:22e6201abb3162e06b1c5e0a61808e76b8a48e4e745ea0534ad9ca3302170f69
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+            ability:
+        targets:
+          - clause: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+            ability:
+        targets:
+          - clause: sha256:22e6201abb3162e06b1c5e0a61808e76b8a48e4e745ea0534ad9ca3302170f69
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:62ea7888e0cf3c3f5f2bb109b2f271c98b0a04c52e51e545e164b9ebafaf831c
+    template: T07e543f28c
+    position:
+      card_no: BP14-P21
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:ad14892317f1cb5785eb2f44b2e2b5975ac65a5720f34f8e936b1d15327a128b
+    raw_hash: sha256:ad14892317f1cb5785eb2f44b2e2b5975ac65a5720f34f8e936b1d15327a128b
+    body_length: 71
+    raw_length: 71
+    token_header_hash:
+    block: sha256:62ea7888e0cf3c3f5f2bb109b2f271c98b0a04c52e51e545e164b9ebafaf831c
+    evidence_hash: sha256:12c4c4ffffb49daf757826b2395222f6eb77614f4fead1fe7da0f1038af5ef7a
+    clauses:
+      - id: sha256:3073dfc9a281ef17362e3829e522d5ef76fdcd5de12d722e438c2600d394d4a8
+        template: Cf38c01f5ef
+        body:
+          start: 0
+          end: 54
+        raw:
+          start: 0
+          end: 54
+      - id: sha256:22e6201abb3162e06b1c5e0a61808e76b8a48e4e745ea0534ad9ca3302170f69
+        template: Ca1099c5fef
+        body:
+          start: 54
+          end: 71
+        raw:
+          start: 54
+          end: 71
+  - kind: classification
+    id: T2d89f545fb
+    status: candidate
+    family: evolve.recover-pp
+    normalized_hash: sha256:2d89f545fb92feec00e7e0fb3490088594c9b5e52aba1cd4a53112067851e176
+    definition_hash: sha256:52cc4d0dd2206a655005ed133e7e702c77900f9b9340851e6c7bcd22f404f77f
+    label_hash: sha256:c4b7882eb923be440f7abbb20ad507436d08e7f6035e696dd639e4f44fd42ee3
+    members:
+      - sha256:47362d2618e5993d45103e572769a7394ef4a66b44d3a9c2f2b9da7568934385
+      - sha256:45d19c77823efa86ce04415e3ef724965f1c3bcda50d690df1cc1f2d2d8d1ea4
+      - sha256:41044d7984d0b0010987ef72bb3dff56ea6c9207d8425bbd36d1113829c8e9fc
+    abilities:
+      - id: a1
+        head: A.head.evolve_time
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:0b820680a3958427d4f94c0a3112ed9f62b4e502cfc9bb9c1f537ad5c5b8a3bd
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.evolve
+          - I.resource
+        author:
+          - A.head.evolve_time
+          - A.act.pp
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations: []
+  - kind: member
+    id: sha256:41044d7984d0b0010987ef72bb3dff56ea6c9207d8425bbd36d1113829c8e9fc
+    template: T2d89f545fb
+    position:
+      card_no: BP14-P22
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:74a4f14e4c35b41718594c64fbda905ed741b22ea1f0d885b2d0fa43a832eb06
+    raw_hash: sha256:74a4f14e4c35b41718594c64fbda905ed741b22ea1f0d885b2d0fa43a832eb06
+    body_length: 17
+    raw_length: 17
+    token_header_hash:
+    block: sha256:41044d7984d0b0010987ef72bb3dff56ea6c9207d8425bbd36d1113829c8e9fc
+    evidence_hash: sha256:f75a8b4a1a073909935ac50b7f84609ac4ee026bbe6ce72fc193f7d6772d365e
+    clauses:
+      - id: sha256:0b820680a3958427d4f94c0a3112ed9f62b4e502cfc9bb9c1f537ad5c5b8a3bd
+        template: C2d89f545fb
+        body:
+          start: 0
+          end: 17
+        raw:
+          start: 0
+          end: 17
+  - kind: member
+    id: sha256:d715c1969d998f15fea929caa299aadfbeb312dca4a50a20b615e76198a1f35c
+    template: T743c2188a6
+    position:
+      card_no: BP14-P22
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:743c2188a6c3acc88b5f482c74422a4349c5d2c863de1fcf7772f6242ac0eb4c
+    raw_hash: sha256:743c2188a6c3acc88b5f482c74422a4349c5d2c863de1fcf7772f6242ac0eb4c
+    body_length: 20
+    raw_length: 20
+    token_header_hash:
+    block: sha256:d715c1969d998f15fea929caa299aadfbeb312dca4a50a20b615e76198a1f35c
+    evidence_hash: sha256:841f2339ff49149c32e405dd3f084a1db94dcef06a8b5b2e51b286a859f6e9b3
+    clauses:
+      - id: sha256:29cd1837aa24f073edf319947749630a5fe057447fc3d81e5b4342778d4b55f1
+        template: C743c2188a6
+        body:
+          start: 0
+          end: 20
+        raw:
+          start: 0
+          end: 20
+  - kind: classification
+    id: T18ed1206c7
+    status: candidate
+    family: keywords.ward+fanfare-leader-life
+    normalized_hash: sha256:18ed1206c707900a9bf20f9643ebb152d5d2e8a3ebebf8117608d1f217cb96f0
+    definition_hash: sha256:43ad32d07a6578425594dd13d0c9e879763cd24a88115d6531d8a2145384e09e
+    label_hash: sha256:ead6c2b37f5b8161806683626dff7beb9a9d523c77965995696a21c4658d77eb
+    members:
+      - sha256:2b2c87c07c361416643d6ec4df65904acc8d2501a78bcd63964f4c78c83072c6
+      - sha256:9bcb652b35f62ce37e32fdf101b811b349bf0e4d32d94d8d4c016c92c5b7e6e7
+      - sha256:aa60dc4efe58bc9d8050b7953cf90fd5b991388e22e1ce03e9d9ddfcacd76809
+      - sha256:4fb8cb6537d8d192e963c9a27baea43a8f3911b8f09f6d1bfbed514991fe6db1
+      - sha256:96d7eb123d66fcc8fd9bda19c17e7e62291bc50e2a355e86a7d4d319c34e18b5
+      - sha256:5121fe8baf2a07f4830f30531999e29977df328121fb849d97f6718da14b8d96
+      - sha256:eee9ba9936262b03d3798905dc5a36056c8da65e74b9e6bafd57dc592de7e640
+    abilities:
+      - id: a1
+        head: A.head.keywords
+        ir: B.keyword
+        cost_timing: None
+        note_hash:
+      - id: a2
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:f267023f9e452a9c1cd81395f17bd209c7a8057f5fe0da33e1fe527470bcc166
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.keyword
+        author:
+          - A.head.keywords
+        note_hash: sha256:20ab7c61ec0bb325d2a0dc05e5db405765eae1190f0f485efb91742ba68a2906
+      - id: sha256:f267023f9e452a9c1cd81395f17bd209c7a8057f5fe0da33e1fe527470bcc166
+        ability: a2
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.life
+        author:
+          - A.act.life
+        note_hash: sha256:cea528edae89e32e82b5ce9eba2f008c656021f2725ba93b1025cb0d5e4abffd
+    relations: []
+  - kind: member
+    id: sha256:96d7eb123d66fcc8fd9bda19c17e7e62291bc50e2a355e86a7d4d319c34e18b5
+    template: T18ed1206c7
+    position:
+      card_no: BP14-P23
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:49dc3fae65673a3ae5dc922ec411ca9e2433268c9d685ca609a4d7f40d78df9e
+    raw_hash: sha256:49dc3fae65673a3ae5dc922ec411ca9e2433268c9d685ca609a4d7f40d78df9e
+    body_length: 30
+    raw_length: 30
+    token_header_hash: sha256:14bda37bc9bbd2b8bbf4d7a114903e6abfedd6059fd8baff763dc5a526d8dd4e
+    block: sha256:96d7eb123d66fcc8fd9bda19c17e7e62291bc50e2a355e86a7d4d319c34e18b5
+    evidence_hash: sha256:01b9350c79a94370dc792b3064ccc1d79f3bd380d35ce177a95578854251ccf6
+    clauses:
+      - id: sha256:f267023f9e452a9c1cd81395f17bd209c7a8057f5fe0da33e1fe527470bcc166
+        template: C18ed1206c7
+        body:
+          start: 0
+          end: 30
+        raw:
+          start: 0
+          end: 30
+  - kind: member
+    id: sha256:4c9365827c354d0b38614963adce0ba4ff1203f9fa014a852386b774b9c9d3f1
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-P23
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:4c9365827c354d0b38614963adce0ba4ff1203f9fa014a852386b774b9c9d3f1
+    evidence_hash: sha256:ca6a290641c96d88d1dc0f55a945ba735d8bb392262f38dc9f0c9cf7b9fd5850
+    clauses:
+      - id: sha256:dff39af7adda1e6451635ae2b9e0e1993cccde5558f866573777297468ea4f1c
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: classification
+    id: T46680a4f5d
+    status: candidate
+    family: auto.life-increase-act-draw
+    normalized_hash: sha256:46680a4f5d86f7a317adcb360e491960cf5d130f27ebd733b63097f01f8da568
+    definition_hash: sha256:f7a77cfbd74677fbcdcaebbf63d57e9b4db64d483b4dc00b761725edc14b7c40
+    label_hash: sha256:ae7aae33ab162f6d6ed8943cb7c6604ea0a1910cdb0b3f31a798083b0373ac2a
+    members:
+      - sha256:bdc1393c31e02721e924798a336b896e2c259b7d7fee5db36a59e710c6729333
+      - sha256:1b028927adda916a8c4a6c0a1cdbcea0ae31d854c9097e8ed8aff5eb7ebad385
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: ResolutionChoice
+        note_hash:
+    clauses:
+      - id: sha256:80a824436d3aa2efbefae54fd627ce45015b6f0a839c43c6545f1cff52510feb
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.stat-change
+          - K.pay
+          - D.resolve-choice
+          - I.posture
+          - I.draw
+        author:
+          - A.head.auto
+          - A.pay
+          - A.act.draw
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: cost-of
+        sources:
+          - clause: sha256:80a824436d3aa2efbefae54fd627ce45015b6f0a839c43c6545f1cff52510feb
+            ability:
+        targets:
+          - clause: sha256:80a824436d3aa2efbefae54fd627ce45015b6f0a839c43c6545f1cff52510feb
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:1b028927adda916a8c4a6c0a1cdbcea0ae31d854c9097e8ed8aff5eb7ebad385
+    template: T46680a4f5d
+    position:
+      card_no: BP14-P23
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:840215f8ace9b05918c446edd9cfc9c2c308f857d768db9a7aa63edb0ef62782
+    raw_hash: sha256:840215f8ace9b05918c446edd9cfc9c2c308f857d768db9a7aa63edb0ef62782
+    body_length: 33
+    raw_length: 33
+    token_header_hash:
+    block: sha256:1b028927adda916a8c4a6c0a1cdbcea0ae31d854c9097e8ed8aff5eb7ebad385
+    evidence_hash: sha256:530b38fe53e6e9506b4dae5dd5d91e1e5c5fdd0fa93544cd9c70daf5c4415b13
+    clauses:
+      - id: sha256:80a824436d3aa2efbefae54fd627ce45015b6f0a839c43c6545f1cff52510feb
+        template: C46680a4f5d
+        body:
+          start: 0
+          end: 33
+        raw:
+          start: 0
+          end: 33
+  - kind: member
+    id: sha256:fdff7ccd6ca2779c0a6cdb3b5b616949d0c2bf769757623184da512d84800add
+    template: Te24db00bc8
+    position:
+      card_no: BP14-P23
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:449f61a82b1943bb4e7e5141ede3f8d29bc06ccf1bb87de8c78f4565292d1014
+    raw_hash: sha256:449f61a82b1943bb4e7e5141ede3f8d29bc06ccf1bb87de8c78f4565292d1014
+    body_length: 27
+    raw_length: 27
+    token_header_hash:
+    block: sha256:fdff7ccd6ca2779c0a6cdb3b5b616949d0c2bf769757623184da512d84800add
+    evidence_hash: sha256:46a4cf73fe6b367b83e3041baf2a789916d3bc038bd85e302d353b4a677e8ac8
+    clauses:
+      - id: sha256:528a4e6e34a2f458ada38e7ec68c7bd208d9c63cb491e7d6edba082d65d5a612
+        template: Ce24db00bc8
+        body:
+          start: 0
+          end: 27
+        raw:
+          start: 0
+          end: 27
+  - kind: member
+    id: sha256:c2c804abbd031a68576a97e6eba1c12ffc1be73ce023ab36b25ded9a853683f8
+    template: T3f4ec6dc23
+    position:
+      card_no: BP14-P24
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
+    raw_hash: sha256:3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
+    body_length: 4
+    raw_length: 4
+    token_header_hash: sha256:c15906c8c09a84590969396c565df64be1927bd506abd92fbd14f7962908963e
+    block: sha256:c2c804abbd031a68576a97e6eba1c12ffc1be73ce023ab36b25ded9a853683f8
+    evidence_hash: sha256:8c827eb0fb2c0e79697b52aa18241ca58c2471a8b7ba742730304e292ed667b8
+    clauses:
+      - id: sha256:8a324088efa7af86a9da12514f421dfdcbdfd08f1daa16dbfcd5b77832b836ad
+        template: C3f4ec6dc23
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:bf259bc77324ae9b8d6890772b3b439e7ee0d1fc991c4bf150e581dfd88c8425
+    template: Tca6721d157
+    position:
+      card_no: BP14-P24
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+    raw_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:bf259bc77324ae9b8d6890772b3b439e7ee0d1fc991c4bf150e581dfd88c8425
+    evidence_hash: sha256:6de73839278f176700d3e8c092ae9557ca6056184cdc7fb6dfcf6ce710b6d38b
+    clauses:
+      - id: sha256:3c4398916f0cf46c3d5b05a9d8a22d72fd525235f7e0b7ff0cc9c36b16821ea1
+        template: Cca6721d157
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: classification
+    id: Tcc02752fdf
+    status: candidate
+    family: auto.own-turn-life-increase-token
+    normalized_hash: sha256:cc02752fdf67de1dcd64d3aebddd4f285e60424cff7564522577ae6f21f82d25
+    definition_hash: sha256:568322001b3cdf402f684e4704f7eaf787170acadd88ac6f0044e59ba456f913
+    label_hash: sha256:6437b3445fda85c3ee6c18f8c96a46e8f25ba5b43882965af971bcccce37047e
+    members:
+      - sha256:c1a7d99f78850ee69e7168aeb22dffb3a8c0d463e7ec497f3d1d7de61bebaa7f
+      - sha256:4aef2e31d0b36748d343f5a69b75a12ad89a92370a23e421cb78bdf94f1c7c09
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:fe5e611b67711abe55699e3048225cb95c240a334ff9e8f2d9bbf8f1dc20bfe8
+        ability: a1
+        decision:
+        capture: C.at-event
+        stage: known
+        ir:
+          - B.trigger
+          - E.stat-change
+          - V.turn
+          - B.limit
+          - I.token
+        author:
+          - A.head.auto
+          - A.cond
+          - A.ability
+          - A.act.create
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations: []
+  - kind: member
+    id: sha256:4aef2e31d0b36748d343f5a69b75a12ad89a92370a23e421cb78bdf94f1c7c09
+    template: Tcc02752fdf
+    position:
+      card_no: BP14-P24
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:26afa70297ff7418c1c2eff346ccaf39eb35f5f27c71ab591beff3d2e68f4cc3
+    raw_hash: sha256:26afa70297ff7418c1c2eff346ccaf39eb35f5f27c71ab591beff3d2e68f4cc3
+    body_length: 50
+    raw_length: 50
+    token_header_hash:
+    block: sha256:4aef2e31d0b36748d343f5a69b75a12ad89a92370a23e421cb78bdf94f1c7c09
+    evidence_hash: sha256:eb2296d40761ae361262ac4699e6c68b8ba6a51bb4dd3387eb2fcd93fbfaa9f5
+    clauses:
+      - id: sha256:fe5e611b67711abe55699e3048225cb95c240a334ff9e8f2d9bbf8f1dc20bfe8
+        template: Ccc02752fdf
+        body:
+          start: 0
+          end: 50
+        raw:
+          start: 0
+          end: 50
+  - kind: classification
+    id: T763c65d2a0
+    status: candidate
+    family: auto.token-entry-target-act
+    normalized_hash: sha256:763c65d2a0e5db0ac8d15f99c61b442416c7ceea3a71cc0e642bdaf1a3dfe3c3
+    definition_hash: sha256:ab5208e880049666e5d1b5336bd73f313a6b70d05611f7814d1e56ed3eccb9b5
+    label_hash: sha256:c19e8995dbcd64d1972351277e4381fec192fb57b8b651a26a7cbdf4cdfdc2c8
+    members:
+      - sha256:5e3cb8b1eb998049e70949d696f2c2dd72114ada7697d1b7f28b397ea1b51c4c
+      - sha256:57cb6833584f28ee11069acb40561be5bb404498f52f380d5d2be82842e3d4f9
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:01420e808b1ef836331778f664907dd98820c564dfa03c12d6d61022b199da6e
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.enter-field
+          - S.zone
+          - S.filter
+          - D.play-param
+          - R.target
+        author:
+          - A.head.auto
+          - A.sel
+          - A.target
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:dc7f081d7c1ccee0f3d8bf99969e1fae1aa7ae789026ff8aa9af788411a02bdd
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.posture
+        author:
+          - A.act.act
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:01420e808b1ef836331778f664907dd98820c564dfa03c12d6d61022b199da6e
+            ability:
+        targets:
+          - clause: sha256:dc7f081d7c1ccee0f3d8bf99969e1fae1aa7ae789026ff8aa9af788411a02bdd
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:57cb6833584f28ee11069acb40561be5bb404498f52f380d5d2be82842e3d4f9
+    template: T763c65d2a0
+    position:
+      card_no: BP14-P24
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:e44b4d22744af14473ec5208a79dd1af3f5fe213f0606af2e33f78ba787c269f
+    raw_hash: sha256:e44b4d22744af14473ec5208a79dd1af3f5fe213f0606af2e33f78ba787c269f
+    body_length: 53
+    raw_length: 53
+    token_header_hash:
+    block: sha256:57cb6833584f28ee11069acb40561be5bb404498f52f380d5d2be82842e3d4f9
+    evidence_hash: sha256:63789fc717949dbdb41bed57fcd43e5a46d83ef1c759ee0eadf8283f475baf88
+    clauses:
+      - id: sha256:01420e808b1ef836331778f664907dd98820c564dfa03c12d6d61022b199da6e
+        template: Cf86ff58aae
+        body:
+          start: 0
+          end: 44
+        raw:
+          start: 0
+          end: 44
+      - id: sha256:dc7f081d7c1ccee0f3d8bf99969e1fae1aa7ae789026ff8aa9af788411a02bdd
+        template: Cfeccef9f05
+        body:
+          start: 44
+          end: 53
+        raw:
+          start: 44
+          end: 53
+  - kind: classification
+    id: T3af71866f9
+    status: candidate
+    family: auto.evolve-sacrifice-life
+    normalized_hash: sha256:3af71866f9f1944976e24b754c29521f82bd591ad5b225861e66371db0b218db
+    definition_hash: sha256:610195a8b1fcaee0ddc152867829912db9b8396ea7d5b3fcc41b81d02e0b5d0c
+    label_hash: sha256:6bfe8ca011ce46a33dc301d4778b184fcc5b845b307032771ae866c3de305eac
+    members:
+      - sha256:0db744edfb4e2e7ee7ebcb93d3061d7f1dd043603e7bb2168a40d3e3e28a59ad
+      - sha256:eb4c9b0ee5ae7092b608650197a04e2f495cfeee658434e85c000e83b57d2c97
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: ResolutionChoice
+        note_hash:
+    clauses:
+      - id: sha256:032990c8e0469d86c2ac6c25522c3481f073fb94685d1ae23c8ad960758473a3
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.evolve
+          - S.zone
+          - S.filter
+          - K.pay
+          - D.resolve-choice
+          - I.move
+          - I.life
+        author:
+          - A.head.auto
+          - A.sel
+          - A.pay
+          - A.act.life
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: cost-of
+        sources:
+          - clause: sha256:032990c8e0469d86c2ac6c25522c3481f073fb94685d1ae23c8ad960758473a3
+            ability:
+        targets:
+          - clause: sha256:032990c8e0469d86c2ac6c25522c3481f073fb94685d1ae23c8ad960758473a3
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:eb4c9b0ee5ae7092b608650197a04e2f495cfeee658434e85c000e83b57d2c97
+    template: T3af71866f9
+    position:
+      card_no: BP14-P25
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:36d14cc04125dbbfccb36f1d72a6449961d508d76d793f0d84016886a9955117
+    raw_hash: sha256:36d14cc04125dbbfccb36f1d72a6449961d508d76d793f0d84016886a9955117
+    body_length: 48
+    raw_length: 48
+    token_header_hash:
+    block: sha256:eb4c9b0ee5ae7092b608650197a04e2f495cfeee658434e85c000e83b57d2c97
+    evidence_hash: sha256:68ae2d20a8d43faa51736b9b5ca65a3eaba3a0fe7526a9ee80f970059803c77b
+    clauses:
+      - id: sha256:032990c8e0469d86c2ac6c25522c3481f073fb94685d1ae23c8ad960758473a3
+        template: C3af71866f9
+        body:
+          start: 0
+          end: 48
+        raw:
+          start: 0
+          end: 48
+  - kind: classification
+    id: Te1c6707ca0
+    status: candidate
+    family: fanfare.search-ex
+    normalized_hash: sha256:e1c6707ca05120af4f593a2a621050c2c7ba6f27eed63e4516ae38a35229f0a4
+    definition_hash: sha256:fa1bbd54fadf25d4a2fda0ef2a56c9d13c6e94c294f75c0e4ad84258715e6e98
+    label_hash: sha256:e463907c326ab95cf15fbb185402ce20ff5bf2b8da7e441fe619438af417b140
+    members:
+      - sha256:5791e87db8cbcba9f798baf476518198e11ea595d67fbbb3e8e5bc936591b269
+      - sha256:f0487ab6e7f5cbd1fec943860bedd36126a2aa644e45c08262fa498ebeedf9da
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:42de717554e3b8fdebc8eda5127563c1e700c011b0392e22afc6da89db6bba6d
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.enter-field
+          - I.search
+          - I.shuffle
+          - D.resolve-choice
+          - S.zone
+          - S.filter
+        author:
+          - A.head.fanfare
+          - A.act.search
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations: []
+  - kind: member
+    id: sha256:f0487ab6e7f5cbd1fec943860bedd36126a2aa644e45c08262fa498ebeedf9da
+    template: Te1c6707ca0
+    position:
+      card_no: BP14-P25
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:bbf74450ea6164d04b9b1efb29315af2efd8d9ff743c011cb2d6fd6a35027547
+    raw_hash: sha256:bbf74450ea6164d04b9b1efb29315af2efd8d9ff743c011cb2d6fd6a35027547
+    body_length: 41
+    raw_length: 41
+    token_header_hash:
+    block: sha256:f0487ab6e7f5cbd1fec943860bedd36126a2aa644e45c08262fa498ebeedf9da
+    evidence_hash: sha256:927084295bb61617463848b9b1cdede706f76df20bda5e00a85bdb4fb5eb351e
+    clauses:
+      - id: sha256:42de717554e3b8fdebc8eda5127563c1e700c011b0392e22afc6da89db6bba6d
+        template: Ce1c6707ca0
+        body:
+          start: 0
+          end: 41
+        raw:
+          start: 0
+          end: 41
+  - kind: member
+    id: sha256:83c7c6e238a8962b0acccad4723e33c9d219bf32e06b7159ca22657387db300c
+    template: T23f16a2851
+    position:
+      card_no: BP14-P26
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    raw_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    body_length: 19
+    raw_length: 19
+    token_header_hash:
+    block: sha256:83c7c6e238a8962b0acccad4723e33c9d219bf32e06b7159ca22657387db300c
+    evidence_hash: sha256:4beca5a44e0d55bf3df082f01199cef43fa9491e9787d0710cf905629516e8bf
+    clauses:
+      - id: sha256:31d46992fa8721c10cb06c5e7a2c183c44deeebd6bb03c8c3016958d8c9a3cea
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+  - kind: classification
+    id: T6560b5d559
+    status: candidate
+    family: fanfare.pay-discard-damage-buff
+    normalized_hash: sha256:6560b5d559c744f701419e0f9ac20f78b932eb3a1b59cc7e8e2ae81e6078ff6c
+    definition_hash: sha256:876b25a8f0d630d0d407e0286c90ce095e4c8586ff84e0a8069bca7c9d1c8f01
+    label_hash: sha256:9e2dcf212ae622793ece73912ff363346f76fc6f90d99fd9da554f789272de25
+    members:
+      - sha256:97b16af9cc03718327836192932ac4bb9617dd6827a8d30fcbc634c99552e26f
+      - sha256:726de98d17b96a7bf23c25901f252dd97cf544c365ccba82417b2aaae852929a
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:11dfc3def73d6420d2cd5f5c92440f3cf9ff69393ea1c5f8c4749b480da3117d
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.enter-field
+          - K.pay
+          - I.resource
+          - I.discard
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.fanfare
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:a618a4fb34fbbcdb089f0b3e63d0246131bf2d6920fac657832efa21080dfe0f
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:37b571536a6e2b332e70294b4218a5e4a2322a05c1f9031cfe6584fdb671dece
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.modify
+          - L.continuous
+        author:
+          - A.act.buff
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:11dfc3def73d6420d2cd5f5c92440f3cf9ff69393ea1c5f8c4749b480da3117d
+            ability:
+        targets:
+          - clause: sha256:a618a4fb34fbbcdb089f0b3e63d0246131bf2d6920fac657832efa21080dfe0f
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: sha256:a618a4fb34fbbcdb089f0b3e63d0246131bf2d6920fac657832efa21080dfe0f
+            ability:
+        targets:
+          - clause: sha256:37b571536a6e2b332e70294b4218a5e4a2322a05c1f9031cfe6584fdb671dece
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:11dfc3def73d6420d2cd5f5c92440f3cf9ff69393ea1c5f8c4749b480da3117d
+            ability:
+        targets:
+          - clause: sha256:a618a4fb34fbbcdb089f0b3e63d0246131bf2d6920fac657832efa21080dfe0f
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:11dfc3def73d6420d2cd5f5c92440f3cf9ff69393ea1c5f8c4749b480da3117d
+            ability:
+        targets:
+          - clause: sha256:37b571536a6e2b332e70294b4218a5e4a2322a05c1f9031cfe6584fdb671dece
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:726de98d17b96a7bf23c25901f252dd97cf544c365ccba82417b2aaae852929a
+    template: T6560b5d559
+    position:
+      card_no: BP14-P26
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:4e9566f4a5ad68b875d3b2738eb59da6a1cd3b50869a1c4d5be041f93e2f1e22
+    raw_hash: sha256:4e9566f4a5ad68b875d3b2738eb59da6a1cd3b50869a1c4d5be041f93e2f1e22
+    body_length: 78
+    raw_length: 78
+    token_header_hash:
+    block: sha256:726de98d17b96a7bf23c25901f252dd97cf544c365ccba82417b2aaae852929a
+    evidence_hash: sha256:c5dba5ab952a78b45f1861ef29a15c4e04a9845bfa3b471d8fc11f9065514c78
+    clauses:
+      - id: sha256:11dfc3def73d6420d2cd5f5c92440f3cf9ff69393ea1c5f8c4749b480da3117d
+        template: Cb65d1db0b7
+        body:
+          start: 0
+          end: 49
+        raw:
+          start: 0
+          end: 49
+      - id: sha256:a618a4fb34fbbcdb089f0b3e63d0246131bf2d6920fac657832efa21080dfe0f
+        template: Cdf35a4dada
+        body:
+          start: 49
+          end: 58
+        raw:
+          start: 49
+          end: 58
+      - id: sha256:37b571536a6e2b332e70294b4218a5e4a2322a05c1f9031cfe6584fdb671dece
+        template: Cde1ade80b1
+        body:
+          start: 58
+          end: 78
+        raw:
+          start: 58
+          end: 78
+  - kind: member
+    id: sha256:f3b81e9bd46263cad608402781c65ad4a1f8b30cba69aeb133d281978829221b
+    template: Ta0044eee39
+    position:
+      card_no: BP14-P27
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:1ed4c4e8e1c709c0af61cb8f42212e10759728f264197898321166f8e5fa5c47
+    raw_hash: sha256:1ed4c4e8e1c709c0af61cb8f42212e10759728f264197898321166f8e5fa5c47
+    body_length: 10
+    raw_length: 10
+    token_header_hash:
+    block: sha256:f3b81e9bd46263cad608402781c65ad4a1f8b30cba69aeb133d281978829221b
+    evidence_hash: sha256:6f1c35f3c9bfb49e5da97b69865d733501675d836f1fcd99c0ee8f0a761191bd
+    clauses:
+      - id: sha256:a2d0318aa66febf76a95284a5611059256e1d8367ce479b4acd5c61642c1a5d5
+        template: Ca0044eee39
+        body:
+          start: 0
+          end: 10
+        raw:
+          start: 0
+          end: 10
+  - kind: classification
+    id: T347499cc9e
+    status: candidate
+    family: fanfare.hand-ex-draw-buff
+    normalized_hash: sha256:347499cc9ef4963a2d1c3d48ceaa62449aafa38007bd4c50cb6ea86b9bd7de18
+    definition_hash: sha256:113f1befd3a28b849af534611f47007581cd2d72bda2277b34b2e3ae27c0a812
+    label_hash: sha256:976777d641e81a3321c4f28455bc74753f6005a83f82c4c3a283298f4be1e96e
+    members:
+      - sha256:1db05ea3b0eb45e536764168f22b0f156ea790c895263983998d1968bbc50bc3
+      - sha256:5068ee37360839409148958d6c1459958f3e8d5e631bcc084794c0195e1d5857
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:984b9739957be7974f41509d24a91e75192a278d4755d7e6a737e0c270dbe2e5
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.enter-field
+          - K.pay
+          - I.move
+          - I.draw
+        author:
+          - A.head.fanfare
+          - A.cost
+          - A.act.draw
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:db90217ee15d2934e9836714859e6ca6a61d97e23fb2a92d2dea216bf283e20f
+        ability: a1
+        decision:
+        capture: C.live
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - S.zone
+          - S.filter
+          - V.zone-count
+          - X.aggregate
+          - I.modify
+          - L.continuous
+        author:
+          - A.if
+          - A.cond
+          - A.sel
+          - A.expr
+          - A.act.buff
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:984b9739957be7974f41509d24a91e75192a278d4755d7e6a737e0c270dbe2e5
+            ability:
+        targets:
+          - clause: sha256:db90217ee15d2934e9836714859e6ca6a61d97e23fb2a92d2dea216bf283e20f
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:984b9739957be7974f41509d24a91e75192a278d4755d7e6a737e0c270dbe2e5
+            ability:
+        targets:
+          - clause: sha256:984b9739957be7974f41509d24a91e75192a278d4755d7e6a737e0c270dbe2e5
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:984b9739957be7974f41509d24a91e75192a278d4755d7e6a737e0c270dbe2e5
+            ability:
+        targets:
+          - clause: sha256:db90217ee15d2934e9836714859e6ca6a61d97e23fb2a92d2dea216bf283e20f
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: sha256:db90217ee15d2934e9836714859e6ca6a61d97e23fb2a92d2dea216bf283e20f
+            ability:
+        targets:
+          - clause: sha256:db90217ee15d2934e9836714859e6ca6a61d97e23fb2a92d2dea216bf283e20f
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:5068ee37360839409148958d6c1459958f3e8d5e631bcc084794c0195e1d5857
+    template: T347499cc9e
+    position:
+      card_no: BP14-P28
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:ed9d99bfc86a22a8303f7e47f3b389ac0f7c73b43892a6426ffa4a11e5a0503e
+    raw_hash: sha256:ed9d99bfc86a22a8303f7e47f3b389ac0f7c73b43892a6426ffa4a11e5a0503e
+    body_length: 78
+    raw_length: 78
+    token_header_hash:
+    block: sha256:5068ee37360839409148958d6c1459958f3e8d5e631bcc084794c0195e1d5857
+    evidence_hash: sha256:19d6da41d4ed094a6f2eb6e790c523f17d6c6382a821507b77fa4191b37cc0ba
+    clauses:
+      - id: sha256:984b9739957be7974f41509d24a91e75192a278d4755d7e6a737e0c270dbe2e5
+        template: Cbf45daba13
+        body:
+          start: 0
+          end: 35
+        raw:
+          start: 0
+          end: 35
+      - id: sha256:db90217ee15d2934e9836714859e6ca6a61d97e23fb2a92d2dea216bf283e20f
+        template: Ca78fd048bb
+        body:
+          start: 35
+          end: 78
+        raw:
+          start: 35
+          end: 78
+  - kind: member
+    id: sha256:6bf7a84a431b27231a35695c10bf3208cec4cea25800d2404b027b81156eae39
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-P29
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:6bf7a84a431b27231a35695c10bf3208cec4cea25800d2404b027b81156eae39
+    evidence_hash: sha256:d6c03f3f8923414b5a8bcc201e27f34e9a76ade694b6f220c0c7eac2f9c2cf45
+    clauses:
+      - id: sha256:076f57eb197b96eec3645aa29fef214c12ad484e472bc8073bc4857859245b84
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:0c206d9f7af3270ba965490ec4686aa3f1aa55e38f099ee2313e684c27e92409
+    template: T53bcf8cbcf
+    position:
+      card_no: BP14-P29
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:072709ecc5fd6c68db62514b37d801fd9fc352ea9313375cd4d25b063b993d79
+    raw_hash: sha256:072709ecc5fd6c68db62514b37d801fd9fc352ea9313375cd4d25b063b993d79
+    body_length: 33
+    raw_length: 33
+    token_header_hash:
+    block: sha256:0c206d9f7af3270ba965490ec4686aa3f1aa55e38f099ee2313e684c27e92409
+    evidence_hash: sha256:265c9f14b96f8ddb832b76e108316362f4d89db1e029958401ddbdde88c9f1c8
+    clauses:
+      - id: sha256:e065069c8096914b4383c6a23707141c4dd12fdfeeef845e6da91fd562ef77df
+        template: Cd7dc77dc4b
+        body:
+          start: 0
+          end: 24
+        raw:
+          start: 0
+          end: 24
+      - id: sha256:7c5336375b38e43e671989d4346231f81d2dc31f4ee8fce19ede7611d5f743e2
+        template: Cdf35a4dada
+        body:
+          start: 24
+          end: 33
+        raw:
+          start: 24
+          end: 33
+  - kind: member
+    id: sha256:7e5200bd40aa74a7dc9670d64866a10c71cd6e03797e6aa52cee1f6dc9c0b316
+    template: T672ee11fa1
+    position:
+      card_no: BP14-P30
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:26c1929da2a956f7c6f20f2ca0c3481fa2639645720b88fb0d91977b2c37cd32
+    raw_hash: sha256:26c1929da2a956f7c6f20f2ca0c3481fa2639645720b88fb0d91977b2c37cd32
+    body_length: 43
+    raw_length: 43
+    token_header_hash:
+    block: sha256:7e5200bd40aa74a7dc9670d64866a10c71cd6e03797e6aa52cee1f6dc9c0b316
+    evidence_hash: sha256:08fb8f9df3aedc264c33348c0da7141e084e3d0b97721b33643a51cab1cf2ab8
+    clauses:
+      - id: sha256:ae34a2de7d5e713587489ee83f6f917eeb536afee934142d65442032bc1b32c0
+        template: C502b22b80f
+        body:
+          start: 0
+          end: 34
+        raw:
+          start: 0
+          end: 34
+      - id: sha256:ca76e5c5b5a4c0b5f3b61e71fb9a7d4410292b690e5a41fb11404846e8e8a5e1
+        template: Cdf35a4dada
+        body:
+          start: 34
+          end: 43
+        raw:
+          start: 34
+          end: 43
+  - kind: classification
+    id: Tb2677eaa67
+    status: candidate
+    family: activate.sacrifice-grant-attack-damage
+    normalized_hash: sha256:b2677eaa67055a58603805c1f068d9ec7b501abe2b1b8b1f9dbcd243b11c3d15
+    definition_hash: sha256:0ddfa74ae9711c2921da63af8e52119945e261c336f64eb3be4341b4b7cd9aa8
+    label_hash: sha256:7e658e38329297c04e9389f8721a6b4969a36c5906af4a9213b10d82b0a05a07
+    members:
+      - sha256:7a6ec6e80dbe54c1362c762402062a77f07987b29360a5bc523c5f32c4bf0913
+      - sha256:d02b6fccf811bb81e6eba90608fc58224622144321971162a87d66b07e483f15
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:9680b882d4e40a0b90946c320c63578359df1f28bfbf6c571f88a276e911bd59
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - I.resource
+          - I.posture
+          - I.move
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.activate
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:41dbad02f04ce472999b3bd39c5f11cf00f1ba4fa9c4df3797442cdad08c06ca
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.grant
+          - B.source
+          - B.trigger
+          - E.attack
+          - I.damage
+          - T.player-set
+        author:
+          - A.act.grant
+          - A.head.attack_time
+          - A.act.damage
+          - A.who
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:9680b882d4e40a0b90946c320c63578359df1f28bfbf6c571f88a276e911bd59
+            ability:
+        targets:
+          - clause: sha256:41dbad02f04ce472999b3bd39c5f11cf00f1ba4fa9c4df3797442cdad08c06ca
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:9680b882d4e40a0b90946c320c63578359df1f28bfbf6c571f88a276e911bd59
+            ability:
+        targets:
+          - clause: sha256:41dbad02f04ce472999b3bd39c5f11cf00f1ba4fa9c4df3797442cdad08c06ca
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:7a6ec6e80dbe54c1362c762402062a77f07987b29360a5bc523c5f32c4bf0913
+    template: Tb2677eaa67
+    position:
+      card_no: BP14-P30
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:899704c74e7e5e17888ea309e7401e94a96cf0268ea7ba05713fd1c6b3317b70
+    raw_hash: sha256:899704c74e7e5e17888ea309e7401e94a96cf0268ea7ba05713fd1c6b3317b70
+    body_length: 74
+    raw_length: 74
+    token_header_hash:
+    block: sha256:7a6ec6e80dbe54c1362c762402062a77f07987b29360a5bc523c5f32c4bf0913
+    evidence_hash: sha256:6e652c5727294501163d529781a2aa615c39ab05445fb365f13fa8690f23b21a
+    clauses:
+      - id: sha256:9680b882d4e40a0b90946c320c63578359df1f28bfbf6c571f88a276e911bd59
+        template: C04fd61232f
+        body:
+          start: 0
+          end: 44
+        raw:
+          start: 0
+          end: 44
+      - id: sha256:41dbad02f04ce472999b3bd39c5f11cf00f1ba4fa9c4df3797442cdad08c06ca
+        template: C2b32b9d78a
+        body:
+          start: 44
+          end: 74
+        raw:
+          start: 44
+          end: 74
+  - kind: classification
+    id: T74de75251b
+    status: candidate
+    family: spell.awakening-replace-damage
+    normalized_hash: sha256:74de75251bedcf11a32935debb0cee73931302ca618a4d1d91c30448b471c180
+    definition_hash: sha256:770d06d4e61da2837e50d795540ab64be3dab9e2164884dce193cd3786f3392e
+    label_hash: sha256:5c758b573f14d009c1db0e8382f7580e855f14e08573c615ddf47d03615c7609
+    members:
+      - sha256:016770987387054c38d5aa03740212a6f56c2cf92e6e33d7f8509783404a57fd
+      - sha256:d1fc367cf570f633f00cc1fb8a1e7623c7f2ba9c13766aad0fd32da9ae5f7c83
+      - sha256:65f60c4be57ac4f7ce838ff56f9ef0afc8d6667301bdd9bb0508f22552495c44
+      - sha256:741b96dac497acf6e031ba4b9c6d9f42bb5103dfef87e2d18db95c346fdd42e7
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:86c7a4891530f4ab61909ec3d00a3568bb7be27dd1481700eb35ef9f4ea8c7c0
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.spell
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:4179486803dfa280d3f7527b2ea96f8012e1d96b70afda337ac997ff54af21f4
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:0134de49b41c12befff389560444e0a4c1ce34656b39a14acc785e8257f737d4
+        ability: a1
+        decision:
+        capture: C.live
+        stage: known
+        ir:
+          - X.predicate
+          - V.awakening
+          - L.replacement
+          - I.damage
+        author:
+          - A.cond
+          - A.comb.instead
+          - A.act.damage
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:86c7a4891530f4ab61909ec3d00a3568bb7be27dd1481700eb35ef9f4ea8c7c0
+            ability:
+        targets:
+          - clause: sha256:4179486803dfa280d3f7527b2ea96f8012e1d96b70afda337ac997ff54af21f4
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: sha256:0134de49b41c12befff389560444e0a4c1ce34656b39a14acc785e8257f737d4
+            ability:
+        targets:
+          - clause: sha256:4179486803dfa280d3f7527b2ea96f8012e1d96b70afda337ac997ff54af21f4
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: sha256:0134de49b41c12befff389560444e0a4c1ce34656b39a14acc785e8257f737d4
+            ability:
+        targets:
+          - clause: sha256:0134de49b41c12befff389560444e0a4c1ce34656b39a14acc785e8257f737d4
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:d1fc367cf570f633f00cc1fb8a1e7623c7f2ba9c13766aad0fd32da9ae5f7c83
+    template: T74de75251b
+    position:
+      card_no: BP14-P31
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:3d75eca5e31ab968ccbe21656d4e4f11696b7abf0c912227c28e24de21f1a004
+    raw_hash: sha256:3d75eca5e31ab968ccbe21656d4e4f11696b7abf0c912227c28e24de21f1a004
+    body_length: 44
+    raw_length: 44
+    token_header_hash:
+    block: sha256:d1fc367cf570f633f00cc1fb8a1e7623c7f2ba9c13766aad0fd32da9ae5f7c83
+    evidence_hash: sha256:c05cf40e1899d0ce53cf050d2bb0d4f69ce9ec2a65064a8f6df3c84f7cf8f0e2
+    clauses:
+      - id: sha256:86c7a4891530f4ab61909ec3d00a3568bb7be27dd1481700eb35ef9f4ea8c7c0
+        template: C3f5066b9e7
+        body:
+          start: 0
+          end: 16
+        raw:
+          start: 0
+          end: 16
+      - id: sha256:4179486803dfa280d3f7527b2ea96f8012e1d96b70afda337ac997ff54af21f4
+        template: Cdf35a4dada
+        body:
+          start: 16
+          end: 25
+        raw:
+          start: 16
+          end: 25
+      - id: sha256:0134de49b41c12befff389560444e0a4c1ce34656b39a14acc785e8257f737d4
+        template: C730dec3f9d
+        body:
+          start: 25
+          end: 44
+        raw:
+          start: 25
+          end: 44
+  - kind: classification
+    id: T2f9a79ec6b
+    status: candidate
+    family: spell.damage-optional-discard-mill
+    normalized_hash: sha256:2f9a79ec6b1a21b8ad8c3f320840d7db823c0152d3fc014fc6068ebbb72bb664
+    definition_hash: sha256:fd3099033d052bef0c79ed3cfa9d30069f6b2ea28c78f188625aee0b65398fda
+    label_hash: sha256:7f2be84c89d2b14d74f3474b8c9ad43c3708a9dc7329e78647095287e8d06c52
+    members:
+      - sha256:053309df467d69eff39cc6478eeac3e58e4cef847a38db2b8b4212667c10c3f0
+      - sha256:ed791de42e2983a302cb22441b05791b3ec7a442be6783af8c9a0b53e1f60576
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:4a640b5be5fb364ed2931fbb871099ed4a2b3ee0b3ef0f34a29c73ea71494cab
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.spell
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:a0bbc88fda346f5dcadbdd79d569de7fb66b71765f0cf8ac1be50dec3ff7ceec
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:59fb6f0065bc814d4e0a5f33c2c3d90aaec0668a098a1cc1057b72ceded1133f
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - K.may
+          - D.resolve-choice
+          - I.discard
+        author:
+          - A.may
+          - A.act.discard
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:65bb8669f6d3bb95d320c21e59b7e19e1cab14cc350b65a09a8f2923655916ae
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - T.receipt
+          - V.receipt-field
+          - I.move
+        author:
+          - A.if
+          - A.cond
+          - A.expr
+          - A.act.move
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:4a640b5be5fb364ed2931fbb871099ed4a2b3ee0b3ef0f34a29c73ea71494cab
+            ability:
+        targets:
+          - clause: sha256:a0bbc88fda346f5dcadbdd79d569de7fb66b71765f0cf8ac1be50dec3ff7ceec
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: sha256:a0bbc88fda346f5dcadbdd79d569de7fb66b71765f0cf8ac1be50dec3ff7ceec
+            ability:
+        targets:
+          - clause: sha256:59fb6f0065bc814d4e0a5f33c2c3d90aaec0668a098a1cc1057b72ceded1133f
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: sha256:59fb6f0065bc814d4e0a5f33c2c3d90aaec0668a098a1cc1057b72ceded1133f
+            ability:
+        targets:
+          - clause: sha256:65bb8669f6d3bb95d320c21e59b7e19e1cab14cc350b65a09a8f2923655916ae
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: result-of
+        sources:
+          - clause: sha256:59fb6f0065bc814d4e0a5f33c2c3d90aaec0668a098a1cc1057b72ceded1133f
+            ability:
+        targets:
+          - clause: sha256:65bb8669f6d3bb95d320c21e59b7e19e1cab14cc350b65a09a8f2923655916ae
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: sha256:65bb8669f6d3bb95d320c21e59b7e19e1cab14cc350b65a09a8f2923655916ae
+            ability:
+        targets:
+          - clause: sha256:65bb8669f6d3bb95d320c21e59b7e19e1cab14cc350b65a09a8f2923655916ae
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:053309df467d69eff39cc6478eeac3e58e4cef847a38db2b8b4212667c10c3f0
+    template: T2f9a79ec6b
+    position:
+      card_no: BP14-P32
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:cccca1ae0767f0df927170e209d7f2c707cd5dc1c1676248a2b317087bf625ce
+    raw_hash: sha256:cccca1ae0767f0df927170e209d7f2c707cd5dc1c1676248a2b317087bf625ce
+    body_length: 63
+    raw_length: 63
+    token_header_hash:
+    block: sha256:053309df467d69eff39cc6478eeac3e58e4cef847a38db2b8b4212667c10c3f0
+    evidence_hash: sha256:ef0c04cceb5b59edbab8f7b0dd957460ceea12e135774bfea6a3717badef1dc2
+    clauses:
+      - id: sha256:4a640b5be5fb364ed2931fbb871099ed4a2b3ee0b3ef0f34a29c73ea71494cab
+        template: C3f5066b9e7
+        body:
+          start: 0
+          end: 16
+        raw:
+          start: 0
+          end: 16
+      - id: sha256:a0bbc88fda346f5dcadbdd79d569de7fb66b71765f0cf8ac1be50dec3ff7ceec
+        template: Cdf35a4dada
+        body:
+          start: 16
+          end: 25
+        raw:
+          start: 16
+          end: 25
+      - id: sha256:59fb6f0065bc814d4e0a5f33c2c3d90aaec0668a098a1cc1057b72ceded1133f
+        template: C7cd4a59423
+        body:
+          start: 25
+          end: 39
+        raw:
+          start: 25
+          end: 39
+      - id: sha256:65bb8669f6d3bb95d320c21e59b7e19e1cab14cc350b65a09a8f2923655916ae
+        template: C8755fa811f
+        body:
+          start: 39
+          end: 63
+        raw:
+          start: 39
+          end: 63
+  - kind: member
+    id: sha256:79a4e5787f57faadcae3f2a0b26085137d9a9c08ae9ef148ee2d7766c32d1829
+    template: T25ba50b47a
+    position:
+      card_no: BP14-P33
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
+    raw_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
+    body_length: 6
+    raw_length: 6
+    token_header_hash:
+    block: sha256:79a4e5787f57faadcae3f2a0b26085137d9a9c08ae9ef148ee2d7766c32d1829
+    evidence_hash: sha256:c879a0a84817db1ffd0b69a5c82bedcc01244baa00357a22b7fcac0acdaf82a2
+    clauses:
+      - id: sha256:2ed3cdf5e3d5e771e381a590aa4d0fc427c4da08fc20dee8f9d10f4f550d6191
+        template: C25ba50b47a
+        body:
+          start: 0
+          end: 6
+        raw:
+          start: 0
+          end: 6
+  - kind: classification
+    id: T3346d1faf3
+    status: candidate
+    family: spell.damage-reduction-draw
+    normalized_hash: sha256:3346d1faf3123847814ff1499c0f4c0bdf064b9ea1c8bd22875a33b460a5dcf5
+    definition_hash: sha256:6ad576a55b3f67a4f6179566c338343e2888fa6b5adf53608de2c7a6a89867e3
+    label_hash: sha256:ef666abfe6702941b66ae6fd9436240d7c132f3c43bb28c75dfbfd8e7bd10d86
+    members:
+      - sha256:0a8a809a22908d797aabdf21c2cb9a05cd2882e2bbff24a2bae8f0ae99c5689d
+      - sha256:97e77e16594c5c9045a79fe32b6a6c73a6d9d6027ce3e7c8ff2c03e5160fd248
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:3f6177ab80d867d87df3c4e2e540025372ab5fbb033a93aa6bac8f8f373500c9
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - L.replacement
+          - L.duration
+        author:
+          - A.head.spell
+          - A.effect
+          - A.until
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:6d148036bc23bcddf94f202ef643fec9969102f10f7e1bbf0efc339c0729c008
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.draw
+        author:
+          - A.act.draw
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:3f6177ab80d867d87df3c4e2e540025372ab5fbb033a93aa6bac8f8f373500c9
+            ability:
+        targets:
+          - clause: sha256:6d148036bc23bcddf94f202ef643fec9969102f10f7e1bbf0efc339c0729c008
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:0a8a809a22908d797aabdf21c2cb9a05cd2882e2bbff24a2bae8f0ae99c5689d
+    template: T3346d1faf3
+    position:
+      card_no: BP14-P33
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:4079a6d262998b0896bf8155b09c0bf388c31160a4936278c5bf8fb1e0480a4e
+    raw_hash: sha256:4079a6d262998b0896bf8155b09c0bf388c31160a4936278c5bf8fb1e0480a4e
+    body_length: 32
+    raw_length: 32
+    token_header_hash:
+    block: sha256:79a4e5787f57faadcae3f2a0b26085137d9a9c08ae9ef148ee2d7766c32d1829
+    evidence_hash: sha256:6c089c23407cd8037eebf49fab4e8528baace97fe655c25bbfeccafc829d76b2
+    clauses:
+      - id: sha256:3f6177ab80d867d87df3c4e2e540025372ab5fbb033a93aa6bac8f8f373500c9
+        template: C32039d3903
+        body:
+          start: 0
+          end: 27
+        raw:
+          start: 0
+          end: 27
+      - id: sha256:6d148036bc23bcddf94f202ef643fec9969102f10f7e1bbf0efc339c0729c008
+        template: Cde5a71eee8
+        body:
+          start: 27
+          end: 32
+        raw:
+          start: 27
+          end: 32
+  - kind: member
+    id: sha256:3522591b72674acd80acfd5a656774001eb4e96c3cbb640eb0a057dd99157ab9
+    template: T23f16a2851
+    position:
+      card_no: BP14-SL01
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    raw_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    body_length: 19
+    raw_length: 19
+    token_header_hash:
+    block: sha256:3522591b72674acd80acfd5a656774001eb4e96c3cbb640eb0a057dd99157ab9
+    evidence_hash: sha256:635f05fe6a727c18209109e305da8b005ccb091639ca71b986de6537502c7baf
+    clauses:
+      - id: sha256:848d36db049154de37b2cd895f8de919076e16d96e7e662775e9416d0ef9d093
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+  - kind: member
+    id: sha256:72e7deb73a68802fcfa83e073e230ead0e662f8e0048c8bcdc67c6c09cbe33f6
+    template: T47033b1c1d
+    position:
+      card_no: BP14-SL01
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:e9ed3bbfb0f0cae54380a6339b7fcbd5f4b15254d87efc36d60b901751f82c21
+    raw_hash: sha256:e9ed3bbfb0f0cae54380a6339b7fcbd5f4b15254d87efc36d60b901751f82c21
+    body_length: 43
+    raw_length: 43
+    token_header_hash:
+    block: sha256:72e7deb73a68802fcfa83e073e230ead0e662f8e0048c8bcdc67c6c09cbe33f6
+    evidence_hash: sha256:c66dd948c76bef2f3c4376be94bb61bd23b87a2da497ac7970321c1f400c7ee7
+    clauses:
+      - id: sha256:d3623018d7df55dff6e6edf5e5a8b53e5fde1c1c731657245ca1d321698ae0b5
+        template: C47033b1c1d
+        body:
+          start: 0
+          end: 43
+        raw:
+          start: 0
+          end: 43
+  - kind: member
+    id: sha256:efde5581308b22eb88d5cde2dcf88e5eca819d2fd4a7f6043becb4a3fd12041f
+    template: T7555a681e6
+    position:
+      card_no: BP14-SL02
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:0e0deca19854bdb4c3411d88f352d4e0b774ead07b00055c68771b856100b633
+    raw_hash: sha256:0e0deca19854bdb4c3411d88f352d4e0b774ead07b00055c68771b856100b633
+    body_length: 106
+    raw_length: 106
+    token_header_hash:
+    block: sha256:efde5581308b22eb88d5cde2dcf88e5eca819d2fd4a7f6043becb4a3fd12041f
+    evidence_hash: sha256:efe0f21f971c0b14260286e5756d113d0e327c4e4fb80e954251802d66187fe5
+    clauses:
+      - id: sha256:73342823cc03603706c9e143929dc3167e484b2b34bd6ea4094e25954d76279b
+        template: C7aaa9557ed
+        body:
+          start: 0
+          end: 59
+        raw:
+          start: 0
+          end: 59
+      - id: sha256:ccd69cfdf6d0d98c35103bcba2560d2d7f00df4a9e0eb27c7db51624200ded32
+        template: Ca9effdf62b
+        body:
+          start: 59
+          end: 106
+        raw:
+          start: 59
+          end: 106
+  - kind: member
+    id: sha256:1226a0da70ee88ff62a273054ea3fd15fa569e05a7b8684089d115c6a5ba2bfe
+    template: T2d1091be95
+    position:
+      card_no: BP14-SL03
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:78e5987cc49253829d4e669c1dc40d49d0edbd9cef5b5e50fbef3e654eb58f17
+    raw_hash: sha256:78e5987cc49253829d4e669c1dc40d49d0edbd9cef5b5e50fbef3e654eb58f17
+    body_length: 97
+    raw_length: 97
+    token_header_hash:
+    block: sha256:1226a0da70ee88ff62a273054ea3fd15fa569e05a7b8684089d115c6a5ba2bfe
+    evidence_hash: sha256:73782f3304b143e99374d8bb68d4a812d88a55342303f29f9a067e1de2ec516c
+    clauses:
+      - id: sha256:e84ef68ce2337e3c6f20b8c27a3e730426329778e43f77eb14e239725264fe5d
+        template: Cd62b2d48be
+        body:
+          start: 0
+          end: 29
+        raw:
+          start: 0
+          end: 29
+      - id: sha256:d4b146417c1b43e62a864dba7f25e274074c1192e314f45a657f1a6137342985
+        template: Cdf35a4dada
+        body:
+          start: 29
+          end: 38
+        raw:
+          start: 29
+          end: 38
+      - id: sha256:a314129397cb206f4f68161218a7f7665fcce5d43236714ff9de3475f073fee4
+        template: Cde5a71eee8
+        body:
+          start: 38
+          end: 43
+        raw:
+          start: 38
+          end: 43
+      - id: sha256:89bcd7caf186b7abfc9c48748f13441e594b46355d8be6a7c2fa9b5f4cdf72b2
+        template: Cfa87afe606
+        body:
+          start: 43
+          end: 97
+        raw:
+          start: 43
+          end: 97
+  - kind: classification
+    id: T83aeda33cb
+    status: candidate
+    family: advance.self-banish-summon
+    normalized_hash: sha256:83aeda33cb390223b307beb6d4fecc4e0f9cff0abd9477b54b79015c5b1e645c
+    definition_hash: sha256:2e0edd8ca083df2c63daef92be161c5ef3a9f178849b321980b1744636cf5c2e
+    label_hash: sha256:68e8335d665b42a9d86104e0117bb8a688e3fccc2ddf88c4b8e8138e36bb7dfe
+    members:
+      - sha256:c24257a216cf590ec13da93585d4ba684a89eca12b9a1970706789e9c07f04bf
+      - sha256:a3a0a86d28d8e06997d461a5b7a4b18b49ef9c34a5e796d279fb03aa73430e77
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:3c1f903e5ed49a9017d4f55b51522ea1ae01c0b268f72d56d681e4b645f44c6b
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - B.keyword
+          - K.pay
+          - I.resource
+          - I.banish
+          - D.resolve-choice
+          - X.binding
+          - S.zone
+          - S.filter
+          - K.may
+          - I.move
+        author:
+          - A.head.activate
+          - A.cost
+          - A.choose
+          - A.sel
+          - A.may
+          - A.act.move
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:d6dc568c1f1ee60dca1cd2fafd9bbcebf9d572a14a3506fc3e3355dae108807f
+        ability: a1
+        decision:
+        capture: C.at-play
+        stage: known
+        ir:
+          - X.predicate
+          - S.zone
+          - S.filter
+          - V.zone-count
+          - X.aggregate
+        author:
+          - A.cond
+          - A.sel
+          - A.expr
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: cost-of
+        sources:
+          - clause: sha256:3c1f903e5ed49a9017d4f55b51522ea1ae01c0b268f72d56d681e4b645f44c6b
+            ability:
+        targets:
+          - clause: sha256:3c1f903e5ed49a9017d4f55b51522ea1ae01c0b268f72d56d681e4b645f44c6b
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: scope-of
+        sources:
+          - clause: sha256:d6dc568c1f1ee60dca1cd2fafd9bbcebf9d572a14a3506fc3e3355dae108807f
+            ability:
+        targets:
+          - clause: sha256:3c1f903e5ed49a9017d4f55b51522ea1ae01c0b268f72d56d681e4b645f44c6b
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:a3a0a86d28d8e06997d461a5b7a4b18b49ef9c34a5e796d279fb03aa73430e77
+    template: T83aeda33cb
+    position:
+      card_no: BP14-SL04
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:33e9372424139a9b72f655c153b824bc480a6c0320dedeebdd638351633a489c
+    raw_hash: sha256:33e9372424139a9b72f655c153b824bc480a6c0320dedeebdd638351633a489c
+    body_length: 105
+    raw_length: 105
+    token_header_hash:
+    block: sha256:a3a0a86d28d8e06997d461a5b7a4b18b49ef9c34a5e796d279fb03aa73430e77
+    evidence_hash: sha256:016b6b989d9441d699a2375d8f14792e9b36d80356ca23f838257a1b6344b97c
+    clauses:
+      - id: sha256:3c1f903e5ed49a9017d4f55b51522ea1ae01c0b268f72d56d681e4b645f44c6b
+        template: C990910311f
+        body:
+          start: 0
+          end: 55
+        raw:
+          start: 0
+          end: 55
+      - id: sha256:d6dc568c1f1ee60dca1cd2fafd9bbcebf9d572a14a3506fc3e3355dae108807f
+        template: C5d40c2c479
+        body:
+          start: 55
+          end: 105
+        raw:
+          start: 55
+          end: 105
+  - kind: classification
+    id: Ta55ec8afff
+    status: candidate
+    family: fanfare.draw-discard-token
+    normalized_hash: sha256:a55ec8afff408a2e52eb977eed8224fe0e97bfa35f338b5228d1d22fedc0b015
+    definition_hash: sha256:68fac85460a4cddb3c10bbec339aeb2f2cabb1346260bd2c66c8ff11cce1caef
+    label_hash: sha256:5cdba61e39a955cca7fe03cd61e3d06517dbeb0ca5566f4b19688402cf11397b
+    members:
+      - sha256:3adce1bf8730551abb0d4605c2502a395d4d31a0a9bc43ec53ecd81ee3c7d751
+      - sha256:19a4354b9e332f2d2641f44bc91d79dba468b39b4981ca8d1d34aa2a221c2d0c
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:7754e13693424e74e5ed34f5170e66540066f96f2950fe66b57345e2f1acf2fb
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.enter-field
+          - I.draw
+        author:
+          - A.head.fanfare
+          - A.act.draw
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:0d14cea21d766cda7d96263a737e3962b4159b7bf9fd8d41749d8ed1c4840ac3
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - I.discard
+        author:
+          - A.act.discard
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:9a996203a30d607d7ab4a82d14bcb17cf0475b90d77c2adb9451ba165c06e319
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.token
+        author:
+          - A.act.create
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:7754e13693424e74e5ed34f5170e66540066f96f2950fe66b57345e2f1acf2fb
+            ability:
+        targets:
+          - clause: sha256:0d14cea21d766cda7d96263a737e3962b4159b7bf9fd8d41749d8ed1c4840ac3
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: sha256:0d14cea21d766cda7d96263a737e3962b4159b7bf9fd8d41749d8ed1c4840ac3
+            ability:
+        targets:
+          - clause: sha256:9a996203a30d607d7ab4a82d14bcb17cf0475b90d77c2adb9451ba165c06e319
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:19a4354b9e332f2d2641f44bc91d79dba468b39b4981ca8d1d34aa2a221c2d0c
+    template: Ta55ec8afff
+    position:
+      card_no: BP14-SL04
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:f27d57971f56f389380261cffc6e3b94775ee893e59a74e81117702b8f04078f
+    raw_hash: sha256:f27d57971f56f389380261cffc6e3b94775ee893e59a74e81117702b8f04078f
+    body_length: 44
+    raw_length: 44
+    token_header_hash:
+    block: sha256:19a4354b9e332f2d2641f44bc91d79dba468b39b4981ca8d1d34aa2a221c2d0c
+    evidence_hash: sha256:7adfdd25b06159947269c452309811d720eb14845fe680c315caa0fca390f37d
+    clauses:
+      - id: sha256:7754e13693424e74e5ed34f5170e66540066f96f2950fe66b57345e2f1acf2fb
+        template: C602e7589fd
+        body:
+          start: 0
+          end: 14
+        raw:
+          start: 0
+          end: 14
+      - id: sha256:0d14cea21d766cda7d96263a737e3962b4159b7bf9fd8d41749d8ed1c4840ac3
+        template: C988d12be6c
+        body:
+          start: 14
+          end: 26
+        raw:
+          start: 14
+          end: 26
+      - id: sha256:9a996203a30d607d7ab4a82d14bcb17cf0475b90d77c2adb9451ba165c06e319
+        template: Cf320be2c84
+        body:
+          start: 26
+          end: 44
+        raw:
+          start: 26
+          end: 44
+  - kind: classification
+    id: Tdc23f08743
+    status: candidate
+    family: token.ward-lastword-damage
+    normalized_hash: sha256:dc23f0874308b2c433643fd629d9333e149ed239213210960a6657030e270109
+    definition_hash: sha256:8c8fa725b1a0d1086522ca7c07d1d2ded175365d766892bf851b1a9011b22b70
+    label_hash: sha256:4c54efc6cca1a14074597a699666731cec91c1b27ced251284877ea3fc88aec7
+    members:
+      - sha256:64aba52873dfcdc66932aa51e5d5a2f4a8ccfbab57e678dc81ae666fdfd2ed90
+      - sha256:6a7c45d706e9d2cbba6807d6e894f50214f4ad69dbc6c8e8b9ab20681fdea4d4
+    abilities:
+      - id: a1
+        head: A.head.lastword
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+      - id: a2
+        head: A.head.keywords
+        ir: B.keyword
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:23b1b3fa785ddb5e8c82cb035ebe1886404be0d7dcb06e566d019a19e222b0a8
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.leave-field
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.lastword
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:ed6b86934e23c382826c07acb66ed15821d69f6b5b0c40f208500bb30545c1a2
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:23b1b3fa785ddb5e8c82cb035ebe1886404be0d7dcb06e566d019a19e222b0a8
+        ability: a2
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.keyword
+        author:
+          - A.head.keywords
+        note_hash: sha256:6964c45972829d1465eb13211243d5c7769803bb19e1c25fdb8447b2819bc98b
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:23b1b3fa785ddb5e8c82cb035ebe1886404be0d7dcb06e566d019a19e222b0a8
+            ability: a1
+        targets:
+          - clause: sha256:ed6b86934e23c382826c07acb66ed15821d69f6b5b0c40f208500bb30545c1a2
+            ability: a1
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:6a7c45d706e9d2cbba6807d6e894f50214f4ad69dbc6c8e8b9ab20681fdea4d4
+    template: Tdc23f08743
+    position:
+      card_no: BP14-SL05
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:31f125f6ac89f88e257bbd3846a35c5071c47e1b474239f0c511be0a497ee9e1
+    raw_hash: sha256:31f125f6ac89f88e257bbd3846a35c5071c47e1b474239f0c511be0a497ee9e1
+    body_length: 37
+    raw_length: 37
+    token_header_hash: sha256:53d7451772907771659e730bee1cd800fd44cf8aef8e01e59cb621bc262d1caf
+    block: sha256:6a7c45d706e9d2cbba6807d6e894f50214f4ad69dbc6c8e8b9ab20681fdea4d4
+    evidence_hash: sha256:37b15e175310745cdb40e6c2b88dea45bde7a0296f7829f2ecc371f1f928580c
+    clauses:
+      - id: sha256:23b1b3fa785ddb5e8c82cb035ebe1886404be0d7dcb06e566d019a19e222b0a8
+        template: Cc0ebe7fd48
+        body:
+          start: 0
+          end: 28
+        raw:
+          start: 0
+          end: 28
+      - id: sha256:ed6b86934e23c382826c07acb66ed15821d69f6b5b0c40f208500bb30545c1a2
+        template: Cdf35a4dada
+        body:
+          start: 28
+          end: 37
+        raw:
+          start: 28
+          end: 37
+  - kind: member
+    id: sha256:6d17637c0c183249b3201a78af78b223c5ec6a9c568a5113957e3c0a29b192e1
+    template: T4daf6eb734
+    position:
+      card_no: BP14-SL05
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:874f44231476226b1075c013b405bf74ee59b9a34c491a779c27e268dc1ccc4f
+    raw_hash: sha256:874f44231476226b1075c013b405bf74ee59b9a34c491a779c27e268dc1ccc4f
+    body_length: 22
+    raw_length: 22
+    token_header_hash:
+    block: sha256:6d17637c0c183249b3201a78af78b223c5ec6a9c568a5113957e3c0a29b192e1
+    evidence_hash: sha256:0da4d5cb5111d1b96618ec19a3d7ee7c10018fdeccf054b76056f1eee092b977
+    clauses:
+      - id: sha256:50687054c58a7e86e2d8199f3cb58227e72532ba27fde06e4b778b0cb2af418a
+        template: C4daf6eb734
+        body:
+          start: 0
+          end: 22
+        raw:
+          start: 0
+          end: 22
+  - kind: classification
+    id: T8a72595e0a
+    status: candidate
+    family: activate.target-linked-damage
+    normalized_hash: sha256:8a72595e0a34ff4a8c2d4b0c1f7c80b5212f96ef674b89a1538a9a8aa069b05d
+    definition_hash: sha256:6d437cab1e2a2492550880744b2661307132efde4a3d229ea23b907d8becf364
+    label_hash: sha256:58aeabf219a3085f8bfa2336fffb21adae5048e3c1288d2a429a0b31b63506d0
+    members:
+      - sha256:73c175f0e56efa733f7158933966f008834ad768c774aa94db06bde44590d51f
+      - sha256:0e6884d4d7976e28b38759ae02825ab6476c79755c2072f91b8801bc6386466c
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:72b00aa37bdacc2676b7a4aa0c279f623aa7d1f41e398b2dc17a9b91a50233fa
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - I.posture
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.activate
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:17bace06fc400f6d6a263e93a4cfdf50d2e44930f8678665aad498c405493ba2
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:f13d1aabda6c99c6130515060a1febfead82840612762da03d380bc514349380
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.damage
+          - V.roles
+          - S.relation
+          - T.player-ref
+        author:
+          - A.act.damage
+          - A.who
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:72b00aa37bdacc2676b7a4aa0c279f623aa7d1f41e398b2dc17a9b91a50233fa
+            ability:
+        targets:
+          - clause: sha256:17bace06fc400f6d6a263e93a4cfdf50d2e44930f8678665aad498c405493ba2
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: sha256:17bace06fc400f6d6a263e93a4cfdf50d2e44930f8678665aad498c405493ba2
+            ability:
+        targets:
+          - clause: sha256:f13d1aabda6c99c6130515060a1febfead82840612762da03d380bc514349380
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:72b00aa37bdacc2676b7a4aa0c279f623aa7d1f41e398b2dc17a9b91a50233fa
+            ability:
+        targets:
+          - clause: sha256:17bace06fc400f6d6a263e93a4cfdf50d2e44930f8678665aad498c405493ba2
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:72b00aa37bdacc2676b7a4aa0c279f623aa7d1f41e398b2dc17a9b91a50233fa
+            ability:
+        targets:
+          - clause: sha256:f13d1aabda6c99c6130515060a1febfead82840612762da03d380bc514349380
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:0e6884d4d7976e28b38759ae02825ab6476c79755c2072f91b8801bc6386466c
+    template: T8a72595e0a
+    position:
+      card_no: BP14-SL05
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:1e25279e887d9c632ff541563e44c33bb54e5ece54cb7c2076becf1f4e530220
+    raw_hash: sha256:1e25279e887d9c632ff541563e44c33bb54e5ece54cb7c2076becf1f4e530220
+    body_length: 52
+    raw_length: 52
+    token_header_hash:
+    block: sha256:0e6884d4d7976e28b38759ae02825ab6476c79755c2072f91b8801bc6386466c
+    evidence_hash: sha256:323916606f1567da99b3f0d35d82cf58ef84d267db5c824d1d2dfa75d1ca68cd
+    clauses:
+      - id: sha256:72b00aa37bdacc2676b7a4aa0c279f623aa7d1f41e398b2dc17a9b91a50233fa
+        template: Cd62b2d48be
+        body:
+          start: 0
+          end: 29
+        raw:
+          start: 0
+          end: 29
+      - id: sha256:17bace06fc400f6d6a263e93a4cfdf50d2e44930f8678665aad498c405493ba2
+        template: Cdf35a4dada
+        body:
+          start: 29
+          end: 38
+        raw:
+          start: 29
+          end: 38
+      - id: sha256:f13d1aabda6c99c6130515060a1febfead82840612762da03d380bc514349380
+        template: Caa8bc3424e
+        body:
+          start: 38
+          end: 52
+        raw:
+          start: 38
+          end: 52
+  - kind: member
+    id: sha256:b77f81adf84f8ba4de39a4bd646f3d49ffb883aa0d2a8eb988354f6f55ec0c48
+    template: T23f16a2851
+    position:
+      card_no: BP14-SL06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    raw_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    body_length: 19
+    raw_length: 19
+    token_header_hash:
+    block: sha256:b77f81adf84f8ba4de39a4bd646f3d49ffb883aa0d2a8eb988354f6f55ec0c48
+    evidence_hash: sha256:bfa60932674b1562b57e77d3c3ca03dff6a7fb560a929e8bf0105d98a936321e
+    clauses:
+      - id: sha256:cc1b24ff3b7cb5455c71cf019cb2d37e2fc02c49259393638da8e9222586ce57
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+  - kind: member
+    id: sha256:8cf02e635a0c17f29bb3d5f0314f4c0430020b438f629cb3dc651b1e473e7298
+    template: T58b65ad3b8
+    position:
+      card_no: BP14-SL06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:58b65ad3b825b8afe69dfd71e3fc47474e391129756ef0ade35237682872a11a
+    raw_hash: sha256:58b65ad3b825b8afe69dfd71e3fc47474e391129756ef0ade35237682872a11a
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:8cf02e635a0c17f29bb3d5f0314f4c0430020b438f629cb3dc651b1e473e7298
+    evidence_hash: sha256:14e9d85f56bc567b674096d37cc420a298d8a0ade4771b7c52d434ca57f43ade
+    clauses:
+      - id: sha256:4106ac5d0983524ee670d25aa13f9de95ca87709c25f8592d2f36b2651d78f9c
+        template: C58b65ad3b8
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:92085f93e8ecbe08b66281d0971f81880f893d8031fb0fe331a3059fc6e983ed
+    template: T58b65ad3b8
+    position:
+      card_no: BP14-SL07
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:58b65ad3b825b8afe69dfd71e3fc47474e391129756ef0ade35237682872a11a
+    raw_hash: sha256:58b65ad3b825b8afe69dfd71e3fc47474e391129756ef0ade35237682872a11a
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:92085f93e8ecbe08b66281d0971f81880f893d8031fb0fe331a3059fc6e983ed
+    evidence_hash: sha256:11a69e362c31e9f70cd6278e6f430102cd11884bc94d5c71332dbface2ebf659
+    clauses:
+      - id: sha256:04b27a7192a66e92ce417e4e1192f55b098f691496050ba476c4f84306fdea1d
+        template: C58b65ad3b8
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:981e3c2e2f0befb4d88fd5c264e0f23ebb6ca86cbb715758383ba6a2b6d3590c
+    template: Tb4006380ea
+    position:
+      card_no: BP14-SL07
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:c633889c0528826646a2c15f5f857f5cbc680f6dcdd0caf14ea703f67bfa1e44
+    raw_hash: sha256:c633889c0528826646a2c15f5f857f5cbc680f6dcdd0caf14ea703f67bfa1e44
+    body_length: 30
+    raw_length: 30
+    token_header_hash:
+    block: sha256:981e3c2e2f0befb4d88fd5c264e0f23ebb6ca86cbb715758383ba6a2b6d3590c
+    evidence_hash: sha256:510c6ebef540f36d799d7d51dbec342d8006e49e607ebbf241a629fdaf37467e
+    clauses:
+      - id: sha256:1d90a0c9e325c8a9dcbaa0fc83bf1c5bbcf971ebc6bac9a6ba1e252ebf3dd905
+        template: Cf337ee4cf4
+        body:
+          start: 0
+          end: 21
+        raw:
+          start: 0
+          end: 21
+      - id: sha256:753ed1fdef4e8affc869df1fa742d7f0426fc8b6bfe15cc610627f105a02a1e9
+        template: Cdf35a4dada
+        body:
+          start: 21
+          end: 30
+        raw:
+          start: 21
+          end: 30
+  - kind: member
+    id: sha256:bd3e58cca3b94bbb40a2cd32866cae6b431e7ac9b73a65e88ce99849b80c0c08
+    template: T4969d0808f
+    position:
+      card_no: BP14-SL07
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:6a88048b968e51f21ca0aa9fdcc6c277a12efd4ba4b54c66a8d8f1dac819dc58
+    raw_hash: sha256:6a88048b968e51f21ca0aa9fdcc6c277a12efd4ba4b54c66a8d8f1dac819dc58
+    body_length: 23
+    raw_length: 23
+    token_header_hash:
+    block: sha256:bd3e58cca3b94bbb40a2cd32866cae6b431e7ac9b73a65e88ce99849b80c0c08
+    evidence_hash: sha256:ad84a3a94c0494c341859307ca7fd1e990599458a26d93f0ab580251325c693b
+    clauses:
+      - id: sha256:33c0d7d6b3ec3c88d53b5b92b12a297a933953565de26228f33301e22675b79c
+        template: C4969d0808f
+        body:
+          start: 0
+          end: 23
+        raw:
+          start: 0
+          end: 23
+  - kind: member
+    id: sha256:f262d0c435dc13ae89f86e7e13a270d1c0b4ffb1086b2985049d04d2e0bb3519
+    template: Te39b82ffe6
+    position:
+      card_no: BP14-SL08
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:724ce4afef839553006c2f3df4b0f75aa945ec800084d7593c32955b0e3bbd4c
+    raw_hash: sha256:724ce4afef839553006c2f3df4b0f75aa945ec800084d7593c32955b0e3bbd4c
+    body_length: 70
+    raw_length: 70
+    token_header_hash:
+    block: sha256:f262d0c435dc13ae89f86e7e13a270d1c0b4ffb1086b2985049d04d2e0bb3519
+    evidence_hash: sha256:99ff9cd2b0080417d42f0af44d450517a6735fa069b1b5928c4f8c27a2259e3a
+    clauses:
+      - id: sha256:f8157c43361f07001069c346eddf239f8aa82ffdd6709179bf69d21cfc8f7584
+        template: Cea28e869f8
+        body:
+          start: 0
+          end: 61
+        raw:
+          start: 0
+          end: 61
+      - id: sha256:c5e28f3dc0062a76759b397bb7db99f703218fc9e7e1b4ac396b895d2b2643e1
+        template: Cdf35a4dada
+        body:
+          start: 61
+          end: 70
+        raw:
+          start: 61
+          end: 70
+  - kind: member
+    id: sha256:2f64b35a602a77c35f5e62ff442721bdd1d3dbf4afee9e83cbef58ff1e65bda8
+    template: T14e7334fc1
+    position:
+      card_no: BP14-SL08
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:d36fbf8b18b47cb04ecbf5adbe98a93e1d36285cfd7f585e6c073c3102dffbe5
+    raw_hash: sha256:d36fbf8b18b47cb04ecbf5adbe98a93e1d36285cfd7f585e6c073c3102dffbe5
+    body_length: 70
+    raw_length: 70
+    token_header_hash:
+    block: sha256:2f64b35a602a77c35f5e62ff442721bdd1d3dbf4afee9e83cbef58ff1e65bda8
+    evidence_hash: sha256:d930313054b2b39f831324e6513e91329756684f4c658b93e086a7a7a684b5b2
+    clauses:
+      - id: sha256:656d2b242a2c24e90deb1775ac9c6575b2aa1c568764dab962eeb07715158bea
+        template: C14e7334fc1
+        body:
+          start: 0
+          end: 70
+        raw:
+          start: 0
+          end: 70
+  - kind: member
+    id: sha256:978fd4969f82e21be4d3c1f0ea043677e10d6ef7e55bc6bdb3bba2b742072cc6
+    template: T5acba189ad
+    position:
+      card_no: BP14-SL09
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
+    raw_hash: sha256:5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
+    body_length: 6
+    raw_length: 6
+    token_header_hash: sha256:048075e16ca2c38681426a402fd2ab0803fa007ab76b083949b09756c05331c9
+    block: sha256:978fd4969f82e21be4d3c1f0ea043677e10d6ef7e55bc6bdb3bba2b742072cc6
+    evidence_hash: sha256:25b2df7f00a8b3180555e1a064ae8579cde1eb49bcbd3db61d91d6a8b3e73ecb
+    clauses:
+      - id: sha256:e971b313154322837f43cbe34f07f86bd3494bdf08fc67097cbebe4f6b87edc0
+        template: C5acba189ad
+        body:
+          start: 0
+          end: 6
+        raw:
+          start: 0
+          end: 6
+  - kind: classification
+    id: Tfb4373e9a1
+    status: candidate
+    family: evolution.earth-rite-history-gate
+    normalized_hash: sha256:fb4373e9a14f53eb053c0197579e0f04daa92957f2b009e5afedaa41a726589e
+    definition_hash: sha256:eac37b087fc5b562c2eea54af927c14dc32f7ea74d352f97f023695c85e445ab
+    label_hash: sha256:fd40a0f5fc98c21271bef153587126efed4fe0e90b542284ef52791d57bfe612
+    members:
+      - sha256:7af0738519e61f3e1e0ae67ff97e89510e7089db46c8a0ab47a377096eeec310
+      - sha256:a901af05d52b951820221b75baa4b861363bc46fa1949e4575d2910fd81edff2
+    abilities:
+      - id: a1
+        head: A.head.evolve
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:4c1fadf78865a066fe03311acaebe3da7abe5a9971642e2e0d90df33885d2efe
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - B.keyword
+          - K.pay
+          - I.resource
+          - I.evolve
+        author:
+          - A.head.evolve
+          - A.cost
+          - A.act.evolve
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:36a817760f14803d4e1d3cc9f385fa253e40517ef211e7e87441b104966510bb
+        ability: a1
+        decision:
+        capture: C.at-play
+        stage: known
+        ir:
+          - X.predicate
+          - H.fact
+          - H.query
+          - H.window
+          - V.history
+        author:
+          - A.cond
+          - A.history
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: cost-of
+        sources:
+          - clause: sha256:4c1fadf78865a066fe03311acaebe3da7abe5a9971642e2e0d90df33885d2efe
+            ability:
+        targets:
+          - clause: sha256:4c1fadf78865a066fe03311acaebe3da7abe5a9971642e2e0d90df33885d2efe
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: scope-of
+        sources:
+          - clause: sha256:36a817760f14803d4e1d3cc9f385fa253e40517ef211e7e87441b104966510bb
+            ability:
+        targets:
+          - clause: sha256:4c1fadf78865a066fe03311acaebe3da7abe5a9971642e2e0d90df33885d2efe
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:a901af05d52b951820221b75baa4b861363bc46fa1949e4575d2910fd81edff2
+    template: Tfb4373e9a1
+    position:
+      card_no: BP14-SL09
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:ad0e3c3a5c9bc91a9f4ccf1b163c4caa0542e39a1d00308dc49c4d2b6c4e7967
+    raw_hash: sha256:ad0e3c3a5c9bc91a9f4ccf1b163c4caa0542e39a1d00308dc49c4d2b6c4e7967
+    body_length: 71
+    raw_length: 71
+    token_header_hash:
+    block: sha256:a901af05d52b951820221b75baa4b861363bc46fa1949e4575d2910fd81edff2
+    evidence_hash: sha256:bb1a8191dfcfc82d6f99776e112f125050edcc3e7d80054c3326c5e1c979d2d0
+    clauses:
+      - id: sha256:4c1fadf78865a066fe03311acaebe3da7abe5a9971642e2e0d90df33885d2efe
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+      - id: sha256:36a817760f14803d4e1d3cc9f385fa253e40517ef211e7e87441b104966510bb
+        template: C0725d2a7b3
+        body:
+          start: 19
+          end: 71
+        raw:
+          start: 19
+          end: 71
+  - kind: member
+    id: sha256:0b56bcbc426841d44ff22dd4040a5c8b305094a05c6a2b7e3d3ce9360d9f1c4d
+    template: T0b1f3b5a25
+    position:
+      card_no: BP14-SL09
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:7f30210a3b7709c0276dbc4e8a4486c5932c5dbc11d98ef3581b77e3e81f5b1f
+    raw_hash: sha256:7f30210a3b7709c0276dbc4e8a4486c5932c5dbc11d98ef3581b77e3e81f5b1f
+    body_length: 24
+    raw_length: 24
+    token_header_hash:
+    block: sha256:0b56bcbc426841d44ff22dd4040a5c8b305094a05c6a2b7e3d3ce9360d9f1c4d
+    evidence_hash: sha256:f369e3e3f905b83e65621c16ec77190cf66a12e88e70e52b67c45878b8403f8a
+    clauses:
+      - id: sha256:d9ec51a70e0aebc837f33789fec38015e2d952ce437428af3fac4a0881230137
+        template: C0b1f3b5a25
+        body:
+          start: 0
+          end: 24
+        raw:
+          start: 0
+          end: 24
+  - kind: classification
+    id: T7ab2417fdc
+    status: candidate
+    family: evolve.defined-pp-search
+    normalized_hash: sha256:7ab2417fdc48a74831ded86b6266417eb8be41e973548c4bee6102df0195ccce
+    definition_hash: sha256:320eae4cb15a50ab983498436e4eafa6976fe9739c1bafa6b17efd25fa514608
+    label_hash: sha256:3fbfb3d0ae92ae0c5f661fd07774ddabb71340a9ac89be7b64216109a95475f2
+    members:
+      - sha256:58728d564e21e6c636647d5cd3204a5400cbcc771d4d36f2a0befb285cc89d8b
+      - sha256:3dc30aa5637bc0aaea923266082fc35f3e1d76d5f58b7f9b50196aceb688f9e5
+    abilities:
+      - id: a1
+        head: A.head.evolve_time
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:774f85f40d3dd142e6ddbd8a1a30396085475105e6215917a2f6c4fdc000bb96
+        ability: a1
+        decision: D.resolve-choice
+        capture: C.live
+        stage: known
+        ir:
+          - B.trigger
+          - E.evolve
+          - I.search
+          - I.shuffle
+          - D.resolve-choice
+          - S.zone
+          - S.filter
+          - X.binding
+          - V.binding
+        author:
+          - A.head.evolve_time
+          - A.act.search
+          - A.expr
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:6524d4b3ab69929dbd09973f36aa723c0aa22da0770310aa35e0ff05b8bc1464
+        ability: a1
+        decision:
+        capture: C.live
+        stage: known
+        ir:
+          - X.binding
+          - V.binding
+          - V.player-resource
+        author:
+          - A.expr
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: capture-of
+        sources:
+          - clause: sha256:6524d4b3ab69929dbd09973f36aa723c0aa22da0770310aa35e0ff05b8bc1464
+            ability:
+        targets:
+          - clause: sha256:774f85f40d3dd142e6ddbd8a1a30396085475105e6215917a2f6c4fdc000bb96
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:3dc30aa5637bc0aaea923266082fc35f3e1d76d5f58b7f9b50196aceb688f9e5
+    template: T7ab2417fdc
+    position:
+      card_no: BP14-SL10
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:f40e380a8e8da522372e76e6bc4ceba53d3f4b65b9b544e10c9c1257adc81b1f
+    raw_hash: sha256:f40e380a8e8da522372e76e6bc4ceba53d3f4b65b9b544e10c9c1257adc81b1f
+    body_length: 63
+    raw_length: 63
+    token_header_hash:
+    block: sha256:3dc30aa5637bc0aaea923266082fc35f3e1d76d5f58b7f9b50196aceb688f9e5
+    evidence_hash: sha256:551d2a8892aa7e9a8e021ea243fa7b92d5448db78c5c10720e4e34c46e9714b4
+    clauses:
+      - id: sha256:774f85f40d3dd142e6ddbd8a1a30396085475105e6215917a2f6c4fdc000bb96
+        template: Cfd38fe2215
+        body:
+          start: 0
+          end: 47
+        raw:
+          start: 0
+          end: 47
+      - id: sha256:6524d4b3ab69929dbd09973f36aa723c0aa22da0770310aa35e0ff05b8bc1464
+        template: C6d06720adf
+        body:
+          start: 47
+          end: 63
+        raw:
+          start: 47
+          end: 63
+  - kind: member
+    id: sha256:65f60c4be57ac4f7ce838ff56f9ef0afc8d6667301bdd9bb0508f22552495c44
+    template: T74de75251b
+    position:
+      card_no: BP14-SL11
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:3d75eca5e31ab968ccbe21656d4e4f11696b7abf0c912227c28e24de21f1a004
+    raw_hash: sha256:3d75eca5e31ab968ccbe21656d4e4f11696b7abf0c912227c28e24de21f1a004
+    body_length: 44
+    raw_length: 44
+    token_header_hash: sha256:95f2e166d36e45b78a2e4227502cef5623684ee04001e8eabef8761bb201b128
+    block: sha256:65f60c4be57ac4f7ce838ff56f9ef0afc8d6667301bdd9bb0508f22552495c44
+    evidence_hash: sha256:852c962ddc7a78738248920ed2ff708c1dfb29e7a1bbdb46081bf4dcc542c084
+    clauses:
+      - id: sha256:5501c341492f6439fdf07fdc2e6fe21accb162442bcfa6a2d0c1cc2b83357746
+        template: C3f5066b9e7
+        body:
+          start: 0
+          end: 16
+        raw:
+          start: 0
+          end: 16
+      - id: sha256:160369dd2815f7fc5bab50e4f0250f32375266c1d1e407d1d0314353a16445a9
+        template: Cdf35a4dada
+        body:
+          start: 16
+          end: 25
+        raw:
+          start: 16
+          end: 25
+      - id: sha256:6b8c261c4930d1c5a6bc87369b496f3412b240d257f2cb8fb234d887deedc387
+        template: C730dec3f9d
+        body:
+          start: 25
+          end: 44
+        raw:
+          start: 25
+          end: 44
+  - kind: member
+    id: sha256:cfcc44b2c11eec8def035acb351b1b8f3ee12926381f64e29c548c951b91ca86
+    template: T23f16a2851
+    position:
+      card_no: BP14-SL11
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    raw_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    body_length: 19
+    raw_length: 19
+    token_header_hash:
+    block: sha256:cfcc44b2c11eec8def035acb351b1b8f3ee12926381f64e29c548c951b91ca86
+    evidence_hash: sha256:904af8ada48eb28d6df75549530ac82b86e5015e102dc9f9cd1d969e17b38b19
+    clauses:
+      - id: sha256:1d795979424d9cc8576a083d8cb11d2f42fd42b60ae75473be34fbf73fa2f295
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+  - kind: classification
+    id: T9123e9868c
+    status: candidate
+    family: fanfare.token-awakening-life
+    normalized_hash: sha256:9123e9868ce337cc6f82623ef0fc8100698f535afe393054ba4701dbea9ec918
+    definition_hash: sha256:b1c1e6f0bcc4f218f1be177127c885c5748cd33cc9f15036f08444a8370d9530
+    label_hash: sha256:98b908690435965401b9d899b597a0a2949f9ca1302143d6838f117b973b7e42
+    members:
+      - sha256:c688626d195db3d82db50f566be155194d19ec92e7f6a074fa6c88ee7c2cc9e4
+      - sha256:52dbbc2becf473f0161e2ca91691592609b19c1b953635c47ba46da91daac69c
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:bbcfd06d4b8d5946af90d55a26e2d47c03adb0d3b8a867f20f5e632bb992a613
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.enter-field
+          - I.token
+        author:
+          - A.head.fanfare
+          - A.act.create
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:71293a30c6783a501092926292f29f83841d862356dc26cc9190d54423b6a522
+        ability: a1
+        decision:
+        capture: C.live
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.awakening
+          - I.life
+        author:
+          - A.if
+          - A.cond
+          - A.act.life
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:bbcfd06d4b8d5946af90d55a26e2d47c03adb0d3b8a867f20f5e632bb992a613
+            ability:
+        targets:
+          - clause: sha256:71293a30c6783a501092926292f29f83841d862356dc26cc9190d54423b6a522
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: sha256:71293a30c6783a501092926292f29f83841d862356dc26cc9190d54423b6a522
+            ability:
+        targets:
+          - clause: sha256:71293a30c6783a501092926292f29f83841d862356dc26cc9190d54423b6a522
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:52dbbc2becf473f0161e2ca91691592609b19c1b953635c47ba46da91daac69c
+    template: T9123e9868c
+    position:
+      card_no: BP14-SL11
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:d2be16dea8aa720fdffe70c8589967df83264d7303dfcfb7497b2560fbd9e3ff
+    raw_hash: sha256:d2be16dea8aa720fdffe70c8589967df83264d7303dfcfb7497b2560fbd9e3ff
+    body_length: 54
+    raw_length: 54
+    token_header_hash:
+    block: sha256:52dbbc2becf473f0161e2ca91691592609b19c1b953635c47ba46da91daac69c
+    evidence_hash: sha256:8cab29a63a41b508822d242391b82042c59efa3e21f0abdf1b64ad5274a036be
+    clauses:
+      - id: sha256:bbcfd06d4b8d5946af90d55a26e2d47c03adb0d3b8a867f20f5e632bb992a613
+        template: Ce24db00bc8
+        body:
+          start: 0
+          end: 28
+        raw:
+          start: 0
+          end: 28
+      - id: sha256:71293a30c6783a501092926292f29f83841d862356dc26cc9190d54423b6a522
+        template: C4cbba08bf9
+        body:
+          start: 28
+          end: 54
+        raw:
+          start: 28
+          end: 54
+  - kind: classification
+    id: T837a208711
+    status: candidate
+    family: evolve.next-tribal-discount
+    normalized_hash: sha256:837a20871105b51bdd97221c067863c686060c50a89f7b93d3e18b4e15f578fa
+    definition_hash: sha256:bc89ab39d4c0b62dfac2c5438e774717ffc6e79a2370acbb17d799e90959ccfa
+    label_hash: sha256:68748ea10c17d090702243780fec146b9746337bd3b5a6553f15369c75df0051
+    members:
+      - sha256:cf93dacccde96c8c3368d819ac6a98e8182c749b661d81f55428e8384cf8b7f7
+      - sha256:ff5556821f0e2e59936b99b35d182f3f30299cffe5f05ac9cc17fe2087d85159
+      - sha256:5fc4919b39a6c23166af074446a886b32167798cdd0957aa174a2dd1b98197ab
+    abilities:
+      - id: a1
+        head: A.head.evolve_time
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:ba4050a55a07d8ce7a1789eb4afc7e06f674a3bc468dc58e37f6965e6179deb6
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.evolve
+          - L.replacement
+          - L.duration
+          - S.zone
+          - S.filter
+        author:
+          - A.head.evolve_time
+          - A.macro.discount
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations: []
+  - kind: member
+    id: sha256:ff5556821f0e2e59936b99b35d182f3f30299cffe5f05ac9cc17fe2087d85159
+    template: T837a208711
+    position:
+      card_no: BP14-SL12
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:e0dca99b94096e1fb636d5442ab593012bd1393e0bffb12ce4fe7e31e6989016
+    raw_hash: sha256:e0dca99b94096e1fb636d5442ab593012bd1393e0bffb12ce4fe7e31e6989016
+    body_length: 39
+    raw_length: 39
+    token_header_hash:
+    block: sha256:ff5556821f0e2e59936b99b35d182f3f30299cffe5f05ac9cc17fe2087d85159
+    evidence_hash: sha256:77eaa5837566e09f1f55408a89c74cf60d07465b30bde078f5db732002b4a453
+    clauses:
+      - id: sha256:ba4050a55a07d8ce7a1789eb4afc7e06f674a3bc468dc58e37f6965e6179deb6
+        template: C837a208711
+        body:
+          start: 0
+          end: 39
+        raw:
+          start: 0
+          end: 39
+  - kind: member
+    id: sha256:57b2b70f9f15b50b6f30049de7a88e1e530519caefe7194f71be3066d2bc32e0
+    template: Ted815258fe
+    position:
+      card_no: BP14-SL13
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:ed815258fed30205c7b5dc7ff3c8266f5bdbd2a24bba454fe6efaff8265cf0a6
+    raw_hash: sha256:ed815258fed30205c7b5dc7ff3c8266f5bdbd2a24bba454fe6efaff8265cf0a6
+    body_length: 10
+    raw_length: 10
+    token_header_hash:
+    block: sha256:57b2b70f9f15b50b6f30049de7a88e1e530519caefe7194f71be3066d2bc32e0
+    evidence_hash: sha256:c66ccdd745d3f2d7c06fe3bf01433063a58ac4d1965335f67984979c16f54c8c
+    clauses:
+      - id: sha256:38cc630262589dbf6b3cecc12318f658b770193ee412fe00719c94cdce237713
+        template: Ced815258fe
+        body:
+          start: 0
+          end: 10
+        raw:
+          start: 0
+          end: 10
+  - kind: classification
+    id: T25869686a8
+    status: candidate
+    family: attack.counter-cost-draw-prevent
+    normalized_hash: sha256:25869686a8eb6266628d2b61203bd5aa32ed85b8780b315f2fe152be368a4862
+    definition_hash: sha256:ad67592314672dec2a20b8ee9335ea87128dbd67d243a1a27e63532feb75c42b
+    label_hash: sha256:d1199ea78c7cd62160bd1c4c7e1ffc8be5df77a432331d667aab3a1c2ee0e498
+    members:
+      - sha256:c28d66c2ac97ecbbf25828376869ed7c25effbe33d8ad04af105e3469f031db9
+      - sha256:3e06859ba72295990848982e4e459638ae51d16c484efb9adaac44411522832e
+    abilities:
+      - id: a1
+        head: A.head.attack_time
+        ir: B.trigger
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:3f55efe11fcd0982e6d1087f4a8c1827ff13b3d409305050f18f4e864faf1866
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.attack
+          - K.pay
+          - I.counter
+          - I.draw
+        author:
+          - A.head.attack_time
+          - A.cost
+          - A.act.draw
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:38ced9a7649e7a7650569cf06403f94e27892237b98e6dce73dcf5de7372e261
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - L.replacement
+          - L.duration
+        author:
+          - A.effect
+          - A.until
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:3f55efe11fcd0982e6d1087f4a8c1827ff13b3d409305050f18f4e864faf1866
+            ability:
+        targets:
+          - clause: sha256:38ced9a7649e7a7650569cf06403f94e27892237b98e6dce73dcf5de7372e261
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:3f55efe11fcd0982e6d1087f4a8c1827ff13b3d409305050f18f4e864faf1866
+            ability:
+        targets:
+          - clause: sha256:3f55efe11fcd0982e6d1087f4a8c1827ff13b3d409305050f18f4e864faf1866
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:3f55efe11fcd0982e6d1087f4a8c1827ff13b3d409305050f18f4e864faf1866
+            ability:
+        targets:
+          - clause: sha256:38ced9a7649e7a7650569cf06403f94e27892237b98e6dce73dcf5de7372e261
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:3e06859ba72295990848982e4e459638ae51d16c484efb9adaac44411522832e
+    template: T25869686a8
+    position:
+      card_no: BP14-SL13
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:9a41488510dfc9c59934730a7058c1bb7b37c59eecadebe7f88c1517b4f8265a
+    raw_hash: sha256:9a41488510dfc9c59934730a7058c1bb7b37c59eecadebe7f88c1517b4f8265a
+    body_length: 55
+    raw_length: 55
+    token_header_hash:
+    block: sha256:3e06859ba72295990848982e4e459638ae51d16c484efb9adaac44411522832e
+    evidence_hash: sha256:974573a35b668d9b0692423e49d65bd3fa5b4d7f85bcc400ad4ae93983ea3188
+    clauses:
+      - id: sha256:3f55efe11fcd0982e6d1087f4a8c1827ff13b3d409305050f18f4e864faf1866
+        template: C2be6f91ebd
+        body:
+          start: 0
+          end: 34
+        raw:
+          start: 0
+          end: 34
+      - id: sha256:38ced9a7649e7a7650569cf06403f94e27892237b98e6dce73dcf5de7372e261
+        template: C022e02801a
+        body:
+          start: 34
+          end: 55
+        raw:
+          start: 34
+          end: 55
+  - kind: member
+    id: sha256:a2de93e871894f1a38d08a6f0b173455c9ff00861a14df16e52dfad948386e50
+    template: T09180b6b6e
+    position:
+      card_no: BP14-SL13
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:b94aadd8fc05b6f5a4519e1135c45d322bc962e458a319b8fecd666e77fd7979
+    raw_hash: sha256:b94aadd8fc05b6f5a4519e1135c45d322bc962e458a319b8fecd666e77fd7979
+    body_length: 34
+    raw_length: 34
+    token_header_hash:
+    block: sha256:a2de93e871894f1a38d08a6f0b173455c9ff00861a14df16e52dfad948386e50
+    evidence_hash: sha256:e7492dcb34a828faf83c7494c9eeccb7196af01e89c2e40f077d430dbdca963e
+    clauses:
+      - id: sha256:7b170bdf44760ca87c14d57dcd31d99cde5323688941c669818999322cb4d9b9
+        template: C09180b6b6e
+        body:
+          start: 0
+          end: 34
+        raw:
+          start: 0
+          end: 34
+  - kind: member
+    id: sha256:9b7d009a3e18456c8eaaff9e36af9f5137a15f370d272999fb00a839644f5215
+    template: T416c6d363b
+    position:
+      card_no: BP14-SL14
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:011bc9f09112f472f1ecfa388c50fb35002a71a2c15bcf5ae09892584dbc2a55
+    raw_hash: sha256:011bc9f09112f472f1ecfa388c50fb35002a71a2c15bcf5ae09892584dbc2a55
+    body_length: 106
+    raw_length: 106
+    token_header_hash:
+    block: sha256:9b7d009a3e18456c8eaaff9e36af9f5137a15f370d272999fb00a839644f5215
+    evidence_hash: sha256:0504949a11686ea8777e7b1ed6d63073cf06686bac87e924667e487d2d973365
+    clauses:
+      - id: sha256:a3753c48242daca599eb1e10f7e46abdb4cd9679ff990154a9e47e909c9bdc4a
+        template: C990910311f
+        body:
+          start: 0
+          end: 55
+        raw:
+          start: 0
+          end: 55
+      - id: sha256:d65f75a4ba63472a793cbc5163446cd5bb63be67f23ffb782805d62a76cd18e8
+        template: C2befcff4a0
+        body:
+          start: 55
+          end: 106
+        raw:
+          start: 55
+          end: 106
+  - kind: member
+    id: sha256:e2c8f48040bb2a3d3998750f74c6d3fe6a00250890f510f9452079d3d5a9664c
+    template: Te24db00bc8
+    position:
+      card_no: BP14-SL14
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:c12b1d15b8bbf6427bafc80a8f7ca1a7643fea82e50ec3beb9e0645bb1bf3fa1
+    raw_hash: sha256:c12b1d15b8bbf6427bafc80a8f7ca1a7643fea82e50ec3beb9e0645bb1bf3fa1
+    body_length: 27
+    raw_length: 27
+    token_header_hash:
+    block: sha256:e2c8f48040bb2a3d3998750f74c6d3fe6a00250890f510f9452079d3d5a9664c
+    evidence_hash: sha256:313d4b2c7a161ed9e1b6db44552f004ab253a9a80ae3cea13a382db008d48d5a
+    clauses:
+      - id: sha256:340dc5955cf255ec1f663f0b3e07911ede3aea9eb02fbd69bb96af67fd9b3d88
+        template: Ce24db00bc8
+        body:
+          start: 0
+          end: 27
+        raw:
+          start: 0
+          end: 27
+  - kind: member
+    id: sha256:b9012e2f3e781212e1c5b3fb301d42ba500cebd22f814d6638831dac34ab863b
+    template: Te21e13538a
+    position:
+      card_no: BP14-SL15
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:64538385b89b0ffe364fe23b82d95884d51986b19af6e6ff95524b3f1eea0848
+    raw_hash: sha256:64538385b89b0ffe364fe23b82d95884d51986b19af6e6ff95524b3f1eea0848
+    body_length: 61
+    raw_length: 61
+    token_header_hash:
+    block: sha256:b9012e2f3e781212e1c5b3fb301d42ba500cebd22f814d6638831dac34ab863b
+    evidence_hash: sha256:d0cca277ddce6b40dddcb8e4819a5a25ae5890cbfb885c52e9b269e66476658a
+    clauses:
+      - id: sha256:54fc127c0f3a03a458fbede64dc635fd1496507004db6a152e2df68a5aca1c8e
+        template: C25e33fe850
+        body:
+          start: 0
+          end: 44
+        raw:
+          start: 0
+          end: 44
+      - id: sha256:f7c5cdb249481500d31b68b6b41c88a30584b505ee06869fb21ae53decb76c67
+        template: Ca1099c5fef
+        body:
+          start: 44
+          end: 61
+        raw:
+          start: 44
+          end: 61
+  - kind: member
+    id: sha256:c942ae000149af7a965ce70a8b0bed91d0e550721f92a7b0c2bda13cb7d422fa
+    template: Ta6d350cb6c
+    position:
+      card_no: BP14-SL15
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:c101a56b0063bb98dc936e09a1da340a316a31fa9f79eefe54fc36b6df8e9270
+    raw_hash: sha256:c101a56b0063bb98dc936e09a1da340a316a31fa9f79eefe54fc36b6df8e9270
+    body_length: 51
+    raw_length: 51
+    token_header_hash:
+    block: sha256:c942ae000149af7a965ce70a8b0bed91d0e550721f92a7b0c2bda13cb7d422fa
+    evidence_hash: sha256:4cc152b6058c5b9c6497d5178485dec0ade6323e7a2fba3203ca8049ea079e27
+    clauses:
+      - id: sha256:dbca84ba2fee284fd2160052b230e85c51b5e4ebad78a6ebd7208be1269687ae
+        template: C20617925f8
+        body:
+          start: 0
+          end: 26
+        raw:
+          start: 0
+          end: 26
+      - id: sha256:f92b91b90609d4b9b0273cfca6e3fc1c9764b0b36af4939c697b4be439853df5
+        template: Cec3125b3b8
+        body:
+          start: 26
+          end: 39
+        raw:
+          start: 26
+          end: 39
+      - id: sha256:36e0a3358c554728942ad2174070de8ac69904489037cb5f4fd41fdb7dcbe58b
+        template: Cdce43507dd
+        body:
+          start: 39
+          end: 51
+        raw:
+          start: 39
+          end: 51
+  - kind: classification
+    id: T9530d49d50
+    status: candidate
+    family: evolution-hand-empty-gate
+    normalized_hash: sha256:9530d49d50c23873700c64715a7e79620aae058b4c67a7a572f53d2861a30077
+    definition_hash: sha256:51ead3a7731799f32a8984320b45b0cc26ed6327cf28f92ddfe65a3d89be7c5c
+    label_hash: sha256:98991cc16c748967ac3923a6eae2db12ad0beece043f1743ad68a1043b03da9e
+    members:
+      - sha256:d92a3ba3d35bfb93ddf86030685a0bca13ee0f375bac07a21647ef51cbb6263a
+      - sha256:eacb11a7055249db1fe6bbd0623f9c342f589a6d7203717ddccfab9b69ccea40
+    abilities:
+      - id: a1
+        head: A.head.evolve
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:b7b5cabcfec0162f1e96e9995ab9f07646c1cf62476fa85561259ccd59d93fe4
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - B.keyword
+          - K.pay
+          - I.resource
+          - I.evolve
+        author:
+          - A.head.evolve
+          - A.cost
+        note_hash: sha256:90d5a201360ea07cbcf9c8e1c0b6c860e90073c0ea9466940b4fd25ff01682f6
+      - id: sha256:0eac3219a43fc6ac1bf4b2828532389e3e5894e9085ef44a7942877335607d28
+        ability: a1
+        decision:
+        capture: C.at-play
+        stage: known
+        ir:
+          - X.predicate
+          - V.zone-count
+          - X.aggregate
+        author:
+          - A.cond
+          - A.expr
+          - A.sel
+        note_hash: sha256:2c16890f4a519e38208aaa0d156903e97d842b440770fa8cb83d1a0966a41b34
+    relations:
+      - type: scope-of
+        sources:
+          - clause: sha256:0eac3219a43fc6ac1bf4b2828532389e3e5894e9085ef44a7942877335607d28
+            ability:
+        targets:
+          - clause: sha256:b7b5cabcfec0162f1e96e9995ab9f07646c1cf62476fa85561259ccd59d93fe4
+            ability:
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+  - kind: member
+    id: sha256:eacb11a7055249db1fe6bbd0623f9c342f589a6d7203717ddccfab9b69ccea40
+    template: T9530d49d50
+    position:
+      card_no: BP14-SL16
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:a47f8eb14fac1ed587c053db758e5759b8e4c10d13710dba190c08427c6b8ed2
+    raw_hash: sha256:a47f8eb14fac1ed587c053db758e5759b8e4c10d13710dba190c08427c6b8ed2
+    body_length: 38
+    raw_length: 38
+    token_header_hash:
+    block: sha256:eacb11a7055249db1fe6bbd0623f9c342f589a6d7203717ddccfab9b69ccea40
+    evidence_hash: sha256:6aa11a024f9aec3dd81ea4c2548457f0dd42c13d907ee87aff1764c4c5613393
+    clauses:
+      - id: sha256:b7b5cabcfec0162f1e96e9995ab9f07646c1cf62476fa85561259ccd59d93fe4
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+      - id: sha256:0eac3219a43fc6ac1bf4b2828532389e3e5894e9085ef44a7942877335607d28
+        template: C627e36dba9
+        body:
+          start: 19
+          end: 38
+        raw:
+          start: 19
+          end: 38
+  - kind: classification
+    id: T0635cb956b
+    status: candidate
+    family: fanfare-top-ex-discard
+    normalized_hash: sha256:0635cb956bf9b9b34088f1a5d45ca9f8114648a436941999b85d0f5f8927d849
+    definition_hash: sha256:a6d19b71bb6e31c6fbb7b2bdd8cda3a19a07c4c4ffe3054d6faf7e9f352e375c
+    label_hash: sha256:0c79dc9bf5b079dad23b860729a34da23bc0b855561255c9420603d278e841ae
+    members:
+      - sha256:efa7d376291be5fc8a0bcfecfa428ad8b334658023f811cd8e8b6db9762a7717
+      - sha256:64d38aba076003853ac7e38d3fd43659bad5d2a002852d90275daf819df3d1fa
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:18390c53cebf80579a82a1ba43352b640e6f820e3657b422f40f12db722c5bca
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - I.move
+          - T.receipt
+          - S.ordered
+        author:
+          - A.head.fanfare
+          - A.act.move
+        note_hash: sha256:ac63e5837e8c7fa1275759a987682a28682a8f7d8384c7e1e3893a060411ae5e
+      - id: sha256:25c4deabf5a8ea8a0e48588059bf977aaec08cb5a4b36da5ced69fce432824a7
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - I.discard
+        author:
+          - A.act.discard
+        note_hash: sha256:f9f0ca862dbdca18bee3c069baaf612b55d75e146eb3d90b43480c843c7a1c2e
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:18390c53cebf80579a82a1ba43352b640e6f820e3657b422f40f12db722c5bca
+            ability:
+        targets:
+          - clause: sha256:25c4deabf5a8ea8a0e48588059bf977aaec08cb5a4b36da5ced69fce432824a7
+            ability:
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: sha256:64d38aba076003853ac7e38d3fd43659bad5d2a002852d90275daf819df3d1fa
+    template: T0635cb956b
+    position:
+      card_no: BP14-SL16
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:a45bbd5dba717da69a59477bf48ce18f961b28536a44d9678c8ba38e4b9e2928
+    raw_hash: sha256:a45bbd5dba717da69a59477bf48ce18f961b28536a44d9678c8ba38e4b9e2928
+    body_length: 41
+    raw_length: 41
+    token_header_hash:
+    block: sha256:64d38aba076003853ac7e38d3fd43659bad5d2a002852d90275daf819df3d1fa
+    evidence_hash: sha256:ed5f87d365b88341fd5a068c01fc629b5a548c2f3a14afff9fe4658a9fd069b9
+    clauses:
+      - id: sha256:18390c53cebf80579a82a1ba43352b640e6f820e3657b422f40f12db722c5bca
+        template: Ce1885b6449
+        body:
+          start: 0
+          end: 29
+        raw:
+          start: 0
+          end: 29
+      - id: sha256:25c4deabf5a8ea8a0e48588059bf977aaec08cb5a4b36da5ced69fce432824a7
+        template: C988d12be6c
+        body:
+          start: 29
+          end: 41
+        raw:
+          start: 29
+          end: 41
+  - kind: member
+    id: sha256:518d6a5c5aeffc6f29252de5ec3607c0114e8b8b9b7c867ad2b5bb2cbff2a4eb
+    template: T0ec68aed95
+    position:
+      card_no: BP14-SL17
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:e5c943a5b51a643df2b35e686ba08b77c466108efa1e8f357906f319af434355
+    raw_hash: sha256:e5c943a5b51a643df2b35e686ba08b77c466108efa1e8f357906f319af434355
+    body_length: 81
+    raw_length: 81
+    token_header_hash:
+    block: sha256:518d6a5c5aeffc6f29252de5ec3607c0114e8b8b9b7c867ad2b5bb2cbff2a4eb
+    evidence_hash: sha256:e11f32c85a0cfbb57f6cf355d2088b44a44ae414c65ce100a42c557fba19fca4
+    clauses:
+      - id: sha256:07d54625a4f082e2a567befda921ce76ccbe0e9e7c9eea1513c29afcc3017d27
+        template: Cf337ee4cf4
+        body:
+          start: 0
+          end: 21
+        raw:
+          start: 0
+          end: 21
+      - id: sha256:e4c3e615bb0df7595531982af21041762f9f1098456f31b486169641c4a9ac87
+        template: Cdf35a4dada
+        body:
+          start: 21
+          end: 30
+        raw:
+          start: 21
+          end: 30
+      - id: sha256:64352fcea0c83441934f29146207b52092f3e98a352fae1085828ca5d26c2045
+        template: Caa8bc3424e
+        body:
+          start: 30
+          end: 44
+        raw:
+          start: 30
+          end: 44
+      - id: sha256:5eb3c077253f99776be25644425e43007048c3552d3cd57c8036c8ea7e288019
+        template: Ca1099c5fef
+        body:
+          start: 44
+          end: 61
+        raw:
+          start: 44
+          end: 61
+      - id: sha256:e40cc4a8c3cbb2a1894e50bceb2879a62ddf89df374342be6c7286474d070367
+        template: C9268223afc
+        body:
+          start: 61
+          end: 81
+        raw:
+          start: 61
+          end: 81
+  - kind: member
+    id: sha256:5121fe8baf2a07f4830f30531999e29977df328121fb849d97f6718da14b8d96
+    template: T18ed1206c7
+    position:
+      card_no: BP14-SL18
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:49dc3fae65673a3ae5dc922ec411ca9e2433268c9d685ca609a4d7f40d78df9e
+    raw_hash: sha256:49dc3fae65673a3ae5dc922ec411ca9e2433268c9d685ca609a4d7f40d78df9e
+    body_length: 30
+    raw_length: 30
+    token_header_hash: sha256:14bda37bc9bbd2b8bbf4d7a114903e6abfedd6059fd8baff763dc5a526d8dd4e
+    block: sha256:5121fe8baf2a07f4830f30531999e29977df328121fb849d97f6718da14b8d96
+    evidence_hash: sha256:55a4f411d29944a8c3e54f4be49b071aa3ee2f0fe97693808df79c4c984057d0
+    clauses:
+      - id: sha256:194faa44caa4b54e0f4643bd189b62de0642591d4dc72bf2dec87a542db262f5
+        template: C18ed1206c7
+        body:
+          start: 0
+          end: 30
+        raw:
+          start: 0
+          end: 30
+  - kind: member
+    id: sha256:06ab99c3a164591ab30691855f1f86afa95092434097ea576fe1365355b936ba
+    template: T23f16a2851
+    position:
+      card_no: BP14-SL18
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    raw_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    body_length: 19
+    raw_length: 19
+    token_header_hash:
+    block: sha256:06ab99c3a164591ab30691855f1f86afa95092434097ea576fe1365355b936ba
+    evidence_hash: sha256:9862f92114b7c497fb0fad2bafb02ad31718df1205581f417f82c1a4a502671c
+    clauses:
+      - id: sha256:e6857ed3150a2144440b85dee8c948b8467cdd0a1d2f8a50a4946104a6535a79
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+  - kind: member
+    id: sha256:ebeb5cf3f622ae5ff8e9a2fcb3b97a94d60f9d7b95efb455b52381ba07695c6e
+    template: T4daf6eb734
+    position:
+      card_no: BP14-SL18
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:86dcdc1fd1962a4bef90c481b82695fdd68823aca62ac2d73f5e2711a96b8c5b
+    raw_hash: sha256:86dcdc1fd1962a4bef90c481b82695fdd68823aca62ac2d73f5e2711a96b8c5b
+    body_length: 23
+    raw_length: 23
+    token_header_hash:
+    block: sha256:ebeb5cf3f622ae5ff8e9a2fcb3b97a94d60f9d7b95efb455b52381ba07695c6e
+    evidence_hash: sha256:828d0126ec959176b4ec2f0a06e1a79b86319bf9131cc1fe7c9766ba9f4387ed
+    clauses:
+      - id: sha256:45315ac62a0a423205dd8f827d7f0b0d6142ca0f3694e37b8790a45380cafbf6
+        template: C4daf6eb734
+        body:
+          start: 0
+          end: 23
+        raw:
+          start: 0
+          end: 23
+  - kind: classification
+    id: T57620c3fbe
+    status: candidate
+    family: activate.grave-banish-token-buff
+    normalized_hash: sha256:57620c3fbea1fa35a31461ea9613bd9bcd9245477ccc064ca528c7285378a71a
+    definition_hash: sha256:19b457063fba44fc130fc6e0fc90b0c22333fad8492f7ae97c7e46de100c0dab
+    label_hash: sha256:4e4dafe77235747f7ed0b5b54749c017c7bf567be59e55fe51038d4e4e05d211
+    members:
+      - sha256:907b36e294dbf5e08bcc78b8336cc8477966277007a7c35003b6448b2eaa3fae
+      - sha256:031e638b1a16af822000e64ff8a7e4be439b020643c05a45d4a056d622ddfaf1
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:881c91282de90a601cd4ec600b02e2de008bdbced22bb7cc8a9969c788cd50fb
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - I.resource
+          - I.banish
+          - I.token
+        author:
+          - A.head.activate
+          - A.cost
+          - A.act.create
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:e800243769d30637b1f2622d67e55a3ed26358c10f3f94882043862265b08695
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.modify
+          - L.continuous
+          - S.zone
+          - S.filter
+        author:
+          - A.act.buff
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:881c91282de90a601cd4ec600b02e2de008bdbced22bb7cc8a9969c788cd50fb
+            ability:
+        targets:
+          - clause: sha256:e800243769d30637b1f2622d67e55a3ed26358c10f3f94882043862265b08695
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:881c91282de90a601cd4ec600b02e2de008bdbced22bb7cc8a9969c788cd50fb
+            ability:
+        targets:
+          - clause: sha256:881c91282de90a601cd4ec600b02e2de008bdbced22bb7cc8a9969c788cd50fb
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:881c91282de90a601cd4ec600b02e2de008bdbced22bb7cc8a9969c788cd50fb
+            ability:
+        targets:
+          - clause: sha256:e800243769d30637b1f2622d67e55a3ed26358c10f3f94882043862265b08695
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:031e638b1a16af822000e64ff8a7e4be439b020643c05a45d4a056d622ddfaf1
+    template: T57620c3fbe
+    position:
+      card_no: BP14-SL18
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:f92eedf31ad3990bf4d5204aea04b993f6e2abd63aa09374900475e160d9e03e
+    raw_hash: sha256:f92eedf31ad3990bf4d5204aea04b993f6e2abd63aa09374900475e160d9e03e
+    body_length: 65
+    raw_length: 65
+    token_header_hash:
+    block: sha256:031e638b1a16af822000e64ff8a7e4be439b020643c05a45d4a056d622ddfaf1
+    evidence_hash: sha256:5933f1c6b49a67241274fea480deca7390a1bf3d489121dc7383da7a97b239ca
+    clauses:
+      - id: sha256:881c91282de90a601cd4ec600b02e2de008bdbced22bb7cc8a9969c788cd50fb
+        template: Cce53adaf20
+        body:
+          start: 0
+          end: 33
+        raw:
+          start: 0
+          end: 33
+      - id: sha256:e800243769d30637b1f2622d67e55a3ed26358c10f3f94882043862265b08695
+        template: C1024f17e0a
+        body:
+          start: 33
+          end: 65
+        raw:
+          start: 33
+          end: 65
+  - kind: classification
+    id: Tee97ec7151
+    status: candidate
+    family: evolve.tribal-count-damage
+    normalized_hash: sha256:ee97ec7151f5eb857b94b5b14fe50027d5222c676f996524de0f8b9dc8bc06e4
+    definition_hash: sha256:012731279657058c7d191b31f67d7aa3242b177af135574a5a722e0d54ee7aba
+    label_hash: sha256:621847d71d3437725b11eb1b76b4199ce371d718c5dd96eb4096dfdb7eccff11
+    members:
+      - sha256:58a5a4cf2ef10b5cbe7da234c5c0927148d65dd7f88c105539c1ecaa91c4586e
+      - sha256:727bec688b6d448878486778d8ff89afa6d84471d39a37f6d18b8869f4e0e237
+    abilities:
+      - id: a1
+        head: A.head.evolve_time
+        ir: B.trigger
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:42954aecfdcffed90cc35afdf0562f79e65d67bc8ea5b56a10da6a4f92cc3cf7
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.evolve
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.evolve_time
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:42cb6f28a60782ba10a8e4c31c86ff6bcfad57baed8db88177b4cb6d5d544a77
+        ability: a1
+        decision:
+        capture: C.live
+        stage: known
+        ir:
+          - I.damage
+          - S.zone
+          - S.filter
+          - V.zone-count
+          - X.aggregate
+          - X.math
+        author:
+          - A.act.damage
+          - A.sel
+          - A.expr
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:42954aecfdcffed90cc35afdf0562f79e65d67bc8ea5b56a10da6a4f92cc3cf7
+            ability:
+        targets:
+          - clause: sha256:42cb6f28a60782ba10a8e4c31c86ff6bcfad57baed8db88177b4cb6d5d544a77
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:727bec688b6d448878486778d8ff89afa6d84471d39a37f6d18b8869f4e0e237
+    template: Tee97ec7151
+    position:
+      card_no: BP14-SL19
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:c6aad90fc088c941648d49d57df64ad8e7ea60055f8507fe377e71132c59deab
+    raw_hash: sha256:c6aad90fc088c941648d49d57df64ad8e7ea60055f8507fe377e71132c59deab
+    body_length: 50
+    raw_length: 50
+    token_header_hash:
+    block: sha256:727bec688b6d448878486778d8ff89afa6d84471d39a37f6d18b8869f4e0e237
+    evidence_hash: sha256:4eacb1e51536eeb2c256db7fcdf1282118d93798b40f3bdd0426356a5f026d47
+    clauses:
+      - id: sha256:42954aecfdcffed90cc35afdf0562f79e65d67bc8ea5b56a10da6a4f92cc3cf7
+        template: Cf337ee4cf4
+        body:
+          start: 0
+          end: 21
+        raw:
+          start: 0
+          end: 21
+      - id: sha256:42cb6f28a60782ba10a8e4c31c86ff6bcfad57baed8db88177b4cb6d5d544a77
+        template: Ca1fb052d45
+        body:
+          start: 21
+          end: 50
+        raw:
+          start: 21
+          end: 50
+  - kind: classification
+    id: T3f40c294f0
+    status: candidate
+    family: token.quick-damage-reduction-draw
+    normalized_hash: sha256:3f40c294f06cb95bed5d2fcee69d7dd22c7c9ada7b1d3d72efd9f0a37892c979
+    definition_hash: sha256:5f34d149b11a91215a82bc986534ae9b30fd3b9c289842c5c8bf763c1d0e8531
+    label_hash: sha256:a165eaa7c0b27ccb789980913b16c838da3bba4d2e38b417ecb40d7599843168
+    members:
+      - sha256:08aceeab2206c23b712936f32b19ea355e9f340ed6145c953b11fb6af92c59eb
+      - sha256:d4a50c20416453ba8856c77e7d74f2d9c4ed881f5dd64832496747eb95121368
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+        note_hash:
+      - id: a2
+        head: A.head.quick
+        ir: B.ability
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:d598d25e8d12878d742362385218edf384d588da47ed8f661048ca17b3efc89b
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - L.replacement
+          - L.duration
+        author:
+          - A.head.spell
+          - A.effect
+          - A.until
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:52212cdc5ccfbd7685530be8ad602b049ebac5792b83d2628bbb1861f22fb73a
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.draw
+        author:
+          - A.act.draw
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:d598d25e8d12878d742362385218edf384d588da47ed8f661048ca17b3efc89b
+        ability: a2
+        decision:
+        capture:
+        stage: known
+        ir:
+          - L.permission
+        author:
+          - A.head.quick
+        note_hash: sha256:6964c45972829d1465eb13211243d5c7769803bb19e1c25fdb8447b2819bc98b
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:d598d25e8d12878d742362385218edf384d588da47ed8f661048ca17b3efc89b
+            ability: a1
+        targets:
+          - clause: sha256:52212cdc5ccfbd7685530be8ad602b049ebac5792b83d2628bbb1861f22fb73a
+            ability: a1
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:d4a50c20416453ba8856c77e7d74f2d9c4ed881f5dd64832496747eb95121368
+    template: T3f40c294f0
+    position:
+      card_no: BP14-SL20
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:3445ff4a93803b0a21d81204348c49b66516ce6da162c7ce573d09ca99da4893
+    raw_hash: sha256:3445ff4a93803b0a21d81204348c49b66516ce6da162c7ce573d09ca99da4893
+    body_length: 38
+    raw_length: 38
+    token_header_hash: sha256:80f2435debc14d27faee3e804f96134fdd56e3f40e420d994180d1b49aa396d8
+    block: sha256:d4a50c20416453ba8856c77e7d74f2d9c4ed881f5dd64832496747eb95121368
+    evidence_hash: sha256:bb997117bf4597acda3b202d4647002b7fd2b6a061ca61635f5699998312b4d3
+    clauses:
+      - id: sha256:d598d25e8d12878d742362385218edf384d588da47ed8f661048ca17b3efc89b
+        template: C270dfe48b9
+        body:
+          start: 0
+          end: 33
+        raw:
+          start: 0
+          end: 33
+      - id: sha256:52212cdc5ccfbd7685530be8ad602b049ebac5792b83d2628bbb1861f22fb73a
+        template: Cde5a71eee8
+        body:
+          start: 33
+          end: 38
+        raw:
+          start: 33
+          end: 38
+  - kind: member
+    id: sha256:1b09c0f33cdc903de63e34ad53d285bd0a6519a3447ea795e15a213034b057a9
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-SL20
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:1b09c0f33cdc903de63e34ad53d285bd0a6519a3447ea795e15a213034b057a9
+    evidence_hash: sha256:ee3252cb5b700ecda3cc0da671a5ee26d871811a52e48d58ff40ee8563989c42
+    clauses:
+      - id: sha256:0441e16531855aa54cd851981cba40d70b42cbc956bbc35a43f4bdeea8b336fd
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:1375e10cb17eb13183a81f5d61a2f67bed5265ac3e9f00113978393dc341bec1
+    template: T2ad29027f2
+    position:
+      card_no: BP14-SL20
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:2ad29027f25cf76a3e306e7f850091bab0d7dc80f363524751fbf78babc7c45e
+    raw_hash: sha256:2ad29027f25cf76a3e306e7f850091bab0d7dc80f363524751fbf78babc7c45e
+    body_length: 16
+    raw_length: 16
+    token_header_hash:
+    block: sha256:1375e10cb17eb13183a81f5d61a2f67bed5265ac3e9f00113978393dc341bec1
+    evidence_hash: sha256:4789ae1d727dea8c827f2518d6406ad2f39416979debe1dbf1739fc824ff2688
+    clauses:
+      - id: sha256:bee59b239302100d64f0495b937f79c25702f8541b100a8c66a981e841a1da21
+        template: C2ad29027f2
+        body:
+          start: 0
+          end: 16
+        raw:
+          start: 0
+          end: 16
+  - kind: classification
+    id: T8422d6981f
+    status: candidate
+    family: static.self-leader-damage-reduction
+    normalized_hash: sha256:8422d6981fb5a37f74f3d4dfed4a212f1af1424102307f8f5e73963758b92e0e
+    definition_hash: sha256:e54e49047f7817f59aa6e661db306731c5db2154c890062d878caf7c594581d9
+    label_hash: sha256:a0d61a639d0865eac9f51015eb50ee8353a4e924b551e2aaf88906d92890f0ef
+    members:
+      - sha256:ccd272ab43b3704f6e0a8328703c2b3fe9cafbef4400e466c33946866c4e5306
+      - sha256:43bc26e4940210282006cd640208049d71a8baa0d790eb02a798e77577277e2b
+      - sha256:0ec12e9fb69717ed0969a247631e7687a826903c62962236b81230b60419c229
+    abilities:
+      - id: a1
+        head: A.head.static
+        ir: B.ability
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:1eff27b696a3538e43ac440a40bc1dabdcc73661b39631d3e612766feaa95c91
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - L.replacement
+          - S.combine
+        author:
+          - A.head.static
+          - A.effect
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: scope-of
+        sources:
+          - clause: sha256:1eff27b696a3538e43ac440a40bc1dabdcc73661b39631d3e612766feaa95c91
+            ability:
+        targets:
+          - clause: sha256:1eff27b696a3538e43ac440a40bc1dabdcc73661b39631d3e612766feaa95c91
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:43bc26e4940210282006cd640208049d71a8baa0d790eb02a798e77577277e2b
+    template: T8422d6981f
+    position:
+      card_no: BP14-SL20
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:c5a2f6ef9e501789475c8f6c8dde92cade24785a2cf7b5ae5f93588b800ff4e1
+    raw_hash: sha256:c5a2f6ef9e501789475c8f6c8dde92cade24785a2cf7b5ae5f93588b800ff4e1
+    body_length: 34
+    raw_length: 34
+    token_header_hash:
+    block: sha256:43bc26e4940210282006cd640208049d71a8baa0d790eb02a798e77577277e2b
+    evidence_hash: sha256:f8492a97c7b6d4c3948f2dcb9bf851663c5757ae5f6518a733883a22daf9ad2f
+    clauses:
+      - id: sha256:1eff27b696a3538e43ac440a40bc1dabdcc73661b39631d3e612766feaa95c91
+        template: C8422d6981f
+        body:
+          start: 0
+          end: 34
+        raw:
+          start: 0
+          end: 34
+  - kind: member
+    id: sha256:a3009a0e621e767cc291662b4721ffe6691072bf07d5f147551b421c701232fa
+    template: Te24db00bc8
+    position:
+      card_no: BP14-SL20
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 3
+    body_hash: sha256:5b82bbc276558cd939c1282d220987fdc9278ce1ee9cccc420b2001e6f8d1a08
+    raw_hash: sha256:5b82bbc276558cd939c1282d220987fdc9278ce1ee9cccc420b2001e6f8d1a08
+    body_length: 28
+    raw_length: 28
+    token_header_hash:
+    block: sha256:a3009a0e621e767cc291662b4721ffe6691072bf07d5f147551b421c701232fa
+    evidence_hash: sha256:36fe25186ee613350fe5f364398e0d79aaf9ea028586a0ccc70a6a9a5c94e704
+    clauses:
+      - id: sha256:9ed8f05345cc99fb08c0214df8b49983765278708862b1f8be4898ffecef4d0f
+        template: Ce24db00bc8
+        body:
+          start: 0
+          end: 28
+        raw:
+          start: 0
+          end: 28
+  - kind: classification
+    id: Tbf84d2d09b
+    status: candidate
+    family: evolution.field-ex-count-gate
+    normalized_hash: sha256:bf84d2d09ba254e366f91e2cbb6105ae574fe45a0ea0b8a84c109400bf17c71f
+    definition_hash: sha256:e05a68ce608132d58df74d2ad57c6cd9c874c8da4c38b991a2f8048ae6a0c26e
+    label_hash: sha256:24534a435c5601607978f969ab89fd50ab4c0de3f957c3d7705a264f4f683eac
+    members:
+      - sha256:3f140a68117b4bed3f085d378eecc59d109e524ecf147ce58173829bfea84459
+      - sha256:97f54e5867202ff75a14348b8e3c6f6e44b871a22f2941dd938c93504637cb38
+    abilities:
+      - id: a1
+        head: A.head.evolve
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:ea13c8bbdcfc858fd8aba82134e2263270189c8569a9fe952fb8384a561b8ca9
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - B.keyword
+          - K.pay
+          - I.resource
+          - I.evolve
+        author:
+          - A.head.evolve
+          - A.cost
+          - A.act.evolve
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:8e026c0586d9549ed307c232c0a82f486e0eb1350c7acfa988c27003100acf76
+        ability: a1
+        decision:
+        capture: C.at-play
+        stage: known
+        ir:
+          - X.predicate
+          - S.zone
+          - S.filter
+          - S.combine
+          - V.zone-count
+          - X.aggregate
+        author:
+          - A.cond
+          - A.sel
+          - A.expr
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: cost-of
+        sources:
+          - clause: sha256:ea13c8bbdcfc858fd8aba82134e2263270189c8569a9fe952fb8384a561b8ca9
+            ability:
+        targets:
+          - clause: sha256:ea13c8bbdcfc858fd8aba82134e2263270189c8569a9fe952fb8384a561b8ca9
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: scope-of
+        sources:
+          - clause: sha256:8e026c0586d9549ed307c232c0a82f486e0eb1350c7acfa988c27003100acf76
+            ability:
+        targets:
+          - clause: sha256:ea13c8bbdcfc858fd8aba82134e2263270189c8569a9fe952fb8384a561b8ca9
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:97f54e5867202ff75a14348b8e3c6f6e44b871a22f2941dd938c93504637cb38
+    template: Tbf84d2d09b
+    position:
+      card_no: BP14-SL21
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:37807e0112bb5840088a5b83e8401e2d5a12ee18574e214e74efc724704cde51
+    raw_hash: sha256:37807e0112bb5840088a5b83e8401e2d5a12ee18574e214e74efc724704cde51
+    body_length: 55
+    raw_length: 55
+    token_header_hash:
+    block: sha256:97f54e5867202ff75a14348b8e3c6f6e44b871a22f2941dd938c93504637cb38
+    evidence_hash: sha256:c826886936511ece520318f871bba69c6ea276f02e02be381c25dc5d045fc932
+    clauses:
+      - id: sha256:ea13c8bbdcfc858fd8aba82134e2263270189c8569a9fe952fb8384a561b8ca9
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+      - id: sha256:8e026c0586d9549ed307c232c0a82f486e0eb1350c7acfa988c27003100acf76
+        template: C673e43a98c
+        body:
+          start: 19
+          end: 55
+        raw:
+          start: 19
+          end: 55
+  - kind: member
+    id: sha256:c214d4fe9785f217ea844286d860d32643db02e311ee2eddad2f20dcf4704516
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-SL21
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:c214d4fe9785f217ea844286d860d32643db02e311ee2eddad2f20dcf4704516
+    evidence_hash: sha256:6db6b8a6f0011169aa68107f603e91b1306f057cb88c23d9f4d2cfbda616487a
+    clauses:
+      - id: sha256:a2bc0a4e9e8babc520698be3177ae4048a29a0b163bd888d13fe84346da46e18
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:2412b29a7098f0fd5155d6134594362c825e6086d95630fb875fc7a0fdf73ed7
+    template: Tb95ddef903
+    position:
+      card_no: BP14-SL21
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:30341c46d1297d935065179c5bd123dea1eb0ebdd28a6e2763a40e4fcbdc353f
+    raw_hash: sha256:30341c46d1297d935065179c5bd123dea1eb0ebdd28a6e2763a40e4fcbdc353f
+    body_length: 34
+    raw_length: 34
+    token_header_hash:
+    block: sha256:2412b29a7098f0fd5155d6134594362c825e6086d95630fb875fc7a0fdf73ed7
+    evidence_hash: sha256:b36b046b2f87166d56288aa95a3815788216631015aa9678919e277d6c0237e8
+    clauses:
+      - id: sha256:10e9e0dbf581299a580c6bbf8887560d0101206e5cd50d0c3e8b21164a515318
+        template: Ce3cf6db917
+        body:
+          start: 0
+          end: 25
+        raw:
+          start: 0
+          end: 25
+      - id: sha256:0247041500a7a147aaa35ed2e6f590c7bdd29b4ba0633a104418c7f3eb821aa5
+        template: Cdf35a4dada
+        body:
+          start: 25
+          end: 34
+        raw:
+          start: 25
+          end: 34
+  - kind: member
+    id: sha256:5c70f02e0cc85cfb739b8edb4843f373745e8fad6779e9c8c32c5c1b7ed67d92
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-SL22
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:5c70f02e0cc85cfb739b8edb4843f373745e8fad6779e9c8c32c5c1b7ed67d92
+    evidence_hash: sha256:51ac36344bd2f0443c41f0b773cf5820882760b52ed7140ef9c7ef46e0d70c78
+    clauses:
+      - id: sha256:98f1f5d80caccbb0a767af90332fe56e65dea27c5f6cf38cfe3bf65c9c8b3d66
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:dcc4c31b4f27df38f600a3c25f821c7ce32c458a9edb09c760c49689535be372
+    template: T1aef0c48ab
+    position:
+      card_no: BP14-SL22
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:fb3c42da448bd12bbf53f308a1bb1769dbe433be415d24d9fb9c16f5d67af927
+    raw_hash: sha256:fb3c42da448bd12bbf53f308a1bb1769dbe433be415d24d9fb9c16f5d67af927
+    body_length: 36
+    raw_length: 36
+    token_header_hash:
+    block: sha256:dcc4c31b4f27df38f600a3c25f821c7ce32c458a9edb09c760c49689535be372
+    evidence_hash: sha256:f62157c516bfefd642ea3b75fbc53483ad498787bc36db2441bb5bd2101172ee
+    clauses:
+      - id: sha256:eff20e9d830ef5a154a0514d42958c8039075b03ce064ebddb91a314cac3419c
+        template: C540c61e3b9
+        body:
+          start: 0
+          end: 22
+        raw:
+          start: 0
+          end: 22
+      - id: sha256:2cb69e00577d7df333982450a4613e7d7165e3d5a429ae4d3bde204a81575617
+        template: C93e7c13c93
+        body:
+          start: 22
+          end: 36
+        raw:
+          start: 22
+          end: 36
+  - kind: classification
+    id: Tb8ef69cd2f
+    status: candidate
+    family: fanfare.banish-multi-destroy
+    normalized_hash: sha256:b8ef69cd2f57a7a2ee3dead0c9dceae5e47738b660c15dbea24d5c4a041084e7
+    definition_hash: sha256:685e42e0228b0da3621fdf899eafeaa58aadd066c1e439e46956a4f60c56958e
+    label_hash: sha256:d952e3eb53e30dd923d11f5513f7f9cdf588c675117d4dde14c138fa8bac58f6
+    members:
+      - sha256:19e9be86940f27b47e1edefa54c3867b064b370f5c56b8df4fc82affe62b5b5b
+      - sha256:68f7011e3d97b6ce7e462dea796b809f6835d7b926d5b86c8b0f00b17ec16b4e
+      - sha256:6413ddd42bb92c777ee289fc198b0f0fd5a4a6daa2403f30217e129d40056212
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:60d5b281b1770fe33d1551347c4d84e14983c161ea6048a26444770d6c2dc9a8
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.trigger
+          - E.enter-field
+          - K.pay
+          - I.banish
+          - S.zone
+          - S.filter
+          - S.combine
+          - D.play-param
+          - R.target
+        author:
+          - A.head.fanfare
+          - A.cost
+          - A.sel
+          - A.target
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:b290098e1635ea2b8c2b82120fa79d0ef24b4b55e7a74e523400724e35cf78af
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.destroy
+        author:
+          - A.act.destroy
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:60d5b281b1770fe33d1551347c4d84e14983c161ea6048a26444770d6c2dc9a8
+            ability:
+        targets:
+          - clause: sha256:b290098e1635ea2b8c2b82120fa79d0ef24b4b55e7a74e523400724e35cf78af
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:60d5b281b1770fe33d1551347c4d84e14983c161ea6048a26444770d6c2dc9a8
+            ability:
+        targets:
+          - clause: sha256:b290098e1635ea2b8c2b82120fa79d0ef24b4b55e7a74e523400724e35cf78af
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:68f7011e3d97b6ce7e462dea796b809f6835d7b926d5b86c8b0f00b17ec16b4e
+    template: Tb8ef69cd2f
+    position:
+      card_no: BP14-SL23
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:88d91a2c0e3d0a332ca476856e519c7c680d7b3075c1219b8a5fc3d5cee9ffd1
+    raw_hash: sha256:88d91a2c0e3d0a332ca476856e519c7c680d7b3075c1219b8a5fc3d5cee9ffd1
+    body_length: 54
+    raw_length: 54
+    token_header_hash:
+    block: sha256:68f7011e3d97b6ce7e462dea796b809f6835d7b926d5b86c8b0f00b17ec16b4e
+    evidence_hash: sha256:4c64055b89642f3809c3b70b50d8588cfedee626d698d0ba765b297f060ba992
+    clauses:
+      - id: sha256:60d5b281b1770fe33d1551347c4d84e14983c161ea6048a26444770d6c2dc9a8
+        template: Caa29ccd8a8
+        body:
+          start: 0
+          end: 46
+        raw:
+          start: 0
+          end: 46
+      - id: sha256:b290098e1635ea2b8c2b82120fa79d0ef24b4b55e7a74e523400724e35cf78af
+        template: Cbcbbd98893
+        body:
+          start: 46
+          end: 54
+        raw:
+          start: 46
+          end: 54
+  - kind: classification
+    id: T5788c41c61
+    status: candidate
+    family: activate.banish-grant-storm
+    normalized_hash: sha256:5788c41c6123d1a41d9eef14c64d58ff5b9dda184d52fd907d9b2dee1ba0f01c
+    definition_hash: sha256:d9948a075fcac8052177761b56ec1470c0e1b5e45fd043ccb5989e8f8dacdb20
+    label_hash: sha256:a8faa169b203d38fb716e451f7330838abf62a7d43b31afc90ca3b9ed716d262
+    members:
+      - sha256:3539b10843e9c7c92b4296e45e9ddba21ca7b85b122b05f4c2c24000d5bf1740
+      - sha256:4de0ec0030c62034ee89e4d7ad743a0dd6a7640d8e4ff9075fbf59c51f87f2be
+      - sha256:528dbf470e5d38c52ade407aa7c16094bd5bc46fe7714744fc1e2fc1abdc7136
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:64e993821937c240fda97525d87ee37e3f9f93394b9fccf107e0632ad628d104
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - I.banish
+          - S.zone
+          - S.filter
+          - S.combine
+          - I.grant
+          - B.source
+          - B.keyword
+        author:
+          - A.head.activate
+          - A.cost
+          - A.sel
+          - A.act.grant
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: cost-of
+        sources:
+          - clause: sha256:64e993821937c240fda97525d87ee37e3f9f93394b9fccf107e0632ad628d104
+            ability:
+        targets:
+          - clause: sha256:64e993821937c240fda97525d87ee37e3f9f93394b9fccf107e0632ad628d104
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:4de0ec0030c62034ee89e4d7ad743a0dd6a7640d8e4ff9075fbf59c51f87f2be
+    template: T5788c41c61
+    position:
+      card_no: BP14-SL23
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:60ac135fe74cb3704e9f2d8480c890de17084f0a4d851d2af9363413752c12c0
+    raw_hash: sha256:60ac135fe74cb3704e9f2d8480c890de17084f0a4d851d2af9363413752c12c0
+    body_length: 37
+    raw_length: 37
+    token_header_hash:
+    block: sha256:4de0ec0030c62034ee89e4d7ad743a0dd6a7640d8e4ff9075fbf59c51f87f2be
+    evidence_hash: sha256:848c132379f78a4dd738f814d6bc7000901158e8c463ce7a20f803987cbcea98
+    clauses:
+      - id: sha256:64e993821937c240fda97525d87ee37e3f9f93394b9fccf107e0632ad628d104
+        template: C5788c41c61
+        body:
+          start: 0
+          end: 37
+        raw:
+          start: 0
+          end: 37
+  - kind: member
+    id: sha256:fd129be2d6ddb2b1c199582945d6b8e3442d1bde3fd1e42ec0d68cf5f593a893
+    template: T23f16a2851
+    position:
+      card_no: BP14-SP01
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:86914ad53ab5adaa76c687ce4caf0685686cb5061c8c9e9d6f1ba5ced789656f
+    raw_hash: sha256:86914ad53ab5adaa76c687ce4caf0685686cb5061c8c9e9d6f1ba5ced789656f
+    body_length: 19
+    raw_length: 19
+    token_header_hash:
+    block: sha256:fd129be2d6ddb2b1c199582945d6b8e3442d1bde3fd1e42ec0d68cf5f593a893
+    evidence_hash: sha256:ee76be7c3edd29bad5d0afe9f7f7484d580678ed0ea8256eec6bb2372abe028a
+    clauses:
+      - id: sha256:9ab9bae9008cacabb8f3a452112c33a4fcde65febbce12eea14d834c6a45ff7b
+        template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+        raw:
+          start: 0
+          end: 19
+  - kind: member
+    id: sha256:a936b2995b5a965e7f2ffcbd47d94cfe67f43d1ccf01018e5418e12399c833ae
+    template: T7ac1a48b4a
+    position:
+      card_no: BP14-SP01
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:1494bff3d192f198210d5a9392dad1e9e255601e2a2a13c23d61cd065dcf2757
+    raw_hash: sha256:1494bff3d192f198210d5a9392dad1e9e255601e2a2a13c23d61cd065dcf2757
+    body_length: 33
+    raw_length: 33
+    token_header_hash:
+    block: sha256:a936b2995b5a965e7f2ffcbd47d94cfe67f43d1ccf01018e5418e12399c833ae
+    evidence_hash: sha256:8c11c50373a476e8449d0dd057db9714fdfa384f737def52d30ce612266098b8
+    clauses:
+      - id: sha256:e666ddf9c446c3905f19b3f67b8a4794f0eeacf25a7ab9c37ef57c01a41a1ac6
+        template: C7ac1a48b4a
+        body:
+          start: 0
+          end: 33
+        raw:
+          start: 0
+          end: 33
+  - kind: member
+    id: sha256:a21041b7fddf1f58524a6c601c46814eb0f3354718933ec524373bf56370a18a
+    template: T0ec68aed95
+    position:
+      card_no: BP14-SP02
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:e5c943a5b51a643df2b35e686ba08b77c466108efa1e8f357906f319af434355
+    raw_hash: sha256:e5c943a5b51a643df2b35e686ba08b77c466108efa1e8f357906f319af434355
+    body_length: 81
+    raw_length: 81
+    token_header_hash:
+    block: sha256:a21041b7fddf1f58524a6c601c46814eb0f3354718933ec524373bf56370a18a
+    evidence_hash: sha256:b1c72db6b721d87721e7d70bef349208e815ab143ff0f5fe29b5e055dca323a1
+    clauses:
+      - id: sha256:ee81299b21d09bf778f3f089b607bd5e42d1e0d92b57a0fd81a06151387bdc4a
+        template: Cf337ee4cf4
+        body:
+          start: 0
+          end: 21
+        raw:
+          start: 0
+          end: 21
+      - id: sha256:93dd36ebdf62e47db322cc58cb260476863cdcd86cdf8aafed15b9973d4bb731
+        template: Cdf35a4dada
+        body:
+          start: 21
+          end: 30
+        raw:
+          start: 21
+          end: 30
+      - id: sha256:12ac1b445ce25a9b65f08373830cc4e837e068350bace75dd209effca4eea610
+        template: Caa8bc3424e
+        body:
+          start: 30
+          end: 44
+        raw:
+          start: 30
+          end: 44
+      - id: sha256:eb5daa492a83ff47c8eccd723efb46b4064380e6a1874b7589729a8b1e9dc70e
+        template: Ca1099c5fef
+        body:
+          start: 44
+          end: 61
+        raw:
+          start: 44
+          end: 61
+      - id: sha256:6eec886a1ec40964ce788782fdf686daa80597a42dfdd5cfdc50ef3e8c14f46f
+        template: C9268223afc
+        body:
+          start: 61
+          end: 81
+        raw:
+          start: 61
+          end: 81
+  - kind: member
+    id: sha256:abd25b61e14eddd42575980238297970c7e3deadf458a2908008e145706aa8c5
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-T01
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:abd25b61e14eddd42575980238297970c7e3deadf458a2908008e145706aa8c5
+    evidence_hash: sha256:edb89b5415c98ce5c166fc5c564a9e4ddad597e48be27fcd80f6d2a801091bfa
+    clauses:
+      - id: sha256:7c932852c47768fb6379df5bddbfa5f2837e492c5b05d59b26cded29763e675d
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:d5356043a029d312079e2e5ec3928f7472980a7369b4d09ba9f307177746e4c4
+    template: T53bcf8cbcf
+    position:
+      card_no: BP14-T01
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:072709ecc5fd6c68db62514b37d801fd9fc352ea9313375cd4d25b063b993d79
+    raw_hash: sha256:072709ecc5fd6c68db62514b37d801fd9fc352ea9313375cd4d25b063b993d79
+    body_length: 33
+    raw_length: 33
+    token_header_hash:
+    block: sha256:d5356043a029d312079e2e5ec3928f7472980a7369b4d09ba9f307177746e4c4
+    evidence_hash: sha256:9eaa9ccef3b621ba2e2201fe5941818f7a5cef9b34b497e4e0f123beb8ec5a1f
+    clauses:
+      - id: sha256:f5f63bd5e73ab1c86c9a107b4397d144ee65a2e317ef3fbb560aa89a6c1b09c0
+        template: Cd7dc77dc4b
+        body:
+          start: 0
+          end: 24
+        raw:
+          start: 0
+          end: 24
+      - id: sha256:0743541db62ad65b32cc87be820d9453f8b288f654f07876803841d3949a2c07
+        template: Cdf35a4dada
+        body:
+          start: 24
+          end: 33
+        raw:
+          start: 24
+          end: 33
+  - kind: member
+    id: sha256:4be522286670356d1c86d1bd4deb55bca3c5e3c728d751d680078d84ac68f27a
+    template: T240f757924
+    position:
+      card_no: BP14-T02
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:3557a27ea2331b804c31ce089701d80ef7b5a9acc4151af4bfbda684fc8bc2cd
+    raw_hash: sha256:3557a27ea2331b804c31ce089701d80ef7b5a9acc4151af4bfbda684fc8bc2cd
+    body_length: 53
+    raw_length: 53
+    token_header_hash:
+    block: sha256:4be522286670356d1c86d1bd4deb55bca3c5e3c728d751d680078d84ac68f27a
+    evidence_hash: sha256:3ef6e6471e7fdd0fa17be8904d1a0c20ada5537cee994d96e5bf4ae37602c0ba
+    clauses:
+      - id: sha256:50dd7cf53ccba62864b7d1e1e4cd2795d31666962ccf85f2ed7003588994e3d1
+        template: C2d26f8e8b9
+        body:
+          start: 0
+          end: 48
+        raw:
+          start: 0
+          end: 48
+      - id: sha256:a66ecdf084477b6916e13dbb3f0037a9e1e165866e4f81434d1f0afe4d76a200
+        template: Cde5a71eee8
+        body:
+          start: 48
+          end: 53
+        raw:
+          start: 48
+          end: 53
+  - kind: member
+    id: sha256:1bc9397bb4f554515471c9cfc165a647b00fb3047fdd4ffb86d120cecbe80c2f
+    template: T672ee11fa1
+    position:
+      card_no: BP14-T03
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:26c1929da2a956f7c6f20f2ca0c3481fa2639645720b88fb0d91977b2c37cd32
+    raw_hash: sha256:26c1929da2a956f7c6f20f2ca0c3481fa2639645720b88fb0d91977b2c37cd32
+    body_length: 43
+    raw_length: 43
+    token_header_hash:
+    block: sha256:1bc9397bb4f554515471c9cfc165a647b00fb3047fdd4ffb86d120cecbe80c2f
+    evidence_hash: sha256:d0506046e863bb5a3fe36b5c5f840aa14da7f38c2f0116e37f1c939fb027b741
+    clauses:
+      - id: sha256:de7e39c8d9e585ba88b3b722de33c1c630e3486f8e53c1464a74a66146f3a87c
+        template: C502b22b80f
+        body:
+          start: 0
+          end: 34
+        raw:
+          start: 0
+          end: 34
+      - id: sha256:39c78e8d0920fe48c8a428cd347854e578004c3f6cffe8b2d37b340c0f6cc973
+        template: Cdf35a4dada
+        body:
+          start: 34
+          end: 43
+        raw:
+          start: 34
+          end: 43
+  - kind: member
+    id: sha256:d02b6fccf811bb81e6eba90608fc58224622144321971162a87d66b07e483f15
+    template: Tb2677eaa67
+    position:
+      card_no: BP14-T03
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:899704c74e7e5e17888ea309e7401e94a96cf0268ea7ba05713fd1c6b3317b70
+    raw_hash: sha256:899704c74e7e5e17888ea309e7401e94a96cf0268ea7ba05713fd1c6b3317b70
+    body_length: 74
+    raw_length: 74
+    token_header_hash:
+    block: sha256:d02b6fccf811bb81e6eba90608fc58224622144321971162a87d66b07e483f15
+    evidence_hash: sha256:fb842b27db9e25d96246e7aee69a280f49c4afcd4ca787eaa72e00e86d755921
+    clauses:
+      - id: sha256:55a701d0cd1713534d2e32e81ae842b432932da00160895d07df39746439dd06
+        template: C04fd61232f
+        body:
+          start: 0
+          end: 44
+        raw:
+          start: 0
+          end: 44
+      - id: sha256:81ec9def28fec2bbbe050d97a9d0e8b296be6aa8548d1a6f8823edaf2b15235a
+        template: C2b32b9d78a
+        body:
+          start: 44
+          end: 74
+        raw:
+          start: 44
+          end: 74
+  - kind: member
+    id: sha256:741b96dac497acf6e031ba4b9c6d9f42bb5103dfef87e2d18db95c346fdd42e7
+    template: T74de75251b
+    position:
+      card_no: BP14-T04
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:3d75eca5e31ab968ccbe21656d4e4f11696b7abf0c912227c28e24de21f1a004
+    raw_hash: sha256:3d75eca5e31ab968ccbe21656d4e4f11696b7abf0c912227c28e24de21f1a004
+    body_length: 44
+    raw_length: 44
+    token_header_hash:
+    block: sha256:741b96dac497acf6e031ba4b9c6d9f42bb5103dfef87e2d18db95c346fdd42e7
+    evidence_hash: sha256:2af77dfcf0c49b919b4c69a866ff25f43975a4c18e1c88066cd14837329afb5b
+    clauses:
+      - id: sha256:bb02873b9bd4bb893381877293fab84c0bbf1fddfbd844c7361752a7a433c8b6
+        template: C3f5066b9e7
+        body:
+          start: 0
+          end: 16
+        raw:
+          start: 0
+          end: 16
+      - id: sha256:69070ae6236513da1fa749df0134625d0cb3ea692b8d7b2449a4797aa7f90ce3
+        template: Cdf35a4dada
+        body:
+          start: 16
+          end: 25
+        raw:
+          start: 16
+          end: 25
+      - id: sha256:6603014ed1bd118e83f8d212a4363e2de5358b534aec78086baf6ca6dd28d984
+        template: C730dec3f9d
+        body:
+          start: 25
+          end: 44
+        raw:
+          start: 25
+          end: 44
+  - kind: member
+    id: sha256:ed791de42e2983a302cb22441b05791b3ec7a442be6783af8c9a0b53e1f60576
+    template: T2f9a79ec6b
+    position:
+      card_no: BP14-T05
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:cccca1ae0767f0df927170e209d7f2c707cd5dc1c1676248a2b317087bf625ce
+    raw_hash: sha256:cccca1ae0767f0df927170e209d7f2c707cd5dc1c1676248a2b317087bf625ce
+    body_length: 63
+    raw_length: 63
+    token_header_hash:
+    block: sha256:ed791de42e2983a302cb22441b05791b3ec7a442be6783af8c9a0b53e1f60576
+    evidence_hash: sha256:6356f4e7b749dd6215e8366c571db33bc1d3efe385d7507a189d61b3b2154aa2
+    clauses:
+      - id: sha256:ae8d4f485e4cab91200f0b0dba73d528671d290bf6811ccdf55859482224eb45
+        template: C3f5066b9e7
+        body:
+          start: 0
+          end: 16
+        raw:
+          start: 0
+          end: 16
+      - id: sha256:7987c36f4c0bdfb23cc3484a8359849a28ced6bd445c44ded0ca967d00ca5ae3
+        template: Cdf35a4dada
+        body:
+          start: 16
+          end: 25
+        raw:
+          start: 16
+          end: 25
+      - id: sha256:59dd838ce1e328628aa9625288eb5a89468ecea07c5a3201ad4dd3db4401b7bd
+        template: C7cd4a59423
+        body:
+          start: 25
+          end: 39
+        raw:
+          start: 25
+          end: 39
+      - id: sha256:8f30b01e39a407777a81aed16562db6037cbc4671093130957101dcf89f7457d
+        template: C8755fa811f
+        body:
+          start: 39
+          end: 63
+        raw:
+          start: 39
+          end: 63
+  - kind: member
+    id: sha256:ba998825253eaae9c86bd40becc05c0c4dfa9f531cd24fc4d5e6d0bd5e383200
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-T06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:ba998825253eaae9c86bd40becc05c0c4dfa9f531cd24fc4d5e6d0bd5e383200
+    evidence_hash: sha256:1cb478e72773119907fee6a670bc55e6cfbf3383b338c15f47efaf95b4dfe494
+    clauses:
+      - id: sha256:70e0a9d35605f836f3dbaac25407510451ddb1e71476087713a81704d260803c
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:09c7e890ab2d10b5fd71b4a3873976f593b8635f546cac4d13dfbfc404589749
+    template: T2136dab64e
+    position:
+      card_no: BP14-T06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:722e39200c2bf15567fc75aeffd702bc649bfe48ce88a3d7e4fe18facc5a9fa3
+    raw_hash: sha256:722e39200c2bf15567fc75aeffd702bc649bfe48ce88a3d7e4fe18facc5a9fa3
+    body_length: 26
+    raw_length: 26
+    token_header_hash:
+    block: sha256:09c7e890ab2d10b5fd71b4a3873976f593b8635f546cac4d13dfbfc404589749
+    evidence_hash: sha256:6d03d9e821851208dacfd8046f3fe18fb66355dbd8788f252b8bf0de2c861dec
+    clauses:
+      - id: sha256:83917aa68dc45597c2d9616390b9f4fe793b29393fbd18635ee41232f9ee6401
+        template: C2136dab64e
+        body:
+          start: 0
+          end: 26
+        raw:
+          start: 0
+          end: 26
+  - kind: member
+    id: sha256:5489bd3087169939030f06f337500d9cae7368179946ff2f3ded97b74657b983
+    template: T25ba50b47a
+    position:
+      card_no: BP14-T07
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
+    raw_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
+    body_length: 6
+    raw_length: 6
+    token_header_hash:
+    block: sha256:5489bd3087169939030f06f337500d9cae7368179946ff2f3ded97b74657b983
+    evidence_hash: sha256:e7987a3f5713ede04a00e91ac91105809fce7499bc3f59b22fe2b345318d9764
+    clauses:
+      - id: sha256:03a860801b0c77cbcf5a12cda51e756755c52ead6f23a11798da0624050080b5
+        template: C25ba50b47a
+        body:
+          start: 0
+          end: 6
+        raw:
+          start: 0
+          end: 6
+  - kind: member
+    id: sha256:97e77e16594c5c9045a79fe32b6a6c73a6d9d6027ce3e7c8ff2c03e5160fd248
+    template: T3346d1faf3
+    position:
+      card_no: BP14-T07
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:4079a6d262998b0896bf8155b09c0bf388c31160a4936278c5bf8fb1e0480a4e
+    raw_hash: sha256:4079a6d262998b0896bf8155b09c0bf388c31160a4936278c5bf8fb1e0480a4e
+    body_length: 32
+    raw_length: 32
+    token_header_hash:
+    block: sha256:5489bd3087169939030f06f337500d9cae7368179946ff2f3ded97b74657b983
+    evidence_hash: sha256:5efab1a9146c15d94e0c8fac885e4d98a262caf73894d482382c1b6ab750ad65
+    clauses:
+      - id: sha256:846111861b8faf22aebf083f87bc7ba67d1fb9c0eaa52a88e89132d1413e7751
+        template: C32039d3903
+        body:
+          start: 0
+          end: 27
+        raw:
+          start: 0
+          end: 27
+      - id: sha256:b610ec55c4a3b121b344591de4bbfbcfc709cc0c2de1e53872119488ec05ab4c
+        template: Cde5a71eee8
+        body:
+          start: 27
+          end: 32
+        raw:
+          start: 27
+          end: 32
+  - kind: member
+    id: sha256:133a1b5ca25b94956fa6d842df464ff8e536be1fe010350b5f8e81e08e0525e6
+    template: Tca6721d157
+    position:
+      card_no: BP14-T08
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+    raw_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:133a1b5ca25b94956fa6d842df464ff8e536be1fe010350b5f8e81e08e0525e6
+    evidence_hash: sha256:9def2ad04f4fc51bf640d5be590cceaee343903ae8eac6a64acfb97aff944cf7
+    clauses:
+      - id: sha256:031b650a4ec746d08361c6174c5a230f441aaae3c58f7b6199df4180c9dc907d
+        template: Cca6721d157
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:75f64b0abc12b5ab739aa8b5ab69f411c9b4880cb20db73dd688d23e0221e918
+    template: Tca6721d157
+    position:
+      card_no: BP14-T09
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+    raw_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:75f64b0abc12b5ab739aa8b5ab69f411c9b4880cb20db73dd688d23e0221e918
+    evidence_hash: sha256:c2be9c16d20fb0e7b184f11351702fb14bfc1696ea2e808bd5e071ffa567a407
+    clauses:
+      - id: sha256:fd65263e12f4c194438aa4210bc2032ed992097888135d04271cf7654a74242b
+        template: Cca6721d157
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:b06c15c33931976b1aebc486e4955dff7849c52884c2a2b52a05dabb3d231e9f
+    template: T2d1091be95
+    position:
+      card_no: BP14-U01
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:78e5987cc49253829d4e669c1dc40d49d0edbd9cef5b5e50fbef3e654eb58f17
+    raw_hash: sha256:78e5987cc49253829d4e669c1dc40d49d0edbd9cef5b5e50fbef3e654eb58f17
+    body_length: 97
+    raw_length: 97
+    token_header_hash:
+    block: sha256:b06c15c33931976b1aebc486e4955dff7849c52884c2a2b52a05dabb3d231e9f
+    evidence_hash: sha256:0e6f8d622074a597ae797bd1184c886d13e8adeb67c23b775fbcd37877b840cb
+    clauses:
+      - id: sha256:4f103e5aca4f1f317db62b3262dd2d9e30c2c387eda6c341ee80305ddd90776a
+        template: Cd62b2d48be
+        body:
+          start: 0
+          end: 29
+        raw:
+          start: 0
+          end: 29
+      - id: sha256:fc1e746f2bdafd665581046e198cf2ace41ea50a64a6342f76f31cbae2f9f916
+        template: Cdf35a4dada
+        body:
+          start: 29
+          end: 38
+        raw:
+          start: 29
+          end: 38
+      - id: sha256:57f2d47fb64dc0946e2dde85fa071dcee8cbd144e7df4ed71b259f40d109787f
+        template: Cde5a71eee8
+        body:
+          start: 38
+          end: 43
+        raw:
+          start: 38
+          end: 43
+      - id: sha256:a528616f09186ea4f9456f008a4de71c412d24113c61572cd948a89b34e84622
+        template: Cfa87afe606
+        body:
+          start: 43
+          end: 97
+        raw:
+          start: 43
+          end: 97
+  - kind: member
+    id: sha256:3c54c7dd76d77ff04433eceb00e2b293d68deb4c19ebc94f3b0a15ec6be56406
+    template: T58b65ad3b8
+    position:
+      card_no: BP14-U02
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:58b65ad3b825b8afe69dfd71e3fc47474e391129756ef0ade35237682872a11a
+    raw_hash: sha256:58b65ad3b825b8afe69dfd71e3fc47474e391129756ef0ade35237682872a11a
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:3c54c7dd76d77ff04433eceb00e2b293d68deb4c19ebc94f3b0a15ec6be56406
+    evidence_hash: sha256:81daf04cdf397b65fc941ccee609ed923d6b5013c3f0d5122fe3834ae320e72d
+    clauses:
+      - id: sha256:c1c582b4b2881f6edcf707af6633b09e8cc36b5874dc7d207909692ef54d2a58
+        template: C58b65ad3b8
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:277bab9fdb9ade4a3bbd241726845683df2388fb1a388068b2e0f272c715778b
+    template: Tb4006380ea
+    position:
+      card_no: BP14-U02
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:c633889c0528826646a2c15f5f857f5cbc680f6dcdd0caf14ea703f67bfa1e44
+    raw_hash: sha256:c633889c0528826646a2c15f5f857f5cbc680f6dcdd0caf14ea703f67bfa1e44
+    body_length: 30
+    raw_length: 30
+    token_header_hash:
+    block: sha256:277bab9fdb9ade4a3bbd241726845683df2388fb1a388068b2e0f272c715778b
+    evidence_hash: sha256:b9c89a17b641c53f8f7cdf7b4d0429eaceaa1d133fa3b2ad081ea7b29b0de67f
+    clauses:
+      - id: sha256:e540d8a8c8b321e34840c5c19c3aa0765249cadd12da9737b73e2dfe8f0bdc12
+        template: Cf337ee4cf4
+        body:
+          start: 0
+          end: 21
+        raw:
+          start: 0
+          end: 21
+      - id: sha256:a31da8cca1053aac84afbe54b7715808a36df3d556fb879b3644273fece8ccd8
+        template: Cdf35a4dada
+        body:
+          start: 21
+          end: 30
+        raw:
+          start: 21
+          end: 30
+  - kind: member
+    id: sha256:e9970f38c33150a1c471bb9b0c60bef9ce7af4514247b542ff3d06151ed25607
+    template: T4969d0808f
+    position:
+      card_no: BP14-U02
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:6a88048b968e51f21ca0aa9fdcc6c277a12efd4ba4b54c66a8d8f1dac819dc58
+    raw_hash: sha256:6a88048b968e51f21ca0aa9fdcc6c277a12efd4ba4b54c66a8d8f1dac819dc58
+    body_length: 23
+    raw_length: 23
+    token_header_hash:
+    block: sha256:e9970f38c33150a1c471bb9b0c60bef9ce7af4514247b542ff3d06151ed25607
+    evidence_hash: sha256:0fbac5ab44cfd97dffa71306c60f11415953450c965110b2b679d1e21a139279
+    clauses:
+      - id: sha256:7fff0b9865132b86fd50c5e3f6cb21501c46eaf7690fb0784b357a1e6e027f51
+        template: C4969d0808f
+        body:
+          start: 0
+          end: 23
+        raw:
+          start: 0
+          end: 23
+  - kind: member
+    id: sha256:fe60b49cb74eb7b3f80f08b98f89ed1981f7d532b388ab675f13d15c4302ce05
+    template: Te39b82ffe6
+    position:
+      card_no: BP14-U03
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:724ce4afef839553006c2f3df4b0f75aa945ec800084d7593c32955b0e3bbd4c
+    raw_hash: sha256:724ce4afef839553006c2f3df4b0f75aa945ec800084d7593c32955b0e3bbd4c
+    body_length: 70
+    raw_length: 70
+    token_header_hash:
+    block: sha256:fe60b49cb74eb7b3f80f08b98f89ed1981f7d532b388ab675f13d15c4302ce05
+    evidence_hash: sha256:a55002234a7cda15c1d19243ecc2141ac2cd811de8c5f0fea4e90b7ef99b065e
+    clauses:
+      - id: sha256:2929c525f59acaa7486c72102d545ad556683b6904df43984b7e6933ece5604e
+        template: Cea28e869f8
+        body:
+          start: 0
+          end: 61
+        raw:
+          start: 0
+          end: 61
+      - id: sha256:cd7cbff908c593ce201be6428bfe7b7928180aa32b0d7fd99832b9ec8b1d7d4b
+        template: Cdf35a4dada
+        body:
+          start: 61
+          end: 70
+        raw:
+          start: 61
+          end: 70
+  - kind: member
+    id: sha256:ff848fdb8e3b7abf28defdfbbeb4698e07ba7d76e8880ea4ee8c3afdb3fa0f37
+    template: T14e7334fc1
+    position:
+      card_no: BP14-U03
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:d36fbf8b18b47cb04ecbf5adbe98a93e1d36285cfd7f585e6c073c3102dffbe5
+    raw_hash: sha256:d36fbf8b18b47cb04ecbf5adbe98a93e1d36285cfd7f585e6c073c3102dffbe5
+    body_length: 70
+    raw_length: 70
+    token_header_hash:
+    block: sha256:ff848fdb8e3b7abf28defdfbbeb4698e07ba7d76e8880ea4ee8c3afdb3fa0f37
+    evidence_hash: sha256:2609b5021cc91729b4a9f93ded4cf978983f11990eb8b2f85c38c08b66fc49d3
+    clauses:
+      - id: sha256:cf2e712ff54ff61cea55f6bf97a30b7fd709a5e56ecd8b84b4ce39458a1994f5
+        template: C14e7334fc1
+        body:
+          start: 0
+          end: 70
+        raw:
+          start: 0
+          end: 70
+  - kind: member
+    id: sha256:5fc4919b39a6c23166af074446a886b32167798cdd0957aa174a2dd1b98197ab
+    template: T837a208711
+    position:
+      card_no: BP14-U04
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:e0dca99b94096e1fb636d5442ab593012bd1393e0bffb12ce4fe7e31e6989016
+    raw_hash: sha256:e0dca99b94096e1fb636d5442ab593012bd1393e0bffb12ce4fe7e31e6989016
+    body_length: 39
+    raw_length: 39
+    token_header_hash:
+    block: sha256:5fc4919b39a6c23166af074446a886b32167798cdd0957aa174a2dd1b98197ab
+    evidence_hash: sha256:cc4034b4573babffa005e16b4718465d871ae596592821e00aa66b2cdd19a478
+    clauses:
+      - id: sha256:97ded7f175cd6dfc6cf58401ab72f9dc4224793c8096cd4a3785ba5a032defd7
+        template: C837a208711
+        body:
+          start: 0
+          end: 39
+        raw:
+          start: 0
+          end: 39
+  - kind: classification
+    id: T385359f124
+    status: candidate
+    family: spell.repeat-top-ex-hand-banish
+    normalized_hash: sha256:385359f12405711436ec542b9e66a316594f664e1f2738519ea073767b2fb4f7
+    definition_hash: sha256:dfe0ade521a739ff69c2109c22d025a5aa7c9ea1c73a96124e156af2973493c2
+    label_hash: sha256:2b61d929f55d44ebffe9b9ac6b41699c117ac3b5873a437fb1413053cf8ede3f
+    members:
+      - sha256:d2f26338f21d9d6addee96211e8c51551ea3053592e66364d851dd82cbabf5fb
+      - sha256:d157d0db8c14401d3b12a9481a68d1c504f81400df1cca2f1861edf01550faa6
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+        note_hash:
+    clauses:
+      - id: sha256:3590780f20800c18861a8e4ed58092d865e858022754489d765aefd18b11e36f
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - K.repeat
+        author:
+          - A.head.spell
+          - A.comb.repeat
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:d91b457e010dd35109a7a459b63ba5593da9575fb3b023cbf8f54703074a6c23
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.move
+        author:
+          - A.act.move
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:65e87358bf25f97a91f20fe7ecb53c9e2ff8623698617a2a714955ad88e35739
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - D.resolve-choice
+          - X.binding
+          - S.zone
+          - S.filter
+          - I.banish
+        author:
+          - A.choose
+          - A.sel
+          - A.act.banish
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: scope-of
+        sources:
+          - clause: sha256:3590780f20800c18861a8e4ed58092d865e858022754489d765aefd18b11e36f
+            ability:
+        targets:
+          - clause: sha256:d91b457e010dd35109a7a459b63ba5593da9575fb3b023cbf8f54703074a6c23
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: scope-of
+        sources:
+          - clause: sha256:3590780f20800c18861a8e4ed58092d865e858022754489d765aefd18b11e36f
+            ability:
+        targets:
+          - clause: sha256:65e87358bf25f97a91f20fe7ecb53c9e2ff8623698617a2a714955ad88e35739
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: sha256:d91b457e010dd35109a7a459b63ba5593da9575fb3b023cbf8f54703074a6c23
+            ability:
+        targets:
+          - clause: sha256:65e87358bf25f97a91f20fe7ecb53c9e2ff8623698617a2a714955ad88e35739
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:d157d0db8c14401d3b12a9481a68d1c504f81400df1cca2f1861edf01550faa6
+    template: T385359f124
+    position:
+      card_no: BP14-U05
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_hash: sha256:654a45de643a4f89c4478f334213f4c936e0dca94d330efa53f18f3c787f2f7a
+    raw_hash: sha256:654a45de643a4f89c4478f334213f4c936e0dca94d330efa53f18f3c787f2f7a
+    body_length: 44
+    raw_length: 44
+    token_header_hash:
+    block: sha256:d157d0db8c14401d3b12a9481a68d1c504f81400df1cca2f1861edf01550faa6
+    evidence_hash: sha256:ab58ccb1c17d291e31b9aa64567a43c55125983dfbe017b7810bd6f1c2b1ad19
+    clauses:
+      - id: sha256:3590780f20800c18861a8e4ed58092d865e858022754489d765aefd18b11e36f
+        template: Cae6b21a454
+        body:
+          start: 0
+          end: 10
+        raw:
+          start: 0
+          end: 10
+      - id: sha256:d91b457e010dd35109a7a459b63ba5593da9575fb3b023cbf8f54703074a6c23
+        template: C9268223afc
+        body:
+          start: 10
+          end: 30
+        raw:
+          start: 10
+          end: 30
+      - id: sha256:65e87358bf25f97a91f20fe7ecb53c9e2ff8623698617a2a714955ad88e35739
+        template: Cd02c1cd5d2
+        body:
+          start: 30
+          end: 44
+        raw:
+          start: 30
+          end: 44
+  - kind: classification
+    id: T6eb0068e99
+    status: candidate
+    family: activate.retrieve-shuffle-flip
+    normalized_hash: sha256:6eb0068e997cff3de30fc381f75d90262e3853557887b3d2bf1871c5ad7f282f
+    definition_hash: sha256:d1e414db8b6ae7417afa3a18f2a84c10e03b5dfba9ff25247964201638d8e9fa
+    label_hash: sha256:2df6f2a3d09b73468af8b1bc1c1d5e36f8abbd6d57e4e9991de3790b8abde909
+    members:
+      - sha256:518a8a835f920da243bedffb3848d63071e29524c7d42dd49d6e33f8bc09a576
+      - sha256:ca8934988b949da68fc17f82dd4352d16449f54d8056904623a99c8dd21b8791
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+        note_hash:
+    clauses:
+      - id: sha256:ac7729446e3c8b615a8f66aa9d8ddd24064699d10dfbf0e587046c6d86e0dc76
+        ability: a1
+        decision: D.play-param
+        capture:
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - I.resource
+          - I.banish
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+          - S.combine
+        author:
+          - A.head.activate
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:550c2fc7090a8e6877a4ba8d3bef1d0e56dc102d2aad66bbbf69d858bedae5ab
+        ability: a1
+        decision:
+        capture:
+        stage: known
+        ir:
+          - I.move
+          - I.shuffle
+        author:
+          - A.act.move
+          - A.act.shuffle
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - id: sha256:898a94396f82077fc05b299508f91873bde1d53f3c0ffd4605f211fc03ea469b
+        ability: a1
+        decision: D.resolve-choice
+        capture:
+        stage: known
+        ir:
+          - D.resolve-choice
+          - X.binding
+          - S.zone
+          - S.filter
+          - I.flip-down
+        author:
+          - A.choose
+          - A.sel
+          - A.act.flip_down
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    relations:
+      - type: sequence
+        sources:
+          - clause: sha256:ac7729446e3c8b615a8f66aa9d8ddd24064699d10dfbf0e587046c6d86e0dc76
+            ability:
+        targets:
+          - clause: sha256:550c2fc7090a8e6877a4ba8d3bef1d0e56dc102d2aad66bbbf69d858bedae5ab
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: sha256:550c2fc7090a8e6877a4ba8d3bef1d0e56dc102d2aad66bbbf69d858bedae5ab
+            ability:
+        targets:
+          - clause: sha256:898a94396f82077fc05b299508f91873bde1d53f3c0ffd4605f211fc03ea469b
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:ac7729446e3c8b615a8f66aa9d8ddd24064699d10dfbf0e587046c6d86e0dc76
+            ability:
+        targets:
+          - clause: sha256:550c2fc7090a8e6877a4ba8d3bef1d0e56dc102d2aad66bbbf69d858bedae5ab
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: cost-of
+        sources:
+          - clause: sha256:ac7729446e3c8b615a8f66aa9d8ddd24064699d10dfbf0e587046c6d86e0dc76
+            ability:
+        targets:
+          - clause: sha256:898a94396f82077fc05b299508f91873bde1d53f3c0ffd4605f211fc03ea469b
+            ability:
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: sha256:ca8934988b949da68fc17f82dd4352d16449f54d8056904623a99c8dd21b8791
+    template: T6eb0068e99
+    position:
+      card_no: BP14-U05
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:4fce77554b2afd599a110a71be250b1d03e8503ad180b05f2df8904600123a3e
+    raw_hash: sha256:4fce77554b2afd599a110a71be250b1d03e8503ad180b05f2df8904600123a3e
+    body_length: 118
+    raw_length: 118
+    token_header_hash:
+    block: sha256:ca8934988b949da68fc17f82dd4352d16449f54d8056904623a99c8dd21b8791
+    evidence_hash: sha256:5f9e2f41917aad86b3f40dd154d96afee54db89bd8a833a8804bf6e5546e9a4e
+    clauses:
+      - id: sha256:ac7729446e3c8b615a8f66aa9d8ddd24064699d10dfbf0e587046c6d86e0dc76
+        template: C6992c78ff4
+        body:
+          start: 0
+          end: 56
+        raw:
+          start: 0
+          end: 56
+      - id: sha256:550c2fc7090a8e6877a4ba8d3bef1d0e56dc102d2aad66bbbf69d858bedae5ab
+        template: Ce7635ea9f0
+        body:
+          start: 56
+          end: 74
+        raw:
+          start: 56
+          end: 74
+      - id: sha256:898a94396f82077fc05b299508f91873bde1d53f3c0ffd4605f211fc03ea469b
+        template: Ceca7e9d403
+        body:
+          start: 74
+          end: 118
+        raw:
+          start: 74
+          end: 118
+  - kind: member
+    id: sha256:c52e76b36c7b137d76f1f390e486fc723e9dd60ec3af5a4ffc9e86c99e1c0b5e
+    template: T921ff9f9b9
+    position:
+      card_no: BP14-U06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    raw_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    body_length: 4
+    raw_length: 4
+    token_header_hash:
+    block: sha256:c52e76b36c7b137d76f1f390e486fc723e9dd60ec3af5a4ffc9e86c99e1c0b5e
+    evidence_hash: sha256:68ad120001c40426c49d32c88645cc371a2e9307566c2711b8854ebcd8007286
+    clauses:
+      - id: sha256:77f536e782fb340ddb85431362bfc304bda3e103298b4f092a78bb6b18260c8a
+        template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+        raw:
+          start: 0
+          end: 4
+  - kind: member
+    id: sha256:671010c074427951c2e10278f3f636871f32bbc0052bed18cb400d285496399f
+    template: T2ad29027f2
+    position:
+      card_no: BP14-U06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:2ad29027f25cf76a3e306e7f850091bab0d7dc80f363524751fbf78babc7c45e
+    raw_hash: sha256:2ad29027f25cf76a3e306e7f850091bab0d7dc80f363524751fbf78babc7c45e
+    body_length: 16
+    raw_length: 16
+    token_header_hash:
+    block: sha256:671010c074427951c2e10278f3f636871f32bbc0052bed18cb400d285496399f
+    evidence_hash: sha256:ce25ce60794681a957e846e92174e4d17bf889d2ad83fc73eb2400db70f8b66f
+    clauses:
+      - id: sha256:84887b9bc14267823dc13e2816f9466ffc8d4fe2367543f12d1170a158323330
+        template: C2ad29027f2
+        body:
+          start: 0
+          end: 16
+        raw:
+          start: 0
+          end: 16
+  - kind: member
+    id: sha256:0ec12e9fb69717ed0969a247631e7687a826903c62962236b81230b60419c229
+    template: T8422d6981f
+    position:
+      card_no: BP14-U06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 2
+    body_hash: sha256:c5a2f6ef9e501789475c8f6c8dde92cade24785a2cf7b5ae5f93588b800ff4e1
+    raw_hash: sha256:c5a2f6ef9e501789475c8f6c8dde92cade24785a2cf7b5ae5f93588b800ff4e1
+    body_length: 34
+    raw_length: 34
+    token_header_hash:
+    block: sha256:0ec12e9fb69717ed0969a247631e7687a826903c62962236b81230b60419c229
+    evidence_hash: sha256:d46f0f1c27348dea1356e07bdf7d4d8bc73d9a1ded0850e7bb1eb73560f1375f
+    clauses:
+      - id: sha256:64e7bef1e44bdbc06c4320b55f7bab5d42c1c263d6f02a23915d7c0b8a7426c0
+        template: C8422d6981f
+        body:
+          start: 0
+          end: 34
+        raw:
+          start: 0
+          end: 34
+  - kind: member
+    id: sha256:bb5a673f8cf939e16065ea4d34a0dd196a118f4d1a23d4e806965e9d8bbe9a83
+    template: Te24db00bc8
+    position:
+      card_no: BP14-U06
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 3
+    body_hash: sha256:5b82bbc276558cd939c1282d220987fdc9278ce1ee9cccc420b2001e6f8d1a08
+    raw_hash: sha256:5b82bbc276558cd939c1282d220987fdc9278ce1ee9cccc420b2001e6f8d1a08
+    body_length: 28
+    raw_length: 28
+    token_header_hash:
+    block: sha256:bb5a673f8cf939e16065ea4d34a0dd196a118f4d1a23d4e806965e9d8bbe9a83
+    evidence_hash: sha256:853bb966662277546d5a2345b9a2d0c212e65dc5aaaa3636bec7630ec438512b
+    clauses:
+      - id: sha256:ed8a40d6a27106ba0db8a6755973359fee3de2a9072dab7dca7c60215b5664cb
+        template: Ce24db00bc8
+        body:
+          start: 0
+          end: 28
+        raw:
+          start: 0
+          end: 28
+  - kind: member
+    id: sha256:6413ddd42bb92c777ee289fc198b0f0fd5a4a6daa2403f30217e129d40056212
+    template: Tb8ef69cd2f
+    position:
+      card_no: BP14-U07
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 0
+    body_hash: sha256:88d91a2c0e3d0a332ca476856e519c7c680d7b3075c1219b8a5fc3d5cee9ffd1
+    raw_hash: sha256:88d91a2c0e3d0a332ca476856e519c7c680d7b3075c1219b8a5fc3d5cee9ffd1
+    body_length: 54
+    raw_length: 54
+    token_header_hash:
+    block: sha256:6413ddd42bb92c777ee289fc198b0f0fd5a4a6daa2403f30217e129d40056212
+    evidence_hash: sha256:8de0ee6f19a65b8393ac08dd43965b0258a0a896e22966730b04ca04e45a8792
+    clauses:
+      - id: sha256:180e7789268e6ea9e9b2fb7295afd6dc45a863362237798bca66f6f2b06e1c87
+        template: Caa29ccd8a8
+        body:
+          start: 0
+          end: 46
+        raw:
+          start: 0
+          end: 46
+      - id: sha256:59efc6eafd1f09ea4c5a1906f8bfe68f3c2771e76f387a942b4057742793be42
+        template: Cbcbbd98893
+        body:
+          start: 46
+          end: 54
+        raw:
+          start: 46
+          end: 54
+  - kind: member
+    id: sha256:528dbf470e5d38c52ade407aa7c16094bd5bc46fe7714744fc1e2fc1abdc7136
+    template: T5788c41c61
+    position:
+      card_no: BP14-U07
+      region: jp
+      face: 0
+      field: effect
+      ordinal:
+      line: 1
+    body_hash: sha256:60ac135fe74cb3704e9f2d8480c890de17084f0a4d851d2af9363413752c12c0
+    raw_hash: sha256:60ac135fe74cb3704e9f2d8480c890de17084f0a4d851d2af9363413752c12c0
+    body_length: 37
+    raw_length: 37
+    token_header_hash:
+    block: sha256:528dbf470e5d38c52ade407aa7c16094bd5bc46fe7714744fc1e2fc1abdc7136
+    evidence_hash: sha256:78fd03ac1c688f163447af3c16e7bd4a8a892631ad43edcec2efce496fada322
+    clauses:
+      - id: sha256:19c55b4ea1128d99570182c88cd943178d1b24445a985d47e9aeaae022734e39
+        template: C5788c41c61
+        body:
+          start: 0
+          end: 37
+        raw:
+          start: 0
+          end: 37
