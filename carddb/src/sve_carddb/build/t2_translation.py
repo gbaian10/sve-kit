@@ -113,8 +113,13 @@ TABLES = (
             QueryCheck(
                 "name_selection_owner_eligibility",
                 "SELECT 1 FROM translation_selection AS s JOIN translation AS t ON t.id=s.translation_id "
-                "WHERE t.authority != 'unofficial' LIMIT 1",
-                ("translation_selection", "translation"),
+                "WHERE t.authority != 'unofficial' AND NOT (t.origin='official' "
+                "AND t.authority='sve_official' AND t.source_id IS NOT NULL "
+                "AND EXISTS (SELECT 1 FROM translation_use AS u WHERE u.context_id=t.context_id "
+                "AND u.vocabulary_kind IS NOT NULL AND u.field='label') "
+                "AND NOT EXISTS (SELECT 1 FROM translation_use AS u WHERE u.context_id=t.context_id "
+                "AND (u.vocabulary_kind IS NULL OR u.field!='label'))) LIMIT 1",
+                ("translation_selection", "translation", "translation_use"),
             ),
         ),
     ),

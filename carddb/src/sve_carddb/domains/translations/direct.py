@@ -1,4 +1,4 @@
-"""Whole-field machine translations of one owner, written without any template layer."""
+"""Whole-field translations of one owner, written without any template layer."""
 
 from typing import TYPE_CHECKING, Literal
 
@@ -22,13 +22,27 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
     lang: str,
     source_unit_id: str,
     text: str,
-    origin: Literal["project", "machine"],
+    origin: Literal["project", "machine", "official"],
     low_confidence: bool,
     semantic_variant: str = "default",
+    source_id: str | None = None,
 ) -> None:
     """Insert context, use, translation and selection; a differing repeat is a conflict."""
     if not owner or not set(owner) <= _OWNER_COLUMNS:
         raise ValueError("Direct translation owner must use known owner columns")
+    if origin == "official":
+        if (
+            set(owner) != {"vocabulary_kind", "vocabulary_code"}
+            or field != "label"
+            or source_id is None
+        ):
+            raise ValueError(
+                "Official direct translation requires a sourced vocabulary label"
+            )
+    elif source_id is not None:
+        raise ValueError(
+            "Unofficial direct translation cannot claim an official source"
+        )
     units = db.select(
         "text_unit", db.columns("text_unit"), where={"id": source_unit_id}
     )
@@ -83,6 +97,7 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
                 "text": text,
                 "origin": origin,
                 "low_confidence": low_confidence,
+                **({"source_id": source_id} if source_id is not None else {}),
             }
         )
     )[7:]
@@ -98,10 +113,10 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
             "text": text,
             "tokens": None,
             "origin": origin,
-            "authority": "unofficial",
+            "authority": "sve_official" if origin == "official" else "unofficial",
             "low_confidence": low_confidence,
             "source_hash": units[0].values["content_hash"],
-            "source_id": None,
+            "source_id": source_id,
         },
         ("id",),
     )

@@ -33,8 +33,17 @@ from sve_carddb.domains.translations.models import Quality
 class LabelTranslation(RecordData):
     lang: Lang
     text: Text
-    origin: Literal["project", "machine"] = "project"
+    origin: Literal["project", "machine", "official"] = "project"
     low_confidence: bool = False
+    source_ref: SourceRef | None = None
+
+    @model_validator(mode="after")
+    def _source(self) -> Self:
+        if (self.origin == "official") != (self.source_ref is not None):
+            raise ValueError(
+                "Only official label translations require a source reference"
+            )
+        return self
 
 
 class CurrentVocabularyValue(VocabularyValue):
@@ -95,6 +104,7 @@ class VocabularyRecord(Quality):
                     else ()
                 ),
                 *(mapping.source_ref for mapping in value.raw_mappings),
+                *(label.source_ref for label in value.translations if label.source_ref),
             )
         )
         return _evidence(self.data.evidence, refs)
