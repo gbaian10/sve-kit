@@ -210,7 +210,7 @@ records:
             text: 。
       expression_targets: {}
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；完整日文與渲染全文對照一致；禁止攻擊的主語、條件與期間保留。敵方沿 P0 既有寫法涵蓋敵方主戰者與從者，官方 FAQ Q546 已明確其範圍。source_claim：https://shadowverse-evolve.com/cardlist/?cardno=BP03-P31&faq=
     kind: template_translation
     data:
       template_id: frame:1c323bb85645278f691fe30ae896b7f24991c54af47e1e1387b27916cd1e8014
@@ -583,6 +583,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；中文保留完整日文句界，但兩個門檻／分支之間的獨立句是否沿用前一條件仍缺明確裁定。P0 R22 明訂此類階梯中間句保留低信心；不自行補入條件或改為無條件
     kind: template_translation
     data:
       template_id: frame:d1f7e1f225009684361a7cd98969de2a910e2893cb5fac1e9aa9a1ce9767a4e1

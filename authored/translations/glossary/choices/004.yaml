@@ -334,7 +334,7 @@ records:
         text: 唯一的容器
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；開催為舉辦，大成功與驚嘆語氣均保留
     kind: glossary_choice
     data:
       term_id: term:name.a_super_successful_event
@@ -344,7 +344,7 @@ records:
         text: 舉辦大成功！
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；恋する為戀愛中的，スウィーティーサマー保留英語音譯字形，不涉及角色姓名
     kind: glossary_choice
     data:
       term_id: term:name.a_sweet_romantic_summer
@@ -355,6 +355,7 @@ records:
       concept_evidence: []
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；缺少可核對的臺灣官方或穩定通行名稱來源；凍結數位版無精確同名對應，既有 glossary 亦不足以確認此合作角色／單位的專名
     kind: glossary_choice
     data:
       term_id: term:name.abyss_freezer

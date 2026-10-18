@@ -107,7 +107,7 @@ records:
         text: 詛咒槍兵
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；笑顔為笑容，カーテンコール為謝幕，語義自然
     kind: glossary_choice
     data:
       term_id: term:name.curtain_call_of_smiles
@@ -128,7 +128,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；キュート作為作品類型名沿既有 Cute；pendant 統一為墜飾
     kind: glossary_choice
     data:
       term_id: term:name.cute_pendant
@@ -138,7 +138,7 @@ records:
         text: Cute墜飾
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；キュート作為作品類型名沿既有 Cute；tiara 與同組統一為后冠
     kind: glossary_choice
     data:
       term_id: term:name.cute_tiara
@@ -148,7 +148,7 @@ records:
         text: Cute后冠
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；サイバー、グラス、パンク的三個組成要素均保留為賽博、眼鏡、龐克
     kind: glossary_choice
     data:
       term_id: term:name.cyberglasses_criminal
@@ -193,7 +193,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/characters
-  - low_confidence: true
+  - note: 2026-10-18 對照日文確認；日文為 Dancing in the Rain 的口語音譯，既有 Dancin' 字形保留口語省音
     kind: glossary_choice
     data:
       term_id: term:name.dancing_in_the_rain

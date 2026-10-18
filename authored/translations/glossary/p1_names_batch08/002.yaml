@@ -92,24 +92,36 @@ records:
         text: 卓越的魯米那斯法師
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.enchanting_landlady_hozumi
       lang: zh-Hant
       value:
         kind: authored
-        text: 幻術老闆娘‧穗積
+        text: 狸惑的女將‧穗澄
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.exceed_blast
       lang: zh-Hant
       value:
         kind: authored
-        text: 超越爆裂
+        text: 卓越爆擊
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice

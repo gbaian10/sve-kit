@@ -857,6 +857,7 @@ records:
       expression_targets: {}
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；中文保留完整日文句界，但兩個門檻／分支之間的獨立句是否沿用前一條件仍缺明確裁定。P0 R22 明訂此類階梯中間句保留低信心；不自行補入條件或改為無條件
     kind: template_translation
     data:
       template_id: frame:a3a1b1c0f82231ec6268de4d583db35d34a262d9e4437647079a567edbfb9ad7

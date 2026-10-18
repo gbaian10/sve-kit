@@ -98,6 +98,7 @@ records:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；缺少可核對的臺灣官方或穩定通行名稱來源；凍結數位版無精確同名對應，既有 glossary 亦不足以確認此合作角色／單位的專名
     kind: glossary_choice
     data:
       term_id: term:name.navalgazer_dragon
@@ -206,7 +207,7 @@ records:
         source_urls:
           - https://gnn.gamer.com.tw/detail.php?sn=302442
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；ニューウェーブ為 New Wave 的音譯；沿既有標題字形
     kind: glossary_choice
     data:
       term_id: term:name.new_wave

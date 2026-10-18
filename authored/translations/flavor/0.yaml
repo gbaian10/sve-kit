@@ -565,7 +565,7 @@ entries:
     lang: zh-Hant
     text: "哎最近啊，只有特定的人才會跟我說YMD啊。\n真的覺得吾輩被小看了耶——。欸，你怎麼看？"
     origin: machine
-    low_confidence: true
+    low_confidence: false  # note: 2026-10-18 對照日文確認；YMD沿來源縮寫保留，特定的人、被小看及詢問對方的口語語氣完整
   - source_hash: sha256:0f70a7ec34709c90d128d1e5c402254dd27e167ad58817ebff547c24858a64fa
     lang: zh-Hant
     text: "Bono Bo～no♪我是菱曙喔～☆請多指教～♪\n不管料理還是跑步，都會注入大～大的愛送給大家！"

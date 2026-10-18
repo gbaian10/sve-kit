@@ -135,7 +135,7 @@ entries:
     lang: zh-Hant
     text: "◆死角拗的葉針　症狀：急性發炎\n【合格】十一名　【備註】其中一名撐過了五十針"
     origin: machine
-    low_confidence: true
+    low_confidence: false  # note: 2026-10-18 對照日文確認；死角拗沿日文原漢字保留；急性發炎、十一名與其中一名承受五十針的語義及數量均正確
   - source_hash: sha256:23d0247b8c5b2dbc4897334f267311fcf796ffd545fc95744d26c3a2683ccd93
     lang: zh-Hant
     text: "美麗水面的底下，黏稠地擴散著醜陋的汙泥。\n美麗面容的底下，奸笑地藏著醜陋的嘲笑。"

@@ -83,24 +83,36 @@ records:
         text: 大地的魔片
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.esukamari_adviser
       lang: zh-Hant
       value:
         kind: authored
-        text: 艾斯卡瑪里的顧問
+        text: 耶斯嘉馬利的建言者
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.esukamari_patroller
       lang: zh-Hant
       value:
         kind: authored
-        text: 艾斯卡瑪里的巡邏者
+        text: 耶斯嘉馬利的巡視者
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -130,14 +142,19 @@ records:
         text: 古蕾婭的炎熱
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；完整凍結數位版目錄有精確同名，改為與目前正式顯示及引用一致的既有繁中名稱
     kind: glossary_choice
     data:
       term_id: term:name.grown_up_cute_exclamation
       lang: zh-Hant
       value:
         kind: authored
-        text: 長大了啦！
+        text: 有所成長了！
+      source_claim:
+        source_work: 'Shadowverse: Worlds Beyond'
+        source_urls:
+          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=360
+        claimed_source: 2026-10-18 對照完整凍結目錄的日文同名與繁中名稱；沿用既有官方數位版選詞，不主張為官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -176,14 +193,20 @@ records:
         text: 艾茲迪亞
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.jewel_shrine
       lang: zh-Hant
       value:
         kind: authored
-        text: 寶石神殿
+        text: 寶石聖堂
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -222,7 +245,7 @@ records:
         text: 剎那的猛藥
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；片段與凍結數位版的同角色名稱一致，沿既有喵魯
     kind: glossary_choice
     data:
       term_id: term:name.munyaru_name_fragment
@@ -230,6 +253,12 @@ records:
       value:
         kind: authored
         text: 喵魯
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結數位版的同名或同角色片段，沿用既有繁中選詞；不主張為官方 SVE 譯名。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -277,14 +306,20 @@ records:
         text: 安息的絕傑‧瑪文
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.sonic_four
       lang: zh-Hant
       value:
         kind: authored
-        text: 音速‧四
+        text: 蒼奏之四
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -296,24 +331,36 @@ records:
         text: 劍兔
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.terminal_weapon
       lang: zh-Hant
       value:
         kind: authored
-        text: 終末武器
+        text: 終戰兵器
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；凍結數位版有精確同名對應，改為其既有繁中選詞，避免效果中卡名與正式顯示名不一致
     kind: glossary_choice
     data:
       term_id: term:name.terror_night
       lang: zh-Hant
       value:
         kind: authored
-        text: 恐怖之夜
+        text: 驚駭之夜
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結日文同名與繁中名稱；僅記錄選詞來源，不改稱官方 SVE 譯文。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -325,7 +372,7 @@ records:
         text: 真實的絕傑‧萊歐
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；片段與凍結數位版的同角色名稱一致，沿既有班比
     kind: glossary_choice
     data:
       term_id: term:name.vanpi_name_fragment
@@ -333,6 +380,12 @@ records:
       value:
         kind: authored
         text: 班比
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結數位版的同名或同角色片段，沿用既有繁中選詞；不主張為官方 SVE 譯名。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice
@@ -353,7 +406,7 @@ records:
         text: 尤里烏斯
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；片段與凍結數位版的同角色名稱一致，沿既有夕月
     kind: glossary_choice
     data:
       term_id: term:name.yuzuki_name_fragment
@@ -361,6 +414,12 @@ records:
       value:
         kind: authored
         text: 夕月
+      source_claim:
+        source_work: Shadowverse 數位版
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 2026-10-18 對照凍結數位版的同名或同角色片段，沿用既有繁中選詞；不主張為官方 SVE 譯名。
       concept_evidence: []
   - origin: machine
     kind: glossary_choice

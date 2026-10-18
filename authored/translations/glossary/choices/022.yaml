@@ -161,6 +161,7 @@ records:
       concept_evidence: []
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；凍結數位版無精確同名對應；尚缺可確認專名漢字、譯音或作品梗的可靠來源，不能只憑片假名或字面拆詞確認
     kind: glossary_choice
     data:
       term_id: term:name.kyou_verdant_path_shepherd
@@ -230,7 +231,7 @@ records:
         source_urls:
           - https://gametora.com/zh-tw/umamusume/supports
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；ラプラトン音譯與星的地名後綴完整
     kind: glossary_choice
     data:
       term_id: term:name.laplaton_planet

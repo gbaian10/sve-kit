@@ -590,7 +590,7 @@ entries:
     lang: zh-Hant
     text: "偶然生於眼窩的黃金，將眾人隔絕至彼方。\n「阿賴耶，得之。式就在那裡。除了我以外，拒絕就好了呢」"
     origin: machine
-    low_confidence: true
+    low_confidence: true  # note: 2026-10-18 對照後保留低信心；阿頼耶與式是敘事專詞，私以外的排除範圍與得て的受詞省略仍缺可靠上下文，不能只以字面拼接判定
   - source_hash: sha256:ffb8ba5f8f7c34d4df97941853a15f690e533e7e815b8da142030f9b1f9d44b5
     lang: zh-Hant
     text: "明明是模仿完美造出來的，重要的地方卻一點都不像。\n但這個缺陷……現在的我能稱它為心。"

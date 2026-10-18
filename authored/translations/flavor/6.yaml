@@ -555,7 +555,7 @@ entries:
     lang: zh-Hant
     text: 眼識，偽裝吧。那麼，這裡就不對了呢。
     origin: machine
-    low_confidence: true
+    low_confidence: true  # note: 2026-10-18 對照後保留低信心；眼識為抽象／佛教語彙，偽って的主語及此處的所指缺上下文；無法確認偽裝是否準確
   - source_hash: sha256:6d2a4509d773d4c58a7f3b7ea31fafbe38cd6f11256347d17e550a8b1b703e63
     lang: zh-Hant
     text: "追求強健的身體，追求從疾病中解脫，\n許多人求助於蘿蘿的祕術。"

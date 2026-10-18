@@ -2,7 +2,7 @@ format: 3
 kind: translation_shard
 records:
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；パッション作為作品類型名沿既有 Passion；tiara 與同組統一為后冠
     kind: glossary_choice
     data:
       term_id: term:name.passion_tiara
@@ -46,6 +46,7 @@ records:
       concept_evidence: []
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；缺少可核對的臺灣官方或穩定通行名稱來源；凍結數位版無精確同名對應，既有 glossary 亦不足以確認此合作角色／單位的專名
     kind: glossary_choice
     data:
       term_id: term:name.phantom_blaster_overlord
@@ -77,6 +78,7 @@ records:
           - https://gametora.com/zh-tw/umamusume/supports
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；缺少可核對的臺灣官方或穩定通行名稱來源；凍結數位版無精確同名對應，既有 glossary 亦不足以確認此合作角色／單位的專名
     kind: glossary_choice
     data:
       term_id: term:name.pongal
@@ -95,7 +97,7 @@ records:
         text: 交錯之力
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；イタズラ為惡作劇，宣言直接採繁體
     kind: glossary_choice
     data:
       term_id: term:name.prank_proclamation
@@ -129,7 +131,7 @@ records:
         source_urls:
           - https://github.com/Expugn/priconne-database
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；おしゃまな有早熟、愛裝大人之意，與小惡魔的修飾關係完整
     kind: glossary_choice
     data:
       term_id: term:name.precocious_little_devil
@@ -148,7 +150,7 @@ records:
         text: 淘氣公主‧普莉姆
       concept_evidence: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；保留公主與吻的意象；敬語前綴不另造專名
     kind: glossary_choice
     data:
       term_id: term:name.princess_kiss
@@ -195,6 +197,7 @@ records:
           - https://gametora.com/zh-tw/umamusume/supports
   - origin: machine
     low_confidence: true
+    note: 2026-10-18 對照後保留低信心；缺少可核對的臺灣官方或穩定通行名稱來源；凍結數位版無精確同名對應，既有 glossary 亦不足以確認此合作角色／單位的專名
     kind: glossary_choice
     data:
       term_id: term:name.prowling_dragon_striken
@@ -207,7 +210,7 @@ records:
         source_work: Cardfight Vanguard
         source_urls: []
   - origin: machine
-    low_confidence: true
+    note: 2026-10-18 對照日文確認；彩與星號保留；きっく的超能力諧音用超能力少女呈現
     kind: glossary_choice
     data:
       term_id: term:name.psychic_maiden
