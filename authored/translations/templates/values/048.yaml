@@ -290,7 +290,7 @@ records:
               quantity:
                 slot: leaf_1
           - kind: Literal
-            text: 個從者。在敵方的下一個回合中，其無法攻擊敵方。
+            text: 個從者。在敵方的下一個回合中，其無法攻擊。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -1358,7 +1358,7 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有『
             - kind: LeafRef
               slot: fragment
             - kind: Literal

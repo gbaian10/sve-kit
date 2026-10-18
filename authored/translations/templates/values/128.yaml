@@ -30,7 +30,7 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有『
             - kind: LeafRef
               slot: fragment
             - kind: Literal
@@ -1118,7 +1118,7 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有『
             - kind: LeafRef
               slot: fragment
             - kind: Literal
@@ -1882,7 +1882,7 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有『
             - kind: LeafRef
               slot: fragment
             - kind: Literal
@@ -3029,7 +3029,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 這張卡片無法攻擊敵方。
+            text: 這張卡片無法攻擊。
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -3680,7 +3680,7 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有『
             - kind: LeafRef
               slot: fragment
             - kind: Literal

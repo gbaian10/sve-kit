@@ -341,7 +341,7 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 卡片名稱含有『
+              text: 日文卡名含有『
             - kind: LeafRef
               slot: fragment
             - kind: Literal
@@ -995,7 +995,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 以下的從者就無法攻擊敵方。
+            text: 以下的從者就無法攻擊。
       expression_targets: {}
   - origin: machine
     kind: template_translation
