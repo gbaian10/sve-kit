@@ -7,6 +7,7 @@ import pytest
 
 from sve_carddb.contracts.four_layer import (
     ContextExpression,
+    Expression,
     FormDefinition,
     FormNode,
     LeafRef,
@@ -36,6 +37,8 @@ from .test_four_layer_n3 import n3_classifier
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
+
+    from sve_carddb.contracts.four_layer import Node
 
 
 def placeholder_form() -> FormDefinition:
@@ -78,7 +81,7 @@ def choice() -> tuple[Renderer, BoundTarget, FormNode]:
     slots = {slot.role: slot.name for slot in frame.leaf_schema.slots}
     quantity = binding.values[slots["choice_mode_count"]]
     assert isinstance(quantity, QuantitySpec)
-    assert quantity.expr is not None
+    assert isinstance(quantity.expr, Expression)
     form = placeholder_form()
     form_node = FormNode(
         kind="Form",
@@ -90,7 +93,7 @@ def choice() -> tuple[Renderer, BoundTarget, FormNode]:
     )
     dependencies = target_dependencies(frame, binding, registry=derived.registry)
     nested = {name for names in dependencies.values() for name in names}
-    nodes = (
+    nodes: tuple[Node, ...] = (
         *(
             LeafRef(kind="LeafRef", slot=slot.name)
             for slot in frame.leaf_schema.slots
@@ -172,6 +175,7 @@ def test_placeholder_renders_once_with_traceable_ranges(
             ),
         )
     forms = {key: value.definition for key, value in renderer.forms.items()}
+    assert item.selected is not None
     verify_target_shape(
         item.frame,
         item.selected.target,
@@ -239,6 +243,7 @@ def test_placeholder_requires_direct_definition_even_when_operands_are_rendered(
         ),
     )
     item = replace(item, selected=replace(item.selected, target=target))
+    assert item.selected is not None
     forms = {key: value.definition for key, value in renderer.forms.items()}
     with pytest.raises(ValueError, match="direct definition LeafRef"):
         verify_target_shape(
@@ -260,7 +265,7 @@ def test_placeholder_rejects_incompatible_binding_pairs(
     values = dict(item.binding.values)
     quantity = values[name]
     assert isinstance(quantity, QuantitySpec)
-    assert quantity.expr is not None
+    assert isinstance(quantity.expr, Expression)
     if mutation == "role":
         item = replace(
             item,
