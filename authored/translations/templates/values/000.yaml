@@ -241,54 +241,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:0c8e9d79f4373858afac84d2e65799c37b880502412559358fd736aa62673f65
+      template_id: frame:9e2b65e80598a57455f95df58018227c400283127b926e7677f1f2914b9345d0
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}{消費'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: '}：給予敵方的全部主戰者'
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 點傷害。抽
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 張卡片。
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 上有
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_6
-          - kind: Literal
-            text: 個以上的「
-          - kind: LeafRef
-            slot: name_9
-          - kind: Literal
-            text: 的士兵・衍生物・從者」時，才可以使用這個能力，並且在
-          - kind: LeafRef
-            slot: leaf_7
-          - kind: Literal
-            text: 回合中可以使用
-          - kind: LeafRef
-            slot: leaf_8
-          - kind: Literal
-            text: 次。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}{消費'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}：給予敵方的全部主戰者'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 點傷害。抽}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 張卡片。}, {kind: LeafRef, slot: leaf_4}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: 上有}, {kind: Form, form_id: quantity.existence_count.value, args: {quantity: {slot: leaf_6}}}, {kind: Literal, text: 個以上的「}, {kind: LeafRef, slot: name_9}, {kind: Literal, text: 的士兵・}, {kind: LeafRef, slot: token_72}, {kind: Literal, text: ・從者」時，才可以使用這個能力，並且在}, {kind: LeafRef, slot: leaf_7}, {kind: Literal, text: 回合中可以使用}, {kind: LeafRef, slot: leaf_8}, {kind: Literal, text: 次。}]
       expression_targets:
         name.selection.distinct.v1:
           format: 1
@@ -1331,13 +1288,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:9d93bfe0bd6d8fa3e6c999f7e12c749f7295027c89a6c572830804178c379c1c
+      template_id: frame:26006508c5dbc552d190f6d92cc8a5580b71b6a782cfeecb2f8035c87b7f8cbf
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

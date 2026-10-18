@@ -77,33 +77,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:fc630d776cd6494987bc238272381930f66f21ac5ed6950313466c6c26edb2df
+      template_id: frame:1b4c5dfc301e69216e9f3c3f4e7ddbb8154689bb234b358241f42a98352ff579
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 選擇自己戰場上的
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 個原始消費
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 以下的超克・衍生物・從者。召喚
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: name_4
-          - kind: Literal
-            text: 的超克・衍生物・從者到
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 上。
+        nodes: [{kind: Literal, text: 選擇自己戰場上的}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 個原始消費}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 以下的超克・}, {kind: LeafRef, slot: token_17}, {kind: Literal, text: ・從者。召喚}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 個}, {kind: LeafRef, slot: name_4}, {kind: Literal, text: 的超克・}, {kind: LeafRef, slot: token_42}, {kind: Literal, text: ・從者到}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 上。}]
       expression_targets:
         name.relative.objects.equal.v1:
           format: 1

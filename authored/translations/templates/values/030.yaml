@@ -77,21 +77,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:aa1c892022ebfbccc842394c22e67588e4049f5901d72b50b3eb391963c6d5e5
+      template_id: frame:d97bb8f48a83556a4966d1498ff0b4afd57ff92e9dd5106c95e1f848d313dfb2
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}衍生物・從者進入自己的戰場時，選擇敵方戰場上的'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 個從者。將其橫置。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}'}, {kind: LeafRef, slot: token_12}, {kind: Literal, text: ・從者進入自己的戰場時，選擇敵方戰場上的}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 個從者。將其橫置。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -774,37 +764,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:d7277c76c93c4d93dc930bcfd91c1d6eb5621379aeb95ba2ec4192a7ab63a092
+      template_id: frame:6ab108692b8b1eb4046d8f43f90b8b969dc223e82fedb539cd5c0fa933dfb72e
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}{消費'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: '}使EX區中的'
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張機械・衍生物消失：召喚
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 個『
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 』到
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 上。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}{消費'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}使EX區中的'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 張機械・}, {kind: LeafRef, slot: token_19}, {kind: Literal, text: 消失：召喚}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 個『}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 』到}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: 上。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

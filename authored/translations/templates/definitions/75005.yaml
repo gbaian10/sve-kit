@@ -3119,7 +3119,7 @@ records:
       content_hash: df01b76dbc2bd880d977ff36573f51a2922b8f517df0ae30cfaa20b70a0df350
   - kind: sentence_template
     data:
-      id: frame:aecc065c91671132383f0513b8df491e44d04623d8e71fd78445879003d77c11
+      id: frame:7b4daf1e5831d2eb6e434f62bfceda1d841247f0398eb32067783b2dccb92be7
       source:
         source_lang: ja
         canonical_hash: c6c167f4e5caa040937f7b16cda182de9e5de74087462278ea74ad8b3ecabcd0
@@ -3142,49 +3142,14 @@ records:
               end: 60
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: class_filter
-            domain:
-              values:
-                - vocabulary.class.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 14
-                end: 18
-          - name: leaf_1
-            type: QuantitySpec
-            role: selection_count
-            domain:
-              values:
-                - quantity.selection_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 45
-                end: 46
-          - name: leaf_2
-            type: Nat
-            role: damage_amount
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 54
-                end: 55
+        slots: [{name: leaf_0, type: Concept, role: class_filter, domain: {values: [vocabulary.class.v1], min: null, max: null}, required: true, occurrences: [{start: 14, end: 18}]}, {name: token_19, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 19, end: 23}]}, {name: leaf_1, type: QuantitySpec, role: selection_count, domain: {values: [quantity.selection_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 45, end: 46}]}, {name: leaf_2, type: Nat, role: damage_amount, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 54, end: 55}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: aecc065c91671132383f0513b8df491e44d04623d8e71fd78445879003d77c11
+      content_hash: 7b4daf1e5831d2eb6e434f62bfceda1d841247f0398eb32067783b2dccb92be7
   - kind: sentence_template
     data:
       id: frame:c390f2ba5deb8afb9b81887efa352aa37c9b753d1f008ec813025fece1bbc026

@@ -268,33 +268,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:3e29c8323c0a65ecdc9fc76181bbcc2b33be5b1ad39d1a038e87bb45e1fb6f1d
+      template_id: frame:996cb1e19eddaa78e908f9b1a977d955fd8e901b42dd371972e567f0e619553c
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 自己的回合中，自己的衍生物・從者從戰場被放置到墓場時，選擇敵方戰場上的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 個從者。使其{
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: '}-'
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: /{
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: '}-'
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 。
+        nodes: [{kind: Literal, text: 自己的回合中，自己的}, {kind: LeafRef, slot: token_11}, {kind: Literal, text: ・從者從戰場被放置到墓場時，選擇敵方戰場上的}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '個從者。使其{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}-'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: '/{'}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: '}-'}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -520,21 +498,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:bafa3de4e2c1b10f3282998617e62a1dd528dc0b9f0513e5f40bb49cc70368d3
+      template_id: frame:686d651d30be81e3e0e3d363cc80c31dcac5badf9093dcc983795d44b95afe44
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 只要這張卡片存在，自己戰場上的全部妖精・衍生物就具有【
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 】【
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 】。
+        nodes: [{kind: Literal, text: 只要這張卡片存在，自己戰場上的全部妖精・}, {kind: LeafRef, slot: token_16}, {kind: Literal, text: 就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】【}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 】。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -972,21 +940,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:f54a8e122a8a04f7a1811b470d52f7b79f72ab9ef969d695c39f4612c7d4dede
+      template_id: frame:9a9942e75ee80195821c3e2a787584dc998dd59035d3ee783e24392ba6e8465f
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 選擇自己戰場上的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 個妖精・衍生物。給予敵方戰場上的全部從者等同於「
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 」的傷害。
+        nodes: [{kind: Literal, text: 選擇自己戰場上的}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 個妖精・}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: 。給予敵方戰場上的全部從者等同於「}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 」的傷害。}]
       expression_targets:
         read.selected.attack.v1:
           format: 1

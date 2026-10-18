@@ -466,7 +466,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:bc0d464e2b4c6c55ed6ea8a1b1cbe1cdb6b30b973f5fb0399c56e37f5c8460f4
+      id: frame:20495a901696df72b8909c737baed5b59149973dfb1e4d506e656392972df99a
       source:
         source_lang: ja
         canonical_hash: 1bbd44e65ad7b1ff52f5607c80d8e00c5860cd9b475fb819dbaffc672b15c360
@@ -489,37 +489,14 @@ records:
               end: 70
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 22
-                end: 25
-          - name: leaf_1
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 27
-                end: 28
+        slots: [{name: token_8, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 8, end: 12}]}, {name: leaf_0, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 22, end: 25}]}, {name: leaf_1, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 27, end: 28}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: bc0d464e2b4c6c55ed6ea8a1b1cbe1cdb6b30b973f5fb0399c56e37f5c8460f4
+      content_hash: 20495a901696df72b8909c737baed5b59149973dfb1e4d506e656392972df99a
   - kind: sentence_template
     data:
       id: frame:fa5a26ac42b05adc7b33cf6e2d77bdfa2d98635d37526071e55bfc2feef8efff

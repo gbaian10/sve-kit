@@ -1331,7 +1331,7 @@ records:
       content_hash: 1d777de6da9bb1f56db0f7bed1266e85a3d87fd1e7ffdb4bac1bd08f843e1e48
   - kind: sentence_template
     data:
-      id: frame:48094424d220de82d4bb6c03408b1e8d719c955d0673af6acaee06443f70928b
+      id: frame:bb7cb03ee11e3329abc2cc9bc02885025929275b92793b4b661cbf44db9e0d65
       source:
         source_lang: ja
         canonical_hash: 209d0d79f027c76fbc161e07c6a8fef1d7940951eb92ab9c5d2f89e98ec74b7f
@@ -1354,26 +1354,14 @@ records:
               end: 40
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: keyword
-            domain:
-              values:
-                - concept.keyword.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 33
-                end: 35
+        slots: [{name: token_18, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 18, end: 22}]}, {name: leaf_0, type: Concept, role: keyword, domain: {values: [concept.keyword.v1], min: null, max: null}, required: true, occurrences: [{start: 33, end: 35}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 48094424d220de82d4bb6c03408b1e8d719c955d0673af6acaee06443f70928b
+      content_hash: bb7cb03ee11e3329abc2cc9bc02885025929275b92793b4b661cbf44db9e0d65
   - kind: sentence_template
     data:
       id: frame:283de2dfd5791374412e0a804739464b9d24bef89fb796c8f3eeed5849e5695b
@@ -2642,7 +2630,7 @@ records:
       content_hash: 421adcbbf5f55ce16dd0869596ba2f9a25cf3ebc1756336d89b3829499187622
   - kind: sentence_template
     data:
-      id: frame:a325bcd0dd601342ff17fde6461d38eef1a42eb6eb39a61dbaf1664435302c1c
+      id: frame:6d3d2058c8a46a8a505bebe0ebf100bc7852c1118fee94ef7a3003c4f7e03932
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -2665,14 +2653,14 @@ records:
               end: 102
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: a325bcd0dd601342ff17fde6461d38eef1a42eb6eb39a61dbaf1664435302c1c
+      content_hash: 6d3d2058c8a46a8a505bebe0ebf100bc7852c1118fee94ef7a3003c4f7e03932
   - kind: sentence_template
     data:
       id: frame:d78782fdb162bd28e0dc82ded1b51e16aac3de341d3c760d061f2c5fcd171ad3

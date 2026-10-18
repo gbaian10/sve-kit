@@ -1729,7 +1729,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:023a52bf56697d9aeaa13fcb062413b5b426fa98d80b80d54825c086aa46c9ae
+      id: frame:1de183f71b8f330fc6dcd5b3d14f7bcae3b4d469e41bc9eb363027448bc5d66f
       source:
         source_lang: ja
         canonical_hash: 17e88d334c234c41864944e16ab5b80f32884df849e2edb2ee1d0c8a52a15c36
@@ -1752,97 +1752,14 @@ records:
               end: 90
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 3
-          - name: leaf_1
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 8
-                end: 11
-          - name: leaf_2
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 27
-                end: 28
-          - name: leaf_3
-            type: Player
-            role: source_owner
-            domain:
-              values:
-                - player.relative.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 36
-                end: 44
-          - name: leaf_4
-            type: ZoneSet
-            role: source_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 45
-                end: 53
-          - name: leaf_5
-            type: CardKind
-            role: counted_kind
-            domain:
-              values:
-                - card_kind.follower.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 54
-                end: 62
-          - name: leaf_6
-            type: QuantitySpec
-            role: selection_count
-            domain:
-              values:
-                - quantity.selection_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 62
-                end: 63
+        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 3}]}, {name: leaf_1, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 8, end: 11}]}, {name: token_23, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 23, end: 27}]}, {name: leaf_2, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 27, end: 28}]}, {name: leaf_3, type: Player, role: source_owner, domain: {values: [player.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 36, end: 44}]}, {name: leaf_4, type: ZoneSet, role: source_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 45, end: 53}]}, {name: leaf_5, type: CardKind, role: counted_kind, domain: {values: [card_kind.follower.v1], min: null, max: null}, required: true, occurrences: [{start: 54, end: 62}]}, {name: leaf_6, type: QuantitySpec, role: selection_count, domain: {values: [quantity.selection_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 62, end: 63}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 023a52bf56697d9aeaa13fcb062413b5b426fa98d80b80d54825c086aa46c9ae
+      content_hash: 1de183f71b8f330fc6dcd5b3d14f7bcae3b4d469e41bc9eb363027448bc5d66f
   - kind: sentence_template
     data:
       id: frame:d24e8dd98f7336bd42ddca14631169bba230f95388eef0f637a12c78ae539431

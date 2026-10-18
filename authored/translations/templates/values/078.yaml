@@ -691,28 +691,20 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:7d0bdea05fb3ad1a97b0c0c412489666cd4328d4893ffa02ec679d2405337ecc
+      template_id: frame:871370eed5fb79dafe70163413e11a7e7eb13cd7f7566dd84ee5b32ae5eac64a
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
       expression_targets: {}
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:ea26d75f49c63c366c92e907e4b25996322d11a219fb065c274fefd311aa4e07
+      template_id: frame:5522f04634803948c0338c39a6578181e8eb6a7f1481d076ee5533e9be23b75e
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 只要這張卡片在戰場上，自己戰場上的全部妖精・衍生物就具有【
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 】。
+        nodes: [{kind: Literal, text: 只要這張卡片在戰場上，自己戰場上的全部妖精・}, {kind: LeafRef, slot: token_18}, {kind: Literal, text: 就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

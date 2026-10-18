@@ -52,13 +52,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:bb165462b46ce9685b68717a8f033a6a84b09157f7ef968876b782f4b72de086
+      template_id: frame:4a14699d0447094d222217e877b3bd7713510841d8dc6c98b4d2a5c8297d9caf
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

@@ -2302,7 +2302,7 @@ records:
       content_hash: 78a8eabb4fb9036a368c09148f57791c04443f66778634f9f01406258714c9b7
   - kind: sentence_template
     data:
-      id: frame:1a3e4367eb70be419070665a0e332d9178a9a9aee69cfa7b7457105d47c66e00
+      id: frame:ffd5c19fc5a08a742b40766b97925155d2434504039da8c28135568b1c822e47
       source:
         source_lang: ja
         canonical_hash: cb1ba992fdb6932bad7264ba6a2f587bcc868dbc6147528a9a9037e33ed6d845
@@ -2325,108 +2325,14 @@ records:
               end: 64
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 8
-          - name: leaf_1
-            type: Player
-            role: source_owner
-            domain:
-              values:
-                - player.relative.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 9
-                end: 17
-          - name: leaf_2
-            type: ZoneSet
-            role: source_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 18
-                end: 26
-          - name: leaf_3
-            type: CardKind
-            role: counted_kind
-            domain:
-              values:
-                - card_kind.follower.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 27
-                end: 35
-          - name: leaf_4
-            type: QuantitySpec
-            role: selection_count
-            domain:
-              values:
-                - quantity.selection_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 35
-                end: 36
-          - name: leaf_5
-            type: Nat
-            role: damage_amount
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 44
-                end: 45
-          - name: leaf_6
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 72
-                end: 73
-          - name: leaf_7
-            type: ZoneSet
-            role: destination_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 75
-                end: 83
+        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 8}]}, {name: leaf_1, type: Player, role: source_owner, domain: {values: [player.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 9, end: 17}]}, {name: leaf_2, type: ZoneSet, role: source_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 18, end: 26}]}, {name: leaf_3, type: CardKind, role: counted_kind, domain: {values: [card_kind.follower.v1], min: null, max: null}, required: true, occurrences: [{start: 27, end: 35}]}, {name: leaf_4, type: QuantitySpec, role: selection_count, domain: {values: [quantity.selection_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 35, end: 36}]}, {name: leaf_5, type: Nat, role: damage_amount, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 44, end: 45}]}, {name: token_62, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 62, end: 66}]}, {name: leaf_6, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 72, end: 73}]}, {name: leaf_7, type: ZoneSet, role: destination_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 75, end: 83}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1a3e4367eb70be419070665a0e332d9178a9a9aee69cfa7b7457105d47c66e00
+      content_hash: ffd5c19fc5a08a742b40766b97925155d2434504039da8c28135568b1c822e47
   - kind: sentence_template
     data:
       id: frame:2bc862ef554dd756ded429e23961c3a91c387f480e5d55e546788db356115535

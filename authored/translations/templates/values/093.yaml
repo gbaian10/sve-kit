@@ -1191,29 +1191,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:5c73ba1cda01e47edc9a9b8df53c1a4102377a9df7b0a70bcf29442fe4126990
+      template_id: frame:979edd9f9047565d923e7283160be9ddfa92780d904eaf1144eb210a6d688473
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 妖精・衍生物進入自己的戰場時，使其{
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: /{
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。
+        nodes: [{kind: Literal, text: 妖精・}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: '進入自己的戰場時，使其{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '/{'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

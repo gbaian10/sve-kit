@@ -243,7 +243,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:bd68fe3d8ba5a20f69d1afaeea10d50ed684020bdeec1c8e9fe63539cec7afb7
+      id: frame:2563b2a19de08ef163910cddd97f651eb9683d2862f096e16f4c0e8d98754b9f
       source:
         source_lang: ja
         canonical_hash: 456e7fbc3eefca8378521b72b4b065dcf55d02334454384882a35290eaf365a5
@@ -266,60 +266,14 @@ records:
               end: 75
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 38
-                end: 41
-          - name: leaf_1
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 43
-                end: 44
-          - name: leaf_2
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 46
-                end: 48
-          - name: leaf_3
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 50
-                end: 51
+        slots: [{name: token_23, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 23, end: 27}]}, {name: leaf_0, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 38, end: 41}]}, {name: leaf_1, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 43, end: 44}]}, {name: leaf_2, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 46, end: 48}]}, {name: leaf_3, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 50, end: 51}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: bd68fe3d8ba5a20f69d1afaeea10d50ed684020bdeec1c8e9fe63539cec7afb7
+      content_hash: 2563b2a19de08ef163910cddd97f651eb9683d2862f096e16f4c0e8d98754b9f
   - kind: sentence_template
     data:
       id: frame:6cf4379aa8f21ff64440e3ca4f4e97c2a1b17ea5be8ad2250b15a24d5c70647f

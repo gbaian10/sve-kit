@@ -735,7 +735,7 @@ records:
       content_hash: 4152d040fc16b6afd48e541d4957d98e3c6b36383bd5134b7e2cc8bcbd1b27d6
   - kind: sentence_template
     data:
-      id: frame:0c8e9d79f4373858afac84d2e65799c37b880502412559358fd736aa62673f65
+      id: frame:9e2b65e80598a57455f95df58018227c400283127b926e7677f1f2914b9345d0
       source:
         source_lang: ja
         canonical_hash: dd59e09d7cd8966b63a861dbae287e5435be8354f19dd10124db85458053fbdc
@@ -758,129 +758,7 @@ records:
               end: 154
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 3
-          - name: leaf_1
-            type: Nat
-            role: cost_value
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 8
-                end: 9
-          - name: leaf_2
-            type: Nat
-            role: damage_amount
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 22
-                end: 23
-          - name: leaf_3
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 28
-                end: 29
-          - name: leaf_4
-            type: Player
-            role: counted_owner
-            domain:
-              values:
-                - player.relative.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 38
-                end: 46
-          - name: leaf_5
-            type: ZoneSet
-            role: counted_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 47
-                end: 55
-          - name: name_9
-            type: PredicateExpr
-            role: selection_name_constraint
-            domain:
-              values:
-                - predicate.selection.distinct_name.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 61
-                end: 69
-            expression:
-              kind: predicate
-              expression_id: name.selection.distinct.v1
-              leaves: []
-              imports:
-                objects: names_port_6575d7d055a979f4
-              scope: read_ability_1
-          - name: leaf_6
-            type: QuantitySpec
-            role: existence_count
-            domain:
-              values:
-                - quantity.existence_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 84
-                end: 85
-          - name: leaf_7
-            type: Nat
-            role: duration_count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 91
-                end: 92
-          - name: leaf_8
-            type: Nat
-            role: repeat_count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 96
-                end: 97
+        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 3}]}, {name: leaf_1, type: Nat, role: cost_value, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 8, end: 9}]}, {name: leaf_2, type: Nat, role: damage_amount, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 22, end: 23}]}, {name: leaf_3, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 28, end: 29}]}, {name: leaf_4, type: Player, role: counted_owner, domain: {values: [player.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 38, end: 46}]}, {name: leaf_5, type: ZoneSet, role: counted_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 47, end: 55}]}, {name: name_9, type: PredicateExpr, role: selection_name_constraint, domain: {values: [predicate.selection.distinct_name.v1], min: null, max: null}, required: true, occurrences: [{start: 61, end: 69}], expression: {kind: predicate, expression_id: name.selection.distinct.v1, leaves: [], imports: {objects: names_port_6575d7d055a979f4}, scope: read_ability_1}}, {name: token_72, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 72, end: 76}]}, {name: leaf_6, type: QuantitySpec, role: existence_count, domain: {values: [quantity.existence_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 84, end: 85}]}, {name: leaf_7, type: Nat, role: duration_count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 91, end: 92}]}, {name: leaf_8, type: Nat, role: repeat_count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 96, end: 97}]}]
       projection:
         projection_kind: pending
         discriminator:
@@ -918,7 +796,7 @@ records:
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: 0c8e9d79f4373858afac84d2e65799c37b880502412559358fd736aa62673f65
+      content_hash: 9e2b65e80598a57455f95df58018227c400283127b926e7677f1f2914b9345d0
   - kind: sentence_template
     data:
       id: frame:b9aa46399cb73c547e230f8b9fa181a34a90aa6860eec062a0aeecd344ca32ad
@@ -4115,7 +3993,7 @@ records:
       content_hash: 6ac71e564cad23b2b0bf55265454b987879baa1f4f3fc214a726e8a044652609
   - kind: sentence_template
     data:
-      id: frame:9d93bfe0bd6d8fa3e6c999f7e12c749f7295027c89a6c572830804178c379c1c
+      id: frame:26006508c5dbc552d190f6d92cc8a5580b71b6a782cfeecb2f8035c87b7f8cbf
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -4138,14 +4016,14 @@ records:
               end: 91
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 9d93bfe0bd6d8fa3e6c999f7e12c749f7295027c89a6c572830804178c379c1c
+      content_hash: 26006508c5dbc552d190f6d92cc8a5580b71b6a782cfeecb2f8035c87b7f8cbf
   - kind: sentence_template
     data:
       id: frame:bc83995bc77f0b2128cd278874f1d2d22c658770de0121e2cddc7025fd6e4c1b

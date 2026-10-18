@@ -3603,7 +3603,7 @@ records:
       content_hash: 49dcd7711bb4ffee95fe9453c1ec0ce85d4302ba5970fbf88db3d39d85d81814
   - kind: sentence_template
     data:
-      id: frame:04af2c32872e5bbfac4c0d1fca2840d7c746c0683f466512994d2b0ce7db1c7a
+      id: frame:fd28f8f14da77469293012e41ca71739569a92ad7c59126e3c45aa9771e0745a
       source:
         source_lang: ja
         canonical_hash: e90a99a4e30f9d0fd027a0fb5d79e08440252bee0b41fbdd187afd7bdea9b449
@@ -3626,48 +3626,14 @@ records:
               end: 101
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 3
-          - name: leaf_1
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 20
-                end: 21
-          - name: leaf_2
-            type: Nat
-            role: counter_amount
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 33
-                end: 34
+        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 3}]}, {name: token_8, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 8, end: 12}]}, {name: leaf_1, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 20, end: 21}]}, {name: leaf_2, type: Nat, role: counter_amount, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 33, end: 34}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 04af2c32872e5bbfac4c0d1fca2840d7c746c0683f466512994d2b0ce7db1c7a
+      content_hash: fd28f8f14da77469293012e41ca71739569a92ad7c59126e3c45aa9771e0745a
   - kind: sentence_template
     data:
       id: frame:3fa2ebda80363592e8ba6c5f41a685100a88279422f6f4ac6b5683c8b514a7f3

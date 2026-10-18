@@ -4182,7 +4182,7 @@ records:
       content_hash: 4f672583d081a4ca179f952e1caa13745c940bce814fc2d816569217f3ea4f62
   - kind: sentence_template
     data:
-      id: frame:85b9c0beebef67cb2f70baff2f09addb14e2d2177c119ba8c6dda5b04a6ea03d
+      id: frame:2b5653bde12559403b57492698c64ad574e9906bc5bc192231bf0c10462116b8
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -4205,11 +4205,11 @@ records:
               end: 58
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 85b9c0beebef67cb2f70baff2f09addb14e2d2177c119ba8c6dda5b04a6ea03d
+      content_hash: 2b5653bde12559403b57492698c64ad574e9906bc5bc192231bf0c10462116b8

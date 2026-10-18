@@ -434,37 +434,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:230ce9fab78021841430885762cbfee3f91bd01f87fdafce9b58c87fd0e7b0d4
+      template_id: frame:bad10720a742e77aae7e9b635c08c6f6b81a572271573f5001cd8c15c6775aa9
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}將'
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張『
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 』放置到
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。自己戰場上的全部妖精・衍生物{
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}將'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 張『}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 』放置到}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 。自己戰場上的全部妖精・}, {kind: LeafRef, slot: token_35}, {kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: 。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

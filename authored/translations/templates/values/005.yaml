@@ -691,13 +691,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:f9a1c53d7907f01ed86c719970b28c954ff123433665f0b6b60e8aa55b12ed34
+      template_id: frame:5c6d6b23eea89e4fe38492955f4dd0df6e913548d8deb1cc5bb699fff433cd07
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 只要這張卡片在戰場上，自己戰場上的全部衍生物・從者就不會受到能力傷害。
+        nodes: [{kind: Literal, text: 只要這張卡片在戰場上，自己戰場上的全部}, {kind: LeafRef, slot: token_15}, {kind: Literal, text: ・從者就不會受到能力傷害。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

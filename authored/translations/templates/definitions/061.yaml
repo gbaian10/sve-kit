@@ -1274,7 +1274,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:511f0e7a169cc588a221939fa2445b52a61af1eb3493ca1cf0820fd13de4a44e
+      id: frame:6c863d48821591fad326a0a088f1525bb8ec03df5e1f90b62be94d83e6a39944
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -1297,14 +1297,14 @@ records:
               end: 118
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 511f0e7a169cc588a221939fa2445b52a61af1eb3493ca1cf0820fd13de4a44e
+      content_hash: 6c863d48821591fad326a0a088f1525bb8ec03df5e1f90b62be94d83e6a39944
   - kind: sentence_template
     data:
       id: frame:5a4f6bf0716122898a00b7455ba1a72babc69fb20e955e5fbf60c5780c0af49d
@@ -1626,7 +1626,7 @@ records:
       content_hash: 6fc47dee6a7d476afdc7bdbd2cbd06f6e6d1851ccb1ff5d28b2bebf2c34edd76
   - kind: sentence_template
     data:
-      id: frame:6049ba6ce897bc00b992a50ace8c24d4f4cd4e33be09970ebe6cd7985718da8b
+      id: frame:78c52e9efa95b41c4dc7b36212655bf100ab43f1655de3ac88db2a78222800cd
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -1649,14 +1649,14 @@ records:
               end: 60
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 6049ba6ce897bc00b992a50ace8c24d4f4cd4e33be09970ebe6cd7985718da8b
+      content_hash: 78c52e9efa95b41c4dc7b36212655bf100ab43f1655de3ac88db2a78222800cd
   - kind: sentence_template
     data:
       id: frame:ef4b52a1182a1a86e19e09423edf7d87357c341c7bee9cc0f71a86b9ba19a4c5

@@ -242,7 +242,7 @@ records:
       content_hash: f1f9770d2a16ac202ef5dafca74b2d4c22883edf73c4bea06ed68a3aa4c19743
   - kind: sentence_template
     data:
-      id: frame:bae606f2b3d4143eee1d39c32a96bd7ce1c5799c4c6c13c7c45b9b0941c396ee
+      id: frame:30d3dbe874a2d6ce8064ec802666261676492f01a4d66acd94db5d764f51f71a
       source:
         source_lang: ja
         canonical_hash: 1adffb12daa5666f44c2be8dda8f57996c6c70887e6622384f68acdc6fac1186
@@ -265,37 +265,14 @@ records:
               end: 37
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 28
-                end: 31
-          - name: leaf_1
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 33
-                end: 34
+        slots: [{name: token_8, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 8, end: 12}]}, {name: leaf_0, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 28, end: 31}]}, {name: leaf_1, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 33, end: 34}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: bae606f2b3d4143eee1d39c32a96bd7ce1c5799c4c6c13c7c45b9b0941c396ee
+      content_hash: 30d3dbe874a2d6ce8064ec802666261676492f01a4d66acd94db5d764f51f71a
   - kind: sentence_template
     data:
       id: frame:7de6beda128081d2fedeed694dc1ed4516c34d16c97ff0d896ac9da1aca64e88

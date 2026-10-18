@@ -116,17 +116,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:c6f94ca0d025cea210125a33bdc47f86389c48eff96ad02272f247bd3609a1f6
+      template_id: frame:0ab588159dd1f3759531f0f5efb621d2f65aad3aab5993a8afbdf398a7cd4d1c
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 只要這張卡片存在，自己的全部妖精・衍生物就具有【
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 】。
+        nodes: [{kind: Literal, text: 只要這張卡片存在，自己的全部妖精・}, {kind: LeafRef, slot: token_14}, {kind: Literal, text: 就具有【}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: 】。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

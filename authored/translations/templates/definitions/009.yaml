@@ -3734,7 +3734,7 @@ records:
       content_hash: 8d245975212a5a68438b84801f91d808c93c0fd52ea922fb89d9d8431ba07e61
   - kind: sentence_template
     data:
-      id: frame:f69fdd5bd2be07e1c9f7c61732126d0cc0eb7cc7715ec7c2873ece71e27c0d17
+      id: frame:0af2edf34d14db8f10844c74e0db6617ea09c5da2d542db79c62a924ddcdfc18
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -3757,14 +3757,14 @@ records:
               end: 72
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: f69fdd5bd2be07e1c9f7c61732126d0cc0eb7cc7715ec7c2873ece71e27c0d17
+      content_hash: 0af2edf34d14db8f10844c74e0db6617ea09c5da2d542db79c62a924ddcdfc18
   - origin: machine
     kind: sentence_template
     data:

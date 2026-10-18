@@ -452,25 +452,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:ff1d74a608865b08e80cf62dc31f9ad07998ae8c0f2abf28262f5acb9c7950d2
+      template_id: frame:b9648d38ed8d46254871e48a5b571dca63e7b9c9a90c4ed1a5a3d2a52f2833bd
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}【融合】'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張非衍生物的從者：在這張卡片上放置
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個融合指示物。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}【融合】'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 張非}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: 的從者：在這張卡片上放置}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 個融合指示物。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -804,33 +790,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:5d49c1143c39ee91258c94b26ccbc4b67ed86438f9ae8215a83dc2eed5a27b06
+      template_id: frame:92caad3a05c7ec91f1af086d503ebf52eb6e3731478ca343b5e5c440ea3c2df9
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}自己的全部妖精・衍生物{'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: /{
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}自己的全部妖精・'}, {kind: LeafRef, slot: token_15}, {kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: '/{'}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

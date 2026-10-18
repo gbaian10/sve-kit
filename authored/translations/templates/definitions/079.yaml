@@ -217,7 +217,7 @@ records:
       content_hash: 91eba369796bd4c3de68c3ee0bbc5128e71d774ae7177b1643fcb77245b321c7
   - kind: sentence_template
     data:
-      id: frame:fc630d776cd6494987bc238272381930f66f21ac5ed6950313466c6c26edb2df
+      id: frame:1b4c5dfc301e69216e9f3c3f4e7ddbb8154689bb234b358241f42a98352ff579
       source:
         source_lang: ja
         canonical_hash: cc42cc1ff038d660da103cf421376c14d069e536cec3c4ef6aca204c7886f082
@@ -240,72 +240,7 @@ records:
               end: 60
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Nat
-            role: threshold
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 5
-                end: 6
-          - name: leaf_1
-            type: QuantitySpec
-            role: selection_count
-            domain:
-              values:
-                - quantity.selection_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 27
-                end: 28
-          - name: name_4
-            type: PredicateExpr
-            role: name_relation
-            domain:
-              values:
-                - predicate.name.relative.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 33
-                end: 38
-            expression:
-              kind: predicate
-              expression_id: name.relative.objects.equal.v1
-              leaves: []
-              imports:
-                objects: names_port_155d68769807b4d8
-              scope: read_ability_0
-          - name: leaf_2
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 52
-                end: 53
-          - name: leaf_3
-            type: ZoneSet
-            role: destination_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 55
-                end: 63
+        slots: [{name: leaf_0, type: Nat, role: threshold, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 5, end: 6}]}, {name: token_17, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 17, end: 21}]}, {name: leaf_1, type: QuantitySpec, role: selection_count, domain: {values: [quantity.selection_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 27, end: 28}]}, {name: name_4, type: PredicateExpr, role: name_relation, domain: {values: [predicate.name.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 33, end: 38}], expression: {kind: predicate, expression_id: name.relative.objects.equal.v1, leaves: [], imports: {objects: names_port_155d68769807b4d8}, scope: read_ability_0}}, {name: token_42, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 42, end: 46}]}, {name: leaf_2, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 52, end: 53}]}, {name: leaf_3, type: ZoneSet, role: destination_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 55, end: 63}]}]
       projection:
         projection_kind: pending
         discriminator:
@@ -340,7 +275,7 @@ records:
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: fc630d776cd6494987bc238272381930f66f21ac5ed6950313466c6c26edb2df
+      content_hash: 1b4c5dfc301e69216e9f3c3f4e7ddbb8154689bb234b358241f42a98352ff579
   - kind: sentence_template
     data:
       id: frame:06c61d18b29a3d24444c8142c539800acf8411ae4c6dbd211f50bc71d143fc99

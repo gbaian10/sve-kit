@@ -3029,7 +3029,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:e172f724c0829de8c87957227d3a4f8425d68d5b436951f058dc5c7cfaa5f40b
+      id: frame:cb4d0651c8205b3302081cab2bb76b6715940999b8f5f5876d5d32969af92b89
       source:
         source_lang: ja
         canonical_hash: f4f25f665dc1c30818b1b664faf6d3cc389a8e0ce63f6eab1b238723ebc31ef7
@@ -3052,36 +3052,14 @@ records:
               end: 56
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Ordinal
-            role: card_index
-            domain:
-              values: []
-              min: 1
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 33
-                end: 34
-          - name: leaf_1
-            type: Nat
-            role: cost_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 52
-                end: 53
+        slots: [{name: token_14, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 14, end: 18}]}, {name: leaf_0, type: Ordinal, role: card_index, domain: {values: [], min: 1, max: 9007199254740991}, required: true, occurrences: [{start: 33, end: 34}]}, {name: token_40, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 40, end: 44}]}, {name: leaf_1, type: Nat, role: cost_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 52, end: 53}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: e172f724c0829de8c87957227d3a4f8425d68d5b436951f058dc5c7cfaa5f40b
+      content_hash: cb4d0651c8205b3302081cab2bb76b6715940999b8f5f5876d5d32969af92b89
   - origin: machine
     kind: sentence_template
     data:
@@ -5367,7 +5345,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:1923e08b5b99296afc2c589b205113c76a46ef0b3bce464cac729a7c9861e574
+      id: frame:0018183031fa718231482db1981c1a314aa111a171087ce8d37de821f9df2c17
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -5390,14 +5368,14 @@ records:
               end: 107
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 1923e08b5b99296afc2c589b205113c76a46ef0b3bce464cac729a7c9861e574
+      content_hash: 0018183031fa718231482db1981c1a314aa111a171087ce8d37de821f9df2c17
   - origin: machine
     kind: sentence_template
     data:
@@ -6774,7 +6752,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:e44a61a7ff37c2df0fb7c2918a074817e4a50594e0724e6949a7df6cc61d8b9f
+      id: frame:3a8219496877cbbaf1e112ea889d07b80130c0b3eefaebab06bbb0750edaf0d7
       source:
         source_lang: ja
         canonical_hash: 232a83686e2ac65d68ffbfd7f44128ec16499ba7eaffa62736406fcba6b8962f
@@ -6797,26 +6775,14 @@ records:
               end: 85
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: keyword
-            domain:
-              values:
-                - concept.keyword.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 25
-                end: 27
+        slots: [{name: token_16, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 16, end: 20}]}, {name: leaf_0, type: Concept, role: keyword, domain: {values: [concept.keyword.v1], min: null, max: null}, required: true, occurrences: [{start: 25, end: 27}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: e44a61a7ff37c2df0fb7c2918a074817e4a50594e0724e6949a7df6cc61d8b9f
+      content_hash: 3a8219496877cbbaf1e112ea889d07b80130c0b3eefaebab06bbb0750edaf0d7
   - origin: machine
     kind: sentence_template
     data:
@@ -7470,7 +7436,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:3bf07f363ed4c524102dea1ecc06d3663fbecac066cb8c3f0b8165155ba5ce15
+      id: frame:cc042d4d14d007cc2a32343340b2153479242d995195221ad9050aa0311b8d5d
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -7493,14 +7459,14 @@ records:
               end: 126
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 3bf07f363ed4c524102dea1ecc06d3663fbecac066cb8c3f0b8165155ba5ce15
+      content_hash: cc042d4d14d007cc2a32343340b2153479242d995195221ad9050aa0311b8d5d
   - origin: machine
     kind: sentence_template
     data:
@@ -8006,7 +7972,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:e374d6257cf98f0831e079cdb071d828e7b027df362813bb2b7080f122630d16
+      id: frame:e168deb21267d81d779f66b5bdd85dac707733cf621f66087d8f81fb9204d730
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -8029,14 +7995,14 @@ records:
               end: 81
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: e374d6257cf98f0831e079cdb071d828e7b027df362813bb2b7080f122630d16
+      content_hash: e168deb21267d81d779f66b5bdd85dac707733cf621f66087d8f81fb9204d730
   - origin: machine
     kind: sentence_template
     data:
@@ -9320,7 +9286,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:2c3f4550ef25a798744d3eb7934ff68756085fec2c65d9b4365758ede8149791
+      id: frame:105836e932c52f1d9dd353416e37e34eac3edf107c16bcd0b9eab904d7f7e55f
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -9343,14 +9309,14 @@ records:
               end: 133
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 2c3f4550ef25a798744d3eb7934ff68756085fec2c65d9b4365758ede8149791
+      content_hash: 105836e932c52f1d9dd353416e37e34eac3edf107c16bcd0b9eab904d7f7e55f
   - origin: machine
     kind: sentence_template
     data:
@@ -10216,7 +10182,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:ac1c2c934b8d2407fdad40c791f6d93e7722e1e8d4455d46030e2f5180df0ac2
+      id: frame:62aae4ce7b8e0d835f42678eea2c1e8fe5115bd76fdfa3362bdebaedfe943c71
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -10239,14 +10205,14 @@ records:
               end: 95
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: ac1c2c934b8d2407fdad40c791f6d93e7722e1e8d4455d46030e2f5180df0ac2
+      content_hash: 62aae4ce7b8e0d835f42678eea2c1e8fe5115bd76fdfa3362bdebaedfe943c71
   - origin: machine
     kind: sentence_template
     data:
@@ -12261,7 +12227,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:a357638ca1e5b9463da69180853c14517857a80a65dca00ea5f5275d5e94e9c8
+      id: frame:e51603918fee552f07066f3b940942f77273c04c61df6ea6f8bea0210f498d74
       source:
         source_lang: ja
         canonical_hash: 539217462a3bc695b361ff43746d31dd29e9aad4ec177d3201418bcf7e4959e1
@@ -12284,166 +12250,7 @@ records:
               end: 156
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 3
-          - name: leaf_1
-            type: Nat
-            role: cost_value
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 8
-                end: 9
-          - name: leaf_2
-            type: Player
-            role: source_owner
-            domain:
-              values:
-                - player.relative.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 11
-                end: 19
-          - name: leaf_3
-            type: ZoneSet
-            role: source_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 20
-                end: 28
-          - name: leaf_4
-            type: CardKind
-            role: counted_kind
-            domain:
-              values:
-                - card_kind.follower.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 29
-                end: 37
-          - name: leaf_5
-            type: QuantitySpec
-            role: selection_count
-            domain:
-              values:
-                - quantity.selection_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 37
-                end: 38
-          - name: leaf_6
-            type: Nat
-            role: damage_amount
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 54
-                end: 55
-          - name: leaf_7
-            type: Player
-            role: counted_owner
-            domain:
-              values:
-                - player.relative.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 65
-                end: 73
-          - name: leaf_8
-            type: ZoneSet
-            role: counted_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 74
-                end: 82
-          - name: name_12
-            type: PredicateExpr
-            role: selection_name_constraint
-            domain:
-              values:
-                - predicate.selection.distinct_name.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 88
-                end: 96
-            expression:
-              kind: predicate
-              expression_id: name.selection.distinct.v1
-              leaves: []
-              imports:
-                objects: names_port_6bd2059f834014ee
-              scope: read_ability_1
-          - name: leaf_9
-            type: QuantitySpec
-            role: existence_count
-            domain:
-              values:
-                - quantity.existence_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 111
-                end: 112
-          - name: leaf_10
-            type: Nat
-            role: duration_count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 118
-                end: 119
-          - name: leaf_11
-            type: Nat
-            role: repeat_count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 123
-                end: 124
+        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 3}]}, {name: leaf_1, type: Nat, role: cost_value, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 8, end: 9}]}, {name: leaf_2, type: Player, role: source_owner, domain: {values: [player.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 11, end: 19}]}, {name: leaf_3, type: ZoneSet, role: source_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 20, end: 28}]}, {name: leaf_4, type: CardKind, role: counted_kind, domain: {values: [card_kind.follower.v1], min: null, max: null}, required: true, occurrences: [{start: 29, end: 37}]}, {name: leaf_5, type: QuantitySpec, role: selection_count, domain: {values: [quantity.selection_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 37, end: 38}]}, {name: leaf_6, type: Nat, role: damage_amount, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 54, end: 55}]}, {name: leaf_7, type: Player, role: counted_owner, domain: {values: [player.relative.v1], min: null, max: null}, required: true, occurrences: [{start: 65, end: 73}]}, {name: leaf_8, type: ZoneSet, role: counted_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 74, end: 82}]}, {name: name_12, type: PredicateExpr, role: selection_name_constraint, domain: {values: [predicate.selection.distinct_name.v1], min: null, max: null}, required: true, occurrences: [{start: 88, end: 96}], expression: {kind: predicate, expression_id: name.selection.distinct.v1, leaves: [], imports: {objects: names_port_6bd2059f834014ee}, scope: read_ability_1}}, {name: token_99, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 99, end: 103}]}, {name: leaf_9, type: QuantitySpec, role: existence_count, domain: {values: [quantity.existence_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 111, end: 112}]}, {name: leaf_10, type: Nat, role: duration_count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 118, end: 119}]}, {name: leaf_11, type: Nat, role: repeat_count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 123, end: 124}]}]
       projection:
         projection_kind: pending
         discriminator:
@@ -12481,7 +12288,7 @@ records:
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: a357638ca1e5b9463da69180853c14517857a80a65dca00ea5f5275d5e94e9c8
+      content_hash: e51603918fee552f07066f3b940942f77273c04c61df6ea6f8bea0210f498d74
   - origin: machine
     kind: sentence_template
     data:

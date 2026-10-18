@@ -685,33 +685,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:3313ac50c985c7e788d3cc518d5138bc654d24bb6a2472dbbff0f77a134849cb
+      template_id: frame:49c7c745fff875e5cdbffc863fc75468082dba126f98fd7c60fe499c332221af
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 自己的回合中，自己的衍生物・從者從戰場被放置到墓場時，選擇敵方戰場上的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 個從者。使其{
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: '}-'
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: /{
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: '}-'
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 。
+        nodes: [{kind: Literal, text: 自己的回合中，自己的}, {kind: LeafRef, slot: token_11}, {kind: Literal, text: ・從者從戰場被放置到墓場時，選擇敵方戰場上的}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '個從者。使其{'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}-'}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: '/{'}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: '}-'}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

@@ -3,7 +3,7 @@ kind: translation_shard
 records:
   - kind: sentence_template
     data:
-      id: frame:8b70a644046d1e9f16a75a9fe265a1fbead86f871850ccb918bd85039b2788d4
+      id: frame:242a901681724864d778a9d7b61786b02578dfe08e38b6a64404fcbe93736394
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -26,14 +26,14 @@ records:
               end: 92
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 8b70a644046d1e9f16a75a9fe265a1fbead86f871850ccb918bd85039b2788d4
+      content_hash: 242a901681724864d778a9d7b61786b02578dfe08e38b6a64404fcbe93736394
   - kind: sentence_template
     data:
       id: frame:b733a1bd05ee9de4f29bf13779d9ec31db3382f3a201290dc0e745463627a459

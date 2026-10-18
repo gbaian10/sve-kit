@@ -1369,7 +1369,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:230ce9fab78021841430885762cbfee3f91bd01f87fdafce9b58c87fd0e7b0d4
+      id: frame:bad10720a742e77aae7e9b635c08c6f6b81a572271573f5001cd8c15c6775aa9
       source:
         source_lang: ja
         canonical_hash: 5742a334527386bd37fbcd9179f721a51054fa88ec2d9abcc0a49984bb5ebb26
@@ -1392,84 +1392,14 @@ records:
               end: 131
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 8
-          - name: leaf_1
-            type: CardName
-            role: name_reference
-            domain:
-              values:
-                - card_name.any.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 10
-                end: 11
-          - name: leaf_2
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 12
-                end: 13
-          - name: leaf_3
-            type: ZoneSet
-            role: destination_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 15
-                end: 23
-          - name: leaf_4
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 44
-                end: 47
-          - name: leaf_5
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 49
-                end: 50
+        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 8}]}, {name: leaf_1, type: CardName, role: name_reference, domain: {values: [card_name.any.v1], min: null, max: null}, required: true, occurrences: [{start: 10, end: 11}]}, {name: leaf_2, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 12, end: 13}]}, {name: leaf_3, type: ZoneSet, role: destination_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 15, end: 23}]}, {name: token_35, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 35, end: 39}]}, {name: leaf_4, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 44, end: 47}]}, {name: leaf_5, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 49, end: 50}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 230ce9fab78021841430885762cbfee3f91bd01f87fdafce9b58c87fd0e7b0d4
+      content_hash: bad10720a742e77aae7e9b635c08c6f6b81a572271573f5001cd8c15c6775aa9
   - kind: sentence_template
     data:
       id: frame:acf77dd2f8346de6d6d5f9103db1e8522efeb6c751aca98588b6ea5b87c6be49

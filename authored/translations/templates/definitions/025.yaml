@@ -788,7 +788,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:3e29c8323c0a65ecdc9fc76181bbcc2b33be5b1ad39d1a038e87bb45e1fb6f1d
+      id: frame:996cb1e19eddaa78e908f9b1a977d955fd8e901b42dd371972e567f0e619553c
       source:
         source_lang: ja
         canonical_hash: 247656dec622f5657808f6e884d2d7f931fcfecdff4321cc9e90ac7ae34ec1f2
@@ -811,72 +811,14 @@ records:
               end: 91
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: QuantitySpec
-            role: selection_count
-            domain:
-              values:
-                - quantity.selection_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 45
-                end: 46
-          - name: leaf_1
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 55
-                end: 58
-          - name: leaf_2
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 60
-                end: 61
-          - name: leaf_3
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 63
-                end: 65
-          - name: leaf_4
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 67
-                end: 68
+        slots: [{name: token_11, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 11, end: 15}]}, {name: leaf_0, type: QuantitySpec, role: selection_count, domain: {values: [quantity.selection_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 45, end: 46}]}, {name: leaf_1, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 55, end: 58}]}, {name: leaf_2, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 60, end: 61}]}, {name: leaf_3, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 63, end: 65}]}, {name: leaf_4, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 67, end: 68}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 3e29c8323c0a65ecdc9fc76181bbcc2b33be5b1ad39d1a038e87bb45e1fb6f1d
+      content_hash: 996cb1e19eddaa78e908f9b1a977d955fd8e901b42dd371972e567f0e619553c
   - kind: sentence_template
     data:
       id: frame:c0c5b3c09b505fafce902a2e30eb392d808e01e2ed8e35ccc833025198e0091e
@@ -1552,7 +1494,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:bafa3de4e2c1b10f3282998617e62a1dd528dc0b9f0513e5f40bb49cc70368d3
+      id: frame:686d651d30be81e3e0e3d363cc80c31dcac5badf9093dcc983795d44b95afe44
       source:
         source_lang: ja
         canonical_hash: 7266e4b6957621500825fa395f52a74fa03601e4854c82892b00ea2a8ff1693e
@@ -1575,38 +1517,14 @@ records:
               end: 38
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: keyword
-            domain:
-              values:
-                - concept.keyword.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 25
-                end: 27
-          - name: leaf_1
-            type: Concept
-            role: keyword
-            domain:
-              values:
-                - concept.keyword.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 29
-                end: 33
+        slots: [{name: token_16, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 16, end: 20}]}, {name: leaf_0, type: Concept, role: keyword, domain: {values: [concept.keyword.v1], min: null, max: null}, required: true, occurrences: [{start: 25, end: 27}]}, {name: leaf_1, type: Concept, role: keyword, domain: {values: [concept.keyword.v1], min: null, max: null}, required: true, occurrences: [{start: 29, end: 33}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: bafa3de4e2c1b10f3282998617e62a1dd528dc0b9f0513e5f40bb49cc70368d3
+      content_hash: 686d651d30be81e3e0e3d363cc80c31dcac5badf9093dcc983795d44b95afe44
   - kind: sentence_template
     data:
       id: frame:f0f5a68d071881097577413df04ee256b6b594e8074d70005bc68053cccc49de
@@ -3002,7 +2920,7 @@ records:
       content_hash: 63f9ea1b4119cbd7056464e6d9ca9603268a3e9589f0cbb4498a5d1676a04cd1
   - kind: sentence_template
     data:
-      id: frame:f54a8e122a8a04f7a1811b470d52f7b79f72ab9ef969d695c39f4612c7d4dede
+      id: frame:9a9942e75ee80195821c3e2a787584dc998dd59035d3ee783e24392ba6e8465f
       source:
         source_lang: ja
         canonical_hash: 7a89d4ae38ea95b4e3e96d804bb50cc6f4c638d045bcb481b0b96db0cadf5595
@@ -3025,38 +2943,7 @@ records:
               end: 97
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: QuantitySpec
-            role: selection_count
-            domain:
-              values:
-                - quantity.selection_count.constant.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 12
-                end: 13
-          - name: leaf_1
-            type: QuantityExpr
-            role: read_value
-            domain:
-              values:
-                - quantity.read.context.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 33
-                end: 39
-            expression:
-              kind: context_expression
-              expression_id: read.selected.attack.v1
-              leaves: []
-              imports:
-                subject: read_port_0
-              scope: read_ability_0
+        slots: [{name: token_8, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 8, end: 12}]}, {name: leaf_0, type: QuantitySpec, role: selection_count, domain: {values: [quantity.selection_count.constant.v1], min: null, max: null}, required: true, occurrences: [{start: 12, end: 13}]}, {name: leaf_1, type: QuantityExpr, role: read_value, domain: {values: [quantity.read.context.v1], min: null, max: null}, required: true, occurrences: [{start: 33, end: 39}], expression: {kind: context_expression, expression_id: read.selected.attack.v1, leaves: [], imports: {subject: read_port_0}, scope: read_ability_0}}]
       projection:
         projection_kind: pending
         discriminator:
@@ -3091,7 +2978,7 @@ records:
                 origin: selection
               source_leaves: []
         exports: []
-      content_hash: f54a8e122a8a04f7a1811b470d52f7b79f72ab9ef969d695c39f4612c7d4dede
+      content_hash: 9a9942e75ee80195821c3e2a787584dc998dd59035d3ee783e24392ba6e8465f
   - origin: machine
     kind: sentence_template
     data:

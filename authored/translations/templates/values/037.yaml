@@ -749,43 +749,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:1a3e4367eb70be419070665a0e332d9178a9a9aee69cfa7b7457105d47c66e00
+      template_id: frame:ffd5c19fc5a08a742b40766b97925155d2434504039da8c28135568b1c822e47
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}選擇'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。給予其
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 點傷害。將自己的EX區中的
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 張士兵・衍生物・從者召喚到
-          - kind: LeafRef
-            slot: leaf_7
-          - kind: Literal
-            text: 上。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}選擇'}, {kind: LeafRef, slot: leaf_1}, {kind: LeafRef, slot: leaf_2}, {kind: Literal, text: 上的}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: 個}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 。給予其}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: 點傷害。將自己的EX區中的}, {kind: LeafRef, slot: leaf_6}, {kind: Literal, text: 張士兵・}, {kind: LeafRef, slot: token_62}, {kind: Literal, text: ・從者召喚到}, {kind: LeafRef, slot: leaf_7}, {kind: Literal, text: 上。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

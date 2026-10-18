@@ -403,13 +403,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:f5084e384531cf5b0fa7170ac39e0f90c97ea6807409c6812a1367a5f6f3b627
+      template_id: frame:c97d5241513e83bbd4b061cd08ac57a68ce6f0dc7283e786a0054650b668c3b5
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: （返回手牌的衍生物移出遊戲）
+        nodes: [{kind: Literal, text: （返回手牌的}, {kind: LeafRef, slot: token_7}, {kind: Literal, text: 移出遊戲）}]
       expression_targets: {}
   - origin: machine
     kind: template_translation
@@ -1217,13 +1215,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:921c555035178bf78cffea152a26f634dae75c58f79c4dc0e34240fc3fa73626
+      template_id: frame:44dfe651b26907ae8f4ddf03061d01a498da21715e2dda1d54370d5e51e980b7
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 只要這張卡片在戰場上，自己戰場上的全部衍生物・從者就不會受到能力傷害。
+        nodes: [{kind: Literal, text: 只要這張卡片在戰場上，自己戰場上的全部}, {kind: LeafRef, slot: token_15}, {kind: Literal, text: ・從者就不會受到能力傷害。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation

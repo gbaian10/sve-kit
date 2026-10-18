@@ -3372,80 +3372,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:27c2ddc22385b16b18f04be5a2a67150bfd7cbad64a04b0133348d3f215d7064
+      template_id: frame:4d84bfdeea5f287477109564df0d3f22378d0d874d68a44b198830972952a374
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: '{'
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}{消費'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: '}：選擇'
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_7
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: ・
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: ・
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 。使其{
-          - kind: LeafRef
-            slot: leaf_8
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_9
-          - kind: Literal
-            text: ，並具有【
-          - kind: LeafRef
-            slot: leaf_10
-          - kind: Literal
-            text: 】。
-          - kind: LeafRef
-            slot: leaf_11
-          - kind: LeafRef
-            slot: leaf_12
-          - kind: Literal
-            text: 上有
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_13
-          - kind: Literal
-            text: 個以上的「
-          - kind: LeafRef
-            slot: name_16
-          - kind: Literal
-            text: 的士兵・衍生物・從者」時，才可以使用這個能力，並且在
-          - kind: LeafRef
-            slot: leaf_14
-          - kind: Literal
-            text: 回合中可以使用
-          - kind: LeafRef
-            slot: leaf_15
-          - kind: Literal
-            text: 次。
+        nodes: [{kind: Literal, text: '{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}{消費'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: '}：選擇'}, {kind: LeafRef, slot: leaf_2}, {kind: LeafRef, slot: leaf_3}, {kind: Literal, text: 上的}, {kind: LeafRef, slot: leaf_7}, {kind: Literal, text: 個}, {kind: LeafRef, slot: leaf_4}, {kind: Literal, text: ・}, {kind: LeafRef, slot: leaf_5}, {kind: Literal, text: ・}, {kind: LeafRef, slot: leaf_6}, {kind: Literal, text: '。使其{'}, {kind: LeafRef, slot: leaf_8}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_9}, {kind: Literal, text: ，並具有【}, {kind: LeafRef, slot: leaf_10}, {kind: Literal, text: 】。}, {kind: LeafRef, slot: leaf_11}, {kind: LeafRef, slot: leaf_12}, {kind: Literal, text: 上有}, {kind: Form, form_id: quantity.existence_count.value, args: {quantity: {slot: leaf_13}}}, {kind: Literal, text: 個以上的「}, {kind: LeafRef, slot: name_16}, {kind: Literal, text: 的士兵・}, {kind: LeafRef, slot: token_123}, {kind: Literal, text: ・從者」時，才可以使用這個能力，並且在}, {kind: LeafRef, slot: leaf_14}, {kind: Literal, text: 回合中可以使用}, {kind: LeafRef, slot: leaf_15}, {kind: Literal, text: 次。}]
       expression_targets:
         name.selection.distinct.v1:
           format: 1

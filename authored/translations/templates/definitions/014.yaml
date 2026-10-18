@@ -1627,7 +1627,7 @@ records:
       content_hash: 37cac397a6dad9e63c57e37e44ea010d62b70e9f5e3a825c5271551c5c460843
   - kind: sentence_template
     data:
-      id: frame:eed132c83688729dc8029d385e951fb73eaf8ea4b25bba3c0d3d2473a9eaadcf
+      id: frame:35f7ea66bd259cf96d3dfca3467ad104524a0441a5f48a2938217235f58426b8
       source:
         source_lang: ja
         canonical_hash: 985926806e1335327e228f54fbe44276cb04d90aa9161fc3c4b2bd4adf8ad74c
@@ -1650,72 +1650,14 @@ records:
               end: 154
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 8
-          - name: leaf_1
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 26
-                end: 29
-          - name: leaf_2
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 31
-                end: 32
-          - name: leaf_3
-            type: Concept
-            role: rule_term
-            domain:
-              values:
-                - concept.rule_term.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 34
-                end: 36
-          - name: leaf_4
-            type: Nat
-            role: stat_delta_magnitude
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 38
-                end: 39
+        slots: [{name: leaf_0, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 8}]}, {name: token_17, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 17, end: 21}]}, {name: leaf_1, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 26, end: 29}]}, {name: leaf_2, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 31, end: 32}]}, {name: leaf_3, type: Concept, role: rule_term, domain: {values: [concept.rule_term.v1], min: null, max: null}, required: true, occurrences: [{start: 34, end: 36}]}, {name: leaf_4, type: Nat, role: stat_delta_magnitude, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 38, end: 39}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: eed132c83688729dc8029d385e951fb73eaf8ea4b25bba3c0d3d2473a9eaadcf
+      content_hash: 35f7ea66bd259cf96d3dfca3467ad104524a0441a5f48a2938217235f58426b8
   - kind: sentence_template
     data:
       id: frame:8d1ab917bc09d9107e86c618eff1d05d7d1f16e477d8348c9edec1e36049eecc

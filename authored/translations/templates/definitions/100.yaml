@@ -988,7 +988,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:e716c432a4cdeaafd8d23dd2d276a9df7c69d1dd7eb3ce33edef948f954bab00
+      id: frame:d5c1f658ebeafcaf27fd78b1d7ed3c750c52b9f895f2029cc018334ebfcdaa05
       source:
         source_lang: ja
         canonical_hash: b4644b0ffe685f77b9f287e5140930b87aba875c843722b424bddcb1c2b4777d
@@ -1011,107 +1011,14 @@ records:
               end: 63
       leaf_schema:
         format: 2
-        slots:
-          - name: leaf_0
-            type: CardName
-            role: name_reference
-            domain:
-              values:
-                - card_name.any.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 1
-                end: 2
-          - name: leaf_1
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 3
-                end: 4
-          - name: leaf_2
-            type: ZoneSet
-            role: destination_zone
-            domain:
-              values:
-                - zone.single.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 6
-                end: 14
-          - name: leaf_3
-            type: Concept
-            role: keyword
-            domain:
-              values:
-                - concept.keyword.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 41
-                end: 43
-          - name: leaf_4
-            type: Concept
-            role: keyword
-            domain:
-              values:
-                - concept.keyword.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 45
-                end: 49
-          - name: leaf_5
-            type: Concept
-            role: ability
-            domain:
-              values:
-                - concept.ability.v1
-              min:
-              max:
-            required: true
-            occurrences:
-              - start: 55
-                end: 63
-          - name: leaf_6
-            type: Nat
-            role: threshold
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 64
-                end: 65
-          - name: leaf_7
-            type: Nat
-            role: count
-            domain:
-              values: []
-              min: 0
-              max: 9007199254740991
-            required: true
-            occurrences:
-              - start: 66
-                end: 67
+        slots: [{name: leaf_0, type: CardName, role: name_reference, domain: {values: [card_name.any.v1], min: null, max: null}, required: true, occurrences: [{start: 1, end: 2}]}, {name: leaf_1, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 3, end: 4}]}, {name: leaf_2, type: ZoneSet, role: destination_zone, domain: {values: [zone.single.v1], min: null, max: null}, required: true, occurrences: [{start: 6, end: 14}]}, {name: token_26, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 26, end: 30}]}, {name: leaf_3, type: Concept, role: keyword, domain: {values: [concept.keyword.v1], min: null, max: null}, required: true, occurrences: [{start: 41, end: 43}]}, {name: leaf_4, type: Concept, role: keyword, domain: {values: [concept.keyword.v1], min: null, max: null}, required: true, occurrences: [{start: 45, end: 49}]}, {name: leaf_5, type: Concept, role: ability, domain: {values: [concept.ability.v1], min: null, max: null}, required: true, occurrences: [{start: 55, end: 63}]}, {name: leaf_6, type: Nat, role: threshold, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 64, end: 65}]}, {name: leaf_7, type: Nat, role: count, domain: {values: [], min: 0, max: 9007199254740991}, required: true, occurrences: [{start: 66, end: 67}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: e716c432a4cdeaafd8d23dd2d276a9df7c69d1dd7eb3ce33edef948f954bab00
+      content_hash: d5c1f658ebeafcaf27fd78b1d7ed3c750c52b9f895f2029cc018334ebfcdaa05
   - kind: sentence_template
     data:
       id: frame:70614d18d63814341a5de073bf4a90d566a5bbb19490925f949d9bcdf75a972e
@@ -1734,7 +1641,7 @@ records:
       content_hash: ed3221354b1b6968385b5d663e3ab7186b0fc61333b7baae1d7f7fcaf4eebca5
   - kind: sentence_template
     data:
-      id: frame:958b1dfccb8bfefa3cd17490ec64f88384b004ccec22e7fb0fe1f0b379e4db14
+      id: frame:04143bc4803ab5312e2a42f10c0dc8462b4f653e31c1c32e97405d2fdf579e34
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -1757,14 +1664,14 @@ records:
               end: 74
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 958b1dfccb8bfefa3cd17490ec64f88384b004ccec22e7fb0fe1f0b379e4db14
+      content_hash: 04143bc4803ab5312e2a42f10c0dc8462b4f653e31c1c32e97405d2fdf579e34
   - kind: sentence_template
     data:
       id: frame:40ebd35a01b311e66c19d2e00923772a785945f8047a6c6e03299286c0d045d3
@@ -3288,7 +3195,7 @@ records:
       content_hash: 682115beb1f580438d0392fd72d5f5b023f7b305083ccc619ec7204d2a483f80
   - kind: sentence_template
     data:
-      id: frame:3d5e0d192843815115355f968bb716a8b42ddd3b8d799d71518615d58fc2de3e
+      id: frame:27baeaeb64ebc7c404e840382017a88691d76b78e11654575edcc0c24350ea84
       source:
         source_lang: ja
         canonical_hash: 12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
@@ -3311,14 +3218,14 @@ records:
               end: 62
       leaf_schema:
         format: 2
-        slots: []
+        slots: [{name: token_7, type: TokenStatus, role: token_reference, domain: {values: [token_status.token.v1], min: null, max: null}, required: true, occurrences: [{start: 7, end: 11}]}]
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 3d5e0d192843815115355f968bb716a8b42ddd3b8d799d71518615d58fc2de3e
+      content_hash: 27baeaeb64ebc7c404e840382017a88691d76b78e11654575edcc0c24350ea84
   - kind: sentence_template
     data:
       id: frame:9e75790b3142269082b2e29b5b85f78e57a35e0e6aca6a7e018c3514418a9cbd

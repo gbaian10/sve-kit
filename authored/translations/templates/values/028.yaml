@@ -161,21 +161,11 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:bc0d464e2b4c6c55ed6ea8a1b1cbe1cdb6b30b973f5fb0399c56e37f5c8460f4
+      template_id: frame:20495a901696df72b8909c737baed5b59149973dfb1e4d506e656392972df99a
       lang: zh-Hant
       target:
         format: 1
-        nodes:
-          - kind: Literal
-            text: 妖精・衍生物進入自己的戰場時，使其{
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: '}+'
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 。
+        nodes: [{kind: Literal, text: 妖精・}, {kind: LeafRef, slot: token_8}, {kind: Literal, text: '進入自己的戰場時，使其{'}, {kind: LeafRef, slot: leaf_0}, {kind: Literal, text: '}+'}, {kind: LeafRef, slot: leaf_1}, {kind: Literal, text: 。}]
       expression_targets: {}
   - origin: machine
     kind: template_translation
