@@ -994,6 +994,30 @@ describe("desktop shell", () => {
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
   })
 
+  it.each([
+    ["both", 1],
+    ["translated", 0],
+    ["original", 0],
+  ] as const)(
+    "a printing whose text is the shared revision pairs only inside its own box (%s)",
+    async (effectLanguage, pairs) => {
+      state.available = true
+      state.translated = true
+      state.candidates = [{ printing_id: "p:synthetic", revision_id: "rev:synthetic" }]
+      state.undated = []
+      prefsStore.set({ uiLanguage: "zh-TW", effectLanguage })
+      await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+        initialEntries: ["/cards/BP-SYNTHETIC"],
+      })
+      expect(document.querySelectorAll('[data-field="effect"]')).toHaveLength(1)
+      const found = document.querySelectorAll("[data-text-pair]")
+      expect(found).toHaveLength(pairs)
+      // The only pair is the text's own section, never an outer wrapper around a single box.
+      for (const pair of found) expect(pair.getAttribute("data-field")).toBe("effect")
+      expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
+    },
+  )
+
   it("renders the translation and the original as one pair when both are shown", async () => {
     state.available = true
     state.translated = true

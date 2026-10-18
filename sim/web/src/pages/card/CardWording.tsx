@@ -105,6 +105,8 @@ function PrintingWording({
   const different = ownRevisionId !== translationRevisionId
   const showTranslation =
     prefs.effectLanguage !== "original" && translation.value?.translated !== undefined
+  // Same revision: the single CardText pairs its own boxes; an outer pair would halve it.
+  const paired = different && showTranslation
   return (
     <>
       {different && prefs.effectLanguage !== "original" && (
@@ -118,10 +120,7 @@ function PrintingWording({
         </>
       )}
       {/* The shared translation and this printing's own original pair up like one text's boxes. */}
-      <div
-        className={showTranslation ? TEXT_PAIR : undefined}
-        data-text-pair={showTranslation ? "" : undefined}
-      >
+      <div className={paired ? TEXT_PAIR : undefined} data-text-pair={paired ? "" : undefined}>
         {different && showTranslation && (
           <CardText
             client={client}
