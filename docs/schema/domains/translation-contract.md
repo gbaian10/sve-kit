@@ -189,7 +189,7 @@ layout 不含待翻語義，可機械生成固定模板；reminder/token_header 
 依計數物、所在區域集合與數量角色查表並驗回原文單位；NFKC、別名及省略均留 trace。
 renderer 與 DSL 使用同一份通過檢查的值，NP 只組合引用，不建立重疊的第二份來源槽。
 N1 正式入口使用同版 derive_source／來源驗證，固定結構由版本決定；既有可選辨識仍尊重 enabled／low_confidence。
-正式 workflow／authored 與 DB reader 只接受 four-layer-jp-v6；renderer v3 的形式、必要引用及複合區域成員呈現參與實際 render 相依。
+正式 workflow／authored 與 DB reader 只接受 four-layer-jp-v6；renderer v4 的形式、必要引用及複合區域成員呈現參與實際 render 相依。
 NC／SC 門檻能力名的繁中一律呈現死靈充能／魔力連鎖全名，並經能力名葉引用輸出；不能把必要能力名引用藏回 Literal。
 同一 G10 source_zone 的兩區與共同 owner 使用封閉 source_union Form，來源範圍、必要引用及逐成員位置依四層契約，不新增自由字串參數。
 

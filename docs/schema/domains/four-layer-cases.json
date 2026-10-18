@@ -5020,11 +5020,11 @@
     },
     {
       "group": "FL-015",
-      "id": "renderer_v3_dependencies",
+      "id": "renderer_version_dependencies",
       "operation": "render_dependencies",
       "input": {
         "changed": "renderer_version",
-        "before_version": "four-layer-renderer-v2",
+        "before_version": "four-layer-renderer-v3",
         "after_version": "four-layer-renderer-v4"
       },
       "expected": {

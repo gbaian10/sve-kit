@@ -264,7 +264,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v6 來源推導。
+這裡記錄來源型別含義；renderer 自 v3 起已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v6 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -377,10 +377,10 @@ QuantityPlaceholder 僅屬於 `quantity.choice_mode_count.placeholder`／`quanti
 簽章恰為 quantity:QuantitySpec/choice_mode_count 與 definition:QuantityExpr/count_expression，只有 up_to case。
 arg 必為 quantity，只輸出字面 X 並記該槽的 leaf output／來源 occurrence；mode 詞由該語言 cases 的 Literal 提供。
 quantity 必須是 up_to Expression，definition 須與 quantity.expr 完整相等，包括有序葉身分；constant、bound、ContextExpression 不適用。
-同一 target 在 placeholder 之外必有直接 LeafRef(definition)，且實際渲染成功；定義句可在 X 之前或之後。
-只有成功呈現的 definition 引用，才按 quantity 的槽名與角色補記實際引用，避免重複展開計數句。
+同一 target 在 placeholder 之外必有直接 LeafRef(definition)，由 target 形狀驗證於 authored 載入及 render 前檢查；定義句可在 X 之前或之後。
+全部頂層節點呈現成功後，才把 definition 已呈現的引用按 quantity 的槽名與角色補記實際引用，避免重複展開計數句；任一節點失敗會先拒絕或整欄 fallback。
 X 本身不產生概念 annotation；概念與加粗範圍保留在定義句。缺必要選詞仍整欄 fallback。
-這是呈現層的四項檢查，不另驗來源的 owner／能力／分枝、ChoiceContext 或選項數；那些仍由正式 producer 的 binding 驗證負責。
+直接 LeafRef 由 target 形狀驗證，其餘數量配對與引用補記由 renderer 負責；不另驗來源的 owner／能力／分枝、ChoiceContext 或選項數，那些仍由正式 producer 的 binding 驗證負責。
 
 rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章合法域，不能把選詞或語義值複製到規則內。
 例如 zone.locative 的 hand／battlefield 分支各組合 Label 與「中」／「上」；三個 quantity.classifier.* 形式依計數語境選中文量詞分支。
