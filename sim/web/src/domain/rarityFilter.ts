@@ -1,9 +1,10 @@
 import { BADGE_STYLES } from "./rarityBadges"
+import { PROMO_RARITY, RARITY_LADDER } from "./representative"
 
 export const UNRATED_RARITY = "unrated"
 
 // The maintainer's chip order: the rarity ladder low to high, PR after the printed rarities.
-const RARITY_ORDER = ["br", "sr", "gr", "lg", "sl", "ur", "sp", "ssp", "pr"]
+const RARITY_ORDER: readonly string[] = [...RARITY_LADDER, PROMO_RARITY]
 
 /** Vocabulary rarities in chip order; codes the order does not know keep their own order after it. */
 export function orderRarities<T extends { readonly code: string }>(rarities: readonly T[]): T[] {

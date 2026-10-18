@@ -6,7 +6,7 @@ recent printing summaries, set `releases` and `count`. Replies carry generation,
 and query ID; old replies cannot replace current results. Suggestions preserve exact printing
 identity and name/alias ranking. Missing recent IDs explicitly return `not-in-edition`.
 
-Search supports card/printing units, text, classes, printing home-set family codes and the cost, attack
+Search supports printing, art and card units, text, classes, printing home-set family codes and the cost, attack
 and defense value selections (the last button collects every value at or above it), printed types,
 deck locations (`main`, `evolve`, `advance`, `leader[:frame]`, `token[:type]`, `ep`, `sep`; special
 kinds and traits come from the front face's revision shown in the edition, the leader frame from the
@@ -17,7 +17,15 @@ The list shows only cards released in the selected edition. Names remain multili
 UI language is independent of card edition. Card detail retains its on-demand compatibility
 path; only the card page starts the full snapshot client.
 
-With no search text, card pages order the existing representative printing's card number;
+A merged cell (one per card, or one per card and front-face `art_id`; a printing without an
+`art_id` is its own cell) shows one representative chosen among the printings that passed every
+filter and, with text, share the group's best text rank (#781): the PR printing when `prFirst` is
+set and one is present, else the lowest or highest rarity on the fixed ladder BR < SR < GR < LG < SL
+< UR < SP < SSP (`domain/representative.ts`; no rarity sits below BR, PR is off the ladder and shown
+only when the group has nothing else), ties going to the earliest card number. A locator whose
+printing metadata has not arrived stands aside while the group has a completed printing, and
+every merged-unit query waits for printing completion so the first answer is the final one.
+With no search text, card pages order the representative printing's card number;
 printing pages order each printing's own card number, without choosing a representative.
 Its width/case-folded key compares set-code digit runs numerically, then the letter prefix
 (empty first), integer number, and suffix (empty first, edition marker ignored). Leading

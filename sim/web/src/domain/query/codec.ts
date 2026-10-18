@@ -1,5 +1,6 @@
 import { isLocationToken } from "../deckLocation"
 import { compareCodePoints } from "../normalize"
+import { REPRESENTATIVE_RARITIES } from "../representative"
 import {
   COST_CAP,
   DEFAULT_QUERY,
@@ -11,7 +12,8 @@ import {
   VIEW_MODES,
 } from "./model"
 
-// URL parameters: q class cost atk def type loc trait mech set rarity alt unit sort order view. Lists
+// URL parameters: q class cost atk def type loc trait mech set rarity alt unit rep prfirst sort
+// order view. Lists
 // are comma separated, de-duplicated and sorted so equal states always give equal URLs; unknown
 // values are dropped rather than failing, because URLs arrive from anywhere. `cost`, `atk` and `def`
 // list the selected values; the cap (7 for cost, 10 for attack and defense) means that value or more.
@@ -86,6 +88,9 @@ export function parseQuery(params: URLSearchParams): QueryState {
     rarities: list(params, LIST_PARAMS.rarities),
     altArtOnly: params.get("alt") === "1",
     unit: oneOf(params.get("unit"), QUERY_UNITS) ?? DEFAULT_QUERY.unit,
+    representative:
+      oneOf(params.get("rep"), REPRESENTATIVE_RARITIES) ?? DEFAULT_QUERY.representative,
+    prFirst: params.get("prfirst") === "1",
     sort: oneOf(params.get("sort"), QUERY_SORTS) ?? DEFAULT_QUERY.sort,
     ...(params.get("order") === "desc" ? { order: "desc" as const } : {}),
     ...(view === undefined ? {} : { view }),
@@ -116,6 +121,8 @@ export function formatQuery(state: QueryState): URLSearchParams {
   if (mechanics.length > 0) params.set("mech", mechanics.join(","))
   if (state.altArtOnly) params.set("alt", "1")
   if (state.unit !== DEFAULT_QUERY.unit) params.set("unit", state.unit)
+  if (state.representative !== DEFAULT_QUERY.representative) params.set("rep", state.representative)
+  if (state.prFirst) params.set("prfirst", "1")
   if (state.sort !== DEFAULT_QUERY.sort) params.set("sort", state.sort)
   if (state.order === "desc") params.set("order", "desc")
   if (state.view !== undefined) params.set("view", state.view)

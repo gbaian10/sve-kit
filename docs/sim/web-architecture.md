@@ -87,13 +87,15 @@ interface QueryState {
   sets: SetCode[];
   rarities: RarityCode[];
   altArtOnly: boolean;
-  unit: "card" | "art" | "printing"; // 每格單位，預設 card（合併印刷）
+  unit: "printing" | "art" | "card"; // 每格單位，預設 printing；art＝同一張卡且正面 art_id 相同的版次合成一格，card＝同卡合成一格
+  representative: "low" | "high"; // 合併格的代表版次取非 PR 版次中的最低／最高稀有度，預設 low；unit=printing 時不生效但保留
+  prFirst: boolean; // 合併格有 PR 版次時優先顯示 PR；預設 false
   sort: "no" | "cost" | "name" | "date" | "atk" | "def"; // 預設 no
   view?: "grid" | "table" | "list"; // 沒帶＝用偏好
 }
 ```
 
-`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech set rarity alt unit sort order view`）之間互轉：
+`domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost atk def type loc trait mech set rarity alt unit rep prfirst sort order view`）之間互轉：
 牌組位置原本放在 `type`，`type` 裡出現的位置 token（`token`、`token:spell`、`leader:gold`、`ep`、`sep`）仍會讀成 `loc`，寫回時只寫 `loc`；
 `set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code；`cost`、`atk`、`def` 是逗號分隔的數值清單，
 同一統計值內取聯集、不同統計值之間取交集。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。

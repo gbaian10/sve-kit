@@ -9,6 +9,7 @@ import {
   statSelected,
 } from "../../domain/query/model"
 import { UNRATED_RARITY } from "../../domain/rarityFilter"
+import { pickRepresentative, UNKNOWN_RARITY } from "../../domain/representative"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
 import { badgeOf, type CardSummary, catalogCards, nameOf } from "../catalog"
@@ -450,9 +451,14 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
           ? fullPrinting["leader_name_frame"]
           : "unknown"
       printings.leaderFrame.push(intern(leaderFrame))
+      // A locator row has no classification yet; a full row without a code has none at all.
       printings.rarity.push(
         intern(
-          typeof fullPrinting?.["rarity_code"] === "string" ? fullPrinting["rarity_code"] : "",
+          !fullPrinting || !Object.hasOwn(fullPrinting, "rarity_code")
+            ? UNKNOWN_RARITY
+            : typeof fullPrinting["rarity_code"] === "string"
+              ? fullPrinting["rarity_code"]
+              : "",
         ),
       )
       printings.badge.push(
@@ -943,6 +949,27 @@ export class SearchIndex {
       statSelected(state.cost, COST_CAP, this.costs[printing]) &&
       statSelected(state.attack, STAT_CAP, this.attacks[printing]) &&
       statSelected(state.defense, STAT_CAP, this.defenses[printing])
+    // A printing's text rank: 0 for its exact number, 1 for a number prefix, else the card's
+    // name/alias rank (2 prefix, 3 contains, 4 none).
+    const textRankOf = (p: number, nameRank: number): number => {
+      const number = this.pool.get(this.printings.number[p] ?? 0)
+      if (
+        (lookup !== null && this.pool.get(this.printings.lookup[p] ?? 0) === lookup) ||
+        (digits !== null && number === digits)
+      )
+        return 0
+      if (
+        this.pool.get(this.printings.flat[p] ?? 0).startsWith(flat) ||
+        (number !== "" &&
+          typed !== null &&
+          typed.suffix === "" &&
+          this.pool.get(this.printings.set[p] ?? 0) === typed.set &&
+          number.startsWith(typed.number)) ||
+        (number !== "" && digits !== null && number.startsWith(digits))
+      )
+        return 1
+      return nameRank
+    }
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (eligible && !eligible.has(this.pool.get(this.cards.id[card] ?? 0))) continue
       if (
@@ -952,116 +979,49 @@ export class SearchIndex {
         continue
       const start = this.cards.printingStart[card] ?? 0
       const end = this.cards.printingStart[card + 1] ?? start
-      if (state.unit === "printing" || state.unit === "art") {
-        const nameRank =
-          state.text === ""
-            ? 0
-            : Math.min(
-                this.textRank(this.names, this.cards.nameStart, card, flat),
-                this.textRank(this.aliases, this.cards.aliasStart, card, flat),
-              )
+      if (state.text !== "" && !flat) continue
+      const nameRank =
+        state.text === ""
+          ? 0
+          : Math.min(
+              this.textRank(this.names, this.cards.nameStart, card, flat),
+              this.textRank(this.aliases, this.cards.aliasStart, card, flat),
+            )
+      if (state.unit === "printing") {
         for (let p = start; p < end; p += 1) {
           if (!allowed(p) || !statsAllowed(p)) continue
-          let rank = nameRank
-          if (state.text !== "") {
-            if (!flat) continue
-            const number = this.pool.get(this.printings.number[p] ?? 0)
-            if (
-              (lookup !== null && this.pool.get(this.printings.lookup[p] ?? 0) === lookup) ||
-              (digits !== null && number === digits)
-            )
-              rank = 0
-            else if (
-              this.pool.get(this.printings.flat[p] ?? 0).startsWith(flat) ||
-              (number !== "" &&
-                typed !== null &&
-                typed.suffix === "" &&
-                this.pool.get(this.printings.set[p] ?? 0) === typed.set &&
-                number.startsWith(typed.number)) ||
-              (number !== "" && digits !== null && number.startsWith(digits))
-            )
-              rank = 1
-          }
+          const rank = state.text === "" ? 0 : textRankOf(p, nameRank)
           if (rank <= 3) buckets[rank]?.push(p)
         }
         continue
       }
-      let representative = this.cards.default[card] ?? start
-      if (!allowed(representative)) {
-        representative = -1
-        for (let p = start; p < end; p += 1)
-          if (allowed(p)) {
-            representative = p
-            break
-          }
+      // Merged units: the printings that pass every filter form one group per card or per art,
+      // and the group's best text rank decides which of them may stand for it (#781).
+      const groups = new Map<number, { readonly p: number; readonly rank: number }[]>()
+      for (let p = start; p < end; p += 1) {
+        if (!allowed(p) || !statsAllowed(p)) continue
+        const rank = state.text === "" ? 0 : textRankOf(p, nameRank)
+        if (rank > 3) continue
+        const key = state.unit === "art" ? (this.printings.art[p] ?? 0) : card
+        const group = groups.get(key) ?? []
+        group.push({ p, rank })
+        groups.set(key, group)
       }
-      if (representative < 0) continue
-      let printing = representative
-      let rank = 0
-      if (state.text !== "") {
-        if (!flat) continue
-        printing = -1
-        if (lookup !== null)
-          for (let p = start; p < end; p += 1)
-            if (allowed(p) && this.pool.get(this.printings.lookup[p] ?? 0) === lookup) {
-              printing = p
-              break
-            }
-        if (printing < 0 && digits !== null)
-          for (let p = start; p < end; p += 1)
-            if (allowed(p) && this.pool.get(this.printings.number[p] ?? 0) === digits) {
-              printing = p
-              break
-            }
-        if (printing < 0) {
-          rank = 1
-          for (let p = start; p < end; p += 1) {
-            if (!allowed(p)) continue
-            const number = this.pool.get(this.printings.number[p] ?? 0)
-            if (
-              this.pool.get(this.printings.flat[p] ?? 0).startsWith(flat) ||
-              (number !== "" &&
-                typed !== null &&
-                typed.suffix === "" &&
-                this.pool.get(this.printings.set[p] ?? 0) === typed.set &&
-                number.startsWith(typed.number)) ||
-              (number !== "" && digits !== null && number.startsWith(digits))
-            ) {
-              printing = p
-              break
-            }
-          }
-        }
-        if (printing < 0) {
-          const name = this.textRank(this.names, this.cards.nameStart, card, flat)
-          const alias = this.textRank(this.aliases, this.cards.aliasStart, card, flat)
-          rank = Math.min(name, alias)
-          if (rank > 3) continue
-          printing = representative
-        }
+      for (const members of groups.values()) {
+        const top = Math.min(...members.map((member) => member.rank))
+        const representative = pickRepresentative(
+          members.filter((member) => member.rank === top).map((member) => member.p),
+          (p) => this.pool.get(this.printings.rarity[p] ?? 0),
+          (p) => this.order[p] ?? 0,
+          { rarity: state.representative, prFirst: state.prFirst },
+        )
+        if (representative !== undefined) buckets[top]?.push(representative)
       }
-      if (!statsAllowed(printing)) continue
-      buckets[rank]?.push(printing)
     }
     const byNumber = (a: number, b: number) => (this.order[a] ?? 0) - (this.order[b] ?? 0)
-    let matches = ranked
+    const matches = ranked
       ? buckets.flatMap((bucket) => bucket.sort(byNumber))
       : buckets.flat().sort(byNumber)
-    if (state.unit === "art") {
-      const representatives = new Map<number, number>()
-      for (const printing of matches) {
-        const art = this.printings.art[printing] ?? 0
-        const card = this.printings.card[printing] ?? 0
-        if (
-          !representatives.has(art) ||
-          (state.text === "" && this.cards.default[card] === printing)
-        )
-          representatives.set(art, printing)
-      }
-      matches = matches.filter(
-        (printing) => representatives.get(this.printings.art[printing] ?? 0) === printing,
-      )
-    }
     const direction = state.order === "desc" ? -1 : 1
     if (state.sort === "no" && direction === -1)
       matches.sort((a, b) => (this.order[b] ?? 0) - (this.order[a] ?? 0))

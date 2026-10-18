@@ -2,7 +2,10 @@
 // every field has one URL parameter, defaults are never written, and results are a pure function of
 // it. Vocabulary codes (classes, types, sets, rarities) come from the snapshot; `neutral` stands for
 // cards without a class.
-export const QUERY_UNITS = ["card", "art", "printing"] as const
+import type { RepresentativeRarity } from "../representative"
+
+/** One cell per printing, per art (same card and front-face art) or per card. */
+export const QUERY_UNITS = ["printing", "art", "card"] as const
 type QueryUnit = (typeof QUERY_UNITS)[number]
 
 export const QUERY_SORTS = ["no", "cost", "name", "date", "atk", "def"] as const
@@ -40,6 +43,9 @@ export interface QueryState {
   readonly rarities: readonly string[]
   readonly altArtOnly: boolean
   readonly unit: QueryUnit
+  /** Which printing a merged cell shows (#781); ignored while the unit is `printing`. */
+  readonly representative: RepresentativeRarity
+  readonly prFirst: boolean
   readonly order?: "desc"
   readonly sort: QuerySort
   /** Absent means "use the preference"; only an explicit choice goes into the URL. */
@@ -60,6 +66,8 @@ export const DEFAULT_QUERY: QueryState = {
   rarities: [],
   altArtOnly: false,
   unit: "printing",
+  representative: "low",
+  prFirst: false,
   sort: "no",
 }
 

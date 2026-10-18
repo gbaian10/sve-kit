@@ -1,8 +1,9 @@
 import { type Row, stringValue } from "../../data"
+import { PROMO_RARITY, RARITY_LADDER } from "../../domain/representative"
 import type { Region } from "../../domain/search"
 
 // A bare premium has no rarity code, so it and the other uncoded printings get sort keys of their own.
-const RARITY_ORDER = ["unknown", "br", "sr", "gr", "lg", "sl", "ur", "sp", "ssp", "premium", "pr"]
+const RARITY_ORDER: readonly string[] = ["unknown", ...RARITY_LADDER, "premium", PROMO_RARITY]
 const rank = (row: Row): number => {
   const code = row["rarity_code"]
   const key = typeof code === "string" ? code : row["premium"] === true ? "premium" : "unknown"
