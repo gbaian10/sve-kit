@@ -85,6 +85,7 @@ def test_official_label_cannot_borrow_another_mapping_or_part_of_composite_type(
         if object_value(object_value(item["data"])["subject"])["kind"] == "type"
     )
     label = object_value(array(value["translations"])[0])
+    value["translations"] = [label]
     if mutation == "text":
         label["text"] = "Invented label"
     elif mutation == "lang":
