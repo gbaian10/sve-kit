@@ -641,7 +641,7 @@ class Frame(RecordData):
                 for p in (*self.projection.imports, *self.projection.exports)
             )
         ):
-            raise ValueError("Preparation structure requires a v5 frame")
+            raise ValueError("Preparation structure requires a v6 frame")
         if self.id != "frame:" + self.content_hash:
             raise ValueError("Frame ID differs from full content hash")
         if (

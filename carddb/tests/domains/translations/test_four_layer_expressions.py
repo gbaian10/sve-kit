@@ -390,7 +390,7 @@ def test_offset_is_a_typed_magnitude_and_unsealed_target_shapes_are_rejected() -
             )
         }
     )
-    with pytest.raises(ValueError, match="require a v5"):
+    with pytest.raises(ValueError, match="require a v6"):
         renderer.render(
             "ctx:synthetic",
             "zh-Hant",
