@@ -9,6 +9,7 @@ from sve_carddb.domains.catalog.models import Term as VocabularyTerm
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
 from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts, adopted_kinds
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.inputs import load_glossary
@@ -71,8 +72,9 @@ def test_token_trait_keeps_empty_or_heterogeneous_definitions_unresolved(
     found = engine.recognize(raw, field.source, part)
     assert bool(found.issues) is (kinds != ("follower",))
     if kinds == ("follower",):
-        frame, binding = found.bind(field.source, part)
-        engine.verify(raw, field, part, frame, binding)
+        derived = derive_source(raw, field.source, engine)
+        frame, binding = derived.bind(0)
+        derived.verify(raw, engine, frame, binding)
         context = engine.references.kind_facts.context(
             raw, part, part.canonical_source.index("N"), engine.references
         )

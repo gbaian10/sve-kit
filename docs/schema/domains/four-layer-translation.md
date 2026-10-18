@@ -1287,6 +1287,13 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 缺少必要 trait／card 概念時保留 `missing_n3_filter_concept`，不能略過該葉完成 binding。
 構築限制中被否定的名稱片段使用 `CardName/name_fragment`，不標為完整名稱引用。
 
+**Token 詞彙引用。** 來源正文、提醒與 Token 表頭中尚未被其他葉持有的 `トークン`，由共用詞彙補齊
+建立必要的 `TokenStatus/token_reference` 葉，沿 `token_status.token.v1` 的 `token`
+值讀取 `term:object.token`。引號內的完整名稱與既有 Token 篩選葉保留原引用，
+不建立重疊位置。補齊只增加詞彙依賴，不改來源分段、既有語意、數值或接受條件。
+模板正文與提醒均引用該葉，不將譯詞寫死在 Literal；改動葉結構時同步重算共用
+模板 ID 與譯本引用。繁中選詞為 `Token`，與相鄰中文字不加空白。
+
 `four_layer_n3_references` 在完整構築限制、四段種類數條件、十費用支付、
 三段 SC 替換減費、承受能力傷害及三種提醒內補齊已封的固定詞彙引用。
 玩家／區域詞彙沿既有 `Concept/rule_term`，明示卡種沿 `CardKind/filter_kind`；
