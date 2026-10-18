@@ -10,13 +10,15 @@ from sve_carddb.contracts.annotations import Annotation, AnnotationSet
 from sve_carddb.contracts.four_layer import GlossaryReference, Span, hash_payload
 from sve_carddb.core.json import digest, object_value, parse
 from sve_carddb.domains.translations.four_layer_storage import write_annotation
+from sve_carddb.domains.translations.names.annotations import annotate_name
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import Fragment, read_snapshot
+from sve_carddb.export.reader_annotations import validate_annotations
 from sve_carddb.export.semantics import validate_view
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
 from ..support.snapshot_media_fixtures import media_rows
-from ..support.snapshot_project_fixtures import TEXT, populate, schema
+from ..support.snapshot_project_fixtures import TEXT, decisions, populate, schema
 from .test_snapshot_project import projected
 
 
@@ -138,6 +140,43 @@ def test_empty_private_sets_emit_no_public_id_use_or_fragment() -> None:
         assert view.tables["field_annotation"] == []
         assert view.tables["annotation_concept"] == []
         assert view.tables["translation"][0]["annotation_set_id"] is None
+
+
+def test_card_targets_require_explicit_bindings_and_keep_only_public_cards() -> None:
+    with create_database(schema(with_annotations=True)) as db:
+        with db.transaction():
+            populate(db)
+            db.update("glossary_term", {"id": "term"}, {"category": "card_name"})
+            annotate_name(db, "use", TEXT, "term")
+        baseline = projected(db)
+        assert baseline.tables["face_revision"][0]["name_concept_id"] == "term"
+        assert baseline.tables["annotation_concept"][0]["card_ids"] == []
+        card = str(baseline.tables["card"][0]["id"])
+        chosen = replace(
+            decisions(), card_name_targets={"term": ("withheld-card", card, card)}
+        )
+        projection = projected(db, chosen)
+        assert projection.tables["annotation_concept"][0]["card_ids"] == [card]
+        validate_annotations(projection.tables, ("ja", "zh-Hant"))
+        projection = replace(projection, tables=projection.tables | media_rows())
+        projection = prepare_media(projection, None, revision=1).projection
+        snapshot = export_snapshot(
+            projection,
+            Ownership.from_database(db, projection),
+            Batch(
+                "preview-20261010T010203Z-0001",
+                "2026-10-10T01:02:03Z",
+                "2026-10-10",
+                ("jp",),
+            ),
+        )
+        assert (
+            read_snapshot(
+                snapshot.manifest,
+                {key: blob.raw for key, blob in snapshot.payloads.items()},
+            )
+            == projection.tables
+        )
 
 
 def test_reader_rejects_annotation_uses_outside_source_field_partition() -> None:

@@ -19,3 +19,5 @@ class Result:
     bindings: tuple[DisplayBinding, ...]
     report: dict[str, JsonValue]
     reference_names: Mapping[str, ReferenceName]
+    card_name_targets: Mapping[str, tuple[str, ...]]
+    card_name_fragments: frozenset[str]

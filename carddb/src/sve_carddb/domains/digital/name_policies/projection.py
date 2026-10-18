@@ -13,7 +13,10 @@ from sve_carddb.domains.digital.name_policies.application import _counterparts
 from sve_carddb.domains.digital.name_policies.catalogue import catalogue
 from sve_carddb.domains.digital.name_policies.evaluate import name_result, owner_text
 from sve_carddb.domains.digital.name_policies.owners import publication_owners
-from sve_carddb.domains.digital.name_policies.references import reference_names
+from sve_carddb.domains.digital.name_policies.references import (
+    reference_names,
+    whole_name_terms,
+)
 from sve_carddb.domains.digital.name_policies.results import Result
 from sve_carddb.domains.translations.four_layer_render import RENDERER_VERSION
 from sve_carddb.domains.translations.glossary.evidence import validate_choice
@@ -67,6 +70,7 @@ class Plan:
     owners: tuple[Selected, ...]
     uses: tuple[SourceUse, ...]
     reference_names: Mapping[str, ReferenceName]
+    card_name_fragments: frozenset[str]
 
     def report(self) -> dict[str, JsonValue]:
         """Diagnostics contain IDs and counts; never official card text or private events."""
@@ -278,6 +282,8 @@ def prepare(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals
         tuple(owners),
         uses_sorted(sources.uses),
         reference_names(replay, frozen, low_confidence=policy.low_confidence),
+        frozenset(identifier for identifier, _ in replay.originals)
+        - whole_name_terms(replay),
     )
 
 
@@ -299,6 +305,7 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
     """Project one checked owner-name plan into the build database."""
     insert_raw_sources(db, (u.source for u in plan.uses))
     bindings = []
+    card_name_targets: dict[str, set[str]] = {}
     for owner in plan.owners:
         candidate = owner.candidate
         if candidate is None and owner.term_id is None:
@@ -354,6 +361,10 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
         insert_exact(db, "translation_use", values, ("id",))
         if owner.term_id is not None:
             annotate_name(db, use, owner.source.unit_id, owner.term_id)
+            if owner.term_id not in plan.card_name_fragments:
+                card_name_targets.setdefault(owner.term_id, set()).add(
+                    owner.source.card_id
+                )
         if candidate is None:
             continue
         translation = materialize(
@@ -381,6 +392,8 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
         tuple(bindings),
         plan.report(),
         plan.reference_names,
+        {key: tuple(sorted(value)) for key, value in sorted(card_name_targets.items())},
+        plan.card_name_fragments,
     )
 
 
