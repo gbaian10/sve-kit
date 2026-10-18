@@ -29,6 +29,12 @@ dependencies = [
 [project.scripts]
 sve-carddb = "sve_carddb.cli:main"
 
+[project.optional-dependencies]
+art-matching = [
+    "numpy>=2.4,<3",
+    "opencv-python-headless==4.13.0.92",
+]
+
 [dependency-groups]
 dev = [
     "pre-commit>=4.6.2",
@@ -58,6 +64,8 @@ test = [
     "pytest-cov>=7.1.0",
     "pytest-clarity>=1.0.1",
     "pytest-random-order>=1.2.0",
+    "opencv-python-headless==4.13.0.92",
+    "numpy>=2.4,<3",
 ]
 
 [tool.uv]
