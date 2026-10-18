@@ -1,0 +1,21 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: BSF2024
+    data:
+      id: a:02c43788e7da51a9813a67bad1dedd98
+      card_id: c:1a8a5d1716f75697856abf132807ae76
+      face_id: f:ad384d25af7b5da38a6fd23184b59770
+      classification: unclassified
+      uses:
+        - printing_id: p:8cb25cfdb6c5582e9f235dbf43eadf25
+          face_id: f:ad384d25af7b5da38a6fd23184b59770
+        - printing_id: p:9eb7d15d753e55b18bf6d5401e066194
+          face_id: f:ad384d25af7b5da38a6fd23184b59770
+      observation:
+        region: en
+        card_no: BSF2024-001EN
+        observation_hash: sha256:f660f1d8388326e78975a2f38a97cfab40c3a27379c364c3a3cb79e703b34164
+        rules_hash: sha256:f9417ce048fa6fbad72fe88ba3e49ffe10235cb8821973b4b719354e562d3065
+        recipe: registry-observation-v2

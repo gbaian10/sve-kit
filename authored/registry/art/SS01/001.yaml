@@ -1,0 +1,23 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: SS01
+    data:
+      id: a:a34f7d64ab8056e2bf41e91c9275b81c
+      card_id: c:93a4f84354e059b694868e6ce31b241d
+      face_id: f:f08947d5a7ce5cd98579986949dedab9
+      classification: unclassified
+      uses:
+        - printing_id: p:9a774793082d5777b8a5a70091b318e9
+          face_id: f:f08947d5a7ce5cd98579986949dedab9
+        - printing_id: p:03331b02dd2458838aa31ba65928e197
+          face_id: f:f08947d5a7ce5cd98579986949dedab9
+        - printing_id: p:ff45e737158159bb8fb4de190f0cc0fa
+          face_id: f:f08947d5a7ce5cd98579986949dedab9
+      observation:
+        region: en
+        card_no: SS01-U01EN
+        observation_hash: sha256:67b2662db7f1160c204f2d8f4dcd1bf878ff54f64ffc6b0e0b0b47d270eeb69e
+        rules_hash: sha256:2262376a126d965e05d6bf7fa7ee2b86aafd354927fff33e1dd7b162018d001b
+        recipe: registry-observation-v2

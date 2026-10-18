@@ -1,0 +1,21 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: BSF2025
+    data:
+      id: a:b4fe53735bf351cf8165b66bb3a31f6e
+      card_id: c:bb24cde08b505312815d35cbb055d9c3
+      face_id: f:75f882e391e953b3867fe6172499458a
+      classification: unclassified
+      uses:
+        - printing_id: p:a29287c6661e546aa7b5f21eea977b9c
+          face_id: f:75f882e391e953b3867fe6172499458a
+        - printing_id: p:c51fbcb195a55d44981166ded5cfb3eb
+          face_id: f:75f882e391e953b3867fe6172499458a
+      observation:
+        region: en
+        card_no: BSF2025-001EN
+        observation_hash: sha256:b38d777ebe4051df5cae3eb0fd133244eaa6a97e725ac59e4b1fd650964b0176
+        rules_hash: sha256:18700f0f221b016fbe21911ddd3f71108f6dc7f8ecb1489feb64cccaecffc640
+        recipe: registry-observation-v2
