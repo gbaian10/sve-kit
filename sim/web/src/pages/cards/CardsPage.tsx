@@ -190,15 +190,17 @@ export function CardsPage() {
       { state: { ...state, overlay: { ...overlay, pushed: true } }, preventScrollReset: true },
     )
   }
+  // Changing a condition leaves the window where the user is (usually inside the filter panel):
+  // neither the router's scroll reset nor the list's own restore may jump it to the top.
   const commit = (next: QueryState) => {
     setEdit(null)
-    commitList(urlParams(next), {})
+    commitList(urlParams(next), {}, true)
   }
   // The list's edition lives in `ed`; the preference follows so other pages open the same edition.
   const commitEdition = (next: Region) => {
     prefsStore.set({ cardEdition: next })
     setEdit(null)
-    commitList(urlParams(query, next), {})
+    commitList(urlParams(query, next), {}, true)
   }
   const nameOf = useCallback(
     (summary: CardSummary) => displayName(summary.name, uiLanguage, prefs.nameDisplay),
@@ -282,12 +284,14 @@ export function CardsPage() {
       navigationType === NavigationType.Pop &&
       previous.key !== location.key &&
       (changedQuery || previous.card === openCard)
+    // A changed condition only rewinds the list's own scrollport; only a return restores the
+    // window position.
     if (changedQuery || returning) {
       listScroll.current =
         navigationType === NavigationType.Pop
           ? (entry.listScroll ?? { top: 0, left: 0 })
           : { top: 0, left: 0 }
-      restoreScroll.current = navigationType === NavigationType.Pop ? (entry.scrollY ?? 0) : 0
+      if (navigationType === NavigationType.Pop) restoreScroll.current = entry.scrollY ?? 0
       const container = imageRoot.current?.querySelector<HTMLElement>("[data-list-scroll]")
       if (container) {
         container.scrollTop = listScroll.current.top
@@ -497,6 +501,19 @@ export function CardsPage() {
   const view = chosenView ?? prefs.viewMode
   const unsupported = queryError?.kind === "unsupported-query"
   const pending = !queryError && page === null
+  // While a changed query waits for its results, the skeleton keeps the previous results' height,
+  // so the page never shrinks under the user's scroll position.
+  const resultsRef = useRef<HTMLDivElement>(null)
+  const resultsHeight = useRef(0)
+  useLayoutEffect(() => {
+    const node = resultsRef.current
+    if (!node) return
+    if (pending) node.style.minHeight = `${String(resultsHeight.current)}px`
+    else {
+      node.style.minHeight = ""
+      resultsHeight.current = node.offsetHeight
+    }
+  }, [pending, page])
   const artOf = useCallback(
     (cell: GridCell): ImageSource | undefined =>
       images?.artImage?.(cell.summary.printingId, cell.summary.faceId),
@@ -770,7 +787,7 @@ export function CardsPage() {
           {t("results.loadFailed")}
         </Notice>
       )}
-      <div className="flex min-w-0 flex-col gap-3">
+      <div ref={resultsRef} data-results="" className="flex min-w-0 flex-col gap-3">
         {/* The status strip above says what is downloading; the list only shows its skeleton. */}
         {pending && readiness.phase !== "error" && (
           <>

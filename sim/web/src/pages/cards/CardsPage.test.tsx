@@ -287,6 +287,38 @@ describe("CardsPage", () => {
     expect(document.querySelector<HTMLElement>("[data-list-scroll]")?.scrollLeft).toBe(120)
   })
 
+  it("keeps the window and the results' height while a changed condition loads", async () => {
+    // jsdom lays nothing out: give the results area a height to hold on to.
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(1234)
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined)
+    const { router } = await open()
+    await expectCount(27)
+    // The first render's scroll reset is the router's; only what a condition change does counts.
+    scrollTo.mockClear()
+    const results = document.querySelector<HTMLElement>("[data-results]")
+    if (!results) throw new Error("missing results area")
+    expect(results.style.minHeight).toBe("")
+    const type = screen.getByRole("button", { name: "從者" })
+    await userEvent.click(type)
+    expect(router.state.location.search).toBe("?type=follower")
+    // The skeleton replaces the grid, but not its height, and the toggle keeps focus.
+    expect(results.style.minHeight).toBe("1234px")
+    expect(type).toHaveFocus()
+    await waitFor(() => {
+      expect(screen.getByText("個版次")).not.toHaveTextContent("27 個版次")
+    })
+    await waitFor(() => {
+      expect(results.style.minHeight).toBe("")
+    })
+    expect(scrollTo).not.toHaveBeenCalled()
+    // Returning restores the saved window position as before.
+    await act(() => router.navigate(-1))
+    await expectCount(27)
+    await waitFor(() => {
+      expect(scrollTo).toHaveBeenCalledWith(0, 0)
+    })
+  })
+
   it("synchronizes header sorting, direction and the toolbar through the URL", async () => {
     const { router } = await open("/cards?class=bishop&view=list")
     const user = userEvent.setup()
