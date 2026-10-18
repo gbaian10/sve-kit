@@ -68,7 +68,7 @@ from sve_carddb.domains.translations.glossary.records import (
     ConceptRecord,
     TermRecord,
 )
-from sve_carddb.domains.translations.jp_sources import effect_bindings
+from sve_carddb.domains.translations.jp_sources import display_bindings
 from sve_carddb.domains.translations.labels import apply as apply_labels
 from sve_carddb.domains.translations.models import EffectTerm, SourceValue
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
@@ -615,7 +615,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             supplemental_restrictions=restrictions,
             display_bindings=(
                 *(() if name_result is None else name_result.bindings),
-                *effect_bindings(db),
+                *display_bindings(
+                    db, names=() if name_result is None else name_result.bindings
+                ),
             ),
             private_digital=names is not None,
         ).with_text_views(views.wording, views.observed)
