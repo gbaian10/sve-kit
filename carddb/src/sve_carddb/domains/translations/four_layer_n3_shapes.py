@@ -62,7 +62,6 @@ SHAPES = {
             "term:rule.original_cost",
             "term:rule.cost",
             "term:zone.cemetery",
-            "term:action.banish",
         ),
     ),
     "spell_chain": Shape(
@@ -114,7 +113,6 @@ SHAPES = {
             "term:ability.lesson",
             "term:player.self",
             "term:zone.ex",
-            "term:action.banish",
         ),
         role="reminder",
     ),

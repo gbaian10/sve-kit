@@ -1,4 +1,4 @@
-"""Derive and verify the complete sealed v5 source construction."""
+"""Derive and verify the complete sealed v6 source construction."""
 
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
@@ -120,7 +120,7 @@ class DerivedField:
         lang: str = "zh-Hant",
         forms: Mapping[tuple[str, str], FormDefinition] | None = None,
     ) -> None:
-        """Reconstruct exact source evidence; a version label never proves v5 validity."""
+        """Reconstruct exact source evidence; a version label never proves v6 validity."""
         if frame.source.normalizer_version != VERSION:
             raise ValueError("Unsupported four-layer normalizer version")
         expected = derive_source(

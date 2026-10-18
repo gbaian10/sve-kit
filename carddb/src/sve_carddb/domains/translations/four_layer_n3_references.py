@@ -36,7 +36,6 @@ _WORDS = {
     "term:rule.damage": ("ダメージ",),
     "term:stat.health": ("体力",),
     "term:event.evolve": ("進化時",),
-    "term:action.banish": ("消滅させる", "消滅"),
     "term:ability.lesson": ("レッスン",),
     "term:ability.necrocharge": ("ネクロチャージ", "NC"),
     "term:ability.spell_chain": ("スペルチェイン", "SC"),
@@ -143,7 +142,6 @@ def _target(
     alias = {
         "NC": ("ネクロチャージ", "term:ability.necrocharge"),
         "SC": ("スペルチェイン", "term:ability.spell_chain"),
-        "消滅": ("消滅させる", "term:action.banish"),
     }.get(spelling)
     if (
         alias is not None

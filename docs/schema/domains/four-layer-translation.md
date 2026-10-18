@@ -238,7 +238,7 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 
 ### 4.3 N1 正式來源登錄
 
-`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v5`；正式 compile、authored reader 與 DB reader 只接受 v5，不保留舊版 reader。
+`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v6`；正式 compile、authored reader 與 DB reader 只接受 v6，不保留舊版 reader。
 N0 的來源構造與數值規則是 N1 明列的既有基礎；歷史對帳使用切換前已保存的 N0 建置資料，不從新 frame 反推舊版。
 此入口沿相同 source units、分段、catalog、數值規則及來源驗證邊界產葉，不另建來源驗證器。
 只擴充精確 face_revision／printing_face 的 effect／section 中 role=body 的部分；name、label、layout、reminder、token_header
@@ -264,7 +264,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v5 來源推導。
+這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用完整 v6 來源推導。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -380,7 +380,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v5。
+renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 v6。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
 
 | ID | signature（name:type/role） | rule／cases |
@@ -769,12 +769,12 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。
 
-## 11. v5 來源推導與 expression 呈現
+## 11. v6 來源推導與 expression 呈現
 
 `four_layer_derivation.derive_source(raw, source, classifier)` 產生 `DerivedField`，
-由其 `bind` 建立 `four-layer-jp-v5` 身分；`verify` 從原始來源重新推導，
+由其 `bind` 建立 `four-layer-jp-v6` 身分；`verify` 從原始來源重新推導，
 再驗完整 frame、binding、語義及接口。正式 compile、classifier、authored 與
-SQLite 來源契約只接受 v5，沒有可選家族或舊版執行入口。
+SQLite 來源契約只接受 v6，沒有可選家族或舊版執行入口。
 
 此接口只在正式來源辨識上依序套用已封版的容量、具名參數與區域計數／SEP 規則，
 最後依最終葉建構常數選項接口；共用型別不授予其他來源句型。
@@ -786,7 +786,7 @@ SQLite 來源契約只接受 v5，沒有可選家族或舊版執行入口。
 常數選項接口僅描述同一片段、同能力中已有唯一在前 intro、常數 choice_mode_count 與
 按印刷次序連續 1..K 的 choice_index。沿既有完整欄位的 choice 守衛，所有 intro／序號
 均須已具 typed 葉且無來源問題；跨片段、孤兒、歧義及缺卡名／數值前置者不加接口。
-`DerivedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v5 frame／binding
+`DerivedField.interfaces` 保存逐片段的可選 projection；`bind` 建立 v6 frame／binding
 並附接口，接口沿既有 `interface_key` 獨立驗證，不進 frame hash；`verify` 從原文重建後比對。
 `choice` 能力 scope 匯出
 `ChoiceContext/choice_mode_count`，依印刷序的 `choice_1`…`choice_K` branch scope
@@ -1196,7 +1196,7 @@ EntryFact 的持久連接、Unknown、來源快照／LKI、授予能力持有者
 
 `four_layer_integrated.FAMILY` 由唯一正式入口 `derive_source` 啟用。它依來源依賴執行歷史、
 入場／打出來源、名稱、合計、讀值／支付 X，最後接選項 consumer；
-authored 只載入正式 v5 定義與譯文，來源家族由來源推導決定。
+authored 只載入正式 v6 定義與譯文，來源家族由來源推導決定。
 整合 registry 沿各家族的閉域簽章，不另建 parser 或常數域。
 
 同一來源構造只由一個 provider 擁有：
@@ -1238,7 +1238,7 @@ descriptor ID 可以把原文字面編進構造而不留槽，所以全部 provi
 
 ### 11.12 有限來源形狀與構築上限
 
-正式來源版本為 `four-layer-jp-v5`。既有 N0／N1／N2 仍經同一 `derive_source`，
+正式來源版本為 `four-layer-jp-v6`。既有 N0／N1／N2 仍經同一 `derive_source`，
 沒有按家族混用版本的入口。`four_layer_n3_numbers` 只在完整卡片效果／section 的
 具名形狀及同欄提醒 anchor 內補數值證據，不登錄新的 expression、Form 或 DSL 語義。
 lexical numeric veto 只有在整體來源守衛成立且無其他問題時才能解除；原先的低信心、
@@ -1281,7 +1281,7 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 
 ### 11.13 #749 有限池、holder、事件與參數接口
 
-正式版本為 `four-layer-jp-v5`。本節與 §11.12 使用相同的正常 `derive_source`、
+正式版本為 `four-layer-jp-v6`。本節與 §11.12 使用相同的正常 `derive_source`、
 `bind`、來源重建驗證、SQLite reader 與 renderer；沒有另外的執行入口。
 `source_relations` 不增加任何種類。projection 的 provider／consumer 只用 port、
 scope、OccurrenceKey 與 capture 證據連接，操作次序保留於 canonical 來源。
@@ -1387,3 +1387,9 @@ intro 的 X 與 provider 來源可追，expression 與 imports 的必要葉全�
 舊 `quantity.choice_mode_count.constant.v1` 與 ModeCountRule 的常數驗證不變。
 K2 只另轉移 BP17-056 的既有 frame，中文 AST 依精確來源用途重接至新數量葉，
 up_to 接管原「至多」前綴，既有文字須保持相同，並交 #750 重審。
+
+### 11.14 固定動作文字與必要詞界線
+
+`four-layer-jp-v6` 的十種原費用逐項支付句及課程提醒，保留既有完整來源句型、數值守衛與 pending 分類；動作「消滅」留在 canonical 固定文字，不另產生 `term:action.banish` 的 Concept/rule_term 葉。其他卡片、玩家、區域、能力與數值葉仍須完整引用；不改 glossary 概念或基礎選詞，也不新增動作受詞 form。
+
+這是全庫來源葉規則換版，既有正式定義與引用同步重鍵；版本以外的轉移依 §9 比完整 payload，葉結構變更按精確來源 occurrence 重建。canonical 相同的 occurrence-scoped pending frame 仍保留各自 scope，不因中文完成而改成 resolved。
