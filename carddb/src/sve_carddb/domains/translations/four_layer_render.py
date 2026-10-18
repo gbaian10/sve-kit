@@ -63,7 +63,7 @@ if TYPE_CHECKING:
         TypedValue,
     )
 
-RENDERER_VERSION = "four-layer-renderer-v4"
+RENDERER_VERSION = "four-layer-renderer-v5"
 ZONE_CASES = frozenset(
     {"battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand", "banish", "mixed"}
 )
@@ -497,7 +497,9 @@ class Renderer:
                 continue
             for reference in self.references(item, slot.name):
                 key = canonical(reference.model_dump(mode="json"))
-                label = self.labels.get((key, lang))
+                label = self.labels.get(
+                    (key, _leaf_language(slot.type, slot.role, lang))
+                )
                 if slot.required or (
                     label is not None
                     and (label.bold is True or label.origin in {"project", "machine"})
@@ -646,8 +648,9 @@ class _Output:
         elif isinstance(node, CountExpr):
             self.leaf(item, node.args.expr.slot, (*path, 0))
 
-    def label(self, reference: Reference) -> None:
-        key = (canonical(reference.model_dump(mode="json")), self.lang)
+    def label(self, reference: Reference, lang: str | None = None) -> None:
+        lang = self.lang if lang is None else lang
+        key = (canonical(reference.model_dump(mode="json")), lang)
         value = self.renderer.labels.get(key)
         if value is None:
             raise MissingValueError("missing_term_translation")
@@ -664,7 +667,7 @@ class _Output:
         self.dependencies.append(
             {
                 "label": reference.model_dump(mode="json"),
-                "lang": self.lang,
+                "lang": lang,
                 "text": value.text,
                 "origin": value.origin,
                 "low_confidence": value.low_confidence,
@@ -691,7 +694,7 @@ class _Output:
         elif isinstance(
             value, (GlossaryReference, VocabularyReference, CardNameReference)
         ):
-            self.label(value)
+            self.label(value, _leaf_language(slot.type, slot.role, self.lang))
         elif isinstance(value, tuple):
             self.zones(item, value, path)
         elif isinstance(value, QuantitySpec):
@@ -1040,6 +1043,16 @@ class _Output:
             any(low for _, low in self.quality),
             tuple(self.leaves),
         )
+
+
+def _leaf_language(type_: LeafType, role: str, lang: str) -> str:
+    # Substring predicates match the original name, independently of localized labels.
+    return (
+        "ja"
+        if (type_, role)
+        in {("CardName", "name_fragment"), ("PredicateExpr", "name_contains_filter")}
+        else lang
+    )
 
 
 def _classifier(kind: TypedValue, zone: TypedValue) -> str:

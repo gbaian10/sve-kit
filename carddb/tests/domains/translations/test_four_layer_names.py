@@ -99,7 +99,10 @@ def test_ambiguous_or_cross_ability_receipt_remains_pending() -> None:
         )
 
 
-def test_fragments_render_with_required_reference_annotation() -> None:  # ruff: ignore[too-many-locals] -- keep source, dependency closure and normal rendering in one case
+@pytest.mark.parametrize("translated_fragment", ["測試片段", "完全不同的官方譯名"])
+def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[too-many-locals] -- keep source, dependency closure and normal rendering in one case
+    translated_fragment: str,
+) -> None:
     raw = "自分の墓場の「カード名に『仮場手札自分』を含むフォロワー」7枚を選ぶ。"
     classifier = engine()
     prepared = derive_source(raw, source(raw), classifier)
@@ -118,8 +121,11 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
     base = Renderer({}, {}, {}, domains=classifier.domains)
     labels = {
         (canonical(reference.model_dump(mode="json")), "zh-Hant"): Label(
-            reference, "zh-Hant", "測試片段", "project", False, True
-        )
+            reference, "zh-Hant", translated_fragment, "official", True, True
+        ),
+        (canonical(reference.model_dump(mode="json")), "ja"): Label(
+            reference, "ja", "仮場手札自分", "project", False, True
+        ),
     }
     for slot in frame.leaf_schema.slots:
         value = binding.values[slot.name]
@@ -161,8 +167,34 @@ def test_fragments_render_with_required_reference_annotation() -> None:  # ruff:
         expression_plan((BoundTarget(frame, binding, selected),), targets),
     )
     assert result.rendered is not None
-    assert "名稱含有測試片段" in result.rendered.text
+    assert "名稱含有仮場手札自分" in result.rendered.text
+    assert translated_fragment not in result.rendered.text
+    assert result.rendered.low_confidence is False
     assert result.rendered.annotation.occurrences
+    occurrence = next(
+        a for a in result.rendered.annotation.occurrences if a.reference == reference
+    )
+    assert occurrence.bold is True
+    assert [result.rendered.text[s.start : s.end] for s in occurrence.ranges] == [
+        "仮場手札自分"
+    ]
+    assert any(leaf.slot == fragment.name for leaf in result.rendered.leaves)
+    del renderer.labels[canonical(reference.model_dump(mode="json")), "zh-Hant"]
+    without_translation = renderer.render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
+    )
+    assert without_translation.rendered is not None
+    assert without_translation.rendered.identity() == result.rendered.identity()
+    del renderer.labels[canonical(reference.model_dump(mode="json")), "ja"]
+    missing = renderer.render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
+    )
+    assert missing.rendered is None
+    assert missing.issues == ("missing_term_translation",)
     invalid = Target(
         format=1,
         nodes=tuple(
