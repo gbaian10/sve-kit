@@ -340,7 +340,11 @@ function snapshotClient(
     previous: LoadedSnapshot | null,
     check: () => void,
     entryBytes?: Promise<Uint8Array>,
-  ): Promise<{ readonly snapshot: LoadedSnapshot; readonly downloaded: boolean }> => {
+  ): Promise<{
+    readonly snapshot: LoadedSnapshot
+    readonly downloaded: boolean
+    readonly validate: boolean
+  }> => {
     const selectedRegion = region
     const progress = (phase: LoadPhase, files?: { done: number; total: number }) => {
       check()
@@ -366,7 +370,7 @@ function snapshotClient(
       (previous.entrySource ?? "current") === source
     ) {
       matchEntry(chosen, previous.manifest)
-      return { snapshot: previous, downloaded: false }
+      return { snapshot: previous, downloaded: false, validate: false }
     }
     const cached = catalogs.get(`${stringValue(chosen["manifest_sha256"])}/${selectedRegion}`)
     const restored =
@@ -378,8 +382,13 @@ function snapshotClient(
         const candidate = await prepareAdoption(
           restored.entrySource === source ? restored : { ...restored, entrySource: source },
           check,
+          false,
         )
-        return { snapshot: candidate, downloaded: cached !== undefined && unsaved.delete(cached) }
+        return {
+          snapshot: candidate,
+          downloaded: cached !== undefined && unsaved.delete(cached),
+          validate: false,
+        }
       } catch (error) {
         check()
         if (!(error instanceof SnapshotError)) throw error
@@ -453,15 +462,33 @@ function snapshotClient(
       bootstrap,
     }
     check()
-    return { snapshot, downloaded: true }
+    return { snapshot, downloaded: true, validate: true }
+  }
+
+  const currentSnapshot = (candidate: LoadedSnapshot): LoadedSnapshot => {
+    const current = loaded
+    if (
+      !current ||
+      current === candidate ||
+      current.manifestHash !== candidate.manifestHash ||
+      current.region !== candidate.region ||
+      (current.entrySource ?? "current") !== (candidate.entrySource ?? "current")
+    )
+      return candidate
+    const available = new Set(current.bootstrap.map((fragment) => fragment.identity))
+    return candidate.bootstrap.every((fragment) => available.has(fragment.identity))
+      ? current
+      : candidate
   }
 
   const prepareAdoption = async (
     candidate: LoadedSnapshot,
     check: () => void,
+    validate = true,
   ): Promise<LoadedSnapshot> => {
     for (;;) {
       check()
+      candidate = currentSnapshot(candidate)
       const previous = loaded
       if (previous && previous !== candidate && previous.manifestHash === candidate.manifestHash) {
         const present = new Set(candidate.bootstrap.map((fragment) => fragment.identity))
@@ -469,7 +496,7 @@ function snapshotClient(
         if (extra.length)
           candidate = { ...candidate, bootstrap: [...candidate.bootstrap, ...extra] }
       }
-      await prepareCatalog(candidate, check)
+      await prepareCatalog(candidate, check, validate)
       check()
       // Printing preload may finish during a yield; compose again before warming the final key.
       if (loaded !== previous && loaded?.manifestHash === candidate.manifestHash) continue
@@ -549,7 +576,7 @@ function snapshotClient(
       restoredHash = stringValue(selection["manifestHash"])
       const snapshot = await restore(restoredHash, selectedRegion, check)
       if (!snapshot) return undefined
-      const restored = await prepareAdoption({ ...snapshot, entrySource: source }, check)
+      const restored = await prepareAdoption({ ...snapshot, entrySource: source }, check, false)
       if (revision > lastRevision) {
         lastRevision = revision
         lastIndex = signature
@@ -558,7 +585,8 @@ function snapshotClient(
     } catch (error) {
       check()
       if (error instanceof Superseded) throw error
-      if (restoredHash) await stored.remove(`snapshot-${selectedRegion}`, restoredHash)
+      if (restoredHash && error instanceof SnapshotError)
+        await stored.remove(`snapshot-${selectedRegion}`, restoredHash)
       await stored.remove(`adopted-${entry}-${selectedRegion}`, "active")
       return undefined
     }
@@ -569,10 +597,10 @@ function snapshotClient(
     const previous = loaded
     const check = selectionCheck()
     try {
-      const { snapshot, downloaded } = await download(previous, check, entryBytes)
-      const candidate = await prepareAdoption(snapshot, check)
+      const { snapshot, downloaded, validate } = await download(previous, check, entryBytes)
+      const candidate = currentSnapshot(await prepareAdoption(snapshot, check, validate))
       check()
-      if (candidate !== previous) adopt(candidate)
+      if (candidate !== loaded) adopt(candidate)
       set({
         state: "ready",
         dataVersion: candidate.dataVersion,

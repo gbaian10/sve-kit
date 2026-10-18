@@ -1,14 +1,11 @@
 import { catalogInterval } from "./catalog-timing"
 
-export function drainCatalog<T>(cursor: Iterator<void, T>): T {
-  let step = cursor.next()
-  while (!step.done) step = cursor.next()
-  return step.value
-}
+// Eight milliseconds leaves room for unmarked work and browser rendering.
+const CATALOG_BUDGET_MS = 8
 
 /** One deadline spans validation and construction, including their microtask continuations. */
 export class CatalogBudget {
-  private deadline = performance.now() + 8
+  private deadline = performance.now() + CATALOG_BUDGET_MS
   private channel: MessageChannel | undefined
 
   private readonly check: () => void
@@ -55,7 +52,7 @@ export class CatalogBudget {
         await this.pause()
         this.check()
         start = performance.now()
-        this.deadline = start + 8
+        this.deadline = start + CATALOG_BUDGET_MS
         active = true
       }
     } finally {

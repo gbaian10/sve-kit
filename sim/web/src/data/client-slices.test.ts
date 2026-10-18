@@ -261,7 +261,7 @@ describe("catalog preparation at client publication boundaries", () => {
           if (key.url.includes("/adopted-")) await cache.delete(key)
       }
       const clock = slices(),
-        gate = clock.hold(),
+        gate = clock.hold("sve:catalog:catalogOf"),
         served = origin(),
         client = createSnapshotClient(base, { fetch: served.fetch, cacheStorage: storage })
       const published = observed(client),
@@ -275,6 +275,8 @@ describe("catalog preparation at client publication boundaries", () => {
       const snapshot = ready(client)
       expect(published).toEqual([snapshot])
       expect(served.paths.every((path) => path === INDEX)).toBe(true)
+      expect(clock.measures.some((entry) => entry.name === "sve:catalog:catalogOf")).toBe(true)
+      expect(clock.measures.some((entry) => entry.name === "sve:catalog:validate")).toBe(false)
     },
   )
 
@@ -427,6 +429,82 @@ describe("catalog preparation at client publication boundaries", () => {
     expect(published.map((snapshot) => snapshot.region)).toEqual(["en"])
   })
 
+  it.each(["reload", "restored background check"])(
+    "keeps completed printings when a same-manifest %s finishes later",
+    async (path) => {
+      const saved = path === "reload" ? undefined : await seeded()
+      slices()
+      const served = origin(),
+        entered = Promise.withResolvers<undefined>(),
+        released = Promise.withResolvers<undefined>()
+      let holdIndex = path !== "reload"
+      const client = createSnapshotClient(base, {
+        cacheStorage: saved?.storage ?? memoryCache(),
+        fetch: async (url, init) => {
+          if (holdIndex && url === `${base}/${INDEX}`) {
+            holdIndex = false
+            entered.resolve(undefined)
+            await released.promise
+          }
+          return served.fetch(url, init)
+        },
+      })
+      await client.load()
+      if (path === "reload") holdIndex = true
+      const reloading = client.reload()
+      await entered.promise
+      await client.prefetchPrintings?.()
+      const supplemented = ready(client),
+        catalog = catalogOf(supplemented),
+        published = observed(client)
+      expect(supplemented.printingReady).toBe(true)
+      released.resolve(undefined)
+      await reloading
+      expect(client.snapshot()).toBe(supplemented)
+      expect(catalogOf(ready(client))).toBe(catalog)
+      expect(published).toEqual([])
+      await client.prefetchPrintings?.()
+      expect(client.snapshot()).toBe(supplemented)
+      expect(published).toEqual([])
+    },
+  )
+
+  it("keeps a restored snapshot record after a transient preparation failure", async () => {
+    const { storage, original } = await seeded(),
+      snapshot = ready(original),
+      stored = new VerifiedCache(base, "snapshot", 2, storage),
+      before = await stored.read("snapshot-jp", snapshot.manifestHash)
+    expect(before).toBeDefined()
+    slices()
+    let fail = true
+    vi.stubGlobal("scheduler", {
+      yield: () => {
+        if (!fail) return Promise.resolve()
+        fail = false
+        return Promise.reject(new Error("temporary scheduler failure"))
+      },
+    })
+    const served = origin(),
+      released = Promise.withResolvers<undefined>(),
+      client = createSnapshotClient(base, {
+        cacheStorage: storage,
+        fetch: async (url, init) => {
+          if (url === `${base}/${INDEX}`) await released.promise
+          return served.fetch(url, init)
+        },
+      }),
+      loading = client.load()
+    try {
+      await expect.poll(() => stored.read("adopted-index-jp", "active")).toBeUndefined()
+      expect(await stored.read("snapshot-jp", snapshot.manifestHash)).toEqual(before)
+    } finally {
+      released.resolve(undefined)
+      await loading
+    }
+    expect(ready(client).manifestHash).toBe(snapshot.manifestHash)
+    expect(served.paths.every((path) => path === INDEX)).toBe(true)
+  })
+
   it("merges printing completion that wins a yield before a same-hash adoption", async () => {
     const clock = slices(),
       served = origin(),
@@ -496,15 +574,19 @@ describe("catalog preparation at client publication boundaries", () => {
   )
 
   it.each(["restore", "restoreAdopted"])(
-    "rejects a semantically damaged %s record before publishing verified network data",
+    "rebuilds an unusable %s record when catalog construction fails",
     async (path) => {
       const { storage, original } = await seeded(),
         snapshot = ready(original)
       const stored = new VerifiedCache(base, "snapshot", 2, storage)
+      const bootstrap = structuredClone(snapshot.bootstrap)
+      const card = bootstrap.find((fragment) => fragment.table === "card")?.rows[0]
+      if (!card) throw new Error("Missing fixture card")
+      delete card["id"]
       const record = {
         manifest: snapshot.manifest,
         config: snapshot.config,
-        bootstrap: snapshot.bootstrap.filter((fragment) => fragment.table !== "text_unit"),
+        bootstrap,
       }
       await stored.write(
         "snapshot-jp",

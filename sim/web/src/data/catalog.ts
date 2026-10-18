@@ -14,9 +14,10 @@ import {
   type Suggestion,
   type TextLang,
 } from "../domain/search"
-import { CatalogBudget, drainCatalog } from "./catalog-cursor"
+import { CatalogBudget } from "./catalog-cursor"
 import { catalogWork } from "./catalog-timing"
 import type { LoadedSnapshot } from "./client"
+import { drain } from "./format-v3/cursor"
 import type { Row } from "./format-v3/decode"
 import { integerValue, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
@@ -353,7 +354,7 @@ const catalogs = new WeakMap<LoadedSnapshot, Catalog>()
 const prepared = new WeakSet<LoadedSnapshot>()
 
 export function createCatalog(snapshot: LoadedSnapshot): Catalog {
-  return drainCatalog(catalogCursor(snapshot))
+  return drain(catalogCursor(snapshot))
 }
 
 /** One catalog per loaded snapshot object; a reload that swaps the snapshot rebuilds it. */
@@ -366,13 +367,17 @@ export function catalogOf(snapshot: LoadedSnapshot): Catalog {
   return catalog
 }
 
-/** Prepare the final candidate object before the client makes it visible to subscribers. */
-export async function prepareCatalog(snapshot: LoadedSnapshot, check: () => void): Promise<void> {
+/** Digest-checked local records reuse their prior validation; construction still stays private. */
+export async function prepareCatalog(
+  snapshot: LoadedSnapshot,
+  check: () => void,
+  validate = true,
+): Promise<void> {
   check()
   if (prepared.has(snapshot)) return
   const budget = new CatalogBudget(check)
   try {
-    await budget.drain(validateCatalogCursor(snapshot.bootstrap), "validate")
+    if (validate) await budget.drain(validateCatalogCursor(snapshot.bootstrap), "validate")
     const catalog =
       catalogs.get(snapshot) ?? (await budget.drain(catalogCursor(snapshot), "catalogOf"))
     check()

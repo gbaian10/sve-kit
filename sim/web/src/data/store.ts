@@ -1,5 +1,5 @@
-import { drainCatalog } from "./catalog-cursor"
 import type { LoadedSnapshot } from "./client"
+import { drain } from "./format-v3/cursor"
 import type { Row } from "./format-v3/decode"
 import { integerValue, stringValue } from "./format-v3/json"
 import { mergedRowsCursor } from "./format-v3/reader"
@@ -54,7 +54,7 @@ function* group(rows: readonly Row[], field: string): Generator<void, Map<string
   return out
 }
 export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
-  return drainCatalog(cardIndexCursor(snapshot))
+  return drain(cardIndexCursor(snapshot))
 }
 
 export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, CardIndex> {

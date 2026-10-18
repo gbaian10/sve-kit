@@ -1,4 +1,4 @@
-import { drainCatalog } from "../catalog-cursor"
+import { drain } from "./cursor"
 import { decodeRow, type Row } from "./decode"
 import { fail } from "./errors"
 import {
@@ -274,7 +274,7 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "4.
 }
 
 export function mergedRows(fragments: readonly Fragment[], table: string): Row[] {
-  return drainCatalog(mergedRowsCursor(fragments, table))
+  return drain(mergedRowsCursor(fragments, table))
 }
 
 export function* mergedRowsCursor(
@@ -430,7 +430,7 @@ export function catalogKeys(files: Files, region: string): string[] {
 }
 
 export function validateCatalog(fragments: readonly Fragment[]): void {
-  drainCatalog(validateCatalogCursor(fragments))
+  drain(validateCatalogCursor(fragments))
 }
 
 export function* validateCatalogCursor(fragments: readonly Fragment[]): Generator<void, void> {
