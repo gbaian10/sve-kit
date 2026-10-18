@@ -53,7 +53,11 @@ def art_inputs(
     result = []
     unavailable = []
     for binding in index.bindings:
-        parent, face = printing[binding.printing_id], faces[binding.face_id]
+        parent, face = printing.get(binding.printing_id), faces.get(binding.face_id)
+        if parent is None:
+            raise ValueError(f"Unknown printing in image index: {binding.printing_id}")
+        if face is None:
+            raise ValueError(f"Unknown face in image index: {binding.face_id}")
         if (
             parent.card_id != face.card_id
             or allocations[parent.id] != binding.int_id
@@ -136,10 +140,20 @@ def art_candidates(
         raise typer.BadParameter(
             "Install sve-carddb[art-matching] to compare images"
         ) from None
-    except ValueError, OSError, KeyError, ValidationError:
+    except ValidationError as error:
+        details = "; ".join(
+            ".".join(map(str, item["loc"])) + ": " + item["msg"]
+            for item in error.errors(
+                include_input=False, include_context=False, include_url=False
+            )
+        )
+        raise typer.BadParameter(f"Invalid art comparison input: {details}") from error
+    except KeyError as error:
         raise typer.BadParameter(
-            "Invalid art comparison input; check index, bindings, bitmaps and previous recipe"
-        ) from None
+            f"Missing registry or image-index field/reference (printing, face or image): {error}"
+        ) from error
+    except (ValueError, OSError) as error:
+        raise typer.BadParameter(f"Invalid art comparison input: {error}") from error
     candidate = result.candidates
     typer.echo(
         json.dumps(

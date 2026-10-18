@@ -226,11 +226,10 @@ def _art(
             raise TypeError("Invalid art use")
         printing = kinds["printing"][string(use, "printing_id")]
         if (
-            printing.data["region"] != "en"
-            or printing.data["card_id"] != entry.data["card_id"]
+            printing.data["card_id"] != entry.data["card_id"]
             or use["face_id"] != entry.data["face_id"]
         ):
-            raise ValueError("English original art attached to the wrong printing")
+            raise ValueError("Art attached to the wrong printing")
 
 
 FIELDS = {

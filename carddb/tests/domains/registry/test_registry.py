@@ -383,7 +383,35 @@ def test_official_registry_special_mappings(official_registry: list[Entry]) -> N
 
 def test_official_curation_and_corrections(official_registry: list[Entry]) -> None:
     arts = [entry for entry in official_registry if entry.kind == "art"]
-    assert len(arts) == 9
+    printing_ids = {
+        string(entry.data, "card_no"): string(entry.data, "id")
+        for entry in official_registry
+        if entry.kind == "printing" and entry.data["region"] == "en"
+    }
+    original_groups = {
+        frozenset(printing_ids[number] for number in group)
+        for group in (
+            ("CP02-072EN", "CP02-P57EN"),
+            ("CP03-T11EN",),
+            ("BP18-SP01EN",),
+            ("PR-211EN",),
+            ("PR-298EN",),
+            ("PR-342EN",),
+            ("PR-395EN",),
+            ("PR-448EN",),
+            ("PR-543EN",),
+        )
+    }
+    registered_groups = set()
+    for art in arts:
+        uses = art.data["uses"]
+        assert isinstance(uses, list)
+        registered_groups.add(
+            frozenset(
+                string(use, "printing_id") for use in uses if isinstance(use, dict)
+            )
+        )
+    assert original_groups <= registered_groups
     assert (
         len([entry for entry in official_registry if entry.kind == "card_related"]) == 3
     )

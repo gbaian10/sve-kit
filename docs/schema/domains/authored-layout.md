@@ -12,7 +12,7 @@
 | 定案 | 永久卡、面、版次 | `registry/card/<owner>/001.yaml`、`registry/face/<owner>/001.yaml`、`registry/printing/<owner>/001.yaml` |
 | 定案 | 整數編號配號／全域入口 | `ids/<owner>/001.yaml`、`ids/index.yaml` |
 | 定案 | 英文獨有查核 | `registry/region-mapping-review/<owner>/001.yaml` |
-| 定案 | 英文原創插畫 | `registry/art/<owner>/001.yaml` |
+| 定案 | 插畫同圖分組（含英文原創插畫） | `registry/art/<owner>/001.yaml` |
 | 定案 | 換皮卡 | `registry/card-related/<owner>/001.yaml` |
 | 定案 | 本批來源更正 | `registry/source-correction/active/<owner>/001.yaml`、`registry/source-correction/needs-review/<owner>/001.yaml` |
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
@@ -199,6 +199,8 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 在重審前相關 EN 特例退回原文；不自動配對新卡或延伸舊批准。EN observations、current 與翻譯身分閘門照原規則重驗。
 
 `art` 的 `data` 為 `id/card_id/face_id/classification/uses/observation`，uses 是 printing_id＋face_id 陣列。本批原創插畫只掛已確認的 EN printing；未確認基準及跨版次同圖組，故 classification=unclassified，不造假 base／alternate 或 JP art。`art_id=null` 的其他 printing 不代表沒有插畫。
+
+一般同圖分組可包含同一卡面已登錄的 JP／EN 版次，含 PR、Token 與雙面卡的對應面；不能跨 card 或 face。候選由[插畫比對工具](../images/art-candidates.md)產生，精確成員經人工審閱後追加為 art，方法與候選 pin、人工決定及驗證結果由 PR 記錄，不擴充 registry 決定封套。observation 引用組內已登錄 use 的完整觀測；其他成員的來源新鮮度仍由匯入器逐筆驗。未採納最早一般版基準時使用 unclassified，不從分組或卡號推導 base／alternate、換框、CV 簽名或活動標誌；既有 art 與舊分片仍不可改寫。
 
 `card_related` 的 `data` 為 `id/from_card_id/to_card_id/relation/source_kind/target_printing_id/suggested_count/dsl_id/evidence`。relation=same_rules_reskin、source_kind=authored，三個選用欄為 null。evidence 逐筆記 `role: from|to` 及全部兩端已採納版次的觀測；匯入時逐地區比對兩端來源。相同換皮卡的普通／特殊 printing 只產一條關係，禁止自指、多目標與反向重複。只能在兩端都有版次且來源驗證仍匹配的地區投影；任一端目前來源改變就停止該地區投影，依 build-db §5 重審。不能繼承原卡 DSL 或構築張數。
 

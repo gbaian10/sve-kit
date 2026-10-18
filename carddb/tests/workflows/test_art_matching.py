@@ -215,6 +215,62 @@ def test_cli_rejects_invalid_inputs_without_writing_candidates(
         index_path = tmp_path / (digest(index.content())[7:] + ".json")
         index_path.write_bytes(index.content())
         args[3] = str(index_path)
-    result = CliRunner().invoke(app, args)
+    result = CliRunner().invoke(app, args, env={"COLUMNS": "240"})
     assert result.exit_code != 0
+    assert not output.exists()
+    if damage == "size":
+        assert "Art bitmap size differs from pinned image index" in result.output
+    elif damage == "binding":
+        assert "Art image binding differs from registered face" in result.output
+
+
+def test_cli_explains_why_previous_cache_is_rejected(
+    image_input: tuple[Path, Path], registry_root: Path, tmp_path: Path
+) -> None:
+    output = tmp_path.parent / (tmp_path.name + "-output") / "first.json"
+    runner = CliRunner(env={"COLUMNS": "240"})
+    first = runner.invoke(app, arguments(image_input, registry_root, output))
+    assert first.exit_code == 0, first.output
+    candidate = ArtCandidates.read(output)
+    output.write_bytes(
+        candidate.model_copy(update={"opencv_version": "obsolete"}).content()
+    )
+    second = runner.invoke(
+        app,
+        [
+            *arguments(image_input, registry_root, output.with_name("second.json")),
+            "--previous",
+            str(output),
+        ],
+    )
+    assert second.exit_code != 0
+    assert "Previous art inputs or OpenCV changed" in second.output
+    assert "run without --previous" in second.output
+
+
+@pytest.mark.parametrize("field", ["printing_id", "face_id", "image_id"])
+def test_cli_identifies_missing_index_references(
+    image_input: tuple[Path, Path], registry_root: Path, tmp_path: Path, field: str
+) -> None:
+    index_path, root = image_input
+    index = ImageIndex.read(index_path)
+    if field == "image_id":
+        del index.tables["printing_image"][0][field]
+        expected = "Missing registry or image-index field/reference"
+    else:
+        index.tables["printing_image"][0][field] = "missing-reference"
+        first = index.bindings[0].model_copy(update={field: "missing-reference"})
+        index = index.model_copy(update={"bindings": (first, *index.bindings[1:])})
+        expected = "Unknown " + field.removesuffix("_id") + " in image index"
+    index_path = tmp_path / (digest(index.content())[7:] + ".json")
+    index_path.write_bytes(index.content())
+    output = tmp_path.parent / (tmp_path.name + "-output") / "output.json"
+    result = CliRunner().invoke(
+        app,
+        arguments((index_path, root), registry_root, output),
+        env={"COLUMNS": "240"},
+    )
+    assert result.exit_code != 0
+    assert expected in result.output
+    assert (field if field == "image_id" else "missing-reference") in result.output
     assert not output.exists()

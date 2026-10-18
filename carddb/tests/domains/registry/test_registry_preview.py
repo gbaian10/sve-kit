@@ -14,7 +14,7 @@ from sve_carddb.domains.registry.records import CorrectionData, PrintingData
 from sve_carddb.domains.registry.storage import Shard, read_yaml
 
 from ...support.registry_preview_fixtures import BUILD, REVISION, evidence, parents
-from ...support.registry_snapshot_fixtures import edit_record, rewrite
+from ...support.registry_snapshot_fixtures import edit_record, kind_shard, rewrite
 from ...support.registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose shared synthetic fixture
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose shared fixture dependency
 
@@ -112,6 +112,47 @@ def test_full_synthetic_import_links_en_art_and_reskin(
         mapping = db.rows("region_mapping_review")[0].values
         assert mapping["source_id"] in authored_sources
         assert sum(check.status == "matched" for check in related.evidence) == 4
+
+
+@pytest.mark.parametrize("include_en", [False, True])
+def test_reviewed_art_can_group_jp_and_en_printings(
+    registry_root: Path, inputs: Inputs, *, include_en: bool
+) -> None:
+    def group(entry: Entry) -> None:
+        _, entries = kind_shard(registry_root, "printing")
+        printing = next(
+            item
+            for item in entries.records
+            if item.data.get("region") == "jp"
+            and item.data["card_id"] == entry.data["card_id"]
+        )
+        use = {
+            "printing_id": printing.data["id"],
+            "face_id": entry.data["face_id"],
+        }
+        previous = entry.data["uses"]
+        assert isinstance(previous, list)
+        entry.data["uses"] = [use, *previous] if include_en else [use]
+        entry.data["observation"] = printing.data["observation"]
+
+    edit_record(registry_root, "art", group)
+    plan = plan_preview(registry_root, evidence(inputs), regions=("jp", "en"))
+    art = plan.included("art")[0]
+    with create_database(compile_build(("en", "related"))) as db:
+        parents(db, plan)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
+        grouped = [
+            row.values
+            for row in db.rows("printing_face")
+            if row.values["art_id"] == art.entry().data["id"]
+        ]
+        assert len(grouped) == (2 if include_en else 1)
+        regions = {
+            row.values["region"]
+            for row in db.rows("printing")
+            if row.values["id"] in {use["printing_id"] for use in grouped}
+        }
+        assert regions == ({"jp", "en"} if include_en else {"jp"})
 
 
 @pytest.mark.parametrize(
