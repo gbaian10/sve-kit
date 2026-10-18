@@ -18,13 +18,99 @@ from sve_carddb.domains.text_observations.wording import populate_wording_basis
 
 from ...support.source_correction_fixtures import make_correction_case
 from ...support.text_observation_fixtures import make_case
+from ..registry.test_registry import card
 from ..registry.test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
 from .test_wording_pending import product
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.core.regions import Region
     from sve_carddb.domains.registry.review import Inputs
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize(
+    "mode",
+    ["main_reminder", "token_reminder", "supplement", "wording", "tie", "undated"],
+)
+def test_current_wording_preferences_precede_release_dates(
+    tmp_path: Path,
+    inputs: Inputs,
+    region: Region,
+    mode: str,
+) -> None:
+    if region == "en":
+        del inputs.en["GF01-001EN"]
+        del inputs.mapping.targets["GF01-001EN"]
+        inputs.mapping.reskins = {}
+        inputs.en["PR-002EN"] = card("PR-002EN", "Name", english=True)
+        inputs.mapping.targets["PR-002EN"] = "BP02-071"
+        inputs.mapping.original_art.add("PR-002EN")
+        inputs.decisions.art_groups = [["BP02-070EN", "PR-002EN"]]
+    cards = inputs.jp if region == "jp" else inputs.en
+    older, newer = tuple(cards.values())
+    newer.faces[0].name = older.faces[0].name
+    plain = "【必殺】" if region == "jp" else "Bane."
+    reminder = (
+        "【必殺】（【必殺】を持つ合成ユニットの説明）"
+        if region == "jp"
+        else "Bane. (After this follower fights, synthetic reminder.)"
+    )
+    older.faces[0].text = plain if mode == "main_reminder" else "Create a token."
+    newer.faces[0].text = (
+        reminder
+        if mode == "main_reminder"
+        else "Create two tokens."
+        if mode in {"wording", "tie", "undated"}
+        else "Create a token."
+    )
+    if mode in {"token_reminder", "supplement"}:
+        older.faces[0].sections = [plain]
+        newer.faces[0].sections = [reminder] if mode == "token_reminder" else []
+    case = make_case(tmp_path / "authored", inputs, regions=(region,))
+    group = case.plan.groups[0]
+    with create_database(compile_build(("t0", "en", "related"))) as db:
+        with db.transaction():
+            case.stage(db)
+        case.compose().import_into(
+            db, build=case.context(), vocabulary=case.vocabulary, published=()
+        )
+        for item in group.observations:
+            product(
+                db,
+                item.printing_id,
+                None
+                if mode == "undated"
+                else "2020-01-01"
+                if mode == "tie" or item.card_no == older.number
+                else "2026-01-01",
+                "unknown" if mode == "undated" else "day",
+            )
+        with db.transaction():
+            for row in db.rows("face_wording"):
+                db.delete(
+                    "face_wording",
+                    {key: row.values[key] for key in ("face_id", "region")},
+                )
+            populate_wording_basis(db, case.plan)
+        if mode == "undated":
+            assert not db.rows("face_current")
+            assert db.rows("face_wording")[0].values["reason"] == "no_known_release_day"
+            return
+        expected_no = (
+            newer.number
+            if mode == "wording"
+            else min(cards)
+            if mode == "tie"
+            else older.number
+        )
+        expected = next(
+            item for item in group.observations if item.card_no == expected_no
+        )
+        assert db.rows("face_current")[0].values[
+            "revision_id"
+        ] == candidate_revision_id(expected)
 
 
 @pytest.mark.parametrize(
@@ -70,7 +156,7 @@ def test_rule_conditions_numbers_and_signs_are_not_reminders(
         "manual_same_day",
     ],
 )
-def test_semantic_basis_requires_equivalence_and_unique_dated_content(
+def test_current_selection_keeps_classification_and_breaks_release_ties(
     tmp_path: Path,
     inputs: Inputs,
     mode: str,
@@ -129,19 +215,29 @@ def test_semantic_basis_requires_equivalence_and_unique_dated_content(
                 return
             populate_wording_basis(db, plan)
         assessment = db.rows("face_wording")[0].values
-        if mode in {"same_day", "errata", "manual_reject_auto"}:
-            assert not db.rows("face_current")
-            assert assessment["classification"] == (
-                "unresolved" if mode == "same_day" else "errata"
-            )
+        assert len(db.rows("face_current")) == 1
+        expected = group.observations[
+            0
+            if mode
+            in {
+                "manual",
+                "undated",
+                "ai_undated_pending",
+                "manual_same_day",
+                "same_day",
+                "manual_reject_auto",
+            }
+            else 1
+        ]
+        if mode == "same_day":
+            expected = min(group.observations, key=lambda item: item.card_no)
+        assert db.rows("face_current")[0].values[
+            "revision_id"
+        ] == candidate_revision_id(expected)
+        if mode in {"errata", "manual_reject_auto"}:
+            assert assessment["classification"] == "errata"
+            assert assessment["basis_printing_id"] is None
         else:
-            assert len(db.rows("face_current")) == 1
-            expected = group.observations[
-                0
-                if mode
-                in {"manual", "undated", "ai_undated_pending", "manual_same_day"}
-                else 1
-            ]
             assert assessment["basis_printing_id"] == expected.printing_id
             assert assessment["classification"] == "same_effect"
             if mode == "ai_undated_pending":
