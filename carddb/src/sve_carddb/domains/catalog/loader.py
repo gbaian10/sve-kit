@@ -212,9 +212,5 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed pr
                         origin=label.origin,
                         low_confidence=label.low_confidence,
                         source_id=source_id,
-                        semantic_variant=(
-                            f"vocabulary:{item_term.kind}:{item_term.code}"
-                            if label.origin == "official"
-                            else "default"
-                        ),
+                        semantic_variant=f"vocabulary:{item_term.kind}:{item_term.code}",
                     )

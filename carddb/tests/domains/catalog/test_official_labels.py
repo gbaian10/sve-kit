@@ -42,7 +42,8 @@ def with_label(case: VocabularyCase, kind: str = "class") -> list[dict[str, Json
             "text": raw["raw"],
             "origin": "official",
             "source_ref": raw["source_ref"],
-        }
+        },
+        {"lang": "zh-Hant", "text": "合成標籤"},
     ]
     return items
 
@@ -54,17 +55,23 @@ def test_exact_base_label_retains_official_source(
     case = save(case, with_label(case, kind))
     with create_database(schema) as db:
         result = populate_case(db, case.case, {"test-store": case.archive})
-        translation = db.rows("translation")[0].values
+        translations = [row.values for row in db.rows("translation")]
+        translation = next(row for row in translations if row["target_lang"] == "en")
         assert translation["text"] == "Synthetic " + kind
         assert (translation["origin"], translation["authority"]) == (
             "official",
             "sve_official",
         )
         assert translation["source_id"] in {use.source.id for use in result.uses}
+        assert translation["id"] in {
+            row.values["translation_id"] for row in db.rows("translation_selection")
+        }
         assert (
-            db.rows("translation_selection")[0].values["translation_id"]
-            == translation["id"]
+            next(row for row in translations if row["target_lang"] == "zh-Hant")["text"]
+            == "合成標籤"
         )
+        assert len({row["context_id"] for row in translations}) == 1
+        assert len(db.rows("translation_use")) == 1
 
 
 @pytest.mark.parametrize("mutation", ["text", "lang", "other_ref", "marked_type"])
