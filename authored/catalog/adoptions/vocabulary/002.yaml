@@ -888,6 +888,16 @@ records:
               text_hash: sha256:b7ff2c1bf3b120eed657e18319ec0b8dd18d503f2ae50b9accdd6ceee8fde135
             special_kinds: []
         active: true
+        translations:
+          - lang: en
+            text: Dragon's Nest
+            origin: official
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:004b2a0334d0edb9b038461131cfac102aef53d0420f23805858d887b6a9097d
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:e3e03d7999f2d6edb6fcfab91a1257819251e75238af394994a3518ad0bed9ff
   - origin: official
     kind: vocabulary_adoption
     data:
