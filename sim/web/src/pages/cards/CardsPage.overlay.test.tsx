@@ -287,7 +287,7 @@ describe("opening a card beside the results", () => {
       await user.click(first)
       const aside = panel()
       await within(aside).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
-      await user.click(screen.getByRole("switch", { name: "同一張卡只顯示一次" }))
+      await user.selectOptions(screen.getByRole("combobox", { name: "顯示方式" }), to)
       await waitFor(() => {
         expect(new URLSearchParams(router.state.location.search).get("unit")).toBe(
           to === "card" ? "card" : null,
@@ -327,7 +327,7 @@ describe("opening a card beside the results", () => {
       await waitFor(() => expect(next).toBeEnabled())
       await user.click(next)
       await within(aside).findByRole("heading", { name: "試作隊長" }, { timeout: 5000 })
-      await user.click(screen.getByRole("switch", { name: "同一張卡只顯示一次" }))
+      await user.selectOptions(screen.getByRole("combobox", { name: "顯示方式" }), to)
       await waitFor(() => {
         expect(new URLSearchParams(router.state.location.search).get("unit")).toBe(
           to === "card" ? "card" : null,

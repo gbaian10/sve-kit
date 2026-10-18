@@ -217,6 +217,10 @@ const heldPath = stringValue(bootstrapFile["path"])
 // The held file is reached only after the manifest is hashed and decoded, which a busy machine
 // can stretch past the default one-second poll.
 const POLL = { timeout: 10_000 }
+// A card's representative may be a printing from another set, which is a locator until the
+// background printing download lands; `search` channels do not re-run on their own.
+const completions = (events: readonly SearchEvent[]) =>
+  events.filter((event) => event.kind === "background-ready").length
 
 describe("complete Worker catalog generations", () => {
   it("keeps only the last input and searches once after the whole download", async () => {
@@ -283,6 +287,9 @@ describe("complete Worker catalog generations", () => {
       result: { phase: "complete" },
     })
     expect(h.served.requests.filter((path) => path.startsWith("snapshots/blobs/"))).toEqual(blobs)
+    await expect.poll(() => completions(h.events), POLL).toBe(2)
+    h.channel.search(query)
+    await h.queried()
     const result = h.status().result
     if (first.phase !== "complete" || result.phase !== "complete") throw new Error("missing result")
     expect(result.page).toEqual(first.page)
@@ -718,6 +725,9 @@ it("shares one generation across independently coalesced result and suggestion c
   h.channel.search(query)
   suggestions.search({ ...query, state: { ...CARD_QUERY, text: "bp01-001" }, limit: 1 })
   await h.settled()
+  await expect.poll(() => completions(h.events), POLL).toBe(1)
+  h.channel.search(query)
+  await h.queried()
   expect(h.events.filter((event) => event.kind === "ready")).toHaveLength(1)
   expect(suggestions.getStatus().result).toMatchObject({ phase: "complete" })
   const suggestionPage = suggestions.getStatus().result
@@ -1369,6 +1379,9 @@ describe("persistent index images", () => {
     second.channel.search(query)
     await second.settled()
     expect(readyMetrics(second.events).slice(-1)).toMatchObject([{ restored: false }])
+    await expect.poll(() => completions(second.events), POLL).toBe(1)
+    second.channel.search(query)
+    await second.queried()
     const before = first.status().result
     const after = second.status().result
     if (before.phase !== "complete" || after.phase !== "complete") throw new Error("missing result")

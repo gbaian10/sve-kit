@@ -487,7 +487,11 @@ export function CardsPage() {
         <b className="font-semibold text-text-1 tabular-nums">
           {new Intl.NumberFormat(uiLanguage).format(page.total)}
         </b>{" "}
-        {query.unit === "printing" ? t("results.countPrintingUnit") : t("results.countUnit")}
+        {query.unit === "printing"
+          ? t("results.countPrintingUnit")
+          : query.unit === "art"
+            ? t("results.countArtUnit")
+            : t("results.countUnit")}
       </p>
     ) : null
   const view = chosenView ?? prefs.viewMode

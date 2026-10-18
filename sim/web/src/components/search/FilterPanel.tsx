@@ -1,9 +1,16 @@
-import { type ReactNode, useId } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
-import { COST_CAP, type QueryState, STAT_CAP, toggleValue } from "../../domain/query/model"
+import {
+  COST_CAP,
+  QUERY_UNITS,
+  type QueryState,
+  STAT_CAP,
+  toggleValue,
+} from "../../domain/query/model"
+import { REPRESENTATIVE_RARITIES } from "../../domain/representative"
 import type { Region } from "../../domain/search"
-import { Switch } from "../ui/Switch"
+import { cn } from "../ui/cn"
 import { Section, Toggle } from "./FilterControls"
 
 export interface FilterPanelProps {
@@ -20,6 +27,8 @@ export interface FilterPanelProps {
 
 const EDITIONS = ["jp", "en"] as const
 const range = (cap: number) => Array.from({ length: cap + 1 }, (_, value) => value)
+const SELECT =
+  "h-9 rounded-control border border-border bg-surface-1 px-2 text-13 text-text-1 disabled:cursor-not-allowed disabled:text-text-3"
 
 // Every button applies at once (the maintainer chose the reference site's behaviour over the
 // drafted "apply" step); the panel only renders the committed state it is given. The class row
@@ -35,7 +44,7 @@ export function FilterPanel({
   facets,
 }: FilterPanelProps) {
   const { t } = useTranslation()
-  const hintId = useId()
+  const merged = query.unit !== "printing"
   const stat = (
     title: string,
     field: "cost" | "attack" | "defense",
@@ -89,26 +98,61 @@ export function FilterPanel({
       {stat(t("filters.attack"), "attack", STAT_CAP, query.attack)}
       {stat(t("filters.defense"), "defense", STAT_CAP, query.defense)}
       {facets}
-      {/* Display, not a filter: on = one row per card (`unit=card`), off = one per printing. */}
-      <div className="flex items-start gap-2">
-        <Switch
-          size="sm"
-          label={t("filters.onePerCard")}
-          describedBy={hintId}
-          checked={query.unit === "card"}
-          onChange={(checked) => {
-            onChange({ ...query, unit: checked ? "card" : "printing" })
+      {/* Display, not a filter: how many cells a card gets, and which printing a merged cell shows
+          (#781). The representative choice only applies to merged cells, so it is disabled, not
+          hidden, while every printing is listed: the URL keeps it for the next switch. */}
+      <Section title={t("filters.display")}>
+        <select
+          aria-label={t("filters.display")}
+          value={query.unit}
+          className={SELECT}
+          onChange={(event) => {
+            const unit = QUERY_UNITS.find((unit) => unit === event.target.value)
+            if (unit) onChange({ ...query, unit })
           }}
-        />
-        <div className="flex min-w-0 flex-col justify-center py-2.5 leading-tight">
-          <span aria-hidden="true" className="text-13 text-text-1">
-            {t("filters.onePerCard")}
-          </span>
-          <span id={hintId} className="text-12 text-text-3">
-            {t("filters.onePerCardHint")}
-          </span>
-        </div>
-      </div>
+        >
+          {QUERY_UNITS.map((unit) => (
+            <option key={unit} value={unit}>
+              {t(`filters.displayUnit.${unit}`)}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label={t("filters.representative")}
+          value={query.representative}
+          disabled={!merged}
+          className={SELECT}
+          onChange={(event) => {
+            const representative = REPRESENTATIVE_RARITIES.find(
+              (rarity) => rarity === event.target.value,
+            )
+            if (representative) onChange({ ...query, representative })
+          }}
+        >
+          {REPRESENTATIVE_RARITIES.map((rarity) => (
+            <option key={rarity} value={rarity}>
+              {t(`filters.representativeRarity.${rarity}`)}
+            </option>
+          ))}
+        </select>
+        <label
+          className={cn(
+            "flex h-9 items-center gap-2 px-1 text-13",
+            merged ? "cursor-pointer text-text-1" : "cursor-not-allowed text-text-3",
+          )}
+        >
+          <input
+            type="checkbox"
+            checked={query.prFirst}
+            disabled={!merged}
+            onChange={(event) => {
+              onChange({ ...query, prFirst: event.target.checked })
+            }}
+            className="size-4 shrink-0 accent-accent"
+          />
+          {t("filters.prFirst")}
+        </label>
+      </Section>
     </section>
   )
 }

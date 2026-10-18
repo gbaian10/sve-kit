@@ -7,7 +7,7 @@ describe("query codec", () => {
   it("reads every parameter and ignores unknown values", () => {
     const state = parseQuery(
       new URLSearchParams(
-        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&loc=token:spell,main&trait=pixie,Bad!&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&unit=art&sort=cost&view=table",
+        "q=%20試作%20&class=witch,elf,elf,Bad!&cost=3,1,3&atk=10,0&def=4&type=spell&loc=token:spell,main&trait=pixie,Bad!&mech=-kw:a,kw:b&set=set:bp01&rarity=gold&alt=1&unit=art&rep=high&prfirst=1&sort=cost&view=table",
       ),
     )
     expect(state).toEqual({
@@ -24,11 +24,32 @@ describe("query codec", () => {
       rarities: ["gold"],
       altArtOnly: true,
       unit: "art",
+      representative: "high",
+      prFirst: true,
       sort: "cost",
       view: "table",
     })
-    expect(parseQuery(new URLSearchParams("unit=nope&sort=nope&view=nope&alt=0"))).toEqual(
-      DEFAULT_QUERY,
+    expect(
+      parseQuery(new URLSearchParams("unit=nope&rep=nope&prfirst=0&sort=nope&view=nope&alt=0")),
+    ).toEqual(DEFAULT_QUERY)
+  })
+
+  it("keeps the merged-cell settings in the URL and still reads the older card-unit links", () => {
+    expect(parseQuery(new URLSearchParams("unit=card"))).toMatchObject({
+      unit: "card",
+      representative: "low",
+      prFirst: false,
+    })
+    const merged = { ...DEFAULT_QUERY, unit: "art" as const, representative: "high" as const }
+    expect(querySearch(merged)).toBe("?unit=art&rep=high")
+    expect(querySearch({ ...merged, prFirst: true })).toBe("?unit=art&rep=high&prfirst=1")
+    expect(parseQuery(formatQuery({ ...merged, prFirst: true }))).toEqual({
+      ...merged,
+      prFirst: true,
+    })
+    // The preference stays in the URL while every printing is shown, so switching back keeps it.
+    expect(querySearch({ ...DEFAULT_QUERY, representative: "high", prFirst: true })).toBe(
+      "?rep=high&prfirst=1",
     )
   })
 

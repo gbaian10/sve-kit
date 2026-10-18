@@ -600,7 +600,7 @@ describe("CardsPage", () => {
           "從者",
           "主戰者・金框",
           "Token",
-          "同一張卡只顯示一次",
+          "同卡合併成一張",
         ])
       })
       // The whole-PR chip is the grey badge; the fixture's "銅" is not a ladder code (no badge,
@@ -621,13 +621,10 @@ describe("CardsPage", () => {
       expect(search().get("loc")).toBe("leader:gold")
       expect(chips(conditions)).not.toContain("Token")
       await userEvent.click(
-        within(conditions).getByRole("button", { name: "移除條件：同一張卡只顯示一次" }),
+        within(conditions).getByRole("button", { name: "移除條件：同卡合併成一張" }),
       )
       expect(search().has("unit")).toBe(false)
-      expect(screen.getByRole("switch", { name: "同一張卡只顯示一次" })).toHaveAttribute(
-        "aria-checked",
-        "false",
-      )
+      expect(screen.getByRole("combobox", { name: "顯示方式" })).toHaveValue("printing")
       // The set dropdown's choice gets a chip with the dropdown's own wording.
       await userEvent.click(screen.getByRole("button", { name: /^卡包/u }))
       const first = screen.getAllByRole("checkbox", { name: /^BP01 / })[0]
@@ -668,27 +665,61 @@ describe("CardsPage", () => {
       expect(within(rarity).queryByRole("button", { name: "清除稀有度" })).not.toBeInTheDocument()
     })
 
-    it("switches the row unit and the card edition from the panel", async () => {
+    it("switches the display unit, its representative and the card edition from the panel", async () => {
       const { router } = await open()
       const user = userEvent.setup()
       await expectCount(27)
-      const onePerCard = screen.getByRole("switch", { name: "同一張卡只顯示一次" })
-      expect(onePerCard).toHaveAttribute("aria-checked", "false")
-      expect(onePerCard).toHaveAccessibleDescription("不同稀有度、異圖與再錄合併成一張")
-      await user.click(onePerCard)
+      const display = screen.getByRole("combobox", { name: "顯示方式" })
+      const representative = screen.getByRole("combobox", { name: "代表版次" })
+      const prFirst = screen.getByRole("checkbox", { name: "優先顯示 PR" })
+      expect(display).toHaveValue("printing")
+      expect(
+        within(display)
+          .getAllByRole("option")
+          .map((option) => option.textContent),
+      ).toEqual(["每個版次", "同圖合併成一張", "同卡合併成一張"])
+      // The representative choice only applies to merged cells.
+      expect(representative).toBeDisabled()
+      expect(prFirst).toBeDisabled()
+      await user.selectOptions(display, "card")
       expect(router.state.location.search).toBe("?unit=card")
-      expect(onePerCard).toHaveAttribute("aria-checked", "true")
       await waitFor(() => {
         expect(screen.getByText("張卡片")).toHaveTextContent(/^\d+ 張卡片$/u)
       })
-      // The switch counts as a condition: one chip at the end of the row, and the badge shows it.
+      // Merging counts as a condition: one chip at the end of the row, and the badge shows it.
       const conditions = screen.getByRole("group", { name: "目前條件" })
-      expect(chips(conditions)).toEqual(["同一張卡只顯示一次"])
+      expect(chips(conditions)).toEqual(["同卡合併成一張"])
       expect(screen.getByRole("button", { name: "篩選" })).toHaveTextContent("1")
-      await user.click(within(conditions).getByRole("button", { name: "清除" }))
+      expect(representative).toBeEnabled()
+      expect(representative).toHaveValue("low")
+      await user.selectOptions(representative, "high")
+      expect(router.state.location.search).toBe("?unit=card&rep=high")
+      await user.click(prFirst)
+      expect(router.state.location.search).toBe("?unit=card&rep=high&prfirst=1")
+      await user.selectOptions(display, "art")
+      expect(router.state.location.search).toBe("?unit=art&rep=high&prfirst=1")
+      await waitFor(() => {
+        expect(screen.getByText("張圖")).toHaveTextContent(/^\d+ 張圖$/u)
+      })
+      expect(chips(conditions)).toEqual(["同圖合併成一張"])
+      // Back to every printing: the representative is kept in the URL, disabled in the panel.
+      await user.selectOptions(display, "printing")
+      expect(router.state.location.search).toBe("?rep=high&prfirst=1")
+      expect(representative).toBeDisabled()
+      expect(representative).toHaveValue("high")
+      expect(prFirst).toBeChecked()
+      expect(screen.queryByRole("group", { name: "目前條件" })).not.toBeInTheDocument()
+      await user.selectOptions(display, "card")
+      await user.click(
+        within(screen.getByRole("group", { name: "目前條件" })).getByRole("button", {
+          name: "清除",
+        }),
+      )
       expect(router.state.location.search).toBe("")
-      expect(onePerCard).toHaveAttribute("aria-checked", "false")
-      await user.click(onePerCard)
+      expect(display).toHaveValue("printing")
+      expect(representative).toHaveValue("low")
+      expect(prFirst).not.toBeChecked()
+      await user.selectOptions(display, "card")
       expect(router.state.location.search).toBe("?unit=card")
       const edition = screen.getByRole("group", { name: "卡面版本" })
       expect(within(edition).getByRole("button", { name: "日版" })).toHaveAttribute(

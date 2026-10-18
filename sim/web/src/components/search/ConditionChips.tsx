@@ -150,16 +150,16 @@ export function ConditionChips({
         label: setLabel(code),
         without: { ...query, sets: query.sets.filter((other) => other !== code) },
       })),
-    // The "one per card" switch is display, but the maintainer wants it removable from here too.
-    ...(query.unit === "card"
-      ? [
+    // Merging cells is display, but the maintainer wants it removable from here too.
+    ...(query.unit === "printing"
+      ? []
+      : [
           {
             key: "unit",
-            label: t("filters.onePerCard"),
+            label: t(`filters.displayUnit.${query.unit}`),
             without: { ...query, unit: "printing" as const },
           },
-        ]
-      : []),
+        ]),
   ]
   if (conditions.length === 0) return null
   return (
