@@ -66,6 +66,20 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
         (case.case.root / area).mkdir(parents=True, exist_ok=True)
     install(
         case.case.root,
+        "rules/keyword-registry.yaml",
+        {
+            "format": 1,
+            "kind": "keyword_registry",
+            "decision": {
+                "id": "synthetic-keywords",
+                "state": "confirmed",
+                "note": "Synthetic mapping.",
+            },
+            "records": [],
+        },
+    )
+    install(
+        case.case.root,
         "catalog/leader-name-frames.yaml",
         {"format": 1, "kind": "printing_leader_name_frames", "records": []},
     )

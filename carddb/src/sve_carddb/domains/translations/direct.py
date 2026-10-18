@@ -33,17 +33,26 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
     if origin == "official":
         if (
             set(owner)
-            not in ({"vocabulary_kind", "vocabulary_code"}, {"product_family_id"})
+            not in (
+                {"vocabulary_kind", "vocabulary_code"},
+                {"product_family_id"},
+                {"keyword_id"},
+            )
             or field != "label"
             or source_id is None
         ):
             raise ValueError(
-                "Official direct translation requires a sourced vocabulary or family label"
+                "Official direct translation requires a sourced vocabulary, family or keyword label"
             )
-    elif source_id is not None:
+    elif source_id is not None and (set(owner) != {"keyword_id"} or field != "label"):
         raise ValueError(
             "Unofficial direct translation cannot claim an official source"
         )
+    authority = (
+        ("digital_official" if set(owner) == {"keyword_id"} else "sve_official")
+        if origin == "official"
+        else "unofficial"
+    )
     units = db.select(
         "text_unit", db.columns("text_unit"), where={"id": source_unit_id}
     )
@@ -99,6 +108,11 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
                 "origin": origin,
                 "low_confidence": low_confidence,
                 **({"source_id": source_id} if source_id is not None else {}),
+                **(
+                    {"authority": authority}
+                    if set(owner) == {"keyword_id"} and source_id is not None
+                    else {}
+                ),
             }
         )
     )[7:]
@@ -114,7 +128,7 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
             "text": text,
             "tokens": None,
             "origin": origin,
-            "authority": "sve_official" if origin == "official" else "unofficial",
+            "authority": authority,
             "low_confidence": low_confidence,
             "source_hash": units[0].values["content_hash"],
             "source_id": source_id,

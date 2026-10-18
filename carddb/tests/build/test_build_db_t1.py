@@ -42,7 +42,7 @@ def test_exact_inventory_and_optional_closure() -> None:
     assert len(compile_build(("cr",)).tables) == 44
     assert {table.name for table in compile_build().tables} == base
     assert compile_build(("cr",)).sql == compile_build(("cr", "t0")).sql
-    for cap in ("dsl", "keyword", "unknown"):
+    for cap in ("dsl", "unknown"):
         with pytest.raises(ValueError, match="Unknown or unimplemented"):
             compile_build((cap,))
 
@@ -54,7 +54,7 @@ def test_connected_graph_and_pragma_inventory() -> None:
             populate(db)
         for table in schema.tables:
             assert db.rows(table.name)
-        assert db._read("PRAGMA user_version") == ((13,),)
+        assert db._read("PRAGMA user_version") == ((14,),)
         assert db._read("SELECT count(*) FROM sqlite_schema WHERE type='table'") == (
             (44,),
         )

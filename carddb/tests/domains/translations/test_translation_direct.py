@@ -105,7 +105,7 @@ def test_official_direct_translation_requires_a_sourced_label(
     message = (
         "Unofficial direct translation cannot claim an official source"
         if mutation == "origin"
-        else "Official direct translation requires a sourced vocabulary or family label"
+        else "Official direct translation requires a sourced vocabulary, family or keyword label"
     )
     with (
         template.copy() as db,
@@ -146,3 +146,39 @@ def test_official_card_name_still_cannot_enter_the_common_selection(
                     "source_id": "source",
                 },
             )
+
+
+@pytest.mark.parametrize("owner", [FOLLOWER, {"product_family_id": "family"}])
+def test_sourced_official_vocabulary_and_family_labels_keep_sve_authority(
+    template: DatabaseTemplate, owner: dict[str, str]
+) -> None:
+    with template.copy() as db:
+        with db.transaction():
+            write(
+                db,
+                owner,
+                field="label",
+                lang="en",
+                source_unit_id="text",
+                text="Synthetic official label",
+                origin="official",
+                source_id="source",
+                low_confidence=False,
+            )
+        selected = db.rows("translation")[0].values
+        assert selected["authority"] == "sve_official"
+        assert selected["source_id"] == "source"
+
+
+def test_official_keyword_label_requires_source(template: DatabaseTemplate) -> None:
+    with template.copy() as db, pytest.raises(ValueError, match="sourced"):
+        write(
+            db,
+            {"keyword_id": "kw:synthetic"},
+            field="label",
+            lang="zh-Hant",
+            source_unit_id="text",
+            text="合成關鍵字",
+            origin="official",
+            low_confidence=False,
+        )

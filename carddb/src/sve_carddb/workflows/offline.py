@@ -24,6 +24,9 @@ from sve_carddb.domains.card_extras import (
     populate_planned_card_extras,
     require_card_extras_ready,
 )
+from sve_carddb.domains.mechanics import Settings as MechanicSettings
+from sve_carddb.domains.mechanics import apply as apply_mechanics
+from sve_carddb.domains.mechanics import load as load_mechanics
 from sve_carddb.domains.products import (
     FrozenProducts,
     load_product_identities,
@@ -63,6 +66,7 @@ from sve_carddb.domains.translations.flavor import apply as apply_flavor
 from sve_carddb.domains.translations.flavor import load as load_flavor
 from sve_carddb.domains.translations.four_layer_build import Settings as FrameSettings
 from sve_carddb.domains.translations.four_layer_build import apply as apply_templates
+from sve_carddb.domains.translations.four_layer_pipeline import prepare_classifier
 from sve_carddb.domains.translations.glossary.records import (
     ChoiceRecord,
     ConceptRecord,
@@ -457,6 +461,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         configuration |= names.configuration(inputs)
     if image_index is not None:
         configuration["image_index"] = digest(image_index.content())
+    mechanics = load_mechanics(authored_root(inputs.repo))
+    configuration["mechanics"] = mechanics.configuration()
     context = BuildContext.from_inputs(inputs.revision, configuration)
     mark("adoptions + rulings + config")
     schema = compile_build(
@@ -467,6 +473,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "translation_names",
             "translation_templates",
             "rulings",
+            "keyword",
         )
     )
     mark("compile schema")
@@ -580,6 +587,31 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
             )
             mark("db: flavor + templates (translations)")
+            mechanic_report = (
+                None
+                if translation is None or not mechanics.registry.records
+                else apply_mechanics(
+                    db,
+                    mechanics,
+                    MechanicSettings(
+                        name_sources,
+                        prepare_classifier(
+                            db,
+                            translation.load(),
+                            name_sources,
+                            vocabulary,
+                            load_rules(inputs.repo),
+                        ),
+                        jp.card_batch,
+                        inputs.revision,
+                    ),
+                )
+            )
+            if translation is None and mechanics.registry.records:
+                raise ValueError(
+                    "Keyword registration requires adopted glossary inputs"
+                )
+            mark("db: mechanic H1 projection")
             link_uses = () if link_result is None else link_result.record.uses
             ruling_report = write_rulings(db, rulings, inputs.revision)
             name_uses = () if name_result is None else name_result.record.uses
@@ -748,6 +780,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             for row in projection.tables["annotation_concept"]
             if row["category"] == "card_name" and not row["card_ids"]
         ]
+        report["mechanics"] = mechanic_report
         if name_result is not None:
             report["name_application"] = name_result.report
         if image_index is not None:
