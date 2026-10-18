@@ -916,15 +916,13 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 日文卡名含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment_0
             - kind: Literal
-              text: 』或『
+              text: 或
             - kind: LeafRef
               slot: fragment_1
-            - kind: Literal
-              text: 』
   - origin: machine
     kind: template_translation
     data:

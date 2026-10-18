@@ -596,11 +596,9 @@ records:
           format: 1
           nodes:
             - kind: Literal
-              text: 日文卡名含有『
+              text: 日文卡名含有
             - kind: LeafRef
               slot: fragment
-            - kind: Literal
-              text: 』
         traits.all2.v1:
           format: 1
           nodes:
