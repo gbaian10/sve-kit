@@ -60,6 +60,20 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
         {"format": 1, "kind": "printing_rarity_badges", "records": []},
     )
     (root / "authored/rules/rulings").mkdir(parents=True)
+    install(
+        root / "authored",
+        "rules/keyword-registry.yaml",
+        {
+            "format": 1,
+            "kind": "keyword_registry",
+            "decision": {
+                "id": "synthetic-keywords",
+                "state": "confirmed",
+                "note": "Synthetic mapping.",
+            },
+            "records": [],
+        },
+    )
     home = fixture.digital.printing.home_set_id
     install(
         root / "authored",

@@ -68,6 +68,9 @@ def prepared(
     case = default_text_case.copy(tmp_path / "synthetic")
     repo = tmp_path / "repo"
     (repo / "authored/rules/rulings").mkdir(parents=True)
+    (repo / "authored/rules/keyword-registry.yaml").write_text(
+        "format: 1\nkind: keyword_registry\ndecision: {id: synthetic-keywords, state: confirmed, note: Synthetic mapping.}\nrecords: []\n"
+    )
     (repo / "carddb/src/sve_carddb").mkdir(parents=True)
     (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
     (repo / "authored/catalog").mkdir()

@@ -10,6 +10,7 @@ from pydantic import BaseModel, JsonValue, ValidationError
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.catalog.records import Shard as CatalogShard
 from sve_carddb.domains.digital.name_policies.records import LinkPolicy, Policy
+from sve_carddb.domains.mechanics import Registry as KeywordRegistry
 from sve_carddb.domains.products.identity_models import IdentityShard
 from sve_carddb.domains.products.models import Shard as ProductShard
 from sve_carddb.domains.registry.badges import BadgeOverrides
@@ -45,6 +46,7 @@ CASES = (
     (CropOverrides, "images/crops.yaml", None),
     (BadgeOverrides, "catalog/rarity-badges.yaml", None),
     (LeaderFrames, "catalog/leader-name-frames.yaml", None),
+    (KeywordRegistry, "rules/keyword-registry.yaml", None),
 )
 
 

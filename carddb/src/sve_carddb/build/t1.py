@@ -2,6 +2,7 @@
 
 from sve_carddb.build import (
     four_layer,
+    mechanics,
     t0,
     t1_correction,
     t1_cr,
@@ -19,7 +20,7 @@ from sve_carddb.build.model import Capability
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t0_json import schemas
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 14
 MINIMUM_CAPABILITIES = ("t0", "cr", "errata", "correction", "qa", "related")
 TABLES = (
     *t1_cr.TABLES,
@@ -33,6 +34,7 @@ TABLES = (
     *four_layer.ANNOTATION_TABLES,
     *four_layer.FRAME_TABLES,
     *t1_rulings.TABLES,
+    *mechanics.TABLES,
 )
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
@@ -67,6 +69,11 @@ REGISTRY = Registry(
             requires=("translation_templates",),
         ),
         Capability(
+            "keyword",
+            tuple(table.name for table in mechanics.TABLES),
+            requires=("translation_names",),
+        ),
+        Capability(
             "en",
             tuple(table.name for table in t1_en.TABLES if table.name != "art"),
             requires=("art",),
@@ -74,7 +81,7 @@ REGISTRY = Registry(
         *(
             cap
             for cap in t0.REGISTRY.capabilities
-            if cap.name not in {"t0", "cr", "art"}
+            if cap.name not in {"t0", "cr", "art", "keyword"}
         ),
     ),
 )
@@ -89,6 +96,7 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
         | t1_json.schemas()
         | four_layer.schemas()
         | t1_rulings.schemas()
+        | mechanics.schemas()
         | {"TranslationTokens": {"type": "null"}},
         version=SCHEMA_VERSION,
     )

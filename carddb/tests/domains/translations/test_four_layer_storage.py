@@ -6,7 +6,13 @@ from typing import TYPE_CHECKING
 import pytest
 from jsonschema import ValidationError
 
-from sve_carddb.build import Json, compile_schema, create_database, four_layer
+from sve_carddb.build import (
+    Json,
+    compile_schema,
+    create_database,
+    four_layer,
+    mechanics,
+)
 from sve_carddb.build.model import Column, Kind, Table
 from sve_carddb.build.t0_json import schemas as t0_schemas
 from sve_carddb.build.t1 import REGISTRY
@@ -51,8 +57,8 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="session")
 def compiled() -> CompiledSchema:
-    # Exercise the reserved owner without enabling a production keyword importer.
-    old = {t.name for t in four_layer.FRAME_TABLES}
+    # This fixture isolates frame storage from the independent mechanism pipeline.
+    old = {t.name for t in (*four_layer.FRAME_TABLES, *mechanics.TABLES)}
     registry = replace(
         REGISTRY,
         tables=tuple(t for t in REGISTRY.tables if t.name not in old)
@@ -61,7 +67,7 @@ def compiled() -> CompiledSchema:
         capabilities=tuple(
             replace(cap, tables=tuple(t.name for t in four_layer.FRAME_TABLES))
             if cap.name == "translation_templates"
-            else replace(cap, implemented=True)
+            else replace(cap, tables=("keyword",), implemented=True)
             if cap.name == "keyword"
             else cap
             for cap in REGISTRY.capabilities
