@@ -7339,7 +7339,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:c818281c3a68c7a3014299df97e8d4ceb09460f9cd7cf4afad03428148f2ec15
+      id: frame:90772b4cc8a4b5ceeda95cb2f79c87f3f0c6e11018e1993828394e1ade1f3765
       source:
         source_lang: ja
         canonical_hash: aa834c87af49c86f4405e7960a5c64e7e2530fdf7d7767d39cb50e5751087fa2
@@ -7363,6 +7363,18 @@ records:
       leaf_schema:
         format: 2
         slots:
+          - name: trait_type_8
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 8
+                end: 11
           - name: leaf_0
             type: CardName
             role: name_reference
@@ -7438,7 +7450,7 @@ records:
         scopes: []
         imports: []
         exports: []
-      content_hash: c818281c3a68c7a3014299df97e8d4ceb09460f9cd7cf4afad03428148f2ec15
+      content_hash: 90772b4cc8a4b5ceeda95cb2f79c87f3f0c6e11018e1993828394e1ade1f3765
   - origin: machine
     kind: sentence_template
     data:

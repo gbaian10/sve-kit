@@ -376,7 +376,7 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:4a530e5caad7073d849acc4bcb81fb7a77829cb5873137ac569b885e436c9cc5
+      template_id: frame:dd789f82110c94784de918c60a41a65e3923c55dc577ef16c79fc6994061b880
       lang: zh-Hant
       target:
         format: 1
@@ -416,7 +416,11 @@ records:
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
-            text: ，並具有武裝特性。
+            text: ，並具有武裝
+          - kind: LeafRef
+            slot: trait_type_75
+          - kind: Literal
+            text: 。
       expression_targets: {}
   - origin: machine
     kind: template_translation

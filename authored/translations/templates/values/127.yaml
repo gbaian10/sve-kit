@@ -2426,13 +2426,17 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:c818281c3a68c7a3014299df97e8d4ceb09460f9cd7cf4afad03428148f2ec15
+      template_id: frame:90772b4cc8a4b5ceeda95cb2f79c87f3f0c6e11018e1993828394e1ade1f3765
       lang: zh-Hant
       target:
         format: 1
         nodes:
           - kind: Literal
-            text: 破壞戰場上的全部「不具有灰姑娘特性的從者」。將
+            text: 破壞戰場上的全部「不具有灰姑娘
+          - kind: LeafRef
+            slot: trait_type_8
+          - kind: Literal
+            text: 的從者」。將
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
