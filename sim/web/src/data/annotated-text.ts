@@ -465,6 +465,11 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
     const translation = selection
       ? { ...(await page.row("translation", selection["translation_id"] ?? null)) }
       : undefined
+    if (
+      selection?.["basis"] === "official_counterpart" &&
+      (translation?.["origin"] !== "official" || translation["authority"] !== "sve_official")
+    )
+      annotationFailure("reference")
     const sourcePointer = selection ? objectValue(selection["source"]) : pointer
     const receiverRegion = receiver.region ?? snapshot.region
     const sourceRegion = selection?.["basis"] === "jp_source" ? "jp" : receiverRegion
