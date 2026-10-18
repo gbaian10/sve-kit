@@ -18,6 +18,21 @@ def reference_names(
     """Only a term's whole frozen name field can qualify as a complete name."""
     originals = dict(replay.originals)
     result = {}
+    complete = whole_name_terms(replay)
+    for record in replay.snapshot.current_records():
+        if not isinstance(record, TermRecord) or record.data.id not in complete:
+            continue
+        term = record.data
+        outcome = exact_name_result(originals[term.id], frozen)
+        if outcome.status == "eligible":
+            assert outcome.text is not None
+            result[term.id] = ReferenceName(outcome.text, low_confidence)
+    return result
+
+
+def whole_name_terms(replay: Names) -> frozenset[str]:
+    """Source shape, rather than a slug or matching string, distinguishes fragments."""
+    result = set()
     for record in replay.snapshot.current_records():
         if not isinstance(record, TermRecord) or record.data.category != "card_name":
             continue
@@ -31,8 +46,5 @@ def reference_names(
         }.get(ref.parser)
         if pattern is None or re.fullmatch(pattern, ref.locator) is None:
             continue
-        outcome = exact_name_result(originals[term.id], frozen)
-        if outcome.status == "eligible":
-            assert outcome.text is not None
-            result[term.id] = ReferenceName(outcome.text, low_confidence)
-    return result
+        result.add(term.id)
+    return frozenset(result)

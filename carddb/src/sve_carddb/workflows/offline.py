@@ -611,6 +611,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         views = observations.views(db)
         decisions = replace(
             Decisions(),
+            card_name_targets={}
+            if name_result is None
+            else name_result.card_name_targets,
             related_regions=applicable_reskin_regions(db, texts, vocabulary=vocabulary),
             supplemental_restrictions=restrictions,
             display_bindings=(
@@ -734,6 +737,17 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             None if template_report is None else template_report.payload()
         )
         report["ruling_references"] = ruling_report.payload()
+        report["card_name_target_gaps"] = [
+            {
+                "term_id": row["id"],
+                "reason": "name_fragment"
+                if name_result is not None
+                and row["id"] in name_result.card_name_fragments
+                else "no_public_card",
+            }
+            for row in projection.tables["annotation_concept"]
+            if row["category"] == "card_name" and not row["card_ids"]
+        ]
         if name_result is not None:
             report["name_application"] = name_result.report
         if image_index is not None:

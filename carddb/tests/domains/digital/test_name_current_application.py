@@ -13,7 +13,11 @@ from sve_carddb.contracts.four_layer import CardNameReference, Span
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.digital.name_policies.application import Inputs, populate
-from sve_carddb.domains.digital.name_policies.projection import materialize, prepare
+from sve_carddb.domains.digital.name_policies.projection import (
+    apply,
+    materialize,
+    prepare,
+)
 from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.domains.translations.four_layer_labels import labels
 from sve_carddb.domains.translations.four_layer_storage import read_annotation
@@ -27,6 +31,7 @@ from sve_carddb.domains.translations.glossary.records import (
 from sve_carddb.domains.translations.inputs import Inputs as TranslationInputs
 from sve_carddb.domains.translations.models import PrintingOwner, RevisionOwner
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
+from sve_carddb.domains.translations.names.sources import NameOwner, name_source
 
 from ...support.adoption_fixtures import commit
 from ...support.database_fixtures import DatabaseTemplate
@@ -321,6 +326,75 @@ def test_untranslated_resolved_name_keeps_its_original_annotation(
         assert not db.rows("translation_annotation")
         assert len(db.rows("translation_use_annotation")) == 1
         assert len(db.rows("annotation_set")) == 1
+
+
+@pytest.mark.parametrize("cards", [1, 2])
+def test_card_targets_reverse_the_annotated_owner_binding(
+    base_case: ApplicationCase, tmp_path: Path, cards: int
+) -> None:
+    case = current_case(base_case, tmp_path / "repo", frozen_source=True, excluded=True)
+    with case.database.copy() as db, db.transaction():
+        plan = prepare(
+            db, case.inputs, case.texts, sources=case.sources(), replay=case.replay
+        )
+        selected = plan.owners[0]
+        expected = {selected.source.card_id}
+        owners = [selected, selected]
+        if cards == 2:
+            for table, identifier, changes in (
+                ("card", selected.source.card_id, {"id": "second-card"}),
+                (
+                    "face",
+                    selected.source.face_id,
+                    {"id": "second-face", "card_id": "second-card"},
+                ),
+                (
+                    "face_revision",
+                    selected.source.owner.identifier,
+                    {"id": "second-revision", "face_id": "second-face"},
+                ),
+            ):
+                original = db.select(
+                    table, db.columns(table), where={"id": identifier}
+                )[0]
+                db.insert(table, dict(original.values) | changes)
+            source = name_source(db, NameOwner("face_revision", "second-revision"))
+            assert source is not None
+            owners.append(replace(selected, source=source))
+            expected.add("second-card")
+        result = apply(db, replace(plan, owners=tuple(owners)), case.context)
+        assert result.card_name_targets == {"term:name.test": tuple(sorted(expected))}
+        assert not result.bindings
+        for row in db.rows("annotation_set"):
+            annotation = read_annotation(db, str(row.values["id"]))
+            assert annotation.occurrences[0].reference == CardNameReference(
+                kind="card_name", term_id="term:name.test"
+            )
+
+
+@pytest.mark.parametrize("scenario", ["fragment", "missing", "ambiguous"])
+def test_card_targets_require_a_resolved_whole_name(
+    base_case: ApplicationCase, tmp_path: Path, scenario: str
+) -> None:
+    case = current_case(
+        base_case,
+        tmp_path / "repo",
+        frozen_source=scenario != "fragment",
+        ambiguous=scenario == "ambiguous",
+    )
+    replay = case.replay
+    if scenario == "missing":
+        replay = replace(
+            replay, originals=(("term:name.test", "Absent synthetic name"),)
+        )
+    with case.database.copy() as db, db.transaction():
+        result = populate(
+            db, case.inputs, case.texts, sources=case.sources(), replay=replay
+        )
+        assert result.card_name_targets == {}
+        assert ("term:name.test" in result.card_name_fragments) == (
+            scenario == "fragment"
+        )
 
 
 def test_current_variant_cannot_select_two_concepts(

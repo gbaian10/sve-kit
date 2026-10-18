@@ -9,11 +9,12 @@ from pydantic import JsonValue
 
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
-from sve_carddb.core.json import array, digest, object_value
+from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.domains.catalog import adoption_importer
 from sve_carddb.domains.catalog.models import Catalog
 from sve_carddb.domains.catalog.projection import CatalogProjection
 from sve_carddb.domains.products import Language
+from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.domains.text_observations import Binding, Vocabulary
 from sve_carddb.domains.translations.glossary.importer import populate_glossary
 from sve_carddb.domains.translations.inputs import Inputs as TranslationInputs
@@ -24,7 +25,7 @@ from ..export.test_snapshot_preview import EmptySources
 from ..support.adoption_fixtures import REPO, commit, git
 from ..support.digital_name_policy_fixtures import make_policy_fixture
 from ..support.product_fixtures import envelope, family, install
-from ..support.translation_fixtures import write
+from ..support.translation_fixtures import name_term, write
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -66,9 +67,25 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
         envelope([family(home, code="synthetic")]),
     )
     (root / "authored/products/identities").mkdir(parents=True)
-    revision = commit(root)
     ref = fixture.owner().name_ref
     assert ref is not None
+    term = name_term("name.test")
+    object_value(term["data"]).update(
+        source_ref=ref.model_dump(mode="json"),
+        authored_source_ja=None,
+        missing_source_reason=None,
+    )
+    write(
+        root / "authored",
+        {
+            "translations/glossary/concepts/001.yaml": {
+                "format": 3,
+                "kind": "translation_shard",
+                "records": [term],
+            }
+        },
+    )
+    revision = commit(root)
     batch = ref.batch_id
     return offline.Inputs(
         repo=root,
@@ -189,6 +206,10 @@ def test_offline_name_policy_reconstructs_identical_bundle(
         if p.is_file()
     }
     assert object_value(first.report["name_application"])["covered_owners"] == 1
+    tables = first.projection.tables
+    assert tables["face_revision"][0]["name_concept_id"] == "term:name.test"
+    assert tables["annotation_concept"][0]["card_ids"] == [tables["card"][0]["id"]]
+    assert first.report["card_name_target_gaps"] == []
     translation = first.projection.tables["translation"][0]
     assert translation["origin"] == "official"
     assert translation["authority"] == "digital_official"
@@ -227,6 +248,36 @@ def test_name_composition_reads_link_entry_from_disk(
     absent = composer(checkout)
     assert absent is not None
     assert absent.links is None
+
+
+def test_offline_reports_fragment_even_when_it_matches_a_complete_owner_name(
+    recipe: offline.Inputs, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    catalogue(monkeypatch)
+    root = tmp_path / "checkout"
+    git(tmp_path, "clone", "--local", "--no-hardlinks", str(recipe.repo), str(root))
+    for directory in ("products/identities", "rules/rulings"):
+        (root / "authored" / directory).mkdir(parents=True, exist_ok=True)
+    shard = root / "authored/translations/glossary/concepts/001.yaml"
+    document = object_value(read_yaml(shard))
+    term = object_value(object_value(array(document["records"])[0])["data"])
+    term.update(
+        source_ref=None,
+        authored_source_ja="Synthetic card",
+        missing_source_reason="Synthetic name fragment",
+    )
+    shard.write_bytes(canonical(document))
+    built = offline.build(
+        recipe.model_copy(update={"repo": root, "revision": commit(root)})
+    )
+    assert (
+        built.projection.tables["face_revision"][0]["name_concept_id"]
+        == "term:name.test"
+    )
+    assert built.projection.tables["annotation_concept"][0]["card_ids"] == []
+    assert built.report["card_name_target_gaps"] == [
+        {"term_id": "term:name.test", "reason": "name_fragment"}
+    ]
 
 
 def test_name_composition_rejects_symlinked_authored_entry(

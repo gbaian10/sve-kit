@@ -82,6 +82,7 @@ def _concepts(
                 )
             )
     concepts: list[Record] = []
+    public_cards = {string(row["id"]) for row in view["card"]}
     for identifier in sorted(referenced):
         term = terms[identifier]
         explanations: list[Record] = []
@@ -92,7 +93,12 @@ def _concepts(
                 "id": identifier,
                 "category": term["category"],
                 "explanations": json_list(explanations),
-                "card_ids": json_list(decisions.card_name_targets.get(identifier, ()))
+                "card_ids": json_list(
+                    sorted(
+                        set(decisions.card_name_targets.get(identifier, ()))
+                        & public_cards
+                    )
+                )
                 if term["category"] == "card_name"
                 else [],
             }
