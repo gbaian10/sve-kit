@@ -32,7 +32,7 @@ Catalog／Vocabulary 記憶體物件由此推導，不是另一份權威。
 
 ## 4. 15 筆繁中選詞
 
-七職業、八基本卡種的 zh-Hant 選詞屬 #51，存在該詞彙記錄 `value.translations`（`lang,text,origin,low_confidence`），label 仍只存日文基準。code 配發不授予翻譯權威；origin、低信心及撤回依[翻譯契約](translation-contract.md)。resource EP／SEP 與 type EP／SEP、trait 精霊與 class エルフ即使同譯仍分別定位，不合併 glossary。EN 原值映射不等於此次採納 EN 術語翻譯。
+七職業、八基本卡種的 zh-Hant 選詞屬 #51，存在該詞彙記錄 `value.translations`（`lang,text,origin,low_confidence`），label 仍只存日文基準。code 配發不授予翻譯權威；origin、低信心及撤回依[翻譯契約](translation-contract.md)。resource EP／SEP 與 type EP／SEP、trait 精霊與 class エルフ即使同譯仍分別定位，不合併 glossary。EN 原值映射不會自動成為 EN 標籤；必須在同一記錄明示採納標籤選詞。
 
 缺有效繁中選詞時，模板的整個 context 回原文並報 `missing_term_translation`；UI fallback 不套用卡文。標籤翻譯選用投影屬 #53，必須驗有效 catalog 主體與當前選詞，不由相同字串或裸 FK 借用其他概念的翻譯。
 
@@ -54,6 +54,20 @@ EP、SEP 與稀有度縮寫不投影詞表。
 凍結來源與 authored 來源紀錄保留在建置 DB 的 glossary 與 source_record。投影 ID 由詞彙主體與選詞的概念、文字、品質、凍結來源推導，
 不含帶建置 revision 的 authored 來源紀錄，選詞未變時重建 ID 不變；
 公開快照沿用既有 vocabulary label 指標，不公開私人來源定位。重建時選詞改字即更新標籤譯文。
+
+### 4.2 SVE 官方英文標籤
+
+`value.translations` 可明示 `origin: official`，並附 `source_ref`。其語言、完整文字及來源引用
+必須與同一詞彙已採納且不帶特殊標記的 raw mapping 完全一致；建置沿用來源批次、parser、locator
+與文字 hash 驗證，拒絕拆出複合卡種的一部分作為基本標籤。其他 origin 不得附官方來源引用。
+官方英文選詞只從已人工確認的日英同卡、同面的對應取得；沿既有 raw mapping 定位類型，
+不以卡號、卡名或類型排列位置推算。多種英文寫法及無對應者保留缺譯，交維護者決定。
+
+建置 DB 將官方標籤保存為 `origin: official`、`authority: sve_official`，`source_id` 指向實際凍結來源，
+輸入紀錄保留可重現的 exact 引用。每個詞彙主體使用自己的翻譯 context，避免同字原文借用另一概念的官方標籤。
+共同選用槽僅允許這種有來源的官方 vocabulary label；卡名等其他官方翻譯仍沿原有顯示綁定選用。
+公開快照使用既有 translation、text_unit 與 vocabulary label 指標，reader 及前端照一般語言選用，
+缺譯時依現有規則退回基準原文；不公開私人來源定位。
 
 ## 5. preview 與前端驗收
 
