@@ -1,4 +1,6 @@
-# 關鍵字登錄與 manual H1 投影
+# 關鍵字登錄與自身宣告投影
+
+自身宣告（內部代號 H1）指「整行只有關鍵字」，表示卡片本身具有該能力。
 
 本入口依[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)與
 [快照三態](../export/snapshot-format.md)提供查卡正標籤，不產生 DSL，不變更引擎支援狀態。
@@ -35,6 +37,8 @@ F1 configuration 納入 registry hash 與 adapter 版本。
 ## 來源與關係
 
 只檢查已確認 card 的 JP face_current 主效果，逐面保留 exact owner。
+雙面卡採「任一面有即標 has」：任一面證明自身宣告，就在 card 層級標記，
+不表示正面一定具有該能力；公開投影沒有面向維度。
 SourceDescriptor／frozen source 驗回 bytes、來源版本及 locator；更正沿用既有 corrected-source recipe。
 空主文只記未抽取，不授予完整 coverage；不合併所有 printing、歷史 revision 或他 owner binding。
 
@@ -65,6 +69,8 @@ relations／actions 排序去重，不公開原始證據或 unknown／absent 列
 選填 suppressions 每筆必有 `id,target_tag_id,source_text_hash,producer_version,reason,decision`；
 decision 同上例且必須 confirmed。只有候選 ID、source hash 及 producer 完全相符才寫入並套用；
 不相符報 stale_suppression，不遮蔽新候選，不把 partial 改 complete。
+補正使用獨立的 mechanic_suppression decision category；只有實際寫入 override
+時才保存其 decision 與來源，不為 stale suppression 留下未使用的 confirmed decision。
 
 ## Coverage 與承載
 
