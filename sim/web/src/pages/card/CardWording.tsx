@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useAnnotatedText } from "../../app/snapshot"
-import { CardText } from "../../components/card/CardText"
+import { CardText, TEXT_PAIR } from "../../components/card/CardText"
 import { useTextLanguage } from "../../components/card/text-language"
 import { TextPurposeStatus } from "../../components/card/TextPurposeStatus"
 import { type Catalog, type Row, type SnapshotClient, stringValue } from "../../data"
@@ -117,32 +117,38 @@ function PrintingWording({
           <TextPurposeStatus readiness={translation.readiness} />
         </>
       )}
-      {different && showTranslation && (
+      {/* The shared translation and this printing's own original pair up like one text's boxes. */}
+      <div
+        className={showTranslation ? TEXT_PAIR : undefined}
+        data-text-pair={showTranslation ? "" : undefined}
+      >
+        {different && showTranslation && (
+          <CardText
+            client={client}
+            edition={edition}
+            owner={{ kind: "face_revision", id: translationRevisionId }}
+            field="effect"
+            display="translated"
+            {...(basisCardNo
+              ? {
+                  translationBasis: {
+                    cardNo: basisCardNo,
+                    to: `/cards/${encodeURIComponent(basisCardNo)}`,
+                    state: entry,
+                  },
+                }
+              : {})}
+          />
+        )}
         <CardText
           client={client}
           edition={edition}
-          owner={{ kind: "face_revision", id: translationRevisionId }}
+          owner={{ kind: "face_revision", id: ownRevisionId }}
           field="effect"
-          display="translated"
-          {...(basisCardNo
-            ? {
-                translationBasis: {
-                  cardNo: basisCardNo,
-                  to: `/cards/${encodeURIComponent(basisCardNo)}`,
-                  state: entry,
-                },
-              }
-            : {})}
+          display={different ? "original" : undefined}
+          label={different ? t("card.wording.printingOriginal") : undefined}
         />
-      )}
-      <CardText
-        client={client}
-        edition={edition}
-        owner={{ kind: "face_revision", id: ownRevisionId }}
-        field="effect"
-        display={different ? "original" : undefined}
-        label={different ? t("card.wording.printingOriginal") : undefined}
-      />
+      </div>
       {different &&
         prefs.effectLanguage !== "original" &&
         (translation.readiness.basic === "ready" || translation.readiness.basic === "none") &&

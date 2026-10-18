@@ -6,12 +6,8 @@ import {
   stringValue,
 } from "../data"
 
-/**
- * A client whose snapshot carries the printing rows of every listed printing of one card, so the
- * image index can resolve thumbnails of printings that live outside the card's own family. The
- * route only completes the printing it opened; the printing catalog holds the others without
- * their rows being part of any snapshot.
- */
+// The image index only resolves printings whose rows are in a snapshot; the route completes just
+// the opened printing, so the other printings' bands are pinned here for their thumbnails.
 export async function printingImageClient(
   client: SnapshotClient,
   snapshot: LoadedSnapshot,

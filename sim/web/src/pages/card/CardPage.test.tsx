@@ -609,6 +609,18 @@ describe("plain wording on the card page", () => {
     expect(screen.getByText("合成新版譯文")).toBeVisible()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
     expect(screen.getByText("此版次的原文")).toBeVisible()
+    // The shared translation and this printing's original share the desktop pair container.
+    const pair = document.querySelector("[data-text-pair]")
+    expect(pair).not.toBeNull()
+    expect(within(pair as HTMLElement).getByText("合成新版譯文")).toBeVisible()
+    expect(within(pair as HTMLElement).getByText("Synthetic older effect")).toBeVisible()
+    act(() => {
+      prefsStore.set({ effectLanguage: "original" })
+    })
+    expect(document.querySelector("[data-text-pair]")).toBeNull()
+    act(() => {
+      prefsStore.set({ effectLanguage: "translated" })
+    })
     // The basis printing sits in the translation's source area with its other sources.
     expect(screen.queryByRole("link", { name: "BP-OTHER" })).not.toBeVisible()
     await userEvent.click(screen.getByText("來源與依據"))

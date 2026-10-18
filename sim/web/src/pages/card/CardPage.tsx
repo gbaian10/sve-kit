@@ -734,11 +734,11 @@ export function CardView({
               </>
             )}
           </div>
-          {/* The page stacks the image over the text in its middle column; the text column is the
-          container the original/translation pair measures itself against. */}
+          {/* The desktop middle column is the container the original/translation pair measures
+          itself against; phones and tablets keep the pair stacked. */}
           <div
             className={cn(
-              frame === undefined && "@container/text",
+              frame === undefined && "lg:@container/text",
               // The drawer and the modal are containers: side by side only once they are wide enough.
               frame !== undefined &&
                 "px-4 @4xl:grid @4xl:grid-cols-[280px_minmax(0,1fr)] @4xl:gap-x-6",

@@ -12,11 +12,8 @@ export function representatives(cards: readonly CardSummary[], edition: Region):
   return [...byCard.values()]
 }
 
-/**
- * The cards the texts' confirmed card-name references point at, in order of first appearance.
- * Every text of a resolved value (original, translation, Japanese source) counts, since an English
- * card's own text may carry no annotation while its Japanese source does.
- */
+// Every text of a value counts: an English card's own text may carry no annotation while its
+// Japanese source and source sections do.
 export function mentionedCards(
   values: readonly (SelectedText | null | undefined)[],
   edition: Region,
@@ -27,7 +24,12 @@ export function mentionedCards(
   for (const value of values) {
     if (!value) continue
     pool.push(...value.cards)
-    for (const text of [value.original, value.translated, value.source]) {
+    for (const text of [
+      value.original,
+      value.translated,
+      value.source,
+      ...(value.sourceSections ?? []),
+    ]) {
       if (!text?.annotation) continue
       for (const raw of arrayValue(text.annotation["occurrences"])) {
         const reference = objectValue(objectValue(raw)["reference"])
@@ -68,11 +70,7 @@ const byCardNo = (a: CardSummary, b: CardSummary): number =>
   a.cardNo.localeCompare(b.cardNo, "en", { numeric: true }) ||
   a.printingId.localeCompare(b.printingId, "en")
 
-/**
- * Splits a card's related cards into the groups the tabs show. A card appears once: the evolve
- * group takes precedence, then the text's own mentions, then the remaining official relations.
- * The official groups sort by card number; mentions keep the text's order.
- */
+// A card appears once: evolve first, then the text's mentions, then the remaining official rows.
 export function relatedGroups({
   cardId,
   related,

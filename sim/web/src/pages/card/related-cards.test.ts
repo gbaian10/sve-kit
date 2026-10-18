@@ -30,7 +30,7 @@ const related = (from: string, ...to: string[]) =>
 const text = (
   references: readonly { readonly termId: string; readonly cardIds: readonly string[] }[],
   cards: readonly CardSummary[],
-  where: "original" | "translated" | "source" = "original",
+  where: "original" | "translated" | "source" | "sourceSections" = "original",
 ): SelectedText => {
   const annotated = {
     unit: { text: "x".repeat(references.length), lang: "ja" },
@@ -47,6 +47,7 @@ const text = (
     original: where === "original" ? annotated : plain,
     ...(where === "translated" ? { translated: annotated } : {}),
     ...(where === "source" ? { source: annotated } : {}),
+    ...(where === "sourceSections" ? { sourceSections: [plain, annotated] } : {}),
     concepts: references.map(({ termId, cardIds }) => ({
       id: termId,
       category: "card_name",
@@ -84,12 +85,28 @@ describe("mentionedCards", () => {
     expect(mentionedCards([value], "jp").map((card) => card.cardNo)).toEqual(["PR-108", "BP01-002"])
   })
 
-  it("reads the translation and the Japanese source when the original carries no annotation", () => {
+  it("reads the translation, the Japanese source and its sections when the original carries no annotation", () => {
     const fairy = summary("c:fairy", "PR-108")
-    for (const where of ["translated", "source"] as const) {
+    for (const where of ["translated", "source", "sourceSections"] as const) {
       const value = text([{ termId: "term:name.fairy", cardIds: ["c:fairy"] }], [fairy], where)
       expect(mentionedCards([value], "jp")).toEqual([fairy])
     }
+  })
+
+  it("keeps the reading order across the source text and its sections", () => {
+    const a = summary("c:a", "BP01-001")
+    const b = summary("c:b", "BP01-002")
+    const sections = text([{ termId: "term:name.b", cardIds: ["c:b"] }], [a, b], "sourceSections")
+    const source = text([{ termId: "term:name.a", cardIds: ["c:a"] }], [a, b], "source")
+    const value: SelectedText = {
+      ...sections,
+      ...(source.source ? { source: source.source } : {}),
+      concepts: [...sections.concepts, ...source.concepts],
+    }
+    expect(mentionedCards([value], "jp").map((card) => card.cardNo)).toEqual([
+      "BP01-001",
+      "BP01-002",
+    ])
   })
 
   it("skips unresolved texts and cards the snapshot does not hold in the shown edition", () => {

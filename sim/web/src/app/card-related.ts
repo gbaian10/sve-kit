@@ -6,11 +6,7 @@ import {
   stringValue,
 } from "../data"
 
-/**
- * The official related-card rows that start at one card. They live in the engine files of the
- * card's own family (one band per file), so only those files are read; the rows pointing at the
- * card from other families are not loaded, the official lists already carry both directions.
- */
+// Only the card's own family bands are read: the official lists already carry both directions.
 export async function loadCardRelated(
   client: SnapshotClient,
   snapshot: LoadedSnapshot,

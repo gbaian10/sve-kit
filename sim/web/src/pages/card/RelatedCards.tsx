@@ -190,23 +190,29 @@ export function RelatedCards({
     language,
     edition,
   )
+  const sectionPointers = effects.flatMap((state, face) =>
+    (state.value?.originalSections ?? []).map((section) => ({
+      face,
+      owner: { kind: "face_revision", id: revisionIds[face] ?? "" },
+      field: "section" as const,
+      ordinal: section.ordinal,
+    })),
+  )
   const sections = useAnnotatedTexts(
     client,
-    effects.flatMap((state, index) =>
-      (state.value?.originalSections ?? []).map((section) => ({
-        owner: { kind: "face_revision", id: revisionIds[index] ?? "" },
-        field: "section" as const,
-        ordinal: section.ordinal,
-      })),
-    ),
+    sectionPointers.map(({ owner, field, ordinal }) => ({ owner, field, ordinal })),
     language,
     edition,
   )
   const [selected, setSelected] = useState<TabId | null>(null)
   // The section waits for the official rows so its tabs do not shuffle after the first paint.
   if (related === undefined) return null
+  // Reading order: each face's effect, then its sections, before the next face.
   const mentions = mentionedCards(
-    [...effects, ...sections].map((state) => state.value),
+    effects.flatMap((effect, face) => [
+      effect.value,
+      ...sections.filter((_, index) => sectionPointers[index]?.face === face).map((s) => s.value),
+    ]),
     edition,
   )
   const groups = relatedGroups({

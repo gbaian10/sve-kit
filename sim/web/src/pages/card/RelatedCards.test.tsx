@@ -7,12 +7,18 @@ import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { type PrintingEntry, RelatedCards } from "./RelatedCards"
 
-const state = vi.hoisted(() => ({
-  rows: [] as { from_card_id: string; to_card_id: string }[],
-  failRows: false,
-  mentions: [] as string[],
-  loads: [] as string[],
-}))
+const state = vi.hoisted(() => {
+  /** Card ids named by texts other than the front effect, keyed `<revision>/<field>/<ordinal>`. */
+  const texts: Record<string, string[]> = {}
+  return {
+    rows: [] as { from_card_id: string; to_card_id: string }[],
+    failRows: false,
+    /** Card ids named by the front face's effect text. */
+    mentions: [] as string[],
+    texts,
+    loads: [] as string[],
+  }
+})
 
 vi.mock("../../app/card-related", () => ({
   loadCardRelated: (_client: unknown, _snapshot: unknown, cardId: string) => {
@@ -25,33 +31,47 @@ vi.mock("../../app/card-related", () => ({
 
 vi.mock("../../app/snapshot", () => ({
   useImageIndex: () => undefined,
-  useAnnotatedTexts: (_client: unknown, pointers: readonly { field: string }[]) =>
-    pointers.map(({ field }) => ({
-      readiness: { basic: "ready", source: "none", annotations: "ready" },
-      value:
-        field === "effect"
-          ? {
-              original: {
-                unit: { text: "x".repeat(state.mentions.length), lang: "ja" },
-                annotation: {
-                  occurrences: state.mentions.map((id, index) => ({
-                    reference: { kind: "card_name", term_id: `term:name.${id}` },
-                    ranges: [{ start: index, end: index + 1 }],
-                    bold: true,
-                  })),
-                },
-              },
-              concepts: state.mentions.map((id) => ({
-                id: `term:name.${id}`,
-                category: "card_name",
-                explanations: [],
-                card_ids: [`c:${id}`],
+  useAnnotatedTexts: (
+    _client: unknown,
+    pointers: readonly {
+      owner: { id: string }
+      field: string
+      ordinal: number | null
+    }[],
+  ) =>
+    pointers.map(({ owner, field, ordinal }) => {
+      const key = `${owner.id}/${field}/${String(ordinal)}`
+      const ids = key === "rev:base/effect/null" ? state.mentions : state.texts[key]
+      if (ids === undefined) return { readiness: { basic: "none" }, value: null }
+      const prefix = `${owner.id}/section/`
+      const sections = Object.keys(state.texts)
+        .filter((entry) => entry.startsWith(prefix))
+        .map((entry) => ({ ordinal: Number(entry.slice(prefix.length)) }))
+      return {
+        readiness: { basic: "ready", source: "none", annotations: "ready" },
+        value: {
+          ...(field === "effect" && sections.length > 0 ? { originalSections: sections } : {}),
+          original: {
+            unit: { text: "x".repeat(ids.length), lang: "ja" },
+            annotation: {
+              occurrences: ids.map((id, index) => ({
+                reference: { kind: "card_name", term_id: `term:name.${id}` },
+                ranges: [{ start: index, end: index + 1 }],
+                bold: true,
               })),
-              explanations: [],
-              cards: state.mentions.map((id) => summary(id)),
-            }
-          : null,
-    })),
+            },
+          },
+          concepts: ids.map((id) => ({
+            id: `term:name.${id}`,
+            category: "card_name",
+            explanations: [],
+            card_ids: [`c:${id}`],
+          })),
+          explanations: [],
+          cards: ids.map((id) => summary(id)),
+        },
+      }
+    }),
 }))
 
 const NAMES: Record<string, string> = {
@@ -111,7 +131,11 @@ const printings = (...ids: string[]): PrintingEntry[] =>
     link: { to: `/cards/${NUMBERS[id] ?? id}`, state: null },
   }))
 
-async function open(entries: PrintingEntry[] = [], cardId = "c:base") {
+async function open(
+  entries: PrintingEntry[] = [],
+  cardId = "c:base",
+  revisionIds: string[] = ["rev:base"],
+) {
   return renderInRouter(
     <RelatedCards
       client={client}
@@ -119,7 +143,7 @@ async function open(entries: PrintingEntry[] = [], cardId = "c:base") {
       edition="jp"
       cardId={cardId}
       printingId="p:base"
-      revisionIds={["rev:base"]}
+      revisionIds={revisionIds}
       printings={entries}
       linkTo={(card) => ({ to: `/cards/${card.cardNo}`, state: null })}
     />,
@@ -130,6 +154,7 @@ beforeEach(() => {
   state.rows = []
   state.failRows = false
   state.mentions = []
+  state.texts = {}
   state.loads = []
 })
 afterEach(() => {
@@ -230,6 +255,22 @@ describe("RelatedCards", () => {
     await user.click(screen.getByRole("button", { name: "重試" }))
     expect(await screen.findByRole("tab", { name: "進化" })).toBeInTheDocument()
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+  })
+
+  it("orders mentions face by face, each face's effect before its sections", async () => {
+    state.mentions = ["other"]
+    state.texts = {
+      "rev:base/section/1": ["token"],
+      "rev:back/effect/null": ["evolve"],
+      "rev:back/section/2": ["other", "another"],
+    }
+    await open([], "c:base", ["rev:base", "rev:back"])
+    const list = await screen.findByRole("list", { name: "這張卡提到" })
+    expect(
+      within(list)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual(["/cards/BP05-070", "/cards/PR-108", "/cards/BP05-053", "/cards/another"])
   })
 
   it("never lists the card itself among its relations", async () => {
