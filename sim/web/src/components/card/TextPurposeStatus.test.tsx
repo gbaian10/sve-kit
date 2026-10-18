@@ -11,7 +11,10 @@ import { CardNameHeading } from "./CardNameHeading"
 import { CardText } from "./CardText"
 
 const boundary = vi.hoisted(() => ({ state: null as AnnotatedTextState | null }))
-vi.mock("../../app/snapshot", () => ({ useAnnotatedText: () => boundary.state }))
+vi.mock("../../app/snapshot", () => ({
+  useAnnotatedText: () => boundary.state,
+  useAnnotatedTexts: () => [],
+}))
 const owner = { kind: "face_revision", id: "revision" }
 const { client } = await annotatedOrigin(fixture)
 await client.load()

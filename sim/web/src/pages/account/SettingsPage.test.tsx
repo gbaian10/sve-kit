@@ -117,7 +117,7 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
     preloadPrintings: true,
     preloadNeighbours: true,
     infiniteScroll: false,
-    collapsedText: { effectOriginal: true, flavorOriginal: true, sectionOriginal: true },
+    collapsedText: { effectOriginal: true, flavorOriginal: true },
     showFlavorText: false,
     symbolLabels: true,
     termEmphasis: false,
@@ -140,7 +140,6 @@ it("confirms restoring all defaults and keeps recent cards and downloaded data",
   expect(readPrefs().collapsedText).toEqual({
     effectOriginal: true,
     flavorOriginal: true,
-    sectionOriginal: true,
   })
   await userEvent.click(screen.getByRole("button", { name: "恢復預設" }))
   await userEvent.click(

@@ -951,7 +951,123 @@ function afterPaint(task: () => void): () => void {
   }
 }
 
+export type TextPointer = {
+  readonly owner: JsonObject
+  readonly field: TextField
+  readonly ordinal: number | null
+}
+
+function failureOf(error: unknown): TextFailure {
+  return error instanceof SnapshotError
+    ? { kind: "validation", code: error.code, message: error.message }
+    : { kind: "load", message: error instanceof Error ? error.message : String(error) }
+}
+
 // A changed exact owner or edition must never display the previous identity's text.
+export function useAnnotatedTexts(
+  client: SnapshotClient,
+  pointers: readonly TextPointer[],
+  language: string,
+  edition: Region,
+  sharedResolver?: AnnotatedTextResolver | null,
+): AnnotatedTextState[] {
+  const root = useSnapshotRoot()
+  const snapshot = client.snapshot()
+  const identity = canonicalText([[...pointers], language, edition])
+  const [loaded, setLoaded] = useState<{
+    readonly snapshot: typeof snapshot
+    readonly identity: string
+    readonly results: ReadonlyMap<number, { value?: SelectedText | null; error?: TextFailure }>
+  }>()
+  // A text resolved earlier for this snapshot renders final on the first pass.
+  const existing = sharedResolver ?? peekAnnotatedTextResolver(client)
+  useEffect(() => {
+    if (!snapshot) return
+    let active = true
+    const [currentPointers, currentLanguage] = arrayValue(parseJson(identity))
+    const targetLang = stringValue(currentLanguage)
+    const pending = arrayValue(currentPointers).flatMap((raw, index) => {
+      const value = objectValue(raw)
+      const pointer = {
+        owner: objectValue(value["owner"]),
+        field: stringValue(value["field"]),
+        ordinal: value["ordinal"] ?? null,
+      }
+      const resolved = (sharedResolver ?? peekAnnotatedTextResolver(client))?.peek(
+        pointer,
+        targetLang,
+      )
+      return resolved === undefined ? [{ index, pointer }] : []
+    })
+    if (pending.length === 0) return
+    const cancel = afterPaint(() => {
+      const resolver = sharedResolver ?? sharedAnnotatedTextResolver(client)
+      const settle = (
+        index: number,
+        result: { value?: SelectedText | null; error?: TextFailure },
+      ) => {
+        if (!active) return
+        setLoaded((previous) => {
+          const results = new Map(
+            previous?.snapshot === snapshot && previous.identity === identity
+              ? previous.results
+              : [],
+          )
+          results.set(index, result)
+          return { snapshot, identity, results }
+        })
+      }
+      for (const { index, pointer } of pending)
+        void resolver.resolve(pointer, targetLang).then(
+          (value) => {
+            settle(index, { value })
+          },
+          (error: unknown) => {
+            settle(index, { error: failureOf(error) })
+          },
+        )
+    })
+    return () => {
+      active = false
+      cancel()
+    }
+  }, [client, sharedResolver, snapshot, identity])
+  const base = {
+    root,
+    generation: generationOf(snapshot),
+    ...(snapshot ? { dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash } : {}),
+    language,
+    edition,
+  }
+  return pointers.map((pointer, index) => {
+    const fields = { ...base, owner: pointer.owner, ordinal: pointer.ordinal, field: pointer.field }
+    const entry =
+      loaded?.snapshot === snapshot && loaded.identity === identity
+        ? loaded.results.get(index)
+        : undefined
+    const peeked = existing?.peek(pointer, language)
+    const settled = entry ?? (peeked === undefined ? undefined : { value: peeked })
+    if (settled === undefined)
+      return {
+        readiness: { ...fields, basic: "pending", source: "pending", annotations: "pending" },
+        value: null,
+      }
+    if (settled.error)
+      return {
+        readiness: {
+          ...fields,
+          basic: "error",
+          source: "error",
+          annotations: "error",
+          error: settled.error,
+        },
+        value: null,
+      }
+    const value = settled.value ?? null
+    return { readiness: { ...fields, ...purposesOf(value) }, value }
+  })
+}
+
 export function useAnnotatedText(
   client: SnapshotClient,
   owner: JsonObject,
@@ -961,94 +1077,15 @@ export function useAnnotatedText(
   sharedResolver?: AnnotatedTextResolver | null,
   ordinal: number | null = null,
 ): AnnotatedTextState {
-  const root = useSnapshotRoot()
-  const snapshot = client.snapshot()
-  const identity = canonicalText([owner, field, language, edition, ordinal])
-  const [loaded, setLoaded] = useState<{
-    readonly snapshot: typeof snapshot
-    readonly identity: string
-    readonly value?: SelectedText | null
-    readonly error?: TextFailure
-  }>()
-  // A text resolved earlier for this snapshot renders final on the first pass.
-  const peeked = (sharedResolver ?? peekAnnotatedTextResolver(client))?.peek(
-    { owner, field, ordinal },
-    language,
-  )
-  useEffect(() => {
-    if (!snapshot) return
-    let active = true
-    const [currentOwner, currentField, currentLanguage, , currentOrdinal] = arrayValue(
-      parseJson(identity),
-    )
-    const pointer = {
-      owner: objectValue(currentOwner),
-      field: stringValue(currentField),
-      ordinal: currentOrdinal ?? null,
-    }
-    const existing = sharedResolver ?? peekAnnotatedTextResolver(client)
-    if (existing?.peek(pointer, stringValue(currentLanguage)) !== undefined) return
-    const cancel = afterPaint(() => {
-      const resolver = sharedResolver ?? sharedAnnotatedTextResolver(client)
-      void resolver.resolve(pointer, stringValue(currentLanguage)).then(
-        (value) => {
-          if (active) setLoaded({ snapshot, identity, value })
-        },
-        (error: unknown) => {
-          if (active)
-            setLoaded({
-              snapshot,
-              identity,
-              error:
-                error instanceof SnapshotError
-                  ? { kind: "validation", code: error.code, message: error.message }
-                  : {
-                      kind: "load",
-                      message: error instanceof Error ? error.message : String(error),
-                    },
-            })
-        },
-      )
-    })
-    return () => {
-      active = false
-      cancel()
-    }
-  }, [client, sharedResolver, snapshot, identity])
-  const settled =
-    loaded?.snapshot === snapshot && loaded.identity === identity
-      ? loaded
-      : peeked === undefined
-        ? undefined
-        : { snapshot, identity, value: peeked }
-  const base = {
-    root,
-    generation: generationOf(snapshot),
-    ...(snapshot ? { dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash } : {}),
-    owner,
-    ordinal,
-    field,
+  const [state] = useAnnotatedTexts(
+    client,
+    [{ owner, field, ordinal }],
     language,
     edition,
-  }
-  if (settled === undefined)
-    return {
-      readiness: { ...base, basic: "pending", source: "pending", annotations: "pending" },
-      value: null,
-    }
-  if (settled.error)
-    return {
-      readiness: {
-        ...base,
-        basic: "error",
-        source: "error",
-        annotations: "error",
-        error: settled.error,
-      },
-      value: null,
-    }
-  const value = settled.value ?? null
-  return { readiness: { ...base, ...purposesOf(value) }, value }
+    sharedResolver,
+  )
+  if (state === undefined) throw new Error("one pointer resolves to one state")
+  return state
 }
 
 export function useNeighbours(query: SearchQuery | null, target: string | null, maxItems?: number) {

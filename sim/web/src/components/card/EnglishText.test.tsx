@@ -247,7 +247,6 @@ it("boxes both translations and originals, collapses each original independently
   expect(readPrefs().collapsedText).toEqual({
     effectOriginal: false,
     flavorOriginal: true,
-    sectionOriginal: false,
   })
   act(() => {
     prefsStore.set(DEFAULT_PREFS)

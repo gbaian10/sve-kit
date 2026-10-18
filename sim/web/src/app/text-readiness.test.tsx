@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import fixture from "../../../../tests/fixtures/snapshot-contract/v3/whole-name-native.json"
 import { SnapshotError } from "../data"
 import { annotatedOrigin } from "../test-utils/annotated-snapshot"
-import { useAnnotatedText } from "./snapshot"
+import { useAnnotatedText, useAnnotatedTexts } from "./snapshot"
 
 const owner = { kind: "face_revision", id: "revision" }
 
@@ -117,4 +117,25 @@ describe("useAnnotatedText", () => {
       expect(result.current.value).toBeNull()
     },
   )
+})
+
+describe("useAnnotatedTexts", () => {
+  it("resolves several pointers independently and reports each in order", async () => {
+    const { client } = await annotatedOrigin(fixture)
+    await client.load()
+    const resolve = vi.fn((pointer: { ordinal: number | null }) =>
+      pointer.ordinal === 3 ? Promise.reject(new Error("offline")) : Promise.resolve(null),
+    )
+    const resolver = { resolve, peek: () => undefined }
+    const pointers = [1, 3].map((ordinal) => ({ owner, field: "section" as const, ordinal }))
+    const { result } = renderHook(() =>
+      useAnnotatedTexts(client, pointers, "ja", "jp", resolver as never),
+    )
+    expect(result.current.map((state) => state.readiness.basic)).toEqual(["pending", "pending"])
+    await waitFor(() => {
+      expect(result.current.map((state) => state.readiness.basic)).toEqual(["none", "error"])
+    })
+    expect(result.current[0]?.readiness.ordinal).toBe(1)
+    expect(result.current[1]?.readiness).toMatchObject({ ordinal: 3, error: { kind: "load" } })
+  })
 })
