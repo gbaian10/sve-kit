@@ -147,14 +147,14 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 。指定敵方至多
+            text: 。選擇敵方至多
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_4
           - kind: Literal
-            text: 個從者。將其返回
+            text: 個從者。使其返回
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -516,7 +516,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】：指定
+            text: 】：選擇
           - kind: LeafRef
             slot: leaf_2
           - kind: LeafRef
@@ -533,7 +533,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 。使其獲得【
+            text: 。其具有【
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal

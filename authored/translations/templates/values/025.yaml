@@ -146,7 +146,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】指定自己的
+            text: 【進化時】選擇自己的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -157,7 +157,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}從者。將其返回'
+            text: '}從者。使其返回'
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -313,7 +313,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 個其他從者放置到墓場：從自己牌堆頂逐張公開，直到公開「消費大於被放置到墓場的從者的從者」為止。將其召喚到
+            text: 個其他從者放置到墓場：從自己牌堆頂逐張公開，直到公開「消費大於被放置到墓場的從者消費的從者」為止。將其召喚到
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal

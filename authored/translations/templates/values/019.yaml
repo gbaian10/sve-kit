@@ -558,11 +558,11 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: _
+            text: ' '
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 】：指定自己戰場上
+            text: 】：選擇自己戰場上的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -573,11 +573,11 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 以下的其他卡片。將其返回
+            text: 以下的其他卡片。使其返回
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 。本回合，無法使用這張卡片{進化}以外的{
+            text: 。本回合，無法使用這張卡片的{進化}以外的{
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -787,7 +787,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 。若將原始消費
+            text: 。若使原始消費
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal

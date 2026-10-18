@@ -167,7 +167,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 將
+            text: 使
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -179,7 +179,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 返回手牌：指定
+            text: 返回手牌：選擇
           - kind: LeafRef
             slot: leaf_3
           - kind: LeafRef
@@ -1278,14 +1278,14 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】指定敵方的
+            text: 【進化時】選擇敵方的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_0
           - kind: Literal
-            text: 個從者。將其返回
+            text: 個從者。使其返回
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -1293,11 +1293,11 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: _
+            text: ' '
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 】抽取
+            text: 】抽
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal

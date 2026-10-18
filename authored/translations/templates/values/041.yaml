@@ -253,18 +253,18 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】指定敵方的
+            text: 【進化時】選擇敵方的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_0
           - kind: Literal
-            text: 個從者。將其返回
+            text: 個從者。使其返回
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 。如果其為進化從者，則轉變為破壞。
+            text: 。若其為進化從者，則改為將其破壞。
       expression_targets: {}
   - origin: machine
     kind: template_translation

@@ -508,14 +508,14 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定自己的'
+            text: '}選擇自己的'
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_1
           - kind: Literal
-            text: 張其他卡片。將其返回
+            text: 張其他卡片。使其返回
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal

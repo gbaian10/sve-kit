@@ -1052,7 +1052,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 從下列之中選擇
+            text: 從下列抉擇
           - kind: Form
             form_id: quantity.choice_mode_count.value
             args:
@@ -1063,7 +1063,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】指定自己的
+            text: 】選擇自己的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -1086,13 +1086,15 @@ records:
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: 】指定
+            text: 】選擇
           - kind: LeafRef
             slot: leaf_7
+          - kind: Literal
+            text: 的
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
-            text: 至多
+            text: 中的至多
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -1107,11 +1109,11 @@ records:
           - kind: LeafRef
             slot: leaf_10
           - kind: Literal
-            text: 。將其返回
+            text: 。使其返回
           - kind: LeafRef
             slot: leaf_12
           - kind: Literal
-            text: 並洗牌。抽取
+            text: 並洗牌。抽
           - kind: LeafRef
             slot: leaf_13
           - kind: Literal
