@@ -8,7 +8,7 @@ import pytest
 from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, digest, object_value, string
 from sve_carddb.domains.translations.four_layer_authored import Inputs, shard
-from sve_carddb.domains.translations.jp_sources import effect_bindings
+from sve_carddb.domains.translations.jp_sources import display_bindings
 from sve_carddb.domains.translations.labels import apply as apply_labels
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.export.media import prepare_media
@@ -77,7 +77,7 @@ def test_current_jp_effect_bindings_do_not_require_alignment(
             {"card_id": "card", "region": "en", "field_scope": "name"},
             {"resolved": resolved},
         )
-    bindings = effect_bindings(db)
+    bindings = display_bindings(db)
     assert bindings == (
         DisplayBinding("use", ("face_revision", "revision-en"), "zh-Hant", "jp_source"),
     )
@@ -101,7 +101,108 @@ def test_jp_effect_bindings_require_current_donor_and_existing_receiver(
     with db.transaction():
         db.update("translation_use", {"id": "use"}, {"field": "effect"})
         db.delete("face_current", {"face_id": "face", "region": "jp"})
-    assert effect_bindings(db) == ()
+    assert display_bindings(db) == ()
+
+
+@pytest.mark.parametrize(
+    "state",
+    ["confirmed", "provisional", "no_jp_current", "no_en_current", "untranslated"],
+)
+def test_current_name_policy_reaches_only_confirmed_english_receivers(
+    db: Database, state: str
+) -> None:
+    dual_region(db)
+    own = DisplayBinding(
+        "use", ("face_revision", "revision"), "zh-Hant", "own_source", "translation"
+    )
+    with db.transaction():
+        db.delete(
+            "translation_selection", {"context_id": "context", "target_lang": "zh-Hant"}
+        )
+        if state == "provisional":
+            db.update("card", {"id": "card"}, {"identity_state": "provisional"})
+        elif state in {"no_jp_current", "no_en_current"}:
+            db.delete("face_current", {"face_id": "face", "region": state[3:5]})
+    bindings = display_bindings(db, names=() if state == "untranslated" else (own,))
+    if state in {"no_jp_current", "no_en_current"}:
+        assert bindings == ()
+        return
+    result = dual_project(db, replace(decisions(), display_bindings=(own, *bindings)))
+    source = one(result, "face_revision", "revision")
+    receiver = one(result, "face_revision", "revision-en")
+    source_name = object_value(array(source["translations"])[0])
+    received = array(receiver["translations"])
+    if state != "confirmed":
+        assert received == []
+        return
+    assert len(received) == 1
+    name = object_value(received[0])
+    assert name == source_name | {"basis": "jp_source"}
+    assert name["field"] == "name"
+    assert name["source"] == {
+        "owner": {"kind": "face_revision", "id": "revision"},
+        "field": "name",
+        "ordinal": None,
+    }
+
+
+@pytest.mark.parametrize(
+    ("origin", "authority", "low_confidence"),
+    [("machine", "unofficial", True), ("official", "digital_official", False)],
+)
+def test_current_name_policy_direct_jp_source_round_trips(
+    db: Database, origin: str, authority: str, low_confidence: bool
+) -> None:
+    dual_region(db)
+    with db.transaction():
+        db.delete(
+            "translation_selection", {"context_id": "context", "target_lang": "zh-Hant"}
+        )
+        db.update(
+            "translation",
+            {"id": "translation"},
+            {
+                "origin": origin,
+                "authority": authority,
+                "low_confidence": low_confidence,
+            },
+        )
+    binding = replace(jp_source().display_bindings[0], translation_id="translation")
+    result = dual_project(db, replace(decisions(), display_bindings=(binding,)))
+    translation = one(result, "translation")
+    assert translation["source_unit_id"] == TEXT
+    assert translation["origin"] == origin
+    assert translation["authority"] == authority
+    assert translation["low_confidence"] is low_confidence
+    result = replace(
+        result,
+        tables=result.tables
+        | {
+            "printing_image": [
+                row | {"availability": "unfetched", "publication_state": "pending"}
+                for row in result.tables["printing_image"]
+            ],
+            "image_variant": [],
+        },
+    )
+    result = prepare_media(result, None, revision=1).projection
+    exported = export_snapshot(
+        result,
+        Ownership.from_database(db, result),
+        Batch(
+            "preview-20261018T010203Z-0001",
+            "2026-10-18T01:02:03Z",
+            "2026-10-01",
+            ("en", "jp"),
+        ),
+    )
+    assert (
+        read_snapshot(
+            exported.manifest,
+            {key: blob.raw for key, blob in exported.payloads.items()},
+        )
+        == result.tables
+    )
 
 
 @pytest.mark.parametrize("regions", [("en", "jp")])

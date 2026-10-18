@@ -397,7 +397,11 @@ class _SelectedTranslations:
             context_id=use["context_id"],
             target_lang=binding.target_lang,
         )
-        if binding.basis in {"official_counterpart", "own_source"}:
+        if binding.basis in {"official_counterpart", "own_source"} or (
+            binding.basis == "jp_source"
+            and use["field"] == "name"
+            and binding.translation_id is not None
+        ):
             if binding.translation_id is None:
                 raise ValueError(
                     "Official counterpart requires a direct translation ID"
@@ -409,7 +413,7 @@ class _SelectedTranslations:
                 }
             ]
         elif binding.translation_id is not None:
-            raise ValueError("JP source binding must use the common selection")
+            raise ValueError("JP effect/flavor binding must use the common selection")
         for row in selected:
             self.append(owner, use, row, binding.basis, counterpart)
 

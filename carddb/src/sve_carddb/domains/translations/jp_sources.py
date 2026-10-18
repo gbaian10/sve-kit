@@ -1,4 +1,4 @@
-"""Current JP effect selections supply whole-field views on confirmed paired EN faces."""
+"""Current JP names and effects supply whole-field views on confirmed paired EN faces."""
 
 from typing import TYPE_CHECKING
 
@@ -10,7 +10,9 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database
 
 
-def effect_bindings(db: Database) -> tuple[DisplayBinding, ...]:
+def display_bindings(
+    db: Database, *, names: tuple[DisplayBinding, ...] = ()
+) -> tuple[DisplayBinding, ...]:
     """Region alignment governs rule eligibility independently of JP text display."""
     current = {
         (string(row["face_id"]), string(row["region"])): string(row["revision_id"])
@@ -35,14 +37,25 @@ def effect_bindings(db: Database) -> tuple[DisplayBinding, ...]:
         for stored in db.rows("translation_selection")
         if (row := payload(stored)) and row["target_lang"] == "zh-Hant"
     }
+    name_translations = {
+        binding.source_use_id: binding.translation_id
+        for binding in names
+        if binding.basis == "own_source"
+        and binding.target_lang == "zh-Hant"
+        and binding.translation_id is not None
+    }
     result = []
     for stored in db.rows("translation_use"):
         use = payload(stored)
         if (
-            use["field"] != "effect"
+            use["field"] not in {"name", "effect"}
             or use["ordinal"] is not None
             or use["face_revision_id"] is None
-            or use["context_id"] not in selected
+        ):
+            continue
+        translation = name_translations.get(string(use["id"]))
+        if (use["field"] == "name" and translation is None) or (
+            use["field"] == "effect" and use["context_id"] not in selected
         ):
             continue
         identifier = string(use["face_revision_id"])
@@ -57,7 +70,8 @@ def effect_bindings(db: Database) -> tuple[DisplayBinding, ...]:
         ):
             continue
         receiver = revisions[receiver_id]
-        if source["effect_unit_id"] is None or receiver["effect_unit_id"] is None:
+        field = string(use["field"]) + "_unit_id"
+        if source[field] is None or receiver[field] is None:
             continue
         result.append(
             DisplayBinding(
@@ -65,6 +79,7 @@ def effect_bindings(db: Database) -> tuple[DisplayBinding, ...]:
                 ("face_revision", receiver_id),
                 "zh-Hant",
                 "jp_source",
+                translation if use["field"] == "name" else None,
             )
         )
     return tuple(
