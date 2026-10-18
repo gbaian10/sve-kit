@@ -123,7 +123,7 @@ export function SearchBar({
           }
           onClick={onToggleFilters}
           className={cn(
-            "relative flex h-11 shrink-0 items-center justify-center gap-2 rounded-button border px-3 text-13 font-semibold whitespace-nowrap",
+            "flex h-11 shrink-0 items-center justify-center gap-2 rounded-button border px-3 text-13 font-semibold whitespace-nowrap",
             filtersOpen
               ? "border-accent bg-accent text-accent-ink hover:brightness-105"
               : "border-border bg-surface-1 text-text-1 hover:bg-surface-2",
@@ -142,9 +142,14 @@ export function SearchBar({
           </svg>
           <span>{t("search.filters")}</span>
           {filterCount > 0 && (
+            // In flow after the label: a corner badge either covered the text or overhung the
+            // button, which the overflow audit reports. The colours invert with the button's.
             <span
               aria-hidden="true"
-              className="absolute top-1 right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-11 font-bold text-accent-ink tabular-nums"
+              className={cn(
+                "flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-11 font-bold tabular-nums",
+                filtersOpen ? "bg-accent-ink text-accent" : "bg-accent text-accent-ink",
+              )}
             >
               {filterCount}
             </span>

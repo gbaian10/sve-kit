@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useRef, useState } from "react"
 import { expect, it } from "vitest"
@@ -41,14 +41,22 @@ it("shows the filter label and reflects its open state with the accent style", a
   expect(document.getElementById(button.getAttribute("aria-describedby") ?? "")).toHaveTextContent(
     "已啟用 3 個篩選條件",
   )
+  // The count follows the label in flow (never over it) and inverts with the button.
+  const badge = within(button).getByText("3")
+  expect(badge).toHaveAttribute("aria-hidden", "true")
+  expect(badge).not.toHaveClass("absolute")
+  expect(badge).toHaveClass("rounded-full", "bg-accent", "text-accent-ink")
 
   await userEvent.click(button)
   expect(button).toHaveAttribute("aria-expanded", "true")
   expect(button).toHaveClass("bg-accent", "text-accent-ink", "border-accent")
+  expect(badge).toHaveClass("bg-accent-ink", "text-accent")
+  expect(badge).not.toHaveClass("bg-accent", "text-accent-ink")
 
   await userEvent.click(button)
   expect(button).toHaveAttribute("aria-expanded", "false")
   expect(button).toHaveClass("bg-surface-1", "border-border")
+  expect(badge).toHaveClass("bg-accent", "text-accent-ink")
 })
 
 it.each([
