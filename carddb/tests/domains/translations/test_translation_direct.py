@@ -1,5 +1,6 @@
 """Direct whole-field translations share one context per source text and never merge conflicts."""
 
+import sqlite3
 from typing import TYPE_CHECKING
 
 import pytest
@@ -95,3 +96,53 @@ def test_absent_source_text_is_rejected(template: DatabaseTemplate) -> None:
             origin="machine",
             low_confidence=False,
         )
+
+
+@pytest.mark.parametrize("mutation", ["owner", "field", "source", "origin"])
+def test_official_direct_translation_is_limited_to_sourced_vocabulary_labels(
+    template: DatabaseTemplate, mutation: str
+) -> None:
+    message = (
+        "Unofficial direct translation cannot claim an official source"
+        if mutation == "origin"
+        else "Official direct translation requires a sourced vocabulary label"
+    )
+    with (
+        template.copy() as db,
+        db.transaction(),
+        pytest.raises(ValueError, match=message),
+    ):
+        write(
+            db,
+            {"face_revision_id": "revision"} if mutation == "owner" else FOLLOWER,
+            field="name" if mutation == "field" else "label",
+            lang="en",
+            source_unit_id="text",
+            text="Synthetic label",
+            origin="project" if mutation == "origin" else "official",
+            source_id=None if mutation == "source" else "source",
+            low_confidence=False,
+        )
+
+
+def test_official_card_name_still_cannot_enter_the_common_selection(
+    template: DatabaseTemplate,
+) -> None:
+    with template.copy() as db:
+        put(db, {"face_revision_id": "revision"})
+        translation = db.rows("translation")[0].values
+        with (
+            pytest.raises(
+                sqlite3.IntegrityError, match="name_selection_owner_eligibility"
+            ),
+            db.transaction(),
+        ):
+            db.update(
+                "translation",
+                {"id": translation["id"]},
+                {
+                    "origin": "official",
+                    "authority": "sve_official",
+                    "source_id": "source",
+                },
+            )

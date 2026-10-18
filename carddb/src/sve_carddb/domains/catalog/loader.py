@@ -189,6 +189,16 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed pr
                 for label in (
                     record.data.value.translations if record.data.value else ()
                 ):
+                    source_id = None
+                    if label.source_ref is not None:
+                        source_id = (
+                            prepared.sources.batch(label.source_ref.batch_id)
+                            .metadata(
+                                label.source_ref.source_version_id,
+                                parser_version=label.source_ref.parser,
+                            )[0]
+                            .id
+                        )
                     write(
                         db,
                         {
@@ -201,4 +211,6 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed pr
                         text=label.text,
                         origin=label.origin,
                         low_confidence=label.low_confidence,
+                        source_id=source_id,
+                        semantic_variant=f"vocabulary:{item_term.kind}:{item_term.code}",
                     )

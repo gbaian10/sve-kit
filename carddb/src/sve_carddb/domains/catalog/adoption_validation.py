@@ -12,7 +12,11 @@ from sve_carddb.domains.products.models import Language
 if TYPE_CHECKING:
     from sve_carddb.domains.catalog.adoption_models import RawMapping, ReviewContext
     from sve_carddb.domains.catalog.adoption_sources import AdoptionSources
-    from sve_carddb.domains.catalog.records import LanguageRecord, VocabularyRecord
+    from sve_carddb.domains.catalog.records import (
+        CurrentVocabularyValue,
+        LanguageRecord,
+        VocabularyRecord,
+    )
 
 _FIELD_PARTS = 4
 _UI = {"zh-Hant": ("ja", "en"), "ja": ("en",), "en": ("ja",)}
@@ -84,12 +88,24 @@ def term(
             or "/".join(parts[3:]) not in expected
         ):
             raise ValueError("Vocabulary mapping source field does not match kind")
+    _labels(value)
     return Term(
         kind=record.data.subject.kind,
         code=record.data.subject.code,
         label=sources.value(value.label, review),
         active=value.active,
     )
+
+
+def _labels(value: CurrentVocabularyValue) -> None:
+    for label in value.translations:
+        if label.origin == "official" and not any(
+            (mapping.lang, mapping.raw, mapping.source_ref)
+            == (label.lang, label.text, label.source_ref)
+            and not mapping.special_kinds
+            for mapping in value.raw_mappings
+        ):
+            raise ValueError("Official label requires an exact adopted base mapping")
 
 
 def _trait_components(mapping: RawMapping, projection: JsonValue) -> None:

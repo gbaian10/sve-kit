@@ -5,13 +5,25 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build import Capability, Column, Kind, compile_schema, create_database
+from sve_carddb.build import (
+    Capability,
+    Column,
+    Json,
+    Kind,
+    compile_schema,
+    create_database,
+)
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t1 import REGISTRY
 from sve_carddb.build.translation_evidence import TABLES
-from sve_carddb.core.json import array, object_value, parse
+from sve_carddb.core.json import array, digest, object_value, parse
+from sve_carddb.domains.translations.direct import write
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.reader import read_snapshot
+from sve_carddb.export.transport import Ownership, export_snapshot
 
 from ..support.snapshot_project_fixtures import TEXT, populate, schema
+from .test_snapshot_export import BATCH
 from .test_snapshot_project import projected
 
 if TYPE_CHECKING:
@@ -169,6 +181,65 @@ def test_absent_choice_keeps_nonempty_original(vocabulary_db: Database) -> None:
         for r in result.tables["text_unit"]
         if r["id"] == vocabulary["label_unit_id"]
     )
+
+
+def test_official_english_label_and_chinese_choice_survive_snapshot_reader(
+    vocabulary_db: Database,
+) -> None:
+    with vocabulary_db.transaction():
+        vocabulary_db.insert(
+            "language",
+            {"code": "en", "display_name": "English", "fallback_order": Json(["ja"])},
+        )
+        vocabulary_db.update(
+            "text_unit", {"id": TEXT}, {"content_hash": digest(b"Synthetic text")}
+        )
+        write(
+            vocabulary_db,
+            {"vocabulary_kind": "trait", "vocabulary_code": "elf"},
+            field="label",
+            lang="en",
+            source_unit_id=TEXT,
+            text="Synthetic pixie",
+            origin="official",
+            source_id="source",
+            low_confidence=False,
+        )
+    projection = prepare_media(projected(vocabulary_db), None, revision=1).projection
+    snapshot = export_snapshot(
+        projection, Ownership.from_database(vocabulary_db, projection), BATCH
+    )
+    tables = read_snapshot(
+        snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}
+    )
+    vocabulary = next(
+        row
+        for row in tables["vocabulary"]
+        if (row["kind"], row["code"]) == ("trait", "elf")
+    )
+    labels = {}
+    for raw in array(vocabulary["translations"]):
+        binding = object_value(raw)
+        translation = next(
+            row
+            for row in tables["translation"]
+            if row["id"] == binding["translation_id"]
+        )
+        text = next(
+            row["text"]
+            for row in tables["text_unit"]
+            if row["id"] == translation["text_unit_id"]
+        )
+        labels[binding["target_lang"]] = (
+            text,
+            translation["origin"],
+            translation["authority"],
+        )
+    assert labels == {
+        "en": ("Synthetic pixie", "official", "sve_official"),
+        "zh-Hant": ("合成精靈", "machine", "unofficial"),
+    }
+    assert tables == projection.tables
 
 
 def test_badge_does_not_borrow_a_marker_object_name(vocabulary_db: Database) -> None:
