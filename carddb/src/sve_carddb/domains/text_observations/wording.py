@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import JsonValue, model_validator
 
 from sve_carddb.build import Json
-from sve_carddb.core.json import string
+from sve_carddb.core.json import canonical, string
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.regions import Region
+from sve_carddb.core.wording import Wording, preferred_wordings
 from sve_carddb.domains.products.models import Date, Precision, check_date
 from sve_carddb.domains.registry.records import CorrectionData, PrintingData
 from sve_carddb.domains.text_observations.equivalence import (
@@ -334,6 +335,7 @@ def _release_basis(
     decision: WordingDecision | None,
     dates: dict[str, str | None],
     empty: frozenset[str],
+    group: FaceGroup | None,
 ) -> tuple[WordingDisplay, str | None]:
     eligible = _rules_candidates(view.candidates, empty)
     if decision is not None and decision.basis_printing_id is not None:
@@ -347,6 +349,48 @@ def _release_basis(
         return WordingDisplay(
             revision_id=candidates[0].revision_id, basis="latest_known_release"
         ), decision.basis_printing_id
+    if view.display.basis != "current" and group is not None:
+        observations = {
+            (item.printing_id, candidate_revision_id(item)): item
+            for item in group.observations
+            if item.content.effect is not None
+        }
+        dated = tuple(c for c in eligible if dates[c.printing_id] is not None)
+        if dated and all(
+            c.revision_id is not None
+            and (c.printing_id, c.revision_id) in observations
+            and sum(other.printing_id == c.printing_id for other in dated) == 1
+            for c in dated
+        ):
+            items = tuple(
+                observations[c.printing_id, _string(c.revision_id)] for c in dated
+            )
+            preferred, _ = preferred_wordings(
+                tuple(
+                    Wording(
+                        identity=canonical(
+                            {
+                                key: value
+                                for key, value in item.content.wording_fields().items()
+                                if key not in {"text", "sections"}
+                            }
+                        ),
+                        text=item.content.effect or "",
+                        sections=item.content.sections,
+                    )
+                    for item in items
+                )
+            )
+            latest = max(dates[items[i].printing_id] or "" for i in preferred)
+            chosen = min(
+                (items[i] for i in preferred if dates[items[i].printing_id] == latest),
+                key=lambda item: (item.card_no, item.printing_id),
+            )
+            return WordingDisplay(
+                revision_id=candidate_revision_id(chosen), basis="latest_known_release"
+            ), chosen.printing_id
+        if dated:
+            return WordingDisplay(revision_id=None, basis="candidates"), None
     identifiers = [
         candidate.printing_id
         for candidate in view.candidates
@@ -358,6 +402,14 @@ def _release_basis(
             eligible != view.candidates
             and not any(dates[c.printing_id] is not None for c in eligible)
             and view.display.basis != "current"
+            and group is not None
+            and equivalent(
+                tuple(
+                    item.content
+                    for item in group.observations
+                    if candidate_revision_id(item) not in empty
+                )
+            )
         ):
             candidate = next((c for c in eligible if c.revision_id is not None), None)
             if candidate is not None:
@@ -376,15 +428,10 @@ def _adopt_basis(
     face: str,
     view: WordingView,
     display: WordingDisplay,
-    classification: Classification,
     *,
     undated_fallback: bool = False,
 ) -> None:
-    if (
-        classification != "same_effect"
-        or display.revision_id is None
-        or display.basis == "current"
-    ):
+    if display.revision_id is None or display.basis == "current":
         return
     values: dict[str, Value] = {
         "face_id": face,
@@ -518,7 +565,7 @@ def _classification(
 
 
 def populate_wording_basis(db: Database, plan: TextPlan) -> None:
-    """Select a dated semantic basis only after equivalence or an exact authored decision."""
+    """Select current wording independently of the retained effect classification."""
     dates = printing_dates(db)
     empty = _empty_revisions(plan)
     _discard_empty_current(db, plan, empty)
@@ -531,7 +578,7 @@ def populate_wording_basis(db: Database, plan: TextPlan) -> None:
             comparison = _comparison(view, group, dates, empty)
             decision = decisions.pop((face, view.region), None)
             classification, method, reason = _classification(comparison, decision)
-            display, printing = _release_basis(view, decision, dates, empty)
+            display, printing = _release_basis(view, decision, dates, empty, group)
             if (
                 classification != "errata"
                 and view.display.basis == "current"
@@ -542,7 +589,7 @@ def populate_wording_basis(db: Database, plan: TextPlan) -> None:
                 classification, reason = "unresolved", "adopted_current_preserved"
             if display.revision_id is None and classification != "errata":
                 classification, reason = "unresolved", _unresolved_reason(view, dates)
-            elif classification != "errata" and (
+            elif (
                 group is None
                 or any(reason in group.reasons for reason in ("identity_pending",))
                 or any(
@@ -561,6 +608,8 @@ def populate_wording_basis(db: Database, plan: TextPlan) -> None:
                 )
             ):
                 classification, reason = "unresolved", "incomplete_source"
+                display = WordingDisplay(revision_id=None, basis="candidates")
+                printing = None
             db.insert(
                 "face_wording",
                 {
@@ -583,7 +632,6 @@ def populate_wording_basis(db: Database, plan: TextPlan) -> None:
                 face,
                 view,
                 display,
-                classification,
                 undated_fallback=printing is not None
                 and dates[printing] is None
                 and method != "manual",

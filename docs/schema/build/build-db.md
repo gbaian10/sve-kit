@@ -603,7 +603,8 @@ digital_voice/card_voice與digital_art_link仍只驗自己的原合法證據，�
 
 建置 schema 10 新增 `face_wording`（PK face_id、region），記錄 classification、method、reason、
 comparison_hash、basis_printing_id、basis_released_on；依據版次引用 printing，卡面引用 face。
-`face_current.basis` 增加 latest_known_release，只有等價且可定位唯一依據時由日期證據建立；
+`face_current.basis` 的 latest_known_release 依括號提醒、補充段落偏好，再以發售日與卡號選定；
+現行卡文選用與效果分類分開，errata 等分類照實保留。日期不明及來源不完整仍依契約阻擋；
 各 printing_face_observation 仍保留自己的 revision。契約與覆寫規則依
 [卡文依據契約](../domains/wording-basis.md)。
 

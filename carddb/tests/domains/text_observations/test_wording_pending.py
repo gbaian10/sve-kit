@@ -51,6 +51,11 @@ def product(
             fixtures["product"]
             | {
                 "id": identifier,
+                "region": next(
+                    row.values["region"]
+                    for row in db.rows("printing")
+                    if row.values["id"] == printing
+                ),
                 "name_unit_id": db.rows("text_unit")[0].values["id"],
                 "source_id": db.rows("source_record")[0].values["id"],
                 "released_on": day,

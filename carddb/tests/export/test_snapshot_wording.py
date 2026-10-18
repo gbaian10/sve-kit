@@ -10,6 +10,7 @@ from sve_carddb.core.json import array, object_value, parse, string
 from sve_carddb.export.reader import Fragment, _container, _current
 from sve_carddb.export.semantics import (
     _annotation_partitions,
+    _wording,
     _wording_display,
     validate_view,
 )
@@ -206,6 +207,65 @@ def shared_basis_view(change: str | None = None) -> tuple[View, Row, list[Fragme
 @pytest.mark.parametrize("change", [None, "manual_older"])
 def test_shared_basis_links_a_dated_observation_to_current(change: str | None) -> None:
     validate_view(*shared_basis_view(change))
+
+
+@pytest.mark.parametrize("mode", ["reminder", "supplement", "tie"])
+def test_reader_recomputes_wording_preferences_before_release_order(mode: str) -> None:
+    view, _, _ = shared_basis_view()
+    face = view["face"][0]
+    wording = object_value(array(face["wording"])[0])
+    chosen = next(row for row in view["face_revision"] if row["id"] == "r:a2")
+    other = next(row for row in view["face_revision"] if row["id"] == "r:a1")
+    other.update(deepcopy(chosen) | {"id": "r:a1", "revision": 1})
+    view["text_unit"].extend(
+        [
+            {"id": "plain", "lang": "ja", "text": "【必殺】"},
+            {
+                "id": "reminder",
+                "lang": "ja",
+                "text": "【必殺】（【必殺】を持つ合成ユニットの説明）",
+            },
+        ]
+    )
+    chosen.update(effect_unit_id="plain", sections=[])
+    other.update(
+        effect_unit_id="reminder" if mode == "reminder" else "plain", sections=[]
+    )
+    if mode == "supplement":
+        chosen["sections"] = [
+            {"ordinal": 0, "text_unit_id": "plain", "kind": "token_definition"}
+        ]
+    array(wording["candidates"])[1] = {"printing_id": "p:b", "revision_id": "r:a1"}
+    physical = next(row for row in view["printing"] if row["id"] == "p:b")
+    object_value(array(physical["faces"])[0])["observations"] = [
+        {
+            "revision_id": "r:a1",
+            "state": "available",
+            "source_url": "https://example.invalid/b",
+        }
+    ]
+    view["printing_product"].append(
+        view["printing_product"][0]
+        | {
+            "printing_id": "p:b",
+            "available_on": "2026-01-01" if mode == "tie" else "2027-01-01",
+            "date_precision": "day",
+        }
+    )
+    wording["undated_printing_ids"] = []
+    for printing in view["printing"]:
+        printing["card_no"] = (
+            "SYNTHETIC-A" if printing["id"] == "p:a" else "SYNTHETIC-B"
+        )
+    _wording(view)
+    wording.update(
+        basis_printing_id="p:b",
+        basis_released_on="2026-01-01" if mode == "tie" else "2027-01-01",
+    )
+    object_value(wording["display"])["revision_id"] = "r:a1"
+    object_value(array(face["current"])[0])["revision_id"] = "r:a1"
+    with pytest.raises(ValueError, match="wording preferences"):
+        _wording(view)
 
 
 @pytest.mark.parametrize(

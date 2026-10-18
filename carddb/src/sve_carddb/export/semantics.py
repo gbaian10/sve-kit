@@ -9,6 +9,7 @@ from pydantic import JsonValue
 from sve_carddb.contracts.profiles import profile
 from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
+from sve_carddb.core.wording import Wording, preferred_wordings
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.common_names import common_name
 from sve_carddb.export.name_annotations import whole_name
@@ -582,8 +583,71 @@ def _wording_display(
             raise ValueError("Display belongs to another face/region")
 
 
+def _preferred_basis(
+    candidates: list[Row],
+    dates: dict[str, str | None],
+    revisions: dict[str, Row],
+    units: dict[str, str],
+    printings: dict[str, Row],
+) -> str | None:
+    dated = [
+        item for item in candidates if dates[string(item["printing_id"])] is not None
+    ]
+    if not dated or any(item["revision_id"] is None for item in dated):
+        return None
+    values = []
+    for item in dated:
+        revision = revisions[string(item["revision_id"])]
+        values.append(
+            Wording(
+                identity=canonical(
+                    {
+                        key: revision[key]
+                        for key in (
+                            "name_unit_id",
+                            "class_code",
+                            "type_code",
+                            "cost",
+                            "attack",
+                            "defense",
+                            "traits",
+                            "titles",
+                            "special_kinds",
+                        )
+                    }
+                ),
+                text=units[string(revision["effect_unit_id"])],
+                sections=tuple(
+                    units[string(object_value(s)["text_unit_id"])]
+                    for s in array(revision["sections"])
+                ),
+            )
+        )
+    preferred, _ = preferred_wordings(tuple(values))
+    latest = max(dates[string(dated[i]["printing_id"])] or "" for i in preferred)
+    return min(
+        (
+            string(dated[i]["printing_id"])
+            for i in preferred
+            if dates[string(dated[i]["printing_id"])] == latest
+        ),
+        key=lambda identifier: (string(printings[identifier]["card_no"]), identifier),
+    )
+
+
+@dataclass(frozen=True)
+class _WordingEvidence:
+    revisions: dict[str, Row]
+    units: dict[str, str]
+    printings: dict[str, Row]
+
+
 def _wording_basis(
-    face: Row, wording: Row, dates: dict[str, str | None], candidates: list[Row]
+    face: Row,
+    wording: Row,
+    dates: dict[str, str | None],
+    candidates: list[Row],
+    evidence: _WordingEvidence,
 ) -> None:
     """Verify semantic selection independently of the producing database."""
     identifier = wording["basis_printing_id"]
@@ -617,10 +681,12 @@ def _wording_basis(
                 for item in array(face["current"])
             )
         )
-        if not fallback and (
-            day is None or day != max(value for value in known if value is not None)
+        if not fallback and identifier != _preferred_basis(
+            candidates, dates, evidence.revisions, evidence.units, evidence.printings
         ):
-            raise ValueError("Shared wording basis must use the latest known release")
+            raise ValueError(
+                "Shared wording basis must use the latest known release after wording preferences"
+            )
     if not any(
         object_value(item)["revision_id"] == display["revision_id"]
         and object_value(item)["region"] == wording["region"]
@@ -631,6 +697,7 @@ def _wording_basis(
 
 def _wording(view: View) -> None:
     revisions = {string(row["id"]): row for row in view["face_revision"]}
+    printings = {string(row["id"]): row for row in view["printing"]}
     units = {string(row["id"]): string(row["text"]) for row in view["text_unit"]}
     empty = {
         identifier
@@ -687,7 +754,13 @@ def _wording(view: View) -> None:
             _wording_candidates(
                 face, wording, physical, dates, revisions, eligible=eligible
             )
-            _wording_basis(face, wording, dates, eligible)
+            _wording_basis(
+                face,
+                wording,
+                dates,
+                eligible,
+                _WordingEvidence(revisions, units, printings),
+            )
             if wording["common_name"] != common_name(wording, revisions):
                 raise ValueError("Pending common name differs from candidates")
 
