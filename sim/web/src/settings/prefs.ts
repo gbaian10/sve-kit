@@ -32,7 +32,7 @@ type ViewMode = (typeof VIEW_MODES)[number]
 export const CARD_OPEN_MODES = ["auto", "panel", "modal", "page"] as const
 export type CardOpenMode = (typeof CARD_OPEN_MODES)[number]
 
-const TEXT_BOX_KINDS = ["effectOriginal", "flavorOriginal", "sectionOriginal"] as const
+const TEXT_BOX_KINDS = ["effectOriginal", "flavorOriginal"] as const
 export type TextBoxKind = (typeof TEXT_BOX_KINDS)[number]
 type CollapsedText = Readonly<Record<TextBoxKind, boolean>>
 
@@ -77,7 +77,7 @@ export const DEFAULT_PREFS: Prefs = {
   preloadPrintings: false,
   preloadNeighbours: false,
   symbolLabels: false,
-  collapsedText: { effectOriginal: false, flavorOriginal: false, sectionOriginal: false },
+  collapsedText: { effectOriginal: false, flavorOriginal: false },
   showFlavorText: true,
   termEmphasis: true,
   filterPanelOpen: false,

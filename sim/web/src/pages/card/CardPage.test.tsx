@@ -51,6 +51,9 @@ const card = {
   ),
 }
 
+const paragraphs = (root: Element, lang: string) =>
+  [...root.querySelectorAll(`p[lang="${lang}"]`)].map((p) => p.textContent)
+
 const state = vi.hoisted(() => ({
   available: false,
   current: false,
@@ -73,6 +76,9 @@ const state = vi.hoisted(() => ({
   translated: false,
   originalName: false,
   sections: false,
+  // A recognisable image per printing face, so identity checks can read it back from the DOM.
+  images: false,
+  summary: false,
   candidates: [] as { printing_id: string; revision_id: string | null }[],
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
@@ -95,76 +101,115 @@ vi.mock("../../app/snapshot", () => {
     region: state.crossRegion ? "en" : "jp",
     int_id: 42,
   })
-  return {
-    useImageIndex: () => undefined,
-    // Most cases leave the exact name pending to exercise the catalog stand-in.
-    useAnnotatedText: (
-      _client: unknown,
-      owner: { kind: string; id: string },
-      field: string,
-      _language: string,
-      _edition: string,
-      _resolver: unknown,
-      ordinal: number | null,
-    ) => ({
-      readiness: {
-        basic:
-          field === "effect" || field === "section" || state.originalName ? "ready" : "pending",
-        source: "none",
-        annotations: "none",
-      },
-      value:
-        field === "name" && state.originalName && owner.id === "rev:other"
+  // Most cases leave the exact name pending to exercise the catalog stand-in.
+  const annotatedText = (
+    _client: unknown,
+    owner: { kind: string; id: string },
+    field: string,
+    _language: string,
+    _edition: string,
+    _resolver: unknown,
+    ordinal: number | null,
+  ) => ({
+    readiness: {
+      basic: field === "effect" || field === "section" || state.originalName ? "ready" : "pending",
+      source: "none",
+      annotations: "none",
+    },
+    value:
+      field === "name" && state.originalName && owner.id === "rev:other"
+        ? {
+            original: { unit: { text: "Synthetic original name", lang: "ja" }, annotation: null },
+            concepts: [],
+            explanations: [],
+            cards: [],
+            keywords: [],
+            abilities: [],
+          }
+        : owner.kind === "face_revision" && (field === "effect" || field === "section")
           ? {
-              original: { unit: { text: "Synthetic original name", lang: "ja" }, annotation: null },
+              ...(state.sections && field === "effect"
+                ? {
+                    originalSections: [
+                      {
+                        ordinal: 1,
+                        label: `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} heading`,
+                      },
+                      { ordinal: 3 },
+                    ],
+                  }
+                : {}),
+              original: {
+                unit: {
+                  text:
+                    field === "section"
+                      ? `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} reminder ${String(ordinal)}`
+                      : owner.id === "rev:other"
+                        ? "Synthetic older effect"
+                        : "Synthetic selected effect",
+                  lang: "ja",
+                },
+                annotation: null,
+              },
+              ...(state.translated && _language === "zh-Hant"
+                ? {
+                    translated: {
+                      unit: {
+                        text:
+                          field === "section"
+                            ? `合成${owner.id === "rev:other" ? "舊版" : "新版"}補充譯文 ${String(ordinal)}`
+                            : owner.id === "rev:other"
+                              ? "合成舊版譯文"
+                              : "合成新版譯文",
+                        lang: "zh-Hant",
+                      },
+                      annotation: null,
+                    },
+                  }
+                : {}),
               concepts: [],
               explanations: [],
               cards: [],
-              keywords: [],
-              abilities: [],
             }
-          : owner.kind === "face_revision" && (field === "effect" || field === "section")
-            ? {
-                ...(state.sections && field === "effect"
-                  ? {
-                      originalSections: [
-                        {
-                          ordinal: 1,
-                          label: `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} heading`,
-                        },
-                        { ordinal: 3 },
-                      ],
-                    }
-                  : {}),
-                original: {
-                  unit: {
-                    text:
-                      field === "section"
-                        ? `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} reminder ${String(ordinal)}`
-                        : owner.id === "rev:other"
-                          ? "Synthetic older effect"
-                          : "Synthetic selected effect",
-                    lang: "ja",
-                  },
-                  annotation: null,
-                },
-                ...(state.translated
-                  ? {
-                      translated: {
-                        unit: {
-                          text: field === "section" ? "合成補充譯文" : "合成新版譯文",
-                          lang: "zh-Hant",
-                        },
-                        annotation: null,
-                      },
-                    }
-                  : {}),
-                concepts: [],
-                explanations: [],
-                cards: [],
-              }
-            : null,
-    }),
+          : null,
+  })
+  return {
+    useImageIndex: () =>
+      state.images
+        ? {
+            cardImage: (printingId: string, faceId: string) => ({
+              src: `/synthetic/${printingId}/${faceId}.webp`,
+              srcSet: "",
+              width: 63,
+              height: 88,
+            }),
+            asset: () => undefined,
+            known: () => true,
+          }
+        : undefined,
+    useAnnotatedText: annotatedText,
+    useAnnotatedTexts: (
+      client: unknown,
+      pointers: readonly {
+        owner: { kind: string; id: string }
+        field: string
+        ordinal: number | null
+      }[],
+      language: string,
+      edition: string,
+      resolver: unknown,
+    ) =>
+      pointers.map((pointer) =>
+        annotatedText(
+          client,
+          pointer.owner,
+          pointer.field,
+          language,
+          edition,
+          resolver,
+          pointer.ordinal,
+        ),
+      ),
     useSearchReadiness: () => ({
       phase: "ready",
       generation: 1,
@@ -206,7 +251,7 @@ vi.mock("../../app/snapshot", () => {
               ]
             : []),
         summary: () =>
-          state.doubleFace
+          state.doubleFace || state.summary
             ? {
                 cardId: "c:synthetic",
                 printingId: "p:synthetic",
@@ -333,6 +378,8 @@ beforeEach(() => {
   state.printingRows = null
   state.translated = false
   state.sections = false
+  state.images = false
+  state.summary = false
   state.candidates = [
     { printing_id: "p:synthetic", revision_id: "rev:other" },
     { printing_id: "p:undated", revision_id: "rev:synthetic" },
@@ -393,21 +440,133 @@ it("shows the shared type line and stats without a display revision", async () =
 })
 
 describe("plain wording on the card page", () => {
-  it("retains every section of this printing as original text beside the shared translation", async () => {
+  it("prints each revision's own sections under its effect, translation beside this printing's original", async () => {
     state.available = true
     state.translated = true
     state.sections = true
     state.undated = []
-    prefsStore.set({ effectLanguage: "translated" })
     await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(screen.getByText("Synthetic older reminder 1")).toBeVisible()
-    expect(screen.getByText("Synthetic older reminder 3")).toBeVisible()
-    expect(screen.getByRole("heading", { name: "Synthetic older heading" })).toBeVisible()
-    expect(screen.queryByText("Synthetic selected heading")).not.toBeInTheDocument()
-    expect(screen.queryByText("Synthetic selected reminder 1")).not.toBeInTheDocument()
-    expect(screen.queryByText("合成補充譯文")).not.toBeInTheDocument()
+    const translation = screen.getByRole("region", { name: "效果" })
+    expect(paragraphs(translation, "zh-Hant")).toEqual([
+      "合成新版譯文",
+      "合成新版補充譯文 1",
+      "合成新版補充譯文 3",
+    ])
+    expect(paragraphs(translation, "ja")).toEqual([])
+    expect(within(translation).getByText("Synthetic selected heading")).toBeVisible()
+    expect(translation.querySelectorAll("[data-section]")).toHaveLength(2)
+    const original = screen.getByRole("region", { name: "此版次的原文" })
+    expect(paragraphs(original, "ja")).toEqual([
+      "Synthetic older effect",
+      "Synthetic older reminder 1",
+      "Synthetic older reminder 3",
+    ])
+    expect(within(original).getByText("Synthetic older heading")).toBeVisible()
+    expect(original.querySelectorAll("[data-section]")).toHaveLength(2)
+    expect(screen.queryByText("合成舊版譯文")).not.toBeInTheDocument()
+    expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    expect(screen.queryByText("附註")).not.toBeInTheDocument()
+    expect(screen.queryByRole("region", { name: "原文" })).not.toBeInTheDocument()
+    act(() => {
+      prefsStore.set({ effectLanguage: "translated" })
+    })
+    expect(paragraphs(screen.getByRole("region", { name: "效果" }), "zh-Hant")).toHaveLength(3)
+    expect(paragraphs(screen.getByRole("region", { name: "此版次的原文" }), "ja")).toHaveLength(3)
+  })
+  it.each(["ja", "en"] as const)(
+    "keeps sections in the original language without Traditional Chinese in %s",
+    async (language) => {
+      state.available = true
+      state.translated = true
+      state.sections = true
+      state.undated = []
+      await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+        initialEntries: ["/cards/BP-SYNTHETIC"],
+        language,
+      })
+      const effect = document.querySelector('[data-field="effect"]')
+      if (!effect) throw new Error("effect region missing")
+      expect(document.querySelectorAll('[data-field="effect"]')).toHaveLength(1)
+      expect(paragraphs(effect, "ja")).toEqual([
+        "Synthetic older effect",
+        "Synthetic older reminder 1",
+        "Synthetic older reminder 3",
+      ])
+      expect(document.querySelectorAll('p[lang="zh-Hant"]')).toHaveLength(0)
+      expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    },
+  )
+  it("switches between candidates' own effect and sections without changing the printing", async () => {
+    state.available = true
+    state.translated = true
+    state.sections = true
+    state.images = true
+    state.summary = true
+    state.candidates.push({ printing_id: "p:synthetic", revision_id: "rev:synthetic" })
+    const { router, i18n } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    const identity = () => {
+      const slot = document.querySelector("[data-image-printing]")
+      const image = slot?.querySelector("img")
+      return {
+        printing: slot?.getAttribute("data-image-printing"),
+        face: slot?.getAttribute("data-image-face"),
+        src: image?.getAttribute("src"),
+        zoom: screen.getByRole("button", { name: /Synthetic front/ }).getAttribute("aria-label"),
+      }
+    }
+    const before = identity()
+    const pathname = router.state.location.pathname
+    expect(pathname).toMatch(/^\/cards\/BP-SYNTHETIC/)
+    expect(before).toEqual({
+      printing: "p:synthetic",
+      face: "f:synthetic",
+      src: "/synthetic/p:synthetic/f:synthetic.webp",
+      zoom: "放大卡圖：Synthetic front",
+    })
+    const [older, selected] = [...document.querySelectorAll("details")]
+    if (!older || !selected) throw new Error("two candidates expected")
+    expect(selected).toHaveAttribute("open")
+    expect(older).not.toHaveAttribute("open")
+    expect(paragraphs(selected, "ja")).toEqual([
+      "Synthetic selected effect",
+      "Synthetic selected reminder 1",
+      "Synthetic selected reminder 3",
+    ])
+    expect(within(selected).getByText("Synthetic selected heading")).toBeVisible()
+    expect(within(selected).getByText("目前顯示的卡文")).toBeVisible()
+    expect(paragraphs(older, "ja")).toEqual([])
+    await userEvent.click(within(older).getByText("BP-SYNTHETIC"))
+    expect(older).toHaveAttribute("open")
+    expect(paragraphs(older, "ja")).toEqual([
+      "Synthetic older effect",
+      "Synthetic older reminder 1",
+      "Synthetic older reminder 3",
+    ])
+    expect(within(older).getByText("Synthetic older heading")).toBeVisible()
+    expect(document.querySelectorAll('p[lang="zh-Hant"]')).toHaveLength(0)
+    expect(router.state.location.pathname).toBe(pathname)
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP-SYNTHETIC")
+    expect(identity()).toEqual(before)
+    // Text preference and UI language only change what is shown for the same printing.
+    act(() => {
+      prefsStore.set({ effectLanguage: "translated" })
+    })
+    expect(identity()).toEqual(before)
+    expect(paragraphs(older, "ja")).toHaveLength(3)
+    await act(() => i18n.changeLanguage("en"))
+    expect(identity()).toEqual({ ...before, zoom: "Enlarge card image: Synthetic front" })
+    expect(paragraphs(older, "ja")).toEqual([
+      "Synthetic older effect",
+      "Synthetic older reminder 1",
+      "Synthetic older reminder 3",
+    ])
+    expect(document.querySelectorAll('p[lang="zh-Hant"]')).toHaveLength(0)
+    expect(state.wording).toHaveBeenCalledWith("f:synthetic", "jp")
+    expect(state.wording).not.toHaveBeenCalledWith("f:synthetic", "en")
   })
   it.each(["zh-TW", "ja", "en"] as const)(
     "shows this printing's own original in %s",
