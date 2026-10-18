@@ -1,5 +1,4 @@
-import { catalogOf } from "./catalog"
-import { catalogWork } from "./catalog-timing"
+import { prepareCatalog } from "./catalog"
 import { fetchBytes, type Fetcher, NetworkError } from "./cdn"
 import { createDecoder } from "./format-v3/decoder"
 import { SnapshotError } from "./format-v3/errors"
@@ -20,7 +19,6 @@ import {
   type Fragment,
   isCompatible,
   joinDetail,
-  validateCatalog,
 } from "./format-v3/reader"
 import { checkEntry, indexEntries } from "./index-entry"
 import { transferDigest } from "./integrity"
@@ -112,6 +110,7 @@ const PREVIEW_POINTER = "snapshots/preview/current.json"
 // Bump whenever the stored snapshot record changes shape.
 const SNAPSHOT_RECORD_FORMAT = 2
 class NoCompatibleVersion extends Error {}
+class Superseded extends Error {}
 
 function failureOf(error: unknown): LoadFailure {
   if (error instanceof NetworkError) return { kind: "network", detail: error.message }
@@ -127,6 +126,14 @@ function failureOf(error: unknown): LoadFailure {
 export function createSnapshotClient(
   base: string,
   options: SnapshotClientOptions = {},
+): SnapshotClient {
+  return snapshotClient(base, options, () => undefined)
+}
+
+function snapshotClient(
+  base: string,
+  options: SnapshotClientOptions,
+  externalCheck: () => void,
 ): SnapshotClient {
   const requests = options.fetch ? requestQueue(options.fetch) : appRequests
   const fetcher = requests.foreground
@@ -144,6 +151,20 @@ export function createSnapshotClient(
   const listeners = new Set<() => void>()
   let status: SnapshotStatus = { state: "idle" }
   let region = options.region ?? "jp"
+  let generation = 0
+  const select = (next: "jp" | "en"): void => {
+    if (next !== region) {
+      region = next
+      generation++
+    }
+  }
+  const selectionCheck = (): (() => void) => {
+    const started = generation
+    return () => {
+      externalCheck()
+      if (started !== generation) throw new Superseded()
+    }
+  }
   let loaded: LoadedSnapshot | null = null
   let pending: Promise<void> | null = null
   let startup: Promise<void> | null = null
@@ -252,9 +273,11 @@ export function createSnapshotClient(
   // file and all of their checks; anything unreadable falls back to that download.
   const restore = async (
     manifestHash: string,
-    selectedRegion = region,
+    selectedRegion: "jp" | "en",
+    check: () => void,
   ): Promise<LoadedSnapshot | undefined> => {
     const bytes = await stored.read(`snapshot-${selectedRegion}`, manifestHash)
+    check()
     if (!bytes) return undefined
     try {
       const record = objectValue(JSON.parse(new TextDecoder().decode(bytes)) as JsonValue)
@@ -315,10 +338,16 @@ export function createSnapshotClient(
 
   const download = async (
     previous: LoadedSnapshot | null,
+    check: () => void,
     entryBytes?: Promise<Uint8Array>,
-  ): Promise<{ readonly snapshot: LoadedSnapshot; readonly downloaded: boolean }> => {
+  ): Promise<{
+    readonly snapshot: LoadedSnapshot
+    readonly downloaded: boolean
+    readonly validate: boolean
+  }> => {
     const selectedRegion = region
     const progress = (phase: LoadPhase, files?: { done: number; total: number }) => {
+      check()
       set(
         previous
           ? {
@@ -332,6 +361,7 @@ export function createSnapshotClient(
     }
     progress("index")
     const { chosen, source } = await chooseEntry(entryBytes ?? requestEntry())
+    check()
     // A check that finds the same manifest keeps the loaded snapshot and its caches as they are.
     if (
       previous &&
@@ -340,16 +370,30 @@ export function createSnapshotClient(
       (previous.entrySource ?? "current") === source
     ) {
       matchEntry(chosen, previous.manifest)
-      return { snapshot: previous, downloaded: false }
+      return { snapshot: previous, downloaded: false, validate: false }
     }
     const cached = catalogs.get(`${stringValue(chosen["manifest_sha256"])}/${selectedRegion}`)
     const restored =
-      cached ?? (await restore(stringValue(chosen["manifest_sha256"]), selectedRegion))
+      cached ?? (await restore(stringValue(chosen["manifest_sha256"]), selectedRegion, check))
+    check()
     if (restored) {
       matchEntry(chosen, restored.manifest)
-      return {
-        snapshot: { ...restored, entrySource: source },
-        downloaded: cached !== undefined && unsaved.delete(cached),
+      try {
+        const candidate = await prepareAdoption(
+          restored.entrySource === source ? restored : { ...restored, entrySource: source },
+          check,
+          false,
+        )
+        return {
+          snapshot: candidate,
+          downloaded: cached !== undefined && unsaved.delete(cached),
+          validate: false,
+        }
+      } catch (error) {
+        check()
+        if (!(error instanceof SnapshotError)) throw error
+        await stored.remove(`snapshot-${selectedRegion}`, restored.manifestHash)
+        catalogs.delete(`${restored.manifestHash}/${selectedRegion}`)
       }
     }
     progress("manifest")
@@ -417,36 +461,52 @@ export function createSnapshotClient(
       config,
       bootstrap,
     }
-    catalogWork("validate", () => {
-      validateCatalog(bootstrap)
-    })
-    catalogOf(snapshot)
-    return { snapshot, downloaded: true }
+    check()
+    return { snapshot, downloaded: true, validate: true }
+  }
+
+  const currentSnapshot = (candidate: LoadedSnapshot): LoadedSnapshot => {
+    const current = loaded
+    if (
+      !current ||
+      current === candidate ||
+      current.manifestHash !== candidate.manifestHash ||
+      current.region !== candidate.region ||
+      (current.entrySource ?? "current") !== (candidate.entrySource ?? "current")
+    )
+      return candidate
+    const available = new Set(current.bootstrap.map((fragment) => fragment.identity))
+    return candidate.bootstrap.every((fragment) => available.has(fragment.identity))
+      ? current
+      : candidate
+  }
+
+  const prepareAdoption = async (
+    candidate: LoadedSnapshot,
+    check: () => void,
+    validate = true,
+  ): Promise<LoadedSnapshot> => {
+    for (;;) {
+      check()
+      candidate = currentSnapshot(candidate)
+      const previous = loaded
+      if (previous && previous !== candidate && previous.manifestHash === candidate.manifestHash) {
+        const present = new Set(candidate.bootstrap.map((fragment) => fragment.identity))
+        const extra = previous.bootstrap.filter((fragment) => !present.has(fragment.identity))
+        if (extra.length)
+          candidate = { ...candidate, bootstrap: [...candidate.bootstrap, ...extra] }
+      }
+      await prepareCatalog(candidate, check, validate)
+      check()
+      // Printing preload may finish during a yield; compose again before warming the final key.
+      if (loaded !== previous && loaded?.manifestHash === candidate.manifestHash) continue
+      return candidate
+    }
   }
 
   const adopt = (candidate: LoadedSnapshot): void => {
     const previous = loaded
-    if (previous?.manifestHash === candidate.manifestHash) {
-      const present = new Set(candidate.bootstrap.map((fragment) => fragment.identity))
-      candidate = {
-        ...candidate,
-        bootstrap: [
-          ...candidate.bootstrap,
-          ...previous.bootstrap.filter((fragment) => !present.has(fragment.identity)),
-        ],
-      }
-    }
-    catalogOf(candidate)
-    for (const [key, cached] of catalogs)
-      if (cached.manifestHash !== candidate.manifestHash) catalogs.delete(key)
-    catalogs.set(`${candidate.manifestHash}/${candidate.region ?? region}`, candidate)
-    metadata?.dispose()
-    detailAbort.abort()
-    decode.cancel()
-    detailAbort = new AbortController()
-    loaded = candidate
-    detailBytes = 0
-    metadata = new MetadataBytes(
+    const nextMetadata = new MetadataBytes(
       base,
       candidate.manifestHash,
       new Map(
@@ -464,6 +524,16 @@ export function createSnapshotClient(
       requests.background,
       previous?.manifestHash,
     )
+    for (const [key, cached] of catalogs)
+      if (cached.manifestHash !== candidate.manifestHash) catalogs.delete(key)
+    catalogs.set(`${candidate.manifestHash}/${candidate.region ?? region}`, candidate)
+    metadata?.dispose()
+    detailAbort.abort()
+    decode.cancel()
+    detailAbort = new AbortController()
+    loaded = candidate
+    detailBytes = 0
+    metadata = nextMetadata
     details = new Map()
     inflight = new Map()
   }
@@ -491,26 +561,32 @@ export function createSnapshotClient(
     )
   }
 
-  const restoreAdopted = async (): Promise<LoadedSnapshot | undefined> => {
+  const restoreAdopted = async (check: () => void): Promise<LoadedSnapshot | undefined> => {
     const selectedRegion = region
     const bytes = await stored.read(`adopted-${entry}-${selectedRegion}`, "active")
+    check()
     if (!bytes) return undefined
+    let restoredHash: string | undefined
     try {
       const selection = objectValue(parseJson(bytes))
       const source = stringValue(selection["source"])
       if (source !== "current" && source !== "previous") return undefined
       const revision = integerValue(selection["revision"])
       const signature = stringValue(selection["index"])
-      const snapshot = await restore(stringValue(selection["manifestHash"]), selectedRegion)
+      restoredHash = stringValue(selection["manifestHash"])
+      const snapshot = await restore(restoredHash, selectedRegion, check)
       if (!snapshot) return undefined
-      const restored: LoadedSnapshot = { ...snapshot, entrySource: source }
-      catalogOf(restored)
+      const restored = await prepareAdoption({ ...snapshot, entrySource: source }, check, false)
       if (revision > lastRevision) {
         lastRevision = revision
         lastIndex = signature
       }
       return restored
-    } catch {
+    } catch (error) {
+      check()
+      if (error instanceof Superseded) throw error
+      if (restoredHash && error instanceof SnapshotError)
+        await stored.remove(`snapshot-${selectedRegion}`, restoredHash)
       await stored.remove(`adopted-${entry}-${selectedRegion}`, "active")
       return undefined
     }
@@ -519,13 +595,12 @@ export function createSnapshotClient(
   // A failed background check leaves the verified local snapshot usable with an explicit error.
   const run = async (entryBytes?: Promise<Uint8Array>): Promise<void> => {
     const previous = loaded
+    const check = selectionCheck()
     try {
-      const { snapshot: candidate, downloaded } = await download(previous, entryBytes)
-      if (candidate.region !== region) {
-        await run()
-        return
-      }
-      if (candidate !== previous) adopt(candidate)
+      const { snapshot, downloaded, validate } = await download(previous, check, entryBytes)
+      const candidate = currentSnapshot(await prepareAdoption(snapshot, check, validate))
+      check()
+      if (candidate !== loaded) adopt(candidate)
       set({
         state: "ready",
         dataVersion: candidate.dataVersion,
@@ -534,7 +609,17 @@ export function createSnapshotClient(
       // A restored record is already stored; serializing tens of megabytes again only costs time.
       void remember(loaded ?? candidate, downloaded).catch(() => undefined)
     } catch (error) {
-      const failure = failureOf(error)
+      let cause = error
+      try {
+        check()
+      } catch (stale) {
+        if (stale instanceof Superseded) {
+          await run()
+          return
+        }
+        cause = stale
+      }
+      const failure = failureOf(cause)
       if (previous)
         set({
           state: "ready",
@@ -557,7 +642,15 @@ export function createSnapshotClient(
       const entryBytes = requestEntry()
       // Network can fail before local storage finishes; run still classifies the original rejection.
       void entryBytes.catch(() => undefined)
-      const cached = await restoreAdopted()
+      let cached: LoadedSnapshot | undefined
+      const check = selectionCheck()
+      try {
+        cached = await restoreAdopted(check)
+        check()
+      } catch (error) {
+        if (!(error instanceof Superseded)) throw error
+        cached = undefined
+      }
       if (cached && cached.region === region) {
         adopt(cached)
         set({
@@ -701,13 +794,20 @@ export function createSnapshotClient(
     return promise
   }
 
-  let printingPending: { key: string; promise: Promise<void> } | undefined
+  let printingPending:
+    { snapshot: LoadedSnapshot; generation: number; promise: Promise<void> } | undefined
   const prefetchPrintings = (): Promise<void> => {
     const snapshot = loaded
     if (!snapshot || snapshot.printingReady) return Promise.resolve()
     const selectedRegion = snapshot.region ?? options.region ?? "jp"
-    const key = `${snapshot.manifestHash}/${selectedRegion}`
-    if (printingPending?.key === key) return printingPending.promise
+    if (printingPending?.snapshot === snapshot && printingPending.generation === generation)
+      return printingPending.promise
+    const current = selectionCheck()
+    const started = generation
+    const check = () => {
+      current()
+      if (loaded !== snapshot) throw new Superseded()
+    }
     const promise = Promise.all(
       [...snapshot.files]
         .filter(
@@ -717,8 +817,8 @@ export function createSnapshotClient(
         )
         .map(([key]) => fragments(key)),
     )
-      .then((values) => {
-        if (loaded !== snapshot) return
+      .then(async (values) => {
+        check()
         const present = new Set(snapshot.bootstrap.map((fragment) => fragment.identity))
         const supplemented: LoadedSnapshot = {
           ...snapshot,
@@ -728,14 +828,24 @@ export function createSnapshotClient(
             ...values.flat().filter((fragment) => !present.has(fragment.identity)),
           ],
         }
-        catalogOf(supplemented)
+        await prepareCatalog(supplemented, check, false)
+        check()
         loaded = supplemented
         if (status.state === "ready") set({ ...status })
+      })
+      .catch((error: unknown) => {
+        try {
+          check()
+        } catch (stale) {
+          if (stale instanceof Superseded) return
+          throw stale
+        }
+        throw error
       })
       .finally(() => {
         if (printingPending?.promise === promise) printingPending = undefined
       })
-    printingPending = { key, promise }
+    printingPending = { snapshot, generation: started, promise }
     return promise
   }
 
@@ -745,7 +855,8 @@ export function createSnapshotClient(
       reloadRequested = true
       return startup.then(() => pending ?? Promise.resolve())
     }
-    pending = run()
+    // Install the promise before progress listeners can request another selection.
+    pending = Promise.resolve().then(() => run())
     return pending
   }
 
@@ -754,22 +865,33 @@ export function createSnapshotClient(
     signal: AbortSignal,
   ): Promise<LoadedSnapshot> => {
     await (startup ?? pending)
-    signal.throwIfAborted()
     const snapshot = loaded
+    const started = generation
+    const check = () => {
+      signal.throwIfAborted()
+      externalCheck()
+      if (started !== generation || loaded?.manifestHash !== snapshot?.manifestHash)
+        throw new DOMException("snapshot replaced", "AbortError")
+    }
+    check()
     // Lists hold a compact Worker index, so comparison must not download the selected catalog
     // again merely to obtain its manifest on the main thread.
     if (!snapshot) {
-      const comparison = createSnapshotClient(base, {
-        ...options,
-        region: selectedRegion,
-        fetch: (url, init) =>
-          requests.background(url, {
-            ...init,
-            signal: init?.signal ? AbortSignal.any([signal, init.signal]) : signal,
-          }),
-      })
+      const comparison = snapshotClient(
+        base,
+        {
+          ...options,
+          region: selectedRegion,
+          fetch: (url, init) =>
+            requests.background(url, {
+              ...init,
+              signal: init?.signal ? AbortSignal.any([signal, init.signal]) : signal,
+            }),
+        },
+        check,
+      )
       await comparison.load()
-      signal.throwIfAborted()
+      check()
       const candidate = comparison.snapshot()
       if (!candidate) throw new SnapshotError("payload-set", "comparison catalog failed")
       catalogs.set(`${candidate.manifestHash}/${selectedRegion}`, candidate)
@@ -784,7 +906,7 @@ export function createSnapshotClient(
       catalogKeys(snapshot.files, selectedRegion)
         .filter((key) => !present.has(key) && snapshot.files.get(key)?.["purpose"] !== "config")
         .map(async (key) => {
-          signal.throwIfAborted()
+          check()
           const file = snapshot.files.get(key)
           if (!file) throw new SnapshotError("payload-set", "missing catalog file")
           const bytes = await fetchVerified(
@@ -794,25 +916,22 @@ export function createSnapshotClient(
             signal,
             "background",
           )
-          signal.throwIfAborted()
+          check()
           const result = await decode({ kind: "file", file, bytes, version })
           if (result.kind !== "fragments")
             throw new SnapshotError("shape", "expected catalog fragments")
           return result.fragments
         }),
     )
-    signal.throwIfAborted()
-    if (loaded?.manifestHash !== snapshot.manifestHash) throw new Error("snapshot replaced")
+    check()
     const candidate = {
       ...snapshot,
       region: selectedRegion,
       printingReady: false,
       bootstrap: [...snapshot.bootstrap, ...parts.flat()],
     }
-    catalogWork("validate", () => {
-      validateCatalog(candidate.bootstrap)
-    })
-    catalogOf(candidate)
+    await prepareCatalog(candidate, check)
+    check()
     unsaved.add(candidate)
     catalogs.set(key, candidate)
     return candidate
@@ -837,14 +956,14 @@ export function createSnapshotClient(
       if (next === region) return
       if (loaded)
         void (async () => {
-          region = next
+          select(next)
           await reload()
         })()
-      else region = next
+      else select(next)
     },
     selectRegion: async (next) => {
       const changed = next !== region
-      region = next
+      select(next)
       if (changed) await reload()
       else await (pending ?? startup ?? load())
       // An earlier download may have captured the previous region before this selection arrived.
