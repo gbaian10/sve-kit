@@ -1,12 +1,15 @@
 """Source-bound choice counts use X only beside their independently rendered definition."""
 
+import re
 from dataclasses import replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import pytest
 
 from sve_carddb.contracts.four_layer import (
+    Constant,
     ContextExpression,
+    Domain,
     Expression,
     FormDefinition,
     FormNode,
@@ -204,7 +207,8 @@ def test_placeholder_renders_once_with_traceable_ranges(
         assert all(
             not (r.start <= quantity.ranges[0].start < r.end) for r in annotation.ranges
         )
-    assert any(leaf.node_path != definition_leaf.node_path for leaf in output.leaves)
+    assert quantity.node_path[0] == item.selected.target.nodes.index(node)
+    assert len(quantity.node_path) > 1
     assert not output.low_confidence
     low = replace(renderer.forms[node.form_id, "zh-Hant"], low_confidence=True)
     renderer.forms[node.form_id, "zh-Hant"] = low
@@ -228,7 +232,7 @@ def test_placeholder_missing_operand_label_keeps_whole_field_fallback(
         assert result.issues == ("missing_term_translation",)
 
 
-def test_placeholder_requires_direct_definition_even_when_operands_are_rendered(
+def test_placeholder_shape_requires_a_direct_definition(
     choice: tuple[Renderer, BoundTarget, FormNode],
 ) -> None:
     renderer, item, node = choice
@@ -245,20 +249,33 @@ def test_placeholder_requires_direct_definition_even_when_operands_are_rendered(
     item = replace(item, selected=replace(item.selected, target=target))
     assert item.selected is not None
     forms = {key: value.definition for key, value in renderer.forms.items()}
-    with pytest.raises(ValueError, match="direct definition LeafRef"):
+    with pytest.raises(
+        ValueError, match=r"^Quantity placeholder requires a direct definition LeafRef$"
+    ):
         verify_target_shape(
             item.frame, target, item.selected.expression_targets, "zh-Hant", forms
         )
-    with pytest.raises(ValueError, match="direct definition LeafRef"):
+    with pytest.raises(
+        ValueError, match=r"^Quantity placeholder requires a direct definition LeafRef$"
+    ):
         renderer.render("synthetic", "zh-Hant", (item,))
 
 
 @pytest.mark.parametrize(
-    "mutation", ["mode", "constant", "bound", "ordered_leaves", "definition", "role"]
+    ("mutation", "error"),
+    [
+        ("mode", "Context choice requires an up_to typed expression"),
+        ("constant", "Context choice requires an up_to typed expression"),
+        ("bound", "Context choice requires an up_to typed expression"),
+        ("ordered_leaves", "Expression argument has the wrong type role or domain"),
+        ("definition", "Unknown source expression ID"),
+        ("role", "Form leaf role disagrees with signature"),
+    ],
 )
-def test_placeholder_rejects_incompatible_binding_pairs(
+def test_source_or_signature_layer_rejects_incompatible_pairs(
     choice: tuple[Renderer, BoundTarget, FormNode],
     mutation: str,
+    error: str,
 ) -> None:
     renderer, item, node = choice
     name = node.args["quantity"].slot
@@ -307,17 +324,25 @@ def test_placeholder_rejects_incompatible_binding_pairs(
         if mutation in {"mode", "constant", "bound"}:
             values[name] = QuantitySpec.model_validate_json(canonical(data))
         item = replace(item, binding=item.binding.model_copy(update={"values": values}))
-    with pytest.raises(
-        ValueError,
-        match=r"[Pp]laceholder|[Cc]hoice|[Ee]xpression|[Ff]orm|[Ll]eaf|[Qq]uantity|[Ss]ignature",
-    ):
+    with pytest.raises(ValueError, match=f"^{re.escape(error)}$"):
         renderer.render("synthetic", "zh-Hant", (item,))
 
 
 @pytest.mark.parametrize(
-    "mutation", ["role", "literal_only", "case", "part_arg", "rule", "id"]
+    ("mutation", "error"),
+    [
+        ("role", "Quantity placeholder requires its exact paired signature and part"),
+        (
+            "literal_only",
+            "Quantity placeholder requires its exact paired signature and part",
+        ),
+        ("case", "Quantity placeholder requires its exact paired signature and part"),
+        ("part_arg", "QuantityPlaceholder requires its closed choice quantity rule"),
+        ("rule", "QuantityPlaceholder requires its closed choice quantity rule"),
+        ("id", "QuantityPlaceholder requires its closed choice quantity rule"),
+    ],
 )
-def test_placeholder_form_is_closed(mutation: str) -> None:
+def test_placeholder_form_is_closed(mutation: str, error: str) -> None:
     data = placeholder_form().model_dump(mode="json")
     if mutation == "role":
         data["signature"][0]["role"] = "selection_count"
@@ -329,11 +354,124 @@ def test_placeholder_form_is_closed(mutation: str) -> None:
         data["cases"]["up_to"][1]["arg"] = "definition"
     else:
         data[mutation] = "unregistered"
+    with pytest.raises(ValueError, match=re.escape(error)):
+        validate_form(FormDefinition.model_validate_json(canonical(data)))
+
+
+@pytest.mark.parametrize(
+    ("mode", "expression"), [("up_to", False), ("exact", False), ("exact", True)]
+)
+def test_placeholder_rejects_non_up_to_or_non_expression_quantity(
+    choice: tuple[Renderer, BoundTarget, FormNode],
+    mode: Literal["up_to", "exact"],
+    *,
+    expression: bool,
+) -> None:
+    renderer, item, node = choice
+    name = node.args["quantity"].slot
+    quantity = item.binding.values[name]
+    assert isinstance(quantity, QuantitySpec)
+    slots = tuple(
+        slot.model_copy(
+            update={
+                "domain": Domain(
+                    values=("quantity.choice_mode_count.constant.v1",),
+                    min=None,
+                    max=None,
+                )
+            }
+        )
+        if slot.name == name
+        else slot
+        for slot in item.frame.leaf_schema.slots
+    )
+    item = replace(
+        item,
+        frame=item.frame.model_copy(
+            update={
+                "leaf_schema": item.frame.leaf_schema.model_copy(
+                    update={"slots": slots},
+                )
+            }
+        ),
+        binding=item.binding.model_copy(
+            update={
+                "values": dict(item.binding.values)
+                | {
+                    name: QuantitySpec(
+                        mode=mode,
+                        expr=quantity.expr
+                        if expression
+                        else Constant(kind="constant", value=2),
+                    ),
+                }
+            }
+        ),
+    )
     with pytest.raises(
         ValueError,
-        match=r"[Pp]laceholder|[Cc]hoice|[Ee]xpression|[Ff]orm|[Ll]eaf|[Qq]uantity|[Ss]ignature",
+        match=r"^Quantity placeholder requires an up_to expression and equal definition$",
     ):
-        validate_form(FormDefinition.model_validate_json(canonical(data)))
+        renderer.render("synthetic", "zh-Hant", (item,))
+
+
+def test_placeholder_rejects_a_definition_with_duplicate_operands(
+    choice: tuple[Renderer, BoundTarget, FormNode],
+) -> None:
+    renderer, item, node = choice
+    assert item.selected is not None
+    quantity = item.binding.values[node.args["quantity"].slot]
+    assert isinstance(quantity, QuantitySpec)
+    assert isinstance(quantity.expr, Expression)
+    slots = {slot.name: slot for slot in item.frame.leaf_schema.slots}
+    duplicates = tuple(
+        slots[name].model_copy(
+            update={
+                "name": name + "_dup",
+                "required": False,
+                "occurrences": (),
+            }
+        )
+        for name in quantity.expr.leaves
+    )
+    values = dict(item.binding.values) | {
+        copy.name: item.binding.values[name]
+        for name, copy in zip(quantity.expr.leaves, duplicates, strict=True)
+    }
+    values[node.args["definition"].slot] = quantity.expr.model_copy(
+        update={
+            "leaves": tuple(slot.name for slot in duplicates),
+        }
+    )
+    item = replace(
+        item,
+        frame=item.frame.model_copy(
+            update={
+                "leaf_schema": item.frame.leaf_schema.model_copy(
+                    update={"slots": (*item.frame.leaf_schema.slots, *duplicates)},
+                )
+            }
+        ),
+        binding=item.binding.model_copy(update={"values": values}),
+        selected=replace(
+            item.selected,
+            target=Target(
+                format=1,
+                nodes=(
+                    *item.selected.target.nodes,
+                    *(
+                        LeafRef(kind="LeafRef", slot=name)
+                        for name in quantity.expr.leaves
+                    ),
+                ),
+            ),
+        ),
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^Quantity placeholder requires an up_to expression and equal definition$",
+    ):
+        renderer.render("synthetic", "zh-Hant", (item,))
 
 
 def test_paid_context_choice_cannot_supply_an_independent_definition() -> None:

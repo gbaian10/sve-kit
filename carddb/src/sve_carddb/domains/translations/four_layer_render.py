@@ -582,7 +582,6 @@ class Renderer:
                     )
                 )
                 output.actual.clear()
-                output.direct_leaves.clear()
                 output.placeholder_pairs.clear()
                 for index, node in enumerate(item.selected.target.nodes):
                     output.node(item, node, (index,))
@@ -623,7 +622,6 @@ class _Output:
         self.quality: list[tuple[str, bool]] = []
         self.issues: set[str] = set()
         self.actual: set[tuple[str, str, bytes]] = set()
-        self.direct_leaves: set[str] = set()
         self.placeholder_pairs: list[tuple[str, str]] = []
 
     def node(self, item: BoundTarget, node: Node, path: tuple[int, ...]) -> None:
@@ -710,8 +708,6 @@ class _Output:
         else:
             raise ValueError("Typed leaf cannot be presented as a generic string")
         self.record_leaf(item, name, path, start)
-        if len(path) == 1:
-            self.direct_leaves.add(name)
         self.actual.update(
             (name, slot.role, canonical(r.model_dump(mode="json")))
             for r in self.renderer.references(item, name)
@@ -878,10 +874,6 @@ class _Output:
 
     def close_placeholders(self, item: BoundTarget) -> None:
         for quantity, definition in self.placeholder_pairs:
-            if definition not in self.direct_leaves:
-                raise ValueError(
-                    "Quantity placeholder definition was not directly rendered"
-                )
             role = next(
                 s.role for s in item.frame.leaf_schema.slots if s.name == quantity
             )
