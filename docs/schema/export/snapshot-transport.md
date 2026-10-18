@@ -194,7 +194,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 除數值列外皆不可 null；Text 可以空字串，陣列成員不可 null。所有值仍遵守 §1 的 canonical 整數界限，禁止 Bool／浮點數冒充 Int。未知 field、數值字串、額外建置物件一律拒絕。`Correction.is_corrected` 固定 true；source_url 的 required-nullable 規則見 §3.1。
 
-例如 `field=cost, before=null, after=3` 合法，after="3" 非法；`field=traits, before=[], after=["合成特性"]` 合法，after=null 非法；`field=other` 的前後值只能是文字。人工更正的 authored 輸入仍受其自身格式白名單限制，公開值域不擴張該輸入格式的可寫欄位。
+例如 `field=cost, before=null, after=3` 合法，after="3" 非法；`field=traits, before=[], after=["合成類型"]` 合法，after=null 非法；`field=other` 的前後值只能是文字。人工更正的 authored 輸入仍受其自身格式白名單限制，公開值域不擴張該輸入格式的可寫欄位。
 
 ### 3.4 DSL 程式包與版本准入
 

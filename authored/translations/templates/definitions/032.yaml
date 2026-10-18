@@ -1095,7 +1095,7 @@ records:
   - origin: machine
     kind: sentence_template
     data:
-      id: frame:4a530e5caad7073d849acc4bcb81fb7a77829cb5873137ac569b885e436c9cc5
+      id: frame:dd789f82110c94784de918c60a41a65e3923c55dc577ef16c79fc6994061b880
       source:
         source_lang: ja
         canonical_hash: 35cc007fe28f6ba848a13eb6770f72631ea143951f6c792a483742f1c6947230
@@ -1226,13 +1226,25 @@ records:
             occurrences:
               - start: 68
                 end: 69
+          - name: trait_type_75
+            type: Concept
+            role: rule_term
+            domain:
+              values:
+                - concept.rule_term.v1
+              min:
+              max:
+            required: true
+            occurrences:
+              - start: 75
+                end: 78
       projection:
         projection_kind: pending
         discriminator:
         scopes: []
         imports: []
         exports: []
-      content_hash: 4a530e5caad7073d849acc4bcb81fb7a77829cb5873137ac569b885e436c9cc5
+      content_hash: dd789f82110c94784de918c60a41a65e3923c55dc577ef16c79fc6994061b880
   - kind: sentence_template
     data:
       id: frame:d92691b5b53ee17d4b12edc66cb5acd257101ce81e87744169ae07870a2f9dcd

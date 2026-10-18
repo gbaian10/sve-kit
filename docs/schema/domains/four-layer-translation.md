@@ -911,7 +911,7 @@ raw／canonical spans 為空，`resolution_rule=earth_rite.omitted_amount.v1`；
 
 來源只接受同一本文片段內唯一明示的 `Xは「…」である。` 定義，
 區域必須明示相對玩家及戰場、手牌、牌堆、墓場、EX 或消失區。
-限定須完整符合 §11.2 的有限 expression 簽章：單一特性、卡名、職業、種類、關鍵字、衍生物或排除自身；
+限定須完整符合 §11.2 的有限 expression 簽章：單一類型、卡名、職業、種類、關鍵字、衍生物或排除自身；
 沒有明寫「卡片」就不增加 `read_card` 葉。
 定義與使用點共同決定是否接受，僅辨識傷害、回復／能力值增減、費用降低、
 原費用上界、抽牌與具名從者出場的既定使用形狀。
@@ -969,7 +969,7 @@ CapturedValue 的 Nat／Bool 與 measure 也必須符合簽章；ReceiptId 簽�
 | `entry.self.method.ability_source_trait.v1` | `entry_source_trait`：僅已登錄 umamusume | holder、入場事件、直接能力來源卡片的事件快照／LKI |
 
 zone／trait 葉沿舊域，以 descriptor 限制組合。事件與 subject 必須是同一物件世代；
-能力來源特性還須連到事件的直接來源，不能用持有者、自身特性或更早祖先代替。
+能力來源類型還須連到事件的直接來源，不能用持有者、自身類型或更早祖先代替。
 事件不存在、kind 錯誤、Unknown 來源都不能成為 Bool 結果。
 自身入場事實與 CurrentTurn 歷史分型，不能以歷史有無事件代替自身入場。
 
@@ -1050,7 +1050,7 @@ played_from 的來源辨識及 descriptor 由其來源家族負責，不加入 A
 不能用 optional 或 Literal 隱藏缺引用。新葉與既有葉共享原始 provenance，
 expression 依賴經 transform 一起重映射，binding 與 `LeafSlot.expression` 必須一致。
 
-`aggregate.pair.named.v1` 固定兩個已核卡名概念；`aggregate.pair.kind.v1` 固定 mage 特性、
+`aggregate.pair.named.v1` 固定兩個已核卡名概念；`aggregate.pair.kind.v1` 固定 mage 類型、
 follower／spell 兩個互斥種類。兩者都限制自己的墓場，不能以總張數除二。
 `disjoint_pair_count` 僅供有限契約驗證，拒絕同組重複及兩組交集，不負責解析或求值 DSL selector。
 
@@ -1059,7 +1059,7 @@ follower／spell 兩個互斥種類。兩者都限制自己的墓場，不能以
 之後補證據不能反過來改動來源連接詞或常數含義。
 BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍不在接受域。
 
-### 11.7 名稱關係、名稱片段與雙特性
+### 11.7 名稱關係、名稱片段與雙類型
 
 `four_layer_names.FAMILY` 由整合流程辨識 A3、A5、A9。
 名稱種類數沿共用 `name.distinct_count.objects.v1`，結果是 Nat；
@@ -1073,7 +1073,7 @@ BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍�
 | 與本物件不同名、與選取物件或處理結果同名 | `predicate.name.relative.v1`／`name_relation` | ObjectSet 或 ReceiptId import，保存精確來源及 capture |
 | 選取的卡片各有不同名稱 | `predicate.selection.distinct_name.v1`／`selection_name_constraint` | ObjectSet import，與名稱種類數讀值分型 |
 | 名稱包含片段或有限片段 OR | `predicate.name.contains.v1`／`name_contains_filter` | 必要 CardName 引用，角色 `name_fragment`；沿既有 `card_name.any.v1` 詞條來源，不另建片段清冊 |
-| 正文兩個特性同時成立 | `predicate.traits.all2.v1`／`trait_conjunction` | `filter_trait_left`、`filter_trait_right` 各自沿 `concept.trait.v1`；kind 保留獨立引用，已辨識的 kind 葉沿用原角色 |
+| 正文兩個類型同時成立 | `predicate.traits.all2.v1`／`trait_conjunction` | `filter_trait_left`、`filter_trait_right` 各自沿 `concept.trait.v1`；kind 保留獨立引用，已辨識的 kind 葉沿用原角色 |
 
 片段來源以原始引用位置還原，不能把正規化後的名稱 placeholder 當字典查找鍵。
 `CardName/name_fragment` 葉顯示「『日文來源片段』（繁中提示）」，正文說明為
@@ -1086,13 +1086,13 @@ BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍�
 不改用繁中片段；完整卡名引用仍顯示已選譯名。
 完整名稱、片段條件與合作名稱不因中文顯示字相同而合併。
 片段 OR 僅登錄單一、二、四、十個來源片段的有限簽章；不提供一般布林樹或名稱集合生成。
-特性條件只接受正文連續兩個已登錄特性及 kind；三個以上特性、token header、
+類型條件只接受正文連續兩個已登錄類型及 kind；三個以上類型、token header、
 token 身分與兩個 selector 擇一保持來源結果。
 
 import 的物件及 receipt 識別字是由精確來源定位建立的符號，不是對戰物件或結算結果。
 holder 以同一能力的來源符號共用；離場事件主體使用 event_subject／LKI，不能冒充 selection。
 receipt 必須有同能力／分支內唯一的公開或消滅 producer；缺少或歧義時保留具名來源問題。
-特性與 kind 所需概念缺失時也保留 pending，不填入未登錄的必要引用。
+類型與 kind 所需概念缺失時也保留 pending，不填入未登錄的必要引用。
 這些結構不執行名稱比對，也不授予 DSL 可執行資格。
 同名生成保留 PredicateExpr 關係，交由 emission 骨架消費；Bool 不能傳給 token 名稱參數。
 多規則名稱的唯一化或選名仍屬 unresolved lowering，不取任意第一個名稱。
@@ -1144,7 +1144,7 @@ receipt 固定結果及宣告參數各有 import 簽章，不能只因結果為�
 選取的物件在讀值前被破壞、消滅，或移到墓場、手牌、牌堆、EX 區時，讀值改用 LKI。
 處理結果張數引用 `ReceiptId<objects>`，取下指示物數引用 `ReceiptId<amount>`；
 兩者與 `payment_complete` 都不能互換。
-有名稱、特性、職業、關鍵字或指示物引用時，必須沿目前採用的來源概念；
+有名稱、類型、職業、關鍵字或指示物引用時，必須沿目前採用的來源概念；
 指示物種類的名稱維持來源骨架，引用沿既有通用指示物概念，與 §11.1 相同。
 沒有唯一 producer 或缺概念時不補 Literal、不挑第一個、不建立可用 binding。
 
@@ -1178,7 +1178,7 @@ X 在名稱片段 selector 外時，其定義可獨立辨識，selector 由 P3 �
 這兩個家族不擴張 B11 或常數域。
 
 歷史來源的 descriptor 區分事件、固定篩選形狀、aggregate 及 include_execution；
-玩家、特性與卡名等變動 operand 另有 required 葉，不從中文或相同數值推測。
+玩家、類型與卡名等變動 operand 另有 required 葉，不從中文或相同數值推測。
 玩家 import 分 actor、subject_owner 與 resource_owner；物件或生命資源的擁有者不等於造成事件的行動者。
 打出張數使用 CountSubjects，攻擊／UB／生命增減的次數使用 CountFacts，
 生命增加量及土之秘術取走的指示物數使用 Sum，單純是否發生使用 Exists。
@@ -1197,7 +1197,7 @@ A11 沿 §11.5 五個 descriptor，保留本文、能力可使用、模式數量
 事件主體條件必須有唯一、同片段的已辨識入場誘發來源；缺少時保存 typed 結構與
 `missing_unique_entry_event_provider`，拒絕 active binding。
 條件的原文位置保持在其子句內，不能吸收前面的傷害或提前改成 trigger filter。
-直接來源特性沿 required `entry_source_trait`，不能以進場卡自身特性代替。
+直接來源類型沿 required `entry_source_trait`，不能以進場卡自身類型代替。
 
 played_from 另用 `play.self.from_zone.eq.v1`、
 `predicate.play.provenance.v1`／`played_from_condition`，
@@ -1225,10 +1225,10 @@ authored 只載入正式 v6 定義與譯文，來源家族由來源推導決定�
 - 歷史子句內的同名除外及歷史讀值由 P2 擁有，P3／P1 讓位。
 - 名稱種類數由 P3 產生；P1 將同一能力內的 X 定義及使用 occurrence 接到該數值槽，
   不重建另一個母體或多包一層讀值。
-- 合計由 P4 保存骨架，合計 selector 的名稱排除、不同名及雙特性使用 P3 的 typed predicate。
+- 合計由 P4 保存骨架，合計 selector 的名稱排除、不同名及雙類型使用 P3 的 typed predicate。
   `aggregate.sum.deck.filtered_trait_card.original_cost.v1` 消費名稱排除，
-  `aggregate.sum.graveyard.filtered_kind.original_cost.v1` 消費雙特性，
-  `aggregate.sum.deck.distinct_filtered_kind.original_cost.v1` 同時消費雙特性與不同名。
+  `aggregate.sum.graveyard.filtered_kind.original_cost.v1` 消費雙類型，
+  `aggregate.sum.deck.distinct_filtered_kind.original_cost.v1` 同時消費雙類型與不同名。
   這些仍使用 `quantity.aggregate.property_sum.v1`／`property_sum_value`；
   predicate 保留自己的域、角色及 imports，不以合計 descriptor 的名詞形狀再編一次。
 - P5 消費 P2 的 A11／歷史條件；表向進化牌堆具名張數由 P5 直接使用既有 B13 葉。
@@ -1297,6 +1297,13 @@ lexical numeric veto 只有在整體來源守衛成立且無其他問題時才�
 不建立重疊位置。補齊只增加詞彙依賴，不改來源分段、既有語意、數值或接受條件。
 模板正文與提醒均引用該葉，不將譯詞寫死在 Literal；改動葉結構時同步重算共用
 模板 ID 與譯本引用。繁中選詞為 `Token`，與相鄰中文字不加空白。
+
+**類型名稱詞彙引用。** 已登錄的 `term:rule.trait_type` 以 `rule_term` 類別釘住日文 `タイプ`，
+繁中選詞為「類型」。同一詞彙補齊流程對正文、提醒與 Token 表頭中尚未由其他葉持有的
+`タイプ` 建立必要 `Concept/rule_term` 葉，沿 `concept.rule_term.v1` 引用該詞彙。
+完整名稱、圖示與既有結構葉的範圍不重複抽取；個別類型仍引用 `term:trait.*`。
+模板用 LeafRef 接在類型名之後，授予與否定句型的其餘文字不變；改動共用選詞即可更新譯名。
+此補齊只建立顯示詞彙依賴，不增添可執行語意或擴大來源接受條件。
 
 `four_layer_n3_references` 在完整構築限制、四段種類數條件、十費用支付、
 三段 SC 替換減費、承受能力傷害及三種提醒內補齊已封的固定詞彙引用。
