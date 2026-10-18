@@ -71,7 +71,9 @@ async function open(path: string, mode: CardOpenMode) {
   prefsStore.set({ uiLanguage: "zh-TW", cardOpenMode: mode })
   vi.stubGlobal("innerWidth", desktop ? 1440 : 390)
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
-  await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
+  // Scoping avoids computing accessible names for the collapsed filter panel on every retry.
+  const classes = await screen.findByRole("group", { name: "職業" })
+  await within(classes).findByRole("button", { name: "精靈" }, { timeout: 4000 })
   return rendered
 }
 
