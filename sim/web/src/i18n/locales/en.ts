@@ -300,14 +300,16 @@ export default {
     noExplanation: "No public explanation yet",
     closeReference: "Close explanation",
     jpSource: "Translated from Japanese source",
+    sourceArea: "Sources and basis",
+    sourceText: "Source text of the translation",
+    counterpartSource: "Official counterpart: {{edition}} official text",
     wording: {
       different: "This card has different text across printings",
       shown: "Currently displayed text",
       unavailable: "Text for these printings is still being checked",
       printingOriginal: "Original text of this printing",
       translationBasis: "Translation based on",
-      provisional:
-        "Wording pending: no current text is adopted yet, so the name, values and text follow the latest known release provisionally",
+      provisional: "Wording pending: no current text has been adopted yet",
     },
     wordingPending: "Wording pending",
     imageAlt: "{{name}} ({{cardNo}})",

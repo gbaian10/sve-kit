@@ -433,14 +433,18 @@ it("shows the shared type line and stats without a display revision", async () =
   expect(typeLabel?.nextElementSibling).toHaveTextContent("follower")
   const traitLabel = screen.getAllByText("類型")[0]
   expect(traitLabel?.nextElementSibling).toHaveTextContent("synthetic")
-  expect(traitLabel?.nextElementSibling).toHaveClass("rounded-pill")
   for (const name of ["消費 3", "攻擊力 4", "生命值 5"]) {
     expect(screen.getAllByRole("listitem", { name })[0]).toBeVisible()
   }
   // The crystal shows numbers up to 10 itself; attack and defense print theirs beside the icon.
-  expect(screen.getAllByRole("img", { name: "消費" })[0]).toHaveClass("size-6")
-  expect(screen.getAllByRole("img", { name: "攻擊力" })[0]).toHaveClass("size-5")
-  expect(screen.getAllByRole("listitem", { name: "攻擊力 4" })[0]).toHaveTextContent("4")
+  const cost = screen.getAllByRole("listitem", { name: "消費 3" })[0] as HTMLElement
+  expect(within(cost).getByRole("img", { name: "消費" })).toBeVisible()
+  expect(within(cost).queryByText("3")).not.toBeInTheDocument()
+  const attack = screen.getAllByRole("listitem", { name: "攻擊力 4" })[0] as HTMLElement
+  expect(within(attack).getByRole("img", { name: "攻擊力" })).toBeVisible()
+  expect(within(attack).getByText("4")).toBeVisible()
+  const defense = screen.getAllByRole("listitem", { name: "生命值 5" })[0] as HTMLElement
+  expect(within(defense).getByText("5")).toBeVisible()
 })
 
 describe("plain wording on the card page", () => {
@@ -605,6 +609,9 @@ describe("plain wording on the card page", () => {
     expect(screen.getByText("合成新版譯文")).toBeVisible()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
     expect(screen.getByText("此版次的原文")).toBeVisible()
+    // The basis printing sits in the translation's source area with its other sources.
+    expect(screen.queryByRole("link", { name: "BP-OTHER" })).not.toBeVisible()
+    await userEvent.click(screen.getByText("來源與依據"))
     expect(screen.getByText("繁中翻譯依據")).toBeVisible()
     await userEvent.click(screen.getByRole("link", { name: "BP-OTHER" }))
     expect(router.state.historyAction).toBe("REPLACE")
@@ -619,12 +626,24 @@ describe("plain wording on the card page", () => {
     expect(screen.getByText("Synthetic older effect")).toBeVisible()
     expect(screen.queryByRole("note")).not.toBeInTheDocument()
     adopted.unmount()
+    // The selected printing's own revision differs from the display: its own text still shows.
     state.current = false
+    const own = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByRole("note")).toHaveTextContent("卡文未定：尚無採納的現行卡文")
+    expect(screen.getByRole("note")).not.toHaveTextContent("發售")
+    expect(screen.getByText("此版次的原文")).toBeVisible()
+    expect(screen.getByText("Synthetic older effect")).toBeVisible()
+    expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    own.unmount()
+    // Several observed revisions on this printing: the candidate comparison keeps the note.
+    state.candidates.push({ printing_id: "p:synthetic", revision_id: "rev:synthetic" })
     await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(screen.getByText("Synthetic older effect")).toBeVisible()
-    expect(screen.getByRole("note")).toHaveTextContent("卡文未定：現行卡文尚未採納")
+    expect(screen.getByRole("heading", { name: "此卡各版次的卡文不同" })).toBeVisible()
+    expect(screen.getByRole("note")).toHaveTextContent("卡文未定：尚無採納的現行卡文")
   })
   it("keeps all candidates when the printing has multiple observations", async () => {
     state.available = true

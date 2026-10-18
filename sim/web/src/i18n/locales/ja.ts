@@ -302,14 +302,16 @@ export default {
     noExplanation: "公開された説明はありません",
     closeReference: "説明を閉じる",
     jpSource: "日本語原文からの訳",
+    sourceArea: "出典と根拠",
+    sourceText: "翻訳の元になった原文",
+    counterpartSource: "公式対照：{{edition}}の公式テキスト",
     wording: {
       different: "このカードは版によってテキストが異なります",
       shown: "現在表示中のテキスト",
       unavailable: "これらの版のテキストは確認中です",
       printingOriginal: "この版の原文",
       translationBasis: "翻訳の参照元",
-      provisional:
-        "表記未定：現在のテキストは未採用のため、名前・数値・テキストは最新の既知発売版を暫定表示しています",
+      provisional: "表記未定：採用された現在のテキストはまだありません",
     },
     wordingPending: "表記未定",
     imageAlt: "{{name}}（{{cardNo}}）",

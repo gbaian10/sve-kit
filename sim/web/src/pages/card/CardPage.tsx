@@ -696,7 +696,6 @@ export function CardView({
                 {faceSummary && name && (
                   <div className="flex flex-col gap-1.5">
                     {ordinal > 0 && <Badge className="self-start">{t("cardPage.backFace")}</Badge>}
-                    {/* Design 06 head: class icon beside the name, then rarity · number · class, then card type and traits. */}
                     <div className="flex items-start gap-2">
                       {classCode !== undefined && (
                         <img

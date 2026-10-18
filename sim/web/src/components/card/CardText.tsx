@@ -15,6 +15,7 @@ import type { NameDisplay } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
 import { prefsStore, type TextBoxKind, usePrefs } from "../../settings"
 import { cn } from "../ui/cn"
+import { Link } from "../ui/Link"
 import { AnnotatedText } from "./AnnotatedText"
 import { useTextLanguage } from "./text-language"
 import { TextPurposeStatus } from "./TextPurposeStatus"
@@ -168,6 +169,7 @@ export function CardText({
   display,
   label,
   ordinal = null,
+  translationBasis,
 }: {
   readonly sharedResolver?: AnnotatedTextResolver | null
   readonly client: SnapshotClient
@@ -177,6 +179,12 @@ export function CardText({
   readonly ordinal?: number | null
   readonly display?: NameDisplay | undefined
   readonly label?: string | undefined
+  /** The printing whose shared wording this translation was made from, for the source area. */
+  readonly translationBasis?: {
+    readonly cardNo: string
+    readonly to: string
+    readonly state?: unknown
+  }
 }) {
   const { t } = useTranslation()
   const prefs = usePrefs()
@@ -285,6 +293,49 @@ export function CardText({
       {sectionTexts("original")}
     </div>
   )
+  const jpSource = value.selection?.["basis"] === "jp_source"
+  const counterpartLang = value.counterpart ? stringValue(value.counterpart.unit["lang"]) : null
+  // Sources stay out of the reading flow (#521): one collapsed area, not a line per source.
+  const sourceEntries = [
+    ...(jpSource && readiness.source === "ready" && value.source
+      ? [
+          <div key="source">
+            <p className="text-12 text-text-3">{t("card.sourceText")}</p>
+            <AnnotatedText
+              value={value.source}
+              context={value}
+              emphasis={prefs.termEmphasis}
+              annotationReady={annotationReady}
+            />
+          </div>,
+        ]
+      : []),
+    ...(translationBasis
+      ? [
+          <p key="basis" className="text-13 text-text-2">
+            {t("card.wording.translationBasis")}{" "}
+            <Link to={translationBasis.to} state={translationBasis.state} replace>
+              {translationBasis.cardNo}
+            </Link>
+          </p>,
+        ]
+      : []),
+    ...(value.selection?.["basis"] === "official_counterpart" && counterpartLang !== null
+      ? [
+          <p key="counterpart" className="text-13 text-text-2">
+            {t("card.counterpartSource", {
+              edition: t(`options.edition.${counterpartLang === "ja" ? "jp" : "en"}`),
+            })}
+          </p>,
+        ]
+      : []),
+  ]
+  const sourceArea = value.translated && sourceEntries.length > 0 && (
+    <details className="text-15" data-source-area>
+      <summary className="cursor-pointer text-13 text-text-2">{t("card.sourceArea")}</summary>
+      <div className="mt-1 space-y-2">{sourceEntries}</div>
+    </details>
+  )
   const content = (
     <>
       {printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
@@ -292,8 +343,10 @@ export function CardText({
       <TextPurposeStatus readiness={readiness} />
       {translating ? (
         <>
-          {/* The source line sits under the heading (#521); only a section of different quality gets its own. */}
           {value.translated && sharedLine && <TranslationSourceLine value={value} />}
+          {value.translated && jpSource && (
+            <p className="text-12 text-text-3">{t("card.jpSource")}</p>
+          )}
           <div className={cn(BODY, "space-y-2")}>
             {value.translated ? (
               <AnnotatedText
@@ -310,21 +363,7 @@ export function CardText({
             {sectionTexts("translated")}
           </div>
           {boxMissing}
-          {value.selection?.["basis"] === "jp_source" &&
-            readiness.source === "ready" &&
-            value.source && (
-              <details className="text-15">
-                <summary className="cursor-pointer text-13 text-text-2">
-                  {t("card.jpSource")}
-                </summary>
-                <AnnotatedText
-                  value={value.source}
-                  context={value}
-                  emphasis={prefs.termEmphasis}
-                  annotationReady={annotationReady}
-                />
-              </details>
-            )}
+          {sourceArea}
         </>
       ) : (
         <div className={BODY}>{original}</div>

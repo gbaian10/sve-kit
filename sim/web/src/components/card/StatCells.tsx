@@ -3,10 +3,6 @@ import { useTranslation } from "react-i18next"
 import { cn } from "../ui/cn"
 import { ATTACK_ICON, costIcon, costIconNeedsNumber, DEFENSE_ICON } from "./symbolIcons"
 
-/**
- * The card head's three stat cells (design 06): 44px tall, the official cost crystal at 24px and
- * the attack and defense icons at 20px, each with its number; a missing stat prints its name and a dash.
- */
 export function StatCells({
   cost,
   attack,
@@ -27,7 +23,7 @@ export function StatCells({
       value: cost,
       icon: cost === null ? null : costIcon(cost),
       iconClass: "size-6",
-      // The crystal already shows numbers 0–10; the X crystal needs the number written out.
+      // The crystal already shows numbers 0–10; only the X crystal needs the number written out.
       numberHidden: cost !== null && !costIconNeedsNumber(cost),
     },
     {
@@ -65,7 +61,7 @@ export function StatCells({
               {cell.icon !== null && (
                 <img src={cell.icon} alt={cell.label} className={cell.iconClass} />
               )}
-              <b className={cell.numberHidden ? "sr-only" : undefined}>{cell.value}</b>
+              {!cell.numberHidden && <b>{cell.value}</b>}
             </>
           )}
         </li>
