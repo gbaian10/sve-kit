@@ -32,12 +32,13 @@ def write(  # ruff: ignore[too-many-arguments] -- owner, field, source and quali
         raise ValueError("Direct translation owner must use known owner columns")
     if origin == "official":
         if (
-            set(owner) != {"vocabulary_kind", "vocabulary_code"}
+            set(owner)
+            not in ({"vocabulary_kind", "vocabulary_code"}, {"product_family_id"})
             or field != "label"
             or source_id is None
         ):
             raise ValueError(
-                "Official direct translation requires a sourced vocabulary label"
+                "Official direct translation requires a sourced vocabulary or family label"
             )
     elif source_id is not None:
         raise ValueError(

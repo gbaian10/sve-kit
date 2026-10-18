@@ -560,7 +560,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             flavor_report = apply_flavor(db, flavor)
             translation = adoptions.translation_inputs()
             if translation is not None:
-                apply_labels(db, translation.load().four_layer)
+                apply_labels(db, translation.load().four_layer, sources=name_sources)
             template_report = (
                 None
                 if templates is None or translation is None

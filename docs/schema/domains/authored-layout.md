@@ -316,7 +316,12 @@ origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人
 每筆 `data` 恰有 `public_code`、`lang`、`text`；public_code 對應本次建置的
 product_family，找不到即拒絕。`(public_code, lang)` 是全區唯一選用鍵，跨分片重複亦拒絕。
 code 與 text 必須非空白且無首尾空白；沿用 record 外層的 origin、low_confidence、note，
-origin 只允許 project／machine，不據此主張官方權威。
+project／machine 不據此主張官方權威。official 只接受 `lang: en` 且附外層 `source_ref`：
+使用 `translation-en-v1` 重播凍結英文卡片頁的 `/products/<index>/name`，
+建置驗證 batch、來源版本、欄位雜湊、語言與完整文字一致後，寫入 `authority: sve_official` 及來源 ID。
+official 缺來源或文字不一致即拒絕；project／machine 不得附此來源。
+日英系列對應須來自已確認的系列歸屬，或已人工確認的同卡收錄證據；
+不能由代碼前綴或相似名稱推算，重印到其他商品不能直接改稱原系列。多個官方候選仍有衝突時保留原文。
 
 這是可直接修改的當前譯名，唯一來源位於 authored，不另存前端字典。
 建置以 family 自己的 name_unit_id 為來源、`product_family:<family_id>` 為 semantic_variant，

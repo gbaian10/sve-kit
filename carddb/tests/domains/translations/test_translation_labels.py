@@ -74,7 +74,7 @@ def test_blank_or_padded_label_is_rejected(tmp_path: Path, value: str) -> None:
         read_inputs(tmp_path)
 
 
-def test_family_label_cannot_claim_official_authority(tmp_path: Path) -> None:
+def test_official_family_label_requires_frozen_source(tmp_path: Path) -> None:
     record = label()
     record["origin"] = "official"
     authored(tmp_path, [record])

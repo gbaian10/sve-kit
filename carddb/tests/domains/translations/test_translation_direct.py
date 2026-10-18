@@ -99,13 +99,13 @@ def test_absent_source_text_is_rejected(template: DatabaseTemplate) -> None:
 
 
 @pytest.mark.parametrize("mutation", ["owner", "field", "source", "origin"])
-def test_official_direct_translation_is_limited_to_sourced_vocabulary_labels(
+def test_official_direct_translation_requires_a_sourced_label(
     template: DatabaseTemplate, mutation: str
 ) -> None:
     message = (
         "Unofficial direct translation cannot claim an official source"
         if mutation == "origin"
-        else "Official direct translation requires a sourced vocabulary label"
+        else "Official direct translation requires a sourced vocabulary or family label"
     )
     with (
         template.copy() as db,
