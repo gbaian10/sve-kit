@@ -1,0 +1,5508 @@
+{
+  "description": "Synthetic reader-only language matrix; J/E/Z/Jc/Ec are distinct. Low-confidence official counterparts are hand-authored consumer inputs, not producer policy.",
+  "texts": {
+    "J": "合成の和文甲😀。",
+    "E": "Synthetic English body B😀.",
+    "Z": "合成繁中效果丙😀。",
+    "Jc": "対照用の和文丁😀。",
+    "Ec": "Synthetic official counterpart E😀."
+  },
+  "translation_columns": [
+    "id",
+    "source_unit_id",
+    "target_lang",
+    "text_unit_id",
+    "origin",
+    "authority",
+    "low_confidence",
+    "annotation_set_id",
+    "annotation_kind"
+  ],
+  "cases": [
+    {
+      "id": "jp-zh-Hant-available",
+      "region": "jp",
+      "ui_language": "zh-TW",
+      "text_language": "zh-Hant",
+      "quality": "available",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:available:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": "合成繁中效果丙😀。",
+        "basis": "own_source",
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "合成の和文甲😀。",
+          "合成繁中效果丙😀。"
+        ],
+        "origin": "machine",
+        "authority": "unofficial"
+      }
+    },
+    {
+      "id": "jp-zh-Hant-missing",
+      "region": "jp",
+      "ui_language": "zh-TW",
+      "text_language": "zh-Hant",
+      "quality": "missing",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:missing:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": null,
+        "basis": null,
+        "missing": true,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "合成の和文甲😀。"
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "jp-zh-Hant-low_confidence",
+      "region": "jp",
+      "ui_language": "zh-TW",
+      "text_language": "zh-Hant",
+      "quality": "low_confidence",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": "合成繁中效果丙😀。",
+        "basis": "own_source",
+        "missing": false,
+        "low_confidence": true,
+        "proofreading": true,
+        "displayed": [
+          "合成の和文甲😀。",
+          "合成繁中效果丙😀。"
+        ],
+        "origin": "machine",
+        "authority": "unofficial"
+      }
+    },
+    {
+      "id": "en-zh-Hant-available",
+      "region": "en",
+      "ui_language": "zh-TW",
+      "text_language": "zh-Hant",
+      "quality": "available",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:available:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": "合成繁中效果丙😀。",
+        "basis": "jp_source",
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "Synthetic English body B😀.",
+          "合成繁中效果丙😀。"
+        ],
+        "origin": "machine",
+        "authority": "unofficial"
+      }
+    },
+    {
+      "id": "en-zh-Hant-missing",
+      "region": "en",
+      "ui_language": "zh-TW",
+      "text_language": "zh-Hant",
+      "quality": "missing",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:missing:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": null,
+        "basis": null,
+        "missing": true,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "Synthetic English body B😀."
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "en-zh-Hant-low_confidence",
+      "region": "en",
+      "ui_language": "zh-TW",
+      "text_language": "zh-Hant",
+      "quality": "low_confidence",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": "合成繁中效果丙😀。",
+        "basis": "jp_source",
+        "missing": false,
+        "low_confidence": true,
+        "proofreading": true,
+        "displayed": [
+          "Synthetic English body B😀.",
+          "合成繁中效果丙😀。"
+        ],
+        "origin": "machine",
+        "authority": "unofficial"
+      }
+    },
+    {
+      "id": "jp-ja-available",
+      "region": "jp",
+      "ui_language": "ja",
+      "text_language": "ja",
+      "quality": "available",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:available:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": null,
+        "basis": null,
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "合成の和文甲😀。"
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "jp-ja-missing",
+      "region": "jp",
+      "ui_language": "ja",
+      "text_language": "ja",
+      "quality": "missing",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:missing:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": null,
+        "basis": null,
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "合成の和文甲😀。"
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "jp-ja-low_confidence",
+      "region": "jp",
+      "ui_language": "ja",
+      "text_language": "ja",
+      "quality": "low_confidence",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": null,
+        "basis": null,
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "合成の和文甲😀。"
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "en-en-available",
+      "region": "en",
+      "ui_language": "en",
+      "text_language": "en",
+      "quality": "available",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:available:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": null,
+        "basis": null,
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "Synthetic English body B😀."
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "en-en-missing",
+      "region": "en",
+      "ui_language": "en",
+      "text_language": "en",
+      "quality": "missing",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:missing:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": null,
+        "basis": null,
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "Synthetic English body B😀."
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "en-en-low_confidence",
+      "region": "en",
+      "ui_language": "en",
+      "text_language": "en",
+      "quality": "low_confidence",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": null,
+        "basis": null,
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "Synthetic English body B😀."
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "jp-en-available",
+      "region": "jp",
+      "ui_language": "en",
+      "text_language": "en",
+      "quality": "available",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:available:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": "Synthetic official counterpart E😀.",
+        "basis": "official_counterpart",
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "合成の和文甲😀。",
+          "Synthetic official counterpart E😀."
+        ],
+        "origin": "official",
+        "authority": "sve_official"
+      }
+    },
+    {
+      "id": "jp-en-missing",
+      "region": "jp",
+      "ui_language": "en",
+      "text_language": "en",
+      "quality": "missing",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:no_counterpart:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": null,
+        "basis": null,
+        "missing": true,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "合成の和文甲😀。"
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "jp-en-low_confidence",
+      "region": "jp",
+      "ui_language": "en",
+      "text_language": "en",
+      "quality": "low_confidence",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "合成の和文甲😀。",
+        "translated": "Synthetic official counterpart E😀.",
+        "basis": "official_counterpart",
+        "missing": false,
+        "low_confidence": true,
+        "proofreading": true,
+        "displayed": [
+          "合成の和文甲😀。",
+          "Synthetic official counterpart E😀."
+        ],
+        "origin": "official",
+        "authority": "sve_official"
+      }
+    },
+    {
+      "id": "en-ja-available",
+      "region": "en",
+      "ui_language": "ja",
+      "text_language": "ja",
+      "quality": "available",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:available:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": "対照用の和文丁😀。",
+        "basis": "official_counterpart",
+        "missing": false,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "Synthetic English body B😀.",
+          "対照用の和文丁😀。"
+        ],
+        "origin": "official",
+        "authority": "sve_official"
+      }
+    },
+    {
+      "id": "en-ja-missing",
+      "region": "en",
+      "ui_language": "ja",
+      "text_language": "ja",
+      "quality": "missing",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:no_counterpart:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": null,
+        "basis": null,
+        "missing": true,
+        "low_confidence": false,
+        "proofreading": false,
+        "displayed": [
+          "Synthetic English body B😀."
+        ],
+        "origin": null,
+        "authority": null
+      }
+    },
+    {
+      "id": "en-ja-low_confidence",
+      "region": "en",
+      "ui_language": "ja",
+      "text_language": "ja",
+      "quality": "low_confidence",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "expected": {
+        "original": "Synthetic English body B😀.",
+        "translated": "対照用の和文丁😀。",
+        "basis": "official_counterpart",
+        "missing": false,
+        "low_confidence": true,
+        "proofreading": true,
+        "displayed": [
+          "Synthetic English body B😀.",
+          "対照用の和文丁😀。"
+        ],
+        "origin": "official",
+        "authority": "sve_official"
+      }
+    }
+  ],
+  "invalid_cases": [
+    {
+      "id": "jp-en-low-confidence-invalid-authority",
+      "region": "jp",
+      "text_language": "en",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "translation_id": "matrix-translation:low_confidence:counterpart-en",
+      "field": "authority",
+      "value": "unofficial",
+      "python_reason": "basis"
+    },
+    {
+      "id": "jp-en-low-confidence-invalid-origin",
+      "region": "jp",
+      "text_language": "en",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:jp"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "translation_id": "matrix-translation:low_confidence:counterpart-en",
+      "field": "origin",
+      "value": "machine",
+      "python_reason": "basis"
+    },
+    {
+      "id": "en-ja-low-confidence-invalid-authority",
+      "region": "en",
+      "text_language": "ja",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "translation_id": "matrix-translation:low_confidence:counterpart-ja",
+      "field": "authority",
+      "value": "unofficial",
+      "python_reason": "basis"
+    },
+    {
+      "id": "en-ja-low-confidence-invalid-origin",
+      "region": "en",
+      "text_language": "ja",
+      "receiver": {
+        "owner": {
+          "kind": "face_revision",
+          "id": "matrix-revision:low_confidence:en"
+        },
+        "field": "effect",
+        "ordinal": null
+      },
+      "translation_id": "matrix-translation:low_confidence:counterpart-ja",
+      "field": "origin",
+      "value": "machine",
+      "python_reason": "basis"
+    }
+  ],
+  "snapshot": {
+    "manifest": {
+      "coverage": {
+        "mechanics": [
+          {
+            "any_annotated_cards": 0,
+            "by_keyword": [],
+            "eligibility": "all_non_retired_cards_in_region",
+            "fully_annotated_cards": 0,
+            "region": "en",
+            "scope": "en_override",
+            "total_cards": 4,
+            "unknown_cards": 4
+          },
+          {
+            "any_annotated_cards": 0,
+            "by_keyword": [],
+            "eligibility": "all_non_retired_cards_in_region",
+            "fully_annotated_cards": 0,
+            "region": "jp",
+            "scope": "shared",
+            "total_cards": 4,
+            "unknown_cards": 4
+          }
+        ],
+        "reviews": [],
+        "translations": []
+      },
+      "engine_support_target": {
+        "engine_build_hash": null,
+        "engine_version": null,
+        "validation_policy_id": null
+      },
+      "errata_card_ids": [],
+      "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "qa_card_ids": [],
+      "restriction_coverage": [],
+      "source_windows": [],
+      "format_version": "4.0.0",
+      "data_version": "preview-20261018T120000Z-0001",
+      "published_at": "2026-10-18T12:00:00Z",
+      "data_as_of": "2026-10-18",
+      "regions": [
+        "en",
+        "jp"
+      ],
+      "languages": [
+        "en",
+        "ja",
+        "zh-Hant"
+      ],
+      "min_reader_version": "4.0.0",
+      "required_capabilities": [
+        "column-partition-v1",
+        "digital-same-name-links-v1",
+        "fragment-container-v1",
+        "image-entity-buckets-v1",
+        "image-id-url-v1",
+        "jp-source-translation-v1",
+        "public-annotation-v1",
+        "rules-name-on-demand-v1"
+      ],
+      "files": [
+        {
+          "path": "snapshots/blobs/8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913.json",
+          "sha256": "sha256:8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913",
+          "bytes": 6528,
+          "key": "catalog/en/family-BP02/0",
+          "role": "bootstrap",
+          "purpose": "catalog",
+          "region": "en",
+          "segment": "family-BP02",
+          "row_counts": [
+            [
+              "card",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "face",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "face_revision",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "printing",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "bootstrap",
+              "family-BP02",
+              1
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f.json",
+          "sha256": "sha256:00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f",
+          "bytes": 6504,
+          "key": "catalog/jp/family-BP02/0",
+          "role": "bootstrap",
+          "purpose": "catalog",
+          "region": "jp",
+          "segment": "family-BP02",
+          "row_counts": [
+            [
+              "card",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "face",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "face_revision",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "printing",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02",
+              4
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "bootstrap",
+              "family-BP02",
+              1
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8.json",
+          "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8",
+          "bytes": 1243,
+          "key": "catalog/shared/shared/0",
+          "role": "bootstrap",
+          "purpose": "catalog",
+          "region": null,
+          "segment": "shared",
+          "row_counts": [
+            [
+              "product_family",
+              "global",
+              null,
+              "bootstrap",
+              "shared",
+              1
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "bootstrap",
+              "shared",
+              4
+            ],
+            [
+              "vocabulary",
+              "global",
+              null,
+              "bootstrap",
+              "shared",
+              3
+            ]
+          ],
+          "dependencies": [],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/117d238650eff67674101cacf74fd99a4d1289fb46625ad0696cb7cad43eb6a3.json",
+          "sha256": "sha256:117d238650eff67674101cacf74fd99a4d1289fb46625ad0696cb7cad43eb6a3",
+          "bytes": 1288,
+          "key": "config",
+          "role": "config",
+          "purpose": "config",
+          "region": null,
+          "segment": "shared",
+          "row_counts": [],
+          "dependencies": [],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/1ff4ff5aecd2da80fba22e61ab30058e2fca6b93a7107fa5d0ff0adf7d4cc6f4.json",
+          "sha256": "sha256:1ff4ff5aecd2da80fba22e61ab30058e2fca6b93a7107fa5d0ff0adf7d4cc6f4",
+          "bytes": 3236,
+          "key": "detail/en/family-BP02/0",
+          "role": "text",
+          "purpose": "detail",
+          "region": "en",
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "face_revision",
+              "home_set",
+              "BP02",
+              "detail",
+              "catalog:family-BP02",
+              4
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              2
+            ],
+            [
+              "translation",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              2
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/en/family-BP02/0",
+              "sha256": "sha256:8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913"
+            },
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            },
+            {
+              "key": "translation/shared/family-BP02/0",
+              "sha256": "sha256:e8f17e7494ddde64ed24c1d53feac6c4e421656285388e3484d1ee383bde2d78"
+            }
+          ],
+          "source_refs": [
+            {
+              "key": "catalog/en/family-BP02/0",
+              "sha256": "sha256:8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913"
+            },
+            {
+              "key": "catalog/jp/family-BP02/0",
+              "sha256": "sha256:00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f"
+            },
+            {
+              "key": "detail/en/family-BP02/0",
+              "sha256": "sha256:1ff4ff5aecd2da80fba22e61ab30058e2fca6b93a7107fa5d0ff0adf7d4cc6f4"
+            },
+            {
+              "key": "detail/jp/family-BP02/0",
+              "sha256": "sha256:df0d5bf7a0eac5c33aaf414ae5a92b99b4cd040c669f91628b3f0e39b3937fcb"
+            },
+            {
+              "key": "history/jp/family-BP02/0",
+              "sha256": "sha256:326c0c5f8b432bc78e5cdc317f69f85af6552a23d607c84155338d9f1449649d"
+            }
+          ],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/df0d5bf7a0eac5c33aaf414ae5a92b99b4cd040c669f91628b3f0e39b3937fcb.json",
+          "sha256": "sha256:df0d5bf7a0eac5c33aaf414ae5a92b99b4cd040c669f91628b3f0e39b3937fcb",
+          "bytes": 3185,
+          "key": "detail/jp/family-BP02/0",
+          "role": "text",
+          "purpose": "detail",
+          "region": "jp",
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "face_revision",
+              "home_set",
+              "BP02",
+              "detail",
+              "catalog:family-BP02",
+              4
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              1
+            ],
+            [
+              "translation",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              2
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/jp/family-BP02/0",
+              "sha256": "sha256:00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f"
+            },
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            },
+            {
+              "key": "translation/shared/family-BP02/0",
+              "sha256": "sha256:e8f17e7494ddde64ed24c1d53feac6c4e421656285388e3484d1ee383bde2d78"
+            }
+          ],
+          "source_refs": [
+            {
+              "key": "catalog/en/family-BP02/0",
+              "sha256": "sha256:8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913"
+            },
+            {
+              "key": "catalog/jp/family-BP02/0",
+              "sha256": "sha256:00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f"
+            },
+            {
+              "key": "detail/jp/family-BP02/0",
+              "sha256": "sha256:df0d5bf7a0eac5c33aaf414ae5a92b99b4cd040c669f91628b3f0e39b3937fcb"
+            },
+            {
+              "key": "history/en/family-BP02/0",
+              "sha256": "sha256:6dd22b596c1cf0321ade249a131efbde1cd094a0a011565918923f4cb3e2fb82"
+            }
+          ],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/d1f1a7ab113c34e9f030e3438373dc577db65ff675530493f562eb5d0fae061e.json",
+          "sha256": "sha256:d1f1a7ab113c34e9f030e3438373dc577db65ff675530493f562eb5d0fae061e",
+          "bytes": 1530,
+          "key": "engine/shared/family-BP02/0",
+          "role": "text",
+          "purpose": "engine",
+          "region": null,
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "card_engine_support",
+              "home_set",
+              "BP02",
+              "bootstrap",
+              "family-BP02:band-0",
+              4
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/6dd22b596c1cf0321ade249a131efbde1cd094a0a011565918923f4cb3e2fb82.json",
+          "sha256": "sha256:6dd22b596c1cf0321ade249a131efbde1cd094a0a011565918923f4cb3e2fb82",
+          "bytes": 2191,
+          "key": "history/en/family-BP02/0",
+          "role": "text",
+          "purpose": "history",
+          "region": "en",
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "face_revision",
+              "home_set",
+              "BP02",
+              "history",
+              "family-BP02:band-0",
+              4
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              2
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/326c0c5f8b432bc78e5cdc317f69f85af6552a23d607c84155338d9f1449649d.json",
+          "sha256": "sha256:326c0c5f8b432bc78e5cdc317f69f85af6552a23d607c84155338d9f1449649d",
+          "bytes": 2166,
+          "key": "history/jp/family-BP02/0",
+          "role": "text",
+          "purpose": "history",
+          "region": "jp",
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "face_revision",
+              "home_set",
+              "BP02",
+              "history",
+              "family-BP02:band-0",
+              4
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              2
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/27e0db0e533357b0e7b135385c7a35df8651126e844989a654ed3cd892edcddc.json",
+          "sha256": "sha256:27e0db0e533357b0e7b135385c7a35df8651126e844989a654ed3cd892edcddc",
+          "bytes": 2729,
+          "key": "print-detail/en/family-BP02/0",
+          "role": "text",
+          "purpose": "print-detail",
+          "region": "en",
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "printing",
+              "home_set",
+              "BP02",
+              "detail",
+              "catalog:family-BP02",
+              4
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/en/family-BP02/0",
+              "sha256": "sha256:8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913"
+            },
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/5f95872747082ed83f0fa32a9a12f21b679b83e9acf4c3b4e8ae3d8c28d4520a.json",
+          "sha256": "sha256:5f95872747082ed83f0fa32a9a12f21b679b83e9acf4c3b4e8ae3d8c28d4520a",
+          "bytes": 2729,
+          "key": "print-detail/jp/family-BP02/0",
+          "role": "text",
+          "purpose": "print-detail",
+          "region": "jp",
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "printing",
+              "home_set",
+              "BP02",
+              "detail",
+              "catalog:family-BP02",
+              4
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/jp/family-BP02/0",
+              "sha256": "sha256:00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f"
+            },
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921.json",
+          "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
+          "bytes": 39,
+          "key": "programs",
+          "role": "programs",
+          "purpose": "programs",
+          "region": null,
+          "segment": "shared",
+          "row_counts": [],
+          "dependencies": [],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        },
+        {
+          "path": "snapshots/blobs/e8f17e7494ddde64ed24c1d53feac6c4e421656285388e3484d1ee383bde2d78.json",
+          "sha256": "sha256:e8f17e7494ddde64ed24c1d53feac6c4e421656285388e3484d1ee383bde2d78",
+          "bytes": 748,
+          "key": "translation/shared/family-BP02/0",
+          "role": "text",
+          "purpose": "translation",
+          "region": null,
+          "segment": "family-BP02:band-0",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              2
+            ],
+            [
+              "translation",
+              "global",
+              null,
+              "detail",
+              "family-BP02:band-0",
+              3
+            ]
+          ],
+          "dependencies": [
+            {
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:45fe76e27a8527dc51f83828929b2505a3ea9378fac0fbec4ec3097322f277d8"
+            }
+          ],
+          "source_refs": [],
+          "compressed_bytes": {
+            "br": null
+          }
+        }
+      ],
+      "config_ref": {
+        "key": "config",
+        "sha256": "sha256:117d238650eff67674101cacf74fd99a4d1289fb46625ad0696cb7cad43eb6a3"
+      },
+      "partitioning": {
+        "algorithm": "sha256-mod-v1",
+        "bucket_count": 64
+      },
+      "changes_ref": null
+    },
+    "payloads": {
+      "config": {
+        "catalog_feedback_url": "https://example.invalid/feedback",
+        "deck_eligibility_policy": "regional_decklog",
+        "digital_endpoints": [
+          {
+            "card_url_template": "https://shadowverse-portal.com/card/{official_id}?lang={provider_lang}",
+            "game": "sv1",
+            "language_map": {
+              "en": "en",
+              "ja": "ja",
+              "zh-Hant": "zh-tw"
+            },
+            "refresh_policy": "frozen",
+            "status": "unknown"
+          },
+          {
+            "card_url_template": "https://shadowverse-wb.com/{provider_lang}/deck/cardslist/card/?card_id={official_id}",
+            "game": "svwb",
+            "language_map": {
+              "en": "en",
+              "ja": "ja",
+              "zh-Hant": "cht"
+            },
+            "refresh_policy": "on_sve_release",
+            "status": "unknown"
+          }
+        ],
+        "format_version": "4.0.0",
+        "image_sizes": [
+          {
+            "key": "art_m",
+            "max_height": 288,
+            "max_width": 384,
+            "purpose": "art"
+          },
+          {
+            "key": "art_s",
+            "max_height": 120,
+            "max_width": 160,
+            "purpose": "art"
+          },
+          {
+            "key": "card_l",
+            "max_height": 641,
+            "max_width": 459,
+            "purpose": "card"
+          },
+          {
+            "key": "card_m",
+            "max_height": 447,
+            "max_width": 320,
+            "purpose": "card"
+          },
+          {
+            "key": "card_s",
+            "max_height": 179,
+            "max_width": 128,
+            "purpose": "card"
+          }
+        ],
+        "languages": [
+          {
+            "code": "en",
+            "display_name": "English",
+            "fallback_order": []
+          },
+          {
+            "code": "ja",
+            "display_name": "Japanese",
+            "fallback_order": []
+          },
+          {
+            "code": "zh-Hant",
+            "display_name": "繁體中文",
+            "fallback_order": [
+              "ja",
+              "en"
+            ]
+          }
+        ],
+        "search": {
+          "grammar_version": "synthetic-v1",
+          "normalizer_version": "synthetic-v1"
+        },
+        "shop_links": [],
+        "third_party_image_policy": "mirror_reviewed"
+      },
+      "programs": {
+        "entries": [],
+        "format_version": "4.0.0"
+      },
+      "catalog/shared/shared/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "product_family": [
+            [
+              [
+                "global",
+                null
+              ],
+              "bootstrap",
+              "shared",
+              null,
+              [
+                [
+                  "BP02",
+                  "bp02",
+                  "BP02",
+                  "booster",
+                  "t:ja:3a4c6bff89dc42fa",
+                  []
+                ]
+              ]
+            ]
+          ],
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "bootstrap",
+              "shared",
+              null,
+              [
+                [
+                  "t:en:9d949fae9fc7f0ed",
+                  "en",
+                  "Follower"
+                ],
+                [
+                  "t:en:dbabdeb497b4efaa",
+                  "en",
+                  "Runecraft"
+                ],
+                [
+                  "t:en:e181bc015be0fe01",
+                  "en",
+                  "Mage"
+                ],
+                [
+                  "t:ja:3a4c6bff89dc42fa",
+                  "ja",
+                  "Synthetic family"
+                ]
+              ]
+            ]
+          ],
+          "vocabulary": [
+            [
+              [
+                "global",
+                null
+              ],
+              "bootstrap",
+              "shared",
+              null,
+              [
+                [
+                  "class",
+                  "runecraft",
+                  "t:en:dbabdeb497b4efaa",
+                  true,
+                  []
+                ],
+                [
+                  "trait",
+                  "mage",
+                  "t:en:e181bc015be0fe01",
+                  true,
+                  []
+                ],
+                [
+                  "type",
+                  "follower",
+                  "t:en:9d949fae9fc7f0ed",
+                  true,
+                  []
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "translation/shared/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "t:ja:7cbc4d575bf2e76c",
+                  "ja",
+                  "合成の和文甲😀。"
+                ],
+                [
+                  "t:zh-Hant:ed1afa073589a867",
+                  "zh-Hant",
+                  "合成繁中效果丙😀。"
+                ]
+              ]
+            ]
+          ],
+          "translation": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "matrix-translation:available:zh",
+                  "t:ja:7cbc4d575bf2e76c",
+                  "zh-Hant",
+                  "t:zh-Hant:ed1afa073589a867",
+                  "machine",
+                  "unofficial",
+                  false,
+                  null,
+                  "none"
+                ],
+                [
+                  "matrix-translation:low_confidence:zh",
+                  "t:ja:7cbc4d575bf2e76c",
+                  "zh-Hant",
+                  "t:zh-Hant:ed1afa073589a867",
+                  "machine",
+                  "unofficial",
+                  true,
+                  null,
+                  "none"
+                ],
+                [
+                  "matrix-translation:no_counterpart:zh",
+                  "t:ja:7cbc4d575bf2e76c",
+                  "zh-Hant",
+                  "t:zh-Hant:ed1afa073589a867",
+                  "machine",
+                  "unofficial",
+                  false,
+                  null,
+                  "none"
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {}
+      },
+      "catalog/en/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "card": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-card:available",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:available"
+                  ],
+                  [
+                    [
+                      "en",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:available:en",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:low_confidence",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:low_confidence"
+                  ],
+                  [
+                    [
+                      "en",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:low_confidence:en",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:missing",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:missing"
+                  ],
+                  [
+                    [
+                      "en",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:missing:en",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:no_counterpart",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:no_counterpart"
+                  ],
+                  [
+                    [
+                      "en",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:no_counterpart:en",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          "face": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-face:available",
+                  "matrix-card:available",
+                  0,
+                  "front",
+                  [
+                    [
+                      "en",
+                      "matrix-revision:available:en",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "matrix-face:low_confidence",
+                  "matrix-card:low_confidence",
+                  0,
+                  "front",
+                  [
+                    [
+                      "en",
+                      "matrix-revision:low_confidence:en",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "matrix-face:missing",
+                  "matrix-card:missing",
+                  0,
+                  "front",
+                  [
+                    [
+                      "en",
+                      "matrix-revision:missing:en",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "matrix-face:no_counterpart",
+                  "matrix-card:no_counterpart",
+                  0,
+                  "front",
+                  [
+                    [
+                      "en",
+                      "matrix-revision:no_counterpart:en",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ]
+              ]
+            ]
+          ],
+          "face_revision": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-revision:available:en",
+                  "matrix-face:available",
+                  "en",
+                  "t:en:dcd1d5223f73b3a9",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:low_confidence:en",
+                  "matrix-face:low_confidence",
+                  "en",
+                  "t:en:dcd1d5223f73b3a9",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:missing:en",
+                  "matrix-face:missing",
+                  "en",
+                  "t:en:dcd1d5223f73b3a9",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:no_counterpart:en",
+                  "matrix-face:no_counterpart",
+                  "en",
+                  "t:en:dcd1d5223f73b3a9",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  null
+                ]
+              ]
+            ]
+          ],
+          "printing": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-printing:available:en",
+                  "matrix-card:available",
+                  "en",
+                  "SYNTH-001EN",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90001,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:available",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ],
+                [
+                  "matrix-printing:low_confidence:en",
+                  "matrix-card:low_confidence",
+                  "en",
+                  "SYNTH-003EN",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90005,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:low_confidence",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ],
+                [
+                  "matrix-printing:missing:en",
+                  "matrix-card:missing",
+                  "en",
+                  "SYNTH-002EN",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90003,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:missing",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ],
+                [
+                  "matrix-printing:no_counterpart:en",
+                  "matrix-card:no_counterpart",
+                  "en",
+                  "SYNTH-004EN",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90007,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:no_counterpart",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ]
+              ]
+            ]
+          ],
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "t:en:dcd1d5223f73b3a9",
+                  "en",
+                  "Name"
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "CommonName": {
+            "columns": [
+              "name_unit_id",
+              "translations"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "array": {
+                  "ref": "CommonNameTranslation"
+                }
+              }
+            ]
+          },
+          "CommonNameTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              }
+            ]
+          },
+          "Current": {
+            "columns": [
+              "region",
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "dated_effective",
+                  "latest_observed_no_errata",
+                  "latest_adopted_wording",
+                  "reviewed_override",
+                  "latest_known_release"
+                ]
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PrintingFaceBootstrap": {
+            "columns": [
+              "face_id",
+              "art_id",
+              "frame_code",
+              "signed",
+              "embellishment_state",
+              "stamps"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Bool"
+                }
+              },
+              {
+                "enum": [
+                  "unreviewed",
+                  "sampled",
+                  "confirmed"
+                ]
+              },
+              {
+                "array": {
+                  "ref": "PrintingStamp"
+                }
+              }
+            ]
+          },
+          "PrintingStamp": {
+            "columns": [
+              "stamp_id",
+              "position",
+              "color"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "RegionView": {
+            "columns": [
+              "region",
+              "release_state",
+              "mapping_state",
+              "availability_override_as_of",
+              "mapping_as_of",
+              "mapping_scope",
+              "default_printing_id",
+              "default_method",
+              "deck_role",
+              "debut_product_ids",
+              "debut_state"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "released",
+                  "unknown",
+                  "announced",
+                  "not_released_confirmed"
+                ]
+              },
+              {
+                "enum": [
+                  "unmapped",
+                  "pending",
+                  "confirmed",
+                  "confirmed_none"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "override",
+                    "fallback",
+                    "lowest_rarity",
+                    "candidate_lowest_rarity"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "main",
+                    "evolve",
+                    "leader",
+                    "extra"
+                  ]
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "known",
+                  "unknown"
+                ]
+              }
+            ]
+          },
+          "WordingCandidate": {
+            "columns": [
+              "printing_id",
+              "revision_id"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "WordingDisplay": {
+            "columns": [
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "current",
+                  "latest_known_release",
+                  "candidates"
+                ]
+              }
+            ]
+          },
+          "WordingView": {
+            "columns": [
+              "region",
+              "state",
+              "display",
+              "candidates",
+              "undated_printing_ids",
+              "common_name",
+              "classification",
+              "method",
+              "reason",
+              "basis_printing_id",
+              "basis_released_on"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "pending"
+                ]
+              },
+              {
+                "ref": "WordingDisplay"
+              },
+              {
+                "array": {
+                  "ref": "WordingCandidate"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "ref": "CommonName"
+                }
+              },
+              {
+                "enum": [
+                  "same_effect",
+                  "pending_review",
+                  "errata",
+                  "unresolved"
+                ]
+              },
+              {
+                "enum": [
+                  "mechanical",
+                  "ai",
+                  "manual",
+                  "none"
+                ]
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "catalog/jp/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "card": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-card:available",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:available"
+                  ],
+                  [
+                    [
+                      "jp",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:available:jp",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:low_confidence",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:low_confidence"
+                  ],
+                  [
+                    [
+                      "jp",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:low_confidence:jp",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:missing",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:missing"
+                  ],
+                  [
+                    [
+                      "jp",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:missing:jp",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:no_counterpart",
+                  "single",
+                  "confirmed",
+                  "BP02",
+                  [
+                    "matrix-face:no_counterpart"
+                  ],
+                  [
+                    [
+                      "jp",
+                      "released",
+                      "confirmed",
+                      null,
+                      null,
+                      null,
+                      "matrix-printing:no_counterpart:jp",
+                      "fallback",
+                      "main",
+                      [],
+                      "unknown"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          "face": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-face:available",
+                  "matrix-card:available",
+                  0,
+                  "front",
+                  [
+                    [
+                      "jp",
+                      "matrix-revision:available:jp",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "matrix-face:low_confidence",
+                  "matrix-card:low_confidence",
+                  0,
+                  "front",
+                  [
+                    [
+                      "jp",
+                      "matrix-revision:low_confidence:jp",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "matrix-face:missing",
+                  "matrix-card:missing",
+                  0,
+                  "front",
+                  [
+                    [
+                      "jp",
+                      "matrix-revision:missing:jp",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "matrix-face:no_counterpart",
+                  "matrix-card:no_counterpart",
+                  0,
+                  "front",
+                  [
+                    [
+                      "jp",
+                      "matrix-revision:no_counterpart:jp",
+                      "latest_observed_no_errata"
+                    ]
+                  ],
+                  []
+                ]
+              ]
+            ]
+          ],
+          "face_revision": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-revision:available:jp",
+                  "matrix-face:available",
+                  "jp",
+                  "t:ja:b45116c27d7e0724",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:low_confidence:jp",
+                  "matrix-face:low_confidence",
+                  "jp",
+                  "t:ja:b45116c27d7e0724",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:missing:jp",
+                  "matrix-face:missing",
+                  "jp",
+                  "t:ja:b45116c27d7e0724",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:no_counterpart:jp",
+                  "matrix-face:no_counterpart",
+                  "jp",
+                  "t:ja:b45116c27d7e0724",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ]
+              ]
+            ]
+          ],
+          "printing": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "matrix-printing:available:jp",
+                  "matrix-card:available",
+                  "jp",
+                  "SYNTH-001",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90000,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:available",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ],
+                [
+                  "matrix-printing:low_confidence:jp",
+                  "matrix-card:low_confidence",
+                  "jp",
+                  "SYNTH-003",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90004,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:low_confidence",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ],
+                [
+                  "matrix-printing:missing:jp",
+                  "matrix-card:missing",
+                  "jp",
+                  "SYNTH-002",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90002,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:missing",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ],
+                [
+                  "matrix-printing:no_counterpart:jp",
+                  "matrix-card:no_counterpart",
+                  "jp",
+                  "SYNTH-004",
+                  "official",
+                  "official",
+                  null,
+                  "confirmed",
+                  [],
+                  "standard",
+                  null,
+                  null,
+                  "LG",
+                  null,
+                  null,
+                  90006,
+                  false,
+                  "unverified",
+                  null,
+                  null,
+                  [
+                    [
+                      "matrix-face:no_counterpart",
+                      null,
+                      null,
+                      null,
+                      "unreviewed",
+                      []
+                    ]
+                  ],
+                  null
+                ]
+              ]
+            ]
+          ],
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "bootstrap",
+              "family-BP02",
+              null,
+              [
+                [
+                  "t:ja:b45116c27d7e0724",
+                  "ja",
+                  "数値仮名"
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "CommonName": {
+            "columns": [
+              "name_unit_id",
+              "translations"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "array": {
+                  "ref": "CommonNameTranslation"
+                }
+              }
+            ]
+          },
+          "CommonNameTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              }
+            ]
+          },
+          "Current": {
+            "columns": [
+              "region",
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "dated_effective",
+                  "latest_observed_no_errata",
+                  "latest_adopted_wording",
+                  "reviewed_override",
+                  "latest_known_release"
+                ]
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PrintingFaceBootstrap": {
+            "columns": [
+              "face_id",
+              "art_id",
+              "frame_code",
+              "signed",
+              "embellishment_state",
+              "stamps"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Bool"
+                }
+              },
+              {
+                "enum": [
+                  "unreviewed",
+                  "sampled",
+                  "confirmed"
+                ]
+              },
+              {
+                "array": {
+                  "ref": "PrintingStamp"
+                }
+              }
+            ]
+          },
+          "PrintingStamp": {
+            "columns": [
+              "stamp_id",
+              "position",
+              "color"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "RegionView": {
+            "columns": [
+              "region",
+              "release_state",
+              "mapping_state",
+              "availability_override_as_of",
+              "mapping_as_of",
+              "mapping_scope",
+              "default_printing_id",
+              "default_method",
+              "deck_role",
+              "debut_product_ids",
+              "debut_state"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "released",
+                  "unknown",
+                  "announced",
+                  "not_released_confirmed"
+                ]
+              },
+              {
+                "enum": [
+                  "unmapped",
+                  "pending",
+                  "confirmed",
+                  "confirmed_none"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "override",
+                    "fallback",
+                    "lowest_rarity",
+                    "candidate_lowest_rarity"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "main",
+                    "evolve",
+                    "leader",
+                    "extra"
+                  ]
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "known",
+                  "unknown"
+                ]
+              }
+            ]
+          },
+          "WordingCandidate": {
+            "columns": [
+              "printing_id",
+              "revision_id"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "WordingDisplay": {
+            "columns": [
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "current",
+                  "latest_known_release",
+                  "candidates"
+                ]
+              }
+            ]
+          },
+          "WordingView": {
+            "columns": [
+              "region",
+              "state",
+              "display",
+              "candidates",
+              "undated_printing_ids",
+              "common_name",
+              "classification",
+              "method",
+              "reason",
+              "basis_printing_id",
+              "basis_released_on"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "pending"
+                ]
+              },
+              {
+                "ref": "WordingDisplay"
+              },
+              {
+                "array": {
+                  "ref": "WordingCandidate"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "ref": "CommonName"
+                }
+              },
+              {
+                "enum": [
+                  "same_effect",
+                  "pending_review",
+                  "errata",
+                  "unresolved"
+                ]
+              },
+              {
+                "enum": [
+                  "mechanical",
+                  "ai",
+                  "manual",
+                  "none"
+                ]
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "detail/en/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "face_revision": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "detail",
+              "catalog:family-BP02",
+              {
+                "file": {
+                  "key": "catalog/en/family-BP02/0",
+                  "sha256": "sha256:8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913"
+                },
+                "owner": {
+                  "id": "BP02",
+                  "kind": "home_set"
+                },
+                "partition": "bootstrap",
+                "segment": "family-BP02",
+                "table": "face_revision"
+              },
+              [
+                [
+                  0,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:ccab756b6a84c2a0",
+                  [],
+                  [
+                    [
+                      "effect",
+                      null,
+                      "ja",
+                      "matrix-translation:available:counterpart-ja",
+                      "official_counterpart",
+                      [
+                        {
+                          "id": "matrix-revision:available:en",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      [
+                        {
+                          "id": "matrix-revision:available:jp-donor",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ]
+                    ],
+                    [
+                      "effect",
+                      null,
+                      "zh-Hant",
+                      "matrix-translation:available:zh",
+                      "jp_source",
+                      [
+                        {
+                          "id": "matrix-revision:available:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      null
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  1,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:ccab756b6a84c2a0",
+                  [],
+                  [
+                    [
+                      "effect",
+                      null,
+                      "ja",
+                      "matrix-translation:low_confidence:counterpart-ja",
+                      "official_counterpart",
+                      [
+                        {
+                          "id": "matrix-revision:low_confidence:en",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      [
+                        {
+                          "id": "matrix-revision:low_confidence:jp-donor",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ]
+                    ],
+                    [
+                      "effect",
+                      null,
+                      "zh-Hant",
+                      "matrix-translation:low_confidence:zh",
+                      "jp_source",
+                      [
+                        {
+                          "id": "matrix-revision:low_confidence:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      null
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  2,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:ccab756b6a84c2a0",
+                  [],
+                  [],
+                  []
+                ],
+                [
+                  3,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:ccab756b6a84c2a0",
+                  [],
+                  [
+                    [
+                      "effect",
+                      null,
+                      "zh-Hant",
+                      "matrix-translation:no_counterpart:zh",
+                      "jp_source",
+                      [
+                        {
+                          "id": "matrix-revision:no_counterpart:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      null
+                    ]
+                  ],
+                  []
+                ]
+              ]
+            ]
+          ],
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "t:en:ccab756b6a84c2a0",
+                  "en",
+                  "Synthetic English body B😀."
+                ],
+                [
+                  "t:ja:c626012cb2732d28",
+                  "ja",
+                  "対照用の和文丁😀。"
+                ]
+              ]
+            ]
+          ],
+          "translation": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "matrix-translation:available:counterpart-ja",
+                  "t:en:ccab756b6a84c2a0",
+                  "ja",
+                  "t:ja:c626012cb2732d28",
+                  "official",
+                  "sve_official",
+                  false,
+                  null,
+                  "none"
+                ],
+                [
+                  "matrix-translation:low_confidence:counterpart-ja",
+                  "t:en:ccab756b6a84c2a0",
+                  "ja",
+                  "t:ja:c626012cb2732d28",
+                  "official",
+                  "sve_official",
+                  true,
+                  null,
+                  "none"
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "Correction": {
+            "columns": [
+              "field",
+              "corrected_from",
+              "is_corrected",
+              "reason",
+              "source_url"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "effect",
+                  "name",
+                  "card_type",
+                  "flavor",
+                  "cost",
+                  "attack",
+                  "defense",
+                  "traits",
+                  "titles",
+                  "special_kinds",
+                  "other"
+                ]
+              },
+              {
+                "json": "CorrectionValue"
+              },
+              {
+                "scalar": "Bool"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "URL"
+                }
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "Section": {
+            "columns": [
+              "ordinal",
+              "text_unit_id",
+              "kind"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "scalar": "Code"
+              }
+            ]
+          }
+        }
+      },
+      "detail/jp/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "face_revision": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "detail",
+              "catalog:family-BP02",
+              {
+                "file": {
+                  "key": "catalog/jp/family-BP02/0",
+                  "sha256": "sha256:00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f"
+                },
+                "owner": {
+                  "id": "BP02",
+                  "kind": "home_set"
+                },
+                "partition": "bootstrap",
+                "segment": "family-BP02",
+                "table": "face_revision"
+              },
+              [
+                [
+                  0,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:7cbc4d575bf2e76c",
+                  [],
+                  [
+                    [
+                      "effect",
+                      null,
+                      "en",
+                      "matrix-translation:available:counterpart-en",
+                      "official_counterpart",
+                      [
+                        {
+                          "id": "matrix-revision:available:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      [
+                        {
+                          "id": "matrix-revision:available:en-donor",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ]
+                    ],
+                    [
+                      "effect",
+                      null,
+                      "zh-Hant",
+                      "matrix-translation:available:zh",
+                      "own_source",
+                      [
+                        {
+                          "id": "matrix-revision:available:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      null
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  1,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:7cbc4d575bf2e76c",
+                  [],
+                  [
+                    [
+                      "effect",
+                      null,
+                      "en",
+                      "matrix-translation:low_confidence:counterpart-en",
+                      "official_counterpart",
+                      [
+                        {
+                          "id": "matrix-revision:low_confidence:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      [
+                        {
+                          "id": "matrix-revision:low_confidence:en-donor",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ]
+                    ],
+                    [
+                      "effect",
+                      null,
+                      "zh-Hant",
+                      "matrix-translation:low_confidence:zh",
+                      "own_source",
+                      [
+                        {
+                          "id": "matrix-revision:low_confidence:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      null
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  2,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:7cbc4d575bf2e76c",
+                  [],
+                  [],
+                  []
+                ],
+                [
+                  3,
+                  1,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:7cbc4d575bf2e76c",
+                  [],
+                  [
+                    [
+                      "effect",
+                      null,
+                      "zh-Hant",
+                      "matrix-translation:no_counterpart:zh",
+                      "own_source",
+                      [
+                        {
+                          "id": "matrix-revision:no_counterpart:jp",
+                          "kind": "face_revision"
+                        },
+                        "effect",
+                        null
+                      ],
+                      null
+                    ]
+                  ],
+                  []
+                ]
+              ]
+            ]
+          ],
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "t:en:ab488ea11c7071d5",
+                  "en",
+                  "Synthetic official counterpart E😀."
+                ]
+              ]
+            ]
+          ],
+          "translation": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "matrix-translation:available:counterpart-en",
+                  "t:ja:7cbc4d575bf2e76c",
+                  "en",
+                  "t:en:ab488ea11c7071d5",
+                  "official",
+                  "sve_official",
+                  false,
+                  null,
+                  "none"
+                ],
+                [
+                  "matrix-translation:low_confidence:counterpart-en",
+                  "t:ja:7cbc4d575bf2e76c",
+                  "en",
+                  "t:en:ab488ea11c7071d5",
+                  "official",
+                  "sve_official",
+                  true,
+                  null,
+                  "none"
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "Correction": {
+            "columns": [
+              "field",
+              "corrected_from",
+              "is_corrected",
+              "reason",
+              "source_url"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "effect",
+                  "name",
+                  "card_type",
+                  "flavor",
+                  "cost",
+                  "attack",
+                  "defense",
+                  "traits",
+                  "titles",
+                  "special_kinds",
+                  "other"
+                ]
+              },
+              {
+                "json": "CorrectionValue"
+              },
+              {
+                "scalar": "Bool"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "URL"
+                }
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "Section": {
+            "columns": [
+              "ordinal",
+              "text_unit_id",
+              "kind"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "scalar": "Code"
+              }
+            ]
+          }
+        }
+      },
+      "engine/shared/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "card_engine_support": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "bootstrap",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "matrix-card:available",
+                  [
+                    "missing_dsl",
+                    null,
+                    null,
+                    null,
+                    "not_applicable",
+                    [
+                      "missing_dsl"
+                    ],
+                    null,
+                    null,
+                    []
+                  ],
+                  [],
+                  [
+                    [
+                      "en",
+                      [
+                        "region_text_unreviewed"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:low_confidence",
+                  [
+                    "missing_dsl",
+                    null,
+                    null,
+                    null,
+                    "not_applicable",
+                    [
+                      "missing_dsl"
+                    ],
+                    null,
+                    null,
+                    []
+                  ],
+                  [],
+                  [
+                    [
+                      "en",
+                      [
+                        "region_text_unreviewed"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:missing",
+                  [
+                    "missing_dsl",
+                    null,
+                    null,
+                    null,
+                    "not_applicable",
+                    [
+                      "missing_dsl"
+                    ],
+                    null,
+                    null,
+                    []
+                  ],
+                  [],
+                  [
+                    [
+                      "en",
+                      [
+                        "region_text_unreviewed"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "matrix-card:no_counterpart",
+                  [
+                    "missing_dsl",
+                    null,
+                    null,
+                    null,
+                    "not_applicable",
+                    [
+                      "missing_dsl"
+                    ],
+                    null,
+                    null,
+                    []
+                  ],
+                  [],
+                  [
+                    [
+                      "en",
+                      [
+                        "region_text_unreviewed"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "ProgramRef": {
+            "columns": [
+              "file_key",
+              "entry_id"
+            ],
+            "items": [
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "ID"
+              }
+            ]
+          },
+          "RegionBlock": {
+            "columns": [
+              "region",
+              "reasons"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              }
+            ]
+          },
+          "Support": {
+            "columns": [
+              "status",
+              "dsl_status",
+              "dsl_version",
+              "dsl_id",
+              "validation_state",
+              "reasons",
+              "reason_detail",
+              "program_ref",
+              "ruling_revision_ids"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "missing_dsl",
+                  "draft",
+                  "reviewed",
+                  "engine_passed",
+                  "load_rejected"
+                ]
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "draft",
+                    "reviewed",
+                    "verified",
+                    "disputed"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "fresh",
+                  "stale",
+                  "not_applicable"
+                ]
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "ref": "ProgramRef"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "SupportOverride": {
+            "columns": [
+              "region",
+              "support"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "ref": "Support"
+              }
+            ]
+          }
+        }
+      },
+      "history/en/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "face_revision": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "history",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "matrix-revision:available:en-donor",
+                  "matrix-face:available",
+                  "en",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:dcd1d5223f73b3a9",
+                  "t:en:ab488ea11c7071d5",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:low_confidence:en-donor",
+                  "matrix-face:low_confidence",
+                  "en",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:dcd1d5223f73b3a9",
+                  "t:en:ab488ea11c7071d5",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:missing:en-donor",
+                  "matrix-face:missing",
+                  "en",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:dcd1d5223f73b3a9",
+                  "t:en:ab488ea11c7071d5",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:no_counterpart:en-donor",
+                  "matrix-face:no_counterpart",
+                  "en",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:en:dcd1d5223f73b3a9",
+                  "t:en:ab488ea11c7071d5",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [
+                    "mage"
+                  ],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ]
+              ]
+            ]
+          ],
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "t:en:ab488ea11c7071d5",
+                  "en",
+                  "Synthetic official counterpart E😀."
+                ],
+                [
+                  "t:en:dcd1d5223f73b3a9",
+                  "en",
+                  "Name"
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "Correction": {
+            "columns": [
+              "field",
+              "corrected_from",
+              "is_corrected",
+              "reason",
+              "source_url"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "effect",
+                  "name",
+                  "card_type",
+                  "flavor",
+                  "cost",
+                  "attack",
+                  "defense",
+                  "traits",
+                  "titles",
+                  "special_kinds",
+                  "other"
+                ]
+              },
+              {
+                "json": "CorrectionValue"
+              },
+              {
+                "scalar": "Bool"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "URL"
+                }
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "Section": {
+            "columns": [
+              "ordinal",
+              "text_unit_id",
+              "kind"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "scalar": "Code"
+              }
+            ]
+          }
+        }
+      },
+      "history/jp/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "face_revision": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "history",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "matrix-revision:available:jp-donor",
+                  "matrix-face:available",
+                  "jp",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:b45116c27d7e0724",
+                  "t:ja:c626012cb2732d28",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:low_confidence:jp-donor",
+                  "matrix-face:low_confidence",
+                  "jp",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:b45116c27d7e0724",
+                  "t:ja:c626012cb2732d28",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:missing:jp-donor",
+                  "matrix-face:missing",
+                  "jp",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:b45116c27d7e0724",
+                  "t:ja:c626012cb2732d28",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ],
+                [
+                  "matrix-revision:no_counterpart:jp-donor",
+                  "matrix-face:no_counterpart",
+                  "jp",
+                  2,
+                  null,
+                  null,
+                  "unknown",
+                  "initial",
+                  "t:ja:b45116c27d7e0724",
+                  "t:ja:c626012cb2732d28",
+                  "runecraft",
+                  "follower",
+                  2,
+                  2,
+                  1,
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  null
+                ]
+              ]
+            ]
+          ],
+          "text_unit": [
+            [
+              [
+                "global",
+                null
+              ],
+              "detail",
+              "family-BP02:band-0",
+              null,
+              [
+                [
+                  "t:ja:b45116c27d7e0724",
+                  "ja",
+                  "数値仮名"
+                ],
+                [
+                  "t:ja:c626012cb2732d28",
+                  "ja",
+                  "対照用の和文丁😀。"
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "Correction": {
+            "columns": [
+              "field",
+              "corrected_from",
+              "is_corrected",
+              "reason",
+              "source_url"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "effect",
+                  "name",
+                  "card_type",
+                  "flavor",
+                  "cost",
+                  "attack",
+                  "defense",
+                  "traits",
+                  "titles",
+                  "special_kinds",
+                  "other"
+                ]
+              },
+              {
+                "json": "CorrectionValue"
+              },
+              {
+                "scalar": "Bool"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "URL"
+                }
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "Section": {
+            "columns": [
+              "ordinal",
+              "text_unit_id",
+              "kind"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "scalar": "Code"
+              }
+            ]
+          }
+        }
+      },
+      "print-detail/en/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "printing": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "detail",
+              "catalog:family-BP02",
+              {
+                "file": {
+                  "key": "catalog/en/family-BP02/0",
+                  "sha256": "sha256:8dab0654241c629ee8908f97d84011264d8b8a705689f805409993b61b462913"
+                },
+                "owner": {
+                  "id": "BP02",
+                  "kind": "home_set"
+                },
+                "partition": "bootstrap",
+                "segment": "family-BP02",
+                "table": "printing"
+              },
+              [
+                [
+                  0,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:available:en",
+                          "available",
+                          "https://example.invalid/matrix/available/en"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ],
+                [
+                  1,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:low_confidence:en",
+                          "available",
+                          "https://example.invalid/matrix/low_confidence/en"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ],
+                [
+                  2,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:missing:en",
+                          "available",
+                          "https://example.invalid/matrix/missing/en"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ],
+                [
+                  3,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:no_counterpart:en",
+                          "available",
+                          "https://example.invalid/matrix/no_counterpart/en"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "Correction": {
+            "columns": [
+              "field",
+              "corrected_from",
+              "is_corrected",
+              "reason",
+              "source_url"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "effect",
+                  "name",
+                  "card_type",
+                  "flavor",
+                  "cost",
+                  "attack",
+                  "defense",
+                  "traits",
+                  "titles",
+                  "special_kinds",
+                  "other"
+                ]
+              },
+              {
+                "json": "CorrectionValue"
+              },
+              {
+                "scalar": "Bool"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "URL"
+                }
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "ObservedText": {
+            "columns": [
+              "revision_id",
+              "state",
+              "source_url"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "available",
+                  "missing_effect",
+                  "correction_conflict"
+                ]
+              },
+              {
+                "scalar": "URL"
+              }
+            ]
+          },
+          "PrintingFaceDetail": {
+            "columns": [
+              "face_ordinal",
+              "printed_name_unit_id",
+              "printed_effect_unit_id",
+              "flavor_unit_id",
+              "printed_text_state",
+              "observations",
+              "sections",
+              "translations",
+              "corrections",
+              "name_concept_id"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "verified",
+                  "derived_no_errata",
+                  "derived_from_errata",
+                  "unknown",
+                  "omitted"
+                ]
+              },
+              {
+                "array": {
+                  "ref": "ObservedText"
+                }
+              },
+              {
+                "array": {
+                  "ref": "Section"
+                }
+              },
+              {
+                "array": {
+                  "ref": "FieldTranslation"
+                }
+              },
+              {
+                "array": {
+                  "ref": "Correction"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "Section": {
+            "columns": [
+              "ordinal",
+              "text_unit_id",
+              "kind"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "scalar": "Code"
+              }
+            ]
+          }
+        }
+      },
+      "print-detail/jp/family-BP02/0": {
+        "format_version": "4.0.0",
+        "tables": {
+          "printing": [
+            [
+              [
+                "home_set",
+                "BP02"
+              ],
+              "detail",
+              "catalog:family-BP02",
+              {
+                "file": {
+                  "key": "catalog/jp/family-BP02/0",
+                  "sha256": "sha256:00bc0d82a39ba66d82b5acce34b6d810de56001e7172cc7853a51633e018a02f"
+                },
+                "owner": {
+                  "id": "BP02",
+                  "kind": "home_set"
+                },
+                "partition": "bootstrap",
+                "segment": "family-BP02",
+                "table": "printing"
+              },
+              [
+                [
+                  0,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:available:jp",
+                          "available",
+                          "https://example.invalid/matrix/available/jp"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ],
+                [
+                  1,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:low_confidence:jp",
+                          "available",
+                          "https://example.invalid/matrix/low_confidence/jp"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ],
+                [
+                  2,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:missing:jp",
+                          "available",
+                          "https://example.invalid/matrix/missing/jp"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ],
+                [
+                  3,
+                  [
+                    [
+                      0,
+                      null,
+                      null,
+                      null,
+                      "unknown",
+                      [
+                        [
+                          "matrix-revision:no_counterpart:jp",
+                          "available",
+                          "https://example.invalid/matrix/no_counterpart/jp"
+                        ]
+                      ],
+                      [],
+                      [],
+                      [],
+                      null
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        },
+        "types": {
+          "Correction": {
+            "columns": [
+              "field",
+              "corrected_from",
+              "is_corrected",
+              "reason",
+              "source_url"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "effect",
+                  "name",
+                  "card_type",
+                  "flavor",
+                  "cost",
+                  "attack",
+                  "defense",
+                  "traits",
+                  "titles",
+                  "special_kinds",
+                  "other"
+                ]
+              },
+              {
+                "json": "CorrectionValue"
+              },
+              {
+                "scalar": "Bool"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "URL"
+                }
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "ObservedText": {
+            "columns": [
+              "revision_id",
+              "state",
+              "source_url"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "available",
+                  "missing_effect",
+                  "correction_conflict"
+                ]
+              },
+              {
+                "scalar": "URL"
+              }
+            ]
+          },
+          "PrintingFaceDetail": {
+            "columns": [
+              "face_ordinal",
+              "printed_name_unit_id",
+              "printed_effect_unit_id",
+              "flavor_unit_id",
+              "printed_text_state",
+              "observations",
+              "sections",
+              "translations",
+              "corrections",
+              "name_concept_id"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "verified",
+                  "derived_no_errata",
+                  "derived_from_errata",
+                  "unknown",
+                  "omitted"
+                ]
+              },
+              {
+                "array": {
+                  "ref": "ObservedText"
+                }
+              },
+              {
+                "array": {
+                  "ref": "Section"
+                }
+              },
+              {
+                "array": {
+                  "ref": "FieldTranslation"
+                }
+              },
+              {
+                "array": {
+                  "ref": "Correction"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "Section": {
+            "columns": [
+              "ordinal",
+              "text_unit_id",
+              "kind"
+            ],
+            "items": [
+              {
+                "scalar": "UInt"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "scalar": "Code"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

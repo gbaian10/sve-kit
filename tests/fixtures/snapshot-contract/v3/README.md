@@ -106,3 +106,19 @@ The Python build, reader and projection cases live in
 presentation and official counterparts. Its explicit assertions cover source body,
 sections, independent annotation sets, one-hop file requests and corrupt pointers or
 dictionaries. Its strings are authored test data; it contains no official card text.
+
+## Language matrix
+
+`language-matrix.json` is shared by the Python reader, TypeScript resolver and Web
+component tests. Its eighteen independently specified expectations use distinct
+J/E/Z/Jc/Ec strings and one synthetic native snapshot. Separate donor revisions of
+the same confirmed card and face keep counterpart text different from each
+receiver's original. Missing-counterpart cases still have Chinese translations,
+so Japanese and English UI tests can detect an incorrect Chinese fallback.
+
+Both low-confidence official-counterpart cases are reader-only synthetic inputs;
+they do not establish producer eligibility or alignment. Rejection cases change
+the selected translation's origin or authority while retaining its low-confidence
+flag and valid owner pointers. Reseal the changed translation file and all exact
+references before invoking the readers, so failures test eligibility rather than
+stale bytes or hashes.
