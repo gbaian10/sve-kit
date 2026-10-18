@@ -134,7 +134,7 @@ const zhTW = {
     attack: "攻擊力",
     defense: "生命值",
     sets: "卡包",
-    traits: "特性",
+    traits: "類型",
     searchIn: "搜尋{{label}}",
     noMatch: "沒有符合的項目",
     onePerCard: "同一張卡只顯示一次",
@@ -147,7 +147,7 @@ const zhTW = {
     subChip: "{{parent}}・{{child}}",
   },
   quickSet: { latest: "最新：{{code}}", latestAccessible: "最新卡包：{{name}}" },
-  typeFilter: { label: "類型" },
+  typeFilter: { label: "種類" },
   locationFilter: {
     label: "牌組位置",
     main: "主牌組",

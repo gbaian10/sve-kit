@@ -140,7 +140,7 @@ export default {
     attack: "Attack",
     defense: "Defense",
     sets: "Sets",
-    traits: "Traits",
+    traits: "Trait",
     searchIn: "Search {{label}}",
     noMatch: "No matching entries",
     onePerCard: "Show each card once",
@@ -153,7 +153,7 @@ export default {
     subChip: "{{parent}} · {{child}}",
   },
   quickSet: { latest: "Latest: {{code}}", latestAccessible: "Latest set: {{name}}" },
-  typeFilter: { label: "Type" },
+  typeFilter: { label: "Card Type" },
   locationFilter: {
     label: "Deck location",
     main: "Main deck",
@@ -215,7 +215,7 @@ export default {
     facet: {
       cost: "cost",
       sets: "set",
-      types: "type",
+      types: "card type",
       rarities: "rarity",
       altArtOnly: "alternate art only",
       mechanics: "mechanics",

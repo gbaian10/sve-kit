@@ -44,12 +44,12 @@ function Harness() {
 
 it("offers only the printed types in order and leaves deck locations to their own row", async () => {
   await renderInRouter(<Harness />)
-  const row = screen.getByRole("group", { name: "類型" })
+  const row = screen.getByRole("group", { name: "種類" })
   expect(
     within(row)
       .getAllByRole("button")
       .map((button) => button.getAttribute("aria-label")),
-  ).toEqual(["清除類型", "從者", "法術", "護符"])
+  ).toEqual(["清除種類", "從者", "法術", "護符"])
   // `token` in an older URL is a deck location, so it never reaches this row's selection.
   expect(within(row).getByRole("button", { name: "法術" })).toHaveAttribute("aria-pressed", "true")
   expect(screen.getByLabelText("url")).toHaveTextContent(/^type=spell$/u)
@@ -58,6 +58,6 @@ it("offers only the printed types in order and leaves deck locations to their ow
     "follower",
     "spell",
   ])
-  await userEvent.click(within(row).getByRole("button", { name: "清除類型" }))
+  await userEvent.click(within(row).getByRole("button", { name: "清除種類" }))
   expect(screen.getByLabelText("url")).toBeEmptyDOMElement()
 })
