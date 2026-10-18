@@ -1,10 +1,16 @@
-"""Bind unquoted token words so legacy prose also follows the selected glossary."""
+"""Bind unquoted lexical terms so legacy prose follows the selected glossary."""
 
 import re
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.four_layer import Domain, LeafSchema, LeafSlot, Span
+from sve_carddb.contracts.four_layer import (
+    Domain,
+    GlossaryReference,
+    LeafSchema,
+    LeafSlot,
+    Span,
+)
 from sve_carddb.contracts.source_binding import LeafOccurrence
 from sve_carddb.domains.translations.four_layer_derivation import SourceFamily
 from sve_carddb.domains.translations.recognition.provenance import merged
@@ -15,14 +21,16 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 
-def token_leaves(text: str, schema: LeafSchema) -> tuple[LeafSlot, ...]:
+def lexical_leaves(
+    text: str, schema: LeafSchema, *, trait_type: bool = False
+) -> tuple[LeafSlot, ...]:
     """Quoted names and already bound noun filters keep their existing source owner."""
     occupied = [span for slot in schema.slots for span in slot.occurrences]
     occupied.extend(
         Span(start=m.start(), end=m.end())
         for m in re.finditer(r"『[^』]*』|\{[^{}]*\}", text)
     )
-    return tuple(
+    tokens = tuple(
         LeafSlot(
             name=f"token_{match.start()}",
             type="TokenStatus",
@@ -34,16 +42,39 @@ def token_leaves(text: str, schema: LeafSchema) -> tuple[LeafSlot, ...]:
         for match in re.finditer(r"トークン", text)
         if not any(s.start < match.end() and match.start() < s.end for s in occupied)
     )
+    traits = (
+        tuple(
+            LeafSlot(
+                name=f"trait_type_{match.start()}",
+                type="Concept",
+                role="rule_term",
+                domain=Domain(values=("concept.rule_term.v1",), min=None, max=None),
+                required=True,
+                occurrences=(Span(start=match.start(), end=match.end()),),
+            )
+            for match in re.finditer(r"タイプ", text)
+            if not any(
+                s.start < match.end() and match.start() < s.end for s in occupied
+            )
+        )
+        if trait_type
+        else ()
+    )
+    return (*tokens, *traits)
 
 
-def prepare_tokens(
+def prepare_lexical(
     raw: str,
     prepared: DerivedField,
     classifier: Classifier,
     context: CardContext | None,
 ) -> DerivedField:
     """Lexical references add no executable semantics or new source acceptance."""
-    del raw, classifier, context
+    del raw, context
+    term = classifier.terms.get("term:rule.trait_type")
+    trait_type = (
+        term is not None and term.category == "rule_term" and term.source_ja == "タイプ"
+    )
     if prepared.field.source.field not in {"effect", "section"}:
         return prepared
     found = list(prepared.recognized)
@@ -53,13 +84,23 @@ def prepare_tokens(
     ):
         if part.source_span.role not in {"body", "reminder", "token_header"}:
             continue
-        added = token_leaves(part.canonical_source, recognized.schema)
+        added = lexical_leaves(
+            part.canonical_source, recognized.schema, trait_type=trait_type
+        )
         if not added:
             continue
         ordered = sorted(
             zip(
                 (*recognized.schema.slots, *added),
-                (*rows[i], *("token.reference" for _ in added)),
+                (
+                    *rows[i],
+                    *(
+                        "token.reference"
+                        if s.type == "TokenStatus"
+                        else "trait_type.reference"
+                        for s in added
+                    ),
+                ),
                 strict=True,
             ),
             key=lambda pair: (
@@ -92,7 +133,12 @@ def prepare_tokens(
             schema=LeafSchema(format=2, slots=tuple(slot for slot, _ in ordered)),
             values={
                 **recognized.values,
-                **dict.fromkeys((s.name for s in added), "token"),
+                **{
+                    s.name: "token"
+                    if s.type == "TokenStatus"
+                    else GlossaryReference(kind="glossary", key="term:rule.trait_type")
+                    for s in added
+                },
             },
             occurrences=tuple(
                 sorted(
@@ -112,4 +158,4 @@ def prepare_tokens(
     )
 
 
-FAMILY = SourceFamily("tokens", (), prepare_tokens)
+FAMILY = SourceFamily("lexical", (), prepare_lexical)

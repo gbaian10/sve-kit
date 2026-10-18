@@ -207,8 +207,8 @@ def derive_source(
 ) -> DerivedField:
     """Apply every sealed family through the sole production source entry."""
     from sve_carddb.domains.translations.four_layer_integrated import FAMILY  # ruff: ignore[import-outside-top-level] -- providers share this source construction type
+    from sve_carddb.domains.translations.four_layer_lexical import FAMILY as LEXICAL  # ruff: ignore[import-outside-top-level] -- lexical completion depends on the shared derivation boundary
     from sve_carddb.domains.translations.four_layer_n3_sources import FAMILY as N3  # ruff: ignore[import-outside-top-level] -- source adapters depend on the shared derivation boundary
-    from sve_carddb.domains.translations.four_layer_tokens import FAMILY as TOKENS  # ruff: ignore[import-outside-top-level] -- lexical completion depends on the shared derivation boundary
 
     derived = analyze_source(raw, source, classifier, context=context)
     derived = prepare_capacities(raw, derived, classifier)
@@ -233,11 +233,11 @@ def derive_source(
         raw, DerivedField(derived, interfaces), classifier, context
     )
     prepared = N3.prepare(raw, prepared, classifier, context)
-    prepared = TOKENS.prepare(raw, prepared, classifier, context)
+    prepared = LEXICAL.prepare(raw, prepared, classifier, context)
     if len(prepared.interfaces) != len(prepared.derived.field.parts):
         raise ValueError("Source interfaces must preserve source part order")
     if prepared.mode_rules and len(prepared.mode_rules) != len(
         prepared.derived.field.parts
     ):
         raise ValueError("Mode rules must preserve source part order")
-    return replace(prepared, families=(FAMILY, N3, TOKENS))
+    return replace(prepared, families=(FAMILY, N3, LEXICAL))

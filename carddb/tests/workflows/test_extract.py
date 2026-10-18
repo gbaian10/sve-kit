@@ -26,9 +26,9 @@ def test_basic_card() -> None:
     assert (face.card_class, face.card_type, face.traits) == (
         "ナイトメア",
         "フォロワー",
-        ["合成特性甲"],
+        ["合成類型甲"],
     )
-    assert face.trait_raw == "合成特性甲"
+    assert face.trait_raw == "合成類型甲"
     assert (face.cost, face.power, face.hp) == ("3", "3", "3")
     assert face.rarity == "LG"
     assert face.product == "SVE-KIT 合成商品 F10"
@@ -54,7 +54,7 @@ def test_double_faced_card_has_two_faces_and_sections() -> None:
     assert back.name == "SVE-KIT 合成測試卡 F12-02"
     assert front.card_type == "フォロワー・エボルヴ"
     assert front.cost == "-"
-    assert front.traits == ["合成特性甲", "合成特性乙"]
+    assert front.traits == ["合成類型甲", "合成類型乙"]
     assert front.product == "SVE-KIT 合成商品 F12"
     assert back.product is None
     assert front.text == "SVE-KIT 合成F12段落018。\nSVE-KIT 合成F12段落019。"
@@ -83,7 +83,7 @@ def test_errata_release_date_and_rulings() -> None:
     ]
     # A notice sharing the credit class must not become the illustrator.
     assert card.faces[0].illustrator == "SVE-KIT 合成插畫者 F08-01"
-    assert card.faces[0].traits == ["合成特性甲"]
+    assert card.faces[0].traits == ["合成類型甲"]
     assert card.notes == [
         "SVE-KIT 合成F08段落024。SVE-KIT 合成F08段落025。SVE-KIT 合成F08段落026。"
     ]
@@ -102,7 +102,7 @@ def test_errata_release_date_and_rulings() -> None:
 
 def test_flavor_keeps_line_breaks() -> None:
     card = extract_card(fixture("F07-card.html"), number="SYN01-007")
-    assert card.faces[0].traits == ["合成特性甲"]
+    assert card.faces[0].traits == ["合成類型甲"]
     assert card.faces[0].flavor == (
         "SVE-KIT 合成F07段落022。\nSVE-KIT 合成F07段落023。"
     )
@@ -110,22 +110,22 @@ def test_flavor_keeps_line_breaks() -> None:
 
 def test_compound_trait_is_not_split() -> None:
     body = fixture("F10-card.html").replace(
-        "<dd>合成特性甲</dd>".encode(),
-        "<dd>合成特性甲・ジオ・テオゴニア・合成特性乙</dd>".encode(),
+        "<dd>合成類型甲</dd>".encode(),
+        "<dd>合成類型甲・ジオ・テオゴニア・合成類型乙</dd>".encode(),
     )
     [face] = extract_card(body, number="SYN01-010").faces
-    assert face.traits == ["合成特性甲", "ジオ・テオゴニア", "合成特性乙"]
-    assert face.trait_raw == "合成特性甲・ジオ・テオゴニア・合成特性乙"
+    assert face.traits == ["合成類型甲", "ジオ・テオゴニア", "合成類型乙"]
+    assert face.trait_raw == "合成類型甲・ジオ・テオゴニア・合成類型乙"
 
 
 def test_angle_bracket_trait_keeps_its_inner_separator() -> None:
     original = fixture("F10-card.html")
-    row = "<dd>合成特性甲</dd>".encode()
+    row = "<dd>合成類型甲</dd>".encode()
     assert original.count(row) == 1
-    body = original.replace(row, "<dd>〈合成・括號〉・合成特性乙</dd>".encode())
+    body = original.replace(row, "<dd>〈合成・括號〉・合成類型乙</dd>".encode())
     [face] = extract_card(body, number="SYN01-010").faces
-    assert face.trait_raw == "〈合成・括號〉・合成特性乙"
-    assert face.traits == ["〈合成・括號〉", "合成特性乙"]
+    assert face.trait_raw == "〈合成・括號〉・合成類型乙"
+    assert face.traits == ["〈合成・括號〉", "合成類型乙"]
 
 
 @pytest.mark.parametrize("number", ["BP03-LDⓈ01", "CP01-001a"])
@@ -259,7 +259,7 @@ def test_duplicate_info_key_is_rejected() -> None:
 @pytest.mark.parametrize("traits", ["合成甲・・合成乙", "・合成甲", "合成甲・"])
 def test_malformed_trait_separators_are_rejected(traits: str) -> None:
     body = fixture("F10-card.html").replace(
-        "<dd>合成特性甲</dd>".encode(),
+        "<dd>合成類型甲</dd>".encode(),
         f"<dd>{traits}</dd>".encode(),
     )
     with pytest.raises(
