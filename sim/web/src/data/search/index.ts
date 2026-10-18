@@ -177,9 +177,8 @@ interface DeckKinds {
   readonly advance: boolean
 }
 
-// Every printing has exactly one parent location, so the row's counts add up to the edition and
-// two parents never share a printing. Combined special kinds (the data has none today) resolve in
-// this fixed order: Token, leader, EP, SEP, evolve, advance, then main for everything else.
+// One parent location per printing, so counts add up and never overlap; combined special kinds
+// (none in the data today) resolve in this fixed order, Token first and main last.
 function locationOf(kinds: DeckKinds): string {
   if (kinds.token) return "token"
   if (kinds.type === "leader") return "leader"

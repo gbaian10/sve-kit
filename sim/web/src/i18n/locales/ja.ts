@@ -142,7 +142,7 @@ export default {
     attack: "攻撃力",
     defense: "体力",
     sets: "カードセット",
-    traits: "特性",
+    traits: "タイプ",
     searchIn: "{{label}}を検索",
     noMatch: "該当する項目はありません",
     onePerCard: "同じカードは1回だけ表示",
@@ -155,7 +155,7 @@ export default {
     subChip: "{{parent}}・{{child}}",
   },
   quickSet: { latest: "最新：{{code}}", latestAccessible: "最新カードセット：{{name}}" },
-  typeFilter: { label: "タイプ" },
+  typeFilter: { label: "カード種類" },
   locationFilter: {
     label: "デッキ区分",
     main: "メインデッキ",
@@ -217,7 +217,7 @@ export default {
     facet: {
       cost: "コスト",
       sets: "パック",
-      types: "タイプ",
+      types: "カード種類",
       rarities: "レアリティ",
       altArtOnly: "別イラストのみ",
       mechanics: "メカニクス",
