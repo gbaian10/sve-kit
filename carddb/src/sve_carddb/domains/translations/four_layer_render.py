@@ -63,7 +63,7 @@ if TYPE_CHECKING:
         TypedValue,
     )
 
-RENDERER_VERSION = "four-layer-renderer-v5"
+RENDERER_VERSION = "four-layer-renderer-v6"
 ZONE_CASES = frozenset(
     {"battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand", "banish", "mixed"}
 )
@@ -691,6 +691,8 @@ class _Output:
         start = len(self.text)
         if type(value) is int:
             self.text += str(value)
+        elif isinstance(value, CardNameReference) and slot.role == "name_fragment":
+            self.fragment(value)
         elif isinstance(
             value, (GlossaryReference, VocabularyReference, CardNameReference)
         ):
@@ -715,6 +717,17 @@ class _Output:
             (name, slot.role, canonical(r.model_dump(mode="json")))
             for r in self.renderer.references(item, name)
         )
+
+    def fragment(self, reference: CardNameReference) -> None:
+        self.text += "『"
+        self.label(reference, "ja")
+        self.text += "』"
+        # The optional hint uses the adopted label without replacing the matching text.
+        key = canonical(reference.model_dump(mode="json")), self.lang
+        if self.lang == "zh-Hant" and key in self.renderer.labels:
+            self.text += "（"
+            self.label(reference)
+            self.text += "）"
 
     def zones(
         self,

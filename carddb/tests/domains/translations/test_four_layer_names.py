@@ -112,7 +112,6 @@ def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[to
     predicate = next(
         s for s in frame.leaf_schema.slots if s.role == "name_contains_filter"
     )
-    assert fragment.required
     assert binding.values[fragment.name] == CardNameReference(
         kind="card_name", term_id="term:name.synthetic"
     )
@@ -160,25 +159,38 @@ def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[to
         {("name.contains.fragment.v1", "zh-Hant"): expression},
         registry=prepared.registry,
     )
-    presenter = renderer
-    result = presenter.render(
+    result = renderer.render(
         "ctx:synthetic",
         "zh-Hant",
         expression_plan((BoundTarget(frame, binding, selected),), targets),
     )
     assert result.rendered is not None
-    assert "名稱含有仮場手札自分" in result.rendered.text
-    assert translated_fragment not in result.rendered.text
-    assert result.rendered.low_confidence is False
-    assert result.rendered.annotation.occurrences
-    occurrence = next(
+    assert f"名稱含有『仮場手札自分』（{translated_fragment}）" in result.rendered.text
+    assert result.rendered.low_confidence is True
+    occurrences = tuple(
         a for a in result.rendered.annotation.occurrences if a.reference == reference
     )
-    assert occurrence.bold is True
-    assert [result.rendered.text[s.start : s.end] for s in occurrence.ranges] == [
-        "仮場手札自分"
+    assert all(a.bold is True for a in occurrences)
+    assert [
+        result.rendered.text[s.start : s.end] for a in occurrences for s in a.ranges
+    ] == ["仮場手札自分", translated_fragment]
+    fragment_leaf = next(
+        leaf for leaf in result.rendered.leaves if leaf.slot == fragment.name
+    )
+    assert fragment_leaf.source_ordinals == (0,)
+    assert [result.rendered.text[s.start : s.end] for s in fragment_leaf.ranges] == [
+        f"『仮場手札自分』（{translated_fragment}）"
     ]
-    assert any(leaf.slot == fragment.name for leaf in result.rendered.leaves)
+    renderer.labels[canonical(reference.model_dump(mode="json")), "zh-Hant"] = Label(
+        reference, "zh-Hant", translated_fragment + "新版", "official", False, True
+    )
+    updated = renderer.render(
+        "ctx:synthetic",
+        "zh-Hant",
+        expression_plan((BoundTarget(frame, binding, selected),), targets),
+    )
+    assert updated.rendered is not None
+    assert updated.rendered.dependency_key != result.rendered.dependency_key
     del renderer.labels[canonical(reference.model_dump(mode="json")), "zh-Hant"]
     without_translation = renderer.render(
         "ctx:synthetic",
@@ -186,7 +198,10 @@ def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[to
         expression_plan((BoundTarget(frame, binding, selected),), targets),
     )
     assert without_translation.rendered is not None
-    assert without_translation.rendered.identity() == result.rendered.identity()
+    assert "名稱含有『仮場手札自分』" in without_translation.rendered.text
+    assert "（" not in without_translation.rendered.text
+    assert without_translation.rendered.low_confidence is False
+    assert without_translation.rendered.dependency_key != result.rendered.dependency_key
     del renderer.labels[canonical(reference.model_dump(mode="json")), "ja"]
     missing = renderer.render(
         "ctx:synthetic",

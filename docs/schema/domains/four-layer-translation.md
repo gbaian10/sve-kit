@@ -389,7 +389,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v5`；正式來源 workflow、authored 與 DB reader 採 v6。
+renderer 使用 `four-layer-renderer-v6`；正式來源 workflow、authored 與 DB reader 採 v6。
 renderer 版本參與所有呈現依賴鍵，包含數位名稱政策；因此既有 translation ID 會重算。
 render-v3 的內容 hash recipe 與公共快照 wire 保持原契約。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
@@ -1076,10 +1076,13 @@ BP02-035／036 的法術連擊計數母體、任意算式樹與其他配對仍�
 | 正文兩個特性同時成立 | `predicate.traits.all2.v1`／`trait_conjunction` | `filter_trait_left`、`filter_trait_right` 各自沿 `concept.trait.v1`；kind 保留獨立引用，已辨識的 kind 葉沿用原角色 |
 
 片段來源以原始引用位置還原，不能把正規化後的名稱 placeholder 當字典查找鍵。
-`CardName/name_fragment` 葉一律顯示詞條的日文來源拼字，正文說明為「日文卡名含有」
-或對應的否定條件；有限 OR 的每個片段也沿用此規則。日文標籤保留必要引用、
-粗體與來源葉位置，依賴及低信心只取實際使用的來源標籤，不借用繁中名稱的品質。
-缺少日文標籤時整欄退回來源，不改用繁中片段；完整卡名引用仍顯示已選譯名。
+`CardName/name_fragment` 葉顯示「『日文來源片段』（繁中提示）」，正文說明為
+「日文卡名含有」或對應的否定條件；有限 OR 的每個片段也沿用此規則。
+引號及提示括號由同一個葉輸出，模板不重複包引號。繁中提示取原本已選的繁中標籤，
+只輔助閱讀，判定仍依日文；缺少繁中選詞時只顯示日文片段，不自造提示。
+兩個標籤各保留引用及粗體 annotation，同一來源葉的位置涵蓋其完整呈現，
+依賴及低信心取實際使用的標籤。缺少日文標籤時整欄退回來源，
+不改用繁中片段；完整卡名引用仍顯示已選譯名。
 完整名稱、片段條件與合作名稱不因中文顯示字相同而合併。
 片段 OR 僅登錄單一、二、四、十個來源片段的有限簽章；不提供一般布林樹或名稱集合生成。
 特性條件只接受正文連續兩個已登錄特性及 kind；三個以上特性、token header、
