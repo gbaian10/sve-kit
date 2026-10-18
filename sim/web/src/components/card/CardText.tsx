@@ -385,9 +385,16 @@ export function CardText({
     </>
   )
   if (boxed) {
+    // Translation and original sit side by side once the page's text column is wide enough
+    // (design 06b); narrower columns, the drawer and the modal keep them stacked.
     if (showOriginal)
       return (
-        <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
+        <section
+          className="mt-3 space-y-2 @xl/text:grid @xl/text:grid-cols-2 @xl/text:items-start @xl/text:gap-3 @xl/text:space-y-0"
+          aria-label={heading}
+          data-field={field}
+          data-text-pair
+        >
           <TextBox heading={heading}>{content}</TextBox>
           <TextBox kind={`${field}Original`} heading={t("card.originalText")}>
             {original}

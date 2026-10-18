@@ -920,3 +920,81 @@ describe("route failures", () => {
     expect(screen.getByRole("heading", { level: 1, name: heading })).toBeVisible()
   })
 })
+
+describe("desktop shell", () => {
+  it("places the pending result and Q&A columns beside the page", async () => {
+    state.available = true
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByRole("complementary", { name: "結果" })).toHaveTextContent(
+      "結果列表由 V4b 接入",
+    )
+    expect(screen.getByRole("complementary", { name: "Q&A" })).toHaveTextContent("Q&A 由 V5 接入")
+  })
+
+  it("keeps the overlay free of the shell columns", async () => {
+    state.available = true
+    function Framed() {
+      const { catalog, client, status } = useCardSnapshot()
+      const row = catalog?.index.printingByCardNo("jp", "BP-SYNTHETIC")
+      return (
+        <CardView
+          client={client}
+          status={status}
+          catalog={catalog}
+          resolved={
+            row
+              ? {
+                  id: stringValue(row["id"]),
+                  cardId: "c:synthetic",
+                  cardOwner: "BP-SYNTHETIC",
+                  printingOwner: "BP-SYNTHETIC",
+                  region: "jp",
+                  cardNo: "BP-SYNTHETIC",
+                  cardNoState: "official",
+                }
+              : undefined
+          }
+          frame={{
+            entry: {},
+            key: "BP-SYNTHETIC",
+            link: () => ({ to: "/cards", state: null }),
+            onClose: () => undefined,
+          }}
+        />
+      )
+    }
+    await renderRoutes(
+      [
+        {
+          path: "/cards",
+          element: (
+            <ToastProvider>
+              <Framed />
+            </ToastProvider>
+          ),
+        },
+      ],
+      { initialEntries: ["/cards?card=BP-SYNTHETIC"] },
+    )
+    expect(screen.getByRole("heading", { level: 2, name: "BP-SYNTHETIC" })).toBeVisible()
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
+  })
+
+  it("renders the translation and the original as one pair when both are shown", async () => {
+    state.available = true
+    state.translated = true
+    // This printing's own text is the displayed one, so the box shows its translation and original.
+    state.candidates = [{ printing_id: "p:synthetic", revision_id: "rev:synthetic" }]
+    state.undated = []
+    prefsStore.set({ uiLanguage: "zh-TW", effectLanguage: "both" })
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    const pair = document.querySelector("[data-text-pair]")
+    expect(pair).not.toBeNull()
+    expect(within(pair as HTMLElement).getByText("合成新版譯文")).toBeVisible()
+    expect(within(pair as HTMLElement).getByText("Synthetic selected effect")).toBeVisible()
+  })
+})
