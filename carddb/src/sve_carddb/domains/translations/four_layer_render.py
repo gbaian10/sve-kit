@@ -63,7 +63,7 @@ if TYPE_CHECKING:
         TypedValue,
     )
 
-RENDERER_VERSION = "four-layer-renderer-v6"
+RENDERER_VERSION = "four-layer-renderer-v7"
 ZONE_CASES = frozenset(
     {"battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand", "banish", "mixed"}
 )
@@ -723,8 +723,13 @@ class _Output:
         self.label(reference, "ja")
         self.text += "』"
         # The optional hint uses the adopted label without replacing the matching text.
-        key = canonical(reference.model_dump(mode="json")), self.lang
-        if self.lang == "zh-Hant" and key in self.renderer.labels:
+        key = canonical(reference.model_dump(mode="json"))
+        hint = self.renderer.labels.get((key, self.lang))
+        if (
+            self.lang == "zh-Hant"
+            and hint is not None
+            and hint.text != self.renderer.labels[key, "ja"].text
+        ):
             self.text += "（"
             self.label(reference)
             self.text += "）"

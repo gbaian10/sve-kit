@@ -99,9 +99,18 @@ def test_ambiguous_or_cross_ability_receipt_remains_pending() -> None:
         )
 
 
-@pytest.mark.parametrize("translated_fragment", ["測試片段", "完全不同的官方譯名"])
+@pytest.mark.parametrize(
+    ("translated_fragment", "show_hint"),
+    [
+        ("測試片段", True),
+        ("完全不同的官方譯名", True),
+        ("仮場手札自分", False),
+        ("仮場手札自分 ", True),
+    ],
+)
 def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[too-many-locals] -- keep source, dependency closure and normal rendering in one case
     translated_fragment: str,
+    show_hint: bool,
 ) -> None:
     raw = "自分の墓場の「カード名に『仮場手札自分』を含むフォロワー」7枚を選ぶ。"
     classifier = engine()
@@ -165,21 +174,22 @@ def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[to
         expression_plan((BoundTarget(frame, binding, selected),), targets),
     )
     assert result.rendered is not None
-    assert f"名稱含有『仮場手札自分』（{translated_fragment}）" in result.rendered.text
-    assert result.rendered.low_confidence is True
+    display = "『仮場手札自分』" + (f"（{translated_fragment}）" if show_hint else "")
+    assert f"名稱含有{display}" in result.rendered.text
+    assert result.rendered.low_confidence is show_hint
     occurrences = tuple(
         a for a in result.rendered.annotation.occurrences if a.reference == reference
     )
     assert all(a.bold is True for a in occurrences)
     assert [
         result.rendered.text[s.start : s.end] for a in occurrences for s in a.ranges
-    ] == ["仮場手札自分", translated_fragment]
+    ] == (["仮場手札自分", translated_fragment] if show_hint else ["仮場手札自分"])
     fragment_leaf = next(
         leaf for leaf in result.rendered.leaves if leaf.slot == fragment.name
     )
     assert fragment_leaf.source_ordinals == (0,)
     assert [result.rendered.text[s.start : s.end] for s in fragment_leaf.ranges] == [
-        f"『仮場手札自分』（{translated_fragment}）"
+        display
     ]
     renderer.labels[canonical(reference.model_dump(mode="json")), "zh-Hant"] = Label(
         reference, "zh-Hant", translated_fragment + "新版", "official", False, True
@@ -199,9 +209,10 @@ def test_fragments_render_with_required_reference_annotation(  # ruff: ignore[to
     )
     assert without_translation.rendered is not None
     assert "名稱含有『仮場手札自分』" in without_translation.rendered.text
-    assert "（" not in without_translation.rendered.text
     assert without_translation.rendered.low_confidence is False
-    assert without_translation.rendered.dependency_key != result.rendered.dependency_key
+    assert (
+        without_translation.rendered.dependency_key != result.rendered.dependency_key
+    ) is show_hint
     del renderer.labels[canonical(reference.model_dump(mode="json")), "ja"]
     missing = renderer.render(
         "ctx:synthetic",
