@@ -13,10 +13,11 @@ from sve_carddb.build.t1 import REGISTRY
 from sve_carddb.build.t1_json import schemas as t1_schemas
 from sve_carddb.build.t1_rulings import schemas as ruling_schemas
 from sve_carddb.contracts.annotations import AnnotationSet
-from sve_carddb.contracts.four_layer import Target, hash_payload
+from sve_carddb.contracts.four_layer import FormDefinition, Target, hash_payload
 from sve_carddb.contracts.source_binding import SourceDescriptor
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
+    FormRecord,
     FrameRecord,
     TargetRecord,
 )
@@ -27,6 +28,7 @@ from sve_carddb.domains.translations.four_layer_storage import (
     read_annotation,
     write_annotation,
     write_binding,
+    write_form,
     write_frame,
     write_target,
 )
@@ -35,6 +37,7 @@ from ...support.build_db_fixtures import seed
 from .test_four_layer_classification import classifier
 from .test_four_layer_classification import source as classified_source
 from .test_four_layer_normalizer import bound_number
+from .test_quantity_placeholder import placeholder_form
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -610,3 +613,28 @@ def test_sqlite_v3_projection_admits_typed_choice_context_ports(
     assert db.select("sentence_template", ("projection",), where={"id": frame.id})[
         0
     ].values["projection"] == Json(projection)
+
+
+def test_placeholder_form_round_trips_through_closed_sqlite_cases(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, _, _ = stored
+    form = placeholder_form()
+    with db.transaction():
+        write_form(db, FormRecord(kind="translation_form", data=form), "source")
+    stored_form = payload(db.rows("translation_form")[0])
+    restored = FormDefinition.model_validate_json(
+        canonical(
+            {
+                name: stored_form[name]
+                for name in ("id", "lang", "rule", "signature", "cases")
+            }
+        )
+    )
+    assert restored == form
+    bad = form.model_dump(mode="json")["cases"]
+    bad["up_to"][1]["kind"] = "UnknownPlaceholder"
+    with pytest.raises(ValidationError), db.transaction():
+        db.update(
+            "translation_form", {"id": form.id, "lang": form.lang}, {"cases": Json(bad)}
+        )
