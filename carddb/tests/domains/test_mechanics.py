@@ -438,7 +438,11 @@ def test_official_keyword_selection_cannot_leak_to_other_owners_or_authorities(
         with db.transaction():
             mechanics.apply(db, inputs, settings)
             use = db.rows("translation_use")[0].values
-            chosen = db.rows("translation")[0].values
+            chosen = next(
+                row.values
+                for row in db.rows("translation")
+                if row.values["context_id"] == use["context_id"]
+            )
             db.update(
                 "translation",
                 {"id": chosen["id"]},
@@ -448,35 +452,37 @@ def test_official_keyword_selection_cannot_leak_to_other_owners_or_authorities(
                     "source_id": "source",
                 },
             )
-        with (
-            pytest.raises(
-                sqlite3.IntegrityError, match="name_selection_owner_eligibility"
-            ),
-            db.transaction(),
+
+        def invalidate_selection() -> None:
+            with db.transaction():
+                if mutation == "borrowed_owner":
+                    db.insert(
+                        "translation_use",
+                        dict(use)
+                        | {
+                            "id": "use:borrowed",
+                            "keyword_id": None,
+                            "face_revision_id": "link-revision",
+                            "field": "name",
+                        },
+                    )
+                elif mutation == "field":
+                    db.update(
+                        "translation_use", {"id": use["id"]}, {"field": "action_label"}
+                    )
+                else:
+                    db.update(
+                        "translation",
+                        {"id": chosen["id"]},
+                        {"source_id": None}
+                        if mutation == "source"
+                        else {"authority": "sve_official"},
+                    )
+
+        with pytest.raises(
+            sqlite3.IntegrityError, match="name_selection_owner_eligibility"
         ):
-            if mutation == "borrowed_owner":
-                db.insert(
-                    "translation_use",
-                    dict(use)
-                    | {
-                        "id": "use:borrowed",
-                        "keyword_id": None,
-                        "face_revision_id": "link-revision",
-                        "field": "name",
-                    },
-                )
-            elif mutation == "field":
-                db.update(
-                    "translation_use", {"id": use["id"]}, {"field": "action_label"}
-                )
-            else:
-                db.update(
-                    "translation",
-                    {"id": chosen["id"]},
-                    {"source_id": None}
-                    if mutation == "source"
-                    else {"authority": "sve_official"},
-                )
+            invalidate_selection()
 
 
 def test_authored_exact_suppression_and_stale_suppression_are_imported_separately(
