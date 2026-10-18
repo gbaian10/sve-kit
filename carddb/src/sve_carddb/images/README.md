@@ -3,6 +3,12 @@
 API summary. Contracts live in `docs/schema/images/image-variants.md` (recipe, sizes, crop)
 and `docs/schema/images/image-crop-overrides.md` (adopted crop boxes).
 
+`images art-candidates` compares registered faces using the optional `art-matching`
+extra. It emits groups, SIFT scores, language-scoped review pairs and transitivity
+conflicts without adopting any art. `--previous` reuses unchanged old pairs and
+scores only pairs containing a new member. See the
+[candidate contract](../../../../docs/schema/images/art-candidates.md).
+
 - `build_regional_assets(FrozenSources, PreviewRoots, region=, crops=, workers=)`
   converts every **current** source of one exclusively `jp` or `en` image batch to
   five WebP files under `images/sha256/<prefix>/<digest>.webp`, plus a private

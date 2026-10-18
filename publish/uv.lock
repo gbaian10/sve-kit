@@ -941,7 +941,7 @@ requires-dist = [
     { name = "jsonschema-rs", specifier = "==0.58.6" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "numpy", marker = "extra == 'art-matching'", specifier = ">=2.4,<3" },
-    { name = "opencv-python-headless", marker = "extra == 'art-matching'", specifier = "==4.13.0.92" },
+    { name = "opencv-python-headless", marker = "extra == 'art-matching'", specifier = "==5.0.0.93" },
     { name = "orjson", specifier = ">=3.12.0" },
     { name = "pillow", specifier = "==12.3.0" },
     { name = "psutil", specifier = ">=7.2.2" },
@@ -974,7 +974,7 @@ dev = [
 pyright = [{ name = "pyright", extras = ["nodejs"], specifier = ">=1.1.414" }]
 test = [
     { name = "numpy", specifier = ">=2.4,<3" },
-    { name = "opencv-python-headless", specifier = "==4.13.0.92" },
+    { name = "opencv-python-headless", specifier = "==5.0.0.93" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },
     { name = "pytest-clarity", specifier = ">=1.0.1" },

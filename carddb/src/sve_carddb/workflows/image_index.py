@@ -43,6 +43,7 @@ from sve_carddb.images.crops import load_image_crops
 from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
 from sve_carddb.parse.pages.official_jp import image_url
+from sve_carddb.workflows.art_matching import art_candidates
 from sve_carddb.workflows.offline import Inputs, registry_provider
 
 if TYPE_CHECKING:
@@ -56,6 +57,7 @@ if TYPE_CHECKING:
 app = typer.Typer(
     no_args_is_help=True, help="Build image assets and pinned image metadata."
 )
+app.command("art-candidates")(art_candidates)
 
 
 class RegionalImages:
