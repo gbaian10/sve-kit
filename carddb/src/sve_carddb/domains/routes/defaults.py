@@ -33,8 +33,8 @@ def _home_dates(db: Database) -> dict[tuple[str, str], str]:
 
 
 def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
-    """Select within each card/region; unknown rarity sorts after ranked vocabulary codes."""
-    ranks = {code: rank for rank, code in enumerate(RARITY_ORDER)}
+    """Select within each card/region, placing uncoded rarity before PR."""
+    ranks = {code: rank for rank, code in enumerate(RARITY_ORDER) if code != "pr"}
     home_dates = _home_dates(db)
     groups: dict[tuple[str, str], list[Row]] = defaultdict(list)
     for row in db.rows("printing"):
@@ -52,8 +52,10 @@ def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
         code = row.values["rarity_code"]
         if isinstance(code, str) and code in ranks:
             return ranks[code]
+        if code == "pr":
+            return unknown + 1
         # A bare premium label has no tier but is known not to be the plain printing.
-        return unknown + 1 if row.values["premium"] is True else unknown
+        return unknown + 2 if row.values["premium"] is True else unknown
 
     def order(row: Row) -> tuple[int, bool, str, str, str]:
         day = home_dates.get((text(row, "home_set_id"), text(row, "region")))
@@ -74,9 +76,11 @@ def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
         selected_row = min(candidates, key=order)
         method: Literal["lowest_rarity", "candidate_lowest_rarity", "fallback"] = (
             "fallback"
-            if rank(selected_row) >= unknown
+            if selected_row.values["rarity_code"] not in RARITY_ORDER
             else "candidate_lowest_rarity"
-            if any(rank(item) >= unknown for item in candidates)
+            if any(
+                item.values["rarity_code"] not in RARITY_ORDER for item in candidates
+            )
             else "lowest_rarity"
         )
         result.append(DefaultPrinting(*key, text(selected_row, "id"), method))
