@@ -1,0 +1,19 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: NY2024
+    data:
+      id: a:868cbb1946115c15b557b5cef979ca61
+      card_id: c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
+      face_id: f:67b8b56d010558398bab2692d34a5aed
+      classification: unclassified
+      uses:
+        - printing_id: p:71d7dcf68dbb5a3488876b2472194389
+          face_id: f:67b8b56d010558398bab2692d34a5aed
+      observation:
+        region: en
+        card_no: NY2024-001EN
+        observation_hash: sha256:6f44d34b0d6eff3f806046d8e98b4c6799469fecc97506cc570e59fdcb494a7e
+        rules_hash: sha256:52ff9a161f0bc87480d60510a7ec43b7a3ae0e8e9e2e47bcf9eb15262a2c8ffc
+        recipe: registry-observation-v2

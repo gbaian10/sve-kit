@@ -164,6 +164,33 @@ def test_art_evidence_is_bound_to_registered_use(
         load_registry(registry_root)
 
 
+@pytest.mark.parametrize("damage", ["printing", "face"])
+def test_art_uses_cannot_cross_card_or_face(registry_root: Path, damage: str) -> None:
+    _, entries = load(registry_root)
+
+    def change(entry: Entry) -> None:
+        other = next(
+            item
+            for item in entries.values()
+            if item.kind == "printing" and item.data["card_id"] != entry.data["card_id"]
+        )
+        uses = entry.data["uses"]
+        assert isinstance(uses, list)
+        assert isinstance(uses[0], dict)
+        if damage == "printing":
+            uses[0]["printing_id"] = other.data["id"]
+            entry.data["observation"] = other.data["observation"]
+        else:
+            maps = other.data["source_face_map"]
+            assert isinstance(maps, list)
+            assert isinstance(maps[0], dict)
+            uses[0]["face_id"] = maps[0]["face_id"]
+
+    edit_record(registry_root, "art", change)
+    with pytest.raises(ValueError, match="wrong printing"):
+        load_registry(registry_root)
+
+
 @pytest.mark.parametrize("damage", ["owner", "ordinal", "side"])
 def test_face_identity_constraints(registry_root: Path, damage: str) -> None:
     def change(entry: Entry) -> None:

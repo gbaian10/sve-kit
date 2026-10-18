@@ -1,0 +1,57 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: PCS01
+    data:
+      id: a:c683a7bc755d52dbbc68f51edd492fa0
+      card_id: c:5ff546e9284a54e38e3ee79ce6ca00fe
+      face_id: f:2e78d628603f53cbb86f939815ce18af
+      classification: unclassified
+      uses:
+        - printing_id: p:e78a5d1fe3695db1b946e557d8666e2a
+          face_id: f:2e78d628603f53cbb86f939815ce18af
+        - printing_id: p:ff0c3d5df3275c7ca57a0b08ab1237be
+          face_id: f:2e78d628603f53cbb86f939815ce18af
+      observation:
+        region: en
+        card_no: PCS01-001EN
+        observation_hash: sha256:bc8195484ab272b8d476c93e5efd51fac3b5d9fc71142480339de4e284cbef0d
+        rules_hash: sha256:69174c8a586b1a7e399e2d21ffb1530b77f9c5152b792e0f7cac906a719d6b17
+        recipe: registry-observation-v2
+  - kind: art
+    owner: PCS01
+    data:
+      id: a:853ad111f8255887b7de8a6a2f5a5834
+      card_id: c:c41a6d3b42485e77ac0c8e2889b2727c
+      face_id: f:1245a7b4b1d65161b0ba22c66549fc7b
+      classification: unclassified
+      uses:
+        - printing_id: p:0baa2d1818a0586e8ac78324053b71bb
+          face_id: f:1245a7b4b1d65161b0ba22c66549fc7b
+        - printing_id: p:9d2ef2222df75914b2e1be2fb42d90b4
+          face_id: f:1245a7b4b1d65161b0ba22c66549fc7b
+      observation:
+        region: en
+        card_no: PCS01-002EN
+        observation_hash: sha256:aa16c5c101f4c4565d2a07c52d8c6c04c22e99387985f4e499147dad96a7aff0
+        rules_hash: sha256:221a09b7727f9d47727d5c2274775a124116b26c4e9bd1a2036263424c5d9104
+        recipe: registry-observation-v2
+  - kind: art
+    owner: PCS01
+    data:
+      id: a:21f3379cf8b75c9593757d0765389325
+      card_id: c:dbe63f1999f35868ac0210d2aa48a372
+      face_id: f:d1aa70cdbb6f5de3a2db7decead5410a
+      classification: unclassified
+      uses:
+        - printing_id: p:1b2373f8b751549a985336e0bc930aa7
+          face_id: f:d1aa70cdbb6f5de3a2db7decead5410a
+        - printing_id: p:e8878265aeba5a6d85622fe0ac37d57c
+          face_id: f:d1aa70cdbb6f5de3a2db7decead5410a
+      observation:
+        region: en
+        card_no: PCS01-003EN
+        observation_hash: sha256:e18fc1ec8e12f36795c86d7f701bb8f986a43d5d6b5d8c4e414e0341aa178f47
+        rules_hash: sha256:36c7f5ec3642373ebcc3096a8c411f135f9e0954c6766c74543f3e5319089769
+        recipe: registry-observation-v2

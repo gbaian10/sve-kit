@@ -1,0 +1,25 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: SDD04
+    data:
+      id: a:fa6b52e7a4da5e50929c4118cab7d020
+      card_id: c:946a19e6b1b35686a5dfaa407fd8718f
+      face_id: f:7c7ace415e6e51f7a7b59a3eba04cde2
+      classification: unclassified
+      uses:
+        - printing_id: p:78a3f55d8ae75b4dbf7dc301e04221c0
+          face_id: f:7c7ace415e6e51f7a7b59a3eba04cde2
+        - printing_id: p:22997778b37757e595f893319d510fcc
+          face_id: f:7c7ace415e6e51f7a7b59a3eba04cde2
+        - printing_id: p:fa07e4c5ee445b30a1005e525dd86cef
+          face_id: f:7c7ace415e6e51f7a7b59a3eba04cde2
+        - printing_id: p:9406cc0ccf1d5beabb79d2a292e99dba
+          face_id: f:7c7ace415e6e51f7a7b59a3eba04cde2
+      observation:
+        region: en
+        card_no: SDD04-LD01EN
+        observation_hash: sha256:d50e1946d08f05bd412578b50758eab67950d43189d7ea209c8b00e7bf144aa8
+        rules_hash: sha256:c51aeba749c4d679f3d4f3e8822d9e5a1c237de07ffc9c61637232c34b42f1c9
+        recipe: registry-observation-v2

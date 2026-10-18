@@ -282,7 +282,7 @@ def test_complete_ownership_is_required(
             "discard_art": "^Invalid identity transition authored fields$",
             "wrong_art": "^Invalid identity transition authored fields$",
             "art_partition": "^Art transfer targets and remaining uses must partition old uses$",
-            "old_use": "^English original art attached to the wrong printing$",
+            "old_use": "^Art attached to the wrong printing$",
             "target_use": "^Art observation must refer to one actual current use$",
             "retirement": "^Repairs must exactly explain card retirement$",
             "missing_after": "^Art uses change is not exactly explained by transfers$",

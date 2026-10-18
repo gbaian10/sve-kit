@@ -1,0 +1,19 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: SCS01
+    data:
+      id: a:369bb3d6720457b0845c177d1958bdec
+      card_id: c:b9c04eb5f12b5c6f87bae0e44fec1e30
+      face_id: f:69e791647e5a5381a6e3e08d576630a0
+      classification: unclassified
+      uses:
+        - printing_id: p:e0705f0e507d57eb8be3fa6ff5167dad
+          face_id: f:69e791647e5a5381a6e3e08d576630a0
+      observation:
+        region: jp
+        card_no: SCS01-010
+        observation_hash: sha256:c9145acb0fcd52f7f3345969759e7e4476123ec621762e2bd6e48c729966d33a
+        rules_hash: sha256:f3b0433966f65c5b9801973b22dcbe9a5ec945de27336b026cb79aafd89f07e4
+        recipe: registry-observation-v2

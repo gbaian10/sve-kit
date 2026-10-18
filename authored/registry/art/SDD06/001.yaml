@@ -1,0 +1,57 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: SDD06
+    data:
+      id: a:4cca93820fbe5822ad680144db6302df
+      card_id: c:a31d3387d8845172ae5c62a1b54acb16
+      face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+      classification: unclassified
+      uses:
+        - printing_id: p:9007e9b5c6ea511c87f7bb741e3a0212
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:dca9944f7f10543abc76931cd641963c
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:ac482e682b3a5e8aa0a36bdf0d7653d7
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:9cb4223da2105d068d4ec00c30688f1e
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:d0d8cc03e7845aa5a4a7a6f87e3be4c5
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:68408a3873d05d80a5ba19b0952e9017
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:58650fb7adb753129d8797691992a756
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:277dcab196e35bceb6dcca84018c13c4
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+        - printing_id: p:6b374356eb0352da81cc5cae5ae8850c
+          face_id: f:6492fc8ca1bc5a7e8722013ad537619b
+      observation:
+        region: en
+        card_no: SDD06-003EN
+        observation_hash: sha256:f404a987e17f613fba70ec30011164dfb37f7be417ba2a66d445354e8fdd88cc
+        rules_hash: sha256:38380aebf2047bbe5732810739fcb3fef93e9e9a6fe2c15f8a00a099333e2516
+        recipe: registry-observation-v2
+  - kind: art
+    owner: SDD06
+    data:
+      id: a:c54049dce58f5e7aa2732c14347eb7ac
+      card_id: c:962e66074a18578f9aa9fa954646c978
+      face_id: f:533411bd9f305fa69fdb4c2a41ff32a5
+      classification: unclassified
+      uses:
+        - printing_id: p:c8f268c4b11556958c64bee71f0ba730
+          face_id: f:533411bd9f305fa69fdb4c2a41ff32a5
+        - printing_id: p:b5f7093fa5ed59b4a234b3b5a3cd3d9d
+          face_id: f:533411bd9f305fa69fdb4c2a41ff32a5
+        - printing_id: p:b35cfea23da15829923eae67da1fd4ed
+          face_id: f:533411bd9f305fa69fdb4c2a41ff32a5
+        - printing_id: p:8fb480c55d315e2caebe0a788ea9d243
+          face_id: f:533411bd9f305fa69fdb4c2a41ff32a5
+      observation:
+        region: en
+        card_no: SDD06-LD01EN
+        observation_hash: sha256:5bc3c613e20e5ba20e8f9f4f0c62e3bdc465e9667e11becbf71a486f9ae08804
+        rules_hash: sha256:bbe94a31cea27263e46ba87b18a0fa1cb7632fa754e67360fd6f8f6d68491da7
+        recipe: registry-observation-v2
