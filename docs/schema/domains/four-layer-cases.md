@@ -48,7 +48,7 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | FL-015／render_dependencies | 改 label、form、bold、target、品質、renderer 版本或 note | 真正依賴重算 render／annotation，note 不失效，frame 不變；v2→v3 改 dependency／tr，binding／annotation 不變 |
 | FL-016／semantic_dependencies | 改來源、frame 語義、接口描述、本體版本 | 精確失效用途／DSL；接口描述只失效相依 DSL，不重鍵翻譯；中文風格不重審規則 |
 | FL-017／zone_forms、np_role_render | 在／到／從、加入／回到手牌、計數來源與目的地、具角色 CardNP 與 owner-only | 格與融合形式分清；三個 classifier 分開派送，source/count owner 與 zone 配對；owner-only 用具角色所有格 |
-| FL-018／partial_np | 部分修飾、分支限定、異種聯集、特性／token／職業 | 未覆蓋可翻譯但不造已支援 DSL；不拉平 scope／型別 |
+| FL-018／partial_np | 部分修飾、分支限定、異種聯集、類型／token／職業 | 未覆蓋可翻譯但不造已支援 DSL；不拉平 scope／型別 |
 | FL-019／quantity | exact/up_to/at_least/all/any/X/may/random | 構造分工不互換；缺 import／不合法 expression 拒絕 |
 | FL-020／owner_omission | 具名成本規則可解析、省略而未知 | 不全域補 self；未知保留 pending、相依 DSL 不可執行 |
 | FL-021／semantic_roles | 關鍵字頭／賦予／篩選／門檻／選項、階段／期限 | 角色不同分 frame；別名同概念，不從《》或數字猜 keyword |
@@ -99,14 +99,14 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | --- | --- | --- |
 | B01 | PCS02-001 | FL-002／FL-022：打出時目標與後句共用 binding，不能把目標當動作 receipt |
 | B02 | CP03-SL24 | FL-003／FL-017：墓場計數與手牌目的地分開 |
-| B03 | BP21-003 | FL-003／FL-018：EX 代幣從者的体、token 與特性分型 |
+| B03 | BP21-003 | FL-003／FL-018：EX 代幣從者的体、token 與類型分型 |
 | B04 | BP08-058、BP16-014 | FL-003／FL-018：跨區聯集枚、分支修飾與整體數量不拉平 |
 | B05 | BP21-P60、CP04-P80、BP21-P34 | FL-003／FL-019：護符つ／枚、X；不從名字猜 token |
 | B06 | BP21-PR06、CP04-P29 | FL-018：主戰者／從者異種集合用具名型別或保留，不能全部變 Card |
 | B07 | BP21-004、BP21-P52、BP21-006、BP20-SL19、BP21-SL20 | FL-017：在／到／從、加／回手牌、牌堆頂底 |
 | B08 | BP21-005 | FL-019：任意控制不能用 upto=0 代替 |
 | B09 | CP04-SL17、BP20-P32、BP21-005 | FL-020：省略持有者依具名構造或保留未解 |
-| B10 | BP21-SL06、CP03-001、BP19-SL07 | FL-018／FL-021：特性鏈、職業圖示；名字內符號不是特性 |
+| B10 | BP21-SL06、CP03-001、BP19-SL07 | FL-018／FL-021：類型鏈、職業圖示；名字內符號不是類型 |
 | B11 | SD07-013、BP15-109、BP21-004 | FL-001／FL-018：長修飾可部分 NP，不能漏排除條件 |
 | B12 | ECP02-003、BP20-P49、BP20-R15、BP21-SL15、BP21-P38 | FL-004／FL-019：存在下限、指示物、次數各有角色 |
 | B13 | BP21-089、BP17-SL21、BP21-P24、BP21-P64 | FL-018／FL-019：語序變體、各組上限／合計限制，不用單一 union 代替 |

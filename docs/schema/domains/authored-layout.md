@@ -164,7 +164,7 @@ data:
 
 卡號保存官網原樣，含 `Ⓢ`、小寫 `a`。EN 的 target 來自已確認候選及有序覆寫，絕不以去 EN 自動配對；JP printing 不填 cross_region_review。有對應時兩端共用 card／face；target 卡號只是核對證據，不是第二張 region_mapping 真值。EN-only 仍有獨立 card 和 printing，target 及 target_observation 為 null。
 
-JP 初始分組依全部面同名／同職業／同種類／同數值／同特性，加上人工判定的規則差異；不是只依同名自動採納。EP、SEP、CP03-125/126、ルゥ遵循 build-db §3.1。同欄位但實際卡面規則不同時，由初始化決定檔的 `separate_groups` 指定不同群組。雙面的 source_index 是此次全體 checked 的面對應，不是以 ordinal 猜日英面對應。
+JP 初始分組依全部面同名／同職業／同種類／同數值／同類型，加上人工判定的規則差異；不是只依同名自動採納。EP、SEP、CP03-125/126、ルゥ遵循 build-db §3.1。同欄位但實際卡面規則不同時，由初始化決定檔的 `separate_groups` 指定不同群組。雙面的 source_index 是此次全體 checked 的面對應，不是以 ordinal 猜日英面對應。
 
 ### 3.2 UInt32
 
@@ -379,7 +379,7 @@ printing 的觀測不是印刷原文：保留自己的 revision／sections 與�
 
 ### 9.2 無主文的證據 recipe（採用 B）
 
-**使用者 2026-10-01 核可 B**：能證明「確定沒有效果主文」的面使用 exact 空字串，不能證明者維持 null、留 report／F1。這沿用 build-db 已有的「空字串＝已確定無文字」語意；新增的是判別與追溯 recipe，不放寬任何 NOT NULL 欄位，也不新增公開 effect_state。absent 只表示該來源版本的主文欄位沒有文字，不表示卡沒有能力；sections、種類／特性／標記仍保留，不因 absent 放行自動規則。
+**使用者 2026-10-01 核可 B**：能證明「確定沒有效果主文」的面使用 exact 空字串，不能證明者維持 null、留 report／F1。這沿用 build-db 已有的「空字串＝已確定無文字」語意；新增的是判別與追溯 recipe，不放寬任何 NOT NULL 欄位，也不新增公開 effect_state。absent 只表示該來源版本的主文欄位沒有文字，不表示卡沒有能力；sections、種類／類型／標記仍保留，不因 absent 放行自動規則。
 
 `effect-presence-v1` 的結果是建置期證據，不是新的 DB 表或公開欄位。每筆恰有 `{recipe,source_version_id,source_index,parser_version,template_id,container_locator,state,reason_code}`，recipe 固定 `effect-presence-v1`；source_index 是該來源面的零起算 UInt，parser_version 與 template_id 必須由 F1 程式／依賴 pin 重現，container_locator 是非空、可重現的來源區塊定位（缺容器時定位應在的父區塊）。state／reason_code 配對固定如下：
 

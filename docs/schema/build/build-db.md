@@ -82,7 +82,7 @@ vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。
 | `face_rules_name`       | `face_id→face, region:Region, rules_name_id→rules_name, role:primary\|collab\|treated_as, decision_id→decision?`；`PK(face_id,region,rules_name_id,role)`，region 必須匹配 `rules_name.region`                                                  |
 | `region_mapping_review` | `card_id→card,target_region:Region,state:pending\|confirmed_none,as_of:Date,coverage_scope:Text,source_id→source_record`；`PK(card_id,target_region,as_of)`，只存待審/無對應證據；有對應仍由 `printing.card_id` 唯一表達                        |
 
-**同卡通則（已定案）**：同名、同種類及數值/特性、規則效果相同，只有插畫/加工或經核對的表記差異，為同一 card 的多 printing/art；規則文字的新舊表記進 `face_revision`，不用新 card。一般進化前後種類不同仍分 card。跨區套用此通則前仍要人工對應，不能只比較號碼或譯名。CP03-125/126「交錯する力」同 card；同名同規則 EP 各插畫同 card，SEP 同理（不同名稱的 EP/SEP 不混併）；BP04/DSD01a/SP01「学院の新入生・ルゥ」同 card，最新「元のコスト1」表記供 current/引擎解讀。其他已核對等義再錄比照辦理，程式不能自行剝括號就宣告等義。
+**同卡通則（已定案）**：同名、同種類及數值/類型、規則效果相同，只有插畫/加工或經核對的表記差異，為同一 card 的多 printing/art；規則文字的新舊表記進 `face_revision`，不用新 card。一般進化前後種類不同仍分 card。跨區套用此通則前仍要人工對應，不能只比較號碼或譯名。CP03-125/126「交錯する力」同 card；同名同規則 EP 各插畫同 card，SEP 同理（不同名稱的 EP/SEP 不混併）；BP04/DSD01a/SP01「学院の新入生・ルゥ」同 card，最新「元のコスト1」表記供 current/引擎解讀。其他已核對等義再錄比照辦理，程式不能自行剝括號就宣告等義。
 
 `int_id` 編 printing，型別 UInt32；號段依 printing.region（目前 JP 20001..59999、EN 60001..99999、1..20000 保留，定義見 [authored-layout.md](../domains/authored-layout.md) §3.2），號碼不作地區真值；所有出貨 printing（含 unlisted、暫定卡號/身分）都配 `int_id`，工具只增不改，不需 decision。**配號不等於准許進牌組**，依 §17 的 `regional_decklog`：由該版次在所屬地區的 `decklog_available` 決定；暫定卡號/身分不阻擋建牌，舊碼仍可解碼。首次 ID 可含卡號提示，之後不重算。printing.id 不得作公開 URL 或分享碼：官方 URL 用原卡號，暫定 URL 用保留命名空間的 `int_id`；分享碼用 `int_id`。目錄 ID 不得作對手隱藏手牌實例 ID。
 
@@ -165,7 +165,7 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipment＋token 對應已觀測的イクイップメント・トークン，這是資料分類，不代替 CR 規則。evolve/advance/token 是特殊標記；traits 不切斷〈ジオ・テオゴニア〉。sections 保留順序與分類，unknown 仍顯示完整原文，但不放行 verified DSL。數值 null 不補 Leader 體力 20。
 
-現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，目前沒有表記採納輸入或規則等義投影。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
+現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/類型 diff，目前沒有表記採納輸入或規則等義投影。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
 
 active 更正先驗再比較投影內容，原始觀測保留。排序依可信發售日／更新證據，不用 fetched_at、卡號、hash 補順序。
 
@@ -496,14 +496,14 @@ canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮�
 
 `text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。舊 T／C 模板身分只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v1 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，normalizer、角色／域或語義變體變更須重鍵，NP／中文形式不入身分。
 
-`program_hash`＝canonical `{dsl_version,ast}`；macro `body_hash`＝`{dsl_version,body}`。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與特性），只作觀測追溯，不充當 DSL 新鮮度鍵。
+`program_hash`＝canonical `{dsl_version,ast}`；macro `body_hash`＝`{dsl_version,body}`。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與類型），只作觀測追溯，不充當 DSL 新鮮度鍵。
 
 目前不提供規則等義 bundle 或跨表記重用 DSL 的建置能力；未實作的語義表與 hash recipe 已移除。未來啟用正式 DSL 驗證時，須依實際來源與消費端另定新鮮度契約，不能只改 recipe 名稱沿用舊驗證結果。翻譯仍比自己的 exact source/context。
 
 卡表快照不出逐列稽核 hash；`program_ref` 由快照清單的檔案雜湊驗證。發布 metadata 不能改寫歷史審核事實。
 
 身分確認與跨區文字 aligned 各自判定；改 hash 或 recipe 名稱不能把 missing_dsl 升為 verified。
-來源規則本文、數值、特性、rules_names、normalizer 或 token 規則依賴變動須重驗，翻譯與 counterpart 仍按 exact source/context 及各 owner 失效。
+來源規則本文、數值、類型、rules_names、normalizer 或 token 規則依賴變動須重驗，翻譯與 counterpart 仍按 exact source/context 及各 owner 失效。
 若需承接真正存在的舊驗證物件，保留舊觀測、決定與歷史快照，先依該實例定義新舊 hash、來源及重驗證據的保存契約，再啟用遷移；不預建空收據庫。
 
 ### 14.1 DSL 撰寫/題本的文字來源

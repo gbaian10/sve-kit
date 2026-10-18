@@ -168,7 +168,7 @@ binding 由每次建置產生。source_span 固定 `{role,segments,anchor}`，se
 | 只有提示文的行 | 分類確認後整段（含括號）使用新 reminder 模板；沒有 body 仍必有 binding | 舊分類未給 T ID 就丟掉該行失敗 |
 | 句中提示 | body.segments 排除提示，提示另綁 reminder 並 anchor 到 body；譯文先輸出完整 body，再按原文順序附提示，原文欄保持原位置 | 用單一 body span 包住提示再重疊 reminder 失敗 |
 | 同模板有／無提示 | 同一 body payload，提示屬來源 binding，不灌進 body 模板；未知括號仍作 body 規則或報匹配失敗 | 把條件括號一律當提示，或因有提示覆寫 body payload 失敗 |
-| token 定義標頭 | 保留標頭完整 span，新 token_header 模板釘名稱、職業／特性／種類、可選費用／攻防的 slot；不同形狀用不同 schema | 只翻後續能力而略掉標頭、未知形狀硬套固定費用失敗 |
+| token 定義標頭 | 保留標頭完整 span，新 token_header 模板釘名稱、職業／類型／種類、可選費用／攻防的 slot；不同形狀用不同 schema | 只翻後續能力而略掉標頭、未知形狀硬套固定費用失敗 |
 | NFKC 改變字元 | trace 保存 raw／canonical 區間，以來源與 canonical 字串取回前後 bytes；normalizer 僅做明定轉換，不做逐字可逆的假設 | 把全形標點正規化後位置當原文 offset 失敗 |
 | 裸 N／『X』與原文字面字母 | 從 exact 來源與具名規則重建 canonical；葉槽明列位置，字面 N/X 保留 literal，舊 normalized 只供重鍵盤點 | 全域 replace N、把字面 N 當數字 slot 失敗 |
 
