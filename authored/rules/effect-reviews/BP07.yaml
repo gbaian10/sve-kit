@@ -107,7 +107,7 @@ groups:
   - id: shape:2ac18c88a7cb6ffc493beee48c31bf0f9a9963c665dd5a383c80e365e3f7b868
     priority: false
     conclusion: 參數值差異
-    rationale: X 依場或墓場數量求值；兩組均 X.binding 與計數，計數 Zone／filter 保留，不把 X 當一般固定 Nat。
+    rationale: X 依場上數量求值；兩組均 X.binding 與計數，差別在 trait 篩選值，保留 filter，不把 X 當一般固定 Nat。
     classifications:
       T2e033f6635: b02417e9214c99aa413ca4869e2119483fccf2c97a7a980dd3feaeb8d5169e79
       Tde113dcc2c: 98c82306ecd0381b8dc6106f520799ea7bd5c1ed252d84b89c365b908d8c06b0
@@ -166,7 +166,24 @@ reverse_positions:
     frame_ids:
       - frame:329671b7b82b6e62fb79e7237c7e9ad6ba359441c3c8b07e131ad31742b45b5a
     category: 跨行涵蓋
-    rationale: 傷害 body 已有，但標成 section 0 line 2；草案移至 effect line 3，保留 additional_costs，不另複製能力。
+    rationale: 傷害 body 已有，但標成 section 0 line 2；草案移至 effect line 3，保留 additional_costs，不另複製能力。 原位置是凍結 section 未更正的重複句；移動後必須由來源更正流程處理該殘留行，詳見 positive_alignment_exceptions。
     covered_by:
       ability: 2
       pointer: /body
+positive_alignment_exceptions:
+  - card_no: BP07-P06
+    ability: 2
+    status: known_invalid_alignment
+    position:
+      face: 0
+      field: section
+      section: 0
+      line: 2
+    source_issue: uncorrected_duplicate
+    source_correction: x:d529a2a90bd757f2be41c721eb0eaf4b
+    proposed_position:
+      face: 0
+      field: effect
+      section:
+      line: 3
+    rationale: 既有來源更正只補 effect，section 仍在 token 定義後保留重複傷害句。能力應移至 proposed_position；原位置隨即成為無分類來源行，須由來源更正流程移除重複，不能當作 token 效果或新增第二份傷害。

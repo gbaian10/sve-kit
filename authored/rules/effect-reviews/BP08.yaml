@@ -79,7 +79,7 @@ groups:
   - id: shape:5b58eb0c4ed9e5ce3167998b39e7e8fb5b59bd3365be4668625cd990f9876e58
     priority: false
     conclusion: 尚未知
-    rationale: 同為指定名稱進化及墓場 trait 使用門檻，但 B.limit／E.payment 的差異涉及一般進化限制與費用責任。未逐項核對通用規則 lowering 前不把兩份標註視為完整等價。
+    rationale: 同為指定名稱進化及墓場 trait 使用門檻，但 B.limit／E.payment 的差異涉及一般進化限制與費用責任。未逐項核對通用規則 lowering 前不把兩份標註視為完整等價。 未知的是標註的含意，不是同組卡文之間的語義差異；釐清後預期收斂為同一種標註，目前沒有需要來源變體的證據。
     classifications:
       T2846b5f071: a8b8c8214e8139b6829bf7c0dd01ec2fb5dadd8fc8cc3b54f6460452c8d2cc35
       T53648ae96e: b61e06b988bb56787fee1c8e1710ab9817d1d472358b365985b84664a743b7c6
@@ -94,13 +94,15 @@ groups:
     frames:
       - frame:773b16c0b6baa543d89c23bbd66a2569754ee348303fbf643a9c3ed003ccfe60
       - frame:7d5cd4290cd1e10400e72cb632e41e917e11b154bc32e8bca14be531fd11f6b5
-    uses: &id001
+    uses:
       - use:7ce316378e67f7b82305e5fa5d88411718cde4016dcad65dc76e071a708271eb
       - use:98e48c9684c95a7578cc7bb6ec2a196f40cf0e7575712502170fc9eebb268807
     translation_review:
       required_uses: []
-      conditional_uses: *id001
-      trigger: 來源變體／選取語義採納時逐 use 比對，只有語義、leaf 或中文 render 改變才重審。
+      conditional_uses:
+        - use:7ce316378e67f7b82305e5fa5d88411718cde4016dcad65dc76e071a708271eb
+        - use:98e48c9684c95a7578cc7bb6ec2a196f40cf0e7575712502170fc9eebb268807
+      trigger: 一般進化限制與費用責任釐清並採納時逐 use 比對；只有來源語義、leaf 或中文 render 改變才重審，單純統一標註不重派。
   - id: shape:9387f3bf4677c772441526b9e47989ee0174ae5b838e719dc2262c32c5fa10e9
     priority: false
     conclusion: 等價寫法

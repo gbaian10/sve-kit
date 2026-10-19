@@ -123,10 +123,10 @@ handwritten_differences:
       - BP18-SL14
     frame: frame:78d2da158c70c053b6a1caf54694bc7eb718077f88d9c0c9654bc2bfb0ae65d2
     classifications:
-      - Tfccbd93286
+      Tfccbd93286: 9466c301dfb8ac36e0ff475d4a7b40b06c072315024f6fbd2d8e2d8ab1f4df88
     conclusion: 舊標註修正
-    rationale: 提案以實際移入 EX 的 placed 作為剩餘牌差集及減費對象；chosen 在 EX 已滿時會留下未移動的牌，兩份 AST 不能視為 alpha-renaming。先保存差異，不在本次改來源或原 DSL；placed 是否在所有替代移動下都足夠，仍須規則審核。
-    scenario: dsl_a2_original_bp18_bodies_keep_different_remainders_when_ex_is_full
+    rationale: 兩卡共用同一個 v0 分類，差異在手寫 body，非 v0 標註；此處「舊標註修正」指手寫 DSL 修正候選。BP18-059 應改用 placed。提案以實際移入 EX 的 placed 作為剩餘牌差集及減費對象；chosen 在 EX 已滿時會留下未移動的牌，兩份 AST 不能視為 alpha-renaming。先保存差異，不在本次改來源或原 DSL；placed 是否在所有替代移動下都足夠，仍須規則審核。
+    scenario: original_bp18_bodies_keep_different_remainders_when_ex_is_full
     translation_review:
       required_uses: []
       trigger: 只修正 DSL 或 lowering，不改來源語義；不得把同 frame 的全部卡號當中文重審清單。

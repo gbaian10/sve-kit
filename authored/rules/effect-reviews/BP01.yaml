@@ -128,7 +128,7 @@ groups:
   - id: shape:f1646da770b5e2982c2b0160aed250ce025e70bf41d5921298ccee408e1e48a1
     priority: true
     conclusion: 需來源變體
-    rationale: BP01-142 的墓場公開目標用 D.play-param／R.target；BP02-092 的手札選取用 D.resolve-choice／R.object。Zone 值會改變選取語義，共用前需明確的來源變體或有型別的選取模式，禁止直接統一成 target。
+    rationale: BP01-142 的墓場公開目標用 D.play-param／R.target；BP02-092 的手札選取用 D.resolve-choice／R.object。Zone 值會改變選取語義，共用前需明確的來源變體或有型別的選取模式，禁止直接統一成 target。 此為保守的暫定標籤；若規則確認 Zone 本身足以決定選取模式，最終應改列參數值差異，不能把此草案當作已採納的來源拆分。
     classifications:
       T95b3a19a04: 2848f29564f19979645372e2a6b308a49ef2fec408c304734b409435d2a7a62c
       Te3d5f53b3b: 567c33ea8c42056cd899c4cbb06191a9b4106637e4f4479f53d933393187a79b
@@ -142,12 +142,14 @@ groups:
     frames:
       - frame:13f218f57acf18d25a95cf15144aaeea5bb9be438607572205b34e402d34bfb3
       - frame:778b72c4c4ec7ca585fe89373cd3b495373fba2730623d95c74785e852c636e4
-    uses: &id001
+    uses:
       - use:3aba96402b38f6004ca3439e0ef173d0c58e43521510b5efce4e78155947bc2a
       - use:dad2995db0e096ff33686cf8ffe86503f4d188baa015ca98c6f70bfa3e7c6f17
     translation_review:
       required_uses: []
-      conditional_uses: *id001
+      conditional_uses:
+        - use:3aba96402b38f6004ca3439e0ef173d0c58e43521510b5efce4e78155947bc2a
+        - use:dad2995db0e096ff33686cf8ffe86503f4d188baa015ca98c6f70bfa3e7c6f17
       trigger: 來源變體／選取語義採納時逐 use 比對，只有語義、leaf 或中文 render 改變才重審。
   - id: shape:ecc4a5b0ba4090bbdba8e007e4b859ef4ffc686813e0fb6a846ac5ef45fba7c6
     priority: false

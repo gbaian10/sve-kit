@@ -36,7 +36,7 @@ groups:
   - id: shape:d5f0459516785d4520bc4ed97f47ff9336cbb0383276e7eac26af597270102af
     priority: false
     conclusion: 尚未知
-    rationale: R.follow-move 與 T.receipt、I.move 的混用尚不足以判定是追蹤移動後物件或只記結果；另有墓場／消滅區參數。未定義 follow-move 契約前不共用，也不宣稱必須拆正式框架。
+    rationale: R.follow-move 與 T.receipt、I.move 的混用尚不足以判定是追蹤移動後物件或只記結果；另有墓場／消滅區參數。未定義 follow-move 契約前不共用，也不宣稱必須拆正式框架。 未知的是標註的含意，不是同組卡文之間的語義差異；釐清後預期收斂為同一種標註，目前沒有需要來源變體的證據。
     classifications:
       T19c5441488: 641832d69d5276ea9001cec083bc0a64e44d2293bd4d2e1cede33546eff39a1c
       T75fc20f8d1: 887fef462892ea751eb9cf9d4ac82d95fb3540351d7d01802e49cdb21bce1374
@@ -64,7 +64,7 @@ groups:
       - frame:8ad5903209782cb9731bb7effe738177791827e00f1836daad06437188e1aba3
       - frame:acbca5e2fdb31e0c15df0f6100838a329a561daef31f109a014e4a14706a976b
       - frame:e8e939866b4a71bdde8d7d822b63d60ff44bb37229600aad9ceb9a1ad9eca0f7
-    uses: &id001
+    uses:
       - use:00f962e8d5a57278153aeb75e15ffa9aac7a8774672d5f52fa115f627784f820
       - use:0fbd8e65ba21306e7392e834f11158c48ef80816c4fe56928a91cd32adb89cc6
       - use:5e5fa3660c6ba2805107e08071cf2405250055af259e523b363064393ae93fd6
@@ -72,8 +72,13 @@ groups:
       - use:d9536d21e3be6352c84b0bf676f67406e39dca1b5085ee3dfcd73663932cd12a
     translation_review:
       required_uses: []
-      conditional_uses: *id001
-      trigger: 來源變體／選取語義採納時逐 use 比對，只有語義、leaf 或中文 render 改變才重審。
+      conditional_uses:
+        - use:00f962e8d5a57278153aeb75e15ffa9aac7a8774672d5f52fa115f627784f820
+        - use:0fbd8e65ba21306e7392e834f11158c48ef80816c4fe56928a91cd32adb89cc6
+        - use:5e5fa3660c6ba2805107e08071cf2405250055af259e523b363064393ae93fd6
+        - use:bfe0cabe71eef8aa159fcf0af27215aa26cf05af2267d4655a8882fd78abf689
+        - use:d9536d21e3be6352c84b0bf676f67406e39dca1b5085ee3dfcd73663932cd12a
+      trigger: follow-move 的追蹤與結果責任釐清並採納時逐 use 比對；只有來源語義、leaf 或中文 render 改變才重審，單純統一標註不重派。
   - id: shape:9ecbbb219f8fcbfbd8df9efba026b093f8801c22093543a01a1a59d012765273
     priority: false
     conclusion: 舊標註修正

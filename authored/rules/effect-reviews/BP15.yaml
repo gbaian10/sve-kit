@@ -152,10 +152,10 @@ reverse_positions:
     frame_ids:
       - frame:17076dadcf87e7d73feef28e4f3f4b55457a8c13048d4c3a6a02a28993ab345a
     category: 跨行涵蓋
-    rationale: 第一行 choice 的第一模式涵蓋第二行。
+    rationale: 第一行 choice 的兩個模式共同涵蓋第二行。
     covered_by:
       ability: 0
-      pointer: /body/modes/0
+      pointer: /body/modes
   - card_no: BP15-SL23
     face: 0
     field: section
