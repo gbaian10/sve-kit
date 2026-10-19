@@ -1,4 +1,4 @@
-"""Invert current effect and section annotations using verified display selections."""
+"""Invert current annotations and asymmetric official related-card links."""
 
 from collections import defaultdict
 from typing import TYPE_CHECKING
@@ -61,6 +61,26 @@ def _targets(annotation: Record, targets: Mapping[str, tuple[str, ...]]) -> set[
     return result
 
 
+def _official_asymmetric(view: View) -> set[tuple[str, str, str]]:
+    pairs = {
+        (string(row["from_card_id"]), string(row["to_card_id"]))
+        for row in view["card_related"]
+    }
+    regions: dict[str, set[str]] = defaultdict(set)
+    for printing in view["printing"]:
+        regions[string(printing["card_id"])].add(string(printing["region"]))
+    cards = {string(row["id"]) for row in view["card"]}
+    return {
+        (string(row["to_card_id"]), region, string(row["from_card_id"]))
+        for row in view["card_related"]
+        if row["relation"] == "official_unspecified"
+        and row["from_card_id"] in cards
+        and row["to_card_id"] in cards
+        and (row["to_card_id"], row["from_card_id"]) not in pairs
+        for region in regions[string(row["from_card_id"])]
+    }
+
+
 def mentioned_by(
     view: View,
     field_annotations: Sequence[Record],
@@ -71,7 +91,7 @@ def mentioned_by(
     uses = _Uses(field_annotations, view["translation"])
     revisions = {row["id"]: row for row in view["face_revision"]}
     cards = {string(row["id"]) for row in view["card"]}
-    edges: set[tuple[str, str, str]] = set()
+    edges = _official_asymmetric(view)
     for face in view["face"]:
         for raw in array(face["current"]):
             current = object_value(raw)

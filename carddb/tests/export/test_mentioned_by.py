@@ -1,4 +1,4 @@
-"""Card-name back references derive from current text, never official related rows."""
+"""Back references combine current text with asymmetric official related rows."""
 
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -31,7 +31,10 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize("field", ["effect", "section", "name", "historical"])
-def test_build_and_wire_invert_only_current_effects_and_sections(field: str) -> None:
+@pytest.mark.parametrize("official", [False, True])
+def test_build_and_wire_union_current_annotations_and_official_oneway(
+    field: str, *, official: bool
+) -> None:
     with create_database(schema(with_annotations=True)) as db:
         with db.transaction():
             populate(db)
@@ -43,6 +46,15 @@ def test_build_and_wire_invert_only_current_effects_and_sections(field: str) -> 
                 | {"id": "other-family", "code": "other", "public_code": "OTHER"},
             )
             db.update("card", {"id": "old_card"}, {"home_set_id": "other-family"})
+            if official:
+                related = db.select("card_related", db.columns("card_related"))[0]
+                link = dict(related.values) | {
+                    "from_card_id": "card",
+                    "to_card_id": "old_card",
+                    "relation": "official_unspecified",
+                }
+                db.update("card_related", {"id": link["id"]}, link)
+                db.insert("card_related", link | {"id": "duplicate-related"})
             revision = "revision"
             if field == "historical":
                 row = db.select("face_revision", db.columns("face_revision"))[0]
@@ -76,7 +88,7 @@ def test_build_and_wire_invert_only_current_effects_and_sections(field: str) -> 
         projection = projected(db, chosen)
         expected = (
             [{"card_id": "old_card", "region": "jp", "from_card_id": "card"}]
-            if field in {"effect", "section"}
+            if official or field in {"effect", "section"}
             else []
         )
         assert projection.tables["card_mentioned_by"] == expected
@@ -112,6 +124,41 @@ def test_build_and_wire_invert_only_current_effects_and_sections(field: str) -> 
                 assert fragment[0] == ["home_set", "other-family"]
 
 
+def test_official_oneway_uses_public_source_regions_and_excludes_other_links() -> None:
+    printings: list[Record] = [
+        {"card_id": "source", "region": region} for region in ("en", "jp", "jp")
+    ]
+    printings.append({"card_id": "target", "region": "en"})
+    view: View = {
+        "card": [
+            {"id": value}
+            for value in ("source", "target", "mutual", "typed", "unprinted")
+        ],
+        "printing": printings,
+        "card_related": [
+            {"from_card_id": source, "to_card_id": target, "relation": relation}
+            for source, target, relation in (
+                ("source", "target", "official_unspecified"),
+                ("source", "target", "official_unspecified"),
+                ("source", "source", "official_unspecified"),
+                ("source", "missing", "official_unspecified"),
+                ("missing", "target", "official_unspecified"),
+                ("unprinted", "target", "official_unspecified"),
+                ("source", "mutual", "official_unspecified"),
+                ("mutual", "source", "same_rules_reskin"),
+                ("source", "typed", "evolves_to"),
+            )
+        ],
+        "face": [],
+        "face_revision": [],
+        "translation": [],
+    }
+    assert mentioned_by(view, [], {}, {}) == [
+        {"card_id": "target", "region": region, "from_card_id": "source"}
+        for region in ("en", "jp")
+    ]
+
+
 def test_english_uses_selected_japanese_sources_and_all_source_sections() -> None:
     owner: Record = {"kind": "face_revision", "id": "jp-history-donor"}
     pointer: Record = {"owner": owner, "field": "effect", "ordinal": None}
@@ -143,6 +190,8 @@ def test_english_uses_selected_japanese_sources_and_all_source_sections() -> Non
             }
         ],
         "translation": [{"id": "zh", "annotation_set_id": "translated"}],
+        "card_related": [],
+        "printing": [],
     }
     originals: list[Record] = [
         pointer | {"annotation_set_id": "body"},
