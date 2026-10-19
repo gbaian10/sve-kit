@@ -91,16 +91,19 @@ class Endpoint(RecordData):
     ability: Code | None
 
 
+RelationType = Literal[
+    "sequence",
+    "branch",
+    "cost-of",
+    "result-of",
+    "capture-of",
+    "scope-of",
+    "simultaneous",
+]
+
+
 class Relation(RecordData):
-    type: Literal[
-        "sequence",
-        "branch",
-        "cost-of",
-        "result-of",
-        "capture-of",
-        "scope-of",
-        "simultaneous",
-    ]
+    type: RelationType
     sources: Annotated[tuple[Endpoint, ...], Field(min_length=1)]
     targets: Annotated[tuple[Endpoint, ...], Field(min_length=1)]
     note_hash: Hash

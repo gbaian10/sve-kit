@@ -14,6 +14,7 @@ from sve_carddb.domains.effects.classifications import (
     Code,
     Member,
     Position,
+    RelationType,
 )
 
 Owner = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
@@ -143,15 +144,7 @@ class StoredEndpoint(RecordData):
 
 
 class StoredRelation(RecordData):
-    type: Literal[
-        "sequence",
-        "branch",
-        "cost-of",
-        "result-of",
-        "capture-of",
-        "scope-of",
-        "simultaneous",
-    ]
+    type: RelationType
     note_hash: Hash
     sources: Annotated[tuple[StoredEndpoint, ...], Field(min_length=1)]
     targets: Annotated[tuple[StoredEndpoint, ...], Field(min_length=1)]

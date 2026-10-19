@@ -98,7 +98,9 @@ namespace 為 `classification-v0`，recipe 為 `v0-classification-candidates-1`�
 文字分片只保存此 v0 分類引用的日文 raw／body；這是本批匯入範圍，不定義其他卡片資料的存放政策。
 文字來自 [Shadowverse: EVOLVE 官方日文卡表](https://shadowverse-evolve.com/cardlist/)。
 v0 擷取索引使用 **2026-09-26 凍結、於 2026-09-27 分類流程使用**的卡表批次；
-原卡表 SHA-256 為 `4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632`。
+原卡表 SHA-256 為 `4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632`，
+即 [`.github/ci/testdata.lock`](../../../.github/ci/testdata.lock) 的 `snapshot_sha256`，
+對應該鎖定版本私有 testdata 的 `fixtures/engine/cards.jsonl`。
 這段日期界定 v0 的輸入與分類時段，不是每張官方頁面的抓取日期，也不表示涵蓋其後的官方勘誤。
 `basis.inputs_hash` 固定該批 v0 索引、分類與標註的完整來源集合；文字版本 ID 另固定實際保存的 raw／body。
 官方文字與識別碼內的官方名稱不在專案授權範圍，依 [LICENSING](../../../LICENSING.md)。

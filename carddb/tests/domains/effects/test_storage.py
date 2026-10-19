@@ -279,6 +279,14 @@ def test_formats_require_their_exact_integer(
             document(raw, sources)
 
 
+@pytest.mark.parametrize("source", [True, False], ids=["text", "classification"])
+def test_in_memory_documents_reject_oversized_input(source: bool) -> None:
+    read = source_document if source else document
+    kind = "classification source shard" if source else "classification shard"
+    with pytest.raises(ValueError, match="^Oversized " + kind + "$"):
+        read(b"x" * 1048576)
+
+
 @pytest.mark.parametrize(
     "raw",
     [b"format: 2\nformat: 2\n", b"1: invalid\n", b"records: [", b"x" * 1048576],

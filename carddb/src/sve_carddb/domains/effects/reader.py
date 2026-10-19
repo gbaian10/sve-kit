@@ -80,18 +80,14 @@ def _resolve(stored: StoredShard, sources: tuple[SourceShard, ...]) -> Shard:
             texts[key] = text
     records: list[Classification | Member] = []
     for record in stored.records:
-        resolved_text = (
-            texts.get((record.owner, record.source))
-            if isinstance(record, StoredMember)
-            else None
-        )
-        if isinstance(record, StoredMember) and resolved_text is None:
-            raise ValueError("Missing classification text version")
         try:
-            if isinstance(record, StoredMember) and resolved_text is not None:
-                records.append(record.resolve(resolved_text))
-            elif isinstance(record, StoredClassification):
+            if isinstance(record, StoredClassification):
                 records.append(record.resolve())
+            else:
+                resolved_text = texts.get((record.owner, record.source))
+                if resolved_text is None:
+                    raise ValueError("Missing classification text version")
+                records.append(record.resolve(resolved_text))
         except ValidationError:
             raise ValueError("Invalid resolved classification record") from None
     return Shard(
