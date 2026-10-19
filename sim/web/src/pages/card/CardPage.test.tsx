@@ -80,6 +80,13 @@ const state = vi.hoisted(() => ({
   images: false,
   summary: false,
   candidates: [] as { printing_id: string; revision_id: string | null }[],
+  classification: "same_effect",
+  /** Revision ids whose effect has no translation in any language. */
+  untranslated: [] as string[],
+  /** Revision ids whose printed effect is blank on the official page. */
+  blank: [] as string[],
+  /** The printing face's `printed_text_state`, when its text is served. */
+  printedTextState: null as string | null,
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
 }))
@@ -117,61 +124,73 @@ vi.mock("../../app/snapshot", () => {
       annotations: "none",
     },
     value:
-      field === "name" && state.originalName && owner.id === "rev:other"
+      owner.kind === "printing_face" && field === "effect" && state.printedTextState !== null
         ? {
-            original: { unit: { text: "Synthetic original name", lang: "ja" }, annotation: null },
+            printedState: state.printedTextState,
+            original: { unit: { text: "", lang: "ja" }, annotation: null },
             concepts: [],
             explanations: [],
             cards: [],
-            keywords: [],
-            abilities: [],
           }
-        : owner.kind === "face_revision" && (field === "effect" || field === "section")
+        : field === "name" && state.originalName && owner.id === "rev:other"
           ? {
-              ...(state.sections && field === "effect"
-                ? {
-                    originalSections: [
-                      {
-                        ordinal: 1,
-                        label: `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} heading`,
-                      },
-                      { ordinal: 3 },
-                    ],
-                  }
-                : {}),
-              original: {
-                unit: {
-                  text:
-                    field === "section"
-                      ? `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} reminder ${String(ordinal)}`
-                      : owner.id === "rev:other"
-                        ? "Synthetic older effect"
-                        : "Synthetic selected effect",
-                  lang: "ja",
-                },
-                annotation: null,
-              },
-              ...(state.translated && _language === "zh-Hant"
-                ? {
-                    translated: {
-                      unit: {
-                        text:
-                          field === "section"
-                            ? `合成${owner.id === "rev:other" ? "舊版" : "新版"}補充譯文 ${String(ordinal)}`
-                            : owner.id === "rev:other"
-                              ? "合成舊版譯文"
-                              : "合成新版譯文",
-                        lang: "zh-Hant",
-                      },
-                      annotation: null,
-                    },
-                  }
-                : {}),
+              original: { unit: { text: "Synthetic original name", lang: "ja" }, annotation: null },
               concepts: [],
               explanations: [],
               cards: [],
+              keywords: [],
+              abilities: [],
             }
-          : null,
+          : owner.kind === "face_revision" && (field === "effect" || field === "section")
+            ? {
+                ...(state.sections && field === "effect"
+                  ? {
+                      originalSections: [
+                        {
+                          ordinal: 1,
+                          label: `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} heading`,
+                        },
+                        { ordinal: 3 },
+                      ],
+                    }
+                  : {}),
+                original: {
+                  unit: {
+                    text: state.blank.includes(owner.id)
+                      ? ""
+                      : field === "section"
+                        ? `Synthetic ${owner.id === "rev:other" ? "older" : "selected"} reminder ${String(ordinal)}`
+                        : owner.id === "rev:other"
+                          ? "Synthetic older effect"
+                          : "Synthetic selected effect",
+                    lang: "ja",
+                  },
+                  annotation: null,
+                },
+                ...(state.translated &&
+                _language === "zh-Hant" &&
+                !state.untranslated.includes(owner.id) &&
+                !state.blank.includes(owner.id)
+                  ? {
+                      translated: {
+                        unit: {
+                          text:
+                            field === "section"
+                              ? `合成${owner.id === "rev:other" ? "舊版" : "新版"}補充譯文 ${String(ordinal)}`
+                              : owner.id === "rev:other"
+                                ? "合成舊版譯文"
+                                : "合成新版譯文",
+                          lang: "zh-Hant",
+                        },
+                        annotation: null,
+                      },
+                    }
+                  : {}),
+                concepts: [],
+                explanations: [],
+                cards: [],
+              }
+            : null,
   })
   return {
     useImageIndex: () =>
@@ -293,7 +312,7 @@ vi.mock("../../app/snapshot", () => {
           wording: (face: string, region: string) => {
             state.wording(face, region)
             return {
-              classification: "same_effect",
+              classification: state.classification,
               basis_printing_id: "p:undated",
               display: {
                 revision_id: state.available ? "rev:synthetic" : null,
@@ -361,6 +380,7 @@ vi.mock("../../app/snapshot", () => {
             const undated = state.undated.find((printing) => printing.id === id)
             return {
               ...printing(),
+              id,
               home_set_id: "BP-SYNTHETIC",
               card_no: undated?.cardNo ?? (id === "p:synthetic" ? "BP-SYNTHETIC" : "BP-OTHER"),
             }
@@ -390,6 +410,10 @@ beforeEach(() => {
   state.doubleFace = false
   state.order = null
   state.undated = [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }]
+  state.classification = "same_effect"
+  state.untranslated = []
+  state.blank = []
+  state.printedTextState = null
   state.wording.mockClear()
 })
 
@@ -456,32 +480,125 @@ describe("plain wording on the card page", () => {
     await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    const translation = screen.getByRole("region", { name: "效果" })
+    const region = screen.getByRole("region", { name: "效果" })
+    // This printing's own translation in the first box, its own text in the second.
+    const [translation, original] = [...region.children] as HTMLElement[]
+    if (!translation || !original) throw new Error("two boxes expected")
     expect(paragraphs(translation, "zh-Hant")).toEqual([
-      "合成新版譯文",
-      "合成新版補充譯文 1",
-      "合成新版補充譯文 3",
+      "合成舊版譯文",
+      "合成舊版補充譯文 1",
+      "合成舊版補充譯文 3",
     ])
     expect(paragraphs(translation, "ja")).toEqual([])
-    expect(within(translation).getByText("Synthetic selected heading")).toBeVisible()
+    expect(within(translation).getByText("Synthetic older heading")).toBeVisible()
     expect(translation.querySelectorAll("[data-section]")).toHaveLength(2)
-    const original = screen.getByRole("region", { name: "此版次的原文" })
+    expect(within(original).getByRole("heading", { name: "原文" })).toBeVisible()
     expect(paragraphs(original, "ja")).toEqual([
       "Synthetic older effect",
       "Synthetic older reminder 1",
       "Synthetic older reminder 3",
     ])
-    expect(within(original).getByText("Synthetic older heading")).toBeVisible()
     expect(original.querySelectorAll("[data-section]")).toHaveLength(2)
-    expect(screen.queryByText("合成舊版譯文")).not.toBeInTheDocument()
+    expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
     expect(screen.queryByText("附註")).not.toBeInTheDocument()
-    expect(screen.queryByRole("region", { name: "原文" })).not.toBeInTheDocument()
+    expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
+    // The note under the effect names the latest wording's basis printing, in every mode.
+    const note = () => document.querySelector("[data-wording-note]")
+    expect(note()).toHaveTextContent("與 BP-OTHER 文字描述略有差異，但意思相同。")
+    expect(
+      region.compareDocumentPosition(note() as Element) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
     act(() => {
       prefsStore.set({ effectLanguage: "translated" })
     })
     expect(paragraphs(screen.getByRole("region", { name: "效果" }), "zh-Hant")).toHaveLength(3)
-    expect(paragraphs(screen.getByRole("region", { name: "此版次的原文" }), "ja")).toHaveLength(3)
+    expect(paragraphs(screen.getByRole("region", { name: "效果" }), "ja")).toHaveLength(0)
+    expect(note()).toHaveTextContent("BP-OTHER")
+    act(() => {
+      prefsStore.set({ effectLanguage: "original" })
+    })
+    expect(paragraphs(screen.getByRole("region", { name: "效果" }), "ja")).toHaveLength(3)
+    expect(paragraphs(screen.getByRole("region", { name: "效果" }), "zh-Hant")).toHaveLength(0)
+    expect(note()).toHaveTextContent("BP-OTHER")
+  })
+  it.each(["errata", "pending_review"] as const)(
+    "says the effect may differ when the wording is classified %s",
+    async (classification) => {
+      state.available = true
+      state.current = true
+      state.translated = true
+      state.classification = classification
+      await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+        initialEntries: ["/cards/BP-SYNTHETIC"],
+      })
+      expect(screen.getByText("合成舊版譯文")).toBeVisible()
+      expect(screen.getByText("Synthetic older effect")).toBeVisible()
+      expect(document.querySelector("[data-wording-note]")).toHaveTextContent(
+        "與 PR-SYNTHETIC 的卡文不同，效果可能有差異。",
+      )
+      expect(screen.queryByText(/意思相同/)).not.toBeInTheDocument()
+    },
+  )
+  it("names the first printing of the older wording on a latest-wording printing and links it like a chip", async () => {
+    state.available = true
+    state.current = true
+    state.translated = true
+    // This printing carries the latest wording; two older printings share the other one.
+    state.candidates = [
+      { printing_id: "p:synthetic", revision_id: "rev:synthetic" },
+      { printing_id: "p:third", revision_id: "rev:other" },
+      { printing_id: "p:second", revision_id: "rev:other" },
+    ]
+    state.undated = [
+      { id: "p:second", cardNo: "BP-SECOND" },
+      { id: "p:third", cardNo: "BP-THIRD" },
+    ]
+    state.multiplePrintings = true
+    const { router } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByText("合成新版譯文")).toBeVisible()
+    expect(screen.getByText("Synthetic selected effect")).toBeVisible()
+    expect(screen.queryByText("Synthetic older effect")).not.toBeInTheDocument()
+    const note = document.querySelector("[data-wording-note]")
+    expect(note).toHaveTextContent("與 BP-SECOND 文字描述略有差異，但意思相同。")
+    expect(note).not.toHaveTextContent("BP-THIRD")
+    await userEvent.click(within(note as HTMLElement).getByRole("link", { name: "BP-SECOND" }))
+    expect(router.state.historyAction).toBe("REPLACE")
+    expect(router.state.location.pathname).toContain("/cards/BP-SECOND")
+  })
+  it("borrows the latest wording's translation when this printing's revision has none", async () => {
+    state.available = true
+    state.current = true
+    state.translated = true
+    state.untranslated = ["rev:other"]
+    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    const region = screen.getByRole("region", { name: "效果" })
+    const [translation, original] = [...region.children] as HTMLElement[]
+    if (!translation || !original) throw new Error("two boxes expected")
+    expect(paragraphs(translation, "zh-Hant")).toEqual(["合成新版譯文"])
+    expect(paragraphs(original, "ja")).toEqual(["Synthetic older effect"])
+    expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    expect(document.querySelector("[data-wording-note]")).toHaveTextContent("PR-SYNTHETIC")
+  })
+  it("shows the latest wording alone when this printing's official text is blank", async () => {
+    state.available = true
+    state.current = true
+    state.translated = true
+    state.blank = ["rev:other"]
+    state.printedTextState = "unknown"
+    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByText("合成新版譯文")).toBeVisible()
+    expect(screen.getByText("Synthetic selected effect")).toBeVisible()
+    expect(screen.getByRole("heading", { name: "原文" })).toBeVisible()
+    expect(screen.getByText("印刷文字尚未確認")).toBeVisible()
+    expect(screen.queryByText("這張卡沒有效果文字")).not.toBeInTheDocument()
+    expect(document.querySelector("[data-wording-note]")).toBeNull()
   })
   it.each(["ja", "en"] as const)(
     "keeps sections in the original language without Traditional Chinese in %s",
@@ -497,6 +614,7 @@ describe("plain wording on the card page", () => {
       const effect = document.querySelector('[data-field="effect"]')
       if (!effect) throw new Error("effect region missing")
       expect(document.querySelectorAll('[data-field="effect"]')).toHaveLength(1)
+      // No translation is expected in this language: only this printing's own text shows.
       expect(paragraphs(effect, "ja")).toEqual([
         "Synthetic older effect",
         "Synthetic older reminder 1",
@@ -504,6 +622,7 @@ describe("plain wording on the card page", () => {
       ])
       expect(document.querySelectorAll('p[lang="zh-Hant"]')).toHaveLength(0)
       expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+      expect(document.querySelector("[data-wording-note]")).toHaveTextContent("BP-OTHER")
     },
   )
   it("switches between candidates' own effect and sections without changing the printing", async () => {
@@ -588,49 +707,41 @@ describe("plain wording on the card page", () => {
       })
       expect(screen.getByText("Synthetic older effect")).toBeVisible()
       expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+      expect(document.querySelector("[data-wording-note]")).not.toBeNull()
       expect(container.querySelectorAll("details")).toHaveLength(0)
     },
   )
-  it("shows a printing's own original beside the latest translation and preserves the list on its source link", async () => {
+  it("stacks a printing's own original under its own translation without a source area", async () => {
     state.available = true
     state.translated = true
     state.undated = []
-    prefsStore.set({ effectLanguage: "translated" })
-    const { router } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+    prefsStore.set({ effectLanguage: "both" })
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    await act(() =>
-      router.navigate("/cards/BP-SYNTHETIC", {
-        replace: true,
-        state: { background: "?q=synthetic", source: "results", pages: 2, resultKey: "c:anchor" },
-      }),
-    )
     expect(screen.getByText("Synthetic older effect")).toBeVisible()
-    expect(screen.getByText("合成新版譯文")).toBeVisible()
+    expect(screen.getByText("合成舊版譯文")).toBeVisible()
+    expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
-    expect(screen.getByText("此版次的原文")).toBeVisible()
-    // The shared translation stacks above this printing's original, never beside it.
+    expect(screen.getByRole("heading", { name: "原文" })).toBeVisible()
+    // The translation stacks above this printing's original, never beside it.
     expect(
       screen
-        .getByText("合成新版譯文")
+        .getByText("合成舊版譯文")
         .compareDocumentPosition(screen.getByText("Synthetic older effect")) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
     act(() => {
       prefsStore.set({ effectLanguage: "original" })
     })
-    expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
+    expect(screen.queryByText("合成舊版譯文")).not.toBeInTheDocument()
     expect(screen.getByText("Synthetic older effect")).toBeVisible()
     act(() => {
       prefsStore.set({ effectLanguage: "translated" })
     })
-    // The basis printing sits in the translation's source area with its other sources.
-    expect(screen.queryByRole("link", { name: "BP-OTHER" })).not.toBeVisible()
-    await userEvent.click(screen.getByText("來源與依據"))
-    expect(screen.getByText("繁中翻譯依據")).toBeVisible()
-    await userEvent.click(screen.getByRole("link", { name: "BP-OTHER" }))
-    expect(router.state.historyAction).toBe("REPLACE")
-    expect(router.state.location.state).toMatchObject({ background: "?q=synthetic", pages: 2 })
+    expect(screen.queryByText("來源與依據")).not.toBeInTheDocument()
+    expect(screen.queryByText("繁中翻譯依據")).not.toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "BP-OTHER" })).not.toBeInTheDocument()
   })
   it("marks a display without an adopted current as provisional and leaves an adopted one unmarked", async () => {
     state.available = true
@@ -648,9 +759,11 @@ describe("plain wording on the card page", () => {
     })
     expect(screen.getByRole("note")).toHaveTextContent("卡文未定：尚無採納的現行卡文")
     expect(screen.getByRole("note")).not.toHaveTextContent("發售")
-    expect(screen.getByText("此版次的原文")).toBeVisible()
+    // No translation anywhere: the one box holds this printing's own text, the note still names
+    // the other wording.
     expect(screen.getByText("Synthetic older effect")).toBeVisible()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    expect(document.querySelector("[data-wording-note]")).not.toBeNull()
     own.unmount()
     // Several observed revisions on this printing: the candidate comparison keeps the note.
     state.candidates.push({ printing_id: "p:synthetic", revision_id: "rev:synthetic" })
@@ -668,7 +781,7 @@ describe("plain wording on the card page", () => {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     expect(screen.getByRole("heading", { name: "此卡各版次的卡文不同" })).toBeVisible()
-    expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
+    expect(document.querySelector("[data-wording-note]")).toBeNull()
     expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
   })
   it("opens this printing's own wording when no wording is displayed yet", async () => {
@@ -958,7 +1071,7 @@ describe("page layout", () => {
         initialEntries: ["/cards/BP-SYNTHETIC"],
       })
       expect(document.querySelectorAll('[data-field="effect"]')).toHaveLength(1)
-      expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
+      expect(document.querySelector("[data-wording-note]")).toBeNull()
     },
   )
 

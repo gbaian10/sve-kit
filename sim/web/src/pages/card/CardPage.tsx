@@ -481,6 +481,9 @@ export function CardView({
       }),
     }),
   )
+  const printingLinks = new Map(
+    printingEntries.flatMap(({ printings: rows }) => rows.map(({ id, link }) => [id, link])),
+  )
   // Thumbnails need the printing's summary, which arrives with the printing metadata.
   const printingThumbnails: PrintingEntry[] = printingEntries.flatMap(({ printings: rows }) =>
     rows.flatMap(({ id, rarity, link }) => {
@@ -835,11 +838,13 @@ export function CardView({
                     <CardWording
                       client={client}
                       edition={region}
-                      catalog={catalog}
+                      // The completed printings carry rarity and premium, which order the chips
+                      // and so the printing named by the wording note.
+                      catalog={completePrintings?.value ?? catalog}
                       printingId={printingId}
                       wording={wording}
                       revision={revision}
-                      entry={entry}
+                      linkOf={(id) => printingLinks.get(id)}
                     />
                   </CardTextPanel>
                 )}
