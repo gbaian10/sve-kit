@@ -118,9 +118,9 @@ records:
   - face_id: f:72dde15acc8f5642aa4e189d506d76d5
     region: jp
     comparison_hash: sha256:afd5340f97863f6a55391642157711a41cc40953ed345a08b6b60b82f6d93c80
-    classification: errata
-    method: ai
-    reason: 條件檢查與選擇對象的先後位置改變；條件未滿足時是否仍選擇對象可能不同。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：「場に」只是明寫原本就只在場上有效；入場曲改成先選再看死靈術條件，條件不成立時不做任何處理，結果相同。
   - face_id: f:7b24baa2c8075c7995dc919250afd982
     region: en
     comparison_hash: sha256:17aaac8f5748d2cab7c63d04761246fed5ebd691002b5dd327f4fda0425bc07f
@@ -160,9 +160,9 @@ records:
   - face_id: f:8bbc5eee22f85a4091f0d028fe6d21af
     region: jp
     comparison_hash: sha256:8604c16c89d351821ac6380e18f4c23ba4ce1213e8c37c15864cae76672ddc4b
-    classification: errata
+    classification: same_effect
     method: manual
-    reason: 維護者判定：語序變更改變選擇時機，無官方勘誤頁
+    reason: 維護者判定：新版先選對象為官方統一寫法；條件同時管「變為護符」與「具有起動能力」，結果與舊版相同。
   - face_id: f:9beb0e10ab3a5e0a883dc7edb17ca960
     region: en
     comparison_hash: sha256:931bf31055330d1c1edc3a7875684f1e46d1123d1be59f5b0065f02f93a557c4

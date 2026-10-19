@@ -70,9 +70,9 @@ records:
   - face_id: f:52eb6b904f7b553f9ea178e214fecc25
     region: jp
     comparison_hash: sha256:7544b2dd508b7d165ed6de8907773b645c22c1e42d2c2b51bfcce9eceff0f795
-    classification: errata
-    method: ai
-    reason: 費用篩選新增原始費用限定；可能改變可選卡片集合，不能視為標點或提醒文差異。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：較新版次補上「元の」只是寫清楚原本的原始費用意圖、避免爭議，不是規則改變。
   - face_id: f:64aeea6fe7b55e66b17cf5effd0f3cfd
     region: en
     comparison_hash: sha256:d8e3ea45ba888462454c2f876abc31f215c25f8a92209ead6136041b20ce66db
@@ -82,9 +82,9 @@ records:
   - face_id: f:64aeea6fe7b55e66b17cf5effd0f3cfd
     region: jp
     comparison_hash: sha256:b69dcb3eafa38cdda213a636dc37e5f495d3a92594c718cbb4dd98971959ce05
-    classification: errata
-    method: ai
-    reason: 費用篩選新增原始費用限定；可能改變可選卡片集合，不能視為標點或提醒文差異。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：較新版次補上「元の」只是寫清楚原本的原始費用意圖、避免爭議，不是規則改變。
   - face_id: f:6ac84a34af0d5255a69219ce57432d7a
     region: en
     comparison_hash: sha256:8b56c6288e4694052a8772d3ec92fc6da16d68872e50104f1c4277f453b9e071

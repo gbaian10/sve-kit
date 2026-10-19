@@ -70,9 +70,9 @@ records:
   - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
     region: jp
     comparison_hash: sha256:abf721038818e03ee6e6217f87c4be1dfc66fcce9af92fe167ebd173c22a8122
-    classification: errata
-    method: ai
-    reason: 零計數器的處理由放入墓場改為破壞，且判斷時機從狀態改為到達零時；可能影響觸發與替代效果，留待勘誤版本呈現。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：以 EBD02-T01 的寫法為準。
   - face_id: f:272b9d335e4856e6bf329a48fdd4df1a
     region: en
     comparison_hash: sha256:e29299473dd486a35066154929e88cdef3dc15262cda5d39dec0ed71b27375bc
@@ -220,9 +220,9 @@ records:
   - face_id: f:9e5c0522581d5167900899e68823293d
     region: jp
     comparison_hash: sha256:33b8ba5181a5e77f6e42be180844bbabdea5ff386dd0ffa29abee2f0bf1659cb
-    classification: errata
-    method: ai
-    reason: 費用篩選新增原始費用限定；可能改變可選卡片集合，不能視為標點或提醒文差異。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：較新版次補上「元の」只是寫清楚原本的原始費用意圖、避免爭議，不是規則改變。
   - face_id: f:ab01bf103af85ffc9d0e46688ca853d3
     region: en
     comparison_hash: sha256:9cb1c287460354b536007d2c5c7013cf0066ba74a3bb9153a7ba2426029e9c2f
