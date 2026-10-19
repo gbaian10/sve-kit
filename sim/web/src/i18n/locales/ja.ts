@@ -149,8 +149,6 @@ export default {
     neutral: "ニュートラル",
   },
   filters: {
-    mergeCards: "同じカードを1回だけ表示",
-    mergeCardsHint: "レアリティ・イラスト・再録をまとめて表示",
     errataOnly: "エラッタのあるカードのみ",
     errataOnlyHint: "公式のエラッタ告知があるカード",
     keywords: "キーワード",

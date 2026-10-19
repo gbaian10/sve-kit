@@ -24,6 +24,9 @@ from sve_carddb.domains.card_extras import (
     populate_planned_card_extras,
     require_card_extras_ready,
 )
+from sve_carddb.domains.card_extras.reviewed_errata import (
+    configuration as errata_configuration,
+)
 from sve_carddb.domains.card_extras.reviewed_errata import read as read_errata
 from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
@@ -463,6 +466,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     )
     errata_translations = load_errata_translations(authored_root(inputs.repo))
     configuration = adoptions.configuration() | {
+        "reviewed_errata": dict(errata_configuration(inputs.repo / "card-data")),
         "errata_translations": errata_translations.configuration(),
         "product_identity": identities.configuration(),
         "offline_recipe": inputs.model_dump(

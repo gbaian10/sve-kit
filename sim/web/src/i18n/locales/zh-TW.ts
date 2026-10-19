@@ -141,8 +141,6 @@ const zhTW = {
     neutral: "中立",
   },
   filters: {
-    mergeCards: "同一張卡只顯示一次",
-    mergeCardsHint: "不同稀有度、異圖與再錄合併成一張",
     errataOnly: "只顯示勘誤卡",
     errataOnlyHint: "官方發過勘誤公告的卡",
     keywords: "關鍵字",

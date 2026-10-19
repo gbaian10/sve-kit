@@ -139,7 +139,15 @@ def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
                 {
                     "face_id": "face",
                     "field": "effect",
-                    "wording_translations": [],
+                    "wording_translations": [
+                        {
+                            "lang": "ja",
+                            "before": "Synthetic old translation",
+                            "after": "Synthetic corrected translation",
+                            "origin": "machine",
+                            "low_confidence": False,
+                        }
+                    ],
                     "before": "Before",
                     "after": "Synthetic text",
                 }
@@ -158,7 +166,7 @@ def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
         }
     ]
     assert result.metadata["qa_card_ids"] == ["card"]
-    assert result.metadata["errata_card_ids"] == ["card"]
+    assert result.metadata["errata_card_ids"] == {"jp": ["card"]}
 
 
 def test_build_audit_columns_and_unused_text_never_ship(db: Database) -> None:
@@ -251,7 +259,7 @@ def test_missing_capabilities_have_empty_arrays_nulls_and_unknown_not_absent() -
     ):
         assert result.tables[table] == []
     assert result.metadata["qa_card_ids"] == []
-    assert result.metadata["errata_card_ids"] == []
+    assert result.metadata["errata_card_ids"] == {"jp": []}
     assert result.metadata["coverage"] == {
         "reviews": [],
         "translations": [],

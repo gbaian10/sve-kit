@@ -66,6 +66,7 @@ export function compareSearchIndexes(actual: SearchApi, expected: SearchApi, edi
   const changes: Partial<QueryState>[] = [
     {},
     { altArtOnly: true },
+    { errataOnly: true },
     { classes: ["synthetic-missing-class"] },
     ...expected.options.classes.map((option) => ({ classes: [option.code] })),
     ...expected.options.sets.map((option) => ({ sets: [option.code] })),

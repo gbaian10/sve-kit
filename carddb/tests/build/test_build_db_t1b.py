@@ -67,11 +67,7 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
     with create_database(schema) as database:
         with database.transaction():
             populate(database, include_en=include_en)
-        assert all(
-            database.rows(table.name)
-            for table in schema.tables
-            if table.name != "errata_change_translation"
-        )
+        assert all(database.rows(table.name) for table in schema.tables)
         assert database._read(
             "SELECT count(*) FROM sqlite_schema WHERE type = 'table'"
         ) == ((len(expected),),)
@@ -507,3 +503,18 @@ def test_non_reskin_relation_cannot_reference_itself(db: Database) -> None:
         db.transaction(),
     ):
         db.update("card_related", key("card_related"), {"to_card_id": "card2"})
+
+
+@pytest.mark.parametrize(
+    ("column", "value"),
+    [("change_id", "missing"), ("lang", "missing"), ("source_id", "missing")],
+)
+def test_errata_translation_rejects_missing_foreign_key(
+    db: Database, column: str, value: str
+) -> None:
+    with pytest.raises(sqlite3.IntegrityError, match="Foreign key"), db.transaction():
+        db.update(
+            "errata_change_translation",
+            {"change_id": "change", "lang": "ja"},
+            {column: value},
+        )

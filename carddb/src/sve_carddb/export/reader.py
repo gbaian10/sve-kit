@@ -452,9 +452,12 @@ def _closure(view: View, manifest: Row) -> None:
         for row in rows:
             _walk(row, targets)
     _card_face_closure(view)
-    for key in ("qa_card_ids", "errata_card_ids"):
-        _ordered(array(manifest[key]))
-        if any(string(item) not in targets["card"] for item in array(manifest[key])):
+    errata = object_value(manifest["errata_card_ids"])
+    if set(errata) != set(array(manifest["regions"])):
+        raise ValueError("Errata summary regions mismatch")
+    for ids in [manifest["qa_card_ids"], *errata.values()]:
+        _ordered(array(ids))
+        if any(string(item) not in targets["card"] for item in array(ids)):
             raise ValueError("Manifest card reference missing")
     for row in view["text_unit"]:
         expected = (

@@ -149,8 +149,6 @@ export default {
     neutral: "Neutral",
   },
   filters: {
-    mergeCards: "Show each card once",
-    mergeCardsHint: "Combine rarities, artwork and reprints",
     errataOnly: "Only show cards with errata",
     errataOnlyHint: "Cards with an official errata announcement",
     keywords: "Keywords",

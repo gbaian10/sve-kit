@@ -34,7 +34,7 @@ function Wording({
   readonly lang: string
   readonly before: boolean
 }) {
-  const content = <InlineText text={text} />
+  const content = <InlineText text={text} emphasis />
   return (
     <p lang={lang} className="text-16 leading-effect whitespace-pre-wrap text-text-1">
       {before ? <del>{content}</del> : content}
@@ -122,29 +122,32 @@ export function CardErrata({
               .find((item) => item["lang"] === "zh-Hant")
             return (
               <div key={index} className="space-y-3 border-t border-border pt-3">
+                {translation && (
+                  <p className="text-12 text-text-3">
+                    {translation["low_confidence"] === true
+                      ? t("errata.translationLowConfidence")
+                      : t("errata.translation")}
+                  </p>
+                )}
                 {SIDES.map((side) => (
                   <div key={side}>
                     <h4 className="mb-1 text-12 text-text-3">{t(`errata.${side}`)}</h4>
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <Wording
-                        text={wording(change[side])}
-                        lang={region === "jp" ? "ja" : "en"}
-                        before={side === "before"}
-                      />
+                    <div className="space-y-2">
                       {translation && (
-                        <div>
-                          <Wording
-                            text={stringValue(translation[side])}
-                            lang="zh-Hant"
-                            before={side === "before"}
-                          />
-                          <p className="mt-1 text-12 text-text-3">
-                            {translation["low_confidence"] === true
-                              ? t("errata.translationLowConfidence")
-                              : t("errata.translation")}
-                          </p>
-                        </div>
+                        <Wording
+                          text={stringValue(translation[side])}
+                          lang="zh-Hant"
+                          before={side === "before"}
+                        />
                       )}
+                      <div className="rounded-control border border-border px-3 py-2">
+                        <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
+                        <Wording
+                          text={wording(change[side])}
+                          lang={region === "jp" ? "ja" : "en"}
+                          before={side === "before"}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}

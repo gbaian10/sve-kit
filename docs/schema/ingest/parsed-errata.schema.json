@@ -165,7 +165,7 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "pattern": "^src:v1:[0-9a-f]{64}\\Z",
+          "pattern": "^src:v1:[0-9a-f]{64}(?![\\s\\S])",
           "title": "Id",
           "type": "string"
         },

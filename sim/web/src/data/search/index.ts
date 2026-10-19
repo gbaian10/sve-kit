@@ -174,7 +174,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 20
+export const INDEX_IMAGE_FORMAT = 21
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -658,7 +658,6 @@ function build(
 function restore(bytes: Uint8Array, edition: Region): Parts {
   const { header, arrays } = unpack(bytes)
   const image = objectValue(header)
-  if (image["recipe"] !== "search-index-errata-v1") throw new Error("stale search index")
   if (image["edition"] !== edition) throw new Error("index image belongs to another edition")
   let next = 0
   const take = <T extends Uint8Array | Uint32Array | Float64Array>(
@@ -1006,7 +1005,6 @@ export class SearchIndex {
     const blocks = this.summaries.parts()
     return pack(
       {
-        recipe: "search-index-errata-v1",
         edition: this.edition,
         sets: [...this.sets],
         options: this.options as unknown as JsonObject,

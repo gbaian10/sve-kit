@@ -1,20 +1,20 @@
 format: 1
 kind: errata_translations
 entries:
-  - source_hash: sha256:3968572eafaae8dfedcec4eaf4f0af11342aa167a43f8405c9b3861decc8d29d
+  - source_hash: sha256:037aa5be3bc9bb4569cfea2308509b91221aa0deaf03ff224b8c5ff139b614ef
     source_url: https://shadowverse-evolve.com/errata/bp01-101/
     source_date: '2026-01-26'
     lang: zh-Hant
-    before: 『米米』
-    after: 『冥焰的右腕‧米米』
+    before: 米米
+    after: 冥焰的右臂‧米米
     origin: machine
     low_confidence: true
   - source_hash: sha256:4eb897951a25ec1ca50472598816055a4f83d586862a9aa50a66ab41113e5c0f
     source_url: https://shadowverse-evolve.com/errata/%E6%A0%B9%E6%BA%90%E3%81%B8%E3%81%AE%E5%9B%9E%E5%B8%B0/
     source_date: '2023-02-20'
     lang: zh-Hant
-    before: 選擇1個敵方從者。其玩家將其放置到牌堆頂或牌堆底。【連擊 5】改為全部敵方從者，而非選擇1個。（放置到牌堆的Token移出遊戲）
-    after: 選擇1個敵方從者。其玩家將其放置到牌堆頂或牌堆底。【連擊 5】改為由其玩家將全部敵方從者放置到牌堆頂或牌堆底，而非將其放置到牌堆。（每1個分別決定放置到牌堆頂或牌堆底）（放置到牌堆的Token移出遊戲）
+    before: 選擇敵方的1個從者。其玩家將其放置到牌堆頂或牌堆底。【連擊 5】改為選擇敵方的全部從者，而非1個。（放置到牌堆的Token移出遊戲）
+    after: 選擇敵方的1個從者。其玩家將其放置到牌堆頂或牌堆底。【連擊 5】改為由其玩家將敵方的全部從者放置到牌堆頂或牌堆底。（每1個分別決定放置到牌堆頂或牌堆底）（放置到牌堆的Token移出遊戲）
     origin: machine
     low_confidence: false
   - source_hash: sha256:59af0bda2072d9f623882e1c82217d997072fed2f72453ce6bee53059772be98
@@ -22,7 +22,7 @@ entries:
     source_date: '2026-01-26'
     lang: zh-Hant
     before: 【進化時】將『米米』與『可可』各1張放置到EX區。
-    after: 【進化時】將『冥焰的右腕‧米米』與『冥焰的左腕‧可可』各1張放置到EX區。
+    after: 【進化時】將『冥焰的右臂‧米米』與『冥焰的左臂‧可可』各1張放置到EX區。
     origin: machine
     low_confidence: true
   - source_hash: sha256:74a253b997ed71f19e9843c8a5d12613ede3b1054188f71825b7dca7cae039b3
@@ -33,12 +33,12 @@ entries:
     after: '{入場曲}這張卡片{攻擊力}+X。X為「不包含這次在內，本回合中自己使用的卡片張數」。'
     origin: machine
     low_confidence: false
-  - source_hash: sha256:a391d4e8a1b8b8085b95707a227a4723390aa0e8387405ed8fc8e98a6c3acd56
+  - source_hash: sha256:c4f49d4459ff71f57ce4b3b40616ec80e937c226acb1f2d29d0da5d9c01b58ef
     source_url: https://shadowverse-evolve.com/errata/bp01-101/
     source_date: '2026-01-26'
     lang: zh-Hant
-    before: 『可可』
-    after: 『冥焰的左腕‧可可』
+    before: 可可
+    after: 冥焰的左臂‧可可
     origin: machine
     low_confidence: true
   - source_hash: sha256:f61aa426d17cb518f317fdf084b7d221a6d4d0c12ad9d7ea35e2c6804ff06561
@@ -46,6 +46,6 @@ entries:
     source_date: '2026-01-26'
     lang: zh-Hant
     before: '{入場曲}將1張『米米』或1張『可可』放置到EX區。【死靈充能 10】改為各放置1張。'
-    after: '{入場曲}將1張『冥焰的右腕‧米米』或1張『冥焰的左腕‧可可』放置到EX區。【死靈充能 10】改為各放置1張。'
+    after: '{入場曲}將1張『冥焰的右臂‧米米』或1張『冥焰的左臂‧可可』放置到EX區。【死靈充能 10】改為各放置1張。'
     origin: machine
     low_confidence: true

@@ -446,7 +446,11 @@ export class SearchEngine {
       files,
       dataVersion: stringValue(manifest["data_version"]),
       manifestFields: entryFields(manifest),
-      errataCards: new Set(arrayValue(manifest["errata_card_ids"]).map((id) => stringValue(id))),
+      errataCards: new Set(
+        arrayValue(objectValue(manifest["errata_card_ids"])[request.edition]).map((id) =>
+          stringValue(id),
+        ),
+      ),
       parseMs,
       manifestRawBytes: manifestBytes.length,
     }

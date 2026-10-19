@@ -206,7 +206,7 @@ def test_reader_rejects_annotation_uses_outside_source_field_partition() -> None
             )
             for table in ("field_annotation", "annotation_set", "annotation_concept")
         ]
-        manifest = view.metadata | {"languages": ["ja", "zh-Hant"]}
+        manifest = view.metadata | {"languages": ["ja", "zh-Hant"], "regions": ["jp"]}
         validate_view(view.tables, manifest, fragments)
         for fragment in fragments:
             fragment.value["partition"] = "detail"

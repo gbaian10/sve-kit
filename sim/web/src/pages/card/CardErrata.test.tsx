@@ -1,7 +1,8 @@
-import { screen, within } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import { expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { InlineText } from "../../components/card/InlineText"
 import { createSnapshotClient } from "../../data"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
@@ -36,8 +37,21 @@ it("shows both announcement passages, their translations, date and source withou
     "https://example.invalid/errata/bp01-020",
   )
   expect(notice.querySelectorAll("del")).toHaveLength(2)
+  expect(within(notice).getAllByText("繁中・日文來源機器譯文（非官方）")).toHaveLength(1)
+  const translation = notice.querySelector('[lang="zh-Hant"]')
+  const original = notice.querySelector('[lang="ja"]')
+  expect(
+    translation &&
+      original &&
+      translation.compareDocumentPosition(original) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
   expect(
     notice.querySelector('del [lang="zh-Hant"]') ?? notice.querySelector('[lang="zh-Hant"] del'),
   ).toHaveTextContent("2")
   expect(within(notice).getByText(/不代表此版次的完整印刷卡文/u)).toBeVisible()
+})
+
+it("emphasizes explicit keyword headings without inventing historical annotation references", () => {
+  const { container } = render(<InlineText text="【連擊 5】改為選擇。" emphasis />)
+  expect(container.querySelector("strong")).toHaveTextContent("【連擊 5】")
 })

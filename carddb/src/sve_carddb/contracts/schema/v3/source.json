@@ -1920,9 +1920,18 @@
           }
         },
         "errata_card_ids": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/ID"
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "jp",
+              "en"
+            ]
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ID"
+            }
           }
         },
         "changes_ref": {

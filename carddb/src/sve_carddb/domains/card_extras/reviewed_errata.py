@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import ValidationError
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.contracts.snapshot import validate as validate_public
 from sve_carddb.core.json import digest, parse
@@ -128,6 +128,17 @@ class Index(RecordData):
     files: tuple[File, ...]
 
 
+def configuration(root: Path) -> dict[str, JsonValue]:
+    """Record exact uncommitted input bytes without performing admission checks."""
+    directory = root / "errata"
+    if not directory.exists():
+        return {}
+    return {
+        f"{region}.json": digest((directory / f"{region}.json").read_bytes())
+        for region in ("jp", "en")
+    }
+
+
 def read(root: Path, *, store_id: str) -> tuple[ErrataPage, ...]:
     """An absent supplemental directory preserves synthetic/minimal recipe support."""
     directory = root / "errata"
@@ -156,7 +167,8 @@ def _check_notice(notice: Notice, region: str) -> None:
         )
 
 
-def _admit(root: Path) -> list[Notice]:
+def admit(root: Path) -> list[Notice]:
+    """Admit the exact reviewed closure before returning portable notice records."""
     directory = root / "errata"
     index_path = directory / "index.json"
     if directory.is_symlink() or index_path.is_symlink():
@@ -196,7 +208,7 @@ def validate(root: Path, *, previous: Path | None = None) -> dict[str, int]:
             raise ValueError("Reviewed errata history cannot be removed")
         return {"notices": 0, "printings": 0, "changes": 0}
     try:
-        pages = _admit(root)
+        pages = admit(root)
     except ValidationError:
         raise ValueError("Invalid reviewed errata input") from None
     versions = [page.source.id for page in pages]
@@ -204,8 +216,11 @@ def validate(root: Path, *, previous: Path | None = None) -> dict[str, int]:
         raise ValueError("Duplicate reviewed errata source observation")
     if previous is not None:
         current = {page.source.id: page for page in pages}
-        for page in () if not (previous / "errata").exists() else _admit(previous):
-            if current.get(page.source.id) != page:
+        for page in () if not (previous / "errata").exists() else admit(previous):
+            candidate = current.get(page.source.id)
+            if candidate is None or candidate.model_dump(
+                exclude={"changes", "review_note"}
+            ) != page.model_dump(exclude={"changes", "review_note"}):
                 raise ValueError("Reviewed errata source history changed")
     return {
         "notices": len(pages),

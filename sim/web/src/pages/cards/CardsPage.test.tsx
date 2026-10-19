@@ -49,7 +49,7 @@ async function open(path = "/cards", { panel = true } = {}) {
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
   // The class row sits outside the panel and appears once the snapshot has loaded, whatever the
   // results are.
-  await screen.findByRole("button", { name: "精靈" }, { timeout: 8000 })
+  await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
   return rendered
 }
 
@@ -66,9 +66,6 @@ async function expectCount(total: number) {
     expect(screen.getByText("個版次")).toHaveTextContent(`${String(total)} 個版次`)
   })
 }
-
-// Cold snapshot startup and debounced suggestions share the CPU-capped integration runner.
-vi.setConfig({ testTimeout: 10_000 })
 
 describe("CardsPage", () => {
   it("commits a multi-match query with Enter without picking a suggestion", async () => {
@@ -407,7 +404,7 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "テンプラー")
-    expect(await screen.findByText(/符合：別名/u, {}, { timeout: 4000 })).toBeInTheDocument()
+    expect(await screen.findByText(/符合：別名/u)).toBeInTheDocument()
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
     expect(router.state.location.search).toBe("?q=%E3%83%86%E3%83%B3%E3%83%97%E3%83%A9%E3%83%BC")
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()

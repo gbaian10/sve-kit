@@ -19,7 +19,14 @@ import { catalogWork } from "./catalog-timing"
 import type { LoadedSnapshot } from "./client"
 import { drain } from "./format-v3/cursor"
 import type { Row } from "./format-v3/decode"
-import { integerValue, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
+import {
+  arrayValue,
+  integerValue,
+  type JsonObject,
+  type JsonValue,
+  objectValue,
+  stringValue,
+} from "./format-v3/json"
 import { mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
 import { type CardIndex, cardIndexCursor } from "./store"
 
@@ -330,6 +337,16 @@ function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
     const unit = index.textUnit(stringValue(row["label_unit_id"]))
     return unit ? stringValue(unit["text"]) : code
   }
+  const errataCards = new Map(
+    ["jp", "en"].map((region) => [
+      region,
+      new Set(
+        arrayValue(objectValue(snapshot.manifest["errata_card_ids"])[region] ?? []).map((id) =>
+          stringValue(id),
+        ),
+      ),
+    ]),
+  )
   const search = snapshot.config["search"]
   const normalizerMatches =
     typeof search === "object" &&
@@ -348,9 +365,7 @@ function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
       apply(
         state,
         state.errataOnly
-          ? entries.filter((entry) =>
-              (snapshot.manifest["errata_card_ids"] as string[]).includes(entry.cardId),
-            )
+          ? entries.filter((entry) => errataCards.get(edition)?.has(entry.cardId) === true)
           : entries,
         { edition, sets },
       ),

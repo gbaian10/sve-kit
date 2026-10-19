@@ -339,21 +339,23 @@ def _summaries(view: View, manifest: Row) -> None:
     }
     faces = {string(row["id"]): string(row["card_id"]) for row in view["face"]}
     prints = {string(row["id"]): string(row["card_id"]) for row in view["printing"]}
-    errata: set[str] = set()
+    errata: dict[str, set[str]] = {
+        string(region): set() for region in array(manifest["regions"])
+    }
     for row in view["errata"]:
         for raw in array(row["versions"]):
             version = object_value(raw)
-            errata |= {
+            errata[string(row["region"])] |= {
                 faces[string(object_value(item)["face_id"])]
                 for item in array(version["changes"])
             }
-            errata |= {
+            errata[string(row["region"])] |= {
                 prints[string(object_value(item)["printing_id"])]
                 for item in array(version["printings"])
             }
-    if manifest["qa_card_ids"] != sorted(qa) or manifest["errata_card_ids"] != sorted(
-        errata
-    ):
+    if manifest["qa_card_ids"] != sorted(qa) or manifest["errata_card_ids"] != {
+        region: sorted(ids) for region, ids in errata.items()
+    }:
         raise ValueError("QA/errata summary mismatch")
     universe: list[JsonValue] = [
         {key: row[key] for key in ("id", "kind", "definition_unit_id", "actions")}

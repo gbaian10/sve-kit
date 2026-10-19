@@ -99,39 +99,6 @@ export function FilterPanel({
       {stat(t("filters.attack"), "attack", STAT_CAP, query.attack)}
       {stat(t("filters.defense"), "defense", STAT_CAP, query.defense)}
       {facets}
-      <div className="flex flex-col gap-x-8 gap-y-2 md:flex-row md:flex-wrap">
-        <div className="flex items-center gap-2">
-          <Switch
-            size="sm"
-            checked={merged}
-            label={t("filters.mergeCards")}
-            onChange={(checked) => {
-              onChange({ ...query, unit: checked ? "card" : "printing" })
-            }}
-          />
-          <div>
-            <div className="text-13 text-text-1">{t("filters.mergeCards")}</div>
-            <p className="text-12 text-text-3">{t("filters.mergeCardsHint")}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch
-            size="sm"
-            checked={query.errataOnly}
-            label={t("filters.errataOnly")}
-            describedBy={`${id}-errata-hint`}
-            onChange={(checked) => {
-              onChange({ ...query, errataOnly: checked })
-            }}
-          />
-          <div>
-            <div className="text-13 text-text-1">{t("filters.errataOnly")}</div>
-            <p id={`${id}-errata-hint`} className="text-12 text-text-3">
-              {t("filters.errataOnlyHint")}
-            </p>
-          </div>
-        </div>
-      </div>
       {/* Display, not a filter: how many cells a card gets, and which printing a merged cell shows
           (#781). The representative choice only applies to merged cells, so it is disabled, not
           hidden, while every printing is listed: the URL keeps it for the next switch. */}
@@ -151,6 +118,23 @@ export function FilterPanel({
             </option>
           ))}
         </select>
+        <div className="flex items-center gap-2">
+          <Switch
+            size="sm"
+            checked={query.errataOnly}
+            label={t("filters.errataOnly")}
+            describedBy={`${id}-errata-hint`}
+            onChange={(checked) => {
+              onChange({ ...query, errataOnly: checked })
+            }}
+          />
+          <div>
+            <div className="text-13 text-text-1">{t("filters.errataOnly")}</div>
+            <p id={`${id}-errata-hint`} className="text-12 text-text-3">
+              {t("filters.errataOnlyHint")}
+            </p>
+          </div>
+        </div>
         <select
           aria-label={t("filters.representative")}
           value={query.representative}

@@ -38,6 +38,15 @@ def rows(*, include_en: bool = True) -> dict[str, dict[str, Value]]:
             "after_value": Json("Synthetic text"),
             "field": "effect",
         },
+        "errata_change_translation": {
+            "change_id": "change",
+            "lang": "ja",
+            "before_text": "Synthetic old translation",
+            "after_text": "Synthetic corrected translation",
+            "origin": "machine",
+            "low_confidence": False,
+            "source_id": "source",
+        },
         "errata_printing": {
             "errata_version_id": "errata_v",
             "printing_id": "printing",

@@ -79,15 +79,15 @@ def summaries(
     )
     faces = {row["id"]: row["card_id"] for row in view["face"]}
     prints = {row["id"]: row["card_id"] for row in view["printing"]}
-    errata_ids: set[str] = set()
+    errata_ids: dict[str, set[str]] = {region: set() for region in regions}
     for errata in view["errata"]:
         for raw in array(errata["versions"]):
             version = object_value(raw)
-            errata_ids.update(
+            errata_ids[string(errata["region"])].update(
                 string(faces[object_value(item)["face_id"]])
                 for item in array(version["changes"])
             )
-            errata_ids.update(
+            errata_ids[string(errata["region"])].update(
                 string(prints[object_value(item)["printing_id"]])
                 for item in array(version["printings"])
             )
@@ -122,7 +122,9 @@ def summaries(
     ]
     result: Record = {
         "qa_card_ids": json_list(qa_ids),
-        "errata_card_ids": json_list(sorted(errata_ids)),
+        "errata_card_ids": {
+            region: json_list(sorted(ids)) for region, ids in errata_ids.items()
+        },
         "source_windows": json_list(windows),
         "restriction_coverage": json_list(restrictions),
         "mechanic_universe_id": digest(canonical(json_list(universe))),
