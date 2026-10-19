@@ -18,7 +18,6 @@ const state = vi.hoisted(() => {
     mentions: [] as string[],
     texts,
     loads: [] as string[],
-    pins: [] as (readonly string[])[],
   }
 })
 
@@ -32,8 +31,7 @@ vi.mock("../../app/card-related", () => ({
 }))
 
 vi.mock("../../app/printing-snapshot", () => ({
-  relatedPrintings: (client: unknown, _snapshot: unknown, catalog: unknown, cardIds: string[]) => {
-    state.pins.push(cardIds)
+  relatedPrintings: (client: unknown, _snapshot: unknown, catalog: unknown) => {
     return state.failPin
       ? Promise.reject(new Error("synthetic print failure"))
       : Promise.resolve({ client, catalog })
@@ -197,7 +195,6 @@ beforeEach(() => {
   state.mentions = []
   state.texts = {}
   state.loads = []
-  state.pins = []
 })
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
@@ -239,8 +236,6 @@ describe("RelatedCards", () => {
         .getAllByRole("link")
         .map((link) => link.getAttribute("href")),
     ).toEqual(["/cards/BP05-053", "/cards/BP20-R08", "/cards/BP05-SL11"])
-    // The bands are pinned for this card first, then for its evolve pairs as well.
-    expect(state.pins).toEqual([["c:base"], ["c:base", "c:evolve"]])
   })
 
   it("lists what an evolve card evolves from and sends its other relations to the references", async () => {

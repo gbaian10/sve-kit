@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router"
 
+import { loadPrintedTextState } from "../../app/printing-detail"
 import { useAnnotatedText } from "../../app/snapshot"
 import { CardText } from "../../components/card/CardText"
 import { useTextLanguage } from "../../components/card/text-language"
@@ -69,6 +70,49 @@ interface OtherWording {
 
 const PLACEHOLDER = "\u0000"
 
+/** The face's `printed_text_state` from the print-detail band; undefined until read or unknown. */
+function usePrintedTextState(
+  client: SnapshotClient,
+  printingId: string,
+  faceId: string,
+  homeSetId: string | undefined,
+  edition: Region,
+): string | undefined {
+  const snapshot = client.snapshot()
+  const key = JSON.stringify([
+    client.base,
+    snapshot?.manifestHash ?? null,
+    printingId,
+    faceId,
+    homeSetId ?? null,
+    edition,
+  ])
+  const [state, setState] = useState<{ readonly key: string; readonly value?: string }>()
+  useEffect(() => {
+    if (homeSetId === undefined) return
+    let active = true
+    void loadPrintedTextState(
+      client,
+      client.snapshot(),
+      printingId,
+      faceId,
+      homeSetId,
+      edition,
+    ).then(
+      (value) => {
+        if (active) setState(value === undefined ? { key } : { key, value })
+      },
+      () => {
+        if (active) setState({ key })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [client, printingId, faceId, homeSetId, edition, key])
+  return state?.key === key ? state.value : undefined
+}
+
 /**
  * One printing's effect: the translation of the text it prints, its own text in the original
  * box, and a note under the effect naming the printings worded differently. A revision without a
@@ -79,6 +123,7 @@ function PrintingWording({
   edition,
   printingId,
   faceId,
+  homeSetId,
   ownRevisionId,
   translationRevisionId,
   classification,
@@ -87,6 +132,7 @@ function PrintingWording({
 }: TextProps & {
   readonly printingId: string
   readonly faceId: string
+  readonly homeSetId: string | undefined
   readonly ownRevisionId: string
   readonly translationRevisionId: string
   readonly classification: unknown
@@ -109,13 +155,7 @@ function PrintingWording({
     language,
     edition,
   )
-  const printedFace = useAnnotatedText(
-    client,
-    { kind: "printing_face", id: printingId, face_id: faceId },
-    "effect",
-    language,
-    edition,
-  )
+  const printedTextState = usePrintedTextState(client, printingId, faceId, homeSetId, edition)
   const different = ownRevisionId !== translationRevisionId
   // The official page prints nothing for this printing (an unconfirmed printed text): the latest
   // wording stands alone with the printed-text state line, no original box, no note.
@@ -149,10 +189,10 @@ function PrintingWording({
             owner={{ kind: "face_revision", id: translationRevisionId }}
             field="effect"
           />
-          {printedFace.value?.printedState === "unknown" && (
+          {printedTextState === "unknown" && (
             <p className="mt-2 text-13 text-text-2">{t("card.printedUnconfirmed")}</p>
           )}
-          {printedFace.value?.printedState === "derived" && (
+          {printedTextState === "derived" && (
             <p className="mt-2 text-13 text-text-2">{t("card.printedDerived")}</p>
           )}
         </>
@@ -253,6 +293,8 @@ export function CardWording({
     candidates.unshift({ revisionId: displayId, printings: [] })
   const display = wording?.["display"] as Row | undefined
   const ownId = own.length === 1 ? own[0]?.revisionId : null
+  const homeSet = catalog.index.printing(printingId)?.["home_set_id"]
+  const homeSetId = typeof homeSet === "string" ? homeSet : undefined
   // One printing stands for each other wording: the latest wording's basis printing, else the
   // first of that wording's printings in chip order.
   const chipOrder = new Map(
@@ -292,6 +334,7 @@ export function CardWording({
         edition={edition}
         printingId={printingId}
         faceId={stringValue(revision?.["face_id"] ?? "")}
+        homeSetId={homeSetId}
         ownRevisionId={ownId}
         translationRevisionId={displayId}
         classification={wording?.["classification"]}

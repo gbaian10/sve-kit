@@ -75,4 +75,89 @@ describe("pinPrintings", () => {
     // The original client keeps its own snapshot; only the pinned view sees the merged rows.
     expect(client.snapshot()).toBe(snapshot)
   })
+
+  it("pins the other region's bands from the merged bootstrap when the page's catalog cannot locate them", async () => {
+    // The EN page: its catalog locates EN printings only; the JP catalog is the base snapshot
+    // and the client's EN bootstrap is merged into it.
+    const other = {
+      manifestHash: "sha256:one",
+      bootstrap: [
+        {
+          file: "catalog/jp/family-BP05/0",
+          table: "printing",
+          value: {},
+          rows: [{ id: "p:jp", card_id: "c:base", region: "jp", home_set_id: "BP05" }],
+          identity: "printing:jp:BP05",
+        },
+        // A printing in another set is known to the catalog only through its card locator.
+        {
+          file: "catalog/jp/family-BP05/0",
+          table: "card_locator",
+          value: {},
+          rows: [
+            {
+              id: "p:jp-r",
+              card_id: "c:base",
+              card_no: "BP20-R08",
+              region: "jp",
+              home_set_id: "BP20",
+            },
+            {
+              id: "p:else",
+              card_id: "c:else",
+              card_no: "SP01-001",
+              region: "jp",
+              home_set_id: "SP01",
+            },
+          ],
+          identity: "catalog/jp/family-BP05/0/card-locators",
+        },
+      ],
+      files: new Map([
+        file("print/jp/family-BP05/0", "print", "jp", [
+          ["printing", "home_set", "BP05", "bootstrap", "family-BP05:band-0", 3],
+        ]),
+        file("print/jp/family-BP20/0", "print", "jp", [
+          ["printing", "home_set", "BP20", "bootstrap", "family-BP20:band-0", 1],
+        ]),
+        file("print/jp/family-SP01/0", "print", "jp", [
+          ["printing", "home_set", "SP01", "bootstrap", "family-SP01:band-0", 1],
+        ]),
+        file("print/en/family-BP05/0", "print", "en", [
+          ["printing", "home_set", "BP05", "bootstrap", "family-BP05:band-0", 1],
+        ]),
+      ]),
+    } as unknown as LoadedSnapshot
+    const current = {
+      manifestHash: "sha256:one",
+      bootstrap: [part("catalog/en/family-BP05/0", "printing:en:BP05")],
+      files: other.files,
+    } as unknown as LoadedSnapshot
+    const reads: string[] = []
+    const client = {
+      base: "/cdn",
+      snapshot: () => current,
+      fragments: vi.fn((key: string) => {
+        reads.push(key)
+        return Promise.resolve([part(key, `printing:${key}`)])
+      }),
+    } as unknown as SnapshotClient
+    const locators = {
+      index: { printingsOf: () => [{ id: "p:en", region: "en", home_set_id: "BP05" }] },
+    } as unknown as Catalog
+    const pinned = await pinPrintings(client, other, locators, ["c:base"], ["jp", "en"])
+    expect(reads.sort()).toEqual([
+      "print/en/family-BP05/0",
+      "print/jp/family-BP05/0",
+      "print/jp/family-BP20/0",
+    ])
+    expect(pinned.snapshot()?.bootstrap.map((entry) => entry.identity)).toEqual([
+      "printing:jp:BP05",
+      "catalog/jp/family-BP05/0/card-locators",
+      "printing:en:BP05",
+      "printing:print/jp/family-BP05/0",
+      "printing:print/jp/family-BP20/0",
+      "printing:print/en/family-BP05/0",
+    ])
+  })
 })

@@ -302,6 +302,8 @@ export default {
       printedDifferent:
         "{{printings}} とはカードテキストが異なり、効果に違いがある可能性があります。",
       printingJoiner: "、",
+      borrowedTranslation:
+        "この版のテキストにはまだ訳文がないため、最新の表記の訳文を表示しています。",
       provisional: "表記未定：採用された現在のテキストはまだありません",
     },
     wordingPending: "表記未定",

@@ -384,6 +384,11 @@ export function CardText({
           {value.translated && jpSource && (
             <p className="text-12 text-text-3">{t("card.jpSource")}</p>
           )}
+          {value.translated && printed !== undefined && (
+            <p className="text-12 text-text-3" data-borrowed-translation>
+              {t("card.wording.borrowedTranslation")}
+            </p>
+          )}
           <div className={cn(BODY, "space-y-2")}>
             {value.translated ? (
               <AnnotatedText

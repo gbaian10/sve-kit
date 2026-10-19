@@ -299,6 +299,8 @@ export default {
       printedSameEffect: "Worded slightly differently from {{printings}}; the meaning is the same.",
       printedDifferent: "The text differs from {{printings}}; the effect may differ.",
       printingJoiner: ", ",
+      borrowedTranslation:
+        "This printing's text has no translation yet; the latest wording's translation is shown.",
       provisional: "Wording pending: no current text has been adopted yet",
     },
     wordingPending: "Wording pending",

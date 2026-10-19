@@ -13,6 +13,7 @@ import { rovingRadioKeyDown } from "../../components/ui/useRovingRadio"
 import {
   type CardSummary,
   type Catalog,
+  type LoadedSnapshot,
   type Row,
   type SnapshotClient,
   stringValue,
@@ -85,24 +86,36 @@ interface PinnedState {
   readonly error?: unknown
 }
 
-/** The print bands of these cards' printings, pinned so thumbnails and summaries resolve. */
+/**
+ * The print bands of these cards' printings, pinned so thumbnails and summaries resolve. With the
+ * other edition's catalog loaded, both regions are pinned on top of it, so the other printings
+ * tab resolves its cross-region thumbnails too.
+ */
 function usePinnedPrintings(
   client: SnapshotClient,
   catalog: Catalog,
   cardIds: readonly string[],
   edition: Region,
+  otherSnapshot: LoadedSnapshot | undefined,
 ): PinnedState | undefined {
   const snapshot = client.snapshot()
   const ids = JSON.stringify(cardIds)
-  const key = JSON.stringify([client.base, snapshot?.manifestHash ?? null, ids, edition])
+  const key = JSON.stringify([
+    client.base,
+    snapshot?.manifestHash ?? null,
+    ids,
+    edition,
+    otherSnapshot?.manifestHash ?? null,
+  ])
   const [state, setState] = useState<PinnedState>()
   // Keyed by the manifest hash rather than the snapshot object, so a client that builds its
   // snapshot view per call does not restart the read on every render.
   useEffect(() => {
-    const snapshot = client.snapshot()
+    const snapshot = otherSnapshot ?? client.snapshot()
     if (!snapshot) return
     let active = true
-    void relatedPrintings(client, snapshot, catalog, JSON.parse(ids) as string[], [edition]).then(
+    const regions: ("jp" | "en")[] = otherSnapshot ? ["jp", "en"] : [edition]
+    void relatedPrintings(client, snapshot, catalog, JSON.parse(ids) as string[], regions).then(
       (value) => {
         if (active) setState({ key, value })
       },
@@ -113,7 +126,7 @@ function usePinnedPrintings(
     return () => {
       active = false
     }
-  }, [client, catalog, ids, edition, key])
+  }, [client, catalog, ids, edition, key, otherSnapshot])
   if (!snapshot) return { key }
   return state?.key === key ? state : undefined
 }
@@ -202,6 +215,7 @@ export function RelatedCards({
   printingId,
   revisionIds,
   printings,
+  otherSnapshot,
   linkTo,
 }: {
   readonly client: SnapshotClient
@@ -212,6 +226,8 @@ export function RelatedCards({
   /** The displayed revision of each face, whose text names the mentioned cards. */
   readonly revisionIds: readonly string[]
   readonly printings: readonly PrintingEntry[]
+  /** The other edition's catalog when its printings are listed too; its thumbnails need its rows. */
+  readonly otherSnapshot?: LoadedSnapshot | undefined
   readonly linkTo: (card: CardSummary) => CardLink
 }) {
   const { t } = useTranslation()
@@ -268,6 +284,7 @@ export function RelatedCards({
     catalog,
     [cardId, ...groups.evolve.cards.map((card) => card.cardId)],
     edition,
+    otherSnapshot,
   )
   const images = useImageIndex(pinned?.value?.client ?? client, true)
   // The section waits for the official rows and the pinned bands so its tabs and thumbnails do

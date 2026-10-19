@@ -910,6 +910,7 @@ export function CardView({
                 typeof revision?.["id"] === "string" ? [revision["id"]] : [],
               )}
               printings={printingThumbnails}
+              otherSnapshot={showOther ? other.snapshot : undefined}
               linkTo={(target) =>
                 cardLink(
                   {
