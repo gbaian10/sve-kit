@@ -17,6 +17,7 @@ export {
   type SnapshotStatus,
 } from "./client"
 export { cardPrintings, editionPrinting, locateEdition } from "./edition"
+export { type CardErratum, loadCardErrata } from "./errata"
 export { faceBasics, loadFaceCandidates } from "./face-basics"
 export type { Row } from "./format-v3/decode"
 export { decodeMessage, type DecodeRequest } from "./format-v3/decode-message"

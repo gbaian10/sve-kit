@@ -829,6 +829,7 @@ export function CardView({
                 )}
                 {printingId && catalog && (
                   <CardTextPanel
+                    cardId={cardId ?? ""}
                     key={printingId}
                     client={client}
                     edition={region}

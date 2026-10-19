@@ -164,6 +164,15 @@ export function ConditionChips({
         label: setLabel(code),
         without: { ...query, sets: query.sets.filter((other) => other !== code) },
       })),
+    ...(query.errataOnly
+      ? [
+          {
+            key: "errata",
+            label: t("filters.errataOnly"),
+            without: { ...query, errataOnly: false },
+          },
+        ]
+      : []),
     // Merging cells is display, but the maintainer wants it removable from here too.
     ...(query.unit === "printing"
       ? []

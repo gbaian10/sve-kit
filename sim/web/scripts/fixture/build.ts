@@ -1131,6 +1131,18 @@ async function addCard(ctx: CardContext): Promise<void> {
               {
                 face_id: face.id,
                 field: "effect",
+                wording_translations:
+                  face.previousEffectZh && face.effect.zhHant
+                    ? [
+                        {
+                          lang: "zh-Hant",
+                          before: face.previousEffectZh,
+                          after: face.effect.zhHant,
+                          origin: "machine",
+                          low_confidence: false,
+                        },
+                      ]
+                    : [],
                 before: face.previousEffectJa,
                 after: face.effect.ja,
               },

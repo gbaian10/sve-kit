@@ -446,6 +446,7 @@ export class SearchEngine {
       files,
       dataVersion: stringValue(manifest["data_version"]),
       manifestFields: entryFields(manifest),
+      errataCards: new Set(arrayValue(manifest["errata_card_ids"]).map((id) => stringValue(id))),
       parseMs,
       manifestRawBytes: manifestBytes.length,
     }
@@ -651,6 +652,7 @@ export class SearchEngine {
         dataVersion,
         manifestFields,
         manifestRawBytes,
+        errataCards,
         parseMs: manifestParseMs,
       } = await this.prepare(request, entry, signal)
       let parseMs = manifestParseMs
@@ -739,7 +741,7 @@ export class SearchEngine {
       const sealedBootstrap = bootstrap
       const index = catalogWork(
         "SearchIndex",
-        () => new SearchIndex(sealedBootstrap, request.edition),
+        () => new SearchIndex(sealedBootstrap, request.edition, errataCards),
       )
       buildMs += performance.now() - mark
       signal.throwIfAborted()

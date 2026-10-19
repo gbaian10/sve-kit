@@ -1,6 +1,21 @@
 import type { Messages } from "./zh-TW"
 
 export default {
+  errata: {
+    heading: "Errata",
+    fragmentHint:
+      "These are the changed passages from the official notice, not the full printed text of this version.",
+    before: "Before (notice excerpt)",
+    after: "After (notice excerpt)",
+    announced: "Announced: {{date}}",
+    effective: "Effective: {{date}}",
+    official: "Official errata notice",
+    translation: "Traditional Chinese · unofficial machine translation from Japanese",
+    translationLowConfidence:
+      "Traditional Chinese · unofficial machine translation from Japanese (needs confirmation)",
+    nonText: "This notice does not list a text change for this face. See the official notice.",
+    retry: "Reload errata",
+  },
   app: {
     title: "sve-kit",
   },
@@ -134,6 +149,10 @@ export default {
     neutral: "Neutral",
   },
   filters: {
+    mergeCards: "Show each card once",
+    mergeCardsHint: "Combine rarities, artwork and reprints",
+    errataOnly: "Only show cards with errata",
+    errataOnlyHint: "Cards with an official errata announcement",
     keywords: "Keywords",
     keywordLoading: "Loading tags",
     keywordEnglishUnknown: "English edition is not tagged yet",

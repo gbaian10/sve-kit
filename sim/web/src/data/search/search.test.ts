@@ -3102,3 +3102,19 @@ it("waits for printing dates before returning a release-date-sorted printing que
     h.session.dispose()
   }
 })
+
+it("filters official errata from the manifest before grouping and keeps it in a restored index", async () => {
+  const cache = memoryCache()
+  for (let pass = 0; pass < 2; pass++) {
+    const h = harness(origin(), cache)
+    h.session.load(base, "jp", "preview")
+    await h.settled()
+    h.channel.search({ ...query, state: { ...CARD_QUERY, errataOnly: true } })
+    await h.settled()
+    const result = h.status().result
+    expect(result.phase).toBe("complete")
+    if (result.phase !== "complete") throw new Error("missing result")
+    expect(result.page.items.map((item) => item.key).sort()).toEqual(["c:bp01-020", "c:bp01-021"])
+    h.session.dispose()
+  }
+})

@@ -344,7 +344,16 @@ function* catalogCursor(snapshot: LoadedSnapshot): Generator<void, Catalog> {
     classCodes,
     normalizerMatches,
     suggest: (text, edition, limit) => suggest(text, entries, { edition, sets, limit }),
-    results: (state, edition) => apply(state, entries, { edition, sets }),
+    results: (state, edition) =>
+      apply(
+        state,
+        state.errataOnly
+          ? entries.filter((entry) =>
+              (snapshot.manifest["errata_card_ids"] as string[]).includes(entry.cardId),
+            )
+          : entries,
+        { edition, sets },
+      ),
     summary: (printingId) => summaries.get(printingId),
     classLabel,
   }

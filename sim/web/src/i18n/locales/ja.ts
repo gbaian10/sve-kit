@@ -1,6 +1,19 @@
 import type { Messages } from "./zh-TW"
 
 export default {
+  errata: {
+    heading: "エラッタ",
+    fragmentHint: "公式告知の変更箇所です。この版の印刷テキスト全文ではありません。",
+    before: "訂正前（告知の抜粋）",
+    after: "訂正後（告知の抜粋）",
+    announced: "告知：{{date}}",
+    effective: "適用：{{date}}",
+    official: "公式エラッタ告知",
+    translation: "繁体字中国語・日本語原文からの非公式機械訳",
+    translationLowConfidence: "繁体字中国語・日本語原文からの非公式機械訳（要確認）",
+    nonText: "このカード面のテキスト変更は掲載されていません。公式告知をご確認ください。",
+    retry: "エラッタを再読み込み",
+  },
   app: {
     title: "sve-kit",
   },
@@ -136,6 +149,10 @@ export default {
     neutral: "ニュートラル",
   },
   filters: {
+    mergeCards: "同じカードを1回だけ表示",
+    mergeCardsHint: "レアリティ・イラスト・再録をまとめて表示",
+    errataOnly: "エラッタのあるカードのみ",
+    errataOnlyHint: "公式のエラッタ告知があるカード",
     keywords: "キーワード",
     keywordLoading: "タグを読み込み中",
     keywordEnglishUnknown: "英語版は未タグ付け",

@@ -8,16 +8,19 @@ import { Segmented } from "../../components/ui/Segmented"
 import type { SnapshotClient } from "../../data"
 import type { Region } from "../../domain/search"
 import { usePrefs } from "../../settings"
+import { CardErrata } from "./CardErrata"
 
 export function CardTextPanel({
   client,
   edition,
   printingId,
+  cardId,
   faceId,
   children,
 }: {
   readonly client: SnapshotClient
   readonly edition: Region
+  readonly cardId: string
   readonly printingId: string
   readonly faceId: string
   readonly children: ReactNode
@@ -50,6 +53,13 @@ export function CardTextPanel({
       {prefs.showFlavorText && flavor.value && (
         <CardText client={client} edition={edition} owner={owner} field="flavor" />
       )}
+      <CardErrata
+        client={client}
+        cardId={cardId}
+        printingId={printingId}
+        faceId={faceId}
+        region={edition}
+      />
       {hasPrintedText && (
         <Segmented
           className="mt-4"

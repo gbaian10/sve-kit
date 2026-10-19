@@ -90,7 +90,7 @@ const BY_SPELLING = new Map(DEFINITIONS.flatMap((d) => d.spellings.map((s) => [s
 const BY_STEM = new Map(DEFINITIONS.flatMap((d) => d.stems.map((s) => [s, d] as const)))
 const COST_SPELLING = /^(?:コスト|消費)(\d{1,2}|X)$/
 const COST_STEM = /^(?:icon_cost(\d{2})|COST (X))$/
-const MARKER = /\{([^{}]*)\}/g
+const MARKER = /\{([^{}]*)\}|《([^《》]+)》/g
 
 interface Span {
   /** UTF-16 offsets of the piece in the source text, so annotation ranges can be laid over it. */
@@ -125,8 +125,9 @@ function resolve(inner: string): { readonly symbol: TextSymbol; readonly alt: st
     const symbol = cost ? costSymbol(cost[2] ?? String(Number(cost[1]))) : BY_STEM.get(stem)
     return symbol && { symbol, alt }
   }
-  const cost = COST_SPELLING.exec(inner)
-  const symbol = cost ? costSymbol(cost[1] ?? "") : BY_SPELLING.get(inner)
+  const spelling = inner.replace(/^《(.*)》$/u, "$1")
+  const cost = COST_SPELLING.exec(spelling)
+  const symbol = cost ? costSymbol(cost[1] ?? "") : BY_SPELLING.get(spelling)
   return symbol && { symbol, alt: inner }
 }
 
@@ -135,7 +136,7 @@ export function inlinePieces(text: string): readonly InlinePiece[] {
   const pieces: InlinePiece[] = []
   let cursor = 0
   for (const match of text.matchAll(MARKER)) {
-    const resolved = resolve(match[1] ?? "")
+    const resolved = resolve(match[1] ?? match[2] ?? "")
     if (!resolved) continue
     const end = match.index + match[0].length
     if (match.index > cursor)
@@ -148,7 +149,7 @@ export function inlinePieces(text: string): readonly InlinePiece[] {
     pieces.push({
       kind: "symbol",
       symbol: resolved.symbol,
-      alt: resolved.alt,
+      alt: match[2] === undefined ? resolved.alt : match[0],
       label: resolved.alt.replace(/^\[(.*)\]$/, "$1"),
       start: match.index,
       end,

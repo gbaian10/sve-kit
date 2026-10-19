@@ -1,4 +1,17 @@
 const zhTW = {
+  errata: {
+    heading: "勘誤",
+    fragmentHint: "以下為官方公告列出的變更片段，不代表此版次的完整印刷卡文。",
+    before: "勘誤前（公告片段）",
+    after: "修正後（公告片段）",
+    announced: "公告：{{date}}",
+    effective: "生效：{{date}}",
+    official: "官方勘誤公告",
+    translation: "繁中・日文來源機器譯文（非官方）",
+    translationLowConfidence: "繁中・日文來源機器譯文（非官方・待確認）",
+    nonText: "此公告沒有列出本卡面的文字變更，請參閱官方公告。",
+    retry: "重新載入勘誤",
+  },
   app: {
     title: "sve-kit",
   },
@@ -128,6 +141,10 @@ const zhTW = {
     neutral: "中立",
   },
   filters: {
+    mergeCards: "同一張卡只顯示一次",
+    mergeCardsHint: "不同稀有度、異圖與再錄合併成一張",
+    errataOnly: "只顯示勘誤卡",
+    errataOnlyHint: "官方發過勘誤公告的卡",
     keywords: "關鍵字",
     keywordLoading: "標註載入中",
     keywordEnglishUnknown: "英文版尚未標註",

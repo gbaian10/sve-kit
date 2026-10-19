@@ -146,6 +146,7 @@ const CARD_COLUMNS = [
   "kinds",
   "present",
   "absent",
+  "errata",
 ] as const
 const PRINTING_COLUMNS = [
   "id",
@@ -475,7 +476,11 @@ function releaseDates(bootstrap: BootstrapColumns): Map<string, string | null> {
   return result
 }
 
-function build(bootstrap: BootstrapColumns, edition: Region): Parts {
+function build(
+  bootstrap: BootstrapColumns,
+  edition: Region,
+  errataCards: ReadonlySet<string>,
+): Parts {
   const dates = releaseDates(bootstrap)
   const pool = new StringPool()
   const summaryColumns = new Columns(pool)
@@ -516,6 +521,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     cards.absent.push(pool.encode([]))
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
+    cards.errata.push(Number(errataCards.has(entry.cardId)))
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
     cards.printingStart.push(printings.id.length)
     cards.nameStart.push(names.length)
@@ -652,6 +658,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
 function restore(bytes: Uint8Array, edition: Region): Parts {
   const { header, arrays } = unpack(bytes)
   const image = objectValue(header)
+  if (image["recipe"] !== "search-index-errata-v1") throw new Error("stale search index")
   if (image["edition"] !== edition) throw new Error("index image belongs to another edition")
   let next = 0
   const take = <T extends Uint8Array | Uint32Array | Float64Array>(
@@ -753,9 +760,15 @@ export class SearchIndex {
   private readonly edition: Region
 
   /** Builds from staged bootstrap columns, or restores the bytes `encode` produced. */
-  constructor(source: BootstrapColumns | Uint8Array, edition: Region) {
+  constructor(
+    source: BootstrapColumns | Uint8Array,
+    edition: Region,
+    errataCards: ReadonlySet<string> = new Set(),
+  ) {
     this.edition = edition
-    const parts = ArrayBuffer.isView(source) ? restore(source, edition) : build(source, edition)
+    const parts = ArrayBuffer.isView(source)
+      ? restore(source, edition)
+      : build(source, edition, errataCards)
     this.pool = parts.pool
     this.summaries = parts.summaries
     this.cards = parts.cards
@@ -993,6 +1006,7 @@ export class SearchIndex {
     const blocks = this.summaries.parts()
     return pack(
       {
+        recipe: "search-index-errata-v1",
         edition: this.edition,
         sets: [...this.sets],
         options: this.options as unknown as JsonObject,
@@ -1107,6 +1121,7 @@ export class SearchIndex {
     const positive = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "has")
     const negative = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "not")
     for (let card = 0; card < this.cards.id.length; card += 1) {
+      if (state.errataOnly && this.cards.errata[card] !== 1) continue
       if (
         positive.length &&
         !arrayValue(this.pool.decode(this.cards.present[card] ?? 0)).some((id) =>
