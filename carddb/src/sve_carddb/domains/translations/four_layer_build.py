@@ -98,6 +98,7 @@ class Report:
     unused_frames: tuple[str, ...]
     details: tuple[FieldReport, ...]
     english_exceptions: dict[str, JsonValue] | None = None
+    compiled: tuple[CompiledField, ...] = ()
 
     def payload(self) -> dict[str, JsonValue]:
         """Only counts, IDs and diagnostic codes enter reports, never source text."""
@@ -434,4 +435,5 @@ def apply(
         ),
         tuple(value for _, value in sorted(plan.details.items())),
         apply_english(db, inputs, settings.sources, audit, settings.reference_names),
+        plan.fields,
     )

@@ -64,6 +64,34 @@ ruling. This does not grant DSL review, freshness or execution qualifications.
 
 `storage.write(db, documents, revision, rebuild=rebuild)` uses the same resolver
 and checks that target/candidate frames and their verified bindings exist in this
-build before writing. The authored ruling format and `applies_to` contents are
-unchanged here. A future authored reference format must preserve the source-use
-scope before mechanical rebinding can enable it.
+build before writing. `applies_to` may declare a `LegacyReference` containing the
+complete old source-use domain; bare T references remain unproven. Mixing bare
+and explicit references to the same T across rulings is rejected.
+
+Full historical-domain validation belongs at data admission. After changing ruling
+references or their classification inputs, run:
+
+```bash
+sve-carddb rulings validate --repo /absolute/candidate-repository --build-db /absolute/validated-build.sqlite
+```
+
+The database must be a closed, previously validated offline build containing all
+selected historical source revisions. It is read-only evidence, not a database
+created or repaired by this command. Missing owners, fields, member coverage,
+body hashes or lengths fail validation. Printing membership, source field hashes
+and exact LF-based line ranges are also checked. Cards are sorted lexically and
+uses by canonical occurrence bytes. Generation code can call `historical.validate`
+with observations from the same verified source boundary before admitting data.
+
+Ordinary builds trust reviewed data. `historical.rebuild` reads the admitted use
+list without loading the A1 catalog, reopening historical source fields, or
+rechecking member coverage and text hashes. It maps that list against the
+translation build's current compiled bindings. A build without translation input
+still rejects explicit references; missing current candidates remain pending.
+
+Its callbacks retain supplied objects for the resolver; they do not repeat
+admission checks. Source changes and frame rekeying are handled by current
+candidate matching, not by rerunning the old normalizer. The historical revision
+choice still requires review against frozen full-face evidence: identical body
+bytes cannot identify which revision the old snapshot used. One-off evidence
+collection and reconciliation scripts and outputs stay outside this repository.

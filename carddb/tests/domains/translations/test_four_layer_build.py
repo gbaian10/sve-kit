@@ -1,5 +1,6 @@
 """The producer projects only complete fields proved against a real sealed batch."""
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -7,8 +8,14 @@ import pytest
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField, Target
+from sve_carddb.contracts.rulings import LegacyReference
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.effects.classifications import Basis
+from sve_carddb.domains.effects.reader import Catalog
 from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.rulings.historical import Observations, validate
+from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
+from sve_carddb.domains.rulings.storage import write as write_rulings
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.text_observations.vocabulary import Vocabulary
 from sve_carddb.domains.translations.four_layer_authored import (
@@ -25,8 +32,11 @@ from sve_carddb.domains.translations.four_layer_sources import descriptor
 from sve_carddb.domains.translations.inputs import load_glossary
 
 from ...support import digital_link_import_fixtures
+from ...support.build_db_fixtures import rows
 from ...support.digital_link_import_fixtures import make_fixture
 from ...support.translation_fixtures import template
+from ..effects.test_classifications import classification, member
+from ..rulings.test_rulings import ruling
 from .test_four_layer_classification import classifier
 from .test_four_layer_storage import compiled as compiled  # ruff: ignore[useless-import-alias] -- shared actual SQLite schema
 
@@ -115,6 +125,31 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
             ordinal=None,
         )
         source = descriptor(db, sources, field, fixture.jp.batch_id)
+        with db.transaction():
+            db.insert(
+                "printing",
+                rows()["printing"]
+                | {
+                    "id": "printing:sample",
+                    "card_id": fixture.card.id,
+                    "card_no": fixture.printing.card_no,
+                    "home_set_id": fixture.printing.home_set_id,
+                    "source_id": source.source_ref.source_version_id,
+                },
+            )
+            db.insert(
+                "printing_face",
+                rows()["printing_face"]
+                | {
+                    "printing_id": "printing:sample",
+                    "face_id": fixture.face.id,
+                    "card_id": fixture.card.id,
+                    "printed_name_unit_id": None,
+                    "printed_effect_unit_id": None,
+                    "printed_text_state": "unknown",
+                    "source_id": source.source_ref.source_version_id,
+                },
+            )
         engine = prepare_classifier(db, snapshot, sources, vocabulary, rules)
         authored_text = "Unused synthetic rule." if unused else "Synthetic rule."
         authored_source = source.model_copy(
@@ -170,6 +205,73 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
         )
         with db.transaction():
             report = apply(db, inputs, snapshot, settings)
+        actual_part = normalize_source("Synthetic rule.", source).parts[0]
+        historical = LegacyReference.model_validate_json(
+            canonical(
+                {
+                    "legacy": "T0123456789",
+                    "namespace": "classification-v0",
+                    "uses": [
+                        {
+                            "cards": [fixture.printing.card_no],
+                            "occurrence": {
+                                **source.model_dump(
+                                    mode="json",
+                                    include={
+                                        "owner",
+                                        "field",
+                                        "ordinal",
+                                        "source_hash",
+                                    },
+                                ),
+                                "line_ordinal": 0,
+                                "role": "body",
+                                "segments": [
+                                    s.model_dump(mode="json")
+                                    for s in actual_part.source_span.segments
+                                ],
+                            },
+                        }
+                    ],
+                }
+            )
+        )
+        documents = (ruling(applies_to=[historical.model_dump(mode="json")]),)
+        old_member = member().model_copy(
+            update={
+                "body_hash": digest(b"Synthetic rule."),
+                "body_length": len("Synthetic rule."),
+                "position": member().position.model_copy(
+                    update={"card_no": fixture.printing.card_no}
+                ),
+            }
+        )
+        catalog = Catalog(
+            "classification-v0",
+            Basis(recipe="fixture-v1", inputs_hash=digest(b"inputs")),
+            (
+                classification().model_copy(
+                    update={"id": historical.legacy, "members": (old_member.id,)}
+                ),
+            ),
+            (old_member,),
+        )
+        validate(documents, catalog, Observations(db))
+        with pytest.raises(ValueError, match="absent from the catalog"):
+            validate(documents, replace(catalog, classifications=()), Observations(db))
+
+        with db.transaction():
+            ruling_report = write_rulings(
+                db,
+                documents,
+                fixture.authored,
+                rebuild=rebuild_rulings(documents, report.compiled),
+            )
+        assert ruling_report.resolutions[0].reason == (
+            "no_candidate" if unused else "unsupported_relation"
+        )
+        assert ruling_report.payload()["active_template_edges"] == 0
+        assert len(ruling_report.resolutions[0].candidates) == (0 if unused else 1)
         assert report.fields == 1
         detail = report.details[0].payload()
         assert detail["owner"] == {

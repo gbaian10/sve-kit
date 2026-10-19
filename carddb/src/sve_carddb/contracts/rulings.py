@@ -34,6 +34,49 @@ class Evidence(RecordData):
     url: str | None = None
 
 
+class HistoricalUse(RecordData):
+    cards: Annotated[tuple[Text, ...], Field(min_length=1)]
+    occurrence: OccurrenceKey
+
+    @model_validator(mode="after")
+    def _unique_cards(self) -> Self:
+        if len(set(self.cards)) != len(self.cards):
+            raise ValueError("Historical use has duplicate printings")
+        if self.cards != tuple(sorted(self.cards)):
+            raise ValueError("Historical printings must be sorted")
+        if self.occurrence.owner.kind != "face_revision":
+            raise ValueError("Historical use requires a face revision")
+        if self.occurrence.field not in {"effect", "section"}:
+            raise ValueError("Historical use requires an ability field")
+        if any(
+            a.end > b.start
+            for a, b in zip(
+                self.occurrence.segments, self.occurrence.segments[1:], strict=False
+            )
+        ):
+            raise ValueError("Historical segments must be ordered and disjoint")
+        if self.occurrence.role != "body":
+            raise ValueError("Classification-v0 use requires the body role")
+        return self
+
+
+class LegacyReference(RecordData):
+    legacy: Annotated[str, Field(pattern=r"^T[0-9a-f]{10}$(?![\s\S])")]
+    namespace: Literal["classification-v0"]
+    uses: Annotated[tuple[HistoricalUse, ...], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def _unique_uses(self) -> Self:
+        keys = [canonical(u.occurrence.model_dump(mode="json")) for u in self.uses]
+        if len(keys) != len(set(keys)):
+            raise ValueError("Historical reference has duplicate source uses")
+        if keys != sorted(keys):
+            raise ValueError(
+                "Historical source uses must be sorted by canonical occurrence"
+            )
+        return self
+
+
 class Ruling(RecordData):
     format: Literal[2]
     kind: Literal["ruling"]
@@ -44,7 +87,7 @@ class Ruling(RecordData):
     evidence: tuple[Evidence, ...]
     strength: Literal["official", "generalized", "inferred", "undecided"]
     decided_on: Date
-    applies_to: tuple[Text, ...]
+    applies_to: tuple[Text | LegacyReference, ...]
     hint: dict[Text, Text]
     note: str = ""
     supersedes: Text | None = None
