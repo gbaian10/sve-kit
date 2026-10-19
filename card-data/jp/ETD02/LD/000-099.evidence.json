@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "ETD02",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-0c36545f4ba7708f": [
+        {
+          "ordinal": 0,
+          "name": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+          "date_raw": "2022-11-19",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=ETD02",
+            "https://shadowverse-evolve.com/products/etd01-03/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=ETD02",
+            "https://shadowverse-evolve.com/products/etd01-03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/etd01-03/",
+              "expansion_code": "ETD02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:51b7e269d8b68da7587cc547fa260ebac6cda48387d135abf4dfe7d145929851": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:0cdf711381e0096471ff6d51057156b4041f0387e374e9a576c924a6b28fa436",
+        "raw_bytes": 36597,
+        "first_receipt_id": "sha256:3a141a0eb034981e5c89776faa430d08207206c739f3637188eb73c99a4ff8b9",
+        "descriptor_sha256": "sha256:ca51a531ed2cf7078c93c7fbb7079585354ab3be76cbbe51ba5606a8c4802d19",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:d63f656ae1af711100b1798316452eefa2a781aa3666173bb67e82e5599c11e7"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-0c36545f4ba7708f",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:1eccc13c2668c7a8b5ba0c15140352a1f735af091df466a2bc3540bbbacadcbc"
+    }
+  }
+}

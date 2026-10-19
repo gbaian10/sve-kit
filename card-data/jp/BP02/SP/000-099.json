@@ -1,0 +1,92 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP02",
+  "range": "SP/000-099",
+  "products": {
+    "products-c98f96bb4055c3e4": [
+      {
+        "name": "ブースターパック第2弾「黒銀のバハムート」",
+        "date": "2022-06-30",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP02",
+          "https://shadowverse-evolve.com/products/bp02/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP02-SP01",
+      "documents": {
+        "documents-d439936e29904aa8": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-SP01",
+            "faces": [
+              {
+                "name": "ラプラスの魔 ラプラス・ダークネス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼",
+                  "プリンセス"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}これは{攻撃力}+X/{体力}+Xする。Xは「自分の場の『フォレストバット』の数」である。\n{起動}{コスト1}『フォレストバット』1体を墓場に置く：相手のフォロワー1体を選ぶ。それに3ダメージ。それのリーダーに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_sp01_3.png",
+                "trait_raw": "吸血鬼・プリンセス"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q305",
+                "date": "2022-06-24",
+                "question": "カードの名前が2つありますが、これは何ですか？",
+                "answer": "名前が2つあるカードには、カード名とコラボ名が存在します。\n名前が2つあるカードはルール上、上側に書かれたカード名のカードとして扱います。\n特定のカード名を参照するカードや能力をプレイする際、これらのカードは上側に書かれたカード名を参照します。"
+              },
+              {
+                "id": "Q304",
+                "date": "2022-06-24",
+                "question": "このフォロワーが場にあり、新たに『フォレストバット』1体が場に出たとき、このフォロワーは《攻撃力》+1/《体力》+1しますか？",
+                "answer": "いいえ。このフォロワーの《ファンファーレ》能力をプレイしたときに既に場にある『フォレストバット』の数のみを参照するため、新たに『フォレストバット』1体が場に出た場合、このフォロワーは《攻撃力》+1/《体力》+1しません。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-069"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aa04f77e6cf4f7f4e8b9427f3f78f3606aa8cc148a080ab00cb26cc1617cffb1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-SP01",
+            "fetched_at": "2026-09-24T23:17:58.162594Z"
+          },
+          "document_ref": "documents-d439936e29904aa8"
+        }
+      ]
+    }
+  ]
+}

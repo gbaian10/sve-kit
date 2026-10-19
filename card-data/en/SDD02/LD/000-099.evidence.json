@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD02",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-33062843a8dc4b18": [
+        {
+          "ordinal": 0,
+          "name": "Showdown Deck: Swordcraft",
+          "date_raw": "Mar. 20, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=SDD02",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SDD02",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sdd/",
+              "expansion_code": "SDD02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:6fdc61b1cbd055ea95c84c717e391682a78bd3b6f5112c391d934567033b5fe4": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:61fd82fbad30f50760ca099564acd629571296c91cd7237dc8571c7cfff3f417",
+        "raw_bytes": 35256,
+        "first_receipt_id": "sha256:f7f9a74246ca9eb935beca23a17857813ee43475952b569ad9ea51f92c38207c",
+        "descriptor_sha256": "sha256:f0b44395f3bc6b754084b1050578500f34cc7c8999cc461d853cec43b358cd05",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:1579341b9fa519c1a779c5b6d25fc61bae2645a37ad9ad3266c99487a2f67b31"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-33062843a8dc4b18",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:59f1170d0da0dd0323bdfeb1090051581a3e59f9569b79cb914967b60918762e"
+    }
+  }
+}

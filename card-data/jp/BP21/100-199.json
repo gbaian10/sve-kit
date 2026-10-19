@@ -1,0 +1,988 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP21",
+  "range": "100-199",
+  "products": {
+    "products-16b81cb0ff373351": [
+      {
+        "name": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+        "date": "2026-07-31",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP21",
+          "https://shadowverse-evolve.com/products/bp21/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP21-100",
+      "documents": {
+        "documents-61ac41820eaec183": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-100",
+            "faces": [
+              {
+                "name": "浄火の令嬢",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "学院",
+                  "光輝"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\nこれの{体力}を+したとき、相手の場のフォロワーすべてに1ダメージ。\n{ファンファーレ}自分の場に他の学院・フォロワーがいるなら、これは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "愛らしいあなた。その木苺の唇で、私の名を呼んでいて。\n待ち焦がれる寂しさを、ダージリンの熱で消してあげる。",
+                "illustrator": "haru",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-100.png",
+                "trait_raw": "信仰・学院・光輝"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2758",
+                "date": "2026-07-27",
+                "question": "『浄火の令嬢』が進化した場合、進化による攻撃力と体力の増加によって、進化前および進化後の『浄火の令嬢』が持つ「これの《体力》を+したとき、相手の場のフォロワーすべてに1ダメージ。」という能力は誘発しますか？",
+                "answer": "いいえ。進化による攻撃力と体力の増加によっては誘発しません。"
+              },
+              {
+                "id": "Q2757",
+                "date": "2026-07-27",
+                "question": "相手のターン中にこのフォロワーの《体力》を+した場合、このフォロワーの「これの《体力》を+したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-101"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:297ec9613c4176310ae18560660a0b5cb2f08efbd32a54adadd9d1282e1b6e33",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-100",
+            "fetched_at": "2026-09-24T18:40:39.032286Z"
+          },
+          "document_ref": "documents-61ac41820eaec183"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-101",
+      "documents": {
+        "documents-072f005c4fafae3d": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-101",
+            "faces": [
+              {
+                "name": "浄火の令嬢",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "学院",
+                  "光輝"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "これの{体力}を+したとき、相手の場のフォロワーすべてに1ダメージ。\n【進化時】自分のリーダーか自分の場のフォロワー1体を選ぶ。それは{体力}+2する。",
+                "sections": [],
+                "flavor": "砂糖菓子のように可愛らしいあの子となら、\nいずれ、きっと熱い愛の技を使えるはずですわ。",
+                "illustrator": "haru",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-101.png",
+                "trait_raw": "信仰・学院・光輝"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2759",
+                "date": "2026-07-27",
+                "question": "このフォロワーが超進化した場合、「これの《体力》を+したとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q2758",
+                "date": "2026-07-27",
+                "question": "『浄火の令嬢』が進化した場合、進化による攻撃力と体力の増加によって、進化前および進化後の『浄火の令嬢』が持つ「これの《体力》を+したとき、相手の場のフォロワーすべてに1ダメージ。」という能力は誘発しますか？",
+                "answer": "いいえ。進化による攻撃力と体力の増加によっては誘発しません。"
+              },
+              {
+                "id": "Q2757",
+                "date": "2026-07-27",
+                "question": "相手のターン中にこのフォロワーの《体力》を+した場合、このフォロワーの「これの《体力》を+したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-100"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9275ac5e6c0f98e99c7c458ff6fc8b0471459fd07f75d6844ce749e65801a7d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-101",
+            "fetched_at": "2026-09-24T18:40:41.646050Z"
+          },
+          "document_ref": "documents-072f005c4fafae3d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-102",
+      "documents": {
+        "documents-2ebf31ab8d5dda5f": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-102",
+            "faces": [
+              {
+                "name": "希望の断片・キリエ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "4",
+                "power": "1",
+                "hp": "1",
+                "text": "【守護】\n{ファンファーレ}1枚引く。自分のPPを3回復する。",
+                "sections": [],
+                "flavor": "欠片を集めて救世の騎士様を復活させなくちゃならない。\n僕にしか出来ないなら……みんなの為にもやってみせる。",
+                "illustrator": "唯＠W",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-102.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a7d26d8a85dc1ffea16614da9e597186d5e3398106fcb6409ae7d5f77365b629",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-102",
+            "fetched_at": "2026-09-24T18:40:44.691084Z"
+          },
+          "document_ref": "documents-2ebf31ab8d5dda5f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-103",
+      "documents": {
+        "documents-719a03af3935f669": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-103",
+            "faces": [
+              {
+                "name": "純真の花少女",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "学院",
+                  "光輝",
+                  "獣"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "ターンごとに1回、これの{体力}を+したとき、1枚引く。\n{起動}これを{アクト}：自分のリーダーは{体力}+1する。この能力は自分の場に他の学院・フォロワーがいるなら使える。",
+                "sections": [],
+                "flavor": "……あら。そこの魔物さん、迷い込んでしまったの？\nお可哀想だけど、私の手刀で成敗を――セイッ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-103.png",
+                "trait_raw": "信仰・学院・光輝・獣"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2760",
+                "date": "2026-07-27",
+                "question": "相手のターン中にこのフォロワーの《体力》を+した場合、このフォロワーの「ターンごとに1回、これの《体力》を+したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:49e74663fa4a6b9937df2919c6773cbd541f4d0553ba857365789c6b96349789",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-103",
+            "fetched_at": "2026-09-24T18:40:47.332710Z"
+          },
+          "document_ref": "documents-719a03af3935f669"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-104",
+      "documents": {
+        "documents-9204b5ebe45c980e": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-104",
+            "faces": [
+              {
+                "name": "ズラトロク",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "光輝",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n【守護】\n{ファンファーレ}1枚引く。これが手札以外から場に出ていたなら、これは{攻撃力}+2/{体力}+2する。",
+                "sections": [],
+                "flavor": "輝かせしは黄金の角。其は乙女と共に在りし楽園の番人。\n聖なる獣が出でし時、欲深き狩人は穿たれる。",
+                "illustrator": "NINNIN",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-104.png",
+                "trait_raw": "光輝・獣"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2745",
+                "date": "2026-07-27",
+                "question": "このフォロワーがEXエリアから場に出た場合、《ファンファーレ》能力の「これが手札以外から場に出ていたなら、」の条件を満たしますか？",
+                "answer": "はい。EXエリアやデッキや墓場などから出た場合、条件を満たします。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-105"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ffa02e912d1fe853f1c93a9e6f4a158da37561cae6538991aee6edd0754ee4b8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-104",
+            "fetched_at": "2026-09-24T18:40:50.315581Z"
+          },
+          "document_ref": "documents-9204b5ebe45c980e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-105",
+      "documents": {
+        "documents-ca34f4559501ff44": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-105",
+            "faces": [
+              {
+                "name": "ズラトロク",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "光輝",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】自分の手札の元のコスト5以下の【守護】を持つフォロワー1枚を場に出してよい。",
+                "sections": [],
+                "flavor": "再誕せし聖なる獣。出でるは原初のエーデルワイス。\n欲望が肥大した時、黄金もまた強靭となり、狩人を穿つ。",
+                "illustrator": "NINNIN",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-105.png",
+                "trait_raw": "光輝・獣"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-104"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:79efbfb00d3561b22e208501833f7f24c8eec2d8397ee226030fd88fb9a06b09",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-105",
+            "fetched_at": "2026-09-24T18:40:52.927960Z"
+          },
+          "document_ref": "documents-ca34f4559501ff44"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-106",
+      "documents": {
+        "documents-36e9cfcccd25b20a": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-106",
+            "faces": [
+              {
+                "name": "アクアプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "7",
+                "power": "4",
+                "hp": "5",
+                "text": "【守護】\n{ファンファーレ}自分のデッキから元のコスト5以下のスペル1枚を探し、EXエリアに置く。このターン、それをプレイする際、コストを-5する。",
+                "sections": [],
+                "flavor": "この水羽は加護の印。聖水の力を高めてくれるの。\nどんどん用意するから、好きなだけ汲んでいってね。",
+                "illustrator": "タダモノ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-106.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9b590180e091a33c052a356880814bb6a6e3278483cd2e66ceff484931964254",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-106",
+            "fetched_at": "2026-09-24T18:40:55.562110Z"
+          },
+          "document_ref": "documents-36e9cfcccd25b20a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-107",
+      "documents": {
+        "documents-cb5e745c9e6dea03": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-107",
+            "faces": [
+              {
+                "name": "聖鎧のチーター",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "自分のリーダーの{体力}を+したとき、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": "古代の神王は、かの俊足の獣を飼って狩猟の供とした。\n現代の神殿では、聖鎧を纏い賊を狩って祭壇の番をする。",
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-107.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2761",
+                "date": "2026-07-27",
+                "question": "相手のターン中に自分のリーダーの《体力》を+した場合、このフォロワーの「自分のリーダーの《体力》を+したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:664463a6d3cf586305ebe386605b1ed909a373c7d93a39475e175ac09ca65771",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-107",
+            "fetched_at": "2026-09-24T18:40:58.469256Z"
+          },
+          "document_ref": "documents-cb5e745c9e6dea03"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-108",
+      "documents": {
+        "documents-153f8e28afdb41c6": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-108",
+            "faces": [
+              {
+                "name": "教皇の祭器",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}これを{アクト}場のアミュレット1つを墓場に置く：相手のリーダーすべてに1ダメージ。自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": "教皇が己を飾り立てるのは、\n己が教理の飾りであることを忘れぬため。",
+                "illustrator": "AOGIRI",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-108.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2762",
+                "date": "2026-07-27",
+                "question": "『教皇の祭器』の《起動》能力のコストにある「場のアミュレット1つを墓場に置く」について、自分の場にあるこの『教皇の祭器』自身を墓場に置くことでコストの支払いを満たすことができますか？",
+                "answer": "はい。コストの支払いを満たすことができます。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ddc86f08e2e39e191bdcae26fcc806628934780232b611bac32e694b0249557c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-108",
+            "fetched_at": "2026-09-24T18:41:01.242770Z"
+          },
+          "document_ref": "documents-153f8e28afdb41c6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-109",
+      "documents": {
+        "documents-c3afc3b778046538": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-109",
+            "faces": [
+              {
+                "name": "気高き魔除け",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーが能力ダメージを受けたとき、これを墓場に置く：自分のリーダーは{体力}+4する。1枚引く。",
+                "sections": [],
+                "flavor": "魔除けは魔が嫌うもので作られるというが、\n魔が真に嫌悪するのは、魔除けを信じるほど清らかな心。",
+                "illustrator": "巻羊",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-109.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2763",
+                "date": "2026-07-27",
+                "question": "相手のターン中に自分のリーダーが能力ダメージを受けた場合、このフォロワーの「自分のリーダーが能力ダメージを受けたとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q2705",
+                "date": "2026-07-27",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6caa4966f7e12f85e63e88ee9bca0f0374b18e6887880650158a4d16a4be8a8a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-109",
+            "fetched_at": "2026-09-24T18:41:03.860704Z"
+          },
+          "document_ref": "documents-c3afc3b778046538"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-110",
+      "documents": {
+        "documents-9283288334f75118": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-110",
+            "faces": [
+              {
+                "name": "レジェンドティーチャー・ルシウス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "学院"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "「迷える者を救うために、今はこの白刃を振るっている」\n数多のジョブ歴を持つ渡り鳥。男は次の運命に誘われる。",
+                "illustrator": "ニジハヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-110.png",
+                "trait_raw": "学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-111"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae9a2628a3ef740d5cb669d4532747a3d85e08cf2bce8554e874ce277a2107a1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-110",
+            "fetched_at": "2026-09-24T18:41:06.572206Z"
+          },
+          "document_ref": "documents-9283288334f75118"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-111",
+      "documents": {
+        "documents-552a29afb11745c3": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-111",
+            "faces": [
+              {
+                "name": "レジェンドティーチャー・ルシウス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "学院"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "【進化時】手札の学院・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "「多くの若者が迷い、苦しんでいる？ならば俺は――！」\n斯くして男は、聖騎士から教師へジョブチェンジした。",
+                "illustrator": "ニジハヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-111.png",
+                "trait_raw": "学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-110"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:111685d3beaab96b9f15ce73fcac634acb619df32aebd3e78cffbf7eff1b8420",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-111",
+            "fetched_at": "2026-09-24T18:41:09.581441Z"
+          },
+          "document_ref": "documents-552a29afb11745c3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-112",
+      "documents": {
+        "documents-230356dd14340db1": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-112",
+            "faces": [
+              {
+                "name": "駆動の領域・グレティナ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "学院",
+                  "超克"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "5",
+                "text": "自分のSEPが0である限り、これは【疾走】を持つ。\n{起動}手札の学院・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに5ダメージ。1枚引く。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": "楽をしたい、楽にやりたい。その願いこそ進歩発展の源。\nようこそ、ロボティクス・テクニカル・スクールへ！",
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-112.png",
+                "trait_raw": "機械・学院・超克"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2764",
+                "date": "2026-07-27",
+                "question": "『駆動の領域・グレティナ』の「自分のSEPが0である限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分のSEPが0である限り、『駆動の領域・グレティナ』は【疾走】を持ちます。\n『駆動の領域・グレティナ』を場に出した後に自分のSEPが1以上から0以下になった場合、【疾走】を持ちます。\n『駆動の領域・グレティナ』を場に出した後に自分のSEPが0以下から1以上になった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q2730",
+                "date": "2026-07-27",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイして、1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイすることができず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:028c0ae619a04ddbe01f121ed2b01ec6a0a37dca75c9558cb673ca50e5d62511",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-112",
+            "fetched_at": "2026-09-24T18:41:12.422334Z"
+          },
+          "document_ref": "documents-230356dd14340db1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-113",
+      "documents": {
+        "documents-dbeda8415e50323c": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-113",
+            "faces": [
+              {
+                "name": "煌奏の学徒・アンリエット",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "学院",
+                  "シンガー"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、学院・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。自分の場の学院・フォロワーが3体以上なら、これは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "制服まで貸してくれるなんて、とっても光栄だわ。\n入学式を彩る校歌の伴奏は、特別ゲストの私に任せて！",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-113.png",
+                "trait_raw": "学院・シンガー"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9cdd3041beb17b884e0288378b72a261406348eda474e8dd2d75be5a1cd6b63f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-113",
+            "fetched_at": "2026-09-24T18:41:15.340963Z"
+          },
+          "document_ref": "documents-dbeda8415e50323c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-114",
+      "documents": {
+        "documents-da5d21f70386cc28": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-114",
+            "faces": [
+              {
+                "name": "大いなる学び舎",
+                "card_class": "ニュートラル",
+                "card_type": "アミュレット",
+                "traits": [
+                  "学院"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、学院・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}墓場に置く：自分のリーダーは{体力}+1する。この能力は自分の場の学院・フォロワーが2体以上なら使える。",
+                "sections": [],
+                "flavor": "国家の未来を担う、一流の人材が集う『学園』。\n己の意志で道を選ぶといい――学び、成長するために。",
+                "illustrator": "ponsumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-114.png",
+                "trait_raw": "学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9c1cb2a4358344e7398997f21523d4006ecd4158f59ea9d7cf9eea53b0b59232",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-114",
+            "fetched_at": "2026-09-24T18:41:18.019353Z"
+          },
+          "document_ref": "documents-da5d21f70386cc28"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-115",
+      "documents": {
+        "documents-de8434372bf394ae": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-115",
+            "faces": [
+              {
+                "name": "スマートゴブリン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "学院",
+                  "ゴブリン"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分の場の学院・フォロワーが3体以上なら、自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": "世界有数の学び舎に編入を果たしたゴブリンがいる。\n非凡なる者は拒まぬ、学園の品格を示す好例となった。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-115.png",
+                "trait_raw": "学院・ゴブリン"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:08ed86117c35f564bb4d13cd2bd63927de84b56e49bbb2cfac5f86ed6826fb14",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-115",
+            "fetched_at": "2026-09-24T18:41:21.097572Z"
+          },
+          "document_ref": "documents-de8434372bf394ae"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-116",
+      "documents": {
+        "documents-6099ee1fea1f2253": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-116",
+            "faces": [
+              {
+                "name": "絆の証明",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "学院",
+                  "ゴブリン"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のデッキの上4枚を見る。その中から、学院・カード2枚まで公開して手札に加えてよい。残りを好きな順にデッキの下に置く。自分のPPを1回復する。",
+                "sections": [],
+                "flavor": "卒業を前にゴブリンが見せた涙は――\nゴブリンとの間に絆は成立する、歴史的な証明となった。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-116.png",
+                "trait_raw": "学院・ゴブリン"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9a4368890159c82b08061d67a33a6990f72accbec781b2869c367d2518f9b9a4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-116",
+            "fetched_at": "2026-09-24T18:41:24.120946Z"
+          },
+          "document_ref": "documents-6099ee1fea1f2253"
+        }
+      ]
+    }
+  ]
+}

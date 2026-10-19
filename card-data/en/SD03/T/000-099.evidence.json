@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SD03",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-07ba122983e4e978": [
+        {
+          "ordinal": 0,
+          "name": "Starter Deck #3 “Mysteries of Conjuration”",
+          "date_raw": "Jun. 30, 2023",
+          "href_raw": [
+            "/cards/searchresults?expansion=SD03",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SD03",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sd0106/",
+              "expansion_code": "SD03"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:4ffe3ad6b40217ce5c07986a6239a4f99671dd51ef53749bd8ad0cf9b7ee61a0": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:3b10d7db29524666815a265fd4e516ff78a9999bd97af7019a4fd1d2740d1982",
+        "raw_bytes": 35480,
+        "first_receipt_id": "sha256:46a0f6120c5e02753fec4ba4ca559a6c0a54dd79c33393ac25b61f6f5d7e33fc",
+        "descriptor_sha256": "sha256:cc89ae57dcb79f955963beeedba36eacdf615bd6118549ad12b5fdf3d57d2bd8",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:6d8ac9950cccccabbb5055352ad5d852e15a4f49fb5d3d5a4bf38fc70bfdd29f"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-07ba122983e4e978",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:051bcfa0a0224cb12fcc5e5e2b26b2a5e1e0d2846dc8707462ea73d2a1bdc4b2"
+    },
+    "src:v1:64bb487cc7457e98f879359d4c3f43fe34ebacb1ba9718c2a588d12c99048f1b": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:a79ed380995ae7e26d8334727f12c5907dfb5cc614fc1c6a89f283c6ddb90bba",
+        "raw_bytes": 35547,
+        "first_receipt_id": "sha256:da70f436e66afcb9ab3e8cb5c506b6df3e9b26681f5f928dc10de82219e4b6dd",
+        "descriptor_sha256": "sha256:b4b47de715205135097635cd88d09ac1b8c33482f87fc1f461c80cee83e16cec",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:fd686bae5dc4a9b2b549e746fef3251b768786bf1a0e1cc83e963c606ed539f1"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-07ba122983e4e978",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:3044ed7e4046be1ca0698f9a2488cfb93cd016c9ea5c67f074e7340399ae5996"
+    }
+  }
+}

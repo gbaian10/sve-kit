@@ -1,0 +1,131 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01a",
+  "range": "U/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-5907c1bc0c53213a": [
+        {
+          "ordinal": 0,
+          "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+          "date_raw": "2024-04-19",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=DSD01",
+            "https://shadowverse-evolve.com/products/dsd01/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=DSD01",
+            "https://shadowverse-evolve.com/products/dsd01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/dsd01/",
+              "expansion_code": "DSD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4c8694213876d3bd": [
+        {
+          "stable_source_key": "Q1235",
+          "official_number": "Q1235",
+          "locator": "qa-block:0",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1234",
+          "official_number": "Q1234",
+          "locator": "qa-block:1",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1233",
+          "official_number": "Q1233",
+          "locator": "qa-block:2",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        }
+      ]
+    },
+    "related": {
+      "related-cd4ddc623a6ecf9f": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=DSD01a-002"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=DSD01a-008"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:c85b4198d74835c4db0c0266b60081e08e53e6183103b00ac6ef86028f873856": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:0870e77750f1bfa6bc5166e7fbbc4b3150a1fd9286906a3032ec2ff71483e45f",
+        "raw_bytes": 39888,
+        "first_receipt_id": "sha256:edf122da56370360cf614a1b3194884b896b19583db61ba74fade92ff7a52323",
+        "descriptor_sha256": "sha256:24a65cf64c8ccfc3ca4a44efb22206a80457b64ada8d9c1c007b173bfd65d198",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:e880dff8baf0e001a7bc45b9056cd9c2bc3d4c7d9000b049c27d247e5f3113f3"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5907c1bc0c53213a",
+        "qa": "qa-4c8694213876d3bd",
+        "related": "related-cd4ddc623a6ecf9f",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:9a945f7d4950dbc88f1a56ebe368dd94a9f91d690808b8b9bb519a68e92798f1"
+    }
+  }
+}

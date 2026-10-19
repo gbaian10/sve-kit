@@ -1,0 +1,1951 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP10",
+  "range": "SL/000-099",
+  "products": {
+    "products-4a38f6ab1ca8bf00": [
+      {
+        "name": "ブースターパック第10弾「Gods of the Arcana」",
+        "date": "2024-04-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP10",
+          "https://shadowverse-evolve.com/products/bp10/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP10-SL01",
+      "documents": {
+        "documents-4db7581607dc3c1d": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL01",
+            "faces": [
+              {
+                "name": "《吊るされた男》・ローフラッド",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "精霊"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\nこれは能力ダメージを受けない。これは能力によって破壊されない。（交戦ダメージでは破壊される）\n{ファンファーレ}{コスト5}：自分のデッキから『真偽の逆転』1枚を探し、EXエリアに置く。このターン、それをプレイする際、コストを-8する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl01.png",
+                "trait_raw": "アルカナ・精霊"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1258",
+                "date": "2024-04-15",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              },
+              {
+                "id": "Q1257",
+                "date": "2024-04-15",
+                "question": "「これは能力によって破壊されない」という能力を持つ『《吊るされた男》・ローフラッド』に対して、『仁義の悪魔・ユヅキ』などが持つ能力の効果にある「墓場に置く」が適用された場合、墓場に置きますか？",
+                "answer": "はい。墓場に置きます。\n「墓場に置く」という処理は能力による破壊ではないので、『《吊るされた男》・ローフラッド』の「これは能力によって破壊されない。」という能力は働きません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:183e9e0ac0f08695c8e2a8e86b33c34c469a0a8bf5dd918b6249a32c02384bbd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL01",
+            "fetched_at": "2026-09-24T21:30:20.616332Z"
+          },
+          "document_ref": "documents-4db7581607dc3c1d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL02",
+      "documents": {
+        "documents-b7042ebfaeb09e1f": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL02",
+            "faces": [
+              {
+                "name": "《吊るされた男》・ローフラッド",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アルカナ",
+                  "精霊"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "これは能力ダメージを受けない。これは能力によって破壊されない。\n【進化時】【コンボ_3】これは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl02.png",
+                "trait_raw": "アルカナ・精霊"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1259",
+                "date": "2024-04-15",
+                "question": "自分のターン中、手札から『《吊るされた男》・ローフラッド』をプレイし、次にEXエリアから『フェアリー』をプレイしました。その後、場に出した『《吊るされた男》・ローフラッド』を進化した場合、『《吊るされた男》・ローフラッド（EVOLVE）』の【進化時】能力にある【コンボ_3】の条件を満たしていますか？",
+                "answer": "いいえ。フォロワーの進化はカードのプレイには含まず、このターンにプレイしたカードは『《吊るされた男》・ローフラッド』と『フェアリー』の2枚のみのため、【コンボ_3】の条件を満たしていません。"
+              },
+              {
+                "id": "Q1258",
+                "date": "2024-04-15",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              },
+              {
+                "id": "Q1257",
+                "date": "2024-04-15",
+                "question": "「これは能力によって破壊されない」という能力を持つ『《吊るされた男》・ローフラッド』に対して、『仁義の悪魔・ユヅキ』などが持つ能力の効果にある「墓場に置く」が適用された場合、墓場に置きますか？",
+                "answer": "はい。墓場に置きます。\n「墓場に置く」という処理は能力による破壊ではないので、『《吊るされた男》・ローフラッド』の「これは能力によって破壊されない。」という能力は働きません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:16e8ca899712574b454233e2cb467cafd82fb0735c44611c51d76d655bd31683",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL02",
+            "fetched_at": "2026-09-24T21:30:23.266273Z"
+          },
+          "document_ref": "documents-b7042ebfaeb09e1f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL03",
+      "documents": {
+        "documents-7fdb323f7595e6c2": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL03",
+            "faces": [
+              {
+                "name": "遺物の番人・ルチル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "4",
+                "text": "{ファンファーレ}『エンシェントアーティファクト』1枚と『ミスティックアーティファクト』1枚の中から、1枚を場に出す。1枚をEXエリアに置く。\n{起動}これを{アクト}EXエリアのカードを元のコストがすべて異なるように5枚消滅：自分のエボルヴデッキの『神秘の遺物・スピネ＆ルチル』1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl03.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1262",
+                "date": "2024-04-15",
+                "question": "「《起動》これを《アクト》EXエリアのカードを元のコストがすべて異なるように5枚消滅：」とは、どのようなカードを消滅させることを指しますか？",
+                "answer": "例えば、コスト0の『フェアリーウィスプ』、コスト1の『エンシェントアーティファクト』、コスト2の『薔薇の一撃』、コスト3の『ミスティックアーティファクト』、コスト6の『ビューティ＆ビースト』のような、コストがそれぞれ異なるカード5枚を指します。"
+              },
+              {
+                "id": "Q1261",
+                "date": "2024-04-15",
+                "question": "自分の場にカードが4枚ある状況で、『遺物の番人・ルチル』をプレイした場合、《ファンファーレ》能力で『エンシェントアーティファクト』と『ミスティックアーティファクト』を1枚ずつEXエリアに置くことができますか？",
+                "answer": "いいえ。『エンシェントアーティファクト』か『ミスティックアーティファクト』のどちらか1枚を選択してEXエリアに置きます。"
+              },
+              {
+                "id": "Q1260",
+                "date": "2024-04-15",
+                "question": "《ファンファーレ》能力で『エンシェントアーティファクト』を場に出した場合、さらに『エンシェントアーティファクト』をEXエリアに置くことができますか？",
+                "answer": "いいえ。『エンシェントアーティファクト』を場に出した場合、『ミスティックアーティファクト』をEXエリアに置きます。逆に『ミスティックアーティファクト』を場に出した場合は『エンシェントアーティファクト』をEXエリアに置きます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T15"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:39f9838999055e735b3bf1d90ceef57b330df3e1a3916ace622a4e1c710b616c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL03",
+            "fetched_at": "2026-09-24T21:30:26.055432Z"
+          },
+          "document_ref": "documents-7fdb323f7595e6c2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL04",
+      "documents": {
+        "documents-c5057fbb901043f6": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL04",
+            "faces": [
+              {
+                "name": "神秘の遺物・スピネ＆ルチル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "10",
+                "power": "6",
+                "hp": "6",
+                "text": "自分のエンドフェイズが来たとき、これをスタンドする。\n相手の場にフォロワーが出たとき、これを{アクト}：場に出たフォロワー1体に6ダメージ。\n{ファンファーレ}相手のリーダーすべてと相手の場のフォロワーすべてに6ダメージ。自分のデッキの上2枚を見る。その中から、2枚までEXエリアに置いてよい。残りを墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl04.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              },
+              {
+                "id": "Q1266",
+                "date": "2024-04-15",
+                "question": "相手のターン中、自分の場に『神秘の遺物・スピネ＆ルチル』がいる状況で、相手が『断罪者・シルヴィア』をプレイし、自分の場の『神秘の遺物・スピネ＆ルチル』を目標に《ファンファーレ》能力をプレイした場合、『神秘の遺物・スピネ＆ルチル』の「相手の場にフォロワーが出たとき、これを《アクト》：場に出たフォロワー1体に6ダメージ。」という能力によって、場に出た『断罪者・シルヴィア』に6ダメージ与えることができますか？",
+                "answer": "いいえ。『断罪者・シルヴィア』に6ダメージ与えることはできません。\n相手の場に『断罪者・シルヴィア』が出たとき、『断罪者・シルヴィア』の《ファンファーレ》能力と『神秘の遺物・スピネ＆ルチル』の能力が同時に誘発し、待機状態になります。\n待機状態になっている自動能力は、ターンプレイヤーから解決するため、先に『断罪者・シルヴィア』の《ファンファーレ》能力を解決し、自分の場の『神秘の遺物・スピネ＆ルチル』が破壊されます。その後、『神秘の遺物・スピネ＆ルチル』の能力を解決しますが、『神秘の遺物・スピネ＆ルチル』が墓場に置かれていることで「これを《アクト》」というコストを支払うことができないため、『断罪者・シルヴィア』に6ダメージを与えることが出来ません。"
+              },
+              {
+                "id": "Q1265",
+                "date": "2024-04-15",
+                "question": "相手の場に2体以上のフォロワーが同時に出た場合、『神秘の遺物・スピネ＆ルチル』の「相手の場にフォロワーが出たとき、これを《アクト》：場に出たフォロワー1体に6ダメージ。」という能力は、コストを支払うことでその中の1体に6ダメージを与えますか？",
+                "answer": "はい。相手の場に2体以上のフォロワーが同時に出た場合、コストを支払うことでその中の1体に6ダメージを与えることができます。"
+              },
+              {
+                "id": "Q1264",
+                "date": "2024-04-15",
+                "question": "自分のターンだけでなく、相手のターン中に相手の場にフォロワーが出た場合、「相手の場にフォロワーが出たとき、これを《アクト》：場に出たフォロワー1体に6ダメージ。」という能力は誘発しますか？",
+                "answer": "はい。自分のターンだけでなく相手のターンでも誘発します。"
+              },
+              {
+                "id": "Q1263",
+                "date": "2024-04-15",
+                "question": "相手の場に【オーラ】を持つフォロワーが出た場合、『神秘の遺物・スピネ＆ルチル』の「相手の場にフォロワーが出たとき、これを《アクト》：場に出たフォロワー1体に6ダメージ。」という能力によって、その【オーラ】を持つフォロワーにダメージを与えることができますか？",
+                "answer": "はい。ダメージを与えることができます。\n【オーラ】は相手の能力によって選ぶことのみを禁止する能力です。この能力では相手の場のフォロワーを選ばないため、【オーラ】を持っていてもダメージを与えることができます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6db270613f880ea2fe39ddb50f7553b958d43eef98132bfa20101480ceb4449f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL04",
+            "fetched_at": "2026-09-24T21:30:28.807548Z"
+          },
+          "document_ref": "documents-c5057fbb901043f6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL05",
+      "documents": {
+        "documents-5757c1042a1333ee": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL05",
+            "faces": [
+              {
+                "name": "《戦車》・オルオーン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "指揮官"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】『ナイト』1体を場に出す。【2】これは{攻撃力}+1して、【突進】【守護】を持つ。【3】相手のリーダーすべてに2ダメージ。【4】{コスト4}これを墓場に置く：自分のエボルヴデッキの『《暴走》する戦車・オルオーン』1枚を場に出してよい。",
+                "sections": [
+                  "『ナイト』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl05.png",
+                "trait_raw": "アルカナ・指揮官"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1276",
+                "date": "2024-04-15",
+                "question": "自分の場が上限枚数の場合、《ファンファーレ》能力によって、【1】をチョイスすることができますか？",
+                "answer": "はい。【1】をチョイスすることができます。\nその場合、『ナイト』1体を場に出すことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL06"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0560181b4e00a1f3341f9114725ce0042a0068a585c526505f168ac6cb0d2795",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL05",
+            "fetched_at": "2026-09-24T21:30:31.573501Z"
+          },
+          "document_ref": "documents-5757c1042a1333ee"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL06",
+      "documents": {
+        "documents-8ba4a14a27f96ff1": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL06",
+            "faces": [
+              {
+                "name": "《暴走》する戦車・オルオーン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "アルカナ",
+                  "指揮官"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "7",
+                "power": "7",
+                "hp": "7",
+                "text": "これは相手を攻撃できない。\n自分のエンドフェイズが来たとき、下記を2回くり返す。サイコロをふる。1か2なら、相手の場のフォロワーすべてを破壊する。3か4なら、相手のリーダーすべてに7ダメージ。5か6なら、自分のリーダーに7ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl06.png",
+                "trait_raw": "アルカナ・指揮官"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1278",
+                "date": "2024-04-15",
+                "question": "相手のリーダーの体力が7以下の状況で、「自分のエンドフェイズが来たとき、下記を2回くり返す。サイコロをふる。1か2なら、相手の場のフォロワーすべてを破壊する。3か4なら、相手のリーダーすべてに7ダメージ。5か6なら、自分のリーダーに7ダメージ。」という能力をプレイし、1回目のサイコロで3が出た場合、その時点でバトルに勝利しますか？",
+                "answer": "いいえ。1回目のサイコロで相手のリーダーの体力が0になった場合でも、その時点でバトルに勝利することはなく、もう1回サイコロをふります。『《暴走》する戦車・オルオーン』の能力の解決が終わった後のチェックタイミングの際に、自身のリーダーの体力が0以下のプレイヤーはバトルに敗北します。（自分のリーダーと相手のリーダーの体力がともに0以下の場合、引き分けとなります。）"
+              },
+              {
+                "id": "Q1277",
+                "date": "2024-04-15",
+                "question": "このフォロワーは、相手の場のアクトしているフォロワーを攻撃することはできますか？",
+                "answer": "いいえ。相手のリーダーや相手のフォロワーを攻撃することはできません。"
+              },
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:293f8686a2c1200aaeda109009ad6447af84e53ebe29d651e15e131a6ee626e2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL06",
+            "fetched_at": "2026-09-24T21:30:34.276856Z"
+          },
+          "document_ref": "documents-8ba4a14a27f96ff1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL07",
+      "documents": {
+        "documents-10ca50efcceca33d": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL07",
+            "faces": [
+              {
+                "name": "戦争商人・アルヤスカ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "商人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキから『動乱商人・イルミスナ』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl07.png",
+                "trait_raw": "指揮官・商人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-P05"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:64230094c27199629127c34f5391895897ef5d2b66035f63c3db215c4a8b8c2e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL07",
+            "fetched_at": "2026-09-24T21:30:37.111784Z"
+          },
+          "document_ref": "documents-10ca50efcceca33d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL08",
+      "documents": {
+        "documents-3be42a1793391202": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL08",
+            "faces": [
+              {
+                "name": "戦争商人・アルヤスカ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "商人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】自分のデッキから『武器商人・エルネスタ』1枚を探し、場に出す。『ターミナルウェポン』1枚をEXエリアに置く。",
+                "sections": [
+                  "『ターミナルウェポン』{ロイヤル}機械・兵士・フォロワー{コスト2}{攻撃力}6/{体力}6【守護】{ファンファーレ}相手の場のカード1枚を選ぶ。それを破壊する。{ラストワード}相手のリーダーすべてに4ダメージ。"
+                ],
+                "flavor": null,
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl08.png",
+                "trait_raw": "指揮官・商人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1279",
+                "date": "2024-04-15",
+                "question": "【進化時】能力で『武器商人・エルネスタ』を見つけない選択をした場合、『ターミナルウェポン』1枚をEXエリアに置くことができますか？",
+                "answer": "はい。『ターミナルウェポン』1枚をEXエリアに置くことができます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-P08"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL07"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:12eaab0e09f212be6eea87b9f6b08a6217ad1a1cd96db391d630c22a1a7d6f1a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL08",
+            "fetched_at": "2026-09-24T21:30:39.691660Z"
+          },
+          "document_ref": "documents-3be42a1793391202"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL09",
+      "documents": {
+        "documents-b9457dd9b348eb34": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL09",
+            "faces": [
+              {
+                "name": "《愚者》・リンクル",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、アルカナ・スペル2枚まで公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl09.png",
+                "trait_raw": "アルカナ・魔法使い"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:231fe97fe35050225f20066ff178c1f60da5a08b1097fe873bc0c78d2646a723",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL09",
+            "fetched_at": "2026-09-24T21:30:42.377216Z"
+          },
+          "document_ref": "documents-b9457dd9b348eb34"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL10",
+      "documents": {
+        "documents-53364bc59783b48b": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL10",
+            "faces": [
+              {
+                "name": "《愚者》・リンクル",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アルカナ",
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "自分がアルカナ・スペルをプレイしたとき、相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": "《無知》と《全能》、知りたがりにはコイツがピッタリ！\nけど好奇心は犬を殺すぜ？ハハ、猫だっけ？",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl10.png",
+                "trait_raw": "アルカナ・魔法使い"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1aeaf9098e92784502fd10d457d903776b5c1d1390a2bff83570a10302f0490f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL10",
+            "fetched_at": "2026-09-24T21:30:45.418050Z"
+          },
+          "document_ref": "documents-53364bc59783b48b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL11",
+      "documents": {
+        "documents-1598a66c02774b96": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL11",
+            "faces": [
+              {
+                "name": "決意の予言者・ルーニィ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}相手の場のフォロワー1体まで選ぶ。【スペルチェイン_5】それに3ダメージ。【SC_10】相手のリーダーすべてに2ダメージ。自分のリーダーは{体力}+2する。【SC_15】自分の墓場の『決意の予言者・ルーニィ』すべてをEXエリアに置く。【SC_20】自分の場と自分のEXエリアの『決意の予言者・ルーニィ』すべては{攻撃力}+2/{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl11.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1288",
+                "date": "2024-04-15",
+                "question": "相手の場にフォロワーがいない場合、このフォロワーの《ファンファーレ》能力をプレイすることはできますか？",
+                "answer": "はい。1体まで選ぶ場合、0体を選ぶことができるため、《ファンファーレ》能力をプレイすることができます。\nまた、0体を選んだ場合でも【スペルチェイン】の条件を満たしているなら、該当する能力が働きます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fc36e5ca4be550c103c087901999de25c3546e0b4673fc4c9fa50b5c00598001",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL11",
+            "fetched_at": "2026-09-24T21:30:48.136740Z"
+          },
+          "document_ref": "documents-1598a66c02774b96"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL12",
+      "documents": {
+        "documents-b1272ee3f46d44dd": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL12",
+            "faces": [
+              {
+                "name": "《正義》・イランツァ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "竜族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "8",
+                "power": "8",
+                "hp": "8",
+                "text": "【守護】\nこれが場を離れたとき、自分のリーダーは{体力}+8する。\n{ファンファーレ}自分のデッキの上1枚をEXエリアに置く。元のコスト5以上のカードをEXエリアに置いたなら、これは進化するか手札に戻る。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl12.png",
+                "trait_raw": "アルカナ・竜族"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1306",
+                "date": "2024-04-15",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              },
+              {
+                "id": "Q1305",
+                "date": "2024-04-15",
+                "question": "『カオティックエンジェル』によって、相手の場の『《正義》・イランツァ』を奪った場合、『《正義》・イランツァ』の「これが場を離れたとき、～」という能力は誘発しますか？",
+                "answer": "いいえ。誘発しません。"
+              },
+              {
+                "id": "Q1304",
+                "date": "2024-04-15",
+                "question": "《ファンファーレ》能力によって、元のコスト4以下のカードをEXエリアに置いた場合、『《正義》・イランツァ』は手札に戻りますか？",
+                "answer": "いいえ。元のコスト4以下のカードをEXエリアに置いた場合、進化することも手札に戻ることもありません。"
+              },
+              {
+                "id": "Q1303",
+                "date": "2024-04-15",
+                "question": "《ファンファーレ》能力によって、元のコスト5以上のカードをEXエリアに置いた状況で、『《正義》・イランツァ』が進化しなかった場合、『《正義》・イランツァ』は手札に戻りますか？",
+                "answer": "はい。元のコスト5以上のカードをEXエリアに置き、進化しなかった場合、手札に戻ります。進化した場合は、手札に戻りません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5955b71ffea80747639099119bf1f971acad13e311c9b7f5dd576f4363d6a038",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL12",
+            "fetched_at": "2026-09-24T21:30:51.101961Z"
+          },
+          "document_ref": "documents-b1272ee3f46d44dd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL13",
+      "documents": {
+        "documents-fd2a4e311a529161": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL13",
+            "faces": [
+              {
+                "name": "《正義》・イランツァ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アルカナ",
+                  "竜族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "11",
+                "hp": "11",
+                "text": "【疾走】\nこれは【守護】を無視して攻撃できる。",
+                "sections": [],
+                "flavor": "示すは《平等》と《不正》、オレの邪魔になるヤツさ！\n正しく在れよ、切り裂かれたくなかったら！",
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl13.png",
+                "trait_raw": "アルカナ・竜族"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": "https://shadowverse-evolve.com/errata/bp10-055/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9e8a9d44700d9876ecfcf5cbd7314d6a28ef1efb9913c7a1ac6735400a84a81e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL13",
+            "fetched_at": "2026-09-24T21:30:53.779040Z"
+          },
+          "document_ref": "documents-fd2a4e311a529161"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL14",
+      "documents": {
+        "documents-8abbef0f0129121f": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL14",
+            "faces": [
+              {
+                "name": "絆の竜剣士・アイラ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "5",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】自分のPP最大値を+1する。自分のPPを2回復する。【2】【覚醒】状態なら、『絆の覇竜』1体を場に出す。自分のリーダーは{体力}+2する。",
+                "sections": [
+                  "『絆の覇竜』{ドラゴン}竜族・フォロワー{コスト5}{攻撃力}6/{体力}6【守護】自分の場に『絆の竜剣士・アイラ』がいる限り、これは能力ダメージを受けない。"
+                ],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl14.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1308",
+                "date": "2024-04-15",
+                "question": "【覚醒】状態ではない場合、このフォロワーの《ファンファーレ》能力によって【2】をチョイスすることができますか？",
+                "answer": "はい。【2】をチョイスすることができます。\nその場合、「【覚醒】状態なら、」を満たさないため、何も起こりません。"
+              },
+              {
+                "id": "Q1307",
+                "date": "2024-04-15",
+                "question": "このフォロワーの《ファンファーレ》能力によって【1】をチョイスすることで、自分のPPをPP最大値より多く回復することはできますか？",
+                "answer": "いいえ。PP最大値より多く回復することはできません。\n例えば、自分のPP最大値と自分のPPが6の状況で、何らかの能力によって、コストを支払わずに『絆の竜剣士・アイラ』が場に出て【1】をチョイスした場合、自分のPP最大値と自分のPPが7になります。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ee53916d680fac998124daec757ba3d9ca42966a98dad047c7028663ce8e7a9f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL14",
+            "fetched_at": "2026-09-24T21:30:56.554810Z"
+          },
+          "document_ref": "documents-8abbef0f0129121f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL15",
+      "documents": {
+        "documents-4749ef866e08cf5c": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL15",
+            "faces": [
+              {
+                "name": "レーヴァテインドラゴン・デュアルモードα",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "【突進】\n【攻撃時】相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分のリーダーは{体力}+2する。\n{ラストワード}自分の墓場の『レーヴァテインドラゴン』1枚を選ぶ。それをアクト状態で場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl15.png",
+                "trait_raw": "竜族・武装"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1309",
+                "date": "2024-04-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「【攻撃時】相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分のリーダーは《体力》+2する。」という能力によって、自分のリーダーの体力を+2することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【攻撃時】能力をプレイすることができず、自分のリーダーの体力を+2することができません。"
+              },
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-SL14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-063"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4976dab3e86ff8de4d624152e4dd7fd5b8fe0ebc5c1c2a34a93cdb1a8ae51e1e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL15",
+            "fetched_at": "2026-09-24T21:30:59.423227Z"
+          },
+          "document_ref": "documents-4749ef866e08cf5c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL16",
+      "documents": {
+        "documents-e99a73a74c0fb951": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL16",
+            "faces": [
+              {
+                "name": "レーヴァテインドラゴン・デュアルモードβ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "【守護】\n{ファンファーレ}相手の場のフォロワーすべてに2ダメージ。自分のリーダーは{体力}+4する。\n{起動}{コスト1}場の『ドラゴウェポン』1つを墓場に置く：1枚引く。自分の手札の元のコスト3以下の武装・フォロワー1枚を場に出してよい。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl16.png",
+                "trait_raw": "竜族・武装"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-SL14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-063"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2711c9bd2c30baa41a0ce0a1fda1d5976a8ef1f072836f96bc69abcbd07096a0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL16",
+            "fetched_at": "2026-09-24T21:31:02.044941Z"
+          },
+          "document_ref": "documents-e99a73a74c0fb951"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL17",
+      "documents": {
+        "documents-c5d9bde9b07a4da3": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL17",
+            "faces": [
+              {
+                "name": "レーヴァテインドラゴン・デュアルモードγ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "自分の墓場に武装・カードが5枚以上ある限り、これは【疾走】を持つ。\n{起動}{コスト1}場の『ドラゴウェポン』1つを墓場に置く：相手の場のフォロワーすべてに2ダメージ。これは{攻撃力}+2/{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl17.png",
+                "trait_raw": "竜族・武装"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1310",
+                "date": "2024-04-15",
+                "question": "『レーヴァテインドラゴン・デュアルモードγ』の「自分の墓場に武装・カードが5枚以上ある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場に武装・カードが5枚以上ある限り、『レーヴァテインドラゴン・デュアルモードγ』は【疾走】を持ちます。\n『レーヴァテインドラゴン・デュアルモードγ』を場に出した後に自分の墓場の武装・カードが4枚以下から5枚以上になった場合、【疾走】を持ちます。\n『レーヴァテインドラゴン・デュアルモードγ』を場に出した後に自分の墓場の武装・カードが5枚以上から4枚以下になった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-SL14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-063"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fa515b28b9682c85ed2fe271aab0061a1454b6e3a57cf03e174193a25fde0b7a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL17",
+            "fetched_at": "2026-09-24T21:31:05.027155Z"
+          },
+          "document_ref": "documents-c5d9bde9b07a4da3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL18",
+      "documents": {
+        "documents-d3638dbaa7dd1d10": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL18",
+            "faces": [
+              {
+                "name": "《恋人》・ミルティオ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、【ネクロチャージ_20】これは進化する。\n{ファンファーレ}手札1枚を捨てる：自分のデッキの上を元のコスト3以下のフォロワーが2枚公開されるまで公開する。これによって公開した元のコスト3以下のフォロワー2枚を場に出す。残りをシャッフルし、デッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl18.png",
+                "trait_raw": "アルカナ・魔界"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1324",
+                "date": "2024-04-15",
+                "question": "自分の場のフォロワーが4体の状況で、『《恋人》・ミルティオ』の《ファンファーレ》能力をプレイした場合、どのように処理を行いますか？",
+                "answer": "場のカードの数に関わらず、自分のデッキの上を元のコスト3以下のフォロワーが2枚公開されるまで、公開します。元のコスト3以下のフォロワーが2枚公開された場合、その中から1枚を選択して場に出します。その後、場に出さなかった元のコスト3以下のフォロワーを含めた公開したカードすべてをシャッフルし、デッキの下に置きます。"
+              },
+              {
+                "id": "Q1323",
+                "date": "2024-04-15",
+                "question": "このフォロワーの《ファンファーレ》能力を処理する際、デッキの上からすべての枚数のカードを公開しても元のコスト3以下のフォロワーを1枚しか公開できなかった場合、その1枚を場に出すことはできますか？",
+                "answer": "はい。公開した元のコスト3以下のフォロワー1枚を場に出すことができます。"
+              },
+              {
+                "id": "Q1322",
+                "date": "2024-04-15",
+                "question": "このフォロワーの《ファンファーレ》能力を処理する際、デッキの上からすべての枚数のカードを公開しても元のコスト3以下のフォロワーを公開することが出来なかった場合、その後はどのように処理を行いますか？",
+                "answer": "元のコスト3以下のフォロワーは無かったため、何も場に出さずに、公開したカードすべてをシャッフルし、デッキ置き場に置きます。"
+              },
+              {
+                "id": "Q1321",
+                "date": "2024-04-15",
+                "question": "このフォロワーが「自分のエンドフェイズが来たとき、～」という能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:59cea4aa14fa74dc5f423eb7a7af98adcdceb0514900ef56eb83eb49d91ba0ae",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL18",
+            "fetched_at": "2026-09-24T21:31:07.773647Z"
+          },
+          "document_ref": "documents-d3638dbaa7dd1d10"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL19",
+      "documents": {
+        "documents-1f185a40016687f7": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL19",
+            "faces": [
+              {
+                "name": "《恋人》・ミルティオ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アルカナ",
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "【進化時】{コスト2}：相手の場のフォロワーすべてを破壊する。相手のリーダーすべての体力を6にする。",
+                "sections": [],
+                "flavor": "示すは《相愛》と《誘惑》、愛がほしいならコイツに任せな。\n伴侶の一つや二つ、すぐに創ってくれるぜ！",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl19.png",
+                "trait_raw": "アルカナ・魔界"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1325",
+                "date": "2024-04-15",
+                "question": "相手のリーダーの体力が5以下の場合、このフォロワーの【進化時】能力で相手のリーダーの体力は6になりますか？",
+                "answer": "はい。6になります。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:da7562141460488b3467b5160b36d5c9c276236cdf89cc76fdb092b71045d936",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL19",
+            "fetched_at": "2026-09-24T21:31:10.433323Z"
+          },
+          "document_ref": "documents-1f185a40016687f7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL20",
+      "documents": {
+        "documents-248449472a3fd0fa": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL20",
+            "faces": [
+              {
+                "name": "《節制》・ルーゼン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "7",
+                "power": "5",
+                "hp": "5",
+                "text": "これが場にいる限り、自分のリーダーが受けるダメージを-1する。\nこれが場にいる限り、相手プレイヤーすべては、スタートフェイズ以外でカードを引けない。\n{ファンファーレ}各プレイヤーは、自身の手札が2枚になるように自身の手札を捨てる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "電蝶(CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl20.png",
+                "trait_raw": "アルカナ・魔界"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2777",
+                "date": "2026-07-27",
+                "question": "自分の場に『《節制》・ルーゼン』2体がいる場合、自分のリーダーが受けるダメージを-2しますか？",
+                "answer": "はい。自分のリーダーが受けるダメージを-2します。"
+              },
+              {
+                "id": "Q1333",
+                "date": "2024-04-15",
+                "question": "自分の場に『《節制》・ルーゼン』がいる状況で、相手が『マナリアウィザード・クレイグ』をプレイした場合、《ファンファーレ》能力の「1枚引く。自分の手札1枚を捨てる。」はどのようになりますか？",
+                "answer": "『《節制》・ルーゼン』の能力によって、『マナリアウィザード・クレイグ』のマスターは1枚引くことができず、続く効果である「自分の手札1枚を捨てる。」によって、自身の手札1枚を捨てます。"
+              },
+              {
+                "id": "Q1332",
+                "date": "2024-04-15",
+                "question": "自分の場に『《節制》・ルーゼン』がいる場合、相手は『知恵の光』をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。\nただ、『《節制》・ルーゼン』の能力によって、1枚引くことができません。"
+              },
+              {
+                "id": "Q1331",
+                "date": "2024-04-15",
+                "question": "自分の場に『《節制》・ルーゼン』がいる場合、相手は「自分のデッキからカード1枚を探し、手札に加える。」や「自分のデッキの上2枚を見る。その中から、1枚を手札に加える。」などの効果によって、デッキからカードを手札に加えることができますか？",
+                "answer": "はい。加えることができます。\n『《節制》・ルーゼン』の能力は「スタートフェイズ以外でカードを引くこと」を禁止する能力なので、デッキからカードを手札に加える能力は有効となります。「1枚引く。」のような能力のみ禁止されます。"
+              },
+              {
+                "id": "Q1330",
+                "date": "2024-04-15",
+                "question": "自分の場に『《節制》・ルーゼン』がいて、相手の場に『大妖狐・ギンセツ（EVOLVE）』と『一ツ尾狐』がいる状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている相手の場の『一ツ尾狐』が自分のリーダーに攻撃しました。\nこの場合、自分のリーダーは相手の『一ツ尾狐』の攻撃によって何ダメージ受けますか？",
+                "answer": "自分の選択により、「ダメージを受けない」もしくは「1ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるのは自分のリーダーなので、自分が適用順を選択します。\n『一ツ尾狐』に適用されている「与えるダメージを+1」と『《節制》・ルーゼン』の「これが場にいる限り、自分のリーダーが受けるダメージを-1する。」を任意の順で適用することができます。\n\n①「受けるダメージを-1」→「与えるダメージを+1」の順で適用する場合\n「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが0ダメージになります。この時点で、0ダメージを与える行動は全く行われなくなるため、ダメージを与えるという行動自体が存在しなくなります。その後、「与えるダメージを+1」を適用しますが、ダメージを与える行動自体がすでに存在しないため、何も適用されません。よって、最終的に「ダメージを与えない」となります。\n\n②「与えるダメージを+1」→「受けるダメージを-1」の順で適用する場合\n「与えるダメージを+1」を適用し、『一ツ尾狐』が与えるダメージが2ダメージになります。その後、「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが1ダメージになります。"
+              },
+              {
+                "id": "Q1329",
+                "date": "2024-04-15",
+                "question": "自分の場に『《節制》・ルーゼン』がいる状況で、「自分のリーダーに1ダメージ。」の効果が適用された場合、『《節制》・ルーゼン』の能力により、ダメージを-1するので、自分のリーダーはダメージを受けませんが、【真紅】状態や「このターン中に自分のリーダーの体力が減少した」を満たしますか？",
+                "answer": "いいえ。【真紅】状態も「このターン中に自分のリーダーの体力が減少した」も満たしません。\n【真紅】状態とは、現在が自分のターンで、その自分のターン中に自分のリーダーの体力が減少したことがあったことを満たす状態です。"
+              },
+              {
+                "id": "Q1328",
+                "date": "2024-04-15",
+                "question": "自分の場に『《節制》・ルーゼン』がいる状況で、自分の『パンクデビル・デモニア』の起動能力のコストにある「リーダーの体力-2」が適用された場合、自分のリーダーの体力を-2しますか？",
+                "answer": "はい。自分のリーダーの体力を-2します。「体力-2」はダメージではないので、『《節制》・ルーゼン』の能力が適用されません。"
+              },
+              {
+                "id": "Q1327",
+                "date": "2024-04-15",
+                "question": "自分が『死の舞踏』をプレイして、相手の場にいる体力5以下の『《節制》・ルーゼン』を選んだ場合、相手のリーダーに2ダメージ与えることができますか？",
+                "answer": "いいえ。相手のリーダーに与えるダメージは-1されて1になります。\n『死の舞踏』の効果による5ダメージで『《節制》・ルーゼン』の体力は0以下になりますが、『《節制》・ルーゼン』の破壊処理は『死の舞踏』の能力の解決後であるため、『《節制》・ルーゼン』の能力が有効です。"
+              },
+              {
+                "id": "Q1326",
+                "date": "2024-04-15",
+                "question": "自分が【スペルチェイン_10】の条件を満たした『炎の握撃』をプレイして、相手の場にいる『《節制》・ルーゼン』を選んだ場合、相手のリーダーに3ダメージ与えることができますか？",
+                "answer": "はい。相手のリーダーに3ダメージ与えることができます。\n『炎の握撃』の効果によって『《節制》・ルーゼン』が破壊されて場にいないため、相手のリーダーに3ダメージ与えるタイミングで『《節制》・ルーゼン』の能力が有効ではありません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a0440990d6ed52710a27461985094ba4783f589c3e9925fde0b29aa2a97411f7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL20",
+            "fetched_at": "2026-09-24T21:31:13.112068Z"
+          },
+          "document_ref": "documents-248449472a3fd0fa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL21",
+      "documents": {
+        "documents-95e58b983617487b": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL21",
+            "faces": [
+              {
+                "name": "マスカレードゴースト・S",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "【疾走】\n自分の場に他の「カード名に『ゴースト』を含むフォロワー」が出たとき、それは{攻撃力}+1して、【突進】を持つ。\n{ファンファーレ}『ジャイアントゴースト』2体を場に出す。\n{ラストワード}自分のEXエリアの『マスカレードゴースト』1枚を選ぶ。それをアクト状態で場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl21.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-SL15"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-081"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:976ef2833d2fc6a442b6e71257ded6e62b1213cae073257e43dde9e14045eb9a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL21",
+            "fetched_at": "2026-09-24T21:31:16.038116Z"
+          },
+          "document_ref": "documents-95e58b983617487b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL22",
+      "documents": {
+        "documents-c84b7194921dea97": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL22",
+            "faces": [
+              {
+                "name": "《力》・ソフィーナ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "先導"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\nこれが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl22.png",
+                "trait_raw": "アルカナ・先導"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1342",
+                "date": "2024-04-15",
+                "question": "自分の場に『《力》・ソフィーナ』と『大鎧のミノタウロス』がいる状況で、相手の場の攻撃力4のフォロワーと『大鎧のミノタウロス』が交戦しました。この場合、『大鎧のミノタウロス』は何ダメージ受けますか？",
+                "answer": "自分の選択により、「2ダメージ」もしくは「1ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるのは自分の『大鎧のミノタウロス』なので、自分が適用順を選択します。\n\n①「これが受ける交戦ダメージを-2」→「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」の順で適用する場合\n「これが受ける交戦ダメージを-2」を適用し、『大鎧のミノタウロス』が受けるダメージは2になります。この時点で、受けるダメージが3以下になるため「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」は適用されません。よって、最終的に受けるダメージは2になります。\n\n②「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」→「これが受ける交戦ダメージを-2」の順で適用する場合\n「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」を適用し、『大鎧のミノタウロス』が受けるダメージは3になります。その後、「これが受ける交戦ダメージを-2」を適用し、最終的に受けるダメージは1になります。"
+              },
+              {
+                "id": "Q1341",
+                "date": "2024-04-15",
+                "question": "「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする。」という能力は、『《力》・ソフィーナ』自身にも適用されますか？",
+                "answer": "はい。適用されます。"
+              },
+              {
+                "id": "Q1340",
+                "date": "2024-04-15",
+                "question": "「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする。」という能力は、そのターン累計で4以上のダメージを受けることはなく、受けるダメージが3になるということですか？（そのターン、累計で4以上のダメージを受けないということですか？）",
+                "answer": "いいえ。そのターンに与えられる4以上のダメージがそれぞれ3ダメージになるということです。\n以下、例です。\n・4以上のダメージを2回受ける場合、3ダメージを2回受けます。\n・4ダメージと2ダメージをそれぞれ受ける場合、3ダメージと2ダメージを受けます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL23"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c5c64f292d113d9bbf52f78ddf3badd11c2f1c66113c156e697c6f355c1313da",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL22",
+            "fetched_at": "2026-09-24T21:31:18.751333Z"
+          },
+          "document_ref": "documents-c84b7194921dea97"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL23",
+      "documents": {
+        "documents-a59bfed32adc3f91": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL23",
+            "faces": [
+              {
+                "name": "《力》・ソフィーナ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アルカナ",
+                  "先導"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "6",
+                "text": "【守護】\nこれが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする。\n【進化時】自分のデッキから『虚脱の剛腕』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl23.png",
+                "trait_raw": "アルカナ・先導"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1342",
+                "date": "2024-04-15",
+                "question": "自分の場に『《力》・ソフィーナ』と『大鎧のミノタウロス』がいる状況で、相手の場の攻撃力4のフォロワーと『大鎧のミノタウロス』が交戦しました。この場合、『大鎧のミノタウロス』は何ダメージ受けますか？",
+                "answer": "自分の選択により、「2ダメージ」もしくは「1ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるのは自分の『大鎧のミノタウロス』なので、自分が適用順を選択します。\n\n①「これが受ける交戦ダメージを-2」→「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」の順で適用する場合\n「これが受ける交戦ダメージを-2」を適用し、『大鎧のミノタウロス』が受けるダメージは2になります。この時点で、受けるダメージが3以下になるため「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」は適用されません。よって、最終的に受けるダメージは2になります。\n\n②「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」→「これが受ける交戦ダメージを-2」の順で適用する場合\n「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする」を適用し、『大鎧のミノタウロス』が受けるダメージは3になります。その後、「これが受ける交戦ダメージを-2」を適用し、最終的に受けるダメージは1になります。"
+              },
+              {
+                "id": "Q1341",
+                "date": "2024-04-15",
+                "question": "「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする。」という能力は、『《力》・ソフィーナ』自身にも適用されますか？",
+                "answer": "はい。適用されます。"
+              },
+              {
+                "id": "Q1340",
+                "date": "2024-04-15",
+                "question": "「これが場にいる限り、自分の場のフォロワーが受ける4以上のダメージを3にする。」という能力は、そのターン累計で4以上のダメージを受けることはなく、受けるダメージが3になるということですか？（そのターン、累計で4以上のダメージを受けないということですか？）",
+                "answer": "いいえ。そのターンに与えられる4以上のダメージがそれぞれ3ダメージになるということです。\n以下、例です。\n・4以上のダメージを2回受ける場合、3ダメージを2回受けます。\n・4ダメージと2ダメージをそれぞれ受ける場合、3ダメージと2ダメージを受けます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-P21"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:61d89efb4a25450487ecec98c0c47ebd267bc0fd5aa56314d228fd6b9856570b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL23",
+            "fetched_at": "2026-09-24T21:31:21.684282Z"
+          },
+          "document_ref": "documents-a59bfed32adc3f91"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL24",
+      "documents": {
+        "documents-5ebc046b270319e9": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL24",
+            "faces": [
+              {
+                "name": "《運命の輪》・スロース",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "信仰"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "自分のEXエリアにカードが置かれたとき、これを{アクト}：相手の場のフォロワー1体を選ぶ。それを破壊する。\n{ファンファーレ}{コスト2}：自分のデッキから『惨禍の円環』1枚を探し、EXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl24.png",
+                "trait_raw": "アルカナ・信仰"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1343",
+                "date": "2024-04-15",
+                "question": "自分のターンだけでなく、相手のターン中に自分のEXエリアにカードが置かれた場合、「自分のEXエリアにカードが置かれたとき、これを《アクト》：相手の場のフォロワー1体を選ぶ。それを破壊する。」という能力は誘発しますか？",
+                "answer": "はい。自分のターンだけでなく相手のターンでも誘発します。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-P24"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:41b3cf3e41faed8c0108ff61edc0cb4588a2063c846eaf179271faa550141fd1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL24",
+            "fetched_at": "2026-09-24T21:31:24.364869Z"
+          },
+          "document_ref": "documents-5ebc046b270319e9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL25",
+      "documents": {
+        "documents-c174ff13533df788": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL25",
+            "faces": [
+              {
+                "name": "《世界》・ゼルガネイア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "大神"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。\n{ファンファーレ}自分のリーダーの体力が10以下なら、自分のリーダーは{体力}+5する。\n{起動}{コスト10}墓場のこれを消滅：自分のエボルヴデッキの『大いなる《世界》・ゼルガネイア』1枚をEXエリアに置いてよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl25.png",
+                "trait_raw": "アルカナ・大神"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1353",
+                "date": "2024-04-15",
+                "question": "自分のリーダの体力が11で、自分の場のフォロワーが0体、相手の場のフォロワーが『ラビットネクロマンサー』1体のみの状況です。\n自分のターン中に、『《世界》・ゼルガネイア』をプレイし、「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」から解決して『ラビットネクロマンサー』を破壊した場合、『ラビットネクロマンサー』の《ラストワード》能力で、自分のリーダーの体力が9になった後に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」によって、自分のリーダーの体力を+5することができますか？",
+                "answer": "いいえ。できません。\n『《世界》・ゼルガネイア』の《ファンファーレ》能力によって、『ラビットネクロマンサー』を破壊した際、『ラビットネクロマンサー』の《ラストワード》能力が誘発し待機状態になりますが、待機状態の自動能力はターンプレイヤーから解決するため、先に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」を解決します。この時点で自分のリーダーの体力は11なので、体力を+5することはできず、この能力の解決後に『ラビットネクロマンサー』の《ラストワード》能力によって自分のリーダーの体力が9になります。\n\nまた、何らかの能力によって相手のターン中に自分の場に『《世界》・ゼルガネイア』が出て《ファンファーレ》能力によって『ラビットネクロマンサー』を破壊した場合、「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」より先に『ラビットネクロマンサー』の《ラストワード》能力を解決するため、自分のリーダーの体力を+5することができます。"
+              },
+              {
+                "id": "Q1352",
+                "date": "2024-04-15",
+                "question": "「《起動》《コスト10》墓場のこれを消滅：自分のエボルヴデッキの『大いなる《世界》・ゼルガネイア』1枚をEXエリアに置いてよい。」という能力は、『《世界》・ゼルガネイア』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『《世界》・ゼルガネイア』が墓場にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1351",
+                "date": "2024-04-15",
+                "question": "『《世界》・ゼルガネイア』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q1350",
+                "date": "2024-04-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」という《ファンファーレ》能力によって、1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、この《ファンファーレ》能力をプレイすることができず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL26"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed711080305deed0ae1a9c66dce2bc4a54a15f97c0659b8e8ae4515b750db772",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL25",
+            "fetched_at": "2026-09-24T21:31:27.235121Z"
+          },
+          "document_ref": "documents-c174ff13533df788"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-SL26",
+      "documents": {
+        "documents-1b104ab2b894980a": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-SL26",
+            "faces": [
+              {
+                "name": "大いなる《世界》・ゼルガネイア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "アルカナ",
+                  "大神"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "10",
+                "power": "10",
+                "hp": "10",
+                "text": "自分のエンドフェイズが来たとき、これがEXエリアにあるなら、相手のリーダーすべてと相手の場のフォロワーすべてに4ダメージ。\n{ファンファーレ}相手のリーダーすべてと相手の場のフォロワーすべてに10ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-sl26.png",
+                "trait_raw": "アルカナ・大神"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1354",
+                "date": "2024-04-15",
+                "question": "「自分のエンドフェイズが来たとき、これがEXエリアにあるなら、相手のリーダーすべてと相手の場のフォロワーすべてに4ダメージ。」という能力は、『大いなる《世界》・ゼルガネイア』がEXエリアにある場合に有効となる能力ですか？",
+                "answer": "はい。『大いなる《世界》・ゼルガネイア』がEXエリアにある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-SL25"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:28623de28b83c5c9522953b5811787c866d025ddb051a4fef8482a6e5e62f308",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL26",
+            "fetched_at": "2026-09-24T21:31:29.948017Z"
+          },
+          "document_ref": "documents-1b104ab2b894980a"
+        }
+      ]
+    }
+  ]
+}

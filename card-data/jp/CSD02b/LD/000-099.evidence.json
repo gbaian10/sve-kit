@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD02b",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-a3fb556f032f1965": [
+        {
+          "ordinal": 0,
+          "name": "コラボスターターデッキ「Cool」",
+          "date_raw": "2023-08-25",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CSD02B",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CSD02B",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/csd02/",
+              "expansion_code": "CSD02B"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:4a5b26e284aa95b98e240e603cfb87b2cbffc48d08f02524445941210db38dd8": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:7578f1eb85b77a48594353e22475257ee56bd43b5af68eee474761c2e689db5d",
+        "raw_bytes": 36742,
+        "first_receipt_id": "sha256:d77ea971915e2e0555d0d8c214495f5f2965b5599afdc784f42a961bc31b5628",
+        "descriptor_sha256": "sha256:ad2a5babff109543617d53f63e072a30f52c957d68f4e7d493889d8c3038a6cb",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:473657f4cf34281465abc854462ed6858eb48f61cd84024b1c90df8bd7795b2a"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-a3fb556f032f1965",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:57bcbf298eb16ee3fac0eb4abaddb201a004e2fd3d9551f4c5a6242809a1edd0"
+    }
+  }
+}

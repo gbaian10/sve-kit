@@ -1,0 +1,134 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "ETD03",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      },
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-17c42724b9d2b339": [
+        {
+          "ordinal": 0,
+          "name": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+          "date_raw": "2022-11-19",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=ETD03",
+            "https://shadowverse-evolve.com/products/etd01-03/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=ETD03",
+            "https://shadowverse-evolve.com/products/etd01-03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/etd01-03/",
+              "expansion_code": "ETD03"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:0b3f4d54d12d41b7d47a116a881eaf0ed0c437711dcb1487a1aeb867642bf296": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:3ace154d29c6d373ef70742da462f32eafa8584cdf6e86933df90e5fe0f2dcac",
+        "raw_bytes": 36666,
+        "first_receipt_id": "sha256:277c57e2e6aaa06a116f324ef02a07a3345f61da353c5e44002767ab6c85494d",
+        "descriptor_sha256": "sha256:497e44377b1053d9df9448ae7cefa4897e9558ffead0aaa95037f0339f0035c9",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:1a6b7c8a6d6851c0d3df7c9091c18d3a5c6c63c5bcf0f030085a83c205c38bab"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-17c42724b9d2b339",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:a7e71199ebf45b2bcb8ac3a3c2ee289598a7b01b71b5dbbe833d345f3b1f839d"
+    },
+    "src:v1:82d303d683f8604fbbf25f01a49a9835a1caf6da88ecd1592975b50ac3181cba": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:3866f0132e611533f7738449e48e51c5fca485373f84ab68f2ba1f7676593a39",
+        "raw_bytes": 36788,
+        "first_receipt_id": "sha256:965e857402cd898cc59de18d83df974169611548c146a93c3f64663523c6dadf",
+        "descriptor_sha256": "sha256:b601cdaa61ad28d6515a0eb9fa3fbde5c4d067dfbecf4ea3e3f8fb7a6f9fde0f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:1595a416b09ddd4a78a5989a2946fb83c94c032e8bb265577b4b2f13f332f82c"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-17c42724b9d2b339",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:92f4fe91ffede83c26f4600492ccbb49c7734883ee03c1907a6ff29c845371dc"
+    }
+  }
+}

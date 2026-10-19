@@ -1,0 +1,1067 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01b",
+  "range": "000-099",
+  "products": {
+    "products-78ede256f7a50fef": [
+      {
+        "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+        "date": "2024-04-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=DSD01",
+          "https://shadowverse-evolve.com/products/dsd01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "DSD01b-001",
+      "documents": {
+        "documents-3d029ab1eafebcbe": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-001",
+            "faces": [
+              {
+                "name": "気高き雷・ロマロニア",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "LG",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【必殺】\n{ラストワード}自分の場に『遺されし電撃』があるなら、自分の場の『遺されし電撃』すべてに雷カウンター1個を置く。自分の場に『遺されし電撃』がないなら、『遺されし電撃』1つを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-001.png",
+                "trait_raw": "ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1246",
+                "date": "2024-03-01",
+                "question": "自分の場のカードが『気高き雷・ロマロニア』2体のみの状況で、相手が『テミスの審判』をプレイし、『気高き雷・ロマロニア』2体が破壊されました。この場合、『遺されし電撃』2つを場に出すことができますか？",
+                "answer": "いいえ。『遺されし電撃』2つを場に出すことはできません。\n『テミスの審判』によって『気高き雷・ロマロニア』2体が破壊され墓場に置かれた場合、それぞれの《ラストワード》能力が同時に誘発し待機状態になります。待機状態になっている1体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』がないため、『遺されし電撃』1つを場に出します。その後、2体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』があるため、『遺されし電撃』を出すことはなく、自分の場の『遺されし電撃』すべてに雷カウンター1個を置きます。"
+              },
+              {
+                "id": "Q1245",
+                "date": "2024-03-01",
+                "question": "『気高き雷・ロマロニア』の《ラストワード》能力を解決する際に自分の場に『遺されし電撃』がない場合、『遺されし電撃』1つを場に出した後、自分の場に『遺されし電撃』があるので、自分の場の『遺されし電撃』すべてに雷カウンター1個を置くことができますか？",
+                "answer": "いいえ。雷カウンターを置くことができず、『遺されし電撃』1つを場に出すことのみ行います。プレイの前提となる選択肢を除き、能力の処理はテキストの表記の順に行います。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-002"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5d96e1bc0a34fb1b1712d817ceeed5a176445af1f07d6207a38a59cbc1918286",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-001",
+            "fetched_at": "2026-09-24T21:27:09.559110Z"
+          },
+          "document_ref": "documents-3d029ab1eafebcbe"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-002",
+      "documents": {
+        "documents-3d7046f76760dae9": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-002",
+            "faces": [
+              {
+                "name": "気高き雷・ロマロニア",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "LG",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "4",
+                "text": "【指定攻撃】【必殺】\n【進化時】相手の場のフォロワー1体を選ぶ。自分の場にアミュレットがあるなら、それに3ダメージ。\n{ラストワード}自分の場に『遺されし電撃』があるなら、自分の場の『遺されし電撃』すべてに雷カウンター1個を置く。自分の場に『遺されし電撃』がないなら、『遺されし電撃』1つを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-002.png",
+                "trait_raw": "ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1246",
+                "date": "2024-03-01",
+                "question": "自分の場のカードが『気高き雷・ロマロニア』2体のみの状況で、相手が『テミスの審判』をプレイし、『気高き雷・ロマロニア』2体が破壊されました。この場合、『遺されし電撃』2つを場に出すことができますか？",
+                "answer": "いいえ。『遺されし電撃』2つを場に出すことはできません。\n『テミスの審判』によって『気高き雷・ロマロニア』2体が破壊され墓場に置かれた場合、それぞれの《ラストワード》能力が同時に誘発し待機状態になります。待機状態になっている1体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』がないため、『遺されし電撃』1つを場に出します。その後、2体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』があるため、『遺されし電撃』を出すことはなく、自分の場の『遺されし電撃』すべてに雷カウンター1個を置きます。"
+              },
+              {
+                "id": "Q1245",
+                "date": "2024-03-01",
+                "question": "『気高き雷・ロマロニア』の《ラストワード》能力を解決する際に自分の場に『遺されし電撃』がない場合、『遺されし電撃』1つを場に出した後、自分の場に『遺されし電撃』があるので、自分の場の『遺されし電撃』すべてに雷カウンター1個を置くことができますか？",
+                "answer": "いいえ。雷カウンターを置くことができず、『遺されし電撃』1つを場に出すことのみ行います。プレイの前提となる選択肢を除き、能力の処理はテキストの表記の順に行います。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-001"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ffa7f95c0dc632583543a340b99b8f675dd5c36abb356cdf61d5df1bd417bcee",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-002",
+            "fetched_at": "2026-09-24T21:27:12.170787Z"
+          },
+          "document_ref": "documents-3d7046f76760dae9"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-003",
+      "documents": {
+        "documents-4c7685503d3076a8": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-003",
+            "faces": [
+              {
+                "name": "暴竜・伊達政宗",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い",
+                  "武闘竜人"
+                ],
+                "rarity": "LG",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【必殺】\n{ファンファーレ}自分の場の武闘竜人・カードが3枚以上なら、これは{攻撃力}+2/{体力}+2して、【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-003.png",
+                "trait_raw": "竜使い・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1247",
+                "date": "2024-03-01",
+                "question": "自分の場の武闘竜人・カードを参照する際、『遺されし電撃』を参照することができますか？",
+                "answer": "はい。『遺されし電撃』は武闘竜人・アミュレットなので、武闘竜人・カードを参照する際に参照することができます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:64774cad2de5efe03f1935b1b20609fa98d7e84df36a5eddd454bf7828973cef",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-003",
+            "fetched_at": "2026-09-24T21:27:14.718121Z"
+          },
+          "document_ref": "documents-4c7685503d3076a8"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-004",
+      "documents": {
+        "documents-3480805088bbd553": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-004",
+            "faces": [
+              {
+                "name": "ダークドラグーン・フォルテ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "LG",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "1",
+                "text": "{進化}{コスト2}：これは進化する。\n【疾走】",
+                "sections": [],
+                "flavor": "空裂く槍、空覆う翼。其の名はフォルテ、天空の覇者。\n「我が暗黒の翼、墜としてみよ！」",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-004.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-005"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4d6a7c6116d2380ac37a973d67df6ee7fc3de303e03f448878710b4bce2edcf8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-004",
+            "fetched_at": "2026-09-24T21:27:17.381386Z"
+          },
+          "document_ref": "documents-3480805088bbd553"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-005",
+      "documents": {
+        "documents-60f7dec9e292cf7f": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-005",
+            "faces": [
+              {
+                "name": "ダークドラグーン・フォルテ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "LG",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "-",
+                "power": "7",
+                "hp": "3",
+                "text": "【疾走】【オーラ】（【オーラ】を持つカードは、相手のカードや能力で選ばれない）",
+                "sections": [],
+                "flavor": "天に座すは天使に非ず。覇を知るは一人のみ。\n「この一槍……止めて見せろ！」",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-005.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6a46b407e294a6a1ea6efe9d96ab102dd3bdc13fc51ac145ff1cb2f18f204bea",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-005",
+            "fetched_at": "2026-09-24T21:27:20.167829Z"
+          },
+          "document_ref": "documents-60f7dec9e292cf7f"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-006",
+      "documents": {
+        "documents-1da7a3a2ebc763e3": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-006",
+            "faces": [
+              {
+                "name": "ポセイドン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "海洋",
+                  "武闘竜人"
+                ],
+                "rarity": "GR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "8",
+                "power": "4",
+                "hp": "7",
+                "text": "【守護】（これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない）\n{ファンファーレ}自分のデッキから元のコスト2以下の武闘竜人・フォロワーをカード名が異なるように2枚まで探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "皆葉英夫（CyDesignation）",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-006.png",
+                "trait_raw": "海洋・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c859fd626d0b7140c11b911076308b69cef5ba22a333015076e6e42159133a4e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-006",
+            "fetched_at": "2026-09-24T21:27:22.953050Z"
+          },
+          "document_ref": "documents-1da7a3a2ebc763e3"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-007",
+      "documents": {
+        "documents-b97bed56ad715216": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-007",
+            "faces": [
+              {
+                "name": "白亜の竜騎士",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い",
+                  "武闘竜人"
+                ],
+                "rarity": "GR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "4",
+                "text": "{ファンファーレ}自分のデッキから元のコスト4以下の武闘竜人・フォロワー1枚を探し、場に出す。【覚醒】状態なら、自分のリーダーは{体力}+3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "シュイトン",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-007.png",
+                "trait_raw": "竜使い・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a32d4364371222348d5d381cec441cf8717b2f97a133a8112ad3d9c707103dde",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-007",
+            "fetched_at": "2026-09-24T21:27:25.428873Z"
+          },
+          "document_ref": "documents-b97bed56ad715216"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-008",
+      "documents": {
+        "documents-5f435d885faf372b": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-008",
+            "faces": [
+              {
+                "name": "ジェネシスドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "GR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "9",
+                "power": "10",
+                "hp": "12",
+                "text": "【疾走】（【疾走】を持つフォロワーは、場に出たターンから攻撃できる）",
+                "sections": [],
+                "flavor": "神代の時代の大洪水は、たった一匹によって齎された。\n「創造の前には破壊がある」",
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-008.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4300adbf5191b86c64e544f138ea56334745b54aef5f4e3dd086e17193097fe0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-008",
+            "fetched_at": "2026-09-24T21:27:28.380947Z"
+          },
+          "document_ref": "documents-5f435d885faf372b"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-009",
+      "documents": {
+        "documents-7e72a2e7d1118581": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-009",
+            "faces": [
+              {
+                "name": "竜の託宣",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "GR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分のPP最大値を+1する。【2】1枚引く。",
+                "sections": [],
+                "flavor": "神の言葉は使命を生み出す。\n知竜の言葉は力を生み出す。",
+                "illustrator": "mstk",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-009.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q298",
+                "date": "2022-06-24",
+                "question": "自分のPP最大値を+1したとき、自分の残りPPは+1しますか？",
+                "answer": "いいえ。自分の残りPPは+1しません。"
+              },
+              {
+                "id": "Q102",
+                "date": "2022-04-26",
+                "question": "このスペルの【1】をチョイスしてプレイし、自分のPP最大値を11以上にすることはできますか？",
+                "answer": "いいえ。PP最大値は10より多くなることはないため、自分のPP最大値を11以上にすることはできません。"
+              },
+              {
+                "id": "Q101",
+                "date": "2022-04-26",
+                "question": "自分のPP最大値が10のとき、このスペルの【1】をチョイスしてプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、PP最大値は10のままとなります。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:951282c4b3984305c85979878178b2e66146f73e6bcd14abb4aa473f7b3b77d6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-009",
+            "fetched_at": "2026-09-24T21:27:31.335420Z"
+          },
+          "document_ref": "documents-7e72a2e7d1118581"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-010",
+      "documents": {
+        "documents-6a420a277e6293e9": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-010",
+            "faces": [
+              {
+                "name": "片倉小十郎",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "武闘竜人"
+                ],
+                "rarity": "SR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の場の他の武闘竜人・フォロワー1体を選ぶ。【覚醒】状態なら、それは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "雨乃テツオ",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-010.png",
+                "trait_raw": "武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-011"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:27664e94f54ea25ca0da6e46067a1e9644ca484250e4ef331dc1ba638d3c223e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-010",
+            "fetched_at": "2026-09-24T21:27:34.323296Z"
+          },
+          "document_ref": "documents-6a420a277e6293e9"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-011",
+      "documents": {
+        "documents-336247342b2b5446": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-011",
+            "faces": [
+              {
+                "name": "片倉小十郎",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "武闘竜人"
+                ],
+                "rarity": "SR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上4枚を見る。その中から、武闘竜人・フォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "雨乃テツオ",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-011.png",
+                "trait_raw": "武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-010"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:88463b8a1adc5bdf5e58ddf7090bd1dbb22f8b294df2be0fab21379ebba9ff6f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-011",
+            "fetched_at": "2026-09-24T21:27:37.272165Z"
+          },
+          "document_ref": "documents-336247342b2b5446"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-012",
+      "documents": {
+        "documents-fa7dd5ef8cf242c8": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-012",
+            "faces": [
+              {
+                "name": "大鎌の竜騎",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い",
+                  "武闘竜人"
+                ],
+                "rarity": "SR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【必殺】（【必殺】を持つフォロワーと交戦した相手のフォロワーは、ダメージを与え合ったあと破壊される）\n自分の場に他の武闘竜人・カードがある限り、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-012.png",
+                "trait_raw": "竜使い・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1248",
+                "date": "2024-03-01",
+                "question": "『大鎌の竜騎』の「自分の場に他の武闘竜人・カードがある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の場に他の武闘竜人・カードがある限り、『大鎌の竜騎』は【疾走】を持ちます。\n『大鎌の竜騎』を場に出した後に自分の場に他の武闘竜人・カードを出した場合、【疾走】を持ちます。\n『大鎌の竜騎』を場に出した後に自分の場の他の武闘竜人・カードが0枚になった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q1247",
+                "date": "2024-03-01",
+                "question": "自分の場の武闘竜人・カードを参照する際、『遺されし電撃』を参照することができますか？",
+                "answer": "はい。『遺されし電撃』は武闘竜人・アミュレットなので、武闘竜人・カードを参照する際に参照することができます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6b0c9796f95ce0820879f214309977ec0c9b462b7a4e5337b6da3c0af94e1a53",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-012",
+            "fetched_at": "2026-09-24T21:27:40.203383Z"
+          },
+          "document_ref": "documents-fa7dd5ef8cf242c8"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-013",
+      "documents": {
+        "documents-b1c2e161bc22102c": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-013",
+            "faces": [
+              {
+                "name": "ガルグイユ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "SR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "5",
+                "text": "【突進】【守護】（【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）\n{ファンファーレ}自分の場の武闘竜人・カードが3枚以上なら、2枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-013.png",
+                "trait_raw": "ドラゴニュート・武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1247",
+                "date": "2024-03-01",
+                "question": "自分の場の武闘竜人・カードを参照する際、『遺されし電撃』を参照することができますか？",
+                "answer": "はい。『遺されし電撃』は武闘竜人・アミュレットなので、武闘竜人・カードを参照する際に参照することができます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:42961b10c9698f8ca432aaa67c2630b5bb904cd06167e8ccd051e9108af5afc1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-013",
+            "fetched_at": "2026-09-24T21:27:42.888326Z"
+          },
+          "document_ref": "documents-b1c2e161bc22102c"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-014",
+      "documents": {
+        "documents-345a86bbaf578085": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-014",
+            "faces": [
+              {
+                "name": "斬竜剣士・ロイ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "SR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキから元のコスト2の{ドラゴン}スペル1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-014.png",
+                "trait_raw": "武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-015"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e9b57e4c9b0b0f6422dcc2ca9a52f4b34a691d6b52f4389122f9f161b40bf745",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-014",
+            "fetched_at": "2026-09-24T21:27:45.854954Z"
+          },
+          "document_ref": "documents-345a86bbaf578085"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-015",
+      "documents": {
+        "documents-1f80cd77479f0f2a": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-015",
+            "faces": [
+              {
+                "name": "斬竜剣士・ロイ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "SR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに2ダメージ。それが竜族・フォロワーなら、代わりに5ダメージ。",
+                "sections": [],
+                "flavor": "正義は数多。ならば、私は己が正義を貫きます。\nその果てにこそ――生の意味があると信じて。",
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-015.png",
+                "trait_raw": "武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-014"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e9a0d763071d5ca14325f8d15935cc08b3256d76e70f7424f501dcaf18a8dcc0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-015",
+            "fetched_at": "2026-09-24T21:27:48.495044Z"
+          },
+          "document_ref": "documents-1f80cd77479f0f2a"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-016",
+      "documents": {
+        "documents-785729b892f7eebe": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-016",
+            "faces": [
+              {
+                "name": "残影のドラゴニュート",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "BR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "自分の場に他の武闘竜人・カードがある限り、これは【突進】【指定攻撃】を持つ。（【指定攻撃】を持つフォロワーは、スタンド状態のフォロワーを攻撃できる）\n{ファンファーレ}{コスト1}：【覚醒】状態なら、自分のデッキから『残影のドラゴニュート』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "根岸千秋",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-016.png",
+                "trait_raw": "ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1250",
+                "date": "2024-03-01",
+                "question": "自分の場のカードが『遺されし電撃』1つと『残影のドラゴニュート』1体の状況で、【突進】【指定攻撃】を持った自分の場の『残影のドラゴニュート』が攻撃し、攻撃目標に相手の場のスタンド状態のフォロワーを選択しました。その後のクイックタイミングにおいて『エクスキューション』などで自分の場の『遺されし電撃』が破壊され、攻撃している『残影のドラゴニュート』が【突進】【指定攻撃】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【突進】や【指定攻撃】を失っていても、攻撃目標の変更は行われず、その攻撃は行われます。"
+              },
+              {
+                "id": "Q1249",
+                "date": "2024-03-01",
+                "question": "『残影のドラゴニュート』の「自分の場に他の武闘竜人・カードがある限り、これは【突進】【指定攻撃】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の場に他の武闘竜人・カードがある限り、『残影のドラゴニュート』は【突進】【指定攻撃】を持ちます。\n『残影のドラゴニュート』を場に出した後に自分の場に他の武闘竜人・カードを出した場合、【突進】【指定攻撃】を持ちます。\n『残影のドラゴニュート』を場に出した後に自分の場の他の武闘竜人・カードが0枚になった場合、【突進】【指定攻撃】を失います。"
+              },
+              {
+                "id": "Q1247",
+                "date": "2024-03-01",
+                "question": "自分の場の武闘竜人・カードを参照する際、『遺されし電撃』を参照することができますか？",
+                "answer": "はい。『遺されし電撃』は武闘竜人・アミュレットなので、武闘竜人・カードを参照する際に参照することができます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:924526f2062a9cdf4f16d56da1a7a8412bfa2b4f890d9c2626a3519f63d8d832",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-016",
+            "fetched_at": "2026-09-24T21:27:51.169169Z"
+          },
+          "document_ref": "documents-785729b892f7eebe"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-017",
+      "documents": {
+        "documents-bc7eb4b4352a8dad": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-017",
+            "faces": [
+              {
+                "name": "竜装の大剣士",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "BR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに3ダメージ。この能力は自分の場の武闘竜人・カードが3枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まじ",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-017.png",
+                "trait_raw": "武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1247",
+                "date": "2024-03-01",
+                "question": "自分の場の武闘竜人・カードを参照する際、『遺されし電撃』を参照することができますか？",
+                "answer": "はい。『遺されし電撃』は武闘竜人・アミュレットなので、武闘竜人・カードを参照する際に参照することができます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:464d53dba60b1ddffb63bacd5209d53bd77c97f8998e484695f9786f73720837",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-017",
+            "fetched_at": "2026-09-24T21:27:53.759972Z"
+          },
+          "document_ref": "documents-bc7eb4b4352a8dad"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-018",
+      "documents": {
+        "documents-fe1c79755b9bf122": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-018",
+            "faces": [
+              {
+                "name": "ブレイジングブレス",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "BR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手の場のフォロワー1体を選ぶ。それに2ダメージ。【覚醒】状態なら、代わりに4ダメージ。(自分のPP最大値が7以上なら、【覚醒】状態になる)",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Illfill",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-018.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q106",
+                "date": "2022-04-26",
+                "question": "【覚醒】の条件を満たしているとき、このスペルは相手のフォロワー1体に6ダメージ与えますか？",
+                "answer": "いいえ。【覚醒】の条件を満たしているとき、このスペルは相手のフォロワー1体に4ダメージ与えます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c8d085fb14c9083d80f72f859b5ab12ccf651b7f4d9ba5f95942d4d5e2b3208e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-018",
+            "fetched_at": "2026-09-24T21:27:56.378042Z"
+          },
+          "document_ref": "documents-fe1c79755b9bf122"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,527 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP11",
+  "range": "U/000-099",
+  "products": {
+    "products-9861c73e1d50a7bf": [
+      {
+        "name": "Booster Set \"Bullet of Fate\"",
+        "date": "Sep. 26, 2025",
+        "links": [
+          "/cards/searchresults?expansion=BP11",
+          "https://en.shadowverse-evolve.com/products/bp11/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP11-U01EN",
+      "documents": {
+        "documents-552d4effd77c88cc": {
+          "region": "en",
+          "record": {
+            "number": "BP11-U01EN",
+            "faces": [
+              {
+                "name": "Shamu & Shama, Posh Felines",
+                "info": {
+                  "Card Set": "Booster Set \"Bullet of Fate\"",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Hunter / Beast"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "Storm.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field. Combo (5) - Deal it 3 damage.\nStrike, Combo (3) - Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "Storm.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field. Combo (5) - Deal it 3 damage.\nStrike, Combo (3) - Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/BP11-U01EN.png",
+                "trait_raw": "Hunter / Beast",
+                "traits": [
+                  "Hunter",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Sep. 26, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-9861c73e1d50a7bf",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:479875ebcab9f1aa61c53681ce99bd1af7497a3fadfcb96dda4b5be3609eece3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP11-U01EN",
+            "fetched_at": "2026-09-27T15:38:55.721703Z"
+          },
+          "document_ref": "documents-552d4effd77c88cc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-U02EN",
+      "documents": {
+        "documents-50d122c2dac45385": {
+          "region": "en",
+          "record": {
+            "number": "BP11-U02EN",
+            "faces": [
+              {
+                "name": "Nahtnaught, Cursed Queen",
+                "info": {
+                  "Card Set": "Booster Set \"Bullet of Fate\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Wasteland / Commander"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for a 1-cost {icon_royal|[swordcraft]} card, put it into your EX area, then shuffle.\n{icon_act|[act]} {icon_cost00|[cost00]}: Select an enemy follower on the field and engage it. It becomes Boxed until the end of its controller's next turn. Activate only once per turn.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for a 1-cost {icon_royal|[swordcraft]} card, put it into your EX area, then shuffle.\n{icon_act|[act]} {icon_cost00|[cost00]}: Select an enemy follower on the field and engage it. It becomes Boxed until the end of its controller's next turn. Activate only once per turn.",
+                "speech": null,
+                "illustrator": "Rwael",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/BP11-U02EN.png",
+                "trait_raw": "Wasteland / Commander",
+                "traits": [
+                  "Wasteland",
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Sep. 26, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1565 (Sep. 19, 2025)",
+                "question": "My opponent has a follower on the field that was given Drive by its Ride ability. If that follower becomes Boxed, does it regain Rush and Single Drive when it is no longer Boxed?",
+                "answer": "Yes, that's correct. Boxed followers will regain their abilities once they are no longer Boxed."
+              },
+              {
+                "title": "Q1564 (Sep. 19, 2025)",
+                "question": "My opponent has a follower on the field that was given Ward by Death's Breath. If that follower becomes Boxed, does it regain Ward when it is no longer Boxed?",
+                "answer": "Yes, that's correct. Boxed followers will regain their abilities once they are no longer Boxed."
+              },
+              {
+                "title": "Q1490 (Sep. 19, 2025)",
+                "question": "If I select Iceschillendrig, Gilded Autocrat with Nahtnaught, Cursed Queen's activated ability, does Iceschillendrig, Gilded Autocrat's automatic ability trigger?",
+                "answer": "Yes, it does. You would then resolve it at the next confirmation timing."
+              },
+              {
+                "title": "Q1489 (Sep. 19, 2025)",
+                "question": "If I select an engaged enemy follower with this follower's activated ability, will it still become Boxed until the end of its controller's next turn?",
+                "answer": "Yes, it will. Although the activated ability's \"engage it\" effect will not apply to a follower that is already engaged, the following effects will still apply."
+              },
+              {
+                "title": "Q1488 (Sep. 19, 2025)",
+                "question": "If a follower given the Armed trait by Draconic Weapon's effect becomes Boxed, does it lose the Armed trait?",
+                "answer": "No, it doesn't."
+              },
+              {
+                "title": "Q1487 (Sep. 19, 2025)",
+                "question": "Can a Boxed follower be given Ward by an ability such as Guardian Sun's Fanfare?",
+                "answer": "Yes, it can."
+              },
+              {
+                "title": "Q1486 (Sep. 19, 2025)",
+                "question": "If a Boxed follower with a \"When this card is returned to hand from your field\" ability is returned to its owner's hand from the field, does the ability trigger?",
+                "answer": "No, it doesn't."
+              },
+              {
+                "title": "Q1485 (Sep. 19, 2025)",
+                "question": "If a Boxed follower with a Last Words ability is put into the cemetery, does the ability trigger?",
+                "answer": "No, it doesn't."
+              }
+            ],
+            "products_ref": "products-9861c73e1d50a7bf",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8dd5fc6745e2776e69af8662f8bc9c88907e39cc529647d08de93548ef1ab76c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP11-U02EN",
+            "fetched_at": "2026-09-27T15:38:58.396650Z"
+          },
+          "document_ref": "documents-50d122c2dac45385"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-U03EN",
+      "documents": {
+        "documents-dfd8d9ddf43837e8": {
+          "region": "en",
+          "record": {
+            "number": "BP11-U03EN",
+            "faces": [
+              {
+                "name": "Maiser, Neighborhood Hero",
+                "info": {
+                  "Card Set": "Booster Set \"Bullet of Fate\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Wasteland / Mage"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_fanfare|[fanfare]} Summon a Dutiful Steed token. Search your deck for a Rapid Fire, put it into your EX area, then shuffle. Spellchain (5) - It costs 1 less to play this turn.\nOnce on each of your turns, when you play a spell that originally costs 1 or less, draw a card, then discard a card.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Summon a Dutiful Steed token. Search your deck for a Rapid Fire, put it into your EX area, then shuffle. Spellchain (5) - It costs 1 less to play this turn.\nOnce on each of your turns, when you play a spell that originally costs 1 or less, draw a card, then discard a card.",
+                "speech": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/BP11-U03EN.png",
+                "trait_raw": "Wasteland / Mage",
+                "traits": [
+                  "Wasteland",
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Sep. 26, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1501 (Sep. 19, 2025)",
+                "question": "Does this follower's automatic ability trigger if I play Delta Cannon's automatic ability from my cemetery?",
+                "answer": "No, playing an automatic ability doesn't count as playing a spell."
+              },
+              {
+                "title": "Q1500 (Sep. 19, 2025)",
+                "question": "If I have multiple copies of this follower on my field, and I play a spell that originally costs 1 or less, will each copy's ability trigger?",
+                "answer": "Yes, each copy's ability would trigger separately."
+              }
+            ],
+            "products_ref": "products-9861c73e1d50a7bf",
+            "related_cards": [
+              {
+                "label": "{BP11-045EN|Rapid Fire}",
+                "href": "/cards/?cardno=BP11-045EN"
+              },
+              {
+                "label": "{BP11-T03EN|Dutiful Steed}",
+                "href": "/cards/?cardno=BP11-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1651e7c2ab808b7daaeaad7b5227a2bf7d60d34a73be26ae2d8b77749d6fbbc6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP11-U03EN",
+            "fetched_at": "2026-09-27T15:39:01.240951Z"
+          },
+          "document_ref": "documents-dfd8d9ddf43837e8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-U04EN",
+      "documents": {
+        "documents-c349032c94d03bb3": {
+          "region": "en",
+          "record": {
+            "number": "BP11-U04EN",
+            "faces": [
+              {
+                "name": "Resplendent Phoenix",
+                "info": {
+                  "Card Set": "Booster Set \"Bullet of Fate\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Phoenix"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} {icon_cost02|[cost02]}: If Overflow is active for you, shuffle your deck, then put the top card into your EX area. It costs 0 to play this turn.\n{icon_lastword|[lastwords]} Give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} {icon_cost02|[cost02]}: If Overflow is active for you, shuffle your deck, then put the top card into your EX area. It costs 0 to play this turn.\n{icon_lastword|[lastwords]} Give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Onineko",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/BP11-U04EN.png",
+                "trait_raw": "Phoenix",
+                "traits": [
+                  "Phoenix"
+                ]
+              }
+            ],
+            "release_date": "Sep. 26, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1518 (Sep. 19, 2025)",
+                "question": "If there's an enemy Rulenye, Omen of Silence on the field, can I play the card I put into my EX area with this follower's Fanfare ability for 0 play points?",
+                "answer": "No. After this follower's effect reduces the card's cost to 0, Rulenye, Omen of Silence's ability would increase the cost to 1."
+              }
+            ],
+            "products_ref": "products-9861c73e1d50a7bf",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b31e29525c142fdc52170202aab73a6951be54db5f35e4946904a7f2ca87f63",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP11-U04EN",
+            "fetched_at": "2026-09-27T15:39:03.896379Z"
+          },
+          "document_ref": "documents-c349032c94d03bb3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-U05EN",
+      "documents": {
+        "documents-f950cec25aa6b489": {
+          "region": "en",
+          "record": {
+            "number": "BP11-U05EN",
+            "faces": [
+              {
+                "name": "Iceschillendrig, Gilded Autocrat",
+                "info": {
+                  "Card Set": "Booster Set \"Bullet of Fate\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "On Evolve - Discard a card: Select 2 followers in your cemetery and add them to your hand.\nWhenever this card becomes engaged, each opponent discards a card.\nDuring your turn, whenever a player discards a card, select an enemy follower on the field and engage it.",
+                "sections": [],
+                "raw_text": "On Evolve - Discard a card: Select 2 followers in your cemetery and add them to your hand.\nWhenever this card becomes engaged, each opponent discards a card.\nDuring your turn, whenever a player discards a card, select an enemy follower on the field and engage it.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP11/BP11-U05EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Sep. 26, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1525 (Sep. 19, 2025)",
+                "question": "If an opponent discards multiple cards during my turn, does this follower's second automatic ability trigger for each of them?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1524 (Sep. 19, 2025)",
+                "question": "When selecting followers from my cemetery, can I select the card I discarded as part of the cost of this follower's ability?",
+                "answer": "No. You must select the followers before paying the cost."
+              },
+              {
+                "title": "Q1523 (Sep. 19, 2025)",
+                "question": "If I have fewer than 2 followers in my cemetery, can I still play this follower's On Evolve ability?",
+                "answer": "No, you can't."
+              },
+              {
+                "title": "Q1490 (Sep. 19, 2025)",
+                "question": "If I select Iceschillendrig, Gilded Autocrat with Nahtnaught, Cursed Queen's activated ability, does Iceschillendrig, Gilded Autocrat's automatic ability trigger?",
+                "answer": "Yes, it does. You would then resolve it at the next confirmation timing."
+              }
+            ],
+            "products_ref": "products-9861c73e1d50a7bf",
+            "related_cards": [
+              {
+                "label": "{BP11-069EN|Iceschillendrig, Gilded Autocrat}",
+                "href": "/cards/?cardno=BP11-069EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8015150dd02fe649ce6d011f40b1c9f59707140014291f69b2d4ba813d33f007",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP11-U05EN",
+            "fetched_at": "2026-09-27T15:39:06.313707Z"
+          },
+          "document_ref": "documents-f950cec25aa6b489"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-U06EN",
+      "documents": {
+        "documents-6f1bd622b96571ab": {
+          "region": "en",
+          "record": {
+            "number": "BP11-U06EN",
+            "faces": [
+              {
+                "name": "Selena, Sugarkiss Assassin",
+                "info": {
+                  "Card Set": "Booster Set \"Bullet of Fate\"",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Wasteland / Faith / Zealot"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "Storm.\n{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. From among them, you may put up to 1 Wasteland card and up to 1 follower that costs 2 or less into your EX area. Put the rest on the bottom of your deck in any order.\nStrike - Recover 2 play points.",
+                "sections": [],
+                "raw_text": "Storm.\n{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. From among them, you may put up to 1 Wasteland card and up to 1 follower that costs 2 or less into your EX area. Put the rest on the bottom of your deck in any order.\nStrike - Recover 2 play points.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/BP11-U06EN.png",
+                "trait_raw": "Wasteland / Faith / Zealot",
+                "traits": [
+                  "Wasteland",
+                  "Faith",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Sep. 26, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1542 (Sep. 19, 2025)",
+                "question": "If I look at the top 4 cards of my deck and they're all Wasteland cards, but there are no followers that cost 2 or less, can I select only 1 card to put into my EX area?",
+                "answer": "Yes, you can. The same is true if all 4 cards are followers that cost 2 or less."
+              }
+            ],
+            "products_ref": "products-9861c73e1d50a7bf",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5df4bf4e4c21600cd8d9d7ec9a0b3cb64252b346f7c30c2a2236fe89ade2a604",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP11-U06EN",
+            "fetched_at": "2026-09-27T15:39:09.026128Z"
+          },
+          "document_ref": "documents-6f1bd622b96571ab"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-U07EN",
+      "documents": {
+        "documents-111c333258e5da28": {
+          "region": "en",
+          "record": {
+            "number": "BP11-U07EN",
+            "faces": [
+              {
+                "name": "Sylvia, Grand Arbiter",
+                "info": {
+                  "Card Set": "Booster Set \"Bullet of Fate\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Supreme"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and, if there are at least 5 faceup evolved followers in your evolve deck, deal it 5 damage.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and, if there are at least 5 faceup evolved followers in your evolve deck, deal it 5 damage.",
+                "speech": null,
+                "illustrator": "Makai no Jumin",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/BP11-U07EN.png",
+                "trait_raw": "Supreme",
+                "traits": [
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Sep. 26, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1553 (Sep. 19, 2025)",
+                "question": "When this follower evolves, does it count itself as a faceup evolved follower in the evolve deck?",
+                "answer": "No, it doesn't."
+              },
+              {
+                "title": "Q1552 (Sep. 19, 2025)",
+                "question": "Do faceup copies of Drive Point or advanced followers count as faceup evolved followers in the evolve deck?",
+                "answer": "No, they don't."
+              }
+            ],
+            "products_ref": "products-9861c73e1d50a7bf",
+            "related_cards": [
+              {
+                "label": "{BP11-103EN|Sylvia, Grand Arbiter}",
+                "href": "/cards/?cardno=BP11-103EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ef3f77862257361c0361dd17a14b55f5938acc06553123798fae527f66b17f3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP11-U07EN",
+            "fetched_at": "2026-09-27T15:39:12.282101Z"
+          },
+          "document_ref": "documents-111c333258e5da28"
+        }
+      ]
+    }
+  ]
+}

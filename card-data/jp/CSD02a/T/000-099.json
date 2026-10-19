@@ -1,0 +1,123 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD02a",
+  "range": "T/000-099",
+  "products": {
+    "products-690961396f50c5af": [
+      {
+        "name": "コラボスターターデッキ「Cute」",
+        "date": "2023-08-25",
+        "links": [
+          "/cardlist/cardsearch?expansion=CSD02A",
+          "https://shadowverse-evolve.com/products/csd02/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CSD02a-T01",
+      "documents": {
+        "documents-4ccffe03a112a2f1": {
+          "region": "jp",
+          "record": {
+            "number": "CSD02a-T01",
+            "faces": [
+              {
+                "name": "キュートイヤリング",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "コラボスターターデッキ「Cute」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [
+                  "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CSD02a/csd02a-t01.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2023-08-25",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q899",
+                "date": "2023-07-28",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q898",
+                "date": "2023-07-28",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q897",
+                "date": "2023-07-28",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-690961396f50c5af",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T02"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T05"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T06"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T08"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3242e9c466ea9e7935a4a27efbf87aefa0557e48224badabe67305fa75cb5e51",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD02a-T01",
+            "fetched_at": "2026-09-24T22:05:43.652694Z"
+          },
+          "document_ref": "documents-4ccffe03a112a2f1"
+        }
+      ]
+    }
+  ]
+}

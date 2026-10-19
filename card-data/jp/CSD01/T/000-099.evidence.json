@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD01",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-0d3a5c628d47fcfe": [
+        {
+          "ordinal": 0,
+          "name": "コラボスターターデッキ「出走！ウマ娘！」",
+          "date_raw": "2022-10-01",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CSD01",
+            "https://shadowverse-evolve.com/products/csd_umamusume"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CSD01",
+            "https://shadowverse-evolve.com/products/csd_umamusume"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/csd_umamusume",
+              "expansion_code": "CSD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:a336137d56765e1c83b1e6393a08dde7b9e60684f9035478944e9cd410995768": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:d0f967344ad7e5204e8baef92959390c66cdf19af29bf920d7efaa09f6f97350",
+        "raw_bytes": 37298,
+        "first_receipt_id": "sha256:a5df5d227e1f6c3b034d902ebe4118506bfce8c67faa0f831190b432b16bc289",
+        "descriptor_sha256": "sha256:60d1595fd88d6cf95f3970e1c1f8b9f356496a4318332d84b15368bebbec7699",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:cd7415894c32bfd1ccd69995e851fa8a7a5a5643c6bddbddee1bec7c716c4eec"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-0d3a5c628d47fcfe",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:1ad6e6f184f2858e95001147c8a3a1ce4422997128e95cdf5ef65e5de3c7f1b3"
+    }
+  }
+}

@@ -1,0 +1,630 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP20",
+  "range": "U/000-099",
+  "products": {
+    "products-eb47d00ae38b6235": [
+      {
+        "name": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+        "date": "Sep. 25, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP19-BP20",
+          "https://en.shadowverse-evolve.com/products/bp1920/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP20-U01EN",
+      "documents": {
+        "documents-246dfa91e9f32aad": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U01EN",
+            "faces": [
+              {
+                "name": "Krulle, Heir to Unkilling",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen / Heir / Hunter"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and give it {icon_power|[attack]}-3/{icon_hp|[defense]}-3.\nOn Super-Evolve - Give each enemy follower on the field {icon_power|[attack]}-3/{icon_hp|[defense]}-3.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and give it {icon_power|[attack]}-3/{icon_hp|[defense]}-3.\nOn Super-Evolve - Give each enemy follower on the field {icon_power|[attack]}-3/{icon_hp|[defense]}-3.",
+                "speech": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U01EN.png",
+                "trait_raw": "Omen / Heir / Hunter",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Hunter"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2405 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2404 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes. Both its On Super-Evolve and On Evolve abilities will trigger."
+              },
+              {
+                "title": "Q2403 (Sep. 10, 2026)",
+                "question": "Can a follower have negative attack?",
+                "answer": "Yes. A follower's attack can be reduced to a negative number by effects. A follower with negative attack doesn't deal attack or combat damage."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-002EN|Krulle, Heir to Unkilling}",
+                "href": "/cards/?cardno=BP20-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:63394d177790f037b6ab3ec8e50b43dfe40a48c034ca2662484319169802b9dd",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U01EN",
+            "fetched_at": "2026-09-27T13:34:14.922128Z"
+          },
+          "document_ref": "documents-246dfa91e9f32aad"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U02EN",
+      "documents": {
+        "documents-6bb61d712a4af2c9": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U02EN",
+            "faces": [
+              {
+                "name": "Sinciro, Heir to Usurpation",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen / Heir / Thief"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "If this would deal ability damage, it deals that much +2 for every fusion counter on it instead.\nOn Evolve - Select an enemy follower on the field and deal it 3 damage.\nOn Super-Evolve - Deal 1 damage to each enemy leader and enemy follower on the field.",
+                "sections": [],
+                "raw_text": "If this would deal ability damage, it deals that much +2 for every fusion counter on it instead.\nOn Evolve - Select an enemy follower on the field and deal it 3 damage.\nOn Super-Evolve - Deal 1 damage to each enemy leader and enemy follower on the field.",
+                "speech": null,
+                "illustrator": "takebayashi",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U02EN.png",
+                "trait_raw": "Omen / Heir / Thief",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2414 (Sep. 10, 2026)",
+                "question": "If this follower has 1 fusion counter and I play its On-Evolve ability selecting an enemy follower equipped with a Princess Sword, how much damage will it take?",
+                "answer": "When there are multiple abilities modifying damage dealt, the player who controls the follower receiving the damage decides the order in which the abilities are applied.\n\nHowever, in this case, since the modifiers are +2 and -2, both orders would result in the follower taking 3 damage."
+              },
+              {
+                "title": "Q2413 (Sep. 10, 2026)",
+                "question": "If this follower has 1 fusion counter and I super-evolve it while my opponent has a Shion, Immortal Aegis on the field, how much damage does this follower deal to Shion and the enemy leader?",
+                "answer": "The player with control of the Shion, Immortal Aegis (in this case, your opponent) would decide if they take 0 damage or 2 damage.\n\nWhen there are multiple abilities modifying damage dealt, the player receiving the damage decides the order in which the abilities are applied. In this case, depending on the order, the final damage taken can be calculated either of the following two ways:\n\n1. Your opponent decides to apply Shion's ability first, reducing 1 damage to 0. Then, since taking 0 damage doesn't count as taking damage at all, there is no instance of damage that would be modified by +2.\n\n2. Your opponent decides to apply the +2 damage first, modifying the damage taken to 3, which is then reduced to 2 by Shion, Immortal Aegis's ability."
+              },
+              {
+                "title": "Q2412 (Sep. 10, 2026)",
+                "question": "What is ability damage?",
+                "answer": "Ability damage is all damage except for damage dealt by two followers in combat or by a follower attacking a leader. Damage from Strike abilities, although triggered by an attack, is considered ability damage."
+              },
+              {
+                "title": "Q2405 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2404 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes. Both its On Super-Evolve and On Evolve abilities will trigger."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-020EN|Sinciro, Heir to Usurpation}",
+                "href": "/cards/?cardno=BP20-020EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:979817e380234766f133bbdc04b9b8864d69d78a04f5e7b9698b2d6a81f59295",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U02EN",
+            "fetched_at": "2026-09-27T13:34:20.565287Z"
+          },
+          "document_ref": "documents-6bb61d712a4af2c9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U03EN",
+      "documents": {
+        "documents-361bf9933c3decfe": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U03EN",
+            "faces": [
+              {
+                "name": "Velharia, Heir to Truth",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen / Heir / Mage"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and destroy it.\nOn Super-Evolve - Select a {icon_witch|[runecraft]} spell in your cemetery that costs 9 or less and put it into your EX area. It costs 3 less to play this turn.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and destroy it.\nOn Super-Evolve - Select a {icon_witch|[runecraft]} spell in your cemetery that costs 9 or less and put it into your EX area. It costs 3 less to play this turn.",
+                "speech": null,
+                "illustrator": "u-suke",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U03EN.png",
+                "trait_raw": "Omen / Heir / Mage",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2405 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2404 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes. Both its On Super-Evolve and On Evolve abilities will trigger."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-038EN|Velharia, Heir to Truth}",
+                "href": "/cards/?cardno=BP20-038EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:00c0982f708539e70e9c59c0f4c80282e0b2c5e7e4a4ff7509aceb1ba7fda834",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U03EN",
+            "fetched_at": "2026-09-27T13:35:07.355445Z"
+          },
+          "document_ref": "documents-361bf9933c3decfe"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U04EN",
+      "documents": {
+        "documents-75a804bdc9648175": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U04EN",
+            "faces": [
+              {
+                "name": "Axia, Heir to Destruction",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen / Heir / Idolatry"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Bury another Idolatry card: Search your deck for a follower with \"Lishenna\" in its name, reveal it, add it to your hand, then shuffle.\nOn Super-Evolve - Deal each enemy leader damage equal to the number of Idolatry cards on your field.\nOnce per turn, when an Idolatry amulet is put onto your field, select an enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "On Evolve - Bury another Idolatry card: Search your deck for a follower with \"Lishenna\" in its name, reveal it, add it to your hand, then shuffle.\nOn Super-Evolve - Deal each enemy leader damage equal to the number of Idolatry cards on your field.\nOnce per turn, when an Idolatry amulet is put onto your field, select an enemy follower on the field and deal it 2 damage.",
+                "speech": null,
+                "illustrator": "ni02",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U04EN.png",
+                "trait_raw": "Omen / Heir / Idolatry",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Idolatry"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2421 (Sep. 10, 2026)",
+                "question": "Does this follower's \"Once per turn, when an Idolatry amulet is put onto your field…\" trigger during an opponent's turn?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q2405 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2404 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes. Both its On Super-Evolve and On Evolve abilities will trigger."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP05-R037EN|Lishenna, Omen of Destruction}",
+                "href": "/cards/?cardno=BP05-R037EN"
+              },
+              {
+                "label": "{BP15-R039EN|Lishenna, Melodious Destruction}",
+                "href": "/cards/?cardno=BP15-R039EN"
+              },
+              {
+                "label": "{BP20-037EN|Lishenna, Melody Manifest}",
+                "href": "/cards/?cardno=BP20-037EN"
+              },
+              {
+                "label": "{BP20-040EN|Axia, Heir to Destruction}",
+                "href": "/cards/?cardno=BP20-040EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:98f0fff41f265097214f8e8ffa156227439a976cb285bcae7a3163f525efe31a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U04EN",
+            "fetched_at": "2026-09-27T13:35:10.415563Z"
+          },
+          "document_ref": "documents-75a804bdc9648175"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U05EN",
+      "documents": {
+        "documents-c77eb7a9a5e137af": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U05EN",
+            "faces": [
+              {
+                "name": "Galmieux, Ardor Manifest",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen / Wyrmkin"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "While Overflow is active for you, this has Storm.\n{icon_fanfare|[fanfare]} Put a Crest: Galmieux, Ardor Manifest token into your EX area.\nOnce on each of your turns, when this takes ability damage, select an enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "While Overflow is active for you, this has Storm.\n{icon_fanfare|[fanfare]} Put a Crest: Galmieux, Ardor Manifest token into your EX area.\nOnce on each of your turns, when this takes ability damage, select an enemy follower on the field and deal it 2 damage.",
+                "speech": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U05EN.png",
+                "trait_raw": "Omen / Wyrmkin",
+                "traits": [
+                  "Omen",
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2425 (Sep. 10, 2026)",
+                "question": "If this follower's defense is reduced to 0 by ability damage during my turn, will its \"Once on each of your turns, when this takes ability damage\" ability trigger?",
+                "answer": "Yes. The ability will trigger before the card is destroyed."
+              },
+              {
+                "title": "Q2412 (Sep. 10, 2026)",
+                "question": "What is ability damage?",
+                "answer": "Ability damage is all damage except for damage dealt by two followers in combat or by a follower attacking a leader. Damage from Strike abilities, although triggered by an attack, is considered ability damage."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-T05EN|Crest: Galmieux, Ardor Manifest}",
+                "href": "/cards/?cardno=BP20-T05EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3786c08e43b1c9a6501ea6ce9d6f750b3f61e0003a13a6ffa720b9adeae29e3a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U05EN",
+            "fetched_at": "2026-09-27T13:35:16.040987Z"
+          },
+          "document_ref": "documents-c77eb7a9a5e137af"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U06EN",
+      "documents": {
+        "documents-0cdc12ab92ec35b4": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U06EN",
+            "faces": [
+              {
+                "name": "Rulenye & Valnareik",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen / Necromancer / Demon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Choose 1. (1) Summon 2 Rulenye, Echoing Scream tokens. (2) Give this Storm. Give each {icon_nightmare|[abysscraft]} Omen follower on your field {icon_power|[attack]}+1.",
+                "sections": [],
+                "raw_text": "On Evolve - Choose 1. (1) Summon 2 Rulenye, Echoing Scream tokens. (2) Give this Storm. Give each {icon_nightmare|[abysscraft]} Omen follower on your field {icon_power|[attack]}+1.",
+                "speech": null,
+                "illustrator": "Hidayahman",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U06EN.png",
+                "trait_raw": "Omen / Necromancer / Demon",
+                "traits": [
+                  "Omen",
+                  "Necromancer",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/rulenye-valnareik/",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-075EN|Rulenye & Valnareik}",
+                "href": "/cards/?cardno=BP20-075EN"
+              },
+              {
+                "label": "{BP20-T17EN|Rulenye, Echoing Scream}",
+                "href": "/cards/?cardno=BP20-T17EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e14a381f015bbb75e380b503d0fc33ae235247e48c2d4111355e9e430a04756e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U06EN",
+            "fetched_at": "2026-09-27T13:35:21.368545Z"
+          },
+          "document_ref": "documents-0cdc12ab92ec35b4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U07EN",
+      "documents": {
+        "documents-6ae7ab19a90d0bb4": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U07EN",
+            "faces": [
+              {
+                "name": "Himeka, Heir to Repose",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen / Heir / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Search your deck for an Omen–Zealot card not named Himeka, Heir to Repose, reveal it, add it to your hand, then shuffle.\nOn Super-Evolve - {icon_cost02|[cost02]}: Search your deck for an Omen–Zealot follower not named Himeka, Heir to Repose that costs 4 or less, summon it, then shuffle.",
+                "sections": [],
+                "raw_text": "On Evolve - Search your deck for an Omen–Zealot card not named Himeka, Heir to Repose, reveal it, add it to your hand, then shuffle.\nOn Super-Evolve - {icon_cost02|[cost02]}: Search your deck for an Omen–Zealot follower not named Himeka, Heir to Repose that costs 4 or less, summon it, then shuffle.",
+                "speech": null,
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U07EN.png",
+                "trait_raw": "Omen / Heir / Zealot",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2405 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2404 (Sep. 10, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes. Both its On Super-Evolve and On Evolve abilities will trigger."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-094EN|Himeka, Heir to Repose}",
+                "href": "/cards/?cardno=BP20-094EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a56f2664e770374d03f3e6653f130eaf869a4e0ce2b8cc1bb4c025d7a4910ff1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U07EN",
+            "fetched_at": "2026-09-27T13:35:26.631350Z"
+          },
+          "document_ref": "documents-6ae7ab19a90d0bb4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U08EN",
+      "documents": {
+        "documents-1f9900c2419e64ab": {
+          "region": "en",
+          "record": {
+            "number": "BP20-U08EN",
+            "faces": [
+              {
+                "name": "Gilnelise, Voracity Manifest",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Omen"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "Drain.\n{icon_fanfare|[fanfare]} Select another follower on the field. Give it {icon_power|[attack]}+3/{icon_hp|[defense]}-3 and, if you have 0 Super-Evolution Points, put a Ravenous Sweetness token into your EX area.\nWhenever you play a Ravenous Sweetness, select an enemy follower on the field and deal it 5 damage.",
+                "sections": [],
+                "raw_text": "Drain.\n{icon_fanfare|[fanfare]} Select another follower on the field. Give it {icon_power|[attack]}+3/{icon_hp|[defense]}-3 and, if you have 0 Super-Evolution Points, put a Ravenous Sweetness token into your EX area.\nWhenever you play a Ravenous Sweetness, select an enemy follower on the field and deal it 5 damage.",
+                "speech": null,
+                "illustrator": "Mainichi Manichi",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-U08EN.png",
+                "trait_raw": "Omen",
+                "traits": [
+                  "Omen"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/gilnelise-voracity-manifest/",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [
+              {
+                "title": "Q2441 (Sep. 10, 2026)",
+                "question": "If I play this follower's Fanfare ability before turn 5, will that fulfill its \"If you have 0 Super-Evolution Points\" condition?",
+                "answer": "No. Each player starts the game with 1 Super-Evolution Point."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-T18EN|Ravenous Sweetness}",
+                "href": "/cards/?cardno=BP20-T18EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f3d6d55ba1b149e4eb3d404ac1e7d7b946b4793e54cdf3110488f4742be14be2",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-U08EN",
+            "fetched_at": "2026-09-27T13:35:32.114049Z"
+          },
+          "document_ref": "documents-1f9900c2419e64ab"
+        }
+      ]
+    }
+  ]
+}

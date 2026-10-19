@@ -1,0 +1,3857 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "ECP02",
+  "range": "SL/000-099",
+  "products": {
+    "products-a37442e94f43a87e": [
+      {
+        "name": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+        "date": "2025-08-22",
+        "links": [
+          "/cardlist/cardsearch?expansion=ECP02",
+          "https://shadowverse-evolve.com/products/ecp02/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "ECP02-SL01",
+      "documents": {
+        "documents-4d4fdb6bed9a8cf5": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL01",
+            "faces": [
+              {
+                "name": "〔光を捕まえて〕アナスタシア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}{コスト1}【レッスン_1】：自分の手札の元のコスト2以下のデレマス・フォロワー1枚をEXエリアに置いてよい。このターン、それをプレイする際、コストを-2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl01.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2151",
+                "date": "2025-08-18",
+                "question": "自分のEXエリアが『魔法のアイテム』1枚を含めて上限枚数の場合、自分のEXエリアの『魔法のアイテム』1枚を消滅させることで、このフォロワーの《ファンファーレ》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c74c322607145b95235fffa5ce02b01d8357084c0bda2d5436f1f17854954d8b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL01",
+            "fetched_at": "2026-09-24T19:55:28.746103Z"
+          },
+          "document_ref": "documents-4d4fdb6bed9a8cf5"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL02",
+      "documents": {
+        "documents-e85df23150220b2f": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL02",
+            "faces": [
+              {
+                "name": "〔光を捕まえて〕アナスタシア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】自分の場の他のデレマス・フォロワー2体まで選ぶ。それは{攻撃力}+1/{体力}+1する。\n【超進化時】自分の場の他のデレマス・フォロワーすべては{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl02.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2153",
+                "date": "2025-08-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2152",
+                "date": "2025-08-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b49f0562c22df2006c267b93f4569c9253b10dbba8ff119ffaef14359e8bdee0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL02",
+            "fetched_at": "2026-09-24T19:55:31.418351Z"
+          },
+          "document_ref": "documents-e85df23150220b2f"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL03",
+      "documents": {
+        "documents-853597967f03661b": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL03",
+            "faces": [
+              {
+                "name": "〔朱華色の夢〕藤原肇",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分のデッキの上1枚を見る。その中から、クール・カード1枚を公開して手札に加えてよい。\n{起動}{コスト0}：相手の場のフォロワー1体を選ぶ。それに1ダメージ。この能力は自分の場のクール・フォロワーが3体以上なら、1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl03.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2154",
+                "date": "2025-08-18",
+                "question": "このフォロワーの《ファンファーレ》能力で自分のデッキから見たカードの中にクール・カードがあるとき、それを手札に加えないことを選択できますか？",
+                "answer": "はい。選択できます。\nその場合カードは公開せず、デッキの上に戻します。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d58ad72ddde8cb339b0ab5015f56aaf7a6c04a785ac4b364d11325ed19aba06a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL03",
+            "fetched_at": "2026-09-24T19:55:34.104490Z"
+          },
+          "document_ref": "documents-853597967f03661b"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL04",
+      "documents": {
+        "documents-5b67dc898f07a573": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL04",
+            "faces": [
+              {
+                "name": "〔渚の花嫁〕新田美波",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキから「カード名に『アナスタシア』を含むフォロワー」1枚を探し、EXエリアに置く。このターン、それをプレイする際、コストを-3する。\n{起動}【レッスン_1】これを{アクト}：相手の場のフォロワー1体を選ぶ。それをアクトする。それは次のそれのプレイヤーのスタートフェイズにスタンドしない。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl04.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2155",
+                "date": "2025-08-18",
+                "question": "《起動》能力によって、アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしませんか？",
+                "answer": "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしません。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「それは次の相手のスタートフェイズにスタンドしない。」が適用されます。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-P03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:addbc17cec4fef7aa378c1f45ea3100324afc47b96c135995d792a2900f1feb4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL04",
+            "fetched_at": "2026-09-24T19:55:36.625053Z"
+          },
+          "document_ref": "documents-5b67dc898f07a573"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL05",
+      "documents": {
+        "documents-ed9c5d966dd770b2": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL05",
+            "faces": [
+              {
+                "name": "〔フルスイング☆エール〕姫川友紀",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "7",
+                "power": "4",
+                "hp": "4",
+                "text": "【疾走】\n{ファンファーレ}相手の場のフォロワーすべてに4ダメージ。自分の場のパッション・カードの元のコストの合計が10以上なら、代わりに8ダメージ。自分の場のパッション・カードの元のコストの合計が20以上なら、相手のリーダーすべてに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl05.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:73188a312f628dc2979d31ab692f0c9635f95e2e6116b664d018df9433762e37",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL05",
+            "fetched_at": "2026-09-24T19:55:39.480487Z"
+          },
+          "document_ref": "documents-ed9c5d966dd770b2"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL06",
+      "documents": {
+        "documents-169419230793fc4e": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL06",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕渋谷凛",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "2",
+                "hp": "1",
+                "text": "【疾走】\n{ファンファーレ}【レッスン_2】：相手の場のフォロワー1体を選ぶ。それに「自分の場のクール・フォロワーの数」と同じダメージ。",
+                "sections": [],
+                "flavor": "輝く靴をもらって、私は走りだしたんだと思う。\nこの輝くドレスをもらったことも、絶対に忘れない｡",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl06.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6a6a82a0f0a0e2001029d98eefa543174ba0e4f169b95b8c7c70f3b206792f03",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL06",
+            "fetched_at": "2026-09-24T19:55:42.411853Z"
+          },
+          "document_ref": "documents-169419230793fc4e"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL07",
+      "documents": {
+        "documents-c95301bf8b1f1a2f": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL07",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕本田未央",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【レッスン_1】：1枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "お祝いしてもらったらさ、ぱーっと騒ぐって……決めてたのに｡\nぐすっ……泣けてきちゃって、言葉が出てこないよ……｡",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl07.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9998bd5de49bc9a5b5a50fbfdac392b935a4d4cb16f43fcd1f106efee2370480",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL07",
+            "fetched_at": "2026-09-24T19:55:45.048655Z"
+          },
+          "document_ref": "documents-c95301bf8b1f1a2f"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL08",
+      "documents": {
+        "documents-64326f9405fd819d": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL08",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕本田未央",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上2枚を見る。その中から、デレマス・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n【超進化時】自分の手札の元のコスト6以下のパッション・フォロワー1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl08.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2153",
+                "date": "2025-08-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2152",
+                "date": "2025-08-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9de52c5420e72fcc2c4810e93e6aa7823b81d8aaa6920ac67af6b2c89b55e1d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL08",
+            "fetched_at": "2026-09-24T19:55:47.845197Z"
+          },
+          "document_ref": "documents-64326f9405fd819d"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL09",
+      "documents": {
+        "documents-2791ab92f86b9373": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL09",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕島村卯月",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "キュート"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "6",
+                "power": "4",
+                "hp": "4",
+                "text": "{ファンファーレ}自分のデッキから「これと同名を除くデレマス・カード」1枚を探し、EXエリアに置く。自分の墓場のキュート・カードが5枚以上なら、代わりに2枚まで。\n{起動}【レッスン_1】：自分のEXエリアのデレマス・カード1枚を選ぶ。それは「これをプレイする際、コストを-5する。」を持つ。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl09.png",
+                "trait_raw": "デレマス・キュート"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2156",
+                "date": "2025-08-18",
+                "question": "このフォロワーの《起動》能力を2回プレイして、自分のEXエリアの『笑顔のカーテンコール』を選んだ場合、その『笑顔のカーテンコール』は「これをプレイする際、コストを-5する。」を2つ持ちますか？",
+                "answer": "はい。2つ持ちます。\nその場合、プレイする際にコストが合計-10されます。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b5311602ef7a9f9dd02c7fc518e1fc38a2675cf5e4c31e43cc07e18763935599",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL09",
+            "fetched_at": "2026-09-24T19:55:50.423070Z"
+          },
+          "document_ref": "documents-2791ab92f86b9373"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL10",
+      "documents": {
+        "documents-04b89e522d63b2fe": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL10",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕北条加蓮",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}自分のデッキの上1枚を見る。その中から、クール・カード1枚を公開して手札に加えてよい。\n{ラストワード}『魔法のアイテム』1枚をEXエリアに置く。",
+                "sections": [
+                  "『魔法のアイテム』{ニュートラル}デレマス・スペル{コスト4}自分のリーダーは{体力}+1する。1枚引く。"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl10.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2154",
+                "date": "2025-08-18",
+                "question": "このフォロワーの《ファンファーレ》能力で自分のデッキから見たカードの中にクール・カードがあるとき、それを手札に加えないことを選択できますか？",
+                "answer": "はい。選択できます。\nその場合カードは公開せず、デッキの上に戻します。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9be1ee0b8092e864a9ce3b0c6c882ef3fc21152e3e3930fe9f5000e23c2c9d55",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL10",
+            "fetched_at": "2026-09-24T19:55:53.002833Z"
+          },
+          "document_ref": "documents-04b89e522d63b2fe"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL11",
+      "documents": {
+        "documents-ba02f0df025ecf69": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL11",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕十時愛梨",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}{コスト1}【レッスン_1】手札のパッション・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": "密着取材だなんて、なんだか緊張しちゃいますねっ！\nでも密着して何を撮るんでしょう……？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl11.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:289641a7860d857d1b2a8d0814a3b8b93e7fa2d05fa5c3abcef2bef534c73896",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL11",
+            "fetched_at": "2026-09-24T19:55:55.827414Z"
+          },
+          "document_ref": "documents-ba02f0df025ecf69"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL12",
+      "documents": {
+        "documents-0d9da3302618134a": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL12",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕十時愛梨",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに2ダメージ。自分の墓場のパッション・カードが5枚以上なら、『魔法のアイテム』1枚をEXエリアに置く。",
+                "sections": [
+                  "『魔法のアイテム』{ニュートラル}デレマス・スペル{コスト4}自分のリーダーは{体力}+1する。1枚引く。"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl12.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2157",
+                "date": "2025-08-18",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイして『魔法のアイテム』1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができず、自分の墓場のパッション・カードが5枚以上であっても、『魔法のアイテム』1枚をEXエリアに置くことができません。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:13e669de0b97908aca2c2ec1c47c0aac0e38cedde2b46237c581571d5c557440",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL12",
+            "fetched_at": "2026-09-24T19:55:58.411856Z"
+          },
+          "document_ref": "documents-0d9da3302618134a"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL13",
+      "documents": {
+        "documents-fe764b6022262660": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL13",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕塩見周子",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}手札のデレマス・カード1枚を捨てる：1枚引く。\n{起動}{コスト2}これを{アクト}墓場に置く：自分のデッキから「カード名に『塩見周子』を含むフォロワー」1枚を探し、場に出す。この能力は自分の墓場のデレマス・カードが10枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl13.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-P29"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:316952e2372b8bcc594789f9e486a6cf04d62542f196ba38db8880bb5cab0158",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL13",
+            "fetched_at": "2026-09-24T19:56:01.169629Z"
+          },
+          "document_ref": "documents-fe764b6022262660"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL14",
+      "documents": {
+        "documents-e99988957fa5221f": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL14",
+            "faces": [
+              {
+                "name": "〔アタシ★スタイル〕城ヶ崎美嘉",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキからデレマス・スペル1枚を探し、EXエリアに置く。このターン、それをプレイする際、コストを-3する。\n{起動}【レッスン_1】：自分の墓場のデレマス・スペル1枚を選ぶ。それをEXエリアに置く。このターン、それをプレイする際、コストを-3する。この能力は自分の墓場のパッション・カードが10枚以上なら、1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl14.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4f4bffbc24ec381342e46c27c2a50760a616a4a3d7b87a5d2832844730e0d86c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL14",
+            "fetched_at": "2026-09-24T19:56:04.109008Z"
+          },
+          "document_ref": "documents-e99988957fa5221f"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL15",
+      "documents": {
+        "documents-1f0565c77dd8477d": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL15",
+            "faces": [
+              {
+                "name": "〔カム・ウィズミー！〕乙倉悠貴",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "キュート"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それは{攻撃力}-3/{体力}-3する。自分の場に他のキュート・フォロワーがいるなら、代わりに{攻撃力}-5/{体力}-5する。\n{起動}{コスト0}：これは【疾走】を持つ。『魔法のアイテム』1枚をEXエリアに置く。この能力は自分の墓場のキュート・カードが10枚以上なら、1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl15.png",
+                "trait_raw": "デレマス・キュート"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2163",
+                "date": "2025-08-18",
+                "question": "フォロワーの攻撃力がマイナスの値になることがありますか？",
+                "answer": "はい。何らかの効果によって攻撃力はマイナスの値になることがあります。攻撃力がマイナスの値になったフォロワーによる攻撃や交戦のダメージは、ダメージ自体を与えません。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fadfd5bcc2fff2a089f1bd5343828262ffb2dba5d443d73af6a379927b7388a3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL15",
+            "fetched_at": "2026-09-24T19:56:06.798038Z"
+          },
+          "document_ref": "documents-1f0565c77dd8477d"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL16",
+      "documents": {
+        "documents-fb9981ce0343af30": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL16",
+            "faces": [
+              {
+                "name": "キラデコ☆パレード",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の墓場の元のコスト2のパッション・フォロワーと元のコスト1のパッション・フォロワーそれぞれ1枚まで選ぶ。それを場に出す。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "リカランドは、マスコットもアイドルもみーんな莉嘉っ！\nカワイすぎてDOKIDOKIさせちゃうんだからー☆",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl16.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3d858a36cf1505eb7f8b593d69925d54ea02c5b3dea4679fa94d7f3ce0ff5956",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL16",
+            "fetched_at": "2026-09-24T19:56:09.753787Z"
+          },
+          "document_ref": "documents-fb9981ce0343af30"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL17",
+      "documents": {
+        "documents-c92abf990e904ada": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL17",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕鷺沢文香",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の場のクール・フォロワーが3体以上なら、相手のリーダーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": "……ここにある書は全て、人が、人のために綴ったもの。\nそう気づいた時、私を取り巻く全てを、愛おしく思ったんです。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl17.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0f51f6ae7d68daaabaedef525e9f55f09ebdb74728c98e12861d3288e0c12d07",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL17",
+            "fetched_at": "2026-09-24T19:56:12.313401Z"
+          },
+          "document_ref": "documents-c92abf990e904ada"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL18",
+      "documents": {
+        "documents-b61ae96fa9aaf189": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL18",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕鷺沢文香",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【2】{コスト4}これを墓場に置く：自分のデッキから「カード名に『鷺沢文香』を含むフォロワー」1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl18.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-P43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fc1cdffef61595a382d38a3eb444e7256bfe3c0f81399984978bdbaa0325cb29",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL18",
+            "fetched_at": "2026-09-24T19:56:14.970836Z"
+          },
+          "document_ref": "documents-b61ae96fa9aaf189"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL19",
+      "documents": {
+        "documents-a09c56f9d8b8b6a9": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL19",
+            "faces": [
+              {
+                "name": "〔ライフ・オンライン〕砂塚あきら",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "5",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}【レッスン_1】：自分のデッキの上3枚を見る。その中から、デレマス・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}手札のキュート・カード1枚とクール・カード1枚とパッション・カード1枚を捨てる：自分のリーダーは{体力}+3する。3枚引く。自分のPPを3回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl19.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2168",
+                "date": "2025-08-18",
+                "question": "《起動》能力をプレイする際のコストとして「手札のキュート・カード1枚とクール・カード1枚とパッション・カード1枚を捨てる」を支払う場合、『ニュージェネレーションズ』や『笑顔のカーテンコール』のようなタイプに「キュート・クール・パッション」を合わせて持つカードは、いずれかのタイプのカード1枚として参照しますか？",
+                "answer": "はい。いずれかのタイプのカード1枚として参照します。（『ニュージェネレーションズ』や『笑顔のカーテンコール』のようなカードを用いたとしても、コストとして手札から捨てるカードの合計枚数は3枚です。）\n例えば、『ニュージェネレーションズ』や『笑顔のカーテンコール』のようなカード1枚のみを用いることで、「手札のキュート・カード1枚とクール・カード1枚とパッション・カード1枚を捨てる」というコストを支払うことはできません。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3973e45bcb83d7a3be37cf94b7b5131db897318944f3b56a41e790aed0791fe1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL19",
+            "fetched_at": "2026-09-24T19:56:17.872417Z"
+          },
+          "document_ref": "documents-a09c56f9d8b8b6a9"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL20",
+      "documents": {
+        "documents-f9e0429b68c7d88d": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL20",
+            "faces": [
+              {
+                "name": "〔すく×2あかりんご〕辻野あかり",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "キュート"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【突進】\n{ファンファーレ}自分のデッキの上3枚を墓場に置く。キュート・カードを墓場に置いたなら、自分のリーダーは{体力}+2する。クール・カードを墓場に置いたなら、これは【指定攻撃】を持つ。パッション・カードを墓場に置いたなら、これは{攻撃力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl20.png",
+                "trait_raw": "デレマス・キュート"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2170",
+                "date": "2025-08-18",
+                "question": "『〔すく×2あかりんご〕辻野あかり』の《ファンファーレ》能力において、『ニュージェネレーションズ』や『笑顔のカーテンコール』のようなタイプにキュート・クール・パッションを合わせ持つカードを墓場に置いた場合、3種類あるそれぞれの効果を適用することができますか？",
+                "answer": "はい。「キュート・カードを墓場に置いたなら、」「クール・カードを墓場に置いたなら、」「パッション・カードを墓場に置いたなら、」という3種類の条件をすべて満たしているため、3種類あるそれぞれの効果を適用することができます。自分のリーダーは《体力》+2し、この『〔すく×2あかりんご〕辻野あかり』は《攻撃力》+2して、【指定攻撃】を持ちます。"
+              },
+              {
+                "id": "Q2169",
+                "date": "2025-08-18",
+                "question": "『〔すく×2あかりんご〕辻野あかり』の《ファンファーレ》能力によって、キュート・カードを2枚墓場に置いた場合、「キュート・カードを墓場に置いたなら、自分のリーダーは《体力》+2する。」は2回働きますか？",
+                "answer": "いいえ。1回働きます。クール・カードやパッション・カードを2枚以上墓場に置いた場合も同様です。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e8d3a78a47ce01f011bb6c96b513980288d427a80e07c7199c163ca6c45df60a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL20",
+            "fetched_at": "2026-09-24T19:56:20.646900Z"
+          },
+          "document_ref": "documents-f9e0429b68c7d88d"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL21",
+      "documents": {
+        "documents-05deb94ca4e41893": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL21",
+            "faces": [
+              {
+                "name": "〔夢見りあむのパーリナイ〕夢見りあむ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "8",
+                "power": "7",
+                "hp": "7",
+                "text": "{ファンファーレ}相手の場のフォロワーすべてに7ダメージ。自分の墓場のキュート・カードとクール・カードとパッション・カードがそれぞれ3枚以上なら、これは【疾走】を持つ。自分のPPを1回復する。\n{Q}{起動}{コスト1}【レッスン_1】手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl21.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2172",
+                "date": "2025-08-18",
+                "question": "「《Q》《起動》《コスト1》【レッスン_1】手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。それに2ダメージ。」という能力は、『〔夢見りあむのパーリナイ〕夢見りあむ』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『〔夢見りあむのパーリナイ〕夢見りあむ』が手札にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q2171",
+                "date": "2025-08-18",
+                "question": "自分の墓場に『ニュージェネレーションズ』や『笑顔のカーテンコール』のようなタイプに「キュート・クール・パッション」を合わせて持つカードが3枚ある場合、《ファンファーレ》能力の「自分の墓場のキュート・カードとクール・カードとパッション・カードがそれぞれ3枚以上なら、」の条件を満たしますか？",
+                "answer": "はい。条件を満たします。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:699457f6b2a22a3ed3504bb08435d9c7d8d3a684ca63b47b4479484e2fc8fb73",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL21",
+            "fetched_at": "2026-09-24T19:56:23.415124Z"
+          },
+          "document_ref": "documents-05deb94ca4e41893"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL22",
+      "documents": {
+        "documents-c77913cc03a4f77d": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL22",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕神崎蘭子",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それを破壊する。【ネクロチャージ_5】自分のリーダーは{体力}+3する。【NC_10】相手のリーダーすべてに3ダメージ。（自分の墓場が5枚以上なら、【ネクロチャージ_5】の後の能力が働く。10枚以上なら、さらに【NC_10】の後の能力が働く）\n{起動}【レッスン_1】：1枚引く。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl22.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2177",
+                "date": "2025-08-18",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイして自分のリーダーは《体力》+3することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができないため、自分の墓場が5枚以上であっても、自分のリーダーは《体力》+3することができません。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:54fe27c2d2fe27cb66103dc4d8b7dad2fa3e3ff95899ab0988373c1c6ea08dd9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL22",
+            "fetched_at": "2026-09-24T19:56:26.354176Z"
+          },
+          "document_ref": "documents-c77913cc03a4f77d"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL23",
+      "documents": {
+        "documents-1752616dddb00d94": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL23",
+            "faces": [
+              {
+                "name": "〔individuals〕星輝子",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}自分のデッキの上2枚を墓場に置く。\n{起動}{コスト1}【レッスン_2】これを{アクト}：自分の墓場の元のコスト2以下のデレマス・フォロワー1枚を選ぶ。それをEXエリアに置く。このターン、それをプレイする際、コストを-2する。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl23.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ece77922c64a1c43991acd1f3df3b4f3db74c244a2c9bc9fee824cdb8148f9e4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL23",
+            "fetched_at": "2026-09-24T19:56:29.057179Z"
+          },
+          "document_ref": "documents-1752616dddb00d94"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL24",
+      "documents": {
+        "documents-3a48aa5ded86032c": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL24",
+            "faces": [
+              {
+                "name": "〔individuals〕早坂美玲",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "キュート"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "自分の墓場にデレマス・カードが10枚以上ある限り、これは【疾走】を持つ。\n【攻撃時】相手の場のフォロワー1体を選ぶ。自分の墓場のデレマス・カードが10枚以上なら、それに2ダメージ。\n{ファンファーレ}自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl24.png",
+                "trait_raw": "デレマス・キュート"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2178",
+                "date": "2025-08-18",
+                "question": "『〔individuals〕早坂美鈴』の「自分の墓場にデレマス・カードが10枚以上ある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。墓場にデレマス・カードが10枚以上ある限り、『〔individuals〕早坂美鈴』は【疾走】を持ちます。\n『〔individuals〕早坂美鈴』を場に出した後に自分の墓場のデレマス・カードが9枚以下から10枚以上になった場合、【疾走】を持ちます。\n『〔individuals〕早坂美鈴』を場に出した後に自分の墓場のデレマス・カードが10枚以上から9枚以下になった場合、【疾走】を失います。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d195d77928300b40efc3fdd7e83ce7674c33b55126b59e8bfd3766a56cb8ddb0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL24",
+            "fetched_at": "2026-09-24T19:56:32.182642Z"
+          },
+          "document_ref": "documents-3a48aa5ded86032c"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL25",
+      "documents": {
+        "documents-a7c14240297ef9b1": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL25",
+            "faces": [
+              {
+                "name": "〔individuals〕森久保乃々",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n自分の場に「カード名に『早坂美玲』か『星輝子』を含むフォロワー」が出たとき、それは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "ひぃぇええ～っ！ちょっ、ぐるぐる、はやすぎっ！\nでっ、でもっ、みなさんと一緒、楽しっ……。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl25.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2179",
+                "date": "2025-08-18",
+                "question": "何らかの能力により、相手のターン中に自分の場に「カード名に『早坂美鈴』か『星輝子』を含むフォロワー」が出た場合、「自分の場に「カード名に『早坂美鈴』か『星輝子』を含むフォロワー」が出たとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-P66"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-P68"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL23"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL24"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL26"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4fb6c36976b8894939555f4439014f3f665e86fbdb5aad0a01d89353a0ed6f6e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL25",
+            "fetched_at": "2026-09-24T19:47:53.321366Z"
+          },
+          "document_ref": "documents-a7c14240297ef9b1"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL26",
+      "documents": {
+        "documents-4e518562b01c0b6c": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL26",
+            "faces": [
+              {
+                "name": "〔individuals〕森久保乃々",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "自分の場に「カード名に『早坂美玲』か『星輝子』を含むフォロワー」が出たとき、それは{攻撃力}+1/{体力}+1する。\n【進化時】自分のデッキの上4枚を見る。その中から、元のコスト2以下のデレマス・フォロワー1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl26.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2179",
+                "date": "2025-08-18",
+                "question": "何らかの能力により、相手のターン中に自分の場に「カード名に『早坂美鈴』か『星輝子』を含むフォロワー」が出た場合、「自分の場に「カード名に『早坂美鈴』か『星輝子』を含むフォロワー」が出たとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-P66"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-P68"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL23"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL24"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL25"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:55697b60cec67398b747eefe2eafbb3b9027bf0f212d7145491f123deb58cfbd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL26",
+            "fetched_at": "2026-09-24T19:47:55.971414Z"
+          },
+          "document_ref": "documents-4e518562b01c0b6c"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL27",
+      "documents": {
+        "documents-590be947626cf2df": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL27",
+            "faces": [
+              {
+                "name": "〔チャーミング・スウィート〕二宮飛鳥",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "自分の場にクール・フォロワーが3体以上いる限り、これは【疾走】を持つ。\n{ファンファーレ}{コスト2}【レッスン_1】：自分のデッキから「カード名に『神崎蘭子』を含むフォロワー」1枚を探し、EXエリアに置く。このターン、それをプレイする際、コストを-4する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl27.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2180",
+                "date": "2025-08-18",
+                "question": "『〔チャーミング・スウィート〕二宮飛鳥』の「自分の場にクール・フォロワーが3体以上いる限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。場にクール・フォロワーが3体以上いる限り、『〔チャーミング・スウィート〕二宮飛鳥』は【疾走】を持ちます。\n『〔チャーミング・スウィート〕二宮飛鳥』を場に出した後に自分の場のクール・フォロワーが2体以下から3体以上になった場合、【疾走】を持ちます。\n『〔チャーミング・スウィート〕二宮飛鳥』を場に出した後に自分の場のクール・フォロワーが3体以上から2体以下になった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q2151",
+                "date": "2025-08-18",
+                "question": "自分のEXエリアが『魔法のアイテム』1枚を含めて上限枚数の場合、自分のEXエリアの『魔法のアイテム』1枚を消滅させることで、このフォロワーの《ファンファーレ》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c753f91356ace6e9ed4277a7ad13b97315155500dd7185c42aeab4f31fa46247",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL27",
+            "fetched_at": "2026-09-24T19:47:58.940655Z"
+          },
+          "document_ref": "documents-590be947626cf2df"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL28",
+      "documents": {
+        "documents-1d1600af7a51f25a": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL28",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕安部菜々",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "キュート"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【レッスン_1】：相手の場のフォロワー1体を選ぶ。それは{攻撃力}-1/{体力}-1する。",
+                "sections": [],
+                "flavor": "昔から好きだった、懐かしい海……見てもらえて、嬉しいです｡\nずっとナナを支えててくれた、大切な人に……｡",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl28.png",
+                "trait_raw": "デレマス・キュート"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2163",
+                "date": "2025-08-18",
+                "question": "フォロワーの攻撃力がマイナスの値になることがありますか？",
+                "answer": "はい。何らかの効果によって攻撃力はマイナスの値になることがあります。攻撃力がマイナスの値になったフォロワーによる攻撃や交戦のダメージは、ダメージ自体を与えません。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL29"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2459a41bd2a83460f97bdd4b5af2fecd5112f779321a21bc00e0211561ad2ed8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL28",
+            "fetched_at": "2026-09-24T19:48:01.627792Z"
+          },
+          "document_ref": "documents-1d1600af7a51f25a"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL29",
+      "documents": {
+        "documents-7b3e5e59b01a7223": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL29",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕安部菜々",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "デレマス",
+                  "キュート"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】手札のデレマス・カード1枚を捨てる：自分のリーダーは{体力}+2する。1枚引く。\n【超進化時】相手の場のフォロワー1体を選ぶ。それをアミュレットにする。それは「自分のメインフェイズが来たとき、自分のリーダーに2ダメージ」と「{起動}{コスト1}手札2枚を捨てる：これを墓場に置く」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl29.png",
+                "trait_raw": "デレマス・キュート"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2203",
+                "date": "2025-08-18",
+                "question": "相手の場の祈りカウンターが4個以上の『大いなる熾天使・ラピス』に対して、このフォロワーの【超進化時】能力をプレイした場合、その『大いなる熾天使・ラピス』はフォロワーとして扱いますか？",
+                "answer": "いいえ。『大いなる熾天使・ラピス』はフォロワーとして扱われず、アミュレットとして扱います。\n『大いなる熾天使・ラピス』の「これの祈りカウンターが4個以上である限り、これはフォロワーである。」という能力による継続効果よりも後に、このフォロワーの【超進化時】能力による効果が適用されます。"
+              },
+              {
+                "id": "Q2202",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーは、能力を失いますか？",
+                "answer": "いいえ。能力を失いません。また、《起動》能力や《進化》能力、《ラストワード》能力など、あらゆる能力は引き続き、有効です。\n例：『ウォーターフェアリー』がこのフォロワーの能力によってアミュレットになった場合、その『ウォーターフェアリー』は、「《進化》《コスト2》：これは進化する。」「《ラストワード》『フェアリー』1枚をEXエリアに置く。」「自分のメインフェイズが来たとき、自分のリーダーに2ダメージ」「《起動》《コスト1》手札2枚を捨てる：これを墓場に置く」を持ったアミュレットとして扱います。また、このアミュレットになった『ウォーターフェアリー』が何らかの理由によって場から墓場に置かれた場合、《ラストワード》能力が誘発します。"
+              },
+              {
+                "id": "Q2201",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーは、攻撃することができますか？",
+                "answer": "いいえ。アミュレットなので攻撃することができません。また、攻撃されることもなく、ダメージを受けることもありません。"
+              },
+              {
+                "id": "Q2200",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーは、攻撃力と体力を参照することができますか？",
+                "answer": "いいえ。攻撃力と体力は、その値自体を保持しますが持っていないものとして扱い、その数値を参照する効果の影響を受けません。"
+              },
+              {
+                "id": "Q2199",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになった『デュエリスト・モルディカイ』が墓場に置かれ《ラストワード》能力で場に出たとき、その『デュエリスト・モルディカイ』はアミュレットのままですか？",
+                "answer": "いいえ。その『デュエリスト・モルディカイ』はアミュレットではありません。一度、場から離れたカードは新しいカードとして扱うため、場に置かれた『デュエリスト・モルディカイ』に対して、それまでに付与されていた効果はリセットされます。"
+              },
+              {
+                "id": "Q2198",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーが墓場に置かれたとき、《ラストワード》能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q2197",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーは、進化することができますか？",
+                "answer": "はい。進化することができます。また、進化した場合でも、そのフォロワーはアミュレットとして扱います。"
+              },
+              {
+                "id": "Q2196",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーは、食事や出走をすることができますか？",
+                "answer": "はい。食事や出走をすることができます。また、食事や出走した場合でも、そのフォロワーはアミュレットとして扱います。"
+              },
+              {
+                "id": "Q2195",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーが進化や出走をしたとき、【進化時】能力や【出走時】能力は誘発しますか？",
+                "answer": "はい。【進化時】能力や【出走時】能力は誘発し、プレイします。"
+              },
+              {
+                "id": "Q2194",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力によって『ダイヤモンドマスター』がアミュレットになった場合、フォロワーを選ぶ能力はその『ダイヤモンドマスター』を選ぶ必要はありますか？",
+                "answer": "いいえ。その『ダイヤモンドマスター』はアミュレットであり、フォロワーを選ぶ能力で選ぶことができないので、選ぶ必要はありません。ただし『エクスキューション』のようにアミュレットを選ぶことができる能力は『ダイヤモンドマスター』を選ぶ必要があります。"
+              },
+              {
+                "id": "Q2193",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力でアミュレットになったフォロワーが【守護】を持つとき、その【守護】の効果で相手はアクト状態のアミュレットになったフォロワーを攻撃目標にする必要はありますか？",
+                "answer": "いいえ。アミュレットになったフォロワーに攻撃することはできないため、攻撃目標にする必要はありません。"
+              },
+              {
+                "id": "Q2192",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力によってアミュレットになったフォロワーが進化したとき『ソウルミニデビル』の「自分のフォロワーが進化したとき」の能力は誘発しますか？",
+                "answer": "いいえ。アミュレットになったフォロワーが進化しても『ソウルミニデビル』の「自分のフォロワーが進化したとき」の能力は誘発しません。『ソウルミニデビル』は「フォロワー」が進化した場合を誘発条件としています。"
+              },
+              {
+                "id": "Q2191",
+                "date": "2025-08-18",
+                "question": "このフォロワーの【超進化時】能力によってアミュレットになったフォロワーは、フォロワーを対象とした効果を受けますか？",
+                "answer": "いいえ。アミュレットとなったフォロワーはフォロワーを対象とした効果を受けず、アミュレットを対象とした効果のみを受けます。"
+              },
+              {
+                "id": "Q2153",
+                "date": "2025-08-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2152",
+                "date": "2025-08-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL28"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c09c930e45ad37d5999e0ba54c0d68419ecc7bd1f05bb282123dafdff8e40252",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL29",
+            "fetched_at": "2026-09-24T19:48:04.356927Z"
+          },
+          "document_ref": "documents-7b3e5e59b01a7223"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL30",
+      "documents": {
+        "documents-37f736e04b6198af": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL30",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕高垣楓",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "【守護】\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の墓場のデレマス・カードが10枚以上なら、それを破壊する。\n{起動}【レッスン_1】これを{アクト}手札1枚を捨てる：相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl30.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5c9c7b37e4c727ef4fd7f10864ac71272a38d78270b4c8bb60493bdcd7df84c5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL30",
+            "fetched_at": "2026-09-24T19:48:07.291221Z"
+          },
+          "document_ref": "documents-37f736e04b6198af"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL31",
+      "documents": {
+        "documents-9d3ba54d3c13f9ad": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL31",
+            "faces": [
+              {
+                "name": "〔シンデレラガール〕イヴ・サンタクロース",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "{ファンファーレ}自分のデッキの上2枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。\n{起動}【レッスン_2】：自分のデッキの上1枚を見る。その中から、デレマス・カード1枚を公開して手札に加えてよい。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl31.png",
+                "trait_raw": "デレマス・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2204",
+                "date": "2025-08-18",
+                "question": "このフォロワーの《起動》能力で自分のデッキから見たカードの中にデレマス・カードがあるとき、それを手札に加えないことを選択できますか？",
+                "answer": "はい。選択できます。\nその場合カードは公開せず、デッキの上に戻します。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5414663005487bde68b039f0877fc599ee59d22d5e3d9cde126839cf700f07ee",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL31",
+            "fetched_at": "2026-09-24T19:48:10.150527Z"
+          },
+          "document_ref": "documents-9d3ba54d3c13f9ad"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL32",
+      "documents": {
+        "documents-908f011b4553580d": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL32",
+            "faces": [
+              {
+                "name": "〔ルージュクチュール〕三船美優",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "デレマス",
+                  "クール"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキから元のコスト1のデレマス・フォロワー1枚を探し、場に出す。\n{起動}{コスト1}【レッスン_1】これを{アクト}：自分のデッキから元のコスト1のデレマス・フォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl32.png",
+                "trait_raw": "デレマス・クール"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2b8e990e9328a2283d0a43d2376afce53a58f4f3784520a886d6699697802fab",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL32",
+            "fetched_at": "2026-09-24T19:48:12.934381Z"
+          },
+          "document_ref": "documents-908f011b4553580d"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL33",
+      "documents": {
+        "documents-bcd53dac8e37cb48": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL33",
+            "faces": [
+              {
+                "name": "笑顔のカーテンコール",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "デレマス",
+                  "キュート",
+                  "クール",
+                  "パッション"
+                ],
+                "rarity": "SL",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "12",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、自分の墓場のデレマス・カードが10枚以上なら、コストを-5する。\n場の「デレマス・タイプを持たないフォロワー」すべてを破壊する。『魔法のアイテム』2枚をEXエリアに置く。自分のリーダーは{体力}+4する。2枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl33.png",
+                "trait_raw": "デレマス・キュート・クール・パッション"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2214",
+                "date": "2025-08-18",
+                "question": "自分のEXエリアに『魔法のアイテム』が5枚ある場合、このスペルをプレイして自分のリーダーは《体力》+4し、2枚引くことができますか？",
+                "answer": "はい。自分のリーダーは《体力》+4し、2枚引くことができます。その場合、自分のEXエリアのカードが上限枚数である5枚なので、『魔法のアイテム』を1枚もEXエリアに置くことはありません。"
+              },
+              {
+                "id": "Q2213",
+                "date": "2025-08-18",
+                "question": "「手札のキュート・カード2枚を捨てる」や「クール・カード1枚を公開して手札に加えてよい。」や「自分の墓場のパッション・カードが5枚以上なら、」というような効果によって、それぞれのタイプを持つカードを参照する場合、『笑顔のカーテンコール』のようなタイプに「キュート・クール・パッション」を合わせて持つカードは、その参照する条件を満たしていますか？",
+                "answer": "はい。参照する条件を満たしています。"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP02-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:82adcb70eb870f91f151d0160a0e29db3ca45923d8e680bbc13cf6583fe77fdd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL33",
+            "fetched_at": "2026-09-24T19:48:15.821484Z"
+          },
+          "document_ref": "documents-bcd53dac8e37cb48"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL34",
+      "documents": {
+        "documents-8d3ba1b2b19f588e": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL34",
+            "faces": [
+              {
+                "name": "〔ラブレター〕五十嵐響子",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "いつも差し入れをする側ですけど、されると嬉しくなりますねっ！\n明日は私が用意してきますっ！美穂ちゃん、何がいいかなぁ？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl34.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ddacddeadf081a26d39e2bafedd96d77871bf159b5ad4f301449df2aefd58617",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL34",
+            "fetched_at": "2026-09-24T19:48:18.484232Z"
+          },
+          "document_ref": "documents-8d3ba1b2b19f588e"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL35",
+      "documents": {
+        "documents-43bbc2785f91293a": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL35",
+            "faces": [
+              {
+                "name": "〔つぼみ〕一ノ瀬志希",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "この歌……リリカルすぎて、ノリだけじゃ歌えない……？\nなら、アプローチの仕方を変えて……ねぇ、もう1回お願い！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl35.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:375ca3218ad8928a826fd505c09b29d7676ac0ad97e3c81b56c42cd80196d0df",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL35",
+            "fetched_at": "2026-09-24T19:48:21.469713Z"
+          },
+          "document_ref": "documents-43bbc2785f91293a"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL36",
+      "documents": {
+        "documents-7ce33f895176bd9e": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL36",
+            "faces": [
+              {
+                "name": "〔Lunatic Show〕輿水幸子",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "そうです。これですよ、これ！頑張った時は全力でホメるべき！\nボク、カワイイ！エライ！お手軽！……あれ？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl36.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5e63115e7f59f4326c161aa30b556a3be35556ab280e40d69558cda2b08f2840",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL36",
+            "fetched_at": "2026-09-24T19:48:24.292910Z"
+          },
+          "document_ref": "documents-7ce33f895176bd9e"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL37",
+      "documents": {
+        "documents-90a1f1ec277909ce": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL37",
+            "faces": [
+              {
+                "name": "〔Nation Blue〕高垣楓",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "はーい、みんな……おひとつ、いかが？\nとても酸っぱいけれど、疲れた体に効きますよー。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl37.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0c152db50b6aa29778ec97e2ff154c46a90b7e27398749e5ba0b8b9fd95f679f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL37",
+            "fetched_at": "2026-09-24T19:48:27.215991Z"
+          },
+          "document_ref": "documents-90a1f1ec277909ce"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL38",
+      "documents": {
+        "documents-ebaf218630dd40b7": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL38",
+            "faces": [
+              {
+                "name": "〔エイトビートロッカー〕多田李衣菜",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "ここを押さえると……こ、このコード難しいよなつきち～。\nもぉー、絶対みんなよりギター上手くなってやるー！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl38.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:83af2ffadef208a5a88e0ed0d6ff1b61a56a99f3391525c41fc84878115c29e2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL38",
+            "fetched_at": "2026-09-24T19:48:30.111610Z"
+          },
+          "document_ref": "documents-ebaf218630dd40b7"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL39",
+      "documents": {
+        "documents-d8852f0b39d09fc2": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL39",
+            "faces": [
+              {
+                "name": "〔パステルピンクな恋〕小早川紗枝",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "体が覚えるまでが手習い、やろ？\n鳴り響くしゅーずの音も風流かな……なんて。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl39.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fbd6212e831eca3c61cd5cbaece1d44d6cfce2b54e86d47014a86573a8c2dd44",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL39",
+            "fetched_at": "2026-09-24T19:48:32.887345Z"
+          },
+          "document_ref": "documents-d8852f0b39d09fc2"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL40",
+      "documents": {
+        "documents-93169bd4913dc275": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL40",
+            "faces": [
+              {
+                "name": "〔Nation Blue〕神崎蘭子",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "生命の雫が！しかし、これこそが堕天使を同胞へ導く滴り！\n（訳：汗かいちゃったけど……これも仲間のため！）",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl40.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:12d2f616444e28a3c928236befd171721148ff61e0d3206fb0fd0c986a7d82e1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL40",
+            "fetched_at": "2026-09-24T19:48:35.731829Z"
+          },
+          "document_ref": "documents-93169bd4913dc275"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL41",
+      "documents": {
+        "documents-d188ee14aa951422": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL41",
+            "faces": [
+              {
+                "name": "〔ド根性☆レポーター〕佐藤心",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "やってやらぁ……登ってやらぁ……崖……っ！\n小さな一歩でも……しゅがみんにとっては大きな一歩……！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl41.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:19e709bbb51e584bd4350996c69d84c50a00479dda7e6517beeb7658a4cf87b1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL41",
+            "fetched_at": "2026-09-24T19:48:38.581505Z"
+          },
+          "document_ref": "documents-d188ee14aa951422"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL42",
+      "documents": {
+        "documents-1c62ddc32354b55d": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL42",
+            "faces": [
+              {
+                "name": "〔Brand new！〕辻野あかり",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "んごぉ……。も、もうダメ……動けない……。\nレッスン、ちょっとやりすぎたんご……。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl42.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c61f9fb3bb38f14567941ca6c29b433c74b18c823fc53fbfc5f248bba2250a5d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL42",
+            "fetched_at": "2026-09-24T19:48:41.520406Z"
+          },
+          "document_ref": "documents-1c62ddc32354b55d"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL43",
+      "documents": {
+        "documents-c05bb4a94bcb55b7": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL43",
+            "faces": [
+              {
+                "name": "〔咲いてJewel〕二宮飛鳥",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "この疲れも……泡みたいなボクらが抱く、塵以下の……。\nハァ、ハァ……けど、このリアル……だからその、休憩を……。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl43.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:00f3f893380e1de4b77959adfabdcc09256c0357a4b5f15e9ec4b135003f09c4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL43",
+            "fetched_at": "2026-09-24T19:48:44.320849Z"
+          },
+          "document_ref": "documents-c05bb4a94bcb55b7"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL44",
+      "documents": {
+        "documents-0ee6ec070f27be26": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL44",
+            "faces": [
+              {
+                "name": "〔つはものの道〕依田芳乃",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "礼を重んじ道を究める……わたくしとそなたの目指すところー｡\nゆえに、無心に挑むのみでしてー。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl44.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1fe21423de7553506cebe8ff8fb936c7ff6c8d61610de9f94a40235bdd07cfba",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL44",
+            "fetched_at": "2026-09-24T19:48:46.938494Z"
+          },
+          "document_ref": "documents-0ee6ec070f27be26"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL45",
+      "documents": {
+        "documents-bc8e4bace1ddf42c": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL45",
+            "faces": [
+              {
+                "name": "〔ステップトゥーミライ〕佐々木千枝",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "ふぅ……がんばって踊ってたら、熱くなっちゃいました。\nでも、すっごく楽しいですっ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl45.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ffaa9ce2903d93f2146966d42739afe19eda179079a12a9b92ee901c7a9bf41",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL45",
+            "fetched_at": "2026-09-24T19:48:49.448656Z"
+          },
+          "document_ref": "documents-bc8e4bace1ddf42c"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL46",
+      "documents": {
+        "documents-b297705ce4122128": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL46",
+            "faces": [
+              {
+                "name": "〔イケナイGO AHEAD〕橘ありす",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "失敗も、つまずくこともたくさんありました。\nですが……この壁の先には、みんなの笑顔があるんです……！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl46.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL47"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:996bf87bd68279c16b746e3bc9031cec970e89b28fa49ce6497ed3ae82ac4b2f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL46",
+            "fetched_at": "2026-09-24T19:48:52.152403Z"
+          },
+          "document_ref": "documents-b297705ce4122128"
+        }
+      ]
+    },
+    {
+      "card_no": "ECP02-SL47",
+      "documents": {
+        "documents-2c224410c022023a": {
+          "region": "jp",
+          "record": {
+            "number": "ECP02-SL47",
+            "faces": [
+              {
+                "name": "〔重ねた手と日々〕佐城雪美",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "デレマス"
+                ],
+                "rarity": "-",
+                "product": "EXコラボパック「アイドルマスター シンデレラガールズ」",
+                "title": "アイドルマスター シンデレラガールズ",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "私も……歌声、届けて……ダンス、届ける……。\nありがとうも、届ける……。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ECP02/ecp02-sl47.png",
+                "trait_raw": "デレマス"
+              }
+            ],
+            "release_date": "2025-08-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2217",
+                "date": "2025-08-18",
+                "question": "このカードは、自分のEXエリアから4PP支払うことでスペルとしてプレイすることができますか？",
+                "answer": "はい。スペルとしてプレイすることができます。\n4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。"
+              },
+              {
+                "id": "Q2216",
+                "date": "2025-08-18",
+                "question": "（※バトル開始時、自分のデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築なら、『魔法のアイテム』5枚をEXエリアに置く）というルールについて教えてください。",
+                "answer": "自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。\nこのルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。"
+              },
+              {
+                "id": "Q2215",
+                "date": "2025-08-18",
+                "question": "このカードは『魔法のアイテム』というカード名ですか？",
+                "answer": "はい。『キュートイヤリング』や『クールペンダント』など、様々なカードが存在しますが、これらはすべてバトル上『魔法のアイテム』という同一のカード名を持つカードであり、トークンです。（『キュートイヤリング』や『クールペンダント』などのトークンカードを組み合わせて使用しても問題ないです。）"
+              }
+            ],
+            "products_ref": "products-a37442e94f43a87e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL35"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL36"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL39"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL40"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL41"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL42"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL43"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL44"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ECP02-SL46"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:002c7dce405e9559d3046a52ba0aa3582493951ac6673615dac280bccbda1826",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ECP02-SL47",
+            "fetched_at": "2026-09-24T19:48:55.428324Z"
+          },
+          "document_ref": "documents-2c224410c022023a"
+        }
+      ]
+    }
+  ]
+}

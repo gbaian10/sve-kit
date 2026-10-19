@@ -1,0 +1,1294 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SD06",
+  "range": "000-099",
+  "products": {
+    "products-77a37bb1d9fea972": [
+      {
+        "name": "Starter Deck #6 “Maculate Ablution”",
+        "date": "Jun. 30, 2023",
+        "links": [
+          "/cards/searchresults?expansion=SD06",
+          "https://en.shadowverse-evolve.com/products/sd0106/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SD06-001EN",
+      "documents": {
+        "documents-4fa929ef41135a8d": {
+          "region": "en",
+          "record": {
+            "number": "SD06-001EN",
+            "faces": [
+              {
+                "name": "Skullfane",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Zealot / Eidolon"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. You may reveal an amulet from among them and put it onto your field. Put the remaining cards into your cemetery.\nWhenever an amulet you control leaves the field, deal 2 damage to each enemy leader and enemy follower on the field.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. You may reveal an amulet from among them and put it onto your field. Put the remaining cards into your cemetery.\nWhenever an amulet you control leaves the field, deal 2 damage to each enemy leader and enemy follower on the field.",
+                "speech": null,
+                "illustrator": "SEMSEI",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-001EN.png",
+                "trait_raw": "Zealot / Eidolon",
+                "traits": [
+                  "Zealot",
+                  "Eidolon"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/skullfane/",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [
+              {
+                "title": "Q128 (Jun. 30, 2023)",
+                "question": "If both this follower and a Hare of Illusions are on my field, and I play Hare of Illusions's activated ability, banishing this card, will this follower's \"Whenever an amulet leaves your field, deal 2 damage to each enemy leader and enemy follower on the field\" ability trigger?",
+                "answer": "Yes, it will."
+              },
+              {
+                "title": "Q127 (Jun. 30, 2023)",
+                "question": "If multiple amulets leave my field at the same time, does this follower's \"Whenever an amulet leaves your field, deal 2 damage to each enemy leader and enemy follower on the field\" ability trigger for each amulet?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:58e762c74dc0294bc3aba3aa00f34d2c1da8538a03b8935ecdbac0a95da30543",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-001EN",
+            "fetched_at": "2026-09-27T18:46:55.231211Z"
+          },
+          "document_ref": "documents-4fa929ef41135a8d"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-002EN",
+      "documents": {
+        "documents-ab96c5dc403206a3": {
+          "region": "en",
+          "record": {
+            "number": "SD06-002EN",
+            "faces": [
+              {
+                "name": "Hare of Illusions",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "0",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]}{icon_stand|[engage]}, put this card into its owner's cemetery: Select an enemy follower on the field and engage it.\n{icon_act|[act]}{icon_cost10|[cost10]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Banish each follower on the field.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]}{icon_stand|[engage]}, put this card into its owner's cemetery: Select an enemy follower on the field and engage it.\n{icon_act|[act]}{icon_cost10|[cost10]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Banish each follower on the field.",
+                "speech": null,
+                "illustrator": "keriru",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-002EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/hare-of-illusions",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [
+              {
+                "title": "Q265 (Jun. 30, 2023)",
+                "question": "If there are no enemy followers on the field, or there are only followers with Aura, can I still play this follower's \"Select an enemy follower on the field and engage it\" activated ability?",
+                "answer": "No. If there are no enemy followers on the field that you can select, then you cannot play the ability or pay the cost of putting this amulet into your cemetery. Note that if there is an engaged enemy follower without Aura, you may select it and play this ability. In that case, the selected follower's state would remain unchanged."
+              },
+              {
+                "title": "Q130 (Jun. 30, 2023)",
+                "question": "When I play this amulet's \"Banish each follower on the field\" activated ability, will it only banish enemy followers on the field?",
+                "answer": "No. All followers on all players' fields will be banished."
+              },
+              {
+                "title": "Q129 (Jun. 30, 2023)",
+                "question": "Can I pay the cost for either of this amulet's activated abilities when it's engaged?",
+                "answer": "No. Both costs require you to engage it, so if it's already engaged, you cannot pay either cost."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bb65e04429e9a70632ca64bbd0400593b35d9fe00fec55bff5729729a3bce950",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-002EN",
+            "fetched_at": "2026-09-27T18:46:57.979762Z"
+          },
+          "document_ref": "documents-ab96c5dc403206a3"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-003EN",
+      "documents": {
+        "documents-76f8cdd3a492f4a5": {
+          "region": "en",
+          "record": {
+            "number": "SD06-003EN",
+            "faces": [
+              {
+                "name": "Priest of the Cudgel",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-003EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": [
+              {
+                "label": "{SD06-004EN|Priest of the Cudgel}",
+                "href": "/cards/?cardno=SD06-004EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4a48b2876923eefd0c150a3e06533baca93ce8ebaaf39c222bc18b785bf5937d",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-003EN",
+            "fetched_at": "2026-09-27T18:47:01.228956Z"
+          },
+          "document_ref": "documents-76f8cdd3a492f4a5"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-004EN",
+      "documents": {
+        "documents-9094cb846bb0cc40": {
+          "region": "en",
+          "record": {
+            "number": "SD06-004EN",
+            "faces": [
+              {
+                "name": "Priest of the Cudgel",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "On Evolve: Select an enemy follower with 3 defense or less on the field and banish it.",
+                "sections": [],
+                "raw_text": "On Evolve: Select an enemy follower with 3 defense or less on the field and banish it.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-004EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": [
+              {
+                "label": "{SD06-003EN|Priest of the Cudgel}",
+                "href": "/cards/?cardno=SD06-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:38547fded738704229f3103589902166cdf81e2f9f0495b087c66bbc60512a96",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-004EN",
+            "fetched_at": "2026-09-27T18:47:03.778057Z"
+          },
+          "document_ref": "documents-9094cb846bb0cc40"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-005EN",
+      "documents": {
+        "documents-d296b0cb352648db": {
+          "region": "en",
+          "record": {
+            "number": "SD06-005EN",
+            "faces": [
+              {
+                "name": "Acolyte's Light",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Spell",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Banish it and give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Banish it and give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Tob",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-005EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q131 (Jun. 30, 2023)",
+                "question": "If there are no enemy followers on the field, can I still play this spell to give my leader +2 defense?",
+                "answer": "No. You must be able to select a follower to play this spell."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:603d1719ee489f73d61a8dd0970ce7bad5e83473257870f42c74c4deb2b2d5ad",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-005EN",
+            "fetched_at": "2026-09-27T18:47:06.137843Z"
+          },
+          "document_ref": "documents-d296b0cb352648db"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-006EN",
+      "documents": {
+        "documents-d5953839e7b46139": {
+          "region": "en",
+          "record": {
+            "number": "SD06-006EN",
+            "faces": [
+              {
+                "name": "Dual Flames",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_fanfare|[fanfare]} Summon a Holy Tiger token.\n{icon_act|[act]}{icon_cost02|[cost02]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Summon a Holy Tiger token.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Summon a Holy Tiger token.\n{icon_act|[act]}{icon_cost02|[cost02]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Summon a Holy Tiger token.",
+                "speech": "{icon_bishop|[havencraft]}{icon_cost04|[cost04]} Holy Tiger (Follower - Beast) {icon_power|[attack]}4/{icon_hp|[defense]}4 | Rush.",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-006EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/dual-flames/",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [
+              {
+                "title": "Q133 (Jun. 30, 2023)",
+                "question": "If my field has reached its card limit, can I still summon a Holy Tiger with this amulet's activated ability?",
+                "answer": "Yes. This amulet leaves your field when you pay the ability's cost, so by the time the ability is resolved, you will have space on your field for the Holy Tiger."
+              },
+              {
+                "title": "Q132 (Jun. 30, 2023)",
+                "question": "Can I pay the cost for this amulet's activated ability when it's engaged?",
+                "answer": "No. The cost requires you to engage it, so if it's already engaged, you cannot pay the cost."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2b8195db0a29809a8ca3edb10218a8aac4f82088724f70a6a7319f059480f6d5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-006EN",
+            "fetched_at": "2026-09-27T18:47:08.963386Z"
+          },
+          "document_ref": "documents-d5953839e7b46139"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-007EN",
+      "documents": {
+        "documents-ff1e105733f2e87a": {
+          "region": "en",
+          "record": {
+            "number": "SD06-007EN",
+            "faces": [
+              {
+                "name": "Cruel Priestess",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Zealot"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Select an amulet that costs 5 play points or less in your cemetery and put it onto your field.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Select an amulet that costs 5 play points or less in your cemetery and put it onto your field.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-007EN.png",
+                "trait_raw": "Zealot",
+                "traits": [
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q134 (Jun. 30, 2023)",
+                "question": "When I put an amulet from my cemetery onto my field with this follower's ability, do I need to pay the cost of that amulet?",
+                "answer": "No, you do not."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9166026fd9bc7b063a8b0300a1fca9ee6a2bdb52dc8035aeb368d6feef24ea0",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-007EN",
+            "fetched_at": "2026-09-27T18:47:11.528447Z"
+          },
+          "document_ref": "documents-ff1e105733f2e87a"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-008EN",
+      "documents": {
+        "documents-b9a611884d6919a4": {
+          "region": "en",
+          "record": {
+            "number": "SD06-008EN",
+            "faces": [
+              {
+                "name": "Snake Priestess",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Zealot"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "Ward. (This follower can be engaged when it's put onto your field or during your end phase. When followers with Ward are engaged, your opponent can only attack them.)",
+                "sections": [],
+                "raw_text": "Ward. (This follower can be engaged when it's put onto your field or during your end phase. When followers with Ward are engaged, your opponent can only attack them.)",
+                "speech": null,
+                "illustrator": "COGA",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-008EN.png",
+                "trait_raw": "Zealot",
+                "traits": [
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fb7357d0771ee69e224684f778a12e23079e336a307273628c6e80d4ad7e09bf",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-008EN",
+            "fetched_at": "2026-09-27T18:47:14.318261Z"
+          },
+          "document_ref": "documents-b9a611884d6919a4"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-009EN",
+      "documents": {
+        "documents-07cfa7c1f8365f79": {
+          "region": "en",
+          "record": {
+            "number": "SD06-009EN",
+            "faces": [
+              {
+                "name": "Ardent Nun",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.\nWard.\nDuring each opponent's turn, this follower deals 1 more damage.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.\nWard.\nDuring each opponent's turn, this follower deals 1 more damage.",
+                "speech": null,
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-009EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": [
+              {
+                "label": "{SD06-010EN|Ardent Nun}",
+                "href": "/cards/?cardno=SD06-010EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3b25d4a2c5c26638c40816e9ebe74dc5576f3f7270b0aac1978e82b9d3188cb5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-009EN",
+            "fetched_at": "2026-09-27T18:47:17.047874Z"
+          },
+          "document_ref": "documents-07cfa7c1f8365f79"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-010EN",
+      "documents": {
+        "documents-f9ab966025a4fdc6": {
+          "region": "en",
+          "record": {
+            "number": "SD06-010EN",
+            "faces": [
+              {
+                "name": "Ardent Nun",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "Ward.\nDuring each opponent's turn, this follower deals 2 more damage.",
+                "sections": [],
+                "raw_text": "Ward.\nDuring each opponent's turn, this follower deals 2 more damage.",
+                "speech": null,
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-010EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": [
+              {
+                "label": "{SD06-009EN|Ardent Nun}",
+                "href": "/cards/?cardno=SD06-009EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5f07860ce0af86f7c85af1846af046bf88f79c5e39adbc15c53a38dcc6e469cf",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-010EN",
+            "fetched_at": "2026-09-27T18:47:20.181348Z"
+          },
+          "document_ref": "documents-f9ab966025a4fdc6"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-011EN",
+      "documents": {
+        "documents-793be0909945d9bb": {
+          "region": "en",
+          "record": {
+            "number": "SD06-011EN",
+            "faces": [
+              {
+                "name": "Guardian Nun",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.\nWard.\n{icon_fanfare|[fanfare]} If there is an amulet on your field, give this follower {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.\nWard.\n{icon_fanfare|[fanfare]} If there is an amulet on your field, give this follower {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "lack",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-011EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q135 (Jun. 30, 2023)",
+                "question": "If there are 2 amulets on my field when this follower comes onto the field, does it gain +2 defense?",
+                "answer": "No. This follower gains +1 defense regardless of the number of amulets."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": [
+              {
+                "label": "{SD06-012EN|Guardian Nun}",
+                "href": "/cards/?cardno=SD06-012EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:946b4ebf7a51afbdaf8802c3feeeeb57e07a53ed8b70bb6be6d83aec14cb930e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-011EN",
+            "fetched_at": "2026-09-27T18:47:22.914186Z"
+          },
+          "document_ref": "documents-793be0909945d9bb"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-012EN",
+      "documents": {
+        "documents-793bbd017ff31c75": {
+          "region": "en",
+          "record": {
+            "number": "SD06-012EN",
+            "faces": [
+              {
+                "name": "Guardian Nun",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "Ward.\nOn Evolve: Give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve: Give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "lack",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-012EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q136 (Jun. 30, 2023)",
+                "question": "If my leader's defense is 20, can I still give them +2 defense with this follower's On Evolve ability?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": [
+              {
+                "label": "{SD06-011EN|Guardian Nun}",
+                "href": "/cards/?cardno=SD06-011EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:36237b7a7cc0651b5f700a4c210337f3eef3451c64701d4cfec5cc500edda598",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-012EN",
+            "fetched_at": "2026-09-27T18:47:25.538861Z"
+          },
+          "document_ref": "documents-793bbd017ff31c75"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-013EN",
+      "documents": {
+        "documents-018e4ac559a6f138": {
+          "region": "en",
+          "record": {
+            "number": "SD06-013EN",
+            "faces": [
+              {
+                "name": "Hallowed Dogma",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Spell",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nLook at the top 5 cards of your deck. You may reveal an amulet from among them and add it to your hand. Put the remaining cards on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nLook at the top 5 cards of your deck. You may reveal an amulet from among them and add it to your hand. Put the remaining cards on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "IGARASHI",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-013EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q138 (Jun. 30, 2023)",
+                "question": "Can I look at my evolve deck with this spell?",
+                "answer": "No. You can only look at your main deck."
+              },
+              {
+                "title": "Q137 (Jun. 30, 2023)",
+                "question": "If I have less than 5 cards in my deck, can I still play this spell?",
+                "answer": "Yes, you can. You would simply look at all the cards in your deck, and return any remaining cards to your deck area in any order."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8133dc9fe95779f9e5f489e54db00efca4dabedb18ef3cc64ab27ed717f7e24f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-013EN",
+            "fetched_at": "2026-09-27T18:47:27.992873Z"
+          },
+          "document_ref": "documents-018e4ac559a6f138"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-014EN",
+      "documents": {
+        "documents-992e40794088472b": {
+          "region": "en",
+          "record": {
+            "number": "SD06-014EN",
+            "faces": [
+              {
+                "name": "Death Sentence",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Zealot"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "This card is put onto the field engaged.\n{icon_act|[act]}{icon_stand|[engage]}, put this card into its owner's cemetery: Select an enemy follower on the field and destroy it.",
+                "sections": [],
+                "raw_text": "This card is put onto the field engaged.\n{icon_act|[act]}{icon_stand|[engage]}, put this card into its owner's cemetery: Select an enemy follower on the field and destroy it.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-014EN.png",
+                "trait_raw": "Zealot",
+                "traits": [
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/death-sentence/",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [
+              {
+                "title": "Q140 (Jun. 30, 2023)",
+                "question": "Can I pay the cost for this amulet's activated ability when it's engaged?",
+                "answer": "No. The cost requires you to engage it, so if it's already engaged, you cannot pay the cost."
+              },
+              {
+                "title": "Q139 (Jun. 30, 2023)",
+                "question": "Does this amulet come onto the field in the reserved state before becoming engaged?",
+                "answer": "No. It comes onto the field in the engaged state."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8aa569e3a768c1160a8d81886db771484128fe2286947f96056e74980d090338",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-014EN",
+            "fetched_at": "2026-09-27T18:47:31.165258Z"
+          },
+          "document_ref": "documents-992e40794088472b"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-015EN",
+      "documents": {
+        "documents-7f86214a3d0dbb80": {
+          "region": "en",
+          "record": {
+            "number": "SD06-015EN",
+            "faces": [
+              {
+                "name": "Pinion Prayer",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith / Avian"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]}{icon_cost01|[cost01]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Summon a Holy Falcon token.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]}{icon_cost01|[cost01]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Summon a Holy Falcon token.",
+                "speech": "{icon_bishop|[havencraft]}{icon_cost03|[cost03]} Holy Falcon (Follower - Avian) {icon_power|[attack]}2/{icon_hp|[defense]}2 | Storm.",
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-015EN.png",
+                "trait_raw": "Faith / Avian",
+                "traits": [
+                  "Faith",
+                  "Avian"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/pinion-prayer/",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [
+              {
+                "title": "Q142 (Jun. 30, 2023)",
+                "question": "If my field has reached its card limit, can I still summon a Holy Falcon with this amulet's activated ability?",
+                "answer": "Yes. This amulet leaves your field when you pay the ability's cost, so by the time the ability is resolved, you will have space on your field for the Holy Falcon."
+              },
+              {
+                "title": "Q141 (Jun. 30, 2023)",
+                "question": "Can I pay the cost for this amulet's ability when it's engaged?",
+                "answer": "No. The cost requires you to engage it, so if it's already engaged, you cannot pay the cost."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": [
+              {
+                "label": "{SD06-T01EN|Holy Falcon}",
+                "href": "/cards/?cardno=SD06-T01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1a6cf8af5b3e0951f626889ed0f2d898d7195d98de1f7bf7ff2039b2b2176993",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-015EN",
+            "fetched_at": "2026-09-27T18:47:34.082028Z"
+          },
+          "document_ref": "documents-7f86214a3d0dbb80"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-016EN",
+      "documents": {
+        "documents-d3b5b21315087aa7": {
+          "region": "en",
+          "record": {
+            "number": "SD06-016EN",
+            "faces": [
+              {
+                "name": "Beastly Vow",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "This card is put onto the field engaged.\n{icon_act|[act]}{icon_cost01|[cost01]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Summon a Holy Tiger token.",
+                "sections": [],
+                "raw_text": "This card is put onto the field engaged.\n{icon_act|[act]}{icon_cost01|[cost01]}, {icon_stand|[engage]}, put this card into its owner's cemetery: Summon a Holy Tiger token.",
+                "speech": "{icon_bishop|[havencraft]}{icon_cost04|[cost04]} Holy Tiger (Follower - Beast) {icon_power|[attack]}4/{icon_hp|[defense]}4 | Rush.",
+                "illustrator": "Mayoko",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-016EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/beastly-vow/",
+            "notes": [
+              "This card's printed ability text contains an erratum. See here for more details."
+            ],
+            "qa": [
+              {
+                "title": "Q145 (Jun. 30, 2023)",
+                "question": "If my field has reached its card limit, can I still summon a Holy Tiger with this amulet's activated ability?",
+                "answer": "Yes. This amulet leaves your field when you pay the ability's cost, so by the time the ability is resolved, you will have space on your field for the Holy Tiger."
+              },
+              {
+                "title": "Q144 (Jun. 30, 2023)",
+                "question": "Can I pay the cost for this amulet's activated ability when it's engaged?",
+                "answer": "No. The cost requires you to engage it, so if it's already engaged, you cannot pay the cost."
+              },
+              {
+                "title": "Q143 (Jun. 30, 2023)",
+                "question": "Does this amulet come onto the field in the reserved state before becoming engaged?",
+                "answer": "No. It comes onto the field in the engaged state."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:543f98f3c4248f49db7f7b98da55d138291a5ebd517c1ac4371fcac275affa72",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-016EN",
+            "fetched_at": "2026-09-27T18:47:37.004823Z"
+          },
+          "document_ref": "documents-d3b5b21315087aa7"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-017EN",
+      "documents": {
+        "documents-b36cd03eca892849": {
+          "region": "en",
+          "record": {
+            "number": "SD06-017EN",
+            "faces": [
+              {
+                "name": "Angelic Sword Maiden",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Angel"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "6",
+                  "power": "4"
+                },
+                "text": "Ward. (This follower can be engaged when it's put onto your field or during your end phase. When followers with Ward are engaged, your opponent can only attack them.)",
+                "sections": [],
+                "raw_text": "Ward. (This follower can be engaged when it's put onto your field or during your end phase. When followers with Ward are engaged, your opponent can only attack them.)",
+                "speech": null,
+                "illustrator": "Melodyoflost",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-017EN.png",
+                "trait_raw": "Angel",
+                "traits": [
+                  "Angel"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ef5a8d7a8ef9fc55b90e7159bc896cb8a4a0ffa1d72de476a78720920ede944a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-017EN",
+            "fetched_at": "2026-09-27T18:47:39.493565Z"
+          },
+          "document_ref": "documents-b36cd03eca892849"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-018EN",
+      "documents": {
+        "documents-a82d8f1253ee69de": {
+          "region": "en",
+          "record": {
+            "number": "SD06-018EN",
+            "faces": [
+              {
+                "name": "Healing Angel",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Angel"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]}{icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-018EN.png",
+                "trait_raw": "Angel",
+                "traits": [
+                  "Angel"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q98 (Jun. 30, 2023)",
+                "question": "If my leader's defense is 20, can I still give them +1 defense with this follower's Fanfare ability?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e49c96fc4cd464708bf6e16cf2a386ad2e1bded500206a7d1298ef0dfda83533",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-018EN",
+            "fetched_at": "2026-09-27T18:47:42.660884Z"
+          },
+          "document_ref": "documents-a82d8f1253ee69de"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-019EN",
+      "documents": {
+        "documents-bfe2280325970bf1": {
+          "region": "en",
+          "record": {
+            "number": "SD06-019EN",
+            "faces": [
+              {
+                "name": "Healing Angel",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Angel"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "On Evolve: Give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "On Evolve: Give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-019EN.png",
+                "trait_raw": "Angel",
+                "traits": [
+                  "Angel"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q99 (Jun. 30, 2023)",
+                "question": "If my leader's defense is 20, can I still give them +2 defense with this follower's ability?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:951d584c3da5f2c19cf0b192ef484d92fbc9aebe37f13f5f1e06d11b6cf767b3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-019EN",
+            "fetched_at": "2026-09-27T18:47:45.159686Z"
+          },
+          "document_ref": "documents-bfe2280325970bf1"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-020EN",
+      "documents": {
+        "documents-d66f2341ade41908": {
+          "region": "en",
+          "record": {
+            "number": "SD06-020EN",
+            "faces": [
+              {
+                "name": "Angelic Snipe",
+                "info": {
+                  "Card Set": "Starter Deck #6 “Maculate Ablution”",
+                  "Card Type": "Spell",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Angel"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower on the field and deal it 2 damage.",
+                "speech": null,
+                "illustrator": "hirooka masaki",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-020EN.png",
+                "trait_raw": "Angel",
+                "traits": [
+                  "Angel"
+                ]
+              }
+            ],
+            "release_date": "Jun. 30, 2023",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-77a37bb1d9fea972",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4eb99a8afaccb1f54e44e9fa220c583bf432438fcb31dd7e3a32ecdca315f890",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SD06-020EN",
+            "fetched_at": "2026-09-27T18:47:48.014738Z"
+          },
+          "document_ref": "documents-d66f2341ade41908"
+        }
+      ]
+    }
+  ]
+}

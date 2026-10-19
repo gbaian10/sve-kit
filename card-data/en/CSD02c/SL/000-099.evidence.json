@@ -1,0 +1,169 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD02c",
+  "range": "SL/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-e4f82dc8e9ae026d": [
+        {
+          "ordinal": 0,
+          "name": "Crossover Starter Deck “Passion”",
+          "date_raw": "Oct. 11, 2024",
+          "href_raw": [
+            "/cards/searchresults?expansion=CSD02C",
+            "https://en.shadowverse-evolve.com/products/csd02/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=CSD02C",
+            "https://en.shadowverse-evolve.com/products/csd02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/csd02/",
+              "expansion_code": "CSD02C"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-89bca9db77dbb37b": [
+        {
+          "stable_source_key": "Q891",
+          "official_number": "Q891",
+          "locator": "qa-block:0",
+          "published_on": "2024-10-08",
+          "date_raw": "Oct. 8, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": [],
+      "related-98499f06f246132d": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=CSD02c-T01EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:5ef0b620bd2453ab1ac3ba1699622b30009c535f3450774413a4c89d961fe809": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:7a77a109e85db845f3d9f7c6af0e464903782c5f1c4202b6b20d73255e15dc08",
+        "raw_bytes": 36107,
+        "first_receipt_id": "sha256:d218a574422201a42c83f43e09e660bdabce20f7e7a01ab5c82900d75be4a96c",
+        "descriptor_sha256": "sha256:a4749ce724dcb829c2e4980d5ddf5f735d25601793bb80656c7f50083196889f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:818de80b97ec2a940f8d2a9fcfd2ec47d53f9619cea4080e873336dd424d0298"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e4f82dc8e9ae026d",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-98499f06f246132d",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:f60f41e439d546f76368dbe1a5f251acda4f08ac7b2211bcdfe51b07b1875c06"
+    },
+    "src:v1:7f23d5962a6b3c017a3de483b84540491b4f6a809e37ef6e3dfb314d4905198d": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:fa0bfcbcd480545b9b003991a6a16f3387284107b6dfaac028277d42c54900e2",
+        "raw_bytes": 36391,
+        "first_receipt_id": "sha256:7d51d95f0281aeef3b87f2e01de183e589ae8ebd1ef47cbbbd05e2d47b655431",
+        "descriptor_sha256": "sha256:e97a7633acda2c2f71036c66f874cf873293e34c867a89386dbfd9874352eae2",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:5f5da9ea2c157d95e57f5215e44b2d80f59312d030a8a80cb8421df8c208c7c8"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e4f82dc8e9ae026d",
+        "qa": "qa-89bca9db77dbb37b",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:17328f3f7d49b70e3c17e1899a70e4ac936ddf3ba15f1c49775c9a7f0c2b6e09"
+    },
+    "src:v1:958daad0d516c07c0cc63926df2f126768c2d8b10e8664f9de63af3c4926d0cb": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:337aed231d2882468e9b5a31f6929ff6a44e2ce96fbd3927989a3775045d5f88",
+        "raw_bytes": 36427,
+        "first_receipt_id": "sha256:24660a34fa688a658c2e76a453e6260521950ccbc21a703698586f1f8f51d689",
+        "descriptor_sha256": "sha256:09ce9c7fe6572adad9b8d167e8a68ac435367544aadef280f93f38bf584e01ae",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:864d76f5b3620f46eba48b297ad1e10d232174a60399afbd77844a60d9b5fb66"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e4f82dc8e9ae026d",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-98499f06f246132d",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:52d3f10852b97e5348cff1760c43a6bd781ad005a72f3ec072b88051044c5ae7"
+    }
+  }
+}

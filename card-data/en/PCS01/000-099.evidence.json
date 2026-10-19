@@ -1,0 +1,175 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "PCS01",
+  "range": "000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-bd7be55d204d4039": [
+        {
+          "ordinal": 0,
+          "name": "Premium Card Set \"Summer Edition Vol. 1\"",
+          "date_raw": "Sep. 4, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=PCS01",
+            "https://en.shadowverse-evolve.com/products/pcs01/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=PCS01",
+            "https://en.shadowverse-evolve.com/products/pcs01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/pcs01/",
+              "expansion_code": "PCS01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-5afde33fbfed25ca": [
+        {
+          "stable_source_key": "Q2352",
+          "official_number": "Q2352",
+          "locator": "qa-block:0",
+          "published_on": "2026-09-04",
+          "date_raw": "Sep. 4, 2026"
+        }
+      ]
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": [],
+      "related-51286508a9dac681": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP16-040EN"
+        }
+      ],
+      "related-d3d8628c384a78bf": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP18-T04EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:1f9917af7518343f54d12651654440b42c79930f05999d95e974e42e0e1a690f": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:a97eb749fc3dc7c4ceee3b67fb86eac71d4fb7391f7d0c09562736c2b77e326c",
+        "raw_bytes": 36391,
+        "first_receipt_id": "sha256:010ee99da8f44889cd2b9e1f1f0ea34184435e5d9a4cdf8961d65f1175b452d0",
+        "descriptor_sha256": "sha256:091fff1213af415bf26db29917b516d7e2d5729f53f840165ee4ecaaaf82969f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:66fd25f98b688e7a3fef8361513a2eb5a44a21f2295e7ecef4510bea159711a2"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-bd7be55d204d4039",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-51286508a9dac681",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:d509a3dc2903aef82a8afff3977c40b8e4c02cd580feb094e56b91f7f9252268"
+    },
+    "src:v1:3acb99da4d066107515ba9fe5c09fc639ae1d2fd4447f000c7126149ff799eaf": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:e52bb76488fa3a737b02493cb2029c68b90539990fb200fffa7953defc2dab86",
+        "raw_bytes": 36534,
+        "first_receipt_id": "sha256:081c82e9413341fb78a745a9dbdc9bbe0030a3c8290726dc0514fe8a7d878747",
+        "descriptor_sha256": "sha256:6262e74c3da0d2c000462cba82c87b7755eec458e38099b7dbc1a3bbe9303b4b",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:8f787dfba1e7568d909b72f55dd0db7bf9a657e29e9240c92b9de7e3078352e0"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-bd7be55d204d4039",
+        "qa": "qa-5afde33fbfed25ca",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:de232372c03ce55b6a7509c4c85d64e1d9a8f82dab0b4864b141a2ead2f2744c"
+    },
+    "src:v1:a7b326933dd63a479785532c6b9cf766453a9f925d4892893597e5c257a356e4": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:8043460177be664ab986dbea67078b8b9527f33d127494552edc103aec873189",
+        "raw_bytes": 36055,
+        "first_receipt_id": "sha256:2f7e1469a34d52d1478dc79ae1fc9b4d5a82995628ee3ae43a8326f77f29f7db",
+        "descriptor_sha256": "sha256:0cefdbb9f99e4e3070191d3ba22d3ed2ad088ab24910f4be5c9728bc71b44edb",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:5f7a650769ff1cf5d282b9564c28f7b9d4e12a1b94afd851df54fe77b9951b02"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-bd7be55d204d4039",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-d3d8628c384a78bf",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:c629a50fbf789a10447c4f347f18977cf358019410cf0b1e4b3f8859dc245d2c"
+    }
+  }
+}

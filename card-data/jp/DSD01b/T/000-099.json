@@ -1,0 +1,83 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01b",
+  "range": "T/000-099",
+  "products": {
+    "products-78ede256f7a50fef": [
+      {
+        "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+        "date": "2024-04-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=DSD01",
+          "https://shadowverse-evolve.com/products/dsd01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "DSD01b-T01",
+      "documents": {
+        "documents-e036520128d4ebe5": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-T01",
+            "faces": [
+              {
+                "name": "遺されし電撃",
+                "card_class": "ドラゴン",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "-",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場に武闘竜人・フォロワーが出たとき、これに雷カウンター1個を置く。\n{起動}これを{アクト}：自分の場の{ドラゴン}フォロワー1体を選ぶ。それは{攻撃力}+2する。この能力はこれの雷カウンターが5個以上なら使える。\n{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それを破壊する。それのリーダーに3ダメージ。この能力はこれの雷カウンターが10個以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-t01.png",
+                "trait_raw": "ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1252",
+                "date": "2024-03-01",
+                "question": "武闘竜人・フォロワーが2体同時に場に出た場合、『遺されし電撃』の「自分の場に武闘竜人・フォロワーが出たとき、これに雷カウンター1個を置く。」という能力は2回誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q1251",
+                "date": "2024-03-01",
+                "question": "何らかの能力によって、武闘竜人・フォロワーが相手のターン中に自分の場に出た場合、『遺されし電撃』の「自分の場に武闘竜人・フォロワーが出たとき、これに雷カウンター1個を置く。」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e0b581c09e3f121a5702513a7b08d2c6c8bd1022b6c0b5cb94f4286f6adc9b46",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-T01",
+            "fetched_at": "2026-09-24T21:28:28.995256Z"
+          },
+          "document_ref": "documents-e036520128d4ebe5"
+        }
+      ]
+    }
+  ]
+}

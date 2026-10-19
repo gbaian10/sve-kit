@@ -1,0 +1,322 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD03a",
+  "range": "SL/000-099",
+  "products": {
+    "products-895e798fc14681f6": [
+      {
+        "name": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+        "date": "Aug. 15, 2025",
+        "links": [
+          "/cards/searchresults?expansion=CSD03A",
+          "https://en.shadowverse-evolve.com/products/csd03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CSD03a-SL01EN",
+      "documents": {
+        "documents-2a377b59be6f6655": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-SL01EN",
+            "faces": [
+              {
+                "name": "Alfred Early",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower into a King of Knights, Alfred.\nStorm. Twin Drive. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower into a King of Knights, Alfred.\nStorm. Twin Drive. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)",
+                "speech": null,
+                "illustrator": "Design: 伊藤彰\nIllustration: 三好載克",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-SL01EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1458 (Aug. 8, 2025)",
+                "question": "Do I resolve Twin Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1456 (Aug. 8, 2025)",
+                "question": "When attacking using a follower with Twin Drive, if I reveal a Trigger with the first drive check, do I resolve the Trigger before or after performing the second drive check?",
+                "answer": "You resolve the Trigger first. For example, if you reveal and resolve a Draw Trigger with the first drive check, you will draw a card, put the resolved Trigger into your cemetery, then perform the second drive check. If you choose not to resolve the Trigger, you will put it on the bottom of your deck, then perform the second drive check."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-SL02EN|King of Knights, Alfred}",
+                "href": "/cards/?cardno=CSD03a-SL02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3ca3c2f231c2aefb2b7a08a8792393e5c3f5b9176b06667cb1ffb3443eaec8d6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-SL01EN",
+            "fetched_at": "2026-09-27T15:46:00.822213Z"
+          },
+          "document_ref": "documents-2a377b59be6f6655"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-SL02EN",
+      "documents": {
+        "documents-03abbda65c0fcd53": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-SL02EN",
+            "faces": [
+              {
+                "name": "King of Knights, Alfred",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "Storm. Twin Drive. (Whenever a follower with Twin Drive attacks, it performs 2 drive checks.)\nOn Evolve - Search your deck for a Royal Paladin follower that costs 3 or less, summon it, then shuffle. If there are at least 15 Royal Paladin cards in your cemetery, give it and this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "Storm. Twin Drive. (Whenever a follower with Twin Drive attacks, it performs 2 drive checks.)\nOn Evolve - Search your deck for a Royal Paladin follower that costs 3 or less, summon it, then shuffle. If there are at least 15 Royal Paladin cards in your cemetery, give it and this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-SL02EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1459 (Aug. 8, 2025)",
+                "question": "If I don't find a Royal Paladin follower that costs 3 or less to summon with this follower's On Evolve ability, but there are at least 15 Royal Paladin cards in my cemetery, do I still give this follower +1/+1?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1458 (Aug. 8, 2025)",
+                "question": "Do I resolve Twin Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1456 (Aug. 8, 2025)",
+                "question": "When attacking using a follower with Twin Drive, if I reveal a Trigger with the first drive check, do I resolve the Trigger before or after performing the second drive check?",
+                "answer": "You resolve the Trigger first. For example, if you reveal and resolve a Draw Trigger with the first drive check, you will draw a card, put the resolved Trigger into your cemetery, then perform the second drive check. If you choose not to resolve the Trigger, you will put it on the bottom of your deck, then perform the second drive check."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-SL01EN|Alfred Early}",
+                "href": "/cards/?cardno=CSD03a-SL01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2484e3b9703c679bc8d1b0158e21695bf2bc30acbc645225790bd9f099ecd751",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-SL02EN",
+            "fetched_at": "2026-09-27T15:46:03.531333Z"
+          },
+          "document_ref": "documents-03abbda65c0fcd53"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-SL03EN",
+      "documents": {
+        "documents-71bf78cf9266a08b": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-SL03EN",
+            "faces": [
+              {
+                "name": "Blaster Blade",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nSingle Drive. (Whenever a follower with Single Drive attacks, it performs a drive check.)\n{icon_fanfare|[fanfare]} If this card was put onto the field by an ability, evolve it.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nSingle Drive. (Whenever a follower with Single Drive attacks, it performs a drive check.)\n{icon_fanfare|[fanfare]} If this card was put onto the field by an ability, evolve it.",
+                "speech": null,
+                "illustrator": "Design: 伊藤彰\nIllustration: TMS",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-SL03EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1462 (Aug. 8, 2025)",
+                "question": "Do I evolve this follower with its Fanfare ability if it is put onto the field by an ability during an opponent's turn?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1461 (Aug. 8, 2025)",
+                "question": "Do I evolve this follower with its Fanfare ability if it is put onto the field by King of Knights, Alfred's On Evolve ability or Wingal's activated ability?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1460 (Aug. 8, 2025)",
+                "question": "If I evolve this follower with its Fanfare ability, can I evolve another follower using its evolve ability in the same turn?",
+                "answer": "Yes. Although you can only activate one evolve ability per turn, other abilities that evolve followers do not count towards this limit."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-SL04EN|Blaster Blade}",
+                "href": "/cards/?cardno=CSD03a-SL04EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4e1990c0cd2cbf438ddb945cf2efdb0a96dc818e554c27f58b7e6a6ae8ef4fac",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-SL03EN",
+            "fetched_at": "2026-09-27T15:46:06.051410Z"
+          },
+          "document_ref": "documents-71bf78cf9266a08b"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-SL04EN",
+      "documents": {
+        "documents-f4165ab9c5f6739d": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-SL04EN",
+            "faces": [
+              {
+                "name": "Blaster Blade",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "Single Drive.\nOn Evolve - Select an enemy follower on the field and deal it damage equal to 2 times the number of Royal Paladin followers on your field.",
+                "sections": [],
+                "raw_text": "Single Drive.\nOn Evolve - Select an enemy follower on the field and deal it damage equal to 2 times the number of Royal Paladin followers on your field.",
+                "speech": null,
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-SL04EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-SL03EN|Blaster Blade}",
+                "href": "/cards/?cardno=CSD03a-SL03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5713866da9d06743cabcd194f7ca8b12e407f118d1b1362bde2689910f543648",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-SL04EN",
+            "fetched_at": "2026-09-27T15:46:09.203709Z"
+          },
+          "document_ref": "documents-f4165ab9c5f6739d"
+        }
+      ]
+    }
+  ]
+}

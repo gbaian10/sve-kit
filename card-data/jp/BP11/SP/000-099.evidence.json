@@ -1,0 +1,191 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP11",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-24a8c41be7a175a9": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック第11弾「宿命の弾丸」",
+          "date_raw": "2024-08-23",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP11",
+            "https://shadowverse-evolve.com/products/bp11/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP11",
+            "https://shadowverse-evolve.com/products/bp11/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp11/",
+              "expansion_code": "BP11"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-dc737d1cf0f93f0e": [
+        {
+          "stable_source_key": "Q1718",
+          "official_number": "Q1718",
+          "locator": "qa-block:0",
+          "published_on": "2024-11-08",
+          "date_raw": "2024-11-08"
+        },
+        {
+          "stable_source_key": "Q1717",
+          "official_number": "Q1717",
+          "locator": "qa-block:1",
+          "published_on": "2024-11-08",
+          "date_raw": "2024-11-08"
+        },
+        {
+          "stable_source_key": "Q1502",
+          "official_number": "Q1502",
+          "locator": "qa-block:2",
+          "published_on": "2024-08-20",
+          "date_raw": "2024-08-20"
+        },
+        {
+          "stable_source_key": "Q1501",
+          "official_number": "Q1501",
+          "locator": "qa-block:3",
+          "published_on": "2024-08-20",
+          "date_raw": "2024-08-20"
+        },
+        {
+          "stable_source_key": "Q1500",
+          "official_number": "Q1500",
+          "locator": "qa-block:4",
+          "published_on": "2024-08-20",
+          "date_raw": "2024-08-20"
+        },
+        {
+          "stable_source_key": "Q1499",
+          "official_number": "Q1499",
+          "locator": "qa-block:5",
+          "published_on": "2024-08-20",
+          "date_raw": "2024-08-20"
+        },
+        {
+          "stable_source_key": "Q1498",
+          "official_number": "Q1498",
+          "locator": "qa-block:6",
+          "published_on": "2024-08-20",
+          "date_raw": "2024-08-20"
+        },
+        {
+          "stable_source_key": "Q1497",
+          "official_number": "Q1497",
+          "locator": "qa-block:7",
+          "published_on": "2024-08-20",
+          "date_raw": "2024-08-20"
+        }
+      ]
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": [],
+      "related-8f86397b0a40ffcd": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=BP01-077"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:5c032ec540d7868458a74431602e86e887723de6b86578ae2304900e720d8a25": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:82f67bd4e686f29ed05081bd4269d04a28e72c367cd988b2383ecf9f99fcf755",
+        "raw_bytes": 37413,
+        "first_receipt_id": "sha256:f40fe72810543011b0f3e462b6152f698ac15002fbcddf42e25d69bc5175ccc3",
+        "descriptor_sha256": "sha256:7d8cb9d6e62d77f6413a15380333e6c148095a6d9d5d5b3f2ff7aa18a6def8c7",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:c1c4d4fa7f343f4e4b9a7b8203aefa5c7f0f15ceda744012bb356e64718309ea"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-24a8c41be7a175a9",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-8f86397b0a40ffcd",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:b5e198ee7ba2056b23e46c60afe043648bb72a02df6a32444983c206057b4a5e"
+    },
+    "src:v1:f50430a62c2ca180638d7bd605a4da6a679278aa1dbafc5e0e0737e355303087": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:1d06ca5d3514b43eb0f2714e5596af9b4f4a629fa84e0f049782bde1229a39d8",
+        "raw_bytes": 42896,
+        "first_receipt_id": "sha256:99889173db8b5b4d7366608b9d272e32c724ba57d1df235c8ed1d7606bc04ead",
+        "descriptor_sha256": "sha256:7b12851dba213e5e22f4bffb75cc921d9d3f16cd8a8d705b6f02d9f35f19b054",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:b471e98fc4b97101364eccc8bb8b1e0af70a95c5e48521742fdb4471d2e063b5"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-24a8c41be7a175a9",
+        "qa": "qa-dc737d1cf0f93f0e",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:240a579bb7677beec66f4ae55f97c9831bcf0526e485312e8c887d4149729d5c"
+    }
+  }
+}

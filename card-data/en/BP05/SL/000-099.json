@@ -1,0 +1,1582 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP05",
+  "range": "SL/000-099",
+  "products": {
+    "products-ac455dddd8fa0850": [
+      {
+        "name": "Booster Set #5 “Omens Eternal”",
+        "date": "Jun. 21, 2024",
+        "links": [
+          "/cards/searchresults?expansion=BP05",
+          "https://en.shadowverse-evolve.com/products/bp05/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP05-SL01EN",
+      "documents": {
+        "documents-0fa2739105bd7150": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL01EN",
+            "faces": [
+              {
+                "name": "Izudia, Omen of Unkilling",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Hunter"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} If there are at least 3 Hunter cards in your cemetery, select an enemy follower on the field. Change it into an amulet and give it \"{icon_act|[act]} {icon_cost02|[cost02]}: Put this card into its owner's cemetery.\" (It keeps all existing abilities, including {icon_evolve|[evolve]} and {icon_carrot|[feed]}.)",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} If there are at least 3 Hunter cards in your cemetery, select an enemy follower on the field. Change it into an amulet and give it \"{icon_act|[act]} {icon_cost02|[cost02]}: Put this card into its owner's cemetery.\" (It keeps all existing abilities, including {icon_evolve|[evolve]} and {icon_carrot|[feed]}.)",
+                "speech": null,
+                "illustrator": "Yuu Fujiki",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL01EN.png",
+                "trait_raw": "Omen / Hunter",
+                "traits": [
+                  "Omen",
+                  "Hunter"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q639 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet, do effects which target followers apply to it?",
+                "answer": "No. Only effects which target amulets apply to it."
+              },
+              {
+                "title": "Q638 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet and then it evolves, does it trigger Mini Soul Devil's \"Whenever one of your followers evolves\" ability?",
+                "answer": "No. It's an amulet, not a follower, so it doesn't trigger Mini Soul Devil's ability when it evolves."
+              },
+              {
+                "title": "Q637 (Jun. 14, 2024)",
+                "question": "If Mordecai the Duelist's card type is changed to amulet, then it's put into the cemetery, and I put it back onto my field with its Last Words ability, is it still an amulet?",
+                "answer": "No. When a card is moved from the field to a different zone, it's considered to be a new card and loses any effects applied to it when it was on the field."
+              },
+              {
+                "title": "Q636 (Jun. 14, 2024)",
+                "question": "If a follower with Ward has its card type changed to amulet, do enemy followers have to attack it when it's engaged?",
+                "answer": "No. Amulets can't be attacked."
+              },
+              {
+                "title": "Q635 (Jun. 14, 2024)",
+                "question": "If Diamond Master's card type is changed to amulet, do opponents still need to select it when selecting followers for an ability?",
+                "answer": "No. Since Diamond Master is an amulet, it can't be selected when selecting followers. However, if an opponent is selecting cards for an ability like Execution's, which can select amulets, they must select Diamond Master."
+              },
+              {
+                "title": "Q634 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet and then it's evolved/raced, do its On Evolve/On Race abilities trigger?",
+                "answer": "Yes, they do."
+              },
+              {
+                "title": "Q633 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet, can it still be served and raced?",
+                "answer": "Yes. Note that even if raced, it remains an amulet."
+              },
+              {
+                "title": "Q632 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet, can it still evolve?",
+                "answer": "Yes. Note that even if evolved, it remains an amulet."
+              },
+              {
+                "title": "Q631 (Jun. 14, 2024)",
+                "question": "If a follower with a Last Words ability has its card type changed to amulet and is put into the cemetery, does its Last Words ability trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q630 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet, can its attack and defense values be referenced?",
+                "answer": "No. It still possesses attack and defense values, but you treat the card as if it doesn't have them, and they can't be referenced by abilities."
+              },
+              {
+                "title": "Q629 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet, can it attack?",
+                "answer": "No. Amulets can't attack, be attacked, or take damage."
+              },
+              {
+                "title": "Q628 (Jun. 14, 2024)",
+                "question": "If a follower's card type is changed to amulet, does it lose all abilities?",
+                "answer": "No. All its abilities remain valid. This includes activated abilities, evolve abilities, and Last Words abilities.\n\nFor example, if you change a Water Fairy's card type to amulet with this follower's ability, it becomes an amulet named Water Fairy with the following three abilities: \"{icon_evolve|evolve} {icon_cost02|cost02}: Evolve this follower\"; \"{icon_act|act} {icon_cost02|cost02}: Put this card into its owner's cemetery\"; and \"{icon_lastword|lastword} Put a Fairy token into your EX area.\" If it gets put into the cemetery, with its new activated ability or otherwise, its Last Words ability triggers as usual."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL02EN|Izudia, Omen of Unkilling}",
+                "href": "/cards/?cardno=BP05-SL02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d40cd291fa7f9c8b42013c655ec28d8e343e72c3f9eb4ccc55e7199c88239e20",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL01EN",
+            "fetched_at": "2026-09-27T17:42:59.887161Z"
+          },
+          "document_ref": "documents-0fa2739105bd7150"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL02EN",
+      "documents": {
+        "documents-e54ae14e228b2292": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL02EN",
+            "faces": [
+              {
+                "name": "Izudia, Omen of Unkilling",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Hunter"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "{icon_act|[act]} {icon_stand|[engage]}: Deal 6 damage to each enemy leader with at least 10 defense.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_stand|[engage]}: Deal 6 damage to each enemy leader with at least 10 defense.",
+                "speech": null,
+                "illustrator": "Yuu Fujiki",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL02EN.png",
+                "trait_raw": "Omen / Hunter",
+                "traits": [
+                  "Omen",
+                  "Hunter"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL01EN|Izudia, Omen of Unkilling}",
+                "href": "/cards/?cardno=BP05-SL01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5ec7fbaf168b712e8da59b7d22c4238d605696fde9147094fef5bcd9b5869f4e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL02EN",
+            "fetched_at": "2026-09-27T17:43:02.623036Z"
+          },
+          "document_ref": "documents-e54ae14e228b2292"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL03EN",
+      "documents": {
+        "documents-9abbcbe618ece170": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL03EN",
+            "faces": [
+              {
+                "name": "Spinaria, Keeper of Enigmas",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Supreme"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. From among them, you may reveal up to 1 {icon_elf|[forestcraft]} follower and up to 1 {icon_elf|[forestcraft]} spell and add them to your hand. Put the remaining cards on the bottom of your deck in any order. Combo (3): Recover 3 play points.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. From among them, you may reveal up to 1 {icon_elf|[forestcraft]} follower and up to 1 {icon_elf|[forestcraft]} spell and add them to your hand. Put the remaining cards on the bottom of your deck in any order. Combo (3): Recover 3 play points.",
+                "speech": null,
+                "illustrator": "Taro Kagawa",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL03EN.png",
+                "trait_raw": "Supreme",
+                "traits": [
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q641 (Jun. 14, 2024)",
+                "question": "If I meet the conditions for Combo (3), but I don't add any followers or spells to my hand from the top 4 cards of my deck, is the Combo effect still executed?",
+                "answer": "Yes, it is."
+              },
+              {
+                "title": "Q640 (Jun. 14, 2024)",
+                "question": "If I look at the top 4 cards of my deck and they're all followers, can I reveal 1 Forestcraft follower and 0 Forestcraft spells from among them and add them to my hand?",
+                "answer": "Yes. The same is true if all 4 cards are spells."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2d77d62360c0a8e6493a5c3d5ead1d3576ee8f9f9affd7eec4b43a926dbaf968",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL03EN",
+            "fetched_at": "2026-09-27T17:43:05.496814Z"
+          },
+          "document_ref": "documents-9abbcbe618ece170"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL04EN",
+      "documents": {
+        "documents-bacf5b8145fa61b4": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL04EN",
+            "faces": [
+              {
+                "name": "Octrice, Omen of Usurpation",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Thief"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_evolve|[evolve]} {icon_cost00|[cost00]}: Evolve this follower. This ability can be activated if there are at least 10 cards in opponents' cemeteries.\n{icon_fanfare|[fanfare]} Each opponent puts the top 2 cards of their deck into their cemetery.\n{icon_act|[act]} {icon_cost08|[cost08]}: Select a card in an opponent's cemetery and play it for 0 play points.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_evolve|[evolve]} {icon_cost00|[cost00]}: Evolve this follower. This ability can be activated if there are at least 10 cards in opponents' cemeteries.\n{icon_fanfare|[fanfare]} Each opponent puts the top 2 cards of their deck into their cemetery.\n{icon_act|[act]} {icon_cost08|[cost08]}: Select a card in an opponent's cemetery and play it for 0 play points.",
+                "speech": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL04EN.png",
+                "trait_raw": "Omen / Thief",
+                "traits": [
+                  "Omen",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q663 (Jun. 14, 2024)",
+                "question": "If my opponent's deck is empty, and I make them put the top card of their deck into their cemetery, do I win the game?",
+                "answer": "No. If you draw a card when your deck is empty, you lose the game. If you put the top card of your deck into your cemetery when your deck is empty, nothing happens."
+              },
+              {
+                "title": "Q655 (Jun. 14, 2024)",
+                "question": "Can you explain this follower's activated ability in detail?",
+                "answer": "If you can select a card in an opponent's cemetery, you can pay 8 play points to play this follower's activated ability, by which you play the selected card for 0 play points.\n\nIf you selected a follower or amulet, you put it onto your field and play any Fanfare abilities it has. When it moves to a zone other than the field, it moves to the corresponding zone of its owner. Cards put onto your field with this follower's ability are generally treated in the same way as stolen cards. See the Q&A for Angel of Chaos (BP03-109EN) for more details.\n\nIf you selected a spell, you resolve its abilities, then put it back into its owner's cemetery."
+              },
+              {
+                "title": "Q654 (Jun. 14, 2024)",
+                "question": "If I play Dimension Shift with this follower's activated ability, do I put it back into my opponent's cemetery after resolving it?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q653 (Jun. 14, 2024)",
+                "question": "Can I select and play 7 More Centimeters with this follower's activated ability?",
+                "answer": "It depends. First, you can select 7 More Centimeters from an opponent's cemetery. Then, if you have at least 20 Umamusume cards in your cemetery, you can play it for 0 play points. If not, you can't play it, and nothing else happens."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL05EN|Octrice, Omen of Usurpation}",
+                "href": "/cards/?cardno=BP05-SL05EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:64c3731ae568ae2e7ee23deff4af9c5e1c75e19730372e8bf80718a3c76ae492",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL04EN",
+            "fetched_at": "2026-09-27T17:43:08.444876Z"
+          },
+          "document_ref": "documents-bacf5b8145fa61b4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL05EN",
+      "documents": {
+        "documents-f0c31decd17deb8c": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL05EN",
+            "faces": [
+              {
+                "name": "Octrice, Omen of Usurpation",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Thief"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "On Evolve: Select a card in an opponent's cemetery and put it into your EX area.\n{icon_act|[act]} {icon_cost08|[cost08]}: Select a card in an opponent's cemetery and play it for 0 play points.\nIf there are at least 10 cards in opponents' cemeteries, any card you play from the EX area costs 2 less.",
+                "sections": [],
+                "raw_text": "On Evolve: Select a card in an opponent's cemetery and put it into your EX area.\n{icon_act|[act]} {icon_cost08|[cost08]}: Select a card in an opponent's cemetery and play it for 0 play points.\nIf there are at least 10 cards in opponents' cemeteries, any card you play from the EX area costs 2 less.",
+                "speech": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL05EN.png",
+                "trait_raw": "Omen / Thief",
+                "traits": [
+                  "Omen",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q882 (Aug. 8, 2024)",
+                "question": "If this follower is on my field and Wyrm God of the Skies is in my EX area, and there are at least 10 cards in my opponent's cemetery, does Wyrm God of the Skies' activated ability cost 2 less?",
+                "answer": "No. Playing an activated ability isn't playing a card, so this follower's ability doesn't apply."
+              },
+              {
+                "title": "Q663 (Jun. 14, 2024)",
+                "question": "If my opponent's deck is empty, and I make them put the top card of their deck into their cemetery, do I win the game?",
+                "answer": "No. If you draw a card when your deck is empty, you lose the game. If you put the top card of your deck into your cemetery when your deck is empty, nothing happens."
+              },
+              {
+                "title": "Q656 (Jun. 14, 2024)",
+                "question": "Can you explain this follower's On Evolve ability in detail?",
+                "answer": "When playing this follower's On Evolve ability, you select a card in an opponent's cemetery and put it into your EX area.\n\nIf you selected a follower or amulet, you can put it onto your field by playing it like any other card, or with abilities that put a card from your EX area onto your field.\n\nIf you selected a spell, you can play it like any other card. After resolving its abilities, you put the spell back into its owner's cemetery.\n\nAfter the card is put into your EX area, if it should move to a zone other than the field, it moves to the corresponding zone of its owner."
+              },
+              {
+                "title": "Q655 (Jun. 14, 2024)",
+                "question": "Can you explain this follower's activated ability in detail?",
+                "answer": "If you can select a card in an opponent's cemetery, you can pay 8 play points to play this follower's activated ability, by which you play the selected card for 0 play points.\n\nIf you selected a follower or amulet, you put it onto your field and play any Fanfare abilities it has. When it moves to a zone other than the field, it moves to the corresponding zone of its owner. Cards put onto your field with this follower's ability are generally treated in the same way as stolen cards. See the Q&A for Angel of Chaos (BP03-109EN) for more details.\n\nIf you selected a spell, you resolve its abilities, then put it back into its owner's cemetery."
+              },
+              {
+                "title": "Q654 (Jun. 14, 2024)",
+                "question": "If I play Dimension Shift with this follower's activated ability, do I put it back into my opponent's cemetery after resolving it?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q653 (Jun. 14, 2024)",
+                "question": "Can I select and play 7 More Centimeters with this follower's activated ability?",
+                "answer": "It depends. First, you can select 7 More Centimeters from an opponent's cemetery. Then, if you have at least 20 Umamusume cards in your cemetery, you can play it for 0 play points. If not, you can't play it, and nothing else happens."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL04EN|Octrice, Omen of Usurpation}",
+                "href": "/cards/?cardno=BP05-SL04EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:28412442e3a005dbccfd8b87341f65b94e4935edfd50a6e085517b5ddb24aee0",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL05EN",
+            "fetched_at": "2026-09-27T17:43:10.818907Z"
+          },
+          "document_ref": "documents-f0c31decd17deb8c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL06EN",
+      "documents": {
+        "documents-0ac3375b16b2696b": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL06EN",
+            "faces": [
+              {
+                "name": "Magna Legacy",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Supreme / Magna"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "8",
+                  "power": "8"
+                },
+                "text": "{icon_fanfare|[fanfare]} Banish the top half of your deck (round up). Deal 4 damage to each enemy leader and enemy follower on the field. If at least 15 cards were banished by this ability, deal 8 damage instead.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Banish the top half of your deck (round up). Deal 4 damage to each enemy leader and enemy follower on the field. If at least 15 cards were banished by this ability, deal 8 damage instead.",
+                "speech": null,
+                "illustrator": "Akira Miyazaki",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL06EN.png",
+                "trait_raw": "Supreme / Magna",
+                "traits": [
+                  "Supreme",
+                  "Magna"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q659 (Jun. 14, 2024)",
+                "question": "Is there anything I should be careful of when banishing the top half of my deck?",
+                "answer": "When counting the cards in your deck, make sure to keep them facedown so neither you nor your opponents can see them. Also, take care not to change the order of any cards in your deck."
+              },
+              {
+                "title": "Q658 (Jun. 14, 2024)",
+                "question": "When banishing cards from my deck with this follower's ability, do I put them faceup or facedown in my banished zone?",
+                "answer": "Put them faceup."
+              },
+              {
+                "title": "Q657 (Jun. 14, 2024)",
+                "question": "Can you give examples of how rounding up works when banishing the top half of my deck?",
+                "answer": "If your deck has 28 cards, banish the top 14.\nIf your deck has 29 cards, banish the top 15.\nIf your deck has 30 cards, banish the top 15."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eff2ede70770667d661c799dd84c670a53c8641863ac18a7bff0d532a4ac4550",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL06EN",
+            "fetched_at": "2026-09-27T17:43:13.641710Z"
+          },
+          "document_ref": "documents-0ac3375b16b2696b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL07EN",
+      "documents": {
+        "documents-8a95e3566569afc7": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL07EN",
+            "faces": [
+              {
+                "name": "Raio, Omen of Truth",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Mage"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "7",
+                  "power": "7"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Discard a Mage card: Select an enemy follower on the field and deal it 9 damage.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Discard a Mage card: Select an enemy follower on the field and deal it 9 damage.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL07EN.png",
+                "trait_raw": "Omen / Mage",
+                "traits": [
+                  "Omen",
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL08EN|Raio, Omen of Truth}",
+                "href": "/cards/?cardno=BP05-SL08EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:09eff69351f70de9d9e714e3e62f183a3df5f2fa7e51366c45757db5050bbebc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL07EN",
+            "fetched_at": "2026-09-27T17:43:16.651645Z"
+          },
+          "document_ref": "documents-8a95e3566569afc7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL08EN",
+      "documents": {
+        "documents-d2d4085bfa7744e5": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL08EN",
+            "faces": [
+              {
+                "name": "Raio, Omen of Truth",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Mage"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "9",
+                  "power": "9"
+                },
+                "text": "On Evolve: Look at the top 9 cards of your deck. You may put up to 3 cards that cost 3 play points or less from among them into your EX area. They cost 3 less to play this turn. Put the remaining cards on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "On Evolve: Look at the top 9 cards of your deck. You may put up to 3 cards that cost 3 play points or less from among them into your EX area. They cost 3 less to play this turn. Put the remaining cards on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL08EN.png",
+                "trait_raw": "Omen / Mage",
+                "traits": [
+                  "Omen",
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL07EN|Raio, Omen of Truth}",
+                "href": "/cards/?cardno=BP05-SL07EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:766e590e6400c42d0866fe340a1e156496610484a7c54d640c6fbd38fdd4e4f2",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL08EN",
+            "fetched_at": "2026-09-27T17:43:19.532538Z"
+          },
+          "document_ref": "documents-d2d4085bfa7744e5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL09EN",
+      "documents": {
+        "documents-a4dd293501fc3734": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL09EN",
+            "faces": [
+              {
+                "name": "Lishenna, Omen of Destruction",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Idolatry"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} Put a Destruction in White and Destruction in Black token into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Put a Destruction in White and Destruction in Black token into your EX area.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost01|[cost01]} Destruction in White (Amulet - Omen/Idolatry) | At the start of your main phase, give your leader {icon_hp|[defense]}+2.\n{icon_witch|[runecraft]}{icon_cost02|[cost02]} Destruction in Black (Amulet - Omen/Idolatry) | At the start of your main phase, deal 2 damage to each enemy leader.",
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL09EN.png",
+                "trait_raw": "Omen / Idolatry",
+                "traits": [
+                  "Omen",
+                  "Idolatry"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q664 (Jun. 14, 2024)",
+                "question": "If I play this follower's Fanfare ability when my EX area has 4 cards, can I choose which token to put into my EX area?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-T01EN|Destruction in White}",
+                "href": "/cards/?cardno=BP05-T01EN"
+              },
+              {
+                "label": "{BP05-T02EN|Destruction in Black}",
+                "href": "/cards/?cardno=BP05-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9f054a2ff0279bc5617a11e6be3224a6be6291d81f3b1a3aa50c08e639128a3b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL09EN",
+            "fetched_at": "2026-09-27T17:43:22.327746Z"
+          },
+          "document_ref": "documents-a4dd293501fc3734"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL10EN",
+      "documents": {
+        "documents-2e71d5f6ead8aa55": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL10EN",
+            "faces": [
+              {
+                "name": "Galmieux, Omen of Disdain",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Wyrmkin"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\nDuring your turn, whenever this follower takes ability damage, change its {icon_evolve|[evolve]} cost to 0 for the rest of the turn.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\nDuring your turn, whenever this follower takes ability damage, change its {icon_evolve|[evolve]} cost to 0 for the rest of the turn.",
+                "speech": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL10EN.png",
+                "trait_raw": "Omen / Wyrmkin",
+                "traits": [
+                  "Omen",
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q671 (Jun. 14, 2024)",
+                "question": "What is ability damage?",
+                "answer": "Ability damage is all damage except for damage dealt by two followers in combat or by a follower attacking a leader. For example, if you deal 1 damage to a follower on your field with Disdainful Rending or Disciple of Disdain, that's ability damage."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL11EN|Galmieux, Omen of Disdain}",
+                "href": "/cards/?cardno=BP05-SL11EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:801a19ef0efeda6023579d1f46b771ac714f0432b7e6c0a4c606c715482742c8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL10EN",
+            "fetched_at": "2026-09-27T17:43:25.283571Z"
+          },
+          "document_ref": "documents-2e71d5f6ead8aa55"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL11EN",
+      "documents": {
+        "documents-a57566ca230260bc": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL11EN",
+            "faces": [
+              {
+                "name": "Galmieux, Omen of Disdain",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Wyrmkin"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "On Evolve: Select an Omen card that costs 2 play points or less in your cemetery and play it for 0 play points.\nDuring your turn, whenever this follower takes ability damage, select an enemy leader or enemy follower on the field and deal it 3 damage.",
+                "sections": [],
+                "raw_text": "On Evolve: Select an Omen card that costs 2 play points or less in your cemetery and play it for 0 play points.\nDuring your turn, whenever this follower takes ability damage, select an enemy leader or enemy follower on the field and deal it 3 damage.",
+                "speech": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL11EN.png",
+                "trait_raw": "Omen / Wyrmkin",
+                "traits": [
+                  "Omen",
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q672 (Jun. 14, 2024)",
+                "question": "If my Galmieux, Omen of Disdain takes ability damage during my turn that brings its defense to 0, does its ability still trigger?",
+                "answer": "Yes. Taking damage triggers this follower's ability. Then, since it has 0 or less defense, it's destroyed. Then, you resolve the ability."
+              },
+              {
+                "title": "Q671 (Jun. 14, 2024)",
+                "question": "What is ability damage?",
+                "answer": "Ability damage is all damage except for damage dealt by two followers in combat or by a follower attacking a leader. For example, if you deal 1 damage to a follower on your field with Disdainful Rending or Disciple of Disdain, that's ability damage."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL10EN|Galmieux, Omen of Disdain}",
+                "href": "/cards/?cardno=BP05-SL10EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76d42b9d678f971360a092d2696b0a5a27df959137456eef216c4c78f775cd3c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL11EN",
+            "fetched_at": "2026-09-27T17:43:27.853217Z"
+          },
+          "document_ref": "documents-a57566ca230260bc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL12EN",
+      "documents": {
+        "documents-61750aa342f90030": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL12EN",
+            "faces": [
+              {
+                "name": "Electromagical Rhino",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Gigant / Supreme"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "7",
+                  "power": "0"
+                },
+                "text": "Storm.\n{icon_fanfare|[fanfare]} Give this follower {icon_power|[attack]}+3. Put the top 4 cards of your deck into your cemetery. If an Electromagical Rhino was put into your cemetery by this ability, repeat this {icon_fanfare|[fanfare]}.\n{icon_lastword|[lastwords]} Select any number of cards named Electromagical Rhino in your cemetery (including this one). Return them to your deck and shuffle it.",
+                "sections": [],
+                "raw_text": "Storm.\n{icon_fanfare|[fanfare]} Give this follower {icon_power|[attack]}+3. Put the top 4 cards of your deck into your cemetery. If an Electromagical Rhino was put into your cemetery by this ability, repeat this {icon_fanfare|[fanfare]}.\n{icon_lastword|[lastwords]} Select any number of cards named Electromagical Rhino in your cemetery (including this one). Return them to your deck and shuffle it.",
+                "speech": null,
+                "illustrator": "Shishizaru",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL12EN.png",
+                "trait_raw": "Gigant / Supreme",
+                "traits": [
+                  "Gigant",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q676 (Jun. 14, 2024)",
+                "question": "If I play this follower's Fanfare ability when my deck is empty, do I still give it +3 attack?",
+                "answer": "Yes. You give this follower +3 attack and simply don't put the top 4 cards of your deck into your cemetery. (You don't lose the game either.)"
+              },
+              {
+                "title": "Q675 (Jun. 14, 2024)",
+                "question": "If I put the top 4 cards of my deck into my cemetery, and among them were 2 copies of this follower, do I give this follower +6 attack when I repeat its Fanfare ability?",
+                "answer": "No, you still only give it +3 attack."
+              },
+              {
+                "title": "Q674 (Jun. 14, 2024)",
+                "question": "If I put the top 4 cards of my deck into my cemetery, and among them were 2 copies of this follower, do I repeat its Fanfare ability twice?",
+                "answer": "No, you still only repeat it once."
+              },
+              {
+                "title": "Q673 (Jun. 14, 2024)",
+                "question": "Is the following correct?\n\nFirst, I play this follower and resolve its Fanfare ability. I give it +3 attack and put the top 4 cards of my deck into my cemetery. Among those 4 cards was an Electromagical Rhino, so I repeat the Fanfare ability.\n\nFor a second time, I give this follower +3 attack and put the top 4 cards of my deck into my cemetery. Among those 4 cards was an Electromagical Rhino, so I repeat the Fanfare ability.\n\nFor a third time, I give this follower +3 attack and put the top 4 cards of my deck into my cemetery. None of those 4 cards was an Electromagical Rhino, so I'm finished resolving the Fanfare ability.",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f0ec879c5a198a894f449c364af8bb7b3ef80080ee3ef15074fa1565ba68454e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL12EN",
+            "fetched_at": "2026-09-27T17:43:30.950666Z"
+          },
+          "document_ref": "documents-61750aa342f90030"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL13EN",
+      "documents": {
+        "documents-949da0f130a436a6": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL13EN",
+            "faces": [
+              {
+                "name": "Valnareik, Omen of Lust",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Demon"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "While Sanguine is active for you, this follower has Storm.\nStrike: Deal X damage to each enemy leader. X equals the number of times your leader has lost defense this turn. If your leader's defense is 7, give this follower {icon_power|[attack]}+2/{icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "While Sanguine is active for you, this follower has Storm.\nStrike: Deal X damage to each enemy leader. X equals the number of times your leader has lost defense this turn. If your leader's defense is 7, give this follower {icon_power|[attack]}+2/{icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL13EN.png",
+                "trait_raw": "Omen / Demon",
+                "traits": [
+                  "Omen",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q695 (Jun. 14, 2024)",
+                "question": "What counts toward \"the number of times your leader has lost defense this turn\"?",
+                "answer": "For example, if you deal 1 damage to your leader, that counts. If you give your leader -1 defense to pay for Servant of Lust's On Evolve ability, that counts."
+              },
+              {
+                "title": "Q694 (Jun. 14, 2024)",
+                "question": "If I play Wings of Lust and choose 2 options, dealing 1 damage to my leader twice, does \"the number of times your leader has lost defense this turn\" go up by 2?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q693 (Jun. 14, 2024)",
+                "question": "If my leader hasn't lost defense this turn, but their defense is 7, can I still give this follower +2/+2 with its Strike ability?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q692 (Jun. 14, 2024)",
+                "question": "If I attack with Valnareik, Omen of Lust, do I resolve her Strike ability before my opponent can play cards or abilities with Quick?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c71ec2a020e946b7ac32b1646685e2d98f423c7b4c6ae4b7623d7fad3651dd06",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL13EN",
+            "fetched_at": "2026-09-27T17:43:33.728452Z"
+          },
+          "document_ref": "documents-949da0f130a436a6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL14EN",
+      "documents": {
+        "documents-b323705754719b91": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL14EN",
+            "faces": [
+              {
+                "name": "Rulenye, Omen of Silence",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Necromancer"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Necrocharge (10): Select an enemy follower that costs 3 play points or less on the field and destroy it.\nWhile this card is on your field, any spell an opponent plays costs 1 more.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Necrocharge (10): Select an enemy follower that costs 3 play points or less on the field and destroy it.\nWhile this card is on your field, any spell an opponent plays costs 1 more.",
+                "speech": null,
+                "illustrator": "Usugumo Nezu",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL14EN.png",
+                "trait_raw": "Omen / Necromancer",
+                "traits": [
+                  "Omen",
+                  "Necromancer"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q698 (Jun. 14, 2024)",
+                "question": "If I have 2 copies of this follower on my field, do spells my opponent plays cost 2 more?",
+                "answer": "Yes, they do."
+              },
+              {
+                "title": "Q697 (Jun. 14, 2024)",
+                "question": "If this follower is on my field when my opponent banishes 10 spells in their cemetery to play Dimension Shift for 7 play points, do they have to pay 8 play points instead?",
+                "answer": "Yes. Effects that change the cost of playing a card to a specific value are applied before effects that increase or decrease that cost."
+              },
+              {
+                "title": "Q696 (Jun. 14, 2024)",
+                "question": "If this follower is on my field when my opponent plays a spell for 0 play points with Merlin's On Evolve ability, does it cost 1 more?",
+                "answer": "Yes. Your opponent must pay 1 play point to play the spell. If they can't, nothing happens."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL15EN|Rulenye, Omen of Silence}",
+                "href": "/cards/?cardno=BP05-SL15EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b86cb1b86ed58f2c780b45d545e9bf70f7b465ad703c5fb3c1764bc47a5a4e8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL14EN",
+            "fetched_at": "2026-09-27T17:43:36.355037Z"
+          },
+          "document_ref": "documents-b323705754719b91"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL15EN",
+      "documents": {
+        "documents-99f84eb1c9910557": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL15EN",
+            "faces": [
+              {
+                "name": "Rulenye, Omen of Silence",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Necromancer"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "On Evolve: Each opponent discards a random card.\nWhile this card is on your field, any spell an opponent plays costs 1 more.",
+                "sections": [],
+                "raw_text": "On Evolve: Each opponent discards a random card.\nWhile this card is on your field, any spell an opponent plays costs 1 more.",
+                "speech": null,
+                "illustrator": "Usugumo Nezu",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL15EN.png",
+                "trait_raw": "Omen / Necromancer",
+                "traits": [
+                  "Omen",
+                  "Necromancer"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q699 (Jun. 14, 2024)",
+                "question": "How do I discard a random card?",
+                "answer": "For example, if you have 6 cards, you could assign each card a number from 1 to 6 and then roll a 6-sided die. If you have 3, you could assign two numbers to each card and then roll. If you have two, you could assign three numbers or flip a coin. Alternatively, you could shuffle your hand and simply have someone else pick a card."
+              },
+              {
+                "title": "Q698 (Jun. 14, 2024)",
+                "question": "If I have 2 copies of this follower on my field, do spells my opponent plays cost 2 more?",
+                "answer": "Yes, they do."
+              },
+              {
+                "title": "Q697 (Jun. 14, 2024)",
+                "question": "If this follower is on my field when my opponent banishes 10 spells in their cemetery to play Dimension Shift for 7 play points, do they have to pay 8 play points instead?",
+                "answer": "Yes. Effects that change the cost of playing a card to a specific value are applied before effects that increase or decrease that cost."
+              },
+              {
+                "title": "Q696 (Jun. 14, 2024)",
+                "question": "If this follower is on my field when my opponent plays a spell for 0 play points with Merlin's On Evolve ability, does it cost 1 more?",
+                "answer": "Yes. Your opponent must pay 1 play point to play the spell. If they can't, nothing happens."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL14EN|Rulenye, Omen of Silence}",
+                "href": "/cards/?cardno=BP05-SL14EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6942591da56b2fdd6497fb396aed6823f1b7d6c4a9f3ed1b9821143684100b46",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL15EN",
+            "fetched_at": "2026-09-27T17:43:39.005676Z"
+          },
+          "document_ref": "documents-99f84eb1c9910557"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL16EN",
+      "documents": {
+        "documents-238afbc0f1c3c0fd": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL16EN",
+            "faces": [
+              {
+                "name": "Marwynn, Omen of Repose",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost04|[cost04]}: Evolve this follower.\n{icon_evolve|[evolve]} Skip your next turn: Evolve this follower.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost04|[cost04]}: Evolve this follower.\n{icon_evolve|[evolve]} Skip your next turn: Evolve this follower.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL16EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q710 (Jun. 14, 2024)",
+                "question": "How do I evolve this follower?",
+                "answer": "You can evolve this follower with either of his two evolve abilities, which have different costs. For the first, you pay 4 play points. For the second, you skip your next turn."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL17EN|Marwynn, Omen of Repose}",
+                "href": "/cards/?cardno=BP05-SL17EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6d83c10dc0846e1f06b48240f391554c7ac0f36b3fe1f4ff219e203764c30676",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL16EN",
+            "fetched_at": "2026-09-27T17:43:41.672246Z"
+          },
+          "document_ref": "documents-238afbc0f1c3c0fd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL17EN",
+      "documents": {
+        "documents-1c144a47201dd0ac": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL17EN",
+            "faces": [
+              {
+                "name": "Marwynn, Omen of Repose",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "8",
+                  "power": "8"
+                },
+                "text": "Ward. Aura.\nOn Evolve: Increase your maximum play points by 1. Give your leader {icon_hp|[defense]}+3. Draw a card.",
+                "sections": [],
+                "raw_text": "Ward. Aura.\nOn Evolve: Increase your maximum play points by 1. Give your leader {icon_hp|[defense]}+3. Draw a card.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL17EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL16EN|Marwynn, Omen of Repose}",
+                "href": "/cards/?cardno=BP05-SL16EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:181da4b1f68710c6ea036c3df82bd3dd0b5a258a34609522e7735f8462676da1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL17EN",
+            "fetched_at": "2026-09-27T17:43:44.259084Z"
+          },
+          "document_ref": "documents-1c144a47201dd0ac"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL18EN",
+      "documents": {
+        "documents-23b900f7c9b79975": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL18EN",
+            "faces": [
+              {
+                "name": "Deus Ex Machina",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Luminary / Supreme"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "6",
+                  "power": "4"
+                },
+                "text": "At the start of your end phase, choose one of the following. (1) Discard your hand. Draw 4 cards. (2) Recover 4 play points.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, choose one of the following. (1) Discard your hand. Draw 4 cards. (2) Recover 4 play points.",
+                "speech": null,
+                "illustrator": "Mushimaro",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL18EN.png",
+                "trait_raw": "Luminary / Supreme",
+                "traits": [
+                  "Luminary",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q862 (Aug. 8, 2024)",
+                "question": "If I have multiple cards with an \"At the start of your end phase\" ability triggering, in what order do I resolve them?",
+                "answer": "You can resolve them in any order. When you proceed to your end phase, all \"At the start of your end phase\" abilities are triggered and become pending. Then, you can choose the order in which you resolve the pending abilities."
+              },
+              {
+                "title": "Q711 (Jun. 14, 2024)",
+                "question": "If I choose option 1 when my hand is empty, do I still draw 4 cards?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8552d4a00b0068db080d82475a8cc156059c9cc3d1ce5d6cd722470c596ba837",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL18EN",
+            "fetched_at": "2026-09-27T17:43:47.188095Z"
+          },
+          "document_ref": "documents-23b900f7c9b79975"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL19EN",
+      "documents": {
+        "documents-8cf1c4e403033ece": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL19EN",
+            "faces": [
+              {
+                "name": "Mjerrabaine, Omen of One",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nRush.\nAt the start of your end phase, if there are 2 cards or less in your hand, deal 3 damage to each enemy leader. If there are 0 cards in your hand, deal 3 damage to each enemy follower on the field.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nRush.\nAt the start of your end phase, if there are 2 cards or less in your hand, deal 3 damage to each enemy leader. If there are 0 cards in your hand, deal 3 damage to each enemy follower on the field.",
+                "speech": null,
+                "illustrator": "Akira Miyazaki",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL19EN.png",
+                "trait_raw": "Omen",
+                "traits": [
+                  "Omen"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q724 (Jun. 14, 2024)",
+                "question": "If my hand is empty at the start of my end phase, do I deal 3 damage both to enemy leaders and enemy followers?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL20EN|Mjerrabaine, Omen of One}",
+                "href": "/cards/?cardno=BP05-SL20EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e533981ff5e3780b807871c401cd45d85397e620e579692c4593b56205bda4a1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL19EN",
+            "fetched_at": "2026-09-27T17:43:50.163187Z"
+          },
+          "document_ref": "documents-8cf1c4e403033ece"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL20EN",
+      "documents": {
+        "documents-0370ec22b277cbad": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL20EN",
+            "faces": [
+              {
+                "name": "Mjerrabaine, Omen of One",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "At the start of your end phase, refresh this card and, if there are 2 cards or less in your hand, deal 5 damage to each enemy leader. If there are 0 cards in your hand, deal 5 damage to each enemy follower on the field.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, refresh this card and, if there are 2 cards or less in your hand, deal 5 damage to each enemy leader. If there are 0 cards in your hand, deal 5 damage to each enemy follower on the field.",
+                "speech": null,
+                "illustrator": "Akira Miyazaki",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL20EN.png",
+                "trait_raw": "Omen",
+                "traits": [
+                  "Omen"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q725 (Jun. 14, 2024)",
+                "question": "If my hand is empty at the start of my end phase, do I deal 5 damage both to enemy leaders and enemy followers?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-SL19EN|Mjerrabaine, Omen of One}",
+                "href": "/cards/?cardno=BP05-SL19EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b13cd330b24670927acc33cd98493db0352fa52eea6f9eb11406e0c660520fa0",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL20EN",
+            "fetched_at": "2026-09-27T17:43:52.550118Z"
+          },
+          "document_ref": "documents-0370ec22b277cbad"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-SL21EN",
+      "documents": {
+        "documents-a3f5715d1b535e45": {
+          "region": "en",
+          "record": {
+            "number": "BP05-SL21EN",
+            "faces": [
+              {
+                "name": "Gilnelise, Omen of Craving",
+                "info": {
+                  "Card Set": "Booster Set #5 “Omens Eternal”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Super Legendary",
+                  "Trait": "Omen"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "Drain.\n{icon_fanfare|[fanfare]} {icon_cost03|[cost03]}: Search your deck for an Apostle of Craving and Craving's Splendor, put them into your EX area, then shuffle your deck.\n{icon_fanfare|[fanfare]} If each player has 10 maximum play points, draw 3 cards.\nWhenever you play a {icon_neutral|[neutral]} card, deal 1 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "Drain.\n{icon_fanfare|[fanfare]} {icon_cost03|[cost03]}: Search your deck for an Apostle of Craving and Craving's Splendor, put them into your EX area, then shuffle your deck.\n{icon_fanfare|[fanfare]} If each player has 10 maximum play points, draw 3 cards.\nWhenever you play a {icon_neutral|[neutral]} card, deal 1 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "Taro Kagawa",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/BP05-SL21EN.png",
+                "trait_raw": "Omen",
+                "traits": [
+                  "Omen"
+                ]
+              }
+            ],
+            "release_date": "Jun. 21, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q731 (Jun. 14, 2024)",
+                "question": "If I play Apostle of Craving from my EX area, does this follower's \"Whenever you play a Neutral card\" ability trigger?",
+                "answer": "Yes. Playing a Neutral card (tokens included) from any zone, whether it be your hand, EX area, or cemetery, triggers this follower's ability. However, note that evolving a follower doesn't count as playing a card."
+              },
+              {
+                "title": "Q730 (Jun. 14, 2024)",
+                "question": "If I play this follower, does its own \"Whenever you play a Neutral card\" ability trigger?",
+                "answer": "No. When you play this follower, it's not on your field yet, so its abilities aren't valid."
+              },
+              {
+                "title": "Q729 (Jun. 14, 2024)",
+                "question": "Can I choose the order in which I resolve this follower's two Fanfare abilities?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q728 (Jun. 14, 2024)",
+                "question": "If I put Lucifer onto my field with Death's Breath while this follower is on my field, does this follower's \"Whenever you play a Neutral card\" ability trigger?",
+                "answer": "No. \"Putting\" a card onto your field with an ability isn't the same as playing it."
+              },
+              {
+                "title": "Q727 (Jun. 14, 2024)",
+                "question": "If I don't have a Craving's Splendor in my deck, can I still search for an Apostle of Craving and put it into my EX area with this follower's Fanfare ability?",
+                "answer": "Yes. Note that even if you do have a Craving's Splendor in your deck, you can choose to not find it."
+              },
+              {
+                "title": "Q726 (Jun. 14, 2024)",
+                "question": "If I play a Neutral card and deal 1 damage to the enemy leader with this follower's ability, does my leader get +1 defense from Drain?",
+                "answer": "No. Drain only triggers when this follower deals attack damage, not ability damage."
+              }
+            ],
+            "products_ref": "products-ac455dddd8fa0850",
+            "related_cards": [
+              {
+                "label": "{BP05-106EN|Apostle of Craving}",
+                "href": "/cards/?cardno=BP05-106EN"
+              },
+              {
+                "label": "{BP05-113EN|Craving's Splendor}",
+                "href": "/cards/?cardno=BP05-113EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eec31b143a927c2c8d2e0577ee62fed379bd99ed787a05626a6a26754d2dcaed",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP05-SL21EN",
+            "fetched_at": "2026-09-27T17:43:55.361725Z"
+          },
+          "document_ref": "documents-a3f5715d1b535e45"
+        }
+      ]
+    }
+  ]
+}

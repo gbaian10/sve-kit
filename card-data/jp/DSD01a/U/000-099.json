@@ -1,0 +1,99 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01a",
+  "range": "U/000-099",
+  "products": {
+    "products-78ede256f7a50fef": [
+      {
+        "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+        "date": "2024-04-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=DSD01",
+          "https://shadowverse-evolve.com/products/dsd01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "DSD01a-U01",
+      "documents": {
+        "documents-d5f70cc8575f0938": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01a-U01",
+            "faces": [
+              {
+                "name": "マナリアの魔導姫・アン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス"
+                ],
+                "rarity": "UR",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}下記から1つチョイスする。自分の墓場の学院・カードが10枚以上なら、代わりに2つまで。\n【1】自分のデッキから『アンの大魔法』1枚を探し、EXエリアに置く。このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。【2】自分のデッキから『マナリアの竜姫・グレア』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01a-u01.png",
+                "trait_raw": "魔法使い・学院・プリンセス"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1235",
+                "date": "2024-03-01",
+                "question": "「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」という能力は、『アンの大魔法』を手札以外からプレイする際もコストを-5しますか？",
+                "answer": "はい。手札以外からプレイする際もコストを-5します。"
+              },
+              {
+                "id": "Q1234",
+                "date": "2024-03-01",
+                "question": "《ファンファーレ》能力で【1】をチョイスし、自分のデッキの『アンの大魔法』を見つけない選択をした場合、「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」は有効ですか？",
+                "answer": "はい。自分のデッキの『アンの大魔法』を見つけない選択をした場合でも「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」は有効です。"
+              },
+              {
+                "id": "Q1233",
+                "date": "2024-03-01",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01a-002"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01a-008"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c85b4198d74835c4db0c0266b60081e08e53e6183103b00ac6ef86028f873856",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01a-U01",
+            "fetched_at": "2026-09-24T21:27:06.856575Z"
+          },
+          "document_ref": "documents-d5f70cc8575f0938"
+        }
+      ]
+    }
+  ]
+}

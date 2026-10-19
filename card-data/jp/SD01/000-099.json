@@ -1,0 +1,1228 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD01",
+  "range": "000-099",
+  "products": {
+    "products-892c19a5fc06aef8": [
+      {
+        "name": "スターターデッキ第1弾「麗しの妖精姫」",
+        "date": "2022-04-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=SD01",
+          "https://shadowverse-evolve.com/products/sd01_06/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SD01-001",
+      "documents": {
+        "documents-77d7510002de790b": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-001",
+            "faces": [
+              {
+                "name": "フェアリープリンセス・アリア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精",
+                  "プリンセス"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\nこれがいる限り、自分の他の妖精・フォロワーすべては【突進】を持つ。\n{ファンファーレ}『フェアリー』9枚の中から、好きな枚数を場に出す。好きな枚数をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-001.png",
+                "trait_raw": "妖精・プリンセス"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q46",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力で、『フェアリー』を1枚も場に出さないまたはEXエリアに置かないことはできますか？",
+                "answer": "はい。好きな枚数を選べるため、0枚を選び『フェアリー』を場に出さないまたはEXエリアに置かないことができます。"
+              },
+              {
+                "id": "Q45",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力で、『フェアリー』を6枚以上場に出すまたはEXエリアに置くことはできますか？",
+                "answer": "いいえ。場とEXエリアの上限はどちらも5枚であるため、6枚目以降を場に出すまたはEXエリアに置くことはできません。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a23cf4d2cda87eb8761a1f4d9cbb5c947a5efe5bcfae7d8e7cb14242e4d5fce3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-001",
+            "fetched_at": "2026-09-24T23:37:45.314643Z"
+          },
+          "document_ref": "documents-77d7510002de790b"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-002",
+      "documents": {
+        "documents-27b2029a28318a83": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-002",
+            "faces": [
+              {
+                "name": "ティターニアの妖精郷",
+                "card_class": "エルフ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "妖精",
+                  "プリンセス"
+                ],
+                "rarity": "GR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "これがある限り、自分の妖精・トークンすべては【指定攻撃】を持つ。\n自分の場に妖精・トークンが出たとき、それは{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分の妖精・トークンすべては{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-002.png",
+                "trait_raw": "妖精・プリンセス"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q269",
+                "date": "2022-05-19",
+                "question": "『ティターニアの妖精郷』の「《ファンファーレ》自分の妖精・トークンすべては《攻撃力》+1/《体力》+1する。」能力は、自分のEXエリアの妖精・トークンも《攻撃力》+1/《体力》+1しますか？",
+                "answer": "いいえ。自分の場の妖精・トークンのみを《攻撃力》+1/《体力》+1します。"
+              },
+              {
+                "id": "Q48",
+                "date": "2022-04-26",
+                "question": "このカードが自分の場に2枚あり、自分の場に妖精・トークンが出たとき、それは《攻撃力》+2/《体力》+2しますか？",
+                "answer": "はい。それぞれの能力によって《攻撃力》+1/《体力》+1するため、あわせて《攻撃力》+2/《体力》+2します。"
+              },
+              {
+                "id": "Q47",
+                "date": "2022-04-26",
+                "question": "【指定攻撃】を持つフォロワーは、相手のリーダーやアクト状態の相手のフォロワーに攻撃することはできますか？",
+                "answer": "はい。攻撃することができます。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:24c99df5c8c0bcbd198cd2445d6162074e62ac5aea7c01d0ac74b5fd11bfcc47",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-002",
+            "fetched_at": "2026-09-24T23:37:47.983386Z"
+          },
+          "document_ref": "documents-27b2029a28318a83"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-003",
+      "documents": {
+        "documents-7b7426f52ace0a94": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-003",
+            "faces": [
+              {
+                "name": "ローズガーデンキーパー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "植物族"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "この薔薇の庭園には誰も通すな、と言われておりますの。\n立ち去っていただけませんか？手荒な真似はしたくないのです。",
+                "illustrator": "七語つきみ",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-003.png",
+                "trait_raw": "植物族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3efdb5358b1ab2e1270fff047c14bae8d20c13a623b2147e2e4baf64f2900aa6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-003",
+            "fetched_at": "2026-09-24T23:37:50.969516Z"
+          },
+          "document_ref": "documents-7b7426f52ace0a94"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-004",
+      "documents": {
+        "documents-eb6a5742a77d9c61": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-004",
+            "faces": [
+              {
+                "name": "ローズガーデンキーパー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "植物族"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手のフォロワー1体を選ぶ。それを手札に戻す。【コンボ_3】1枚引く。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": "聞き入れて貰えないのなら、容赦は致しませんわ。\n醜く愚かな貴方でも、薔薇園の肥料にはなるでしょう。",
+                "illustrator": "七語つきみ",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-004.png",
+                "trait_raw": "植物族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed90ff5a4ee126bff53c0000d6e96fdc9e70147d32e24d50f830fb6dc318ac2e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-004",
+            "fetched_at": "2026-09-24T23:37:53.620312Z"
+          },
+          "document_ref": "documents-eb6a5742a77d9c61"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-005",
+      "documents": {
+        "documents-ee0134db0b06c02c": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-005",
+            "faces": [
+              {
+                "name": "ワルツフェアリー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}{ラストワード}『フェアリー』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-005.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q49",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限のとき、このフォロワーの能力で『フェアリー』をEXエリアに置くことはできますか？",
+                "answer": "いいえ。置くことはできません。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-006"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a5e2e41b81e37c5f742af165e17a8b39e8680339036f9a3a62ec6f51935a9ebf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-005",
+            "fetched_at": "2026-09-24T23:37:56.463909Z"
+          },
+          "document_ref": "documents-ee0134db0b06c02c"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-006",
+      "documents": {
+        "documents-9794ea9b974845fe": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-006",
+            "faces": [
+              {
+                "name": "フェアリーキャスター",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}『フェアリー』3枚を、場が上限になるまで出す。残りをEXエリアに置く。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-006.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q51",
+                "date": "2022-04-26",
+                "question": "自分の場とEXエリアがそれぞれ上限のとき、このフォロワーの能力で『フェアリー』は場とEXエリアに置くことはできますか？",
+                "answer": "いいえ。置くことはできません。"
+              },
+              {
+                "id": "Q50",
+                "date": "2022-04-26",
+                "question": "自分の場とEXエリアにあるカードの合計枚数が8枚のとき、このフォロワーの能力で『フェアリー』は2枚作成しますか？",
+                "answer": "はい。自分の場とEXエリアに出すまたは置ける枚数と同じ枚数まで『フェアリー』を作成し、場とEXエリアに置きます。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae76c11e247612d598a7131284a356d256df104d03d72aff0b63e841f5a450cc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-006",
+            "fetched_at": "2026-09-24T23:37:59.311125Z"
+          },
+          "document_ref": "documents-9794ea9b974845fe"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-007",
+      "documents": {
+        "documents-a15ca5ab1fc71ae0": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-007",
+            "faces": [
+              {
+                "name": "メタルエルフメイジ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}相手のフォロワー1体を選ぶ。それに1ダメージ。【コンボ_3】代わりに3ダメージ。(このターン中にこれを含めて3枚以上プレイしていたなら、【コンボ_3】の後の能力が働く)",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "えいひ",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-007.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b08b5b56d604fefb203444b7350fdc498fc67534453b39519da02af37fcfbfcb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-007",
+            "fetched_at": "2026-09-24T23:38:02.234883Z"
+          },
+          "document_ref": "documents-a15ca5ab1fc71ae0"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-008",
+      "documents": {
+        "documents-a206a0087b401dcf": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-008",
+            "faces": [
+              {
+                "name": "大狼",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "5",
+                "text": "自分の場に他のフォロワーが出たとき、これは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "森の奥深くに住まうという、白き狼。\n森の民の願いを背負い、自然を害する者に牙を剝く。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-008.png",
+                "trait_raw": "獣"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q54",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーが2体あり、他のフォロワーが出たとき、このフォロワーの能力はそれぞれ誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q53",
+                "date": "2022-04-26",
+                "question": "自分の場の他のフォロワーが進化したとき、このフォロワーは《攻撃力》+1/《体力》+1しますか？",
+                "answer": "いいえ。フォロワーの進化ではエボルヴフォロワーは場に出た扱いではないため、このフォロワーは《攻撃力》+1/《体力》+1しません。"
+              },
+              {
+                "id": "Q52",
+                "date": "2022-04-26",
+                "question": "自分の場が上限かつ、フォロワーを場に出す能力をプレイしたとき、このフォロワーは《攻撃力》+1/《体力》+1しますか？",
+                "answer": "いいえ。自分の場が上限の状態でフォロワーやアミュレットを場に出す能力をプレイした場合、フォロワーやアミュレットは場に出ないため、このフォロワーは《攻撃力》+1/《体力》+1しません。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:794807daa78624fd6cbd1961331ed0adb5f19fff912cb854333af1b6bee26d4d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-008",
+            "fetched_at": "2026-09-24T23:38:05.062011Z"
+          },
+          "document_ref": "documents-a206a0087b401dcf"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-009",
+      "documents": {
+        "documents-cacd5085cf2feb64": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-009",
+            "faces": [
+              {
+                "name": "トレント",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}【コンボ_3】これの{進化}コストを0にする。(このターン中にこれを含めて3枚以上プレイしていたなら、【コンボ_3】の後の能力が働く)",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "宮﨑章",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-009.png",
+                "trait_raw": "精霊"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q55",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力で《進化》コストが《コスト0》になっているとき、元の数値の《コスト2》を進化コストとして支払うことはできますか？",
+                "answer": "いいえ。《コスト2》で支払うことはできず、必ず《コスト0》を支払います。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-010"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7e8b0a20d53da9767fb507abc5cdf0c6073983e322c4c98001a7d1f8f27a054b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-009",
+            "fetched_at": "2026-09-24T23:38:07.521209Z"
+          },
+          "document_ref": "documents-cacd5085cf2feb64"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-010",
+      "documents": {
+        "documents-fb3d36cfbf264922": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-010",
+            "faces": [
+              {
+                "name": "トレント",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "精霊"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": null,
+                "sections": [],
+                "flavor": "森の民の祈りにより、大樹は外敵に牙を剥く。\n森の民が祈り続ける限り、樹人はその力を発揮し続ける。",
+                "illustrator": "宮﨑章",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-010.png",
+                "trait_raw": "精霊"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-009"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1d6a7f18bf1b40d6b14c3d09f7f0f9874537e440e5da67a58d2e6fbb60f458a3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-010",
+            "fetched_at": "2026-09-24T23:38:10.440728Z"
+          },
+          "document_ref": "documents-fb3d36cfbf264922"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-011",
+      "documents": {
+        "documents-1e110f69c078e562": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-011",
+            "faces": [
+              {
+                "name": "ウォーターフェアリー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト2}：これは進化する。\n{ラストワード}『フェアリー』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "ezusuke",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-011.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q56",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限のとき、このフォロワーの《ラストワード》能力で『フェアリー』をEXエリアに置くことはできますか？",
+                "answer": "いいえ。置くことはできません。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-012"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a9de3703f4a537f2046c8e411740a747ace5c3e9f5b04c46bc71058500867e63",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-011",
+            "fetched_at": "2026-09-24T23:38:12.966831Z"
+          },
+          "document_ref": "documents-1e110f69c078e562"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-012",
+      "documents": {
+        "documents-c2222fae1b41473f": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-012",
+            "faces": [
+              {
+                "name": "ウォーターフェアリー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】『フェアリー』1体を出す。\n{ラストワード}『フェアリー』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "仲良くしてくれるなら、妖精はニンゲンの味方ナノ！\nあなたはワルモノ？それともイイモノ？",
+                "illustrator": "ezusuke",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-012.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q57",
+                "date": "2022-04-26",
+                "question": "このフォロワーが破壊されたとき、このフォロワーの《ラストワード》能力に加えて、このフォロワーの進化前である『ウォーターフェアリー』の《ラストワード》能力をプレイすることはできますか？",
+                "answer": "いいえ。進化前のカードの能力はプレイできないため、進化したフォロワーの《ラストワード》能力のみをプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-011"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8d5d0f5614902b66d562814d97f40ceb32f7e16f12601eacc3dca3242f9dfb37",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-012",
+            "fetched_at": "2026-09-24T23:38:15.879753Z"
+          },
+          "document_ref": "documents-c2222fae1b41473f"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-013",
+      "documents": {
+        "documents-85b9395201cfdc4b": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-013",
+            "faces": [
+              {
+                "name": "放浪するエルフ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【指定攻撃】(【指定攻撃】を持つフォロワーは、スタンド状態のフォロワーを攻撃できる)\nこれは【守護】を無視して攻撃できる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "u介",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-013.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q59",
+                "date": "2022-04-26",
+                "question": "【守護】を持つ相手のフォロワーがアクト状態のとき、このフォロワーは相手のリーダーを攻撃することはできますか？",
+                "answer": "はい。攻撃することができます。"
+              },
+              {
+                "id": "Q58",
+                "date": "2022-04-26",
+                "question": "【指定攻撃】を持つフォロワーは、相手のリーダーやアクト状態の相手のフォロワーに攻撃することはできますか？",
+                "answer": "はい。攻撃することができます。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2c1ec4e35150a62db146a18dbecd3cad1ebad272887c68b72ccb6e5525c359bb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-013",
+            "fetched_at": "2026-09-24T23:38:18.497241Z"
+          },
+          "document_ref": "documents-85b9395201cfdc4b"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-014",
+      "documents": {
+        "documents-48fef205341968d2": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-014",
+            "faces": [
+              {
+                "name": "フェアリーサークル",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "『フェアリー』3枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "若月さな",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-014.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q60",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限のとき、このスペルで『フェアリー』をEXエリアに置くことはできますか？",
+                "answer": "いいえ。置くことはできません。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:52b6e8eeb4193a1f808bf8a0c6fbaa08fd08348c428e0705f9776b95963897a8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-014",
+            "fetched_at": "2026-09-24T23:38:21.420096Z"
+          },
+          "document_ref": "documents-48fef205341968d2"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-015",
+      "documents": {
+        "documents-0ddb51a7a28b9154": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-015",
+            "faces": [
+              {
+                "name": "森の聖域",
+                "card_class": "エルフ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "精霊"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分の妖精・フォロワー1体を選ぶ。それは{攻撃力}+1する。\n{起動}{コスト1}これを{アクト}：これを手札に戻す。",
+                "sections": [],
+                "flavor": "妖精たちが住まう森には聖域がある。\nその場所を訪れし者は森林の祝福を受けると言う。",
+                "illustrator": "米谷尚展",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-015.png",
+                "trait_raw": "精霊"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q61",
+                "date": "2022-04-26",
+                "question": "このアミュレットの能力は、このアミュレットがアクトしているとき、コストを支払うことはできませんか？",
+                "answer": "はい。能力のコストに、このアミュレットをアクトすることが求められているため、アクト状態ではコストを支払うことができません。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e3209abbb69bd88edb8f784bec7b734e4083e7e78b42612deba570ea443ec87b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-015",
+            "fetched_at": "2026-09-24T23:38:23.946961Z"
+          },
+          "document_ref": "documents-0ddb51a7a28b9154"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-016",
+      "documents": {
+        "documents-b038eaf610b209fb": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-016",
+            "faces": [
+              {
+                "name": "森荒らしへの報い",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに3ダメージ。『フェアリー』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "Tabaroki",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-016.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q63",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限かつ、相手の場に選ぶことのできるフォロワーがあるとき、相手のフォロワー1体を選び、このスペルをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、『フェアリー』はEXエリアに置くことはできません。"
+              },
+              {
+                "id": "Q62",
+                "date": "2022-04-26",
+                "question": "相手の場にフォロワーがないとき、このスペルをプレイして『フェアリー』をEXエリアに置くことはできますか？",
+                "answer": "いいえ。このスペルで選ぶフォロワーがないため、プレイをすることができず、『フェアリー』をEXエリアに置くことはできません。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d2066f1f846475f0b0ca88e649f722a4b083f5d92feca367410ec557c01dfafa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-016",
+            "fetched_at": "2026-09-24T23:38:26.823663Z"
+          },
+          "document_ref": "documents-b038eaf610b209fb"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-017",
+      "documents": {
+        "documents-15a3953f8f9cb4f0": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-017",
+            "faces": [
+              {
+                "name": "ゴブリン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ゴブリン"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト4}：これは進化する。",
+                "sections": [],
+                "flavor": "まぁ、見た目はちっとばかし驚くが、中身は大したことはねぇ。\nだが、凶暴な所には気を付けた方がいいぜ。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-017.png",
+                "trait_raw": "ゴブリン"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-018"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dd92f28126faba3d0ed9234c77fcd19575f2024ca90181f0735ef4d9d6f1d0cb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-017",
+            "fetched_at": "2026-09-24T23:38:29.435424Z"
+          },
+          "document_ref": "documents-15a3953f8f9cb4f0"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-018",
+      "documents": {
+        "documents-fb092c5f58ed80ef": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-018",
+            "faces": [
+              {
+                "name": "ゴブリン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ゴブリン"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": null,
+                "sections": [],
+                "flavor": "多少なりとも心得のある者なら、恐れる必要もねぇ。\nとはいえ、武装してる奴らには注意しろよ。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-018.png",
+                "trait_raw": "ゴブリン"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD01-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c5c277f0ac4c0c447c04611d81957b35393278452453d477a00c699e11234056",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-018",
+            "fetched_at": "2026-09-24T23:38:32.211246Z"
+          },
+          "document_ref": "documents-fb092c5f58ed80ef"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-019",
+      "documents": {
+        "documents-82eb74aec06be024": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-019",
+            "faces": [
+              {
+                "name": "エンジェルスナイプ",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "許されざる者には速やかなる罰を。\n放たれた一矢は光となり、悪しき者の胸を貫く。",
+                "illustrator": "廣岡政樹",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-019.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aaf4f9bb1add10e7e85ce216695896f60d931343d260bd9671e077462609a58a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-019",
+            "fetched_at": "2026-09-24T23:38:35.080901Z"
+          },
+          "document_ref": "documents-82eb74aec06be024"
+        }
+      ]
+    },
+    {
+      "card_no": "SD01-020",
+      "documents": {
+        "documents-2533d8d090ab2e0d": {
+          "region": "jp",
+          "record": {
+            "number": "SD01-020",
+            "faces": [
+              {
+                "name": "エンジェルバレッジ",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第1弾「麗しの妖精姫」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": "許されざる者らには速やかなる罰を。\n放たれた矢は幾筋もの光となり、悪しき者らの胸を次々と貫く。",
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/SD01/SD01-020.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q64",
+                "date": "2022-04-26",
+                "question": "相手の場に【オーラ】を持つフォロワーがあるとき、このスペルで相手の【オーラ】を持つフォロワーにダメージを与えることはできますか？",
+                "answer": "はい。与えることができます。"
+              }
+            ],
+            "products_ref": "products-892c19a5fc06aef8",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e22f597bf74826316589177abcd21afbc6c818c8dd83677ce05a8bc8c280fc19",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD01-020",
+            "fetched_at": "2026-09-24T23:38:38.162383Z"
+          },
+          "document_ref": "documents-2533d8d090ab2e0d"
+        }
+      ]
+    }
+  ]
+}

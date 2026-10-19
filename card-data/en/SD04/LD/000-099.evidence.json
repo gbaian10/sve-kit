@@ -1,0 +1,125 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SD04",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-b8b9aebceb780848": [
+        {
+          "ordinal": 0,
+          "name": "Starter Deck #4 “Wrath of the Greatwyrm”",
+          "date_raw": "Jun. 30, 2023",
+          "href_raw": [
+            "/cards/searchresults?expansion=SD04",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SD04",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sd0106/",
+              "expansion_code": "SD04"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        },
+        {
+          "ordinal": 1,
+          "name": "Worlds Beyond Dragoncraft Starter Set",
+          "date_raw": "Jun. 20, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=SS02",
+            "https://en.shadowverse-evolve.com/products/wbss/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SS02",
+            "https://en.shadowverse-evolve.com/products/wbss/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/wbss/",
+              "expansion_code": "SS02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 1
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:3c01a848593859bab7a0be1db62dc9f43cc2d35f5b61a6cd58460f0f9d6627f1": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:b863b752545fe2c59da357aa05ceae7a9ec03f484b459ab62f8226aa0a7170f7",
+        "raw_bytes": 35707,
+        "first_receipt_id": "sha256:f56047959ad0c4e624cfe6b6ff2ca59050a6fd35ef687c18ea02cd75094eb2ef",
+        "descriptor_sha256": "sha256:d850ca9c1fbbbc5bf63dc3652503927e194682478965a842ef90f9f55b63bc59",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:fc1a3ba71a24b1b7b25fe8d442f068afad83025dab6e3618fe32e35c09a09b06"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-b8b9aebceb780848",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5db01ad3f33c46ac41e6c3f1738928339469767f8b6a3b4e1104960484bd2313"
+    }
+  }
+}

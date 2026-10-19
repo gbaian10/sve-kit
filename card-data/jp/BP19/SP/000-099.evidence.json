@@ -1,0 +1,117 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP19",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-0b348fdadd343546": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック「天魔八虐」",
+          "date_raw": "2026-03-27",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP19",
+            "https://shadowverse-evolve.com/products/bp19/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP19",
+            "https://shadowverse-evolve.com/products/bp19/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp19/",
+              "expansion_code": "BP19"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-1c7a98d293b6fbda": [
+        {
+          "stable_source_key": "Q2562",
+          "official_number": "Q2562",
+          "locator": "qa-block:0",
+          "published_on": "2026-03-25",
+          "date_raw": "2026-03-25"
+        }
+      ]
+    },
+    "related": {
+      "related-45e1c7260be83257": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=BP19-020"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=BP19-T01"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:081404081c6d3d91414ef10eb4d5844b75df753838d42a1154efb104cf516bc8": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:5e76bd9b875d27e9f69b7d6ee5305510404d101639a77c4085e20cca00594a6d",
+        "raw_bytes": 38801,
+        "first_receipt_id": "sha256:a0155777fbefc9eaf7f9ba59fdc6b08b802298521c00aa890777ae2a6e38e582",
+        "descriptor_sha256": "sha256:bb61a77b83db7756271cb923dcc979e559723202782da4182eabd8d7796102f8",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:f2f13690309e8b25bf62e2ab9800c5dfec2f2525dfc2ffcebb70d9c8c07785cb"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-0b348fdadd343546",
+        "qa": "qa-1c7a98d293b6fbda",
+        "related": "related-45e1c7260be83257",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:0944b6cc491628a9667694addd60c899aaea102e4e4795f01d21ea6c97a1fb4b"
+    }
+  }
+}

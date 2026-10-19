@@ -1,0 +1,236 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP05",
+  "range": "R/100-199",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-9cad2252722c84b5": [
+        {
+          "ordinal": 0,
+          "name": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+          "date_raw": "Sep. 25, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP19-BP20",
+            "https://en.shadowverse-evolve.com/products/bp1920/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP19-BP20",
+            "https://en.shadowverse-evolve.com/products/bp1920/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp1920/",
+              "expansion_code": "BP19-BP20"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-2beb35081fd7d44a": [
+        {
+          "stable_source_key": "Q731",
+          "official_number": "Q731",
+          "locator": "qa-block:0",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        },
+        {
+          "stable_source_key": "Q730",
+          "official_number": "Q730",
+          "locator": "qa-block:1",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        },
+        {
+          "stable_source_key": "Q729",
+          "official_number": "Q729",
+          "locator": "qa-block:2",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        },
+        {
+          "stable_source_key": "Q728",
+          "official_number": "Q728",
+          "locator": "qa-block:3",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        },
+        {
+          "stable_source_key": "Q727",
+          "official_number": "Q727",
+          "locator": "qa-block:4",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        },
+        {
+          "stable_source_key": "Q726",
+          "official_number": "Q726",
+          "locator": "qa-block:5",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        }
+      ],
+      "qa-c9dd927e8862bf6e": [
+        {
+          "stable_source_key": "Q725",
+          "official_number": "Q725",
+          "locator": "qa-block:0",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        }
+      ],
+      "qa-dcb91a37090cb833": [
+        {
+          "stable_source_key": "Q724",
+          "official_number": "Q724",
+          "locator": "qa-block:0",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-45523180ee38374d": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP05-106EN"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cards/?cardno=BP05-113EN"
+        }
+      ],
+      "related-53712ac2bc55c558": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP05-R103EN"
+        }
+      ],
+      "related-e9eda111885923f3": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP05-R104EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:14ed36af50a7310606c3fb0613ac854a770a7617ab910f3abc9bc3ea4808d8ef": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:24c1db02da5302be826dcb78d97a066965c629901f6d9c8534f264db6d64c669",
+        "raw_bytes": 36612,
+        "first_receipt_id": "sha256:128f1527c6a783b4fdbf1ad06062d20f36ee3b569792df02977913791d671b50",
+        "descriptor_sha256": "sha256:c2c9b3d8974ba44b486661e6a4b7cf00e0088b904f1f5e2911e6c0957e9e0126",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:38021ecf7f7ce6f913643536ddb0964e00618a54f208bbbd726bffba0b917a93"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-9cad2252722c84b5",
+        "qa": "qa-c9dd927e8862bf6e",
+        "related": "related-53712ac2bc55c558",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:8dcd4e60a713cbbb9905c9ff67855e19d7cf3bbd4f01724fc3e70836396d48b5"
+    },
+    "src:v1:5265e4ddc7f87f0f89c079ee9e7a135616cd72edfd61ca56328e84732c9b4ce3": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:2743d4e0f79566614b01ff78bf806ae248f42f28cbc6ceb82e89bffe19706e35",
+        "raw_bytes": 36826,
+        "first_receipt_id": "sha256:d7930fdbbc029a1862d6fabf34b37d8bb9ab803db0ccf7b440e6a09a6958d9a6",
+        "descriptor_sha256": "sha256:ad9836bb8cb422abf42f9173a9641b0afe43c31863fb2c64a0d9bd292cff4faf",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:1525dee556c068f8efcf45e3f2fa0bb2eba62b4f8eb431e2f0833bd0d6731dc8"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-9cad2252722c84b5",
+        "qa": "qa-dcb91a37090cb833",
+        "related": "related-e9eda111885923f3",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5e37656bd1e0d845daa6229820a549bda45ce4c228a0fc9f690e68fd00dc937a"
+    },
+    "src:v1:734a62a5293e2ef98d7b11263769df91618b20d548aabf9fbd12beac13c1ea12": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:9976920b9e61ae78bc95ea39a7a880c7054eb92ba13786b5b23195df185d3711",
+        "raw_bytes": 39648,
+        "first_receipt_id": "sha256:a27c53d8a11771d5f99e2354340797640d129dcc93e8200d16699296240ffc13",
+        "descriptor_sha256": "sha256:bca645a45811b9e003cc7762cbbb8abca79f1e2c3ec764ce438422b3c9322e99",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:f53ae409ecb8f3bf84fbe1d23e87475d39d778633511a5157f43b7d9767dd218"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-9cad2252722c84b5",
+        "qa": "qa-2beb35081fd7d44a",
+        "related": "related-45523180ee38374d",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:dd6d8907323820c5f288028000dcbe5dd282c60297146427402b389c94ff9490"
+    }
+  }
+}

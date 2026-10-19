@@ -1,0 +1,125 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SD02",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-1a0ad02650868b54": [
+        {
+          "ordinal": 0,
+          "name": "Starter Deck #2 “Blade of Resentment”",
+          "date_raw": "Jun. 30, 2023",
+          "href_raw": [
+            "/cards/searchresults?expansion=SD02",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SD02",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sd0106/",
+              "expansion_code": "SD02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        },
+        {
+          "ordinal": 1,
+          "name": "Worlds Beyond Swordcraft Starter Set",
+          "date_raw": "Jun. 20, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=SS01",
+            "https://en.shadowverse-evolve.com/products/wbss/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SS01",
+            "https://en.shadowverse-evolve.com/products/wbss/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/wbss/",
+              "expansion_code": "SS01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 1
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:874197ea5b3b4f4237f6ee013472b6936e092ce55e9766bb5eba8a251590ff4a": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:8f1ba8b653aab71a671c2cdd545af1db0b8ae8c35a0fef41088005b41d4aafd1",
+        "raw_bytes": 35698,
+        "first_receipt_id": "sha256:a3c6de15047b19770e7b758cabca75824d2770aabf35a8d6c0b83784df027a91",
+        "descriptor_sha256": "sha256:a5687f3384aa8c94dd4ebca48ffc035b9d2d240193da8b498aade26355b2a5ab",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:592fc94e7cf7c9e6415f083e4fb8fa61d41feb7e896b410ff08e1d8d3f92b76a"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1a0ad02650868b54",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:179c7788adfcd3c4e6213f20a0a97a930b6fa76110ee66b57dddba389fc15624"
+    }
+  }
+}

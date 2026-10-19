@@ -1,0 +1,1121 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "ETD03",
+  "range": "000-099",
+  "products": {
+    "products-0fc098fd5c61cf7b": [
+      {
+        "name": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+        "date": "2022-11-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=ETD03",
+          "https://shadowverse-evolve.com/products/etd01-03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "ETD03-001",
+      "documents": {
+        "documents-db367c1120bbaa34": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-001",
+            "faces": [
+              {
+                "name": "ブロッサムウルフ・スレイド",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "GR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト0}：これは進化する。この能力はこのターン、自分のカードが場から手札に戻っていたなら使える。\nこれが場から手札に戻ったとき、自分の手札のコスト2以下の{エルフ}フォロワー1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-001.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q447",
+                "date": "2022-12-09",
+                "question": "このフォロワーが相手のカードや能力によって手札に戻ったとき、このフォロワーの「これが場から手札に戻ったとき」の能力は誘発しますか？",
+                "answer": "はい。「これが場から手札に戻ったとき」の能力は誘発します。"
+              },
+              {
+                "id": "Q446",
+                "date": "2022-12-09",
+                "question": "自分の手札からこのフォロワーをプレイした後『フラワーブリーズ』をプレイし、自分の場にいるこのフォロワーを手札に戻しました。誘発した「これが場から手札に戻ったとき、自分の手札のコスト2以下の《エルフ》フォロワー1枚を場に出してよい。」によって、自分の手札の『クリスタリアプリンセス・ティア』を場に出したとき、『クリスタリアプリンセス・ティア』の持つ「《ファンファーレ》【コンボ_3】『クリスタリア・イヴ』1体を出す。」という能力の【コンボ_3】の条件は満たしていますか？",
+                "answer": "いいえ。プレイしたカードはこのフォロワーと『フラワーブリーズ』の2枚であり、能力によって場に出たカードはプレイ枚数に数えないため、【コンボ_3】の条件は満たしていません。"
+              },
+              {
+                "id": "Q433",
+                "date": "2022-11-11",
+                "question": "このフォロワーの「これが場から手札に戻ったとき、」から始まる能力は、「自分の手札のコスト2以下の《エルフ》フォロワー1枚」として手札に戻ったこのフォロワー自身を場に出すことができますか？",
+                "answer": "はい。このフォロワーの能力の解決時に、『ブロッサムウルフ・スレイド』はすでに手札にあるため、場に出すことができます。"
+              },
+              {
+                "id": "Q432",
+                "date": "2022-11-11",
+                "question": "このフォロワーの《進化》能力は、このターン、このフォロワー以外のカードが場から手札に戻っていた場合でも使えますか？",
+                "answer": "はい。このフォロワーだけでなく他のカードなど、このターン、自分のカードが場から手札に戻っていたなら使えます。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-002"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:34deeeaee938f2ddabf5a30bb7e48d28de35b8ae778f740b7836299733ba960b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-001",
+            "fetched_at": "2026-09-24T23:01:28.659805Z"
+          },
+          "document_ref": "documents-db367c1120bbaa34"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-002",
+      "documents": {
+        "documents-156a4199f3197d95": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-002",
+            "faces": [
+              {
+                "name": "ブロッサムウルフ・スレイド",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "GR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "これが場から手札に戻ったとき、自分の手札のコスト2以下の{エルフ}フォロワー1枚を場に出してよい。\n【進化時】1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-002.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q447",
+                "date": "2022-12-09",
+                "question": "このフォロワーが相手のカードや能力によって手札に戻ったとき、このフォロワーの「これが場から手札に戻ったとき」の能力は誘発しますか？",
+                "answer": "はい。「これが場から手札に戻ったとき」の能力は誘発します。"
+              },
+              {
+                "id": "Q434",
+                "date": "2022-11-11",
+                "question": "進化した『ブロッサムウルフ・スレイド』が場から手札に戻ったときに誘発するこのフォロワーの「自分の手札のコスト2以下の《エルフ》フォロワー1枚を場に出してよい。」という能力でこのフォロワー自身を選ぶ場合、場に出すことができるのは進化前の『ブロッサムウルフ・スレイド』ですか？\nまた、誘発する能力の処理はどのように行われますか？",
+                "answer": "はい。進化前の『ブロッサムウルフ・スレイド』であり、エボルヴフォロワー『ブロッサムウルフ・スレイド』を場に出すことはできません。\n以下、詳細に説明します。まず『ブロッサムウルフ・スレイド』が場から手札に戻ったとき、「これが場から手札に戻ったとき、」から始まる能力が誘発します。手札に戻った直後にエボルヴフォロワー『ブロッサムウルフ・スレイド』との関連付けが失われ、エボルヴフォロワー『ブロッサムウルフ・スレイド』はエボルヴデッキの上に表向きで置きます。その後、誘発した「自分の手札のコスト2以下の《エルフ》フォロワー1枚を場に出してよい。」という能力の解決を行います。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-001"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4f0056c736e7ff5c6bece99618fd06f8609c301656d527be0155ae04c1607d20",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-002",
+            "fetched_at": "2026-09-24T23:01:31.388260Z"
+          },
+          "document_ref": "documents-156a4199f3197d95"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-003",
+      "documents": {
+        "documents-c4d0fa6f575bee9d": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-003",
+            "faces": [
+              {
+                "name": "ガーベラベアー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のカードが場から手札に戻ったとき、自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "anchobi",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-003.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q435",
+                "date": "2022-11-11",
+                "question": "このフォロワーの「自分のカードが場から手札に戻ったとき、自分のリーダーは《体力》+1する。」という能力はこのフォロワー自身が場から手札に戻ったとき誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5c4e37f0e7397c0cb36b030c859ad3d711ed4fb130840d117c83b774d2adb370",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-003",
+            "fetched_at": "2026-09-24T23:01:34.319811Z"
+          },
+          "document_ref": "documents-c4d0fa6f575bee9d"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-004",
+      "documents": {
+        "documents-efc97f7442b5da22": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-004",
+            "faces": [
+              {
+                "name": "ガーベラベアー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "自分のカードが場から手札に戻ったとき、自分のリーダーは{体力}+1する。\n【進化時】自分のデッキから『フラワーブリーズ』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "anchobi",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-004.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q436",
+                "date": "2022-11-11",
+                "question": "このフォロワーの「自分のカードが場から手札に戻ったとき、自分のリーダーは《体力》+1する。」という能力はこのフォロワー自身が場から手札に戻ったとき誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-003"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-018"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:78e86f8d6b0748430a70a1436f453d80601036abe97f64be4a9c65bf48c28221",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-004",
+            "fetched_at": "2026-09-24T23:01:36.925604Z"
+          },
+          "document_ref": "documents-efc97f7442b5da22"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-005",
+      "documents": {
+        "documents-6660c50d72fb5418": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-005",
+            "faces": [
+              {
+                "name": "エルフプリンセスメイジ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族",
+                  "プリンセス"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "魔術師は魔力で風を操る。なぜだろうと彼女は思う。\nだって一言お願いすれば、風は願いを叶えてくれるのに。",
+                "illustrator": "四々九",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-005.png",
+                "trait_raw": "エルフ族・プリンセス"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-006"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7d5d41cf9452376382c4e6757761f1b954065efa96e5f659b76cb7327aa90197",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-005",
+            "fetched_at": "2026-09-24T23:01:39.953490Z"
+          },
+          "document_ref": "documents-6660c50d72fb5418"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-006",
+      "documents": {
+        "documents-ec6c6b63a25cfbf9": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-006",
+            "faces": [
+              {
+                "name": "エルフプリンセスメイジ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "エルフ族",
+                  "プリンセス"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】『フェアリーウィスプ』2枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリーウィスプ』{エルフ}妖精・フォロワー{コスト0}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "四々九",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-006.png",
+                "trait_raw": "エルフ族・プリンセス"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-005"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:29914f66c7adb9b3b997cefecfa1b0b2c3925fa60b520592cbafdcc9f1d05981",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-006",
+            "fetched_at": "2026-09-24T23:01:42.494044Z"
+          },
+          "document_ref": "documents-ec6c6b63a25cfbf9"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-007",
+      "documents": {
+        "documents-39396d569bb3d643": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-007",
+            "faces": [
+              {
+                "name": "ベビーエルフ・メイ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "これが場から手札に戻ったとき、相手のフォロワー1体を選ぶ。それに1ダメージ。\n{ファンファーレ}相手のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-007.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:72cf56f83d62ce0a3498c377c1a1a18051d0f6250bd243b5f13317ee2e302d2d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-007",
+            "fetched_at": "2026-09-24T23:01:45.011209Z"
+          },
+          "document_ref": "documents-39396d569bb3d643"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-008",
+      "documents": {
+        "documents-2cadfb7bc6ae7996": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-008",
+            "faces": [
+              {
+                "name": "自然の導き",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場のカード1枚を選ぶ。それを手札に戻す。1枚引く。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": "時が焦がした緑色、茶に染まったらゆらりと落葉。\n落ちた葉は溶け新芽の餌に、新芽は伸びて緑を生やす。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-008.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q160",
+                "date": "2022-04-26",
+                "question": "このスペルで、自分の場のアミュレットを手札に戻すことはできますか？",
+                "answer": "はい。手札に戻すことができます。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76a23fec0c90cbbd3a446cba9d5817b532771c065a5575b10162dd2e58a03281",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-008",
+            "fetched_at": "2026-09-24T23:01:47.502602Z"
+          },
+          "document_ref": "documents-2cadfb7bc6ae7996"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-009",
+      "documents": {
+        "documents-c248ee381be54348": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-009",
+            "faces": [
+              {
+                "name": "収穫祭",
+                "card_class": "エルフ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "これが場を離れたとき、1枚引く。\n{起動}{コスト1}これを{アクト}墓場に置く：自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": "視覚、聴覚、触覚、味覚、嗅覚、人より鋭き野生の証。\nこれら五感の核となるのは、森が生み出す食物である。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-009.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:deeb2ef88c49b8bc2f5c4356eee777d06e0e26f3592715e4ae8dbe36614464d4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-009",
+            "fetched_at": "2026-09-24T23:01:50.196499Z"
+          },
+          "document_ref": "documents-c248ee381be54348"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-010",
+      "documents": {
+        "documents-19984a15d26a81e9": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-010",
+            "faces": [
+              {
+                "name": "沼の精",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "3",
+                "text": "{ファンファーレ}相手のフォロワー1体を選ぶ。次の相手のターン中、それは相手を攻撃できない。",
+                "sections": [],
+                "flavor": "美しき水面のその底に、どろりと広がる醜き汚泥。\n美しき面貌のその底に、にやりと隠れる醜き嘲笑。",
+                "illustrator": "まるえ",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-010.png",
+                "trait_raw": "精霊"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q437",
+                "date": "2022-11-11",
+                "question": "このフォロワーの能力にある「それは相手を攻撃できない」とはどのような能力ですか？",
+                "answer": "「それは相手を攻撃できない」とは、相手のフォロワーや相手のリーダーを攻撃目標に選択することができず、攻撃することができないという能力です。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:10be4a5eb26e5f8ed39fd9f3a6848ffa477042927d64fbedef75891eff69865f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-010",
+            "fetched_at": "2026-09-24T23:01:52.992274Z"
+          },
+          "document_ref": "documents-19984a15d26a81e9"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-011",
+      "documents": {
+        "documents-0daa1429ad71ae5f": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-011",
+            "faces": [
+              {
+                "name": "パフュームドワーフ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "自分のフォロワーが進化したとき、相手のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "「特別な森の素材から作った香水はいかがですかー？\n花の蜜にドワーフの汗、使えばきっと華やかになれますよ！」",
+                "illustrator": "ちゅん",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-011.png",
+                "trait_raw": "精霊"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d5283dd910e9a6c478756d22d4da596b70e1c1a846d3958add65eb2dc2e73257",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-011",
+            "fetched_at": "2026-09-24T23:01:55.960925Z"
+          },
+          "document_ref": "documents-0daa1429ad71ae5f"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-012",
+      "documents": {
+        "documents-863f7764e70307da": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-012",
+            "faces": [
+              {
+                "name": "癒しのエルフ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のリーダーは{体力}+3する。",
+                "sections": [],
+                "flavor": "そよぐ風。澄んだ空気。神秘を孕んだ泉。\n傷を癒すのに、エルフに頼むこと以上の方法は中々ない。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-012.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ea4fd7e94b345c47d57947f1f9a73293f377da3801c486341b0d0538b70d905a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-012",
+            "fetched_at": "2026-09-24T23:01:58.478495Z"
+          },
+          "document_ref": "documents-863f7764e70307da"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-013",
+      "documents": {
+        "documents-e12cd8bc73a8a70f": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-013",
+            "faces": [
+              {
+                "name": "エルフバード",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "自分のフォロワーが進化したとき、『フェアリーウィスプ』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリーウィスプ』{エルフ}妖精・フォロワー{コスト0}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-013.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:37a2c8aa7cb47275409c19f42e1f346351015961bfeb7e8f877eedc6c37ca372",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-013",
+            "fetched_at": "2026-09-24T23:02:01.092016Z"
+          },
+          "document_ref": "documents-e12cd8bc73a8a70f"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-014",
+      "documents": {
+        "documents-bb32db3a90c3e4ee": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-014",
+            "faces": [
+              {
+                "name": "ローズディアー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊",
+                  "植物族"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "3",
+                "text": "【突進】（【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）\n{ファンファーレ}『薔薇の一撃』1枚をEXエリアに置く。",
+                "sections": [
+                  "『薔薇の一撃』{エルフ}植物族・スペル{コスト2}相手のリーダー1人か相手のフォロワー1体を選ぶ。それに3ダメージ。1枚引く。"
+                ],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-014.png",
+                "trait_raw": "精霊・植物族"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:07b3bfe27f95c70c84285604653c3543e41e59d76211c9debed0cee6905b535f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-014",
+            "fetched_at": "2026-09-24T23:02:03.762656Z"
+          },
+          "document_ref": "documents-bb32db3a90c3e4ee"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-015",
+      "documents": {
+        "documents-ac03f0596a2bdd55": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-015",
+            "faces": [
+              {
+                "name": "アーチャー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n自分の場に他のフォロワーが出たとき、相手のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-015.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q326",
+                "date": "2022-07-07",
+                "question": "『エンシェントエルフ』の《ファンファーレ》能力のコストで『アーチャー』を選択した場合、『アーチャー』の能力はプレイしますか？",
+                "answer": "はい。一度誘発した自動能力は、そのカードが場を離れても能力をプレイできます。"
+              },
+              {
+                "id": "Q161",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーが2体あり、他のフォロワーが出たとき、このフォロワーの『自分の場に他のフォロワーが出たとき、相手のフォロワー1体を選ぶ。それに1ダメージ。』はそれぞれ誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-016"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c9ba18cbb70646418e9eb520398842bb3b4b303e9cc540bbcc2dd07f89b8f2ab",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-015",
+            "fetched_at": "2026-09-24T23:02:06.396755Z"
+          },
+          "document_ref": "documents-ac03f0596a2bdd55"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-016",
+      "documents": {
+        "documents-9140f84ef56363ed": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-016",
+            "faces": [
+              {
+                "name": "アーチャー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "-",
+                "power": "1",
+                "hp": "4",
+                "text": "自分の場に他のフォロワーが出たとき、相手のフォロワー2体まで選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": "木々がざわめいた。獣が鳴いた。虫が蠢いた。\nこの森に足を踏み入れたその時から、警告はされていたのに。",
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-016.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD03-015"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6500e66874ce50ec9d30b838566b267acc58ab19c6893352590ae543e8379b25",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-016",
+            "fetched_at": "2026-09-24T23:02:09.022175Z"
+          },
+          "document_ref": "documents-9140f84ef56363ed"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-017",
+      "documents": {
+        "documents-f13c775ecefe2a14": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-017",
+            "faces": [
+              {
+                "name": "大狼",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "5",
+                "text": "自分の場に他のフォロワーが出たとき、これは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "森の奥深くに住まうという、白き狼。\n森の民の願いを背負い、自然を害する者に牙を剝く。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-017.png",
+                "trait_raw": "獣"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q54",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーが2体あり、他のフォロワーが出たとき、このフォロワーの能力はそれぞれ誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q53",
+                "date": "2022-04-26",
+                "question": "自分の場の他のフォロワーが進化したとき、このフォロワーは《攻撃力》+1/《体力》+1しますか？",
+                "answer": "いいえ。フォロワーの進化ではエボルヴフォロワーは場に出た扱いではないため、このフォロワーは《攻撃力》+1/《体力》+1しません。"
+              },
+              {
+                "id": "Q52",
+                "date": "2022-04-26",
+                "question": "自分の場が上限かつ、フォロワーを場に出す能力をプレイしたとき、このフォロワーは《攻撃力》+1/《体力》+1しますか？",
+                "answer": "いいえ。自分の場が上限の状態でフォロワーやアミュレットを場に出す能力をプレイした場合、フォロワーやアミュレットは場に出ないため、このフォロワーは《攻撃力》+1/《体力》+1しません。"
+              }
+            ],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:de8e76f950e06dcfa8c5cadc33225ea3eb85f831e8ab3f6915da7f9b75467ae5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-017",
+            "fetched_at": "2026-09-24T23:02:11.689415Z"
+          },
+          "document_ref": "documents-f13c775ecefe2a14"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-018",
+      "documents": {
+        "documents-d4983d582984b990": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-018",
+            "faces": [
+              {
+                "name": "フラワーブリーズ",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場のカード1枚を選ぶ。それを手札に戻す。自分のリーダーは{体力}+1する。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": "やりたいことがあるなら、諦めなくてもいいんじゃないかな？\n――蜜田川イツキ",
+                "illustrator": "anchobi",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-018.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:478679883ed5325db9bd73f96d81b71e19d36021ed5c4402b368ba750052715d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-018",
+            "fetched_at": "2026-09-24T23:02:14.632823Z"
+          },
+          "document_ref": "documents-d4983d582984b990"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD03-019",
+      "documents": {
+        "documents-4d7adfc4e47a8b5d": {
+          "region": "jp",
+          "record": {
+            "number": "ETD03-019",
+            "faces": [
+              {
+                "name": "エンジェルスナイプ",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "許されざる者には速やかなる罰を。\n放たれた一矢は光となり、悪しき者の胸を貫く。",
+                "illustrator": "廣岡政樹",
+                "image": "/wordpress/wp-content/images/cardlist/ETD03/etd03-019.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0fc098fd5c61cf7b",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6252c184601c4f888e443d7aa45555a649c0fa54a3df9a1cce5b23566f9119c8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD03-019",
+            "fetched_at": "2026-09-24T23:02:17.197247Z"
+          },
+          "document_ref": "documents-4d7adfc4e47a8b5d"
+        }
+      ]
+    }
+  ]
+}

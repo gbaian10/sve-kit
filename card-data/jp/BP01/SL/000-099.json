@@ -1,0 +1,1289 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP01",
+  "range": "SL/000-099",
+  "products": {
+    "products-0066d46ee4f478d2": [
+      {
+        "name": "ブースターパック第1弾「創世の夜明け」",
+        "date": "2022-04-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP01",
+          "https://shadowverse-evolve.com/products/bp01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP01-SL01",
+      "documents": {
+        "documents-b9a11068a598ac7c": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL01",
+            "faces": [
+              {
+                "name": "ローズクイーン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "植物族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "8",
+                "power": "7",
+                "hp": "7",
+                "text": "{ファンファーレ}自分のEXエリアの妖精・フォロワーを好きな枚数選ぶ。それは『薔薇の一撃』に変身する。\n{起動}これを{アクト}：自分のPPを「自分のEXエリアの『薔薇の一撃』の枚数」と同じだけ回復する。",
+                "sections": [
+                  "『薔薇の一撃』{エルフ}植物族・スペル{コスト2}相手のリーダー1人か相手のフォロワー1体を選ぶ。それに3ダメージ。1枚引く。"
+                ],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl01.png",
+                "trait_raw": "植物族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q147",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《起動》能力で、自分のPPをPP最大値より多く回復することはできますか？",
+                "answer": "いいえ。PP最大値より多く回復することはできません。"
+              },
+              {
+                "id": "Q146",
+                "date": "2023-12-15",
+                "question": "「変身する」とはなんですか？",
+                "answer": "「変身する」とは、その能力で選んだカードを消滅させ、消滅した枚数と同数、指定のトークンを同じ領域に作成することを指します。（消滅したトークンはゲームから取り除かれます。）"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0be369f00b4a671cda9da9eda513dec6b6576b615f257774e25dc0a1c9346b1a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL01",
+            "fetched_at": "2026-09-24T23:30:02.629574Z"
+          },
+          "document_ref": "documents-b9a11068a598ac7c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL02",
+      "documents": {
+        "documents-18b406f9b9d3a5bf": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL02",
+            "faces": [
+              {
+                "name": "エンシェントエルフ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "相場良祐",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl02.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q149",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力のコストで、自分のEXエリアのカードを手札に戻すことはできますか？",
+                "answer": "いいえ。自分の場のカードのみを手札に戻すことができます。"
+              },
+              {
+                "id": "Q148",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力のコストで、相手の場のカードを手札に戻すことはできますか？",
+                "answer": "いいえ。自分の場のカードのみを手札に戻すことができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1054a01c69be66f29b09d6e89fd0a197977e7720a3469dd7572473c6128b5ed3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL02",
+            "fetched_at": "2026-09-24T23:30:05.005232Z"
+          },
+          "document_ref": "documents-18b406f9b9d3a5bf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL03",
+      "documents": {
+        "documents-f3e39d59e34f235a": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL03",
+            "faces": [
+              {
+                "name": "エンシェントエルフ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【守護】\n【進化時】場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "生命とは輪廻、繰り返される循環。\n森が育んだ者たちは、やがて森を育む者へと変わる。",
+                "illustrator": "相場良祐",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl03.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q151",
+                "date": "2022-04-26",
+                "question": "このフォロワーの【進化時】のコストで、自分のEXエリアのカードを手札に戻すことはできますか？",
+                "answer": "いいえ。自分の場のカードのみを手札に戻すことができます。"
+              },
+              {
+                "id": "Q150",
+                "date": "2022-04-26",
+                "question": "このフォロワーの【進化時】のコストで、相手の場のカードを手札に戻すことはできますか？",
+                "answer": "いいえ。自分の場のカードのみを手札に戻すことができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc45f17f817de71c90ccf31bd6517a9a90e56c3af6e8c6796199e9fa50440810",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL03",
+            "fetched_at": "2026-09-24T23:30:07.522969Z"
+          },
+          "document_ref": "documents-f3e39d59e34f235a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL04",
+      "documents": {
+        "documents-5f4d3d2305f0897e": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL04",
+            "faces": [
+              {
+                "name": "海底都市王・乙姫",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}『乙姫お守り隊』1体を出す。",
+                "sections": [
+                  "『乙姫お守り隊』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}2【守護】"
+                ],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl04.png",
+                "trait_raw": "指揮官・プリンセス"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2284dc6c89bc3da1376eb146eeb9db10a052b223711ebb3586a1d5ab7b48ccf9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL04",
+            "fetched_at": "2026-09-24T23:30:10.449288Z"
+          },
+          "document_ref": "documents-5f4d3d2305f0897e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL05",
+      "documents": {
+        "documents-06743741b0f35939": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL05",
+            "faces": [
+              {
+                "name": "海底都市王・乙姫",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "【進化時】『乙姫お守り隊』3枚を、場が上限になるまで出す。残りをEXエリアに置く。",
+                "sections": [],
+                "flavor": "やがて水面の底の底、タイやヒラメが舞い踊る。\n飲めや騒げや宴の真ん中、海の主はここにあり。",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl05.png",
+                "trait_raw": "指揮官・プリンセス"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c1bf9af02f3721f20acc24093a4631e37c65644474fff7bbc1e3856304f15495",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL05",
+            "fetched_at": "2026-09-24T23:30:13.201204Z"
+          },
+          "document_ref": "documents-06743741b0f35939"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL06",
+      "documents": {
+        "documents-7815b2dfd6c4941b": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL06",
+            "faces": [
+              {
+                "name": "ロイヤルセイバー・オーレリア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "6",
+                "text": "【突進】【指定攻撃】【守護】\n{ファンファーレ}相手のリーダー1人を選ぶ。それの場のカードが3枚以上なら、これは{攻撃力}+2/{体力}+2して、【オーラ】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl06.png",
+                "trait_raw": "指揮官・プリンセス"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q243",
+                "date": "2022-05-06",
+                "question": "【突進】と【指定攻撃】を持つフォロワーは、場に出たターンに相手の場のスタンド状態のフォロワーを攻撃することはできますか？",
+                "answer": "はい。攻撃することができます。"
+              },
+              {
+                "id": "Q168",
+                "date": "2022-04-26",
+                "question": "相手の場に『鳳凰の庭園』が2つあり、それらの能力を順にプレイし、このフォロワーと『ウルズ』が場に出ました。\n『ウルズ』の《ファンファーレ》能力で相手の場のフォロワーをEXエリアに置いて、相手の場のカードが2枚以下になったあと、このフォロワーの《ファンファーレ》能力をプレイしたとき、「それの場のカードが3枚以上なら」の条件は満たすことができますか？",
+                "answer": "いいえ。このフォロワーの《ファンファーレ》能力をプレイしたタイミングでは、すでに相手の場のカードが3枚以上ではなくなっているため、条件を満たすことができません。"
+              },
+              {
+                "id": "Q167",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力で、相手のEXエリアのカードは数えることはできますか？",
+                "answer": "いいえ。「場のカード」とあるため、相手のEXエリアのカードを数えることはできません。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:db7da2a3b455ceba96f74deb32c5777465ff5f65beca4a2da77f948fe4d5f2da",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL06",
+            "fetched_at": "2026-09-24T23:30:16.147524Z"
+          },
+          "document_ref": "documents-7815b2dfd6c4941b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL07",
+      "documents": {
+        "documents-4e81996b29b72007": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL07",
+            "faces": [
+              {
+                "name": "アークサモナー・エラスムス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "7",
+                "power": "6",
+                "hp": "8",
+                "text": "{ファンファーレ}【土の秘術】相手のフォロワー1体を選ぶ。それに6ダメージ。それのリーダーに2ダメージ。\n{起動}これを{アクト}【土の秘術】：相手のフォロワー1体を選ぶ。それに6ダメージ。それのリーダーに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "mstk",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl07.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q184",
+                "date": "2022-04-26",
+                "question": "相手の場に選ぶことのできるフォロワーがないとき、このフォロワーの《ファンファーレ》または《起動》能力のコストを支払うことはできますか？",
+                "answer": "いいえ。選ぶ目標がないとき、その能力をプレイすることはできないため、コストを支払うことはできません。"
+              },
+              {
+                "id": "Q183",
+                "date": "2022-04-26",
+                "question": "相手の場にフォロワーがないとき、このフォロワーの《ファンファーレ》または《起動》能力で相手のリーダーにダメージを与えることはできますか？",
+                "answer": "いいえ。「それのリーダー」とあり、相手のフォロワーを選ぶ必要があるため、与えることはできません。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4ac1447e2000d065f72c8a8206e2cfab266af5dedb62b192055386f9539d91e7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL07",
+            "fetched_at": "2026-09-24T23:30:18.989125Z"
+          },
+          "document_ref": "documents-4e81996b29b72007"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL08",
+      "documents": {
+        "documents-09d24ca9e233d007": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL08",
+            "faces": [
+              {
+                "name": "マーリン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキからスペル1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "「鳥が命を運ぶと信じるのは、幼き子供。\n運ぶべき命を選び取るのが、私の役目」",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl08.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q185",
+                "date": "2022-04-26",
+                "question": "自分のデッキにスペルがないとき、このフォロワーの《ファンファーレ》能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、デッキの中身を全て確認したあと、スペルを手札に加えず、デッキをシャッフルします。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:404a728aa10d50ed09749f85af396ff99f80b6f726149f442552421d988ee832",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL08",
+            "fetched_at": "2026-09-24T23:30:21.910473Z"
+          },
+          "document_ref": "documents-09d24ca9e233d007"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL09",
+      "documents": {
+        "documents-bf897b36951e855a": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL09",
+            "faces": [
+              {
+                "name": "マーリン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "3",
+                "text": "【進化時】自分の墓場のコスト3以下のスペル1枚を選ぶ。それのコストを0にしてプレイする。",
+                "sections": [],
+                "flavor": "運ばれるまま進むだけでは、生まれた意味など見つからない。\n命を燃やし、眼を凝らして、ようやく運命は見つかるのだ。",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl09.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q246",
+                "date": "2022-05-06",
+                "question": "自分の墓場のスペルが10枚で、このフォロワーの能力をプレイして自分の墓場から『運命の導き』をプレイしたとき、『運命の導き』の【スペルチェイン_10】は条件を満たしますか？",
+                "answer": "いいえ。『運命の導き』はプレイしたとき墓場ではなく解決領域にあるため、墓場のスペルは9枚となり、【スペルチェイン_10】の条件は満たしません。"
+              },
+              {
+                "id": "Q186",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力でプレイしたスペルは、効果の解決後、墓場に置かれますか？",
+                "answer": "はい。効果の解決後、墓場に置かれます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c240e572316059395c2a7083d38d4b0acd5aed24a5f25eb831d92214d5a12fae",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL09",
+            "fetched_at": "2026-09-24T23:30:24.694754Z"
+          },
+          "document_ref": "documents-bf897b36951e855a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL10",
+      "documents": {
+        "documents-93346f08c4bd2e78": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL10",
+            "faces": [
+              {
+                "name": "ダークドラグーン・フォルテ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "1",
+                "text": "{進化}{コスト2}：これは進化する。\n【疾走】",
+                "sections": [],
+                "flavor": "空裂く槍、空覆う翼。其の名はフォルテ、天空の覇者。\n「我が暗黒の翼、墜としてみよ！」",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl10.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:45ab28376ae626f9decf293af7e9e386862d9ecb500c6a856320e312c7a44904",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL10",
+            "fetched_at": "2026-09-24T23:30:27.563140Z"
+          },
+          "document_ref": "documents-93346f08c4bd2e78"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL11",
+      "documents": {
+        "documents-0fda4de8295cff56": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL11",
+            "faces": [
+              {
+                "name": "ダークドラグーン・フォルテ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "7",
+                "hp": "3",
+                "text": "【疾走】【オーラ】",
+                "sections": [],
+                "flavor": "天に座すは天使に非ず。覇を知るは一人のみ。\n「この一槍……止めて見せろ！」",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl11.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3308b5c1c3f93bc9ae7ea2753cc58f269d4f859aa9a761ddc425aa8052ab7ffe",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL11",
+            "fetched_at": "2026-09-24T23:30:30.100856Z"
+          },
+          "document_ref": "documents-0fda4de8295cff56"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL12",
+      "documents": {
+        "documents-24e133be5218e01d": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL12",
+            "faces": [
+              {
+                "name": "ジルニトラ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}『ドラゴン』1枚をEXエリアに置く。\n{起動}{コスト2}これを{アクト}：自分のEXエリアの『ドラゴン』1枚を選ぶ。それを場に出す。それは【突進】を持つ。【覚醒】状態なら、自分のPPを2回復する。",
+                "sections": [
+                  "『ドラゴン』{ドラゴン}竜族・フォロワー{コスト4}{攻撃力}5/{体力}5"
+                ],
+                "flavor": null,
+                "illustrator": "相場良祐",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl12.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q201",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《起動》能力で、自分のPPをPP最大値より多く回復することはできますか？",
+                "answer": "いいえ。PP最大値より多く回復することはできません。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5b26263c48a2653b88ded4ef191e2103d2ad2d17989dc08b83944c9048cf813f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL12",
+            "fetched_at": "2026-09-24T23:30:33.038219Z"
+          },
+          "document_ref": "documents-24e133be5218e01d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL13",
+      "documents": {
+        "documents-56c67385cb2a01f8": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL13",
+            "faces": [
+              {
+                "name": "ケルベロス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}『冥焔の右腕・ミミ』1枚か『冥焔の左腕・ココ』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに1枚ずつ置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl13.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": "https://shadowverse-evolve.com/errata/bp01-101/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q213",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限まで残り1枚のとき、このフォロワーの《ファンファーレ》能力で『ミミ』と『ココ』のどちらをEXエリアに置くかを選択することはできますか？",
+                "answer": "はい。選択することができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2c74822f0becd14f4a1f2815e05d7a6481a01a7ffe5cb75835c11b55d210297d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL13",
+            "fetched_at": "2026-09-24T23:30:35.993918Z"
+          },
+          "document_ref": "documents-56c67385cb2a01f8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL14",
+      "documents": {
+        "documents-4b04fae9ed36b0f4": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL14",
+            "faces": [
+              {
+                "name": "ケルベロス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】『冥焔の右腕・ミミ』『冥焔の左腕・ココ』1枚ずつEXエリアに置く。",
+                "sections": [],
+                "flavor": "「ぶっ飛ばすワン！」「やってやるワン！」\n「久しぶりに暴れちゃおうかな♪」",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl14.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": "https://shadowverse-evolve.com/errata/bp01-101/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q214",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限まで残り1枚のとき、このフォロワーの能力で『ミミ』と『ココ』のどちらをEXエリアに置くかを選択することはできますか？",
+                "answer": "はい。選択することができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f862575f03e2f4ed976bf0c4de40b61d8eb06e98794dcef5cfdf9fe61390794e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL14",
+            "fetched_at": "2026-09-24T23:30:38.750497Z"
+          },
+          "document_ref": "documents-4b04fae9ed36b0f4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL15",
+      "documents": {
+        "documents-90717003fb727e53": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL15",
+            "faces": [
+              {
+                "name": "骸の王",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "9",
+                "power": "6",
+                "hp": "6",
+                "text": "これをプレイする際、場のスタンド状態の{ナイトメア}カード4枚を墓場に置く、または、EXエリアの{ナイトメア}カード4枚を消滅：コストを-9する。",
+                "sections": [],
+                "flavor": "積み上げた戦功も風化して、かつての栄光は消え去って。\nそれでも忘れられぬ大義のために、王は屍を積み上げる。",
+                "illustrator": "Jang seungpil",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl15.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q271",
+                "date": "2022-05-19",
+                "question": "『骸の王』をプレイする際、自分の場のスタンド状態のトークンを4枚墓場に置き、コストを-9することはできますか？",
+                "answer": "はい。トークンは一度墓場に置かれるため、自分の場のトークンを含めたカード4枚を墓場に置き、コストを-9することができます。"
+              },
+              {
+                "id": "Q216",
+                "date": "2022-04-26",
+                "question": "自分の場とEXエリアのカードを、それぞれ2枚ずつ墓場に置くまたは消滅させて、このフォロワーをプレイすることはできますか？",
+                "answer": "いいえ。「自分の場のカード4枚を墓場に置く」か「自分のEXエリアのカード4枚を消滅させる」のどちらかのみを選択でき、場とEXエリアのカードを合わせて4枚という意味ではないため、プレイすることができません。"
+              },
+              {
+                "id": "Q215",
+                "date": "2022-04-26",
+                "question": "自分の場が上限のとき、場のスタンド状態のカード4枚を墓場に置き、このフォロワーをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:87f0be52e2633676acac2d83dc7e2bbe337cc89ad69f7731f2fa1d3ad61c0e81",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL15",
+            "fetched_at": "2026-09-24T23:30:41.294639Z"
+          },
+          "document_ref": "documents-90717003fb727e53"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL16",
+      "documents": {
+        "documents-68faa24e4172b433": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL16",
+            "faces": [
+              {
+                "name": "ムーンアルミラージ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "【疾走】\n【攻撃時】フォロワーへの攻撃なら、これは{攻撃力}+2する。\n自分のエンドフェイズが来たとき、これは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl16.png",
+                "trait_raw": "獣"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q225",
+                "date": "2022-04-26",
+                "question": "このフォロワーの「自分のエンドフェイズが来たとき」で始まる能力は、このフォロワーの《体力》が減少していない状態でも《体力》+2されますか？",
+                "answer": "はい。《体力》+2されます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b9fc4cd06a70526164d9f276bb9d3e5972a891071803f2e8ec51a67a504e1395",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL16",
+            "fetched_at": "2026-09-24T23:30:44.352976Z"
+          },
+          "document_ref": "documents-68faa24e4172b433"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL17",
+      "documents": {
+        "documents-a4f14220d3b784c9": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL17",
+            "faces": [
+              {
+                "name": "ジャンヌダルク",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}相手のフォロワーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "いかに苦しき道なれど、汝ならばと神が言う。\nいかに険しき道であれ、ならば行かんと聖女は駆ける。",
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl17.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9c5dbcaf3378bb83c71ba1242c717125ae05a9b466e16b51e3f2828f8cedd739",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL17",
+            "fetched_at": "2026-09-24T23:30:46.876324Z"
+          },
+          "document_ref": "documents-a4f14220d3b784c9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL18",
+      "documents": {
+        "documents-1cd6001d31010413": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL18",
+            "faces": [
+              {
+                "name": "ジャンヌダルク",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "【進化時】相手のフォロワーすべてに2ダメージ。自分の他のフォロワーすべては{体力}+2する。",
+                "sections": [],
+                "flavor": "揺るぎない神の正義の名の下に、聖女の行進は続く。\n「絶対の勝利を約束しよう！」",
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl18.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f78594a2d28fc43ff5caf4a22ba1d2d722737d960f62e844794107383cb1c35c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL18",
+            "fetched_at": "2026-09-24T23:30:49.755670Z"
+          },
+          "document_ref": "documents-1cd6001d31010413"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL19",
+      "documents": {
+        "documents-defd5b99a4825c32": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL19",
+            "faces": [
+              {
+                "name": "ガブリエル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは{攻撃力}+4/{体力}+3して、【指定攻撃】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl19.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dead9459847798163f662a9391b0cb6030f5e6704978f2a6e2f6744208f395f9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL19",
+            "fetched_at": "2026-09-24T23:30:52.384694Z"
+          },
+          "document_ref": "documents-defd5b99a4825c32"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL20",
+      "documents": {
+        "documents-cf7f1bf38068bf9c": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL20",
+            "faces": [
+              {
+                "name": "ルシフェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使",
+                  "堕天使"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "7",
+                "power": "6",
+                "hp": "7",
+                "text": "{進化}{コスト0}：これは進化する。\n【守護】\n自分のエンドフェイズが来たとき、自分のリーダーは{体力}+4する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl20.png",
+                "trait_raw": "天使・堕天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3319ba5ad64094538d82fe14db8b2a529c12b01db95f308d5ce5654ea1ee6521",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL20",
+            "fetched_at": "2026-09-24T23:30:55.292224Z"
+          },
+          "document_ref": "documents-cf7f1bf38068bf9c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL21",
+      "documents": {
+        "documents-c25e4119016e1553": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL21",
+            "faces": [
+              {
+                "name": "ルシフェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使",
+                  "堕天使"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "8",
+                "hp": "7",
+                "text": "【必殺】\n自分のエンドフェイズが来たとき、相手のリーダーすべてに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl21.png",
+                "trait_raw": "天使・堕天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:be4ed9690d6c355693d777ce7a8104b4293b909560b40f6c13840af3996a5f7e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL21",
+            "fetched_at": "2026-09-24T23:30:57.995314Z"
+          },
+          "document_ref": "documents-c25e4119016e1553"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-SL22",
+      "documents": {
+        "documents-4b29cc45c4fa8197": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-SL22",
+            "faces": [
+              {
+                "name": "フラム＝グラス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔王"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "10",
+                "power": "7",
+                "hp": "7",
+                "text": "【疾走】\n【攻撃時】相手のフォロワーすべてに3ダメージ。自分の墓場に『ツインプリズナー・フラム』と『ツインプリズナー・グラス』があるなら、代わりに7ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_sl22.png",
+                "trait_raw": "魔王"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:12a32d0baf044a3eef6e7dd1e3c21e6acdc03d17800f7d2d52d6d0db1eb430ac",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL22",
+            "fetched_at": "2026-09-24T23:31:00.816393Z"
+          },
+          "document_ref": "documents-4b29cc45c4fa8197"
+        }
+      ]
+    }
+  ]
+}

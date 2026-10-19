@@ -1,0 +1,134 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD05",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      },
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-47cc5ffa56789093": [
+        {
+          "ordinal": 0,
+          "name": "スターターデッキ第5弾「永久なる定め」",
+          "date_raw": "2022-04-28",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=SD05",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=SD05",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/sd01_06/",
+              "expansion_code": "SD05"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:826a7638caaaf38f375b0b4501d20173b5f7816804e42c4784812711eb0f1ab5": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:42c4b953dc14562ca2a64838db136454dda482cad535e2abd60674edace5c768",
+        "raw_bytes": 36647,
+        "first_receipt_id": "sha256:efff12359c6fabc29f6715f44701688d06764adb82d7aa5615655f6cc4e13566",
+        "descriptor_sha256": "sha256:d46bf89cf0da4905f9e525a22bfd801b66edf9e80fa80395a8ec1c08c893bb0d",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:1f41f2edb5dfe5bc27e40761fd7bdc0f2837cc1789437fc50aa4facc039feef6"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-47cc5ffa56789093",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:6f225bd826cc1f015b192a8c0963ada430ab68b5bae82e4bd20ec2f1de0213de"
+    },
+    "src:v1:9eb497d2eb300c9800fe82e1b104effa30e8afc989683c6ac682f42230fd3a8c": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:633e0dd797e561f432ab43694bd28f9863d1821c5e6329ff7535a4b20fad3a32",
+        "raw_bytes": 36800,
+        "first_receipt_id": "sha256:a1572610385457de90708621c60beffdc74944861964efa5d5101d034c1ca41f",
+        "descriptor_sha256": "sha256:8d5b02e76e045d35bde80a20b504974c5f405abc52dd3e65d5574a08a7d80d82",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:fcd0f069b8e1aea58d13272bf0a5e10a20b5e828e74aa1f35fbbdd990da132e1"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-47cc5ffa56789093",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:7b4554a7081d47e1800140de75c8dba7dc35130211a8280d93634ea87d1d1236"
+    }
+  }
+}

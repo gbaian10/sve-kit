@@ -1,0 +1,115 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01b",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-5907c1bc0c53213a": [
+        {
+          "ordinal": 0,
+          "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+          "date_raw": "2024-04-19",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=DSD01",
+            "https://shadowverse-evolve.com/products/dsd01/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=DSD01",
+            "https://shadowverse-evolve.com/products/dsd01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/dsd01/",
+              "expansion_code": "DSD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-7104f93b9363ae48": [
+        {
+          "stable_source_key": "Q1252",
+          "official_number": "Q1252",
+          "locator": "qa-block:0",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1251",
+          "official_number": "Q1251",
+          "locator": "qa-block:1",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        }
+      ]
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:e0b581c09e3f121a5702513a7b08d2c6c8bd1022b6c0b5cb94f4286f6adc9b46": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:6990a444376a2e37b31ca59e03372dfdae81143b1b0f9eb5fba7e24d43ddd5ad",
+        "raw_bytes": 39073,
+        "first_receipt_id": "sha256:a4db5173518304543bcf44afa9a5452b7887d35b06ed901377c6fef249dfb78b",
+        "descriptor_sha256": "sha256:79b98f6197052ed9020d69da34e70fed3bfaf5f66dbc15b4e8f9dea3a23605e5",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:c7d02ad3d90b0fa590159a2edffa3b61ae23ae5b5200ea4f6ce8e9f08fceaca9"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5907c1bc0c53213a",
+        "qa": "qa-7104f93b9363ae48",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:d5a5e6927261a9bc46dd28766e98b97d139b1fccefcf01a003113f7151d415d8"
+    }
+  }
+}

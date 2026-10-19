@@ -1,0 +1,91 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP19",
+  "range": "SP/000-099",
+  "products": {
+    "products-eb47d00ae38b6235": [
+      {
+        "name": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+        "date": "Sep. 25, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP19-BP20",
+          "https://en.shadowverse-evolve.com/products/bp1920/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP19-SP01EN",
+      "documents": {
+        "documents-9ed9f1406c34a02e": {
+          "region": "en",
+          "record": {
+            "number": "BP19-SP01EN",
+            "faces": [
+              {
+                "name": "Barbaros, Briny Convict",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Special",
+                  "Trait": "Condemned / Thief"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nDuring your turn, any Loot card you play from the EX area costs 1 less.\n{icon_fanfare|[fanfare]} Put a Dread Pirate's Flag token into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nDuring your turn, any Loot card you play from the EX area costs 1 less.\n{icon_fanfare|[fanfare]} Put a Dread Pirate's Flag token into your EX area.",
+                "speech": null,
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/BP19-SP01EN.png",
+                "trait_raw": "Condemned / Thief",
+                "traits": [
+                  "Condemned",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2359 (Sep. 10, 2026)",
+                "question": "During my turn, if there are 2 copies of this follower on my field when I play a Loot card from my EX area, will it cost 2 less?",
+                "answer": "Yes, it will."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP19-020EN|Barbaros, Briny Convict}",
+                "href": "/cards/?cardno=BP19-020EN"
+              },
+              {
+                "label": "{BP19-T01EN|Dread Pirate's Flag}",
+                "href": "/cards/?cardno=BP19-T01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:04559a12554525de8c0a27df7c6ea59040ff2032788aeadc02e7f76c92dcafa1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP19-SP01EN",
+            "fetched_at": "2026-09-27T13:32:54.268243Z"
+          },
+          "document_ref": "documents-9ed9f1406c34a02e"
+        }
+      ]
+    }
+  ]
+}

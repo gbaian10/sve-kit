@@ -1,0 +1,1132 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD03a",
+  "range": "000-099",
+  "products": {
+    "products-895e798fc14681f6": [
+      {
+        "name": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+        "date": "Aug. 15, 2025",
+        "links": [
+          "/cards/searchresults?expansion=CSD03A",
+          "https://en.shadowverse-evolve.com/products/csd03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CSD03a-001EN",
+      "documents": {
+        "documents-195ec0d80fb3098c": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-001EN",
+            "faces": [
+              {
+                "name": "Alfred Early",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower into a King of Knights, Alfred.\nStorm. Twin Drive. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower into a King of Knights, Alfred.\nStorm. Twin Drive. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)",
+                "speech": null,
+                "illustrator": "Design: 伊藤彰\nIllustration: 三好載克",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-001EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1458 (Aug. 8, 2025)",
+                "question": "Do I resolve Twin Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1456 (Aug. 8, 2025)",
+                "question": "When attacking using a follower with Twin Drive, if I reveal a Trigger with the first drive check, do I resolve the Trigger before or after performing the second drive check?",
+                "answer": "You resolve the Trigger first. For example, if you reveal and resolve a Draw Trigger with the first drive check, you will draw a card, put the resolved Trigger into your cemetery, then perform the second drive check. If you choose not to resolve the Trigger, you will put it on the bottom of your deck, then perform the second drive check."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-002EN|King of Knights, Alfred}",
+                "href": "/cards/?cardno=CSD03a-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:24713281edbafd61ee535b8b878900e56f8ccd6cc36f9a02b5030e1df40125bc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-001EN",
+            "fetched_at": "2026-09-27T15:44:48.350114Z"
+          },
+          "document_ref": "documents-195ec0d80fb3098c"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-002EN",
+      "documents": {
+        "documents-d44fd4a5d67e0b7a": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-002EN",
+            "faces": [
+              {
+                "name": "King of Knights, Alfred",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "Storm. Twin Drive. (Whenever a follower with Twin Drive attacks, it performs 2 drive checks.)\nOn Evolve - Search your deck for a Royal Paladin follower that costs 3 or less, summon it, then shuffle. If there are at least 15 Royal Paladin cards in your cemetery, give it and this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "Storm. Twin Drive. (Whenever a follower with Twin Drive attacks, it performs 2 drive checks.)\nOn Evolve - Search your deck for a Royal Paladin follower that costs 3 or less, summon it, then shuffle. If there are at least 15 Royal Paladin cards in your cemetery, give it and this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-002EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1459 (Aug. 8, 2025)",
+                "question": "If I don't find a Royal Paladin follower that costs 3 or less to summon with this follower's On Evolve ability, but there are at least 15 Royal Paladin cards in my cemetery, do I still give this follower +1/+1?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1458 (Aug. 8, 2025)",
+                "question": "Do I resolve Twin Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1456 (Aug. 8, 2025)",
+                "question": "When attacking using a follower with Twin Drive, if I reveal a Trigger with the first drive check, do I resolve the Trigger before or after performing the second drive check?",
+                "answer": "You resolve the Trigger first. For example, if you reveal and resolve a Draw Trigger with the first drive check, you will draw a card, put the resolved Trigger into your cemetery, then perform the second drive check. If you choose not to resolve the Trigger, you will put it on the bottom of your deck, then perform the second drive check."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-001EN|Alfred Early}",
+                "href": "/cards/?cardno=CSD03a-001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:325dff5f96675b7b8dd1bcf5bb737e7fa1363d4967946dec97600e44fb57b323",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-002EN",
+            "fetched_at": "2026-09-27T15:44:51.528022Z"
+          },
+          "document_ref": "documents-d44fd4a5d67e0b7a"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-003EN",
+      "documents": {
+        "documents-b1e91d979d434a6b": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-003EN",
+            "faces": [
+              {
+                "name": "Blaster Blade",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nSingle Drive. (Whenever a follower with Single Drive attacks, it performs a drive check.)\n{icon_fanfare|[fanfare]} If this card was put onto the field by an ability, evolve it.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nSingle Drive. (Whenever a follower with Single Drive attacks, it performs a drive check.)\n{icon_fanfare|[fanfare]} If this card was put onto the field by an ability, evolve it.",
+                "speech": null,
+                "illustrator": "Design: 伊藤彰\nIllustration: TMS",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-003EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1462 (Aug. 8, 2025)",
+                "question": "Do I evolve this follower with its Fanfare ability if it is put onto the field by an ability during an opponent's turn?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1461 (Aug. 8, 2025)",
+                "question": "Do I evolve this follower with its Fanfare ability if it is put onto the field by King of Knights, Alfred's On Evolve ability or Wingal's activated ability?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1460 (Aug. 8, 2025)",
+                "question": "If I evolve this follower with its Fanfare ability, can I evolve another follower using its evolve ability in the same turn?",
+                "answer": "Yes. Although you can only activate one evolve ability per turn, other abilities that evolve followers do not count towards this limit."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-004EN|Blaster Blade}",
+                "href": "/cards/?cardno=CSD03a-004EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a0f70721a8b717f2e2e1b7ee4283d96a2211b1aebad78adf81bf466946443877",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-003EN",
+            "fetched_at": "2026-09-27T15:44:54.480202Z"
+          },
+          "document_ref": "documents-b1e91d979d434a6b"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-004EN",
+      "documents": {
+        "documents-ddf193612dcaa1ee": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-004EN",
+            "faces": [
+              {
+                "name": "Blaster Blade",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "Single Drive.\nOn Evolve - Select an enemy follower on the field and deal it damage equal to 2 times the number of Royal Paladin followers on your field.",
+                "sections": [],
+                "raw_text": "Single Drive.\nOn Evolve - Select an enemy follower on the field and deal it damage equal to 2 times the number of Royal Paladin followers on your field.",
+                "speech": null,
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-004EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-003EN|Blaster Blade}",
+                "href": "/cards/?cardno=CSD03a-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ddd644e1f60165d824dad3213d412d4e377547d5e28b55bb851df73f692384eb",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-004EN",
+            "fetched_at": "2026-09-27T15:44:57.213381Z"
+          },
+          "document_ref": "documents-ddf193612dcaa1ee"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-005EN",
+      "documents": {
+        "documents-081bd279be660549": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-005EN",
+            "faces": [
+              {
+                "name": "Wingal",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_act|[act]} {icon_cost03|[cost03]}, {icon_stand|[engage]}: Select a Blaster Blade in your cemetery and summon it.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_cost03|[cost03]}, {icon_stand|[engage]}: Select a Blaster Blade in your cemetery and summon it.",
+                "speech": null,
+                "illustrator": "TMS",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-005EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-003EN|Blaster Blade}",
+                "href": "/cards/?cardno=CSD03a-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c2f2b1ffaa48368ab342e30482e746c44943057d45164c721e1c4dec4503ff31",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-005EN",
+            "fetched_at": "2026-09-27T15:45:00.561893Z"
+          },
+          "document_ref": "documents-081bd279be660549"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-006EN",
+      "documents": {
+        "documents-f3c951d66ee4c728": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-006EN",
+            "faces": [
+              {
+                "name": "Knight of Conviction, Bors",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nAssail. (Followers with Assail can attack reserved followers.)\nOn Drive - Give this follower {icon_power|[attack]}+2/{icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nAssail. (Followers with Assail can attack reserved followers.)\nOn Drive - Give this follower {icon_power|[attack]}+2/{icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "wolfina",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-006EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-017EN|Drive Point}",
+                "href": "/cards/?cardno=CSD03a-017EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eab9d9d0ec939d7f822280754d8ee6d4f99f28296e6727551b37afb4c1677ec6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-006EN",
+            "fetched_at": "2026-09-27T15:45:03.036359Z"
+          },
+          "document_ref": "documents-f3c951d66ee4c728"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-007EN",
+      "documents": {
+        "documents-e289201996bbce2d": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-007EN",
+            "faces": [
+              {
+                "name": "Flash Shield, Iseult",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Spell",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nChoose one. (1) Select an enemy follower on the field and deal it 2 damage. (2) Discard a Royal Paladin card: Select an enemy follower on the field. Deal it 3 damage and give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nChoose one. (1) Select an enemy follower on the field and deal it 2 damage. (2) Discard a Royal Paladin card: Select an enemy follower on the field. Deal it 3 damage and give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "タイキ",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-007EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1464 (Aug. 8, 2025)",
+                "question": "When playing this spell, if I can't select an enemy follower on the field, can I still choose option 2 to discard an Royal Paladin card and give my leader +2 defense?",
+                "answer": "No. If you can't select an enemy follower, you can't play this spell."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c776cde7abbafd18370991d3ab078915977d3693c662ab0f38d5e3b86ba6c5e5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-007EN",
+            "fetched_at": "2026-09-27T15:45:05.609205Z"
+          },
+          "document_ref": "documents-e289201996bbce2d"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-008EN",
+      "documents": {
+        "documents-c4585920dccbb89f": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-008EN",
+            "faces": [
+              {
+                "name": "Knight of Silence, Gallatin",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "5"
+                },
+                "text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1. Deal 3 damage to each enemy leader.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 5 damage.",
+                "sections": [],
+                "raw_text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1. Deal 3 damage to each enemy leader.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 5 damage.",
+                "speech": null,
+                "illustrator": "村枝賢一",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-008EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-017EN|Drive Point}",
+                "href": "/cards/?cardno=CSD03a-017EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:264215398a1a7fbec38c6ba245522ec8d1168a4555ad441d60c2db60c06c70db",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-008EN",
+            "fetched_at": "2026-09-27T15:45:08.405977Z"
+          },
+          "document_ref": "documents-c4585920dccbb89f"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-009EN",
+      "documents": {
+        "documents-d4dd792da5358200": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-009EN",
+            "faces": [
+              {
+                "name": "Little Sage, Marron",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Look at the top 5 cards of your deck. You may reveal a Royal Paladin card from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Look at the top 5 cards of your deck. You may reveal a Royal Paladin card from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "山﨑奈苗",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-009EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c7cc6b01b101904b614077c9d96567ea30daada60ee9327b0623f8d23320c948",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-009EN",
+            "fetched_at": "2026-09-27T15:45:11.266319Z"
+          },
+          "document_ref": "documents-d4dd792da5358200"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-010EN",
+      "documents": {
+        "documents-da63c078de61d173": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-010EN",
+            "faces": [
+              {
+                "name": "Lake Maiden, Lien",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Discard a Royal Paladin card: Select a Royal Paladin follower in your cemetery and add it to your hand.",
+                "sections": [],
+                "raw_text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Discard a Royal Paladin card: Select a Royal Paladin follower in your cemetery and add it to your hand.",
+                "speech": null,
+                "illustrator": "三好載克",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-010EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1465 (Aug. 8, 2025)",
+                "question": "If I discard a Royal Paladin follower to pay the cost of this follower's Fanfare ability, can I then select that same follower and add it back to my hand?",
+                "answer": "No. You select a follower for the ability before paying the cost."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5a7e8533d3760564b16078b23c91ab4e7c2b3263e389b1c1c826475a868c88cc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-010EN",
+            "fetched_at": "2026-09-27T15:45:13.555243Z"
+          },
+          "document_ref": "documents-da63c078de61d173"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-011EN",
+      "documents": {
+        "documents-ea77f08ee02464f7": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-011EN",
+            "faces": [
+              {
+                "name": "Knight of Rose, Morgana",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Select up to 1 enemy follower on the field. Deal it 2 damage and give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\nStrike - Discard a Royal Paladin card: Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Select up to 1 enemy follower on the field. Deal it 2 damage and give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\nStrike - Discard a Royal Paladin card: Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Ryo-ta.H",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-011EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1467 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive and this follower's Strike abilities before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1466 (Aug. 8, 2025)",
+                "question": "Can I choose the order in which I resolve Single Drive and this follower's Strike abilities?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-017EN|Drive Point}",
+                "href": "/cards/?cardno=CSD03a-017EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e49360f47dfa539fd27dd24ebe9c9dc5f6cde61d18d9ea92281e815f54695ab9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-011EN",
+            "fetched_at": "2026-09-27T15:45:16.495183Z"
+          },
+          "document_ref": "documents-ea77f08ee02464f7"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-012EN",
+      "documents": {
+        "documents-75a3aa7bdcdab80c": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-012EN",
+            "faces": [
+              {
+                "name": "Future Knight, Llew",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} Discard a Vanguard card: Search your deck for a Blaster Blade, reveal it, add it to your hand, then shuffle.",
+                "sections": [
+                  "(If this card is revealed by a drive check, give a follower on your field {icon_power|[attack]}+2.)"
+                ],
+                "raw_text": "{icon_fanfare|[fanfare]} Discard a Vanguard card: Search your deck for a Blaster Blade, reveal it, add it to your hand, then shuffle.\n----------\n(If this card is revealed by a drive check, give a follower on your field {icon_power|[attack]}+2.)",
+                "speech": null,
+                "illustrator": "山崎太郎",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-012EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": [
+              {
+                "label": "{CSD03a-003EN|Blaster Blade}",
+                "href": "/cards/?cardno=CSD03a-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f37f4c8226219233a63f8850f2b24bf0e9535795e4af3f55ddc5edf703179a41",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-012EN",
+            "fetched_at": "2026-09-27T15:45:19.033913Z"
+          },
+          "document_ref": "documents-75a3aa7bdcdab80c"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-013EN",
+      "documents": {
+        "documents-7f1094b13c4ef31d": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-013EN",
+            "faces": [
+              {
+                "name": "Margal",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} Discard a Royal Paladin card: Draw a card.",
+                "sections": [
+                  "(If this card is revealed by a drive check, draw a card.)"
+                ],
+                "raw_text": "{icon_fanfare|[fanfare]} Discard a Royal Paladin card: Draw a card.\n----------\n(If this card is revealed by a drive check, draw a card.)",
+                "speech": null,
+                "illustrator": "田所哲平",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-013EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6783a49140f31c775e052a0afdb21a374ff1db939ac1c00c84db834f09ff27ba",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-013EN",
+            "fetched_at": "2026-09-27T15:45:21.881604Z"
+          },
+          "document_ref": "documents-7f1094b13c4ef31d"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-014EN",
+      "documents": {
+        "documents-bee0fde7f8f4a872": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-014EN",
+            "faces": [
+              {
+                "name": "Flogal",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "At the start of your end phase, refresh this card.",
+                "sections": [
+                  "(If this card is revealed by a drive check, refresh a follower on your field. For the rest of this turn, it can't attack enemy leaders.)"
+                ],
+                "raw_text": "At the start of your end phase, refresh this card.\n----------\n(If this card is revealed by a drive check, refresh a follower on your field. For the rest of this turn, it can't attack enemy leaders.)",
+                "speech": null,
+                "illustrator": "松島一夫",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-014EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:43ad9ec017798a8355d4a049731f2d4398af887f8a33b5132f49130547401b76",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-014EN",
+            "fetched_at": "2026-09-27T15:45:24.878052Z"
+          },
+          "document_ref": "documents-bee0fde7f8f4a872"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-015EN",
+      "documents": {
+        "documents-5ecac8a893d745be": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-015EN",
+            "faces": [
+              {
+                "name": "Yggdrasil Maiden, Elaine",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+2.",
+                "sections": [
+                  "(If this card is revealed by a drive check, give your leader {icon_hp|[defense]}+3.)"
+                ],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+2.\n----------\n(If this card is revealed by a drive check, give your leader {icon_hp|[defense]}+3.)",
+                "speech": null,
+                "illustrator": "武井宏之",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-015EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3b7416fc26b5f2f4ad84fd6c550afe447b5f85e4cb576a50057d1293755515a4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-015EN",
+            "fetched_at": "2026-09-27T15:45:27.719332Z"
+          },
+          "document_ref": "documents-5ecac8a893d745be"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-016EN",
+      "documents": {
+        "documents-15701e3a67d551f6": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-016EN",
+            "faces": [
+              {
+                "name": "Stardust Trumpeter",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Amulet",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Vanguard / Royal Paladin",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Starting Amulet.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select a Vanguard follower on your field and give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [
+                  "(At the start of the game, if your deck is based on the Cardfight!! Vanguard universe, put a card with Starting Amulet from your deck onto your field.)"
+                ],
+                "raw_text": "Starting Amulet.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select a Vanguard follower on your field and give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\n----------\n(At the start of the game, if your deck is based on the Cardfight!! Vanguard universe, put a card with Starting Amulet from your deck onto your field.)",
+                "speech": null,
+                "illustrator": "竜徹",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-016EN.png",
+                "trait_raw": "Vanguard / Royal Paladin",
+                "traits": [
+                  "Vanguard",
+                  "Royal Paladin"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a69ab41b971ff3db888d13514cd2b11b285b10e8b14114d8d310785aff7cbb29",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-016EN",
+            "fetched_at": "2026-09-27T15:45:30.515863Z"
+          },
+          "document_ref": "documents-15701e3a67d551f6"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-017EN",
+      "documents": {
+        "documents-ca68572f2f662eda": {
+          "region": "en",
+          "record": {
+            "number": "CSD03a-017EN",
+            "faces": [
+              {
+                "name": "Drive Point",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+                  "Card Type": "Spell / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "-",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "You can put up to 10 of this card into your evolve deck.",
+                "sections": [
+                  "(Followers with Drive have Rush and Single Drive.)"
+                ],
+                "raw_text": "You can put up to 10 of this card into your evolve deck.\n----------\n(Followers with Drive have Rush and Single Drive.)",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/CSD03a-017EN.png",
+                "trait_raw": "-",
+                "traits": []
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-895e798fc14681f6",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:54e693fc0c57afbdfae197c48d9f24283cf1c9c500da29ccecdbf28b62918087",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03a-017EN",
+            "fetched_at": "2026-09-27T15:45:32.837037Z"
+          },
+          "document_ref": "documents-ca68572f2f662eda"
+        }
+      ]
+    }
+  ]
+}

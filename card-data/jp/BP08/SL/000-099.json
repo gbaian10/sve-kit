@@ -1,0 +1,1377 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP08",
+  "range": "SL/000-099",
+  "products": {
+    "products-e9cd4c2fb84dc1cd": [
+      {
+        "name": "ブースターパック第8弾「次元混沌」",
+        "date": "2023-12-22",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP08",
+          "https://shadowverse-evolve.com/products/bp08/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP08-SL01",
+      "documents": {
+        "documents-06f5ba4717cf474e": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL01",
+            "faces": [
+              {
+                "name": "森の巫女・パメラ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊",
+                  "ダンサー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "7",
+                "power": "4",
+                "hp": "7",
+                "text": "【守護】\n自分のエンドフェイズが来たとき、自分の場の他のフォロワーすべては{攻撃力}+2/{体力}+2する。自分のリーダーは{体力}+4する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それをデッキの上に置く。（デッキに置いたトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "LM7",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl01.png",
+                "trait_raw": "精霊・ダンサー"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:34a974224aeb0a6b977bca40d0cb6d3bbe3a7e893aee902d2756e8f4b5526790",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL01",
+            "fetched_at": "2026-09-24T21:48:21.422682Z"
+          },
+          "document_ref": "documents-06f5ba4717cf474e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL02",
+      "documents": {
+        "documents-6fc6dab4940f06fd": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL02",
+            "faces": [
+              {
+                "name": "人形の少女・オーキス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "人形"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは『決意の人形・オーキス』に進化する。\n{進化}{コスト4}：これは『復讐の人形・オーキス』に進化する。この能力は自分の墓場の人形・カードが3枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl02.png",
+                "trait_raw": "人形"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:38052bfc451d7972cd906c72cf31cc437dd8b7d27c3462dede5350ac9110d031",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL02",
+            "fetched_at": "2026-09-24T21:48:23.287151Z"
+          },
+          "document_ref": "documents-6fc6dab4940f06fd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL03",
+      "documents": {
+        "documents-1d168ce5e3276dec": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL03",
+            "faces": [
+              {
+                "name": "決意の人形・オーキス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "人形",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "自分のターンごとに1回、自分の『操り人形』が場を離れたとき、『ロイド』1枚をEXエリアに置く。\n【進化時】『操り人形』2体を出す。",
+                "sections": [
+                  "『操り人形』{ニュートラル}人形・フォロワー{コスト1}{攻撃力}1/{体力}1【突進】\n『ロイド』{エルフ}人形・フォロワー{コスト0}{攻撃力}2/{体力}4これは場にいる限り、『操り人形』でもある。【守護】{ファンファーレ}自分のリーダーは{体力}+2する。"
+                ],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl03_front.png",
+                "trait_raw": "人形・光輝"
+              },
+              {
+                "name": "復讐の人形・オーキス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "人形",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": null,
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "これがいる限り、自分の場の『操り人形』すべては【指定攻撃】を持つ。\n自分の『操り人形』が場を離れたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n【進化時】『操り人形』4体を出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl03_back.png",
+                "trait_raw": "人形・キラー"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1254",
+                "date": "2024-03-08",
+                "question": "『真紅の絆・ポーラ』の【進化時】能力によって、自分の場の『決意の人形・オーキス』と『操り人形』をEXエリアに置いた場合、『決意の人形・オーキス』の「自分のターンごとに1回、自分の『操り人形』が場を離れたとき、『ロイド』1枚をEXエリアに置く。」という能力は誘発しますか？",
+                "answer": "はい。自分の場の『決意の人形・オーキス』と『操り人形』が同時に場を離れた場合も、自分のターンごとに1回誘発します。"
+              },
+              {
+                "id": "Q1057",
+                "date": "2023-12-15",
+                "question": "自分の場に『復讐の人形・オーキス』1体と『操り人形』1体がいる状況で、『操り人形』によって相手の場の『夢魔の新参』に攻撃した場合、『夢魔の新参』の《ラストワード》能力によって場に出た『フォレストバット』に対して、『復讐の人形・オーキス』の「自分の『操り人形』が場を離れたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに2ダメージ。」という能力によってダメージを与えることができますか？",
+                "answer": "いいえ。ダメージを与えることができません。\n『夢魔の新参』の《ラストワード》能力よりも先に『復讐の人形・オーキス』の能力を解決するので、相手の場に『フォレストバット』が出る前に目標を選んでダメージを与える必要があります。"
+              },
+              {
+                "id": "Q1056",
+                "date": "2023-12-15",
+                "question": "自分の場に『復讐の人形・オーキス』1体と『操り人形』1体がいる状況で、自分の場の『操り人形』を目標に選び、『自然の導き』をプレイした場合、『復讐の人形・オーキス』の「自分の『操り人形』が場を離れたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに2ダメージ。」という能力は誘発しますか？",
+                "answer": "はい。自分の『操り人形』が場を離れたので、誘発します。"
+              },
+              {
+                "id": "Q1055",
+                "date": "2023-12-15",
+                "question": "自分の場に『復讐の人形・オーキス』1体と『操り人形』4体がいる状況で、相手が『テミスの審判』をプレイした場合、『復讐の人形・オーキス』の「自分の『操り人形』が場を離れたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに2ダメージ。」という能力は4回誘発しますか？",
+                "answer": "はい。自分の『操り人形』4体が場を離れたので、『復讐の人形・オーキス』の能力が4回誘発します。"
+              },
+              {
+                "id": "Q1054",
+                "date": "2023-12-15",
+                "question": "自分の場に『決意の人形・オーキス』1体と『操り人形』2体がいる状況で、自分のエンドフェイズに相手がクイックで『エンジェルバレッジ』をプレイし、『操り人形』2体が墓場に置かれました。この場合、『決意の人形・オーキス』の「自分のターンごとに1回、自分の『操り人形』が場を離れたとき、『ロイド』1枚をEXエリアに置く。」という能力で、『ロイド』2枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。『ロイド』1枚をEXエリアに置きます。"
+              },
+              {
+                "id": "Q1053",
+                "date": "2023-12-15",
+                "question": "自分の場に『決意の人形・オーキス』1体と『操り人形』1体がいる状況で、自分の場の『操り人形』を目標に選び、『自然の導き』をプレイした場合、『決意の人形・オーキス』の「自分のターンごとに1回、自分の『操り人形』が場を離れたとき、『ロイド』1枚をEXエリアに置く。」という能力は誘発しますか？",
+                "answer": "はい。自分の『操り人形』が場を離れたので、自分のターンごとに1回誘発します。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL02"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:13fc2413ba8817af218a3fcf171367e04a3f8749c9b743a6e6575ff58a385879",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL03",
+            "fetched_at": "2026-09-24T21:48:25.759601Z"
+          },
+          "document_ref": "documents-1d168ce5e3276dec"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL04",
+      "documents": {
+        "documents-e8fd7ab04ab3cb7f": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL04",
+            "faces": [
+              {
+                "name": "白翼の戦神・アイテール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "自分のエンドフェイズが来たとき、自分の墓場の{ロイヤル}フォロワーが7枚以上なら、自分の場のフォロワーすべては{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分のデッキから指揮官・カードか兵士・カード1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl04.png",
+                "trait_raw": "指揮官・光輝"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c13a486b2681e83269f8f51f788c2cbf4667ff183c67940bb81c706626a622ab",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL04",
+            "fetched_at": "2026-09-24T21:48:28.795126Z"
+          },
+          "document_ref": "documents-e8fd7ab04ab3cb7f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL05",
+      "documents": {
+        "documents-df6d05eb159283a1": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL05",
+            "faces": [
+              {
+                "name": "舞い踊る刃・ディオネ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "ダンサー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト6}：これは進化する。\n【疾走】",
+                "sections": [],
+                "flavor": "乱世より逃れること叶わぬのなら、せめて美しく舞いましょう。\n我が剣技は花、薄桃色の香り。今、貴方の首が舞い落ちる。",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl05.png",
+                "trait_raw": "兵士・ダンサー"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2413017f8624de053d9898020eeca7166778a8e78d9b0915fbfd1f0833b03729",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL05",
+            "fetched_at": "2026-09-24T21:48:31.417008Z"
+          },
+          "document_ref": "documents-df6d05eb159283a1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL06",
+      "documents": {
+        "documents-0b3eaa08fdda21ae": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL06",
+            "faces": [
+              {
+                "name": "舞い踊る刃・ディオネ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士",
+                  "ダンサー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【疾走】\n【攻撃時】これをスタンドする。この能力は1ターンに2回働く。",
+                "sections": [],
+                "flavor": "殺人剣など無粋の極み。暗殺剣など笑止千万。\n私の剣技は乱世を彩る。舞い散る貴方も共に彩る。",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl06.png",
+                "trait_raw": "兵士・ダンサー"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:af3bed985ae763e617da71f0743848b3c7cb4ec1c26324f52359bcb9d8633702",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL06",
+            "fetched_at": "2026-09-24T21:48:34.158671Z"
+          },
+          "document_ref": "documents-0b3eaa08fdda21ae"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL07",
+      "documents": {
+        "documents-a93c447adc7e77fa": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL07",
+            "faces": [
+              {
+                "name": "スウィート★メドゥーサ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "ゴルゴーン"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n自分のターン中、相手のフォロワーが場から墓場に置かれたとき、『毒蛇』1体を出す。\n{ファンファーレ}自分のデッキから元のコスト2以下のカード1枚を探し、手札に加える。",
+                "sections": [
+                  "『毒蛇』{ナイトメア}魔界・フォロワー{コスト1}{攻撃力}0/{体力}1【必殺】"
+                ],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl07.png",
+                "trait_raw": "魔法使い・ゴルゴーン"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1072",
+                "date": "2023-12-15",
+                "question": "自分の場に『スウィート★メドゥーサ』が1体、相手の場に『フェアリー』が4体いる状況で、自分が『大紅蓮』をプレイして相手の場の『フェアリー』4体を破壊した場合、『スウィート★メドゥーサ』の「自分のターン中、相手のフォロワーが場から墓場に置かれたとき、『毒蛇』1体を出す。」という能力は4回誘発しますか？",
+                "answer": "はい。相手の場の『フェアリー』4体が墓場に置かれたので、『スウィート★メドゥーサ』の能力が4回誘発し、自分の場に『毒蛇』が4体出ます。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL08"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8a7f3b9ea84f69d7a2aee21baef477edbae01c8b1ea3a6de0f3022b2ab4d282b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL07",
+            "fetched_at": "2026-09-24T21:48:36.532350Z"
+          },
+          "document_ref": "documents-a93c447adc7e77fa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL08",
+      "documents": {
+        "documents-bc5e0885e4feabeb": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL08",
+            "faces": [
+              {
+                "name": "スウィート★メドゥーサ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "ゴルゴーン"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "自分のターン中、相手のフォロワーが場から墓場に置かれたとき、『毒蛇』1体を出す。\n【進化時】相手の場のフォロワー2体まで選ぶ。それに5ダメージを割りふる。\n{Q}{起動}場の『毒蛇』2体を墓場に置く：このターン、次に自分がカードをプレイする際、コストを-2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl08.png",
+                "trait_raw": "魔法使い・ゴルゴーン"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1073",
+                "date": "2023-12-15",
+                "question": "自分がカードをプレイすることなく、このフォロワーの《起動》能力を2回プレイした場合、そのターン中に次に自分がプレイするカードのコストは-4されますか？",
+                "answer": "はい。-4されます。"
+              },
+              {
+                "id": "Q1072",
+                "date": "2023-12-15",
+                "question": "自分の場に『スウィート★メドゥーサ』が1体、相手の場に『フェアリー』が4体いる状況で、自分が『大紅蓮』をプレイして相手の場の『フェアリー』4体を破壊した場合、『スウィート★メドゥーサ』の「自分のターン中、相手のフォロワーが場から墓場に置かれたとき、『毒蛇』1体を出す。」という能力は4回誘発しますか？",
+                "answer": "はい。相手の場の『フェアリー』4体が墓場に置かれたので、『スウィート★メドゥーサ』の能力が4回誘発し、自分の場に『毒蛇』が4体出ます。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL07"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cc8900b8c30736e2d26feaed92665e993f2e94dafdf253e40f3504a4300a71e9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL08",
+            "fetched_at": "2026-09-24T21:48:39.518937Z"
+          },
+          "document_ref": "documents-bc5e0885e4feabeb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL09",
+      "documents": {
+        "documents-df2219f9563efdd1": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL09",
+            "faces": [
+              {
+                "name": "開闢の予言者",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "10",
+                "power": "10",
+                "hp": "10",
+                "text": "これをプレイする際、墓場の元のコスト1、2、3、4、5、6、7、8、9、10のカードを1枚ずつ消滅：コストを-10する。\n【守護】【オーラ】\nこれは能力によって破壊されない。（交戦か能力によるダメージでは破壊される）\n{起動}手札のこれを捨てる：1枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl09.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1075",
+                "date": "2023-12-15",
+                "question": "「《起動》手札のこれを捨てる：1枚引く。自分の手札1枚を捨てる。」という《起動》能力は、『開闢の予言者』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。手札にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1074",
+                "date": "2023-12-15",
+                "question": "「これは能力によって破壊されない。」という能力を持つ『開闢の予言者』に対して、『仁義の悪魔・ユヅキ』などが持つ能力の効果にある「墓場に置く」が適用された場合、墓場に置きますか？",
+                "answer": "はい。墓場に置きます。\n「墓場に置く」という処理は能力による破壊ではないので、『開闢の予言者』の「これは能力によって破壊されない。」という能力は働きません。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:62e71f2d0dd91af88bedf13d8cbadad836ceebcb2501f41139adb7a61ca16d83",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL09",
+            "fetched_at": "2026-09-24T21:48:42.258734Z"
+          },
+          "document_ref": "documents-df2219f9563efdd1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL10",
+      "documents": {
+        "documents-3983176b94c06d73": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL10",
+            "faces": [
+              {
+                "name": "憤怒の竜帝・乙姫",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "海洋"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "4",
+                "text": "自分のターン中、自分の他の{ドラゴン}フォロワーが場から墓場に置かれたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに1ダメージ。\n{ファンファーレ}『竜帝の近衛兵』1体を出す。【覚醒】状態なら、代わりに3体。",
+                "sections": [
+                  "『竜帝の近衛兵』{ドラゴン}海洋・フォロワー{コスト1}{攻撃力}2/{体力}1【突進】"
+                ],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl10.png",
+                "trait_raw": "ドラゴニュート・海洋"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1084",
+                "date": "2023-12-15",
+                "question": "自分の場に『憤怒の竜帝・乙姫』1体と『竜帝の近衛兵』が4体いる状況で、自分が『灼熱の嵐』をプレイした場合、『憤怒の竜帝・乙姫』の「自分のターン中、自分の他の《ドラゴン》フォロワーが場から墓場に置かれたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに1ダメージ。」という能力は4回誘発しますか？",
+                "answer": "はい。自分の他の《ドラゴン》フォロワー4体が場から墓場に置かれたので、『憤怒の竜帝・乙姫』の能力が4回誘発します。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a2681162ab92cf65ed6e565b676748fd82bff4bc2aba10abfbc4a08f7d1ba123",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL10",
+            "fetched_at": "2026-09-24T21:48:44.832892Z"
+          },
+          "document_ref": "documents-3983176b94c06d73"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL11",
+      "documents": {
+        "documents-39a354c43629eb05": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL11",
+            "faces": [
+              {
+                "name": "アジ・ダハーカ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "6",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}エボルヴデッキの裏向きのエボルヴフォロワー3枚を表向きにする：相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl11.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1085",
+                "date": "2023-12-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力のコストとして、自分のエボルヴデッキの裏向きのエボルヴフォロワー3枚を表向きにすることはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができず、コストの支払いを行うことができません。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:17300a9b6ea109865113621cdd1bad6c16fb1cc9bd1573020e65c66cfd27b2cb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL11",
+            "fetched_at": "2026-09-24T21:48:47.664805Z"
+          },
+          "document_ref": "documents-39a354c43629eb05"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL12",
+      "documents": {
+        "documents-90431346eb175493": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL12",
+            "faces": [
+              {
+                "name": "アジ・ダハーカ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "-",
+                "power": "7",
+                "hp": "8",
+                "text": "【疾走】\n【攻撃時】自分のエボルヴデッキの表向きのエボルヴフォロワーが5枚以上なら、自分のリーダーは{体力}+3する。自分のエボルヴデッキの表向きのエボルヴフォロワーが8枚以上なら、相手のリーダーすべてに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl12.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1086",
+                "date": "2023-12-15",
+                "question": "このフォロワーが攻撃したとき、自分のエボルヴデッキの表向きのエボルヴフォロワーが8枚だった場合、「自分のリーダーは《体力》+3する。」と「相手のリーダーすべてに3ダメージ。」は両方とも処理を行いますか？",
+                "answer": "はい。両方とも処理を行います。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3389ecfb7a4b4929ff03ba8c3dd07d4b0aeb7def1af5dea20d334556b662026d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL12",
+            "fetched_at": "2026-09-24T21:48:50.212770Z"
+          },
+          "document_ref": "documents-90431346eb175493"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL13",
+      "documents": {
+        "documents-73582625cb4b174b": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL13",
+            "faces": [
+              {
+                "name": "真紅のローズクイーン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}『薔薇の一撃』1枚をEXエリアに置く。",
+                "sections": [
+                  "『薔薇の一撃』{エルフ}植物族・スペル{コスト2}相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに3ダメージ。1枚引く。"
+                ],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl13.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5acce8f26915656478b9eb869e9906078574e86e2ad5e2f75eeb5277048e1731",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL13",
+            "fetched_at": "2026-09-24T21:48:52.891712Z"
+          },
+          "document_ref": "documents-73582625cb4b174b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL14",
+      "documents": {
+        "documents-c182c5ff16d19247": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL14",
+            "faces": [
+              {
+                "name": "真紅のローズクイーン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "自分が元のコスト2のカードをプレイしたとき、下記から1つチョイスする。【1】相手の場のフォロワーすべてに2ダメージ。自分のリーダーは{体力}+2する。【2】相手のリーダーすべてに2ダメージ。\n【進化時】自分の手札を公開する。自分のPPを「これによって公開した元のコスト2のカードの枚数」と同じだけ回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl14.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2053",
+                "date": "2025-05-30",
+                "question": "自分の墓場のカードが10枚で、自分の場に『真紅のローズクイーン』がいる状況で、『絶叫の拡散』をプレイした場合、『真紅のローズクイーン』の「自分が元のコスト2のカードをプレイしたとき、～」という能力は3回誘発しますか？",
+                "answer": "いいえ。1回誘発します。\n『真紅のローズクイーン』の「自分が元のコスト2のカードをプレイしたとき、～」という能力は元のコスト2のカードをプレイしたときのみ誘発します。"
+              },
+              {
+                "id": "Q1099",
+                "date": "2023-12-15",
+                "question": "『真紅のローズクイーン』の【進化時】能力は、公開する手札の枚数を選択することができますか？",
+                "answer": "いいえ。公開する手札の枚数を選択することはできません。\n自分の手札すべてを公開する必要があります。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4cb5f71ba332f458fd2f7113550b5dca95c735bcc090c3248651e5d0bc2149f8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL14",
+            "fetched_at": "2026-09-24T21:48:55.545881Z"
+          },
+          "document_ref": "documents-c182c5ff16d19247"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL15",
+      "documents": {
+        "documents-9b6d896be7ada7f9": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL15",
+            "faces": [
+              {
+                "name": "ネフティス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者",
+                  "死霊術師"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "7",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のデッキの上7枚を見る。その中から、元のコスト6以下の{ナイトメア}フォロワーをカード名が異なるように4枚まで場に出してよい。残りを好きな順にデッキの下に置く。これによって場に出したフォロワーすべてを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl15.png",
+                "trait_raw": "死者・死霊術師"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1104",
+                "date": "2023-12-15",
+                "question": "相手の場に『デュエリスト・モルディカイ』1体がいる状況で、自分が『ネフティス』をプレイし、『ネフティス』の《ファンファーレ》能力によって、『冥守の戦士・カムラ』と『仁義の悪魔・ユヅキ』を場に出して破壊しました。自分の『冥守の戦士・カムラ』の《ラストワード》能力によって、相手の『デュエリスト・モルディカイ』を破壊した場合、『デュエリスト・モルディカイ』の《ラストワード》能力で場に出た『デュエリスト・モルディカイ』を『仁義の悪魔・ユヅキ』の《ファンファーレ》能力で墓場に置くことができますか？",
+                "answer": "いいえ。墓場に置くことができません。\n以下、詳細です。\nまず、『ネフティス』の《ファンファーレ》能力によって、誘発して待機状態になった能力は任意の順番で解決することができます。『冥守の戦士・カムラ』の《ラストワード》能力を先に解決し、相手の場の『デュエリスト・モルディカイ』を破壊した場合、『デュエリスト・モルディカイ』の《ラストワード》能力が誘発して待機状態になります。待機状態になっている自動能力はターンプレイヤーから先に解決するため、相手が『デュエリスト・モルディカイ』の《ラストワード》能力を解決する前に自分が『仁義の悪魔・ユヅキ』の《ファンファーレ》能力を解決する必要があります。この時点で相手の場に『デュエリスト・モルディカイ』はいないので、『仁義の悪魔・ユヅキ』の《ファンファーレ》能力で墓場に置くことができません。『仁義の悪魔・ユヅキ』の《ファンファーレ》能力の処理が終わった後に、相手が『デュエリスト・モルディカイ』の《ラストワード》能力を解決します。"
+              },
+              {
+                "id": "Q1103",
+                "date": "2023-12-15",
+                "question": "『ネフティス』の《ファンファーレ》能力によって、『欲望の使徒』1体と魔界・フォロワー3体を場に出して破壊した場合、『欲望の使徒』の「自分の場に他の魔界・フォロワーが出たとき、自分のリーダーは《体力》+1する。」という能力によって、自分のリーダーの体力を+3することができますか？",
+                "answer": "はい。『欲望の使徒』の能力が3回誘発し、自分のリーダーの体力を+3することができます。"
+              },
+              {
+                "id": "Q1102",
+                "date": "2023-12-15",
+                "question": "『ネフティス』の《ファンファーレ》能力によって、『ハウリングデーモン』と『デュエリスト・モルディカイ』を場に出して破壊しました。『デュエリスト・モルディカイ』の《ラストワード》能力を先に解決し、コストとして自分のリーダーの体力を-3した場合、『ハウリングデーモン』の《ファンファーレ》能力にある「【真紅】状態なら、」の条件を満たしますか？",
+                "answer": "はい。満たします。\n『ネフティス』の《ファンファーレ》能力によって、誘発して待機状態になった能力は任意の順番で解決することができます。『デュエリスト・モルディカイ』の《ラストワード》能力を先に解決し、自分のリーダーの体力を-3することで、『ハウリングデーモン』の《ファンファーレ》能力を解決するタイミングで【真紅】状態になっているため、「【真紅】状態なら、」の条件を満たすことができます。"
+              },
+              {
+                "id": "Q1101",
+                "date": "2023-12-15",
+                "question": "自分の墓場が6枚の状況で、『ネフティス』の《ファンファーレ》能力によって、『沈黙の絶傑・ルルナイ』を含む4体を場に出して破壊した場合、『沈黙の絶傑・ルルナイ』の《ファンファーレ》能力にある【ネクロチャージ_10】の条件を満たしますか？",
+                "answer": "はい。満たします。\nまず、『ネフティス』の《ファンファーレ》能力の解決を行い、その後、誘発して待機状態になった能力を解決します。『沈黙の絶傑・ルルナイ』の《ファンファーレ》能力を解決するタイミングで自分の墓場が10枚以上あるため、【ネクロチャージ_10】の条件を満たすことができます。"
+              },
+              {
+                "id": "Q1100",
+                "date": "2023-12-15",
+                "question": "『ネフティス』の《ファンファーレ》能力によって、《ファンファーレ》能力や《ラストワード》能力などの誘発する能力を持っているフォロワーを複数体場に出して破壊した場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\nまず『ネフティス』の《ファンファーレ》能力の解決を行います。その後、場に出て破壊されたフォロワーの《ファンファーレ》能力や《ラストワード》能力などの誘発条件を満たし待機状態となった能力の中からどれを先に解決するか選択することができます。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cd6c3f18889db514ce47144c623e30e777ec04e4c3290de709470f1df760fbae",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL15",
+            "fetched_at": "2026-09-24T21:48:58.316262Z"
+          },
+          "document_ref": "documents-9b6d896be7ada7f9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL16",
+      "documents": {
+        "documents-134f8aeaee132f2b": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL16",
+            "faces": [
+              {
+                "name": "聖騎士・ヘクター",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "先導",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "7",
+                "power": "5",
+                "hp": "6",
+                "text": "【守護】\nこれがいる限り、自分の場の{ビショップ}フォロワーすべては【突進】を持つ。\n{ファンファーレ}自分の墓場の元のコスト2以下の{ビショップ}フォロワー2枚まで選ぶ。それを場に出す。\n{起動}墓場の{ビショップ}フォロワー3枚を消滅：自分の場の他のフォロワーすべては{攻撃力}+1/{体力}+1する。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl16.png",
+                "trait_raw": "信仰・先導・光輝"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1119",
+                "date": "2023-12-15",
+                "question": "自分の場にこのフォロワーがあり、自分が相手のフォロワーを奪ったとき、奪ったフォロワーが《ビショップ》フォロワーの場合、そのフォロワーは【突進】を持ちますか？",
+                "answer": "はい。【突進】を持ちます。"
+              },
+              {
+                "id": "Q1118",
+                "date": "2023-12-15",
+                "question": "このフォロワーの能力によって、このフォロワー自身も【突進】を持ちますか？",
+                "answer": "はい。【突進】を持ちます。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0ee09c0b92605c07f5bff5c607df70d9d308ec11e22367b44763022443a8377b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL16",
+            "fetched_at": "2026-09-24T21:49:01.276081Z"
+          },
+          "document_ref": "documents-134f8aeaee132f2b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL17",
+      "documents": {
+        "documents-3eb836272ad6f528": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL17",
+            "faces": [
+              {
+                "name": "神の盾・ブローディア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "7",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}自分のリーダーは{体力}+Xする。Xは「自分の場のアミュレットの数の2倍」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl17.png",
+                "trait_raw": "信仰・光輝"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:65f56716deb019b815f0659050d3f1965d68d954d944e56172ac3244ba9be834",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL17",
+            "fetched_at": "2026-09-24T21:49:04.069825Z"
+          },
+          "document_ref": "documents-3eb836272ad6f528"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL18",
+      "documents": {
+        "documents-b5d7d58c4cef45b4": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL18",
+            "faces": [
+              {
+                "name": "神の盾・ブローディア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】相手の場のフォロワー1体を選ぶ。それとそれのリーダーに「自分の場のアミュレットの数」の2倍のダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl18.png",
+                "trait_raw": "信仰・光輝"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1120",
+                "date": "2023-12-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力によって、相手のリーダーにダメージを与えることができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができないので、この能力をプレイすることができず、相手のリーダーにダメージを与えることができません。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6e3cac05b2814f58807bf4d10f9c4a834001ae54d16a75c7a9dd917ddeb971db",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL18",
+            "fetched_at": "2026-09-24T21:49:07.103138Z"
+          },
+          "document_ref": "documents-b5d7d58c4cef45b4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL19",
+      "documents": {
+        "documents-66f45de137440f0b": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL19",
+            "faces": [
+              {
+                "name": "異界を統べる者",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "大神"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}好きな数1つを指定する。自分のデッキの上5枚を墓場に置く。相手の場のフォロワーすべてにXダメージ。Xは「これによって墓場に置いた元のコストが指定した数と同じカードの枚数」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl19.png",
+                "trait_raw": "大神"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL20"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5780a802440338cb8d9c9a46f59684b0eb6314321e9a9d9e560397897ca7ab3c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL19",
+            "fetched_at": "2026-09-24T21:49:09.859272Z"
+          },
+          "document_ref": "documents-66f45de137440f0b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL20",
+      "documents": {
+        "documents-16b6462965c82e52": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL20",
+            "faces": [
+              {
+                "name": "異界を統べる者",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "大神"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "【進化時】自分の墓場のカードをカード名が異なるように3枚選ぶ。それの元のコストがすべて同じなら、それを手札に加える。",
+                "sections": [],
+                "flavor": "今や冥界は天の上、今や天界は地の果てに。\n知っているか、あの、かの、それが、全てを変えた。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl20.png",
+                "trait_raw": "大神"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1131",
+                "date": "2023-12-15",
+                "question": "『異界を統べる者（EVOLVE）』の【進化時】能力は、『式神の使役』と『こよの大発明』のようにコラボ名を持つ同名カードを選ぶことができますか？",
+                "answer": "いいえ。選ぶことができません。"
+              },
+              {
+                "id": "Q1130",
+                "date": "2023-12-15",
+                "question": "『異界を統べる者（EVOLVE）』の【進化時】能力によって、元のコスト1のカード2枚と元のコスト2のカード1枚をカード名が異なるように選んだ場合、元のコスト1のカード2枚を手札に加えることができますか？",
+                "answer": "いいえ。【進化時】能力によって選んだ3枚のカードの元のコストがすべて同じ場合のみ手札に加えることができます。"
+              },
+              {
+                "id": "Q1129",
+                "date": "2023-12-15",
+                "question": "自分の墓場が2枚以下の場合、『異界を統べる者（EVOLVE）』の【進化時】能力をプレイすることができますか？",
+                "answer": "いいえ。自分の墓場のカードをカード名が異なるように3枚選ぶことができない場合、『異界を統べる者（EVOLVE）』の【進化時】能力をプレイすることができません。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-SL19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:45b84f87aa0343bda293328bf7dd59cbcc1f576554dfd539697a984969ff910b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL20",
+            "fetched_at": "2026-09-24T21:49:12.526590Z"
+          },
+          "document_ref": "documents-16b6462965c82e52"
+        }
+      ]
+    },
+    {
+      "card_no": "BP08-SL21",
+      "documents": {
+        "documents-4e0591c060b57ccd": {
+          "region": "jp",
+          "record": {
+            "number": "BP08-SL21",
+            "faces": [
+              {
+                "name": "断罪者・シルヴィア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第8弾「次元混沌」",
+                "title": null,
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それを破壊する。それのリーダーに5ダメージ。\n{起動}{コスト2}手札のこれを捨てる：元のコスト5以上の相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP08/bp08-sl21.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2023-12-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1133",
+                "date": "2023-12-15",
+                "question": "エボルヴフォロワーの元のコストの値は、進化前のカードの元のコストの値ですか？",
+                "answer": "はい。進化前のカードの元のコストの値です。"
+              },
+              {
+                "id": "Q1132",
+                "date": "2023-12-15",
+                "question": "「《起動》《コスト2》手札のこれを捨てる：元のコスト5以上の相手の場のフォロワー1体を選ぶ。それを破壊する。」という《起動》能力は、『断罪者・シルヴィア』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-e9cd4c2fb84dc1cd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:33171dcb60bbc787c13da9e759346e994654244c7ea8689645a1ae5b79effc90",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL21",
+            "fetched_at": "2026-09-24T21:49:15.345628Z"
+          },
+          "document_ref": "documents-4e0591c060b57ccd"
+        }
+      ]
+    }
+  ]
+}

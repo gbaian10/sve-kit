@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "PCS01",
+  "range": "unnumbered",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-077a6dd1caf1cd95": [
+        {
+          "ordinal": 0,
+          "name": "プレミアムカードセット「プリンセスコネクト！Re:Dive」",
+          "date_raw": "2026-01-30",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=PCS01",
+            "https://shadowverse-evolve.com/products/pcs01/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=PCS01",
+            "https://shadowverse-evolve.com/products/pcs01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/pcs01/",
+              "expansion_code": "PCS01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:51740912a40750336bce5f2e1c3503a407eb2970554fa11a743aff374a74a4fe": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:277eac15d33a0fe1fb23cc6518f2ab9940ac5aa2d29f7d7cd49cc64421a285e2",
+        "raw_bytes": 36842,
+        "first_receipt_id": "sha256:51bbe77849de9f7b061613afc946ca8b11cd2db75120ab6c742597a3f866043f",
+        "descriptor_sha256": "sha256:922b78cb7909c1087f0c2d54d708aed855ff4378afa8ef05d931e103a31c0e49",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:2f5f4d9d8dba51a7298108a07b993252245ca4c8b4523a08290bec313afc5bb0"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-077a6dd1caf1cd95",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5b33519bcc30fbc064ff9117b2972c9a3cdd0d09c189f66654d63f3650302be6"
+    }
+  }
+}

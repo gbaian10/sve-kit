@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD03a",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-6339ac6e9cec98ac": [
+        {
+          "ordinal": 0,
+          "name": "Crossover Starter Deck \"Sanctuary Knight Brigade\"",
+          "date_raw": "Aug. 15, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=CSD03A",
+            "https://en.shadowverse-evolve.com/products/csd03/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=CSD03A",
+            "https://en.shadowverse-evolve.com/products/csd03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/csd03/",
+              "expansion_code": "CSD03A"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:21dc2a75420c0a4c056b343d97a7e89b9516822a375317c68a6f115d726b2fc0": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:ab4ca63629214ecd746335c908be1005e55020314efa4378c810a9e990562251",
+        "raw_bytes": 35447,
+        "first_receipt_id": "sha256:11c2e0494e4122cf3931295683e2957ceb95f0179e7b34adeb38758e9bfad297",
+        "descriptor_sha256": "sha256:fc461ff2f3ce340203a1a571980aca42c5ce59e483736f9837a99fa24e5a7fd2",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:0459504c64bf97e4498252ad96c14c16057eddd5f763417a4d187af1afaafd71"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-6339ac6e9cec98ac",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:22c60c5634c5f7a26386663c0506979b81680cdeb9729b651483b6a29e825b8c"
+    }
+  }
+}

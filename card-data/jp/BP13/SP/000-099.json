@@ -1,0 +1,153 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP13",
+  "range": "SP/000-099",
+  "products": {
+    "products-c15cb00f9e27c3da": [
+      {
+        "name": "ブースターパック第13弾「暗黒降誕」",
+        "date": "2024-12-13",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP13",
+          "https://shadowverse-evolve.com/products/bp13/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP13-SP01",
+      "documents": {
+        "documents-29a2ded5782c3721": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SP01",
+            "faces": [
+              {
+                "name": "九火石炎・セッカ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "荒野",
+                  "狩人",
+                  "獣"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】自分のデッキから『九尾の決意』1枚を探し、手札に加える。【2】自分の墓場の『九尾の決意』1枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sp01.png",
+                "trait_raw": "荒野・狩人・獣"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1722",
+                "date": "2024-12-13",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              },
+              {
+                "id": "Q1721",
+                "date": "2024-12-13",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1720",
+                "date": "2024-12-13",
+                "question": "自分の墓場の『九尾の決意』を選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【2】をチョイスすることができず、【1】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-001"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-008"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7f0a243ac5817d94183c314e582d8338ce4b2d4a3b7b39183f88782f7767ce8e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SP01",
+            "fetched_at": "2026-09-24T20:38:52.078781Z"
+          },
+          "document_ref": "documents-29a2ded5782c3721"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SP02",
+      "documents": {
+        "documents-b5f20ac9084cc3c2": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SP02",
+            "faces": [
+              {
+                "name": "ジャンヌダルク",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}相手の場のフォロワーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sp02.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-128"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f97260855203b1b93e12c6a25e146c920901aacbf7089a4f9a94467945b4d86e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SP02",
+            "fetched_at": "2026-09-24T20:38:55.091539Z"
+          },
+          "document_ref": "documents-b5f20ac9084cc3c2"
+        }
+      ]
+    }
+  ]
+}

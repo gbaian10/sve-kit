@@ -1,0 +1,239 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01a",
+  "range": "SL/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-5907c1bc0c53213a": [
+        {
+          "ordinal": 0,
+          "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+          "date_raw": "2024-04-19",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=DSD01",
+            "https://shadowverse-evolve.com/products/dsd01/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=DSD01",
+            "https://shadowverse-evolve.com/products/dsd01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/dsd01/",
+              "expansion_code": "DSD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-06a048d6f00295c8": [
+        {
+          "stable_source_key": "Q2778",
+          "official_number": "Q2778",
+          "locator": "qa-block:0",
+          "published_on": "2026-07-27",
+          "date_raw": "2026-07-27"
+        },
+        {
+          "stable_source_key": "Q1239",
+          "official_number": "Q1239",
+          "locator": "qa-block:1",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1238",
+          "official_number": "Q1238",
+          "locator": "qa-block:2",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1237",
+          "official_number": "Q1237",
+          "locator": "qa-block:3",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1236",
+          "official_number": "Q1236",
+          "locator": "qa-block:4",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        }
+      ],
+      "qa-4c8694213876d3bd": [
+        {
+          "stable_source_key": "Q1235",
+          "official_number": "Q1235",
+          "locator": "qa-block:0",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1234",
+          "official_number": "Q1234",
+          "locator": "qa-block:1",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        },
+        {
+          "stable_source_key": "Q1233",
+          "official_number": "Q1233",
+          "locator": "qa-block:2",
+          "published_on": "2024-03-01",
+          "date_raw": "2024-03-01"
+        }
+      ],
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-b5da814e5ad17403": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=DSD01a-SL03"
+        }
+      ],
+      "related-cce5fe1a076f4d9d": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=DSD01a-P03"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=DSD01a-SL02"
+        }
+      ],
+      "related-d8ad23dc1c98c5c7": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=DSD01a-P02"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=DSD01a-SL02"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:9a453b920accc00bd84f3b2747c1f83b4c4f85c1f820e691a9e5774f1aa13b5c": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:5c005d0ae7a202dbd056be1859212a4adfd98760907b8b4376dc0ce132f6af6d",
+        "raw_bytes": 41139,
+        "first_receipt_id": "sha256:1ff6b181616b97f53bac9b828b4eb8b99f3b8384fe74c48725620cd8fc318e2b",
+        "descriptor_sha256": "sha256:2fc8ec32042af20f317fe49ee2542cb4db77dfe75deff88524021d56dd9273fc",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:685a5658a6f1b503f0723d4e1fca179c699c319abb1711d67c4e217bd33ac7d0"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5907c1bc0c53213a",
+        "qa": "qa-06a048d6f00295c8",
+        "related": "related-cce5fe1a076f4d9d",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:d80d3a9a5d57bc57eea2de70879bf652aee5375ae83861ba4bf416cffb6b8cf2"
+    },
+    "src:v1:a24b74ac12dc45ecfec6fb90c78d1422aacc41a8c9b37ffbdceda29b7c13e2b4": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:9a23bb0907a56f817078489527532e95734aaf641e93c1c4d79416a7645d9140",
+        "raw_bytes": 39892,
+        "first_receipt_id": "sha256:ebd9b7c9bf60578e98bd083e4648d64f710257721e54dcbf50496383de20d708",
+        "descriptor_sha256": "sha256:5df48e280fd212bf3a9be489d9e43509a236b3c492008534f9c5cf770a9eb93e",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:732cdf2928ccf2157bd85161baffdb1e9dd4c74de99037e6fe4de7dd515de3f1"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5907c1bc0c53213a",
+        "qa": "qa-4c8694213876d3bd",
+        "related": "related-d8ad23dc1c98c5c7",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:c0fcdc952bafb88378861c2208d6b0597c13cf098171cd9d3f00aa718f20b9c0"
+    },
+    "src:v1:e2273f732258fa1536a7fb421b9894e1f447bbc33fd2ad78129230291fb982e5": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:c3cd7b3263c09073359b270d5b7fdfa37083a90ccb18e28a806852e5cbae9440",
+        "raw_bytes": 37735,
+        "first_receipt_id": "sha256:d93e87dd5714fa3b6ff8fc7c7ec6b6ac556d5d7a2a1f58eda84cf4467001fb99",
+        "descriptor_sha256": "sha256:504f2899690030343d6fdf979871edef981eff51da2088179b5bad49a8c43dc6",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:60529963498e669c8922fa30a5acc99d34bfec15c33a38cc7d2b2dfebc5fe44c"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5907c1bc0c53213a",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-b5da814e5ad17403",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:ba22476083a2546dee94904cc06cded11a5248979c378fb66bb6d8fe8ddbec7f"
+    }
+  }
+}

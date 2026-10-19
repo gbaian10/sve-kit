@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "GFB01d",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-1d642a9739d425da": [
+        {
+          "ordinal": 0,
+          "name": "Gloryfinder Bundle #1 “Guide to Glory”",
+          "date_raw": "Jul. 19, 2024",
+          "href_raw": [
+            "/cards/searchresults?expansion=GFB01",
+            "https://en.shadowverse-evolve.com/products/gfb01/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFB01",
+            "https://en.shadowverse-evolve.com/products/gfb01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/gfb01/",
+              "expansion_code": "GFB01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:bd97977dcbddc359a999c67d55e6c80b3a9bba4684d54ecf779aa2adfe204ced": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:800eb2d18baf81539a8d298c17cc062f7e3fc51ce5bf9b656e8b576465069cc3",
+        "raw_bytes": 35306,
+        "first_receipt_id": "sha256:ca6b406b4d41febf6eab9bfe0ae3cecfa6876a3d95ee036f1572be1240fe5d8d",
+        "descriptor_sha256": "sha256:c99c765fb73bbe8f8a88ad1d545d25d07132df9d692a12ee6534520434fc82cf",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:9e9e86a1b20d18565a909a111d0b5874b09b17b9d3d67f16c7f223a519dc0572"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1d642a9739d425da",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:543a799f083b32201b7ae63c9d36bd245f280d3589d8bf0ca784a9f624c66fd4"
+    }
+  }
+}

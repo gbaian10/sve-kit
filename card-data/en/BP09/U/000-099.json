@@ -1,0 +1,473 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP09",
+  "range": "U/000-099",
+  "products": {
+    "products-8899aab5d23ecaa7": [
+      {
+        "name": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+        "date": "Apr. 11, 2025",
+        "links": [
+          "/cards/searchresults?expansion=BP09",
+          "https://en.shadowverse-evolve.com/products/bp09/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP09-U01EN",
+      "documents": {
+        "documents-c4f0a12115ad7b2a": {
+          "region": "en",
+          "record": {
+            "number": "BP09-U01EN",
+            "faces": [
+              {
+                "name": "Yggdrasil",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Fae-Touched / Verdant"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for a {icon_elf|[forestcraft]} spell, reveal it, add it to your hand, then shuffle your deck.\n{icon_act|[act]} {icon_cost01|[cost01]}: Select a {icon_elf|[forestcraft]} spell that costs X or less in your cemetery and put it into your EX area. It costs 0 to play this turn. X equals the number of {icon_elf|[forestcraft]} spells with different names in your cemetery. Activate only once per turn.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for a {icon_elf|[forestcraft]} spell, reveal it, add it to your hand, then shuffle your deck.\n{icon_act|[act]} {icon_cost01|[cost01]}: Select a {icon_elf|[forestcraft]} spell that costs X or less in your cemetery and put it into your EX area. It costs 0 to play this turn. X equals the number of {icon_elf|[forestcraft]} spells with different names in your cemetery. Activate only once per turn.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-U01EN.png",
+                "trait_raw": "Fae-Touched / Verdant",
+                "traits": [
+                  "Fae-Touched",
+                  "Verdant"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1f195cbd0673f9adcd2aee18814378952e57d27ec0c9c339348ab12934fdd751",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-U01EN",
+            "fetched_at": "2026-09-27T16:24:30.327952Z"
+          },
+          "document_ref": "documents-c4f0a12115ad7b2a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U02EN",
+      "documents": {
+        "documents-ebbf2f847fdf1a8a": {
+          "region": "en",
+          "record": {
+            "number": "BP09-U02EN",
+            "faces": [
+              {
+                "name": "Spartacus",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Commander"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "6",
+                  "power": "4"
+                },
+                "text": "Ward.\nAt the start of your end phase, discard any number of cards and draw that many cards plus 1. Then, if there's 1 card or less in your deck, you win the game.",
+                "sections": [],
+                "raw_text": "Ward.\nAt the start of your end phase, discard any number of cards and draw that many cards plus 1. Then, if there's 1 card or less in your deck, you win the game.",
+                "speech": null,
+                "illustrator": "Ryosuke Aiba (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-U02EN.png",
+                "trait_raw": "Commander",
+                "traits": [
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1147 (Apr. 4, 2025)",
+                "question": "My opponent has Ancient Protector on their field, and I have Spartacus. While resolving this follower's \"at the start of your end phase\" ability, I draw enough cards that my deck is down to a single card. Do I then win the game?",
+                "answer": "No, the game goes on. When one effect instructs a player to perform an action (\"win the game\") that is prohibited by another active effect (\"you can't lose the game, and opponents can't win\"), the prohibiting effect takes precedence."
+              },
+              {
+                "title": "Q1146 (Apr. 4, 2025)",
+                "question": "If my deck is empty when playing this follower's \"at the start of your end phase\" ability, do I lose the game?",
+                "answer": "No, you win. After discarding any number of cards, you draw that many plus 1. Drawing cards from an empty deck means you will lose the game at the next confirmation timing. However, you finish resolving this ability first, and since there's 1 card or less in your deck, you win the game immediately."
+              },
+              {
+                "title": "Q1145 (Apr. 4, 2025)",
+                "question": "Can I choose not to discard any cards when playing this follower's \"at the start of your end phase\" ability?",
+                "answer": "Yes. \"Any number\" includes 0. If you choose not to discard any cards, you draw one card."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:19dcb024bac6aaf583e307a637917e8319873dffbc24ce4986b370c9da359242",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-U02EN",
+            "fetched_at": "2026-09-27T16:24:33.354782Z"
+          },
+          "document_ref": "documents-ebbf2f847fdf1a8a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U03EN",
+      "documents": {
+        "documents-c35ce863071cf617": {
+          "region": "en",
+          "record": {
+            "number": "BP09-U03EN",
+            "faces": [
+              {
+                "name": "Faust, Truthseeker",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Alchemist"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for up to 2 Earth Sigil amulets that cost a total of 4 or less, put them into your EX area, then shuffle your deck. They cost 0 to play this turn.\nAt the start of your end phase, Earth Rite: Select a follower on your field. Give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and deal 2 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for up to 2 Earth Sigil amulets that cost a total of 4 or less, put them into your EX area, then shuffle your deck. They cost 0 to play this turn.\nAt the start of your end phase, Earth Rite: Select a follower on your field. Give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and deal 2 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "Hidayahman",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-U03EN.png",
+                "trait_raw": "Alchemist",
+                "traits": [
+                  "Alchemist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1156 (Apr. 4, 2025)",
+                "question": "I have 4 cards in my EX area. What happens when I play this follower's Fanfare ability?",
+                "answer": "If you find 2 Earth Sigil amulets in your deck, pick one of them to put into your EX area, then shuffle your deck.\n\nIf you only find one, or choose to \"only find one\" even when there are more, put it into your EX area, then shuffle your deck.\n\nYou can also choose to not find any, in which case you simply shuffle your deck.\n\nIn any case, Earth Sigil amulets you put into your EX area this way cost 0 to play for the rest of the turn."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:64ca9e30f108312dc8583be9acf3ab92dcb47417cda710238adbd0e859884f5c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-U03EN",
+            "fetched_at": "2026-09-27T16:24:35.795659Z"
+          },
+          "document_ref": "documents-c35ce863071cf617"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U04EN",
+      "documents": {
+        "documents-36e2178fd03aa54e": {
+          "region": "en",
+          "record": {
+            "number": "BP09-U04EN",
+            "faces": [
+              {
+                "name": "Jerva of Draconic Mail",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Dragonheart"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "At the start of your end phase, deal 5 damage to each other follower on the field and each enemy leader and draw a card.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, deal 5 damage to each other follower on the field and each enemy leader and draw a card.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-U04EN.png",
+                "trait_raw": "Dragonheart",
+                "traits": [
+                  "Dragonheart"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1170 (Apr. 4, 2025)",
+                "question": "If I have multiple cards with an \"At the start of your end phase\" ability triggering, in what order do I resolve them?",
+                "answer": "You can resolve them in any order. When you proceed to your end phase, all \"At the start of your end phase\" abilities are triggered and become pending. Then, you can choose the order in which you resolve the pending abilities."
+              },
+              {
+                "title": "Q1169 (Apr. 4, 2025)",
+                "question": "I have 2 copies of this follower on my field at the start of my end phase, and they both have 5 defense. How do I resolve their abilities?",
+                "answer": "You must resolve the \"at the start of your end phase\" ability of both copies, and both of them end up in the cemetery.\n\nFirst, at the start of your end phase, the corresponding abilities of both copies trigger and become pending. You then resolve them one by one.\n\nThe first copy's ability deals 5 damage to each other follower on the field, bringing the defense of the other copy to 0 and putting it into the cemetery.\n\nEven though the second copy is now in the cemetery, you still resolve its pending ability, dealing 5 damage to each follower on the field, bringing the defense of the first copy to 0 and putting it into the cemetery as well."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-062EN|Jerva of Draconic Mail}",
+                "href": "/cards/?cardno=BP09-062EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eda9828857ffdbd0a3135fb2643185ca0e7a41b570691302b93b2546f00989a6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-U04EN",
+            "fetched_at": "2026-09-27T16:24:38.661280Z"
+          },
+          "document_ref": "documents-36e2178fd03aa54e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U05EN",
+      "documents": {
+        "documents-0688db81011545bc": {
+          "region": "en",
+          "record": {
+            "number": "BP09-U05EN",
+            "faces": [
+              {
+                "name": "Arcus, Spirited Manager",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Departed / Necromancer"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "This follower can't attack enemies.\nAt the start of your main phase, Necrocharge (10) - Summon a Ghost token.\n{icon_act|[act]} Bury another follower: Choose one of the following. Activate only once per turn. (1) Draw a card. (2) Summon 2 Ghost tokens. (3) Bury the top 2 cards of your deck.",
+                "sections": [],
+                "raw_text": "This follower can't attack enemies.\nAt the start of your main phase, Necrocharge (10) - Summon a Ghost token.\n{icon_act|[act]} Bury another follower: Choose one of the following. Activate only once per turn. (1) Draw a card. (2) Summon 2 Ghost tokens. (3) Bury the top 2 cards of your deck.",
+                "speech": null,
+                "illustrator": "Nijihayashi",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-U05EN.png",
+                "trait_raw": "Departed / Necromancer",
+                "traits": [
+                  "Departed",
+                  "Necromancer"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1183 (Apr. 4, 2025)",
+                "question": "Can this follower attack engaged enemy followers?",
+                "answer": "No. \"Enemies\" refers to both enemy leaders and enemy followers."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-T15EN|Ghost}",
+                "href": "/cards/?cardno=BP09-T15EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f83453114c97a512fffc01e66da5258b0428a828b99ce5bddadd6ba3e123b329",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-U05EN",
+            "fetched_at": "2026-09-27T16:24:41.352095Z"
+          },
+          "document_ref": "documents-0688db81011545bc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U06EN",
+      "documents": {
+        "documents-0bb12504eaefa6ec": {
+          "region": "en",
+          "record": {
+            "number": "BP09-U06EN",
+            "faces": [
+              {
+                "name": "Jeanne, Beacon of Salvation",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Faith / Luminary"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "On Evolve - You may summon a {icon_bishop|[havencraft]} follower that costs 2 or less from your hand.\nStrike - Select a {icon_bishop|[havencraft]} follower that costs 2 or less on your field and give it {icon_power|[attack]}+1.",
+                "sections": [],
+                "raw_text": "On Evolve - You may summon a {icon_bishop|[havencraft]} follower that costs 2 or less from your hand.\nStrike - Select a {icon_bishop|[havencraft]} follower that costs 2 or less on your field and give it {icon_power|[attack]}+1.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-U06EN.png",
+                "trait_raw": "Faith / Luminary",
+                "traits": [
+                  "Faith",
+                  "Luminary"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-106EN|Jeanne, Beacon of Salvation}",
+                "href": "/cards/?cardno=BP09-106EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f8b92f15bf0bd899f2269bfbcfd8f09b5e670f09bc503a06240de430ade252b1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-U06EN",
+            "fetched_at": "2026-09-27T16:24:43.862163Z"
+          },
+          "document_ref": "documents-0bb12504eaefa6ec"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U07EN",
+      "documents": {
+        "documents-2e0939d894be0cf7": {
+          "region": "en",
+          "record": {
+            "number": "BP09-U07EN",
+            "faces": [
+              {
+                "name": "Marduk",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Deity"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "On Evolve - If there are at least 5 spells in your cemetery, give your leader {icon_hp|[defense]}+5 and draw a card.\nOn Evolve - If there are at least 5 amulets in your cemetery, deal 5 damage to each enemy follower on the field and draw a card.",
+                "sections": [],
+                "raw_text": "On Evolve - If there are at least 5 spells in your cemetery, give your leader {icon_hp|[defense]}+5 and draw a card.\nOn Evolve - If there are at least 5 amulets in your cemetery, deal 5 damage to each enemy follower on the field and draw a card.",
+                "speech": null,
+                "illustrator": "Minaba Hideo (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-U07EN.png",
+                "trait_raw": "Deity",
+                "traits": [
+                  "Deity"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1200 (Apr. 4, 2025)",
+                "question": "Can I choose the order in which I resolve this follower's two On Evolve abilities?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-123EN|Marduk}",
+                "href": "/cards/?cardno=BP09-123EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2261c947b859946ef3fa9322273b739e0b03733f2236a52a8b5a93f71af23b0b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-U07EN",
+            "fetched_at": "2026-09-27T16:24:46.731617Z"
+          },
+          "document_ref": "documents-2e0939d894be0cf7"
+        }
+      ]
+    }
+  ]
+}

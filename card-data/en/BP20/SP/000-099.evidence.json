@@ -1,0 +1,117 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP20",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-9cad2252722c84b5": [
+        {
+          "ordinal": 0,
+          "name": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+          "date_raw": "Sep. 25, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP19-BP20",
+            "https://en.shadowverse-evolve.com/products/bp1920/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP19-BP20",
+            "https://en.shadowverse-evolve.com/products/bp1920/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp1920/",
+              "expansion_code": "BP19-BP20"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-852c83e8375f8903": [
+        {
+          "stable_source_key": "Q664",
+          "official_number": "Q664",
+          "locator": "qa-block:0",
+          "published_on": "2024-06-14",
+          "date_raw": "Jun. 14, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-1ae17b811405ac85": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP20-T15EN"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cards/?cardno=BP20-T16EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:cd3acbcca89eaa7023035b9bcd764aa78a9315cc222fb024f26f45eabec0bd2c": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:a51be4c84226b1431149145c789f246fdb347f62cbf722e5eb27d540b777cb32",
+        "raw_bytes": 36811,
+        "first_receipt_id": "sha256:4b30ef7b3db5acee526cfcf2305a347f6584d7da262e64802d062df248138041",
+        "descriptor_sha256": "sha256:599e1d93fed56c7ca2ea55cf1c2752ebbf4461fc4933f26d996eae9540a439d5",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:cbfbc060d4271755b944b668b1046ef3fa9fc766cca5f96a87503d3b24e4a84c"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-9cad2252722c84b5",
+        "qa": "qa-852c83e8375f8903",
+        "related": "related-1ae17b811405ac85",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:736da7af4d9337d3aaa7c7a5fde479657d5d5399d8de5eabdfa1ec3bf5812b57"
+    }
+  }
+}

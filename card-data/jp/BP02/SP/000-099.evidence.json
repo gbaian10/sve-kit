@@ -1,0 +1,124 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP02",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-cab360f648e9e091": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック第2弾「黒銀のバハムート」",
+          "date_raw": "2022-06-30",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP02",
+            "https://shadowverse-evolve.com/products/bp02/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP02",
+            "https://shadowverse-evolve.com/products/bp02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp02/",
+              "expansion_code": "BP02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-19b6e2ae0d8bf175": [
+        {
+          "stable_source_key": "Q305",
+          "official_number": "Q305",
+          "locator": "qa-block:0",
+          "published_on": "2022-06-24",
+          "date_raw": "2022-06-24"
+        },
+        {
+          "stable_source_key": "Q304",
+          "official_number": "Q304",
+          "locator": "qa-block:1",
+          "published_on": "2022-06-24",
+          "date_raw": "2022-06-24"
+        }
+      ]
+    },
+    "related": {
+      "related-b9ea0077f2f906eb": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=BP02-069"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=BP02-T18"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:aa04f77e6cf4f7f4e8b9427f3f78f3606aa8cc148a080ab00cb26cc1617cffb1": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:0bc3a67bb1697966d4978410c8e2990d1db94fbabd71aef58854e5da5ae445bc",
+        "raw_bytes": 39770,
+        "first_receipt_id": "sha256:4760f04c040fa2814bb5d81341e735aad1289465bef7bd11f562955d22a752b9",
+        "descriptor_sha256": "sha256:e437183bb2faae687c71f6465fb18b956c42fed5d968f54e41b05e718848ecb0",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:ffe23fdcbadcf55f036bc792be77050846b28366e96dcb373e748af18feb2ad5"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-cab360f648e9e091",
+        "qa": "qa-19b6e2ae0d8bf175",
+        "related": "related-b9ea0077f2f906eb",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5f47330265dd33aaf5b1516524c18743495c31e72b30a1cc4795d23c9c3d832d"
+    }
+  }
+}

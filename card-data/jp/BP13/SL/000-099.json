@@ -1,0 +1,1476 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP13",
+  "range": "SL/000-099",
+  "products": {
+    "products-c15cb00f9e27c3da": [
+      {
+        "name": "ブースターパック第13弾「暗黒降誕」",
+        "date": "2024-12-13",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP13",
+          "https://shadowverse-evolve.com/products/bp13/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP13-SL01",
+      "documents": {
+        "documents-fd47c5265bfc3ec0": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL01",
+            "faces": [
+              {
+                "name": "宿命の狐火・セッカ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "狩人",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、元のコスト2以下の{エルフ}カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。元のコスト2以下の{エルフ}カードを公開したなら、自分の手札1枚を捨てる。\n{起動}{コスト3}墓場のこれとカード2枚を消滅：自分のエボルヴデッキの『九火石炎・セッカ』1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl01.png",
+                "trait_raw": "荒野・狩人・獣"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1719",
+                "date": "2024-12-13",
+                "question": "「《起動》《コスト3》墓場のこれとカード2枚を消滅：自分のエボルヴデッキの『九火石炎・セッカ』1枚を場に出してよい。」という能力は、『宿命の狐火・セッカ』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『宿命の狐火・セッカ』が墓場にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c06ee1db5398ec1bfcf37a444e2551eb130028938be4ab340aca1bd3da83600d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL01",
+            "fetched_at": "2026-09-24T20:37:48.353288Z"
+          },
+          "document_ref": "documents-fd47c5265bfc3ec0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL02",
+      "documents": {
+        "documents-9c74dd705eb8a919": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL02",
+            "faces": [
+              {
+                "name": "九火石炎・セッカ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "荒野",
+                  "狩人",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】自分のデッキから『九尾の決意』1枚を探し、手札に加える。【2】自分の墓場の『九尾の決意』1枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl02.png",
+                "trait_raw": "荒野・狩人・獣"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1722",
+                "date": "2024-12-13",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              },
+              {
+                "id": "Q1721",
+                "date": "2024-12-13",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1720",
+                "date": "2024-12-13",
+                "question": "自分の墓場の『九尾の決意』を選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【2】をチョイスすることができず、【1】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-008"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:32e361fe5c055878407dd4dd62ccfcc827a4840a60d10fd43a599a38623233fe",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL02",
+            "fetched_at": "2026-09-24T20:37:51.235981Z"
+          },
+          "document_ref": "documents-9c74dd705eb8a919"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL03",
+      "documents": {
+        "documents-da78cbefe97c755e": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL03",
+            "faces": [
+              {
+                "name": "瘴気の妖精姫・アリア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精",
+                  "プリンセス",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "これはEXエリアからプレイできない。\n{進化}{コスト1}：これは進化する。\nこれが場かEXエリアにある限り、自分の場の妖精・トークン・フォロワーすべては【突進】を持つ。\n{ファンファーレ}『フェアリー』1枚をEXエリアに置く。\n{ラストワード}これをEXエリアに置いてよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "原田いすか",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl03.png",
+                "trait_raw": "妖精・プリンセス・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1723",
+                "date": "2024-12-13",
+                "question": "『瘴気の妖精姫・アリア』の能力によって【突進】を持った自分の場の『フェアリー』が攻撃し、攻撃目標に相手のアクト状態のフォロワーを選択しました。その後のクイックタイミングにおいて『堕天』などで自分の場の『瘴気の妖精姫・アリア』が消滅され、攻撃している『フェアリー』が【突進】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【突進】を失っていても、その攻撃は行われます。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7abf03b1ee8fb0801bc0370ce99abbfbee71ed2caa149d4e269dbae4148eb075",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL03",
+            "fetched_at": "2026-09-24T20:37:53.931521Z"
+          },
+          "document_ref": "documents-da78cbefe97c755e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL04",
+      "documents": {
+        "documents-06b5b3228f85ea8a": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL04",
+            "faces": [
+              {
+                "name": "瘴気の妖精姫・アリア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "妖精",
+                  "プリンセス",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "これが場にいる限り、自分の場の妖精・トークン・フォロワーすべては【突進】を持つ。\n【進化時】自分のデッキから元のコスト2以下の妖精・アミュレット1枚を探し、場に出す。\n{ラストワード}これをEXエリアに置いてよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "原田いすか",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl04.png",
+                "trait_raw": "妖精・プリンセス・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1723",
+                "date": "2024-12-13",
+                "question": "『瘴気の妖精姫・アリア』の能力によって【突進】を持った自分の場の『フェアリー』が攻撃し、攻撃目標に相手のアクト状態のフォロワーを選択しました。その後のクイックタイミングにおいて『堕天』などで自分の場の『瘴気の妖精姫・アリア』が消滅され、攻撃している『フェアリー』が【突進】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【突進】を失っていても、その攻撃は行われます。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cce463827dddd13601a9a05c206de77dd19ba84e158125b73ec00eca06088a83",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL04",
+            "fetched_at": "2026-09-24T20:37:56.427553Z"
+          },
+          "document_ref": "documents-06b5b3228f85ea8a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL05",
+      "documents": {
+        "documents-71d7cd1078f82a0c": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL05",
+            "faces": [
+              {
+                "name": "雷滅卿・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "6",
+                "power": "3",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n【疾走】\n{ファンファーレ}場の他のレヴィオン・フォロワー1体を墓場に置く：相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl05.png",
+                "trait_raw": "指揮官・レヴィオン・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:34232f833b5a7341a89184db4cd18e0570db757415dde4120239f5775b33ed8e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL05",
+            "fetched_at": "2026-09-24T20:37:58.932736Z"
+          },
+          "document_ref": "documents-71d7cd1078f82a0c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL06",
+      "documents": {
+        "documents-09d2386e0396306a": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL06",
+            "faces": [
+              {
+                "name": "雷滅卿・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "6",
+                "text": "【疾走】\n【攻撃時】相手の場のフォロワー1体まで選ぶ。それを破壊する。これは{攻撃力}+X/{体力}+Xする。Xは「このターン、場から墓場に置かれたフォロワーの数」である。\n{起動}{コスト2}：これをスタンドする。この能力は自分の墓場のレヴィオン・カードが10枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl06.png",
+                "trait_raw": "指揮官・レヴィオン・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1734",
+                "date": "2024-12-13",
+                "question": "このターン、フォロワーが2体破壊されている状況で、相手の場にフォロワーがいない場合、『雷滅卿・アルベール』の【攻撃時】能力をプレイして、『雷滅卿・アルベール』は《攻撃力》+2/《体力》+2することができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、『雷滅卿・アルベール』の【攻撃時】能力をプレイすることができます。そのため、このターン、フォロワーが2体破壊されている状況で、相手の場にフォロワーがいない場合でも、『雷滅卿・アルベール』の【攻撃時】能力をプレイして、『雷滅卿・アルベール』は《攻撃力》+2/《体力》+2することができます。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:065c65d64b8a7266931055be755481236cc9131da3293d623262ca6f6e65e877",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL06",
+            "fetched_at": "2026-09-24T20:38:01.523696Z"
+          },
+          "document_ref": "documents-09d2386e0396306a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL07",
+      "documents": {
+        "documents-9bac633940698005": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL07",
+            "faces": [
+              {
+                "name": "マグナゼロ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "超克",
+                  "マグナ",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "7",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のデッキの上10枚を消滅させる。相手のリーダーすべてと相手の場のフォロワーすべてに5ダメージ。自分の消滅領域が20枚以上なら、代わりに10ダメージ。自分の消滅領域が30枚以上なら、代わりに20ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl07.png",
+                "trait_raw": "機械・超克・マグナ・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1735",
+                "date": "2024-12-13",
+                "question": "自分のデッキが9枚以下の状況で、このフォロワーの《ファンファーレ》能力をプレイした場合、自分はバトルに敗北しますか？",
+                "answer": "いいえ。バトルに敗北しません。\n自分のデッキが1枚から9枚の場合、「自分のデッキの上10枚を消滅させる。」によって、可能な限りデッキを消滅させます。10枚を消滅させることができなくても「相手のリーダーすべてと相手の場のフォロワーすべてに5ダメージ。自分の消滅領域が20枚以上なら、代わりに10ダメージ。自分の消滅領域が30枚以上なら、代わりに20ダメージ。」を行います。\n自分のデッキが0枚の場合、「自分のデッキの上10枚を消滅させる。」は単に行われず、「相手のリーダーすべてと相手の場のフォロワーすべてに5ダメージ。自分の消滅領域が20枚以上なら、代わりに10ダメージ。自分の消滅領域が30枚以上なら、代わりに20ダメージ。」を行います。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ae5ee151a1af9b3673d6b2e09e9f7d029c5f3ad7cfbea250be18b5b45348670",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL07",
+            "fetched_at": "2026-09-24T20:38:04.372528Z"
+          },
+          "document_ref": "documents-9bac633940698005"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL08",
+      "documents": {
+        "documents-2d8ad12ce53a9450": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL08",
+            "faces": [
+              {
+                "name": "マナリアクイーン・アン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}手札の学院・カード1枚を捨てる：1枚引く。自分の墓場の学院・カードが5枚以上なら、『アンの大英霊』1枚をEXエリアに置く。\n{起動}これを{アクト}：自分のエボルヴデッキの『イクシードブラスト』1枚をプレイしてよい。この能力は自分の墓場の学院・カードが15枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl08.png",
+                "trait_raw": "魔法使い・学院・プリンセス・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1744",
+                "date": "2024-12-13",
+                "question": "自分の残りPPが2以下の状況で、『マナリアクイーン・アン』の《起動》能力をプレイした場合、自分のエボルヴデッキの『イクシードブラスト』をプレイすることができますか？",
+                "answer": "いいえ。『マナリアクイーン・アン』の《起動》能力をプレイした場合、『イクシードブラスト』のプレイに必要なコストを支払う必要があります。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-P29"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:64bd5bbfeebb71080fbda475be6c08a1b9a53b4273b0ad334a27baa885622a36",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL08",
+            "fetched_at": "2026-09-24T20:38:06.920956Z"
+          },
+          "document_ref": "documents-2d8ad12ce53a9450"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL09",
+      "documents": {
+        "documents-74305c64b8330e55": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL09",
+            "faces": [
+              {
+                "name": "プリズムブライト・ジオース",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト4}：これは進化する。\n自分のエンドフェイズが来たとき、このターン、自分が魔法使い・フォロワーと魔法使い・スペルをプレイしていたなら、自分のEXエリアのこれに魔力カウンター1個を置く。\n{起動}{コスト0}：自分の手札のこれをEXエリアに置く。自分の墓場の魔法使い・フォロワーと魔法使い・スペルがそれぞれ5枚以上なら、EXエリアのこれに魔力カウンター1個を置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ezusuke",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl09.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1745",
+                "date": "2024-12-13",
+                "question": "「《起動》《コスト0》：自分の手札のこれをEXエリアに置く。自分の墓場の魔法使い・フォロワーと魔法使い・スペルがそれぞれ5枚以上なら、EXエリアのこれに魔力カウンター1個を置く。」という能力は、『プリズムブライト・ジオース』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『プリズムブライト・ジオース』が手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4300ac04d0124912dc96f964b52260c8f7fe80d3d2180ac333e423561649ee4c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL09",
+            "fetched_at": "2026-09-24T20:38:09.790635Z"
+          },
+          "document_ref": "documents-74305c64b8330e55"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL10",
+      "documents": {
+        "documents-451a7cc34cfd57ec": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL10",
+            "faces": [
+              {
+                "name": "プリズムブライト・ジオース",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】自分の墓場の元のコスト3以下の魔法使い・スペルをカード名が異なるようにX枚まで選ぶ。それをEXエリアに置く。Xは「これの魔力カウンターの数」である。このターン、それをプレイする際、コストを-3する。これの魔力カウンターすべてを取る。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ezusuke",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl10.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f2603443a98830d0a8761c49f66f748de2ea94c29e29238360e6e10abf61db4e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL10",
+            "fetched_at": "2026-09-24T20:38:12.668945Z"
+          },
+          "document_ref": "documents-451a7cc34cfd57ec"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL11",
+      "documents": {
+        "documents-7d7a530fd6e918d6": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL11",
+            "faces": [
+              {
+                "name": "イクシードブラスト",
+                "card_class": "ウィッチ",
+                "card_type": "スペル・アドバンス",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "相手のリーダーすべてに8ダメージ。",
+                "sections": [],
+                "flavor": "貴方と出会い全て変わった。今更放してなんかあげない。\nグレアを放すくらいなら、その前に貴方を終わらせる。",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl11.png",
+                "trait_raw": "魔法使い・学院・プリンセス・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1744",
+                "date": "2024-12-13",
+                "question": "自分の残りPPが2以下の状況で、『マナリアクイーン・アン』の《起動》能力をプレイした場合、自分のエボルヴデッキの『イクシードブラスト』をプレイすることができますか？",
+                "answer": "いいえ。『マナリアクイーン・アン』の《起動》能力をプレイした場合、『イクシードブラスト』のプレイに必要なコストを支払う必要があります。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:558ccdf8ef99a8f6a7b6546d65a0e7b9e026baae454594a9c0e5a703bb85f102",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL11",
+            "fetched_at": "2026-09-24T20:38:15.643945Z"
+          },
+          "document_ref": "documents-7d7a530fd6e918d6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL12",
+      "documents": {
+        "documents-f5981878c7acf470": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL12",
+            "faces": [
+              {
+                "name": "焦熱の竜翼・ドラーク",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "3",
+                "text": "{進化}{コスト4}：これは進化する。\n【突進】\n{ファンファーレ}このターン、次に自分が武闘竜人・カードをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl12.png",
+                "trait_raw": "荒野・ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e7554912e34b99abdfd4f0e0ca18abd0e9be378eeb08cec1a1d44b1d7e209542",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL12",
+            "fetched_at": "2026-09-24T20:38:18.310403Z"
+          },
+          "document_ref": "documents-f5981878c7acf470"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL13",
+      "documents": {
+        "documents-710fc5ee6e0b35ca": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL13",
+            "faces": [
+              {
+                "name": "焦熱の竜翼・ドラーク",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "5",
+                "text": "【指定攻撃】\n【進化時】自分の墓場の元のコストX以下の武闘竜人・フォロワー1枚を選ぶ。それを場に出す。Xは「これの攻撃力」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl13.png",
+                "trait_raw": "荒野・ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae2c2a425584c8eac991441f8d4c75970ca241b848e2ac9cd49b98eb236f355f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL13",
+            "fetched_at": "2026-09-24T20:38:21.910996Z"
+          },
+          "document_ref": "documents-710fc5ee6e0b35ca"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL14",
+      "documents": {
+        "documents-ce6ff852b7e8ca74": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL14",
+            "faces": [
+              {
+                "name": "覇道の君臨者・フォルテ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い",
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "10",
+                "power": "5",
+                "hp": "9",
+                "text": "これが場にいる限り、自分の場の『ドラゴン』すべては【疾走】【ドレイン】を持つ。\n自分のエンドフェイズが来たとき、相手の場のフォロワー2体まで選ぶ。次のそれのプレイヤーのターン中、それは相手を攻撃できない。\n{起動}{コスト0}：『ドラゴン』1体を場に出す。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl14.png",
+                "trait_raw": "竜使い・武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1767",
+                "date": "2024-12-13",
+                "question": "『覇道の君臨者・フォルテ』の能力によって【疾走】を持った自分の場の『ドラゴン』が攻撃し、攻撃目標に相手のリーダーを選択しました。その後のクイックタイミングにおいて『堕天』などで自分の場の『覇道の君臨者・フォルテ』が消滅され、攻撃している『ドラゴン』が【疾走】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【疾走】を失っていても、その攻撃は行われます。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-T10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc495308fdbd6ad859ca35a034ea317c95e0eb8c0a7d839aad7612da25497770",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL14",
+            "fetched_at": "2026-09-24T20:38:23.954639Z"
+          },
+          "document_ref": "documents-ce6ff852b7e8ca74"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL15",
+      "documents": {
+        "documents-48a783446b36eda5": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL15",
+            "faces": [
+              {
+                "name": "永劫の吸血鬼・アルザード",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "吸血鬼"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "これに休眠カウンターが置かれている限り、これはEXエリアからプレイできない。\n{進化}{コスト1}：これは進化する。\n自分のメインフェイズが来たとき、EXエリアのこれの休眠カウンター1個を取る：これに休眠カウンターが置かれていないなら、これを場に出す。\n{ラストワード}これをEXエリアに置く。EXエリアのこれに休眠カウンター2個を置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl15.png",
+                "trait_raw": "荒野・吸血鬼"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1775",
+                "date": "2024-12-13",
+                "question": "自分のメインフェイズが来たとき、自分のEXエリアの『永劫の吸血鬼・アルザード』に休眠カウンターが置かれていない場合、「自分のメインフェイズが来たとき、～」という能力によって、その『永劫の吸血鬼・アルザード』を場に出すことができますか？",
+                "answer": "いいえ。自分のEXエリアの『永劫の吸血鬼・アルザード』に休眠カウンターが置かれていない場合、「自分のメインフェイズが来たとき、～」という能力のコストを支払うことができないため、この能力をプレイすることができず、その『永劫の吸血鬼・アルザード』を場に出すことができません。"
+              },
+              {
+                "id": "Q1774",
+                "date": "2024-12-13",
+                "question": "自分のメインフェイズが来たとき、自分のEXエリアの『永劫の吸血鬼・アルザード』に休眠カウンターが1個置かれている場合でも「自分のメインフェイズが来たとき、～」という能力によって、その『永劫の吸血鬼・アルザード』を場に出さないことを選択できますか？",
+                "answer": "はい。「自分のメインフェイズが来たとき、～」という能力のコストを支払わないことで、その『永劫の吸血鬼・アルザード』を場に出さないことを選択できます。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL16"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d38da67141c5c96e4c6ba72d8fc3c1be9b8f77eb5dc8c4cde6005bf7c4bee5b9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL15",
+            "fetched_at": "2026-09-24T20:38:26.599147Z"
+          },
+          "document_ref": "documents-48a783446b36eda5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL16",
+      "documents": {
+        "documents-ee2c666a98eea23d": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL16",
+            "faces": [
+              {
+                "name": "永劫の吸血鬼・アルザード",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "吸血鬼"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "{ラストワード}これと『紅の牙』1枚をEXエリアに置く。EXエリアのこれに休眠カウンター2個を置く。",
+                "sections": [
+                  "『紅の牙』{ナイトメア}荒野・吸血鬼・スペル{コスト1}自分のリーダーに1ダメージ。相手の場のフォロワーすべてに1ダメージ。自分の場の『永劫の吸血鬼・アルザード』すべては{攻撃力}+1して、【ドレイン】を持つ。自分のエボルヴデッキの表向きの『永劫の吸血鬼・アルザード』が3枚なら、さらに{攻撃力}+3/{体力}+3する。"
+                ],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl16.png",
+                "trait_raw": "荒野・吸血鬼"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1776",
+                "date": "2024-12-13",
+                "question": "自分のEXエリアにカードが4枚ある状態でこのフォロワーの《ラストワード》能力を解決する場合、『永劫の吸血鬼・アルザード』と『紅の牙』のどちらをEXエリアに置くかを選択することはできますか？",
+                "answer": "はい。どちらをEXエリアに置くかを選択することができます。また、自分のEXエリアにカードが4枚ある状態で『紅の牙』をEXエリアに置いた場合、『永劫の吸血鬼・アルザード』は墓場から移動しません。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-P31"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL15"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c0b0e8e2d8963b5e66f63f886ab8afed8ffdee9878b5eff1d34a52efd938b962",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL16",
+            "fetched_at": "2026-09-24T20:38:29.464423Z"
+          },
+          "document_ref": "documents-ee2c666a98eea23d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL17",
+      "documents": {
+        "documents-c1d585a97dc3f99a": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL17",
+            "faces": [
+              {
+                "name": "クリムゾンウォー・ラウラ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "自分のターン中、自分のリーダーの体力が減少したとき、下記から1つチョイスする。このターン、この能力でチョイスした選択肢はチョイスできない。【1】相手の場のフォロワー1体を選ぶ。それに「このターン中に自分のリーダーの体力が減少した回数」と同じダメージ。【2】これは{攻撃力}+1/{体力}+1する。【3】これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl17.png",
+                "trait_raw": "魔界・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1779",
+                "date": "2024-12-13",
+                "question": "自分の場に『クリムゾンウォー・ラウラ』が2体いる状況で、一方の『クリムゾンウォー・ラウラ』の「自分のターン中、自分のリーダーの体力が減少したとき、～」という能力で【1】をチョイスした場合、そのターン中、もう一方の『クリムゾンウォー・ラウラ』の「自分のターン中、自分のリーダーの体力が減少したとき、～」という能力で【1】をチョイスすることができますか？",
+                "answer": "はい。【1】をチョイスすることができます。\n一方の『クリムゾンウォー・ラウラ』の「自分のターン中、自分のリーダーの体力が減少したとき、～」という能力で【1】をチョイスした場合、そのターン中、その『クリムゾンウォー・ラウラ』の「自分のターン中、自分のリーダーの体力が減少したとき、～」という能力で再度【1】をチョイスすることはできません。"
+              },
+              {
+                "id": "Q1778",
+                "date": "2024-12-13",
+                "question": "「このターン中に自分のリーダーの体力が減少した回数」とは何を参照しますか？",
+                "answer": "そのターン中、自分のリーダーがダメージや効果などで体力が減少した回数を参照します。これには『欲望の狂信者』の《起動》能力のコストも含みます。"
+              },
+              {
+                "id": "Q1777",
+                "date": "2024-12-13",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「自分のターン中、自分のリーダーの体力が減少したとき、～」という能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】や【3】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2e80716af6b1f3389e7df24d22981e771aa2fd21dacfcfb61fb7091cf6c50900",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL17",
+            "fetched_at": "2026-09-24T20:38:32.268202Z"
+          },
+          "document_ref": "documents-c1d585a97dc3f99a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL18",
+      "documents": {
+        "documents-75a71ba22aeb10f0": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL18",
+            "faces": [
+              {
+                "name": "絶望の聖女・ジャンヌ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狂信",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト5}：これは進化する。\n{ファンファーレ}リーダーの{体力}-2：元のコスト2以下の相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl18.png",
+                "trait_raw": "狂信・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c0dd8a8fe0120ed482b9c07d409d28b4697e355a815b9f60ef39260b930a26aa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL18",
+            "fetched_at": "2026-09-24T20:38:35.119528Z"
+          },
+          "document_ref": "documents-75a71ba22aeb10f0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL19",
+      "documents": {
+        "documents-6697fece409d85c1": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL19",
+            "faces": [
+              {
+                "name": "絶望の聖女・ジャンヌ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "狂信",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "5",
+                "text": "【進化時】相手のリーダーすべてと相手の場のフォロワーすべてに3ダメージ。自分のリーダーは{体力}+3する。",
+                "sections": [],
+                "flavor": "光も、闇も。聖女にとっては、救済の手段に過ぎず。\n「受け入れよ。絶望の果て、救済が待つ！」",
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl19.png",
+                "trait_raw": "狂信・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:34693a0534d97a7c01672492c9e024e25b764b0e8305ebe14d82e91b87319e0c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL19",
+            "fetched_at": "2026-09-24T20:38:38.242912Z"
+          },
+          "document_ref": "documents-6697fece409d85c1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL20",
+      "documents": {
+        "documents-037135d2fe36df71": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL20",
+            "faces": [
+              {
+                "name": "栄華の加護神・ヤテラントゥ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}墓場のアミュレット2枚を消滅：相手の場のフォロワー1体を選ぶ。それを消滅させる。それのリーダーに3ダメージ。自分のリーダーは{体力}+3する。\n{起動}場のアミュレット1つを墓場に置く：自分の手札の元のコスト3以下の{ビショップ}フォロワーか元のコスト3以下の{ビショップ}アミュレット1枚を場に出してよい。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "SEMSEI",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl20.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1784",
+                "date": "2024-12-13",
+                "question": "『栄華の加護神・ヤテラントゥ』の《起動》能力のコストとして《ラストワード》能力を持つアミュレットを墓場に置き、その《起動》能力によって《ファンファーレ》能力を持つフォロワーやアミュレットを場に出した場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\nまず『栄華の加護神・ヤテラントゥ』の能力の解決を行います。その後、墓場に置かれたアミュレットの《ラストワード》能力や、場に出たフォロワーまたはアミュレットの《ファンファーレ》能力などの、誘発条件を満たし待機状態となった能力の中からどれを先に解決するか選択することができます。"
+              },
+              {
+                "id": "Q1783",
+                "date": "2024-12-13",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイして自分のリーダーの体力を+3することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができず、自分のリーダーの体力を+3することができません。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1fb6ca26a8820a8b76fa1fa601dc8a481308a2dfdb3f8367b93764e232e0671b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL20",
+            "fetched_at": "2026-09-24T20:38:40.741944Z"
+          },
+          "document_ref": "documents-037135d2fe36df71"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL21",
+      "documents": {
+        "documents-3dee7d51e3830d13": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL21",
+            "faces": [
+              {
+                "name": "サハクィエル＆イスラーフィール",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使",
+                  "大神"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}自分の手札の元のコスト6以下のフォロワー1枚を場に出してよい。それは「自分のエンドフェイズが来たとき、これを手札に戻す」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl21.png",
+                "trait_raw": "天使・大神"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1789",
+                "date": "2024-12-13",
+                "question": "このフォロワーの《ファンファーレ》能力によって、手札の『風神』を場に出し、自分のエンドフェイズを迎えた場合、「自分のエンドフェイズが来たとき、これを手札に戻す。」と『風神』の「自分のエンドフェイズが来たとき、自分のフォロワーすべては《攻撃力》+1する。」という能力は、どちらも誘発しますか？",
+                "answer": "はい。どちらも誘発し、任意の順番で解決することができます。\nまた、「自分のエンドフェイズが来たとき、これを手札に戻す。」を先に解決した場合でも、「自分のエンドフェイズが来たとき、自分のフォロワーすべては《攻撃力》+1する。」によって、自分のフォロワーすべては《攻撃力》+1できます。"
+              },
+              {
+                "id": "Q1788",
+                "date": "2024-12-13",
+                "question": "『サハクィエル＆イスラーフィール』の《ファンファーレ》能力によって、手札の『エンシェントエルフ』を場に出し、『エンシェントエルフ』の《ファンファーレ》能力で、この『サハクィエル＆イスラーフィール』を手札に戻しました。この『エンシェントエルフ』は自分のエンドフェイズが来たとき、手札に戻りますか？",
+                "answer": "はい。手札に戻ります。\n『サハクィエル＆イスラーフィール』の能力で場に出た『エンシェントエルフ』は「自分のエンドフェイズが来たとき、これを手札に戻す」を持ち、『サハクィエル＆イスラーフィール』が場を離れたとしても、この能力は有効です。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cd07c9ba3a6683dead61d45a1cc827c58e425d4d65883cc8a81a5a5fcbddbb8c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL21",
+            "fetched_at": "2026-09-24T20:38:43.576798Z"
+          },
+          "document_ref": "documents-3dee7d51e3830d13"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL22",
+      "documents": {
+        "documents-25cdd8a983b60085": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL22",
+            "faces": [
+              {
+                "name": "サハクィエル＆イスラーフィール",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使",
+                  "大神"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "-",
+                "power": "7",
+                "hp": "7",
+                "text": "【守護】\n【進化時】場の他のフォロワー1体を選ぶ。それをEXエリアに置く。それを自分のEXエリアに置いたなら、それをアクト状態で場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl22.png",
+                "trait_raw": "天使・大神"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1793",
+                "date": "2024-12-13",
+                "question": "このフォロワーの【進化時】能力で《ファンファーレ》能力を持つフォロワーを場に出したとき、そのフォロワーの《ファンファーレ》能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q1792",
+                "date": "2024-12-13",
+                "question": "このフォロワーの【進化時】能力で相手が奪ったまたは自分が渡した相手の場のフォロワーを選んだ場合、「それを自分のEXエリアに置いたなら、」の条件を満たしますか？",
+                "answer": "はい。奪ったまたは渡したフォロワーが場以外の領域に移動する場合、持ち主の領域に移動するため、条件を満たします。"
+              },
+              {
+                "id": "Q1791",
+                "date": "2024-12-13",
+                "question": "場のフォロワーをEXエリアに置くとき、そのフォロワーのダメージや付与されている能力はなくなりますか？",
+                "answer": "はい。場からEXエリアに置かれたとき、ダメージや付与された能力はすべてなくなります。"
+              },
+              {
+                "id": "Q1790",
+                "date": "2024-12-13",
+                "question": "このフォロワーの【進化時】能力は、相手の場のフォロワーも選ぶことはできますか？",
+                "answer": "はい。自分の場だけでなく相手の場のフォロワーも選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-SL21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae2a4b473239d2ab2c92620fee54d33a25157ccc42107994b8f7af294c363099",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL22",
+            "fetched_at": "2026-09-24T20:38:46.561908Z"
+          },
+          "document_ref": "documents-25cdd8a983b60085"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-SL23",
+      "documents": {
+        "documents-f0ca5b082919a3d1": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-SL23",
+            "faces": [
+              {
+                "name": "ワールドブレイク",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "大神",
+                  "魔王",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "8",
+                "power": "-",
+                "hp": "-",
+                "text": "場のカードすべてとEXエリアのカードすべてを消滅させる。各プレイヤーは、自身のデッキの上10枚を消滅させる。",
+                "sections": [],
+                "flavor": "是は非、陽が陰、善は悪、表は裏へ――\n常世は終わりを告げ、常夜の世界が始まる。",
+                "illustrator": "Joshua Hutchinson",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-sl23.png",
+                "trait_raw": "大神・魔王・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1794",
+                "date": "2024-12-13",
+                "question": "このスペルは相手の場のカードも消滅しますか？また、相手のEXエリアのカードも消滅しますか？",
+                "answer": "はい。すべてのプレイヤーの場のカードを消滅し、すべてのプレイヤーのEXエリアのカードを消滅します。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ca0303f3e7cffb3054f1b481bab404230baad75d95351a375b227f2566ca413",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL23",
+            "fetched_at": "2026-09-24T20:38:49.176077Z"
+          },
+          "document_ref": "documents-f0ca5b082919a3d1"
+        }
+      ]
+    }
+  ]
+}

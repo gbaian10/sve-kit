@@ -1,0 +1,1362 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP10",
+  "range": "100-199",
+  "products": {
+    "products-4a38f6ab1ca8bf00": [
+      {
+        "name": "ブースターパック第10弾「Gods of the Arcana」",
+        "date": "2024-04-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP10",
+          "https://shadowverse-evolve.com/products/bp10/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP10-100",
+      "documents": {
+        "documents-c0cbbf39ecbf8a6f": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-100",
+            "faces": [
+              {
+                "name": "トパーズソーディアン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "4",
+                "text": "【守護】\n【進化時】体力3以下の相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-100.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-099"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:33f25d0aaf46e1f42a8e33ddbd7a67d167bf1bbcfba432310bb3c95f4c4f9674",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-100",
+            "fetched_at": "2026-09-24T21:36:25.306127Z"
+          },
+          "document_ref": "documents-c0cbbf39ecbf8a6f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-101",
+      "documents": {
+        "documents-cca40563f5dcb8f8": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-101",
+            "faces": [
+              {
+                "name": "光明のプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "7",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}自分の場のフォロワー1体を選ぶ。それと自分のリーダーは{体力}+4する。\n{Q}{起動}{コスト1}手札のこれを捨てる：自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "憂",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-101.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1346",
+                "date": "2024-04-15",
+                "question": "「《Q》《起動》《コスト1》手札のこれを捨てる：自分のリーダーは《体力》+2する。」という能力は、『光明のプリースト』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『光明のプリースト』が手札にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1345",
+                "date": "2024-04-15",
+                "question": "このフォロワーの《ファンファーレ》能力は、このフォロワー自身を目標に選ぶことができますか？",
+                "answer": "はい。このフォロワー自身を目標に選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:58f3186e143b017f9d0b80cd244c2b7e875c09f22c0ca067ee02db1ddffe9569",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-101",
+            "fetched_at": "2026-09-24T21:36:28.102181Z"
+          },
+          "document_ref": "documents-cca40563f5dcb8f8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-102",
+      "documents": {
+        "documents-b6182970e658975f": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-102",
+            "faces": [
+              {
+                "name": "惨禍の円環",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "アルカナ",
+                  "信仰"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分の場に『《運命の輪》・スロース』がいるなら、これに災いカウンター2個まで置く。\n{起動}これを{アクト}：これに災いカウンター1個を置く。\n{起動}これを{アクト}墓場に置く：元のコストXの相手の場のフォロワーすべてを破壊する。Xは「これに置かれていた災いカウンターの数」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-102.png",
+                "trait_raw": "アルカナ・信仰"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1347",
+                "date": "2024-04-15",
+                "question": "エボルヴフォロワーの元のコストの値は、進化前のカードの元のコストの値ですか？",
+                "answer": "はい。進化前のカードの元のコストの値です。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-094"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b4b0b4fc175a847b69091f45848669294f21016c0a3486ca4b5c275636a8cbf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-102",
+            "fetched_at": "2026-09-24T21:36:30.917181Z"
+          },
+          "document_ref": "documents-b6182970e658975f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-103",
+      "documents": {
+        "documents-79776ad2b9bd8c59": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-103",
+            "faces": [
+              {
+                "name": "先見の神官",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "7",
+                "power": "3",
+                "hp": "6",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}自分のデッキから元のコスト4以下のアルカナ・フォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ラエル",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-103.png",
+                "trait_raw": "アルカナ・信仰"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-104"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f15de2bdbe019e56d315da91b433b888814bb91337b328b04c53fc74625278ab",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-103",
+            "fetched_at": "2026-09-24T21:36:33.684995Z"
+          },
+          "document_ref": "documents-79776ad2b9bd8c59"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-104",
+      "documents": {
+        "documents-5e8abcf6e3c12703": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-104",
+            "faces": [
+              {
+                "name": "先見の神官",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アルカナ",
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "7",
+                "text": "【守護】\n【進化時】相手の場のフォロワー2体まで選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": "――其は《女教皇》、示すは《聡明》。\n己が決断に従って、迷える者らに信仰を示す。",
+                "illustrator": "ラエル",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-104.png",
+                "trait_raw": "アルカナ・信仰"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-103"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:73c088c9b7e4259475d6524cb777d9dd66be54f2f2c7d0aa1ef67169cbfedb4c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-104",
+            "fetched_at": "2026-09-24T21:36:36.613410Z"
+          },
+          "document_ref": "documents-5e8abcf6e3c12703"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-105",
+      "documents": {
+        "documents-2a264c7fb3e20e1c": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-105",
+            "faces": [
+              {
+                "name": "アズライトメイデン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}{コスト1}：自分の墓場の信仰・フォロワー1枚を選ぶ。それをEXエリアに置く。それは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-105.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1348",
+                "date": "2024-04-15",
+                "question": "このフォロワーの能力によって、攻撃力が+1された自分のEXエリアの信仰・フォロワーが直接場に出る場合やプレイして場に出る場合、その信仰・フォロワーは攻撃力が+1された状態で場に出ますか？",
+                "answer": "はい。攻撃力が+1された状態で場に出ます。EXエリアのカードに何らかの効果が適用されている状態で、そのカードが直接場に出る場合やプレイされて場に出る場合、場に出たカードにも同じ効果が適用されます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d08fe96c8492f399dd3f4f6948cd6ed9265a7b36397d4c9f97de0a896558f736",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-105",
+            "fetched_at": "2026-09-24T21:36:39.197241Z"
+          },
+          "document_ref": "documents-2a264c7fb3e20e1c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-106",
+      "documents": {
+        "documents-238475cd53849053": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-106",
+            "faces": [
+              {
+                "name": "エレガントバード",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "鳥族"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】『ホーリーファルコン』1体を場に出す。【2】自分の墓場のアミュレット1枚を選ぶ。それを手札に加える。",
+                "sections": [
+                  "『ホーリーファルコン』{ビショップ}鳥族・フォロワー{コスト3}{攻撃力}2/{体力}2【疾走】"
+                ],
+                "flavor": null,
+                "illustrator": "Asuka111",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-106.png",
+                "trait_raw": "鳥族"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1349",
+                "date": "2024-08-20",
+                "question": "自分の墓場のアミュレットを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【2】をチョイスすることができず、【1】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1fea1b70e0821fba1e2ae34ea34fdfe1a99f1a5808d848931752e43379fa9f79",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-106",
+            "fetched_at": "2026-09-24T21:36:42.076190Z"
+          },
+          "document_ref": "documents-238475cd53849053"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-107",
+      "documents": {
+        "documents-38ac22f32132ae62": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-107",
+            "faces": [
+              {
+                "name": "剛健の翼人",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "鳥族"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "【守護】\n{ファンファーレ}{コスト2}：これは{攻撃力}+1/{体力}+1して、【疾走】を持つ。",
+                "sections": [],
+                "flavor": "褒美を欲して空を駆け、誰よりも賢く成果を上げる。\nまたの名を、強欲の賢人。彼にとっては褒め言葉。",
+                "illustrator": "五十嵐",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-107.png",
+                "trait_raw": "信仰・鳥族"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76e4ad95effc1dfe0896b0f232c65ba0fa6984aecb369458af5cae2f86b0ad45",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-107",
+            "fetched_at": "2026-09-24T21:36:44.632608Z"
+          },
+          "document_ref": "documents-38ac22f32132ae62"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-108",
+      "documents": {
+        "documents-e4d8897b77da30f8": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-108",
+            "faces": [
+              {
+                "name": "純白の祭壇",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "偶像"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}『ホーリータイガー』1体を場に出す。それは「自分のエンドフェイズが来たとき、これを破壊する」を持つ。\n{起動}{コスト3}これを{アクト}墓場に置く：自分の場のフォロワー1体を選ぶ。自分のリーダーは{体力}+Xする。Xは「選んだフォロワーの元のコスト」である。",
+                "sections": [
+                  "『ホーリータイガー』{ビショップ}獣・フォロワー{コスト4}{攻撃力}4/{体力}4【突進】"
+                ],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-108.png",
+                "trait_raw": "信仰・偶像"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-T13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bd3c5bad77c05a43094334faf67f5cddd0c43db68dfb6351dce3037d22c2ac0f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-108",
+            "fetched_at": "2026-09-24T21:36:47.271280Z"
+          },
+          "document_ref": "documents-e4d8897b77da30f8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-109",
+      "documents": {
+        "documents-725705ee7e7d8d1f": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-109",
+            "faces": [
+              {
+                "name": "《世界》・ゼルガネイア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "大神"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。\n{ファンファーレ}自分のリーダーの体力が10以下なら、自分のリーダーは{体力}+5する。\n{起動}{コスト10}墓場のこれを消滅：自分のエボルヴデッキの『大いなる《世界》・ゼルガネイア』1枚をEXエリアに置いてよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-109.png",
+                "trait_raw": "アルカナ・大神"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1373",
+                "date": "2024-04-26",
+                "question": "自分の場に他のフォロワーがいる場合でも、「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」という能力によって、1枚引くことはできますか？",
+                "answer": "いいえ。自分の場に他のフォロワーがいる場合、相手の場のフォロワーを選ぶことができたとしても、「自分の場に他のフォロワーがいないなら、」以降の効果は働かず、1枚引くことができません。"
+              },
+              {
+                "id": "Q1369",
+                "date": "2024-04-26",
+                "question": "自分の場に他のフォロワーがいない状況で、『《世界》・ゼルガネイア』の「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」という能力によって、『《吊るされた男》・ローフラッド』を選んだ場合、1枚引くことができますか？",
+                "answer": "はい。「これは能力によって破壊されない。」を持つ『《吊るされた男》・ローフラッド』を破壊することはできませんが、1枚引くことができます。"
+              },
+              {
+                "id": "Q1353",
+                "date": "2024-04-15",
+                "question": "自分のリーダの体力が11で、自分の場のフォロワーが0体、相手の場のフォロワーが『ラビットネクロマンサー』1体のみの状況です。\n自分のターン中に、『《世界》・ゼルガネイア』をプレイし、「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」から解決して『ラビットネクロマンサー』を破壊した場合、『ラビットネクロマンサー』の《ラストワード》能力で、自分のリーダーの体力が9になった後に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」によって、自分のリーダーの体力を+5することができますか？",
+                "answer": "いいえ。できません。\n『《世界》・ゼルガネイア』の《ファンファーレ》能力によって、『ラビットネクロマンサー』を破壊した際、『ラビットネクロマンサー』の《ラストワード》能力が誘発し待機状態になりますが、待機状態の自動能力はターンプレイヤーから解決するため、先に「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」を解決します。この時点で自分のリーダーの体力は11なので、体力を+5することはできず、この能力の解決後に『ラビットネクロマンサー』の《ラストワード》能力によって自分のリーダーの体力が9になります。\n\nまた、何らかの能力によって相手のターン中に自分の場に『《世界》・ゼルガネイア』が出て《ファンファーレ》能力によって『ラビットネクロマンサー』を破壊した場合、「《ファンファーレ》自分のリーダーの体力が10以下なら、自分のリーダーは《体力》+5する。」より先に『ラビットネクロマンサー』の《ラストワード》能力を解決するため、自分のリーダーの体力を+5することができます。"
+              },
+              {
+                "id": "Q1352",
+                "date": "2024-04-15",
+                "question": "「《起動》《コスト10》墓場のこれを消滅：自分のエボルヴデッキの『大いなる《世界》・ゼルガネイア』1枚をEXエリアに置いてよい。」という能力は、『《世界》・ゼルガネイア』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『《世界》・ゼルガネイア』が墓場にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1351",
+                "date": "2024-04-15",
+                "question": "『《世界》・ゼルガネイア』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q1350",
+                "date": "2024-04-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」という《ファンファーレ》能力によって、1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、この《ファンファーレ》能力をプレイすることができず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-110"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4cf8052fc1a538e5b9ea69293857a73bac81414c810c302f7b8e9e1f4ec1f871",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-109",
+            "fetched_at": "2026-09-24T21:36:49.882575Z"
+          },
+          "document_ref": "documents-725705ee7e7d8d1f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-110",
+      "documents": {
+        "documents-f557f1f5d06e4120": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-110",
+            "faces": [
+              {
+                "name": "大いなる《世界》・ゼルガネイア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "アルカナ",
+                  "大神"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "10",
+                "power": "10",
+                "hp": "10",
+                "text": "自分のエンドフェイズが来たとき、これがEXエリアにあるなら、相手のリーダーすべてと相手の場のフォロワーすべてに4ダメージ。\n{ファンファーレ}相手のリーダーすべてと相手の場のフォロワーすべてに10ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-110.png",
+                "trait_raw": "アルカナ・大神"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1354",
+                "date": "2024-04-15",
+                "question": "「自分のエンドフェイズが来たとき、これがEXエリアにあるなら、相手のリーダーすべてと相手の場のフォロワーすべてに4ダメージ。」という能力は、『大いなる《世界》・ゼルガネイア』がEXエリアにある場合に有効となる能力ですか？",
+                "answer": "はい。『大いなる《世界》・ゼルガネイア』がEXエリアにある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1268",
+                "date": "2024-04-15",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1267",
+                "date": "2024-04-15",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-109"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:74120cc7c2b5701fddc43ac26d768d5ac93c7e87764b5ea361695af1f6495c0a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-110",
+            "fetched_at": "2026-09-24T21:36:52.602323Z"
+          },
+          "document_ref": "documents-f557f1f5d06e4120"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-111",
+      "documents": {
+        "documents-5ce1d472a0ef2c38": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-111",
+            "faces": [
+              {
+                "name": "星灯りの女神",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "光輝"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト3}：これは進化する。\n【守護】\n{ファンファーレ}手札のフォロワー1枚を公開：自分のデッキから「公開したフォロワーと同名のフォロワー」1枚を探し、EXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-111.png",
+                "trait_raw": "アルカナ・光輝"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1355",
+                "date": "2024-04-15",
+                "question": "《ファンファーレ》能力のコストとして『陰陽の開祖・クオン』を公開した場合、自分のデッキから『澄明なる頭脳・博衣こより』を探してEXエリアに置くことができますか？",
+                "answer": "はい。『澄明なる頭脳・博衣こより』をEXエリアに置くことができます。\n逆に『澄明なる頭脳・博衣こより』をコストとして公開した場合、『陰陽の開祖・クオン』をEXエリアに置くこともできます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-112"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2d574ea023266870ee4598bbf8ed1f351582c515d0bc57d052290f76c2ec1fba",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-111",
+            "fetched_at": "2026-09-24T21:36:55.122031Z"
+          },
+          "document_ref": "documents-5ce1d472a0ef2c38"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-112",
+      "documents": {
+        "documents-59531db731275309": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-112",
+            "faces": [
+              {
+                "name": "星灯りの女神",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アルカナ",
+                  "光輝"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】墓場のフォロワー1枚を消滅：自分のデッキから「消滅させたフォロワーと同名のフォロワー」2枚まで探し、EXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-112.png",
+                "trait_raw": "アルカナ・光輝"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1356",
+                "date": "2024-04-15",
+                "question": "【進化時】能力のコストとして自分の墓場の『陰陽の開祖・クオン』を消滅させた場合、自分のデッキから『澄明なる頭脳・博衣こより』を2枚まで探してEXエリアに置くことができますか？",
+                "answer": "はい。『澄明なる頭脳・博衣こより』を2枚までEXエリアに置くことができます。\n逆に『澄明なる頭脳・博衣こより』をコストとして消滅させた場合、『陰陽の開祖・クオン』をEXエリアに置くこともできます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-111"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:658df403d3175faaa1273f0bf3e6e8c947b603b3318b552062f016e9009d602e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-112",
+            "fetched_at": "2026-09-24T21:36:57.941808Z"
+          },
+          "document_ref": "documents-59531db731275309"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-113",
+      "documents": {
+        "documents-175a9d5fe2450b52": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-113",
+            "faces": [
+              {
+                "name": "天覇風神・フェイラン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "大神"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "2",
+                "text": "これをEXエリアからプレイする際、コストを-3する。\n自分のエンドフェイズが来たとき、自分の場の他のフォロワーすべては{攻撃力}+1する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-113.png",
+                "trait_raw": "大神"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1357",
+                "date": "2024-04-15",
+                "question": "『サハクィエル』の《ファンファーレ》能力によって、手札の『天覇風神・フェイラン』を場に出し、自分のエンドフェイズを迎えた場合、「自分のエンドフェイズが来たとき、これを手札に戻す。」と『天覇風神・フェイラン』の「自分のエンドフェイズが来たとき、自分の場の他のフォロワーすべては《攻撃力》+1する。」という能力は、どちらも誘発しますか？",
+                "answer": "はい。どちらも誘発し、任意の順番で解決することができます。\nまた、「自分のエンドフェイズが来たとき、これを手札に戻す。」を先に解決した場合でも、「自分のエンドフェイズが来たとき、自分の場の他のフォロワーすべては《攻撃力》+1する。」によって、自分の場のフォロワーすべての攻撃力を+1できます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f508310d5aa8cb01515e8a521d728dd30515e4957c8e75112bfb094605c29f34",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-113",
+            "fetched_at": "2026-09-24T21:37:00.756342Z"
+          },
+          "document_ref": "documents-175a9d5fe2450b52"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-114",
+      "documents": {
+        "documents-22d0dd129e2a5442": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-114",
+            "faces": [
+              {
+                "name": "フォーリンショット",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の墓場の天使・フォロワー1枚と相手の場のフォロワー1体を選ぶ。それのプレイヤーはそれをEXエリアに置く。",
+                "sections": [],
+                "flavor": "シャドバで勝つために必要なもの。それはね……才能だよ。\n――白銀ミカド",
+                "illustrator": "あかかがち",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-114.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1359",
+                "date": "2024-04-15",
+                "question": "自分や相手のEXエリアが上限枚数の状況で、このスペルをプレイした場合、どうなりますか？",
+                "answer": "相手のEXエリアが上限枚数の場合、相手の場のフォロワーはEXエリアに移動できないため、場に残ります。\n自分のEXエリアが上限枚数の場合、自分の墓場の天使・フォロワーはEXエリアに移動できないため、墓場に残ります。\n自分と相手のどちらもEXエリアが上限枚数の場合、相手の場のフォロワーも自分のEXエリアの天使・フォロワーもEXエリアに移動せず、それぞれの領域に残ります。"
+              },
+              {
+                "id": "Q1358",
+                "date": "2024-04-15",
+                "question": "このスペルは自分の墓場の天使・フォロワーと相手の場のフォロワーを選ぶことができる場合のみプレイすることができますか？",
+                "answer": "はい。その場合にのみ、プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0042a01708d7dce29b40ba55478669eab943c4b3d137f3cbe971edc6840c468f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-114",
+            "fetched_at": "2026-09-24T21:37:03.087390Z"
+          },
+          "document_ref": "documents-22d0dd129e2a5442"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-115",
+      "documents": {
+        "documents-80eb79a5689df5cf": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-115",
+            "faces": [
+              {
+                "name": "片翼の反逆者",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキの上1枚を見る。その中から、天使・カードか堕天使・カード1枚を公開して手札に加えてよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヒダヤーマン",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-115.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-116"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8737480fe9a564fd08d144dc8a75bc551ae6e71cb28dbbad4c780943e806b77b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-115",
+            "fetched_at": "2026-09-24T21:37:05.683239Z"
+          },
+          "document_ref": "documents-80eb79a5689df5cf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-116",
+      "documents": {
+        "documents-a08062f2e4f35416": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-116",
+            "faces": [
+              {
+                "name": "片翼の反逆者",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分の場の天使・フォロワー1体か自分の場の他の堕天使・フォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "何度も言わせないでもらえるかな……これは遊びなんだ。\n――白銀ミカド",
+                "illustrator": "ヒダヤーマン",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-116.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-115"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a7dfe71925c5ffcbd91a5382dc5227097e54d655f64ede13059c38b196437db5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-116",
+            "fetched_at": "2026-09-24T21:37:08.629093Z"
+          },
+          "document_ref": "documents-a08062f2e4f35416"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-117",
+      "documents": {
+        "documents-65de343caa320309": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-117",
+            "faces": [
+              {
+                "name": "マインドディバイダー",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アルカナ",
+                  "超克"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}自分の場のフォロワーが4体以上なら、自分のデッキの上1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "――其は《剣の二》、示すは《拒絶》。\n拓くは道。研ぐは技。それ以外は在る価値もなし。",
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-117.png",
+                "trait_raw": "アルカナ・超克"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ffc9f66340cfdf22f183283a4f09c997630400f2387ceb393e41088c3266e72c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-117",
+            "fetched_at": "2026-09-24T21:37:11.733828Z"
+          },
+          "document_ref": "documents-65de343caa320309"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-118",
+      "documents": {
+        "documents-e465d204195356da": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-118",
+            "faces": [
+              {
+                "name": "エンジェルブレイク",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "6",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー2体まで選ぶ。それを破壊する。自分の墓場に堕天使・カードがあるなら、自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "頑張るなぁって、褒めに来たんだよ。\n――白銀ミカド",
+                "illustrator": "あかかがち",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-118.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1360",
+                "date": "2024-04-15",
+                "question": "自分の墓場に堕天使・カードがある状況で、相手の場にフォロワーがいない場合、このスペルをプレイして自分のリーダーの体力を+2することができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、このスペルをプレイして自分のリーダーの体力を+2することができます。"
+              }
+            ],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6b1c53d27b6da70e985533b41fbf2f040b00d31b489d99456e47a7d8c4893186",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-118",
+            "fetched_at": "2026-09-24T21:37:14.781574Z"
+          },
+          "document_ref": "documents-e465d204195356da"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-119",
+      "documents": {
+        "documents-6c27e0673aa09136": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-119",
+            "faces": [
+              {
+                "name": "ピアッシングエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": "悪は奥まですっきり処罰！\n見落としがちな黒幕も、この矢は逃がしませんから！",
+                "illustrator": "廣岡政樹",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-119.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-120"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:05da0ee0d3ec0abcd17c0bb5193c3d5fcbdaec23163c46898296b6c267fb5b93",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-119",
+            "fetched_at": "2026-09-24T21:37:17.159333Z"
+          },
+          "document_ref": "documents-6c27e0673aa09136"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-120",
+      "documents": {
+        "documents-20b6a10f3347c1d8": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-120",
+            "faces": [
+              {
+                "name": "ピアッシングエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それとそれのリーダーに3ダメージ。",
+                "sections": [],
+                "flavor": "ご覧くださいこの貫通力！\nイヤ～なしつこい元凶も、この矢にかかればこの通り！",
+                "illustrator": "廣岡政樹",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-120.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP10-119"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:08259f8bfdd6429eacda58dddf39d5026bca0d68e91b72c4463acfae29c83fc4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-120",
+            "fetched_at": "2026-09-24T21:37:19.822191Z"
+          },
+          "document_ref": "documents-20b6a10f3347c1d8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-121",
+      "documents": {
+        "documents-968c9c683e30abb2": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-121",
+            "faces": [
+              {
+                "name": "コラプションガーディアン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "6",
+                "text": "【守護】\n{ファンファーレ}手札の天使・カードか堕天使・カード1枚を捨てる：自分のリーダーは{体力}+3する。1枚引く。自分のPPを2回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-121.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a0256e36c63aecc92f8486c5677a4011b6e87a8257bb42b7c5aa18f55433b5d7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-121",
+            "fetched_at": "2026-09-24T21:37:22.497838Z"
+          },
+          "document_ref": "documents-968c9c683e30abb2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP10-122",
+      "documents": {
+        "documents-d79da65e703feb8f": {
+          "region": "jp",
+          "record": {
+            "number": "BP10-122",
+            "faces": [
+              {
+                "name": "ウィングメッセンジャー",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "傭兵"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第10弾「Gods of the Arcana」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "【攻撃時】1枚引く。",
+                "sections": [],
+                "flavor": "手紙が翼をもたらすのは、読み終えて、思い返す時。\n出来ればその時、イケてる配達員も思い出してくれ！",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP10/bp10-122.png",
+                "trait_raw": "傭兵"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4a38f6ab1ca8bf00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:62c293ad200e278081d192c31543e8275a6bb529ab1920bb1334fed7cd16e3d3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP10-122",
+            "fetched_at": "2026-09-24T21:37:25.392795Z"
+          },
+          "document_ref": "documents-d79da65e703feb8f"
+        }
+      ]
+    }
+  ]
+}

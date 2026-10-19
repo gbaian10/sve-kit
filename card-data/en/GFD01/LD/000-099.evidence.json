@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "GFD01",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-67bc6234f49f5869": [
+        {
+          "ordinal": 0,
+          "name": "Gloryfinder Starter Deck \"Luxheart Legends\"",
+          "date_raw": "Jul. 25, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=GFD01",
+            "https://en.shadowverse-evolve.com/products/gfd01_02/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFD01",
+            "https://en.shadowverse-evolve.com/products/gfd01_02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/gfd01_02/",
+              "expansion_code": "GFD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:9f04616d4a1eea2adb58e3b39aaa61c5f598c8930d10523b77b08c28021128f8": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:512a8d29ca7a2ea2925a5d79f48920b73c546767778e9bf9a8d8c4b9a3cc12d3",
+        "raw_bytes": 35374,
+        "first_receipt_id": "sha256:67941d924cc00d2dbcfbbd863f22d5f66b36fa85192e43d9b09fe18f2b389ec9",
+        "descriptor_sha256": "sha256:34251c6fbb1abc8e2fcc16694d7cb31c2b05f6ce0c25d091461390b4657aee19",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:f01f93fc8b3133cad855c6c8fca861c6188e7e86955f4303a30737188b77f5bc"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-67bc6234f49f5869",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:d470facbf0e1f0291a1539c9a0d0f72e61a9204fc10092db88808e6355a083d3"
+    }
+  }
+}

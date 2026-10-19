@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD01",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-e898a8880b3b295d": [
+        {
+          "ordinal": 0,
+          "name": "スターターデッキ第1弾「麗しの妖精姫」",
+          "date_raw": "2022-04-28",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=SD01",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=SD01",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/sd01_06/",
+              "expansion_code": "SD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:8504c4ebfb7f51f2e9be2e619c0e789965d461f8c8d78d3585cdb9fcd0e89098": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:d2443600cfc876b2af12d4cd0a7cc1216166ef728b7696b813e86a9bc260aad1",
+        "raw_bytes": 36560,
+        "first_receipt_id": "sha256:b52e4b5e93f880512a46eaa5ed108fac878052d8053f7fb9ad80a6ce6bf24694",
+        "descriptor_sha256": "sha256:2e14e514d15d4aa47b65bdfb8f3dac36cfa51d34d80097a339dbcdb07e91527f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:8cfcd8157b6456e33ee0734b05c362c12a461ef818b5024269bbf12588c1aeca"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e898a8880b3b295d",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5cf1684af109b91fcacccb4f89d3837403f4c979c4f7de460292b5fe75c1eaf6"
+    }
+  }
+}

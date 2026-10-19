@@ -1,0 +1,2014 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SP01",
+  "range": "U/000-099",
+  "products": {
+    "products-ac9e8c14660ca665": [
+      {
+        "name": "スペシャルパック「シーサイド・メモリーズ」",
+        "date": "2024-09-27",
+        "links": [
+          "/cardlist/cardsearch?expansion=SP01",
+          "https://shadowverse-evolve.com/products/sp01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SP01-U01",
+      "documents": {
+        "documents-7653f1e70884ddf0": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U01",
+            "faces": [
+              {
+                "name": "揺蕩う意志・スピネ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "3",
+                "text": "自分の場のフォロワーが進化したとき、自分のリーダーは{体力}+2する。\n{ファンファーレ}自分の墓場の元のコスト2以下の{エルフ}フォロワー1枚を選ぶ。それをEXエリアに置く。このターン、それをプレイする際、コストを-2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u01.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1600",
+                "date": "2024-09-20",
+                "question": "何らかの能力により、相手のターン中に自分の場のフォロワーが進化した場合、「自分の場のフォロワーが進化したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a9227fc96ca4fbaaf8eb9426df2e2258c06c4c643bfc17863e7020a48b6215b5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U01",
+            "fetched_at": "2026-09-24T20:55:14.954454Z"
+          },
+          "document_ref": "documents-7653f1e70884ddf0"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U02",
+      "documents": {
+        "documents-a12c555ac4ca443e": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U02",
+            "faces": [
+              {
+                "name": "人形の少女・オーキス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "人形"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは『決意の人形・オーキス』に進化する。\n{進化}{コスト4}：これは『復讐の人形・オーキス』に進化する。この能力は自分の墓場の人形・カードが3枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u02.png",
+                "trait_raw": "人形"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-003"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP08-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:59fa89cc9b2d3555d3a30896da9c6724fac6561b7b1a6d3f391956d8805e8f67",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U02",
+            "fetched_at": "2026-09-24T20:55:17.700210Z"
+          },
+          "document_ref": "documents-a12c555ac4ca443e"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U03",
+      "documents": {
+        "documents-32c2531e2bb3ac4e": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U03",
+            "faces": [
+              {
+                "name": "フェアリープリンセス・アリア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精",
+                  "プリンセス"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\nこれが場にいる限り、自分の場の他の妖精・フォロワーすべては【突進】を持つ。\n{ファンファーレ}『フェアリー』9枚の中から、好きな枚数を場に出す。好きな枚数をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u03.png",
+                "trait_raw": "妖精・プリンセス"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q46",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力で、『フェアリー』を1枚も場に出さないまたはEXエリアに置かないことはできますか？",
+                "answer": "はい。好きな枚数を選べるため、0枚を選び『フェアリー』を場に出さないまたはEXエリアに置かないことができます。"
+              },
+              {
+                "id": "Q45",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力で、『フェアリー』を6枚以上場に出すまたはEXエリアに置くことはできますか？",
+                "answer": "いいえ。場とEXエリアの上限はどちらも5枚であるため、6枚目以降を場に出すまたはEXエリアに置くことはできません。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3905eec8021c9561f1c5832c439b299b3f3612d05e02b6b4ffd11f13d01bdd3f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U03",
+            "fetched_at": "2026-09-24T20:55:20.604192Z"
+          },
+          "document_ref": "documents-32c2531e2bb3ac4e"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U04",
+      "documents": {
+        "documents-dfad748654d36d17": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U04",
+            "faces": [
+              {
+                "name": "晴天の銀騎士・エミリア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "自分の場に兵士・フォロワーが出たとき、相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n{起動}{コスト0}：自分の手札か自分のEXエリアの元のコスト2以下の兵士・フォロワー1枚を場に出してよい。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u04.png",
+                "trait_raw": "指揮官"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2051",
+                "date": "2025-05-30",
+                "question": "『晴天の銀騎士・エミリア』の起動能力によってEXエリアの『ロストサムライ・カゲミツ』を場に出すことができますか？",
+                "answer": "はい。EXエリアの『ロストサムライ・カゲミツ』を場に出すことができます。\nこの場合、EXエリアの『ロストサムライ・カゲミツ』に置かれていた戦意カウンターは『ロストサムライ・カゲミツ』に置かれたまま場に出ます。\nまた、『ロストサムライ・カゲミツ』の「自分の場のフォロワーが進化したとき、～」という能力で場に出ていないので、この能力はプレイされず、この能力によって『ロストサムライ・カゲミツ』を進化させることはできません。"
+              },
+              {
+                "id": "Q1602",
+                "date": "2024-09-20",
+                "question": "何らかの能力により、相手のターン中に自分の場に兵士・フォロワーが出た場合、「自分の場に兵士・フォロワーが出たとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q1601",
+                "date": "2024-09-20",
+                "question": "何らかの能力により、自分の場に兵士・フォロワーが2体同時に出た場合、「自分の場に兵士・フォロワーが出たとき、～」という能力は2回誘発しますか？",
+                "answer": "はい。2回誘発します。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f9c7da18f4656cd7394a147e4b8ca3ca11b546e651c02ddae78c7e3d50d3d79",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U04",
+            "fetched_at": "2026-09-24T20:55:23.362171Z"
+          },
+          "document_ref": "documents-dfad748654d36d17"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U05",
+      "documents": {
+        "documents-e7bbfc235ccbb0aa": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U05",
+            "faces": [
+              {
+                "name": "空の指揮官・セリア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは『希望の戦術家・セリア』に進化する。\n{進化}{コスト4}：これは『絶望の使者・セリア』に進化する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u05.png",
+                "trait_raw": "指揮官"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-019"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-019"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:35c2c2cb005900c5ded1676f16f5190832fd0407ca98e916e83e2a3787122aa7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U05",
+            "fetched_at": "2026-09-24T20:55:26.339164Z"
+          },
+          "document_ref": "documents-e7bbfc235ccbb0aa"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U06",
+      "documents": {
+        "documents-68973d225bcd3b12": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U06",
+            "faces": [
+              {
+                "name": "音速の機構・ララミア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "超克"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト3}：これは進化する。\nこれの{進化}コストは「自分の場の他のフォロワーの数」と同じだけ-1する。\n【突進】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u06.png",
+                "trait_raw": "兵士・超克"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q799",
+                "date": "2023-06-09",
+                "question": "『音速の機構・ララミア』の他に、自分の場にフォロワーが4体いる場合、『音速の機構・ララミア』の《進化》コストは0になりますか？",
+                "answer": "はい。《進化》コストが-4されるので-1となり、コスト0で進化することができます。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f99a850de12b5fe43b73f70511731962b1958e60077911741a95177d554be86c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U06",
+            "fetched_at": "2026-09-24T20:55:29.104093Z"
+          },
+          "document_ref": "documents-68973d225bcd3b12"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U07",
+      "documents": {
+        "documents-77f39391ff4b21a7": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U07",
+            "faces": [
+              {
+                "name": "音速の機構・ララミア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士",
+                  "超克"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "3",
+                "text": "【疾走】\n【進化時】{コスト3}：これは{攻撃力}+X/{体力}+Xする。Xは「自分の場の他のフォロワーの数」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u07.png",
+                "trait_raw": "兵士・超克"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:059800024b0005f7761ad072894e476c47755cb1778ef934b6ef3558da4a0c70",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U07",
+            "fetched_at": "2026-09-24T20:55:31.748731Z"
+          },
+          "document_ref": "documents-77f39391ff4b21a7"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U08",
+      "documents": {
+        "documents-82d1eea19f3519d8": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U08",
+            "faces": [
+              {
+                "name": "レヴィオンセイバー・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "{進化}{コスト3}：これは進化する。\n【疾走】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u08.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:827655edde3190f61d845e073dc70d822737dc039e999598a8d2652997c25108",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U08",
+            "fetched_at": "2026-09-24T20:55:34.642322Z"
+          },
+          "document_ref": "documents-82d1eea19f3519d8"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U09",
+      "documents": {
+        "documents-7b1ebb6273124fa7": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U09",
+            "faces": [
+              {
+                "name": "レヴィオンセイバー・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "【疾走】\n【攻撃時】これをスタンドする。この能力は1ターンに1回働く。\n【進化時】このターン、これは交戦ダメージを受けない。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u09.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q281",
+                "date": "2022-06-24",
+                "question": "交戦ダメージとは何ですか？",
+                "answer": "交戦ダメージとは、攻撃フォロワーと攻撃目標のフォロワーが交戦状態のときに、それらのフォロワーが互いに与える攻撃力に等しいダメージのことを指します。"
+              },
+              {
+                "id": "Q280",
+                "date": "2022-06-24",
+                "question": "このフォロワーが自分の場に2体あり、それらが攻撃したとき、【攻撃時】能力はそれぞれ1回ずつ誘発しますか？",
+                "answer": "はい。【攻撃時】能力はそれぞれ1ターンに1回ずつ誘発します。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b48eb74dd131d001224e66d89b084a30c6cf79b34183cb707397cfd4e30fd692",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U09",
+            "fetched_at": "2026-09-24T20:55:37.173044Z"
+          },
+          "document_ref": "documents-7b1ebb6273124fa7"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U10",
+      "documents": {
+        "documents-6c5d424eb668cd43": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U10",
+            "faces": [
+              {
+                "name": "あどけない飛沫・プリス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "5",
+                "text": "自分が魔法使い・カードをプレイしたとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、元のコスト3以下の魔法使い・フォロワーと元のコスト3以下の魔法使い・スペルそれぞれ1枚までEXエリアに置いてよい。残りを好きな順にデッキの下に置く。このターン、それをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u10.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1604",
+                "date": "2024-09-20",
+                "question": "『あどけない飛沫・プリス』の「自分が魔法使い・カードをプレイしたとき、～」という能力は、この能力を持つ『あどけない飛沫・プリス』自身をプレイした場合でも誘発しますか？",
+                "answer": "いいえ。誘発しません。『あどけない飛沫・プリス』をプレイしたとき、その『あどけない飛沫・プリス』は場におらず、その能力は有効ではありません。"
+              },
+              {
+                "id": "Q1603",
+                "date": "2024-09-20",
+                "question": "相手のターン中、相手のフォロワーが攻撃を宣言した後に訪れるクイックタイミングにおいて、自分が魔法使い・スペルをプレイした場合、自分の場にいる『あどけない飛沫・プリス』の能力は誘発しますか？",
+                "answer": "はい。誘発します。\nまた、クイックタイミングにおいて自分がプレイしたスペルの解決後、誘発した『あどけない飛沫・プリス』の能力を解決します。これは、相手のフォロワーが攻撃目標に対してダメージを与える前に行います。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:904383aa7aa14aa8e50caf7ccd1850608f6a5616ef010f8dcdd60b67d4b607a8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U10",
+            "fetched_at": "2026-09-24T20:55:40.067137Z"
+          },
+          "document_ref": "documents-6c5d424eb668cd43"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U11",
+      "documents": {
+        "documents-163018fecb0b0655": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U11",
+            "faces": [
+              {
+                "name": "マナリアの魔導姫・アン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}下記から1つチョイスする。自分の墓場の学院・カードが10枚以上なら、代わりに2つまで。\n【1】自分のデッキから『アンの大魔法』1枚を探し、EXエリアに置く。このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。【2】自分のデッキから『マナリアの竜姫・グレア』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u11.png",
+                "trait_raw": "魔法使い・学院・プリンセス"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1235",
+                "date": "2024-03-01",
+                "question": "「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」という能力は、『アンの大魔法』を手札以外からプレイする際もコストを-5しますか？",
+                "answer": "はい。手札以外からプレイする際もコストを-5します。"
+              },
+              {
+                "id": "Q1234",
+                "date": "2024-03-01",
+                "question": "《ファンファーレ》能力で【1】をチョイスし、自分のデッキの『アンの大魔法』を見つけない選択をした場合、「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」は有効ですか？",
+                "answer": "はい。自分のデッキの『アンの大魔法』を見つけない選択をした場合でも「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」は有効です。"
+              },
+              {
+                "id": "Q1233",
+                "date": "2024-03-01",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01a-008"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5017bc24c8af742488f6d7a6d54e888b20accbcc8983e24c7b8338055831db12",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U11",
+            "fetched_at": "2026-09-24T20:55:42.824456Z"
+          },
+          "document_ref": "documents-163018fecb0b0655"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U12",
+      "documents": {
+        "documents-72db41b4e55872cc": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U12",
+            "faces": [
+              {
+                "name": "マナリアの竜姫・グレア",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の墓場の学院・カードが10枚以上なら、それに4ダメージ。それのリーダーに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u12.png",
+                "trait_raw": "魔法使い・学院・プリンセス"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1b3a8577220552cba3f239719a9a411306ce0c200f003e8685d557abefa8dec4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U12",
+            "fetched_at": "2026-09-24T20:55:45.516429Z"
+          },
+          "document_ref": "documents-72db41b4e55872cc"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U13",
+      "documents": {
+        "documents-01a830f2e89be138": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U13",
+            "faces": [
+              {
+                "name": "マナリアの竜姫・グレア",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "これが場にいる限り、自分の学院・スペルが与えるダメージを+1する。\n【進化時】自分のデッキから『グレアの炎熱』1枚を探し、EXエリアに置く。このターン、次に自分が『グレアの炎熱』をプレイする際、コストを-1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u13.png",
+                "trait_raw": "魔法使い・学院・プリンセス"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2778",
+                "date": "2026-07-27",
+                "question": "自分の場に『マナリアの竜姫・グレア（EVOLVE）』2体がいる場合、自分の学院・スペルが与えるダメージを+2しますか？",
+                "answer": "はい。自分の学院・スペルが与えるダメージを+2します。"
+              },
+              {
+                "id": "Q1239",
+                "date": "2024-03-01",
+                "question": "自分の墓場の学院・カードが10枚以上の状況で、自分の場に『マナリアの竜姫・グレア（EVOLVE）』がいる場合、『マナリアの魔弾』が相手の場のフォロワーとそれのリーダーに与えるダメージはそれぞれ+1されますか？",
+                "answer": "はい。それぞれ+1され、相手の場のフォロワーに4ダメージ、それのリーダーに3ダメージ与えます。"
+              },
+              {
+                "id": "Q1238",
+                "date": "2024-03-01",
+                "question": "自分の墓場の学院・カードが5枚以上の状況で、自分の場に『マナリアの竜姫・グレア（EVOLVE）』がいる場合、『グレアの炎熱』が相手の場のフォロワーに与えるダメージは4ですか？",
+                "answer": "はい。『グレアの炎熱』の能力によって3ダメージになった後、『マナリアの竜姫・グレア（EVOLVE）』の能力によってダメージが+1されるため、相手の場のフォロワーに与えるダメージは4です。"
+              },
+              {
+                "id": "Q1237",
+                "date": "2024-03-01",
+                "question": "「このターン、次に自分が『グレアの炎熱』をプレイする際、コストを-1する。」という能力は、『グレアの炎熱』を手札以外からプレイする際もコストを-1しますか？",
+                "answer": "はい。手札以外からプレイする際もコストを-1します。"
+              },
+              {
+                "id": "Q1236",
+                "date": "2024-03-01",
+                "question": "『マナリアの竜姫・グレア（EVOLVE）』の【進化時】能力をプレイし、自分のデッキの『グレアの炎熱』を見つけない選択をした場合、「このターン、次に自分が『グレアの炎熱』をプレイする際、コストを-1する。」は有効ですか？",
+                "answer": "はい。自分のデッキの『グレアの炎熱』を見つけない選択をした場合でも「このターン、次に自分が『グレアの炎熱』をプレイする際、コストを-1する。」は有効です。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01a-009"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fc74a19370f45d7386d16e1c9697e788c65ee1153da08a53e8ba1deb738c3c45",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U13",
+            "fetched_at": "2026-09-24T20:55:48.280760Z"
+          },
+          "document_ref": "documents-01a830f2e89be138"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U14",
+      "documents": {
+        "documents-b0f38435625f5b64": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U14",
+            "faces": [
+              {
+                "name": "水辺のニンフ・シャロン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "海洋"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "7",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のPPを5回復する。\n{起動}これを{アクト}：下記から2つまでチョイスする。【1】相手の場のフォロワー1体を選ぶ。次のそれのプレイヤーのターン中、それは相手を攻撃できない。【2】このターン、次に自分の場にフォロワーが1体以上出たとき、その中の1体は{攻撃力}+1/{体力}+1する。【3】自分のリーダーは{体力}+2する。【4】1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u14.png",
+                "trait_raw": "海洋"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1610",
+                "date": "2024-09-20",
+                "question": "このフォロワーの《ファンファーレ》能力によって、自分のPPをPP最大値より多く回復することはできますか？",
+                "answer": "いいえ。PP最大値より多く回復することはできません。"
+              },
+              {
+                "id": "Q1609",
+                "date": "2024-09-20",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q1608",
+                "date": "2024-09-20",
+                "question": "このフォロワーの《起動》能力で【1】と【4】をチョイスした場合、1枚引いてから相手の場のフォロワーを選ぶことができますか？",
+                "answer": "いいえ。1枚引く前に相手の場のフォロワーを選ぶ必要があります。"
+              },
+              {
+                "id": "Q1607",
+                "date": "2024-09-20",
+                "question": "このフォロワーの《起動》能力をプレイし、【2】をチョイスしました。その後、『白亜の竜騎士』をプレイし、『白亜の竜騎士』の《ファンファーレ》能力によって、『ガルグイユ』を場に出した場合、『白亜の竜騎士』か『ガルグイユ』のうち1体を選択して攻撃力と体力を+1することができますか？",
+                "answer": "いいえ。『白亜の竜騎士』の攻撃力と体力が＋1されます。\n「このターン、次に自分の場にフォロワーが1体以上出たとき、～」という能力では、次に自分の場にフォロワーが出る際に、2体以上のフォロワーが同時に場に出た場合は、その中から1体を選択することができますが、次に場に出たフォロワーの能力によって新たに1体のフォロワーが場に出た場合、最初の1体の攻撃力と体力が＋1されます。"
+              },
+              {
+                "id": "Q1606",
+                "date": "2024-09-20",
+                "question": "このフォロワーの《起動》能力をプレイし、【2】をチョイスしました。その後、【覚醒】状態を満たしている状況で『オルカの大渦』をプレイした場合、2体同時に場に出た『オルカ』のうち1体を選択して攻撃力と体力を+1することができますか？",
+                "answer": "はい。2体以上のフォロワーが同時に場に出た場合、そのうちの1体の攻撃力と体力を+1することができます。"
+              },
+              {
+                "id": "Q1605",
+                "date": "2024-09-20",
+                "question": "このフォロワーの《起動》能力で【1】をチョイスした場合、この能力で選ばれたフォロワーは、次のそれのプレイヤーのターン中、相手のフォロワーに攻撃することはできますか？",
+                "answer": "いいえ。選ばれたフォロワーは相手のリーダーと相手のフォロワーに攻撃することができません。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:653df0679742f12bed27f0640616da9d6ab8d605a81b0fb9c0d01fd069e57226",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U14",
+            "fetched_at": "2026-09-24T20:55:51.192770Z"
+          },
+          "document_ref": "documents-b0f38435625f5b64"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U15",
+      "documents": {
+        "documents-451ef9b1f1743890": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U15",
+            "faces": [
+              {
+                "name": "銀氷のドラゴニュート・フィルレイン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "3",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それをアクトする。それは次の相手のスタートフェイズにスタンドしない。\n{ファンファーレ}【覚醒】状態なら、自分のデッキから『銀氷の吐息』1枚を探し、EXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u15.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q821",
+                "date": "2023-06-09",
+                "question": "《ファンファーレ》能力によって、自分のデッキに『銀氷の吐息』がないことが分かっている場合でも、【覚醒】状態なら、デッキの『銀氷の吐息』を探し、見つけない選択をしてデッキをシャッフルする必要がありますか？",
+                "answer": "はい。その場合でもデッキをシャッフルする必要があります。"
+              },
+              {
+                "id": "Q820",
+                "date": "2023-06-09",
+                "question": "《ファンファーレ》能力によって、アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしませんか？",
+                "answer": "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしません。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「それは次の相手のスタートフェイズにスタンドしない。」が適用されます。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-057"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-061"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8a94087700b656be7408f94e449ef6a402e3bd39473bf1c3d9e122b717dff29b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U15",
+            "fetched_at": "2026-09-24T20:55:54.036417Z"
+          },
+          "document_ref": "documents-451ef9b1f1743890"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U16",
+      "documents": {
+        "documents-e69e3d02dab66657": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U16",
+            "faces": [
+              {
+                "name": "侮蔑の絶傑・ガルミーユ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "竜族"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト2}：これは進化する。\n自分のターン中、これが能力ダメージを受けたとき、このターン、これの{進化}コストを0にする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u16.png",
+                "trait_raw": "絶傑・竜族"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q706",
+                "date": "2023-04-21",
+                "question": "「能力によるダメージ」とは何ですか？",
+                "answer": "例えば、スペル『侮蔑の炎爪』によって自分の場のフォロワーに与える1ダメージや、フォロワー『侮蔑の信者』の起動能力によって自分の場のフォロワーに与える1ダメージなどが「能力によるダメージ」に該当します。\n「能力によるダメージ」とは、フォロワー同士の交戦によってお互いに与える交戦ダメージや攻撃ダメージを除くあらゆるダメージです。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f3fb9231aab74683d9d9ecd89bfdf3bb94967ce4c981ac312aa948f100b06455",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U16",
+            "fetched_at": "2026-09-24T20:55:56.830131Z"
+          },
+          "document_ref": "documents-e69e3d02dab66657"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U17",
+      "documents": {
+        "documents-0bdde650ecd21d93": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U17",
+            "faces": [
+              {
+                "name": "侮蔑の絶傑・ガルミーユ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "竜族"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "自分のターン中、これが能力ダメージを受けたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n【進化時】自分の墓場の元のコスト2以下の絶傑・カード1枚を選ぶ。それのコストを0にしてプレイする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u17.png",
+                "trait_raw": "絶傑・竜族"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q707",
+                "date": "2023-04-21",
+                "question": "自分のターン中、『侮蔑の絶傑・ガルミーユ（EVOLVE）』の体力が0以下になるように能力によるダメージを受けた場合、「自分のターン中、これが能力によるダメージを受けたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、体力が0以下になった『侮蔑の絶傑・ガルミーユ（EVOLVE）』の破壊処理が行われた後に、解決します。"
+              },
+              {
+                "id": "Q706",
+                "date": "2023-04-21",
+                "question": "「能力によるダメージ」とは何ですか？",
+                "answer": "例えば、スペル『侮蔑の炎爪』によって自分の場のフォロワーに与える1ダメージや、フォロワー『侮蔑の信者』の起動能力によって自分の場のフォロワーに与える1ダメージなどが「能力によるダメージ」に該当します。\n「能力によるダメージ」とは、フォロワー同士の交戦によってお互いに与える交戦ダメージや攻撃ダメージを除くあらゆるダメージです。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U16"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ab5b1002027b2da054d83694237787a2740d2d8be92a9ca69c43ceb73f13c804",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U17",
+            "fetched_at": "2026-09-24T20:55:59.394366Z"
+          },
+          "document_ref": "documents-0bdde650ecd21d93"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U18",
+      "documents": {
+        "documents-caab0b40cbe1f0af": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U18",
+            "faces": [
+              {
+                "name": "熱き夜・クイーンヴァンパイア",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、自分の場の他の吸血鬼・カードが3枚以上なら、相手のリーダーすべてに3ダメージ。自分のリーダーは{体力}+3する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u18.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:95718c8cae0aca9a15f14ecff0e094422ccc1584d418c946474ecafdf23e7fc9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U18",
+            "fetched_at": "2026-09-24T20:56:02.084162Z"
+          },
+          "document_ref": "documents-caab0b40cbe1f0af"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U19",
+      "documents": {
+        "documents-16be85a12aee73d0": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U19",
+            "faces": [
+              {
+                "name": "大妖狐・ギンセツ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "妖怪"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "6",
+                "power": "1",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『一ツ尾狐』5枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u19.png",
+                "trait_raw": "挑戦者・妖怪"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q829",
+                "date": "2023-06-09",
+                "question": "自分のEXエリアに既にカードが3枚置かれている状態で『大妖狐・ギンセツ』の《ファンファーレ》能力を解決する場合、自分のEXエリアに『一ツ尾狐』は何枚置きますか？",
+                "answer": "既に自分のEXエリアにカードが3枚置かれている場合、EXエリアの上限枚数である5枚になるように、自分のEXエリアに『一ツ尾狐』を2枚置きます。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U20"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae430a8fc3086f801dadfbd979a0169ea0a35187c11beff00b27d3608ad602fd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U19",
+            "fetched_at": "2026-09-24T20:56:05.048856Z"
+          },
+          "document_ref": "documents-16be85a12aee73d0"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U20",
+      "documents": {
+        "documents-2a570b6b7a75e0c4": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U20",
+            "faces": [
+              {
+                "name": "大妖狐・ギンセツ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "挑戦者",
+                  "妖怪"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "-",
+                "power": "1",
+                "hp": "9",
+                "text": "これが場にいる限り、自分が妖怪・フォロワーをプレイする際、コストを-2する。\nこれが場にいる限り、自分の場の妖怪・フォロワーが与えるダメージを+1する。\n自分の妖怪・フォロワーが場を離れたとき、これは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u20.png",
+                "trait_raw": "挑戦者・妖怪"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2775",
+                "date": "2026-07-27",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』2体がいる場合、自分の場の妖怪・フォロワーが与えるダメージを+2しますか？",
+                "answer": "はい。自分の場の妖怪・フォロワーが与えるダメージを+2します。"
+              },
+              {
+                "id": "Q838",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』1体と『一ツ尾狐』4体がいる状況で、相手の『ハンプティダンプティ（EVOLVE）』の【進化時】能力による全体ダメージで、自分の『一ツ尾狐』4体が破壊された場合、『大妖狐・ギンセツ（EVOLVE）』の「自分の妖怪・フォロワーが場を離れたとき、これは《攻撃力》+1する。」という能力は4回誘発しますか？",
+                "answer": "はい。妖怪・フォロワーである『一ツ尾狐』4体が場を離れているので、『大妖狐・ギンセツ（EVOLVE）』の能力が4回誘発し、攻撃力を+4します。"
+              },
+              {
+                "id": "Q837",
+                "date": "2023-06-09",
+                "question": "「これがいる限り、自分の場の妖怪・フォロワーが与えるダメージを+1する。」とは、具体的にどのようなダメージを+1しますか？",
+                "answer": "自分の場の妖怪・フォロワーが相手のリーダーや相手のフォロワーに攻撃して与えるダメージや自分の場の、妖怪・フォロワーの能力によって与えるダメージが+1されます。"
+              },
+              {
+                "id": "Q836",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』と、何らかの理由によって攻撃力が0になった『一ツ尾狐』がいる状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『一ツ尾狐』が相手のリーダーに攻撃した場合、相手のリーダーに1ダメージ与えますか？",
+                "answer": "いいえ。相手のリーダーにダメージは与えません。\n攻撃力が0の『一ツ尾狐』が相手のリーダーに攻撃した場合、『一ツ尾狐』の攻撃力が0であるため、ダメージを与えるという行動が起こりません。すなわち、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」を適用する際に、ダメージを与えるという行動自体が存在しないため、何も適用されず、最終的に「ダメージを与えない」となります。"
+              },
+              {
+                "id": "Q835",
+                "date": "2023-06-09",
+                "question": "自分の場に攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』がいて、相手の場に『安息の領域』がある状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『大妖狐・ギンセツ（EVOLVE）』が攻撃し、相手のリーダーを攻撃目標に選択しました。次に、その後のクイックタイミングにおいて、『安息の領域』の《起動》能力が使われ、相手のリーダーに「リーダーが受ける5以上のダメージを4にする」が適用されました。\nこの場合、自分の攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』は、相手のリーダーに何ダメージ与えますか？",
+                "answer": "相手プレイヤーの選択により、「4ダメージ」もしくは「5ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、相手のリーダーがダメージを受けるので、相手が適用順を選択します。\n攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』に適用されている「与えるダメージを+1」と相手のリーダーに適用されている「リーダーが受ける5以上のダメージを4にする」を任意の順で適用することができます。\n\n①「与えるダメージを+1」→「リーダーが受ける5以上のダメージを4にする」の順で適用する場合\n「与えるダメージを+1」を適用し、攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが7ダメージになります。その後、「リーダーが受ける5以上のダメージを4にする」を適用し、『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが4ダメージになります。\n\n②「リーダーが受ける5以上のダメージを4にする」→「与えるダメージを+1」の順で適用する場合\n「リーダーが受ける5以上のダメージを4にする」を適用し、攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが4ダメージになります。その後、「与えるダメージを+1」を適用し、『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが5ダメージになります。"
+              },
+              {
+                "id": "Q834",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』と攻撃力が1の『一ツ尾狐』がいて、相手の場に『レーヴァテインドラゴン・ディフェンスモード』がいる状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『一ツ尾狐』の攻撃によって、相手の『レーヴァテインドラゴン・ディフェンスモード』と交戦しました。\nこの場合、自分の『一ツ尾狐』は、相手の『レーヴァテインドラゴン・ディフェンスモード』に何ダメージ与えますか？",
+                "answer": "『レーヴァテインドラゴン・ディフェンスモード』が場にいる方のプレイヤー（相手）の選択により、「ダメージを与えない」もしくは「1ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるフォロワーは『レーヴァテインドラゴン・ディフェンスモード』なので、相手が適用順を選択します。（『レーヴァテインドラゴン・ディフェンスモード』のマスターが適用順を選択します。）\n『一ツ尾狐』に適用されている「与えるダメージを+1」と『レーヴァテインドラゴン・ディフェンスモード』の「受けるダメージを-1」を任意の順で適用することができます。\n\n①「受けるダメージを-1」→「与えるダメージを+1」の順で適用する場合\n「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが0ダメージになります。この時点で、0ダメージ与える行動は全く行われなくなるため、ダメージを与えるという行動自体が存在しなくなります。その後、「与えるダメージを+1」を適用しますが、ダメージを与えるという行動自体がすでに存在しないため、何も適用されません。よって、最終的に「ダメージを与えない」となります。\n\n②「与えるダメージを+1」→「受けるダメージを-1」の順で適用する場合\n「与えるダメージを+1」を適用し、『一ツ尾狐』が与えるダメージが2ダメージになります。その後、「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが1ダメージになります。"
+              },
+              {
+                "id": "Q833",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』と攻撃力が3の『火車』がいて、相手の場に『レーヴァテインドラゴン・ディフェンスモード』がいる状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『火車』の攻撃によって、相手の『レーヴァテインドラゴン・ディフェンスモード』と交戦しました。\nこの場合、自分の『火車』は、相手の『レーヴァテインドラゴン・ディフェンスモード』に何ダメージ与えますか？",
+                "answer": "3ダメージです。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるフォロワーは『レーヴァテインドラゴン・ディフェンスモード』なので、相手が適用順を選択します。（『レーヴァテインドラゴン・ディフェンスモード』のマスターが適用順を選択します。）\n『火車』に適用されている「与えるダメージを+1」と『レーヴァテインドラゴン・ディフェンスモード』の「受けるダメージを-1」を適用し、最終的に3ダメージになります。"
+              },
+              {
+                "id": "Q832",
+                "date": "2023-06-09",
+                "question": "『変装の牙』によって「【攻撃時】相手のフォロワー1体を選ぶ。それに「これの攻撃力」と同じダメージ」という能力が付与された妖怪・フォロワーが、この能力によって与えるダメージは+1されますか？",
+                "answer": "はい。『変装の牙』によって付与された【攻撃時】能力で与えるダメージも+1されます。"
+              },
+              {
+                "id": "Q831",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』がいる状態で、自分のEXエリアから『一ツ尾狐』をプレイする場合、そのコストを-2しますか？",
+                "answer": "はい。トークンである『一ツ尾狐』もタイプに妖怪を持つフォロワ―であるため、プレイする際のコストを-2します。"
+              },
+              {
+                "id": "Q830",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』が2体いる場合、自分が妖怪・フォロワーをプレイする際、そのコストを-4しますか？",
+                "answer": "はい。それぞれの『大妖狐・ギンセツ（EVOLVE）』の能力が適用されるため、そのコストを-4します。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e312d4535ab612626fd9751527785c171edb2a7ad4b35254b7bef2df01b2c86d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U20",
+            "fetched_at": "2026-09-24T20:56:07.586984Z"
+          },
+          "document_ref": "documents-2a570b6b7a75e0c4"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U21",
+      "documents": {
+        "documents-2791586857ab3359": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U21",
+            "faces": [
+              {
+                "name": "ケルベロス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}『冥焔の右腕・ミミ』1枚か『冥焔の左腕・ココ』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに1枚ずつ置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u21.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": "https://shadowverse-evolve.com/errata/bp01-101/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q213",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限まで残り1枚のとき、このフォロワーの《ファンファーレ》能力で『ミミ』と『ココ』のどちらをEXエリアに置くかを選択することはできますか？",
+                "answer": "はい。選択することができます。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c6ed48e255711dc8aaaf1ee040d3d65931a62e68a22b2d38aa325cf40b11d396",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U21",
+            "fetched_at": "2026-09-24T20:56:10.250828Z"
+          },
+          "document_ref": "documents-2791586857ab3359"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U22",
+      "documents": {
+        "documents-dd6cc1539e51a793": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U22",
+            "faces": [
+              {
+                "name": "ケルベロス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】『冥焔の右腕・ミミ』『冥焔の左腕・ココ』1枚ずつEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u22.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": "https://shadowverse-evolve.com/errata/bp01-101/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q214",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限まで残り1枚のとき、このフォロワーの能力で『ミミ』と『ココ』のどちらをEXエリアに置くかを選択することはできますか？",
+                "answer": "はい。選択することができます。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9d00a6c86645929d15fcbedadc62b483b0b057c6e53bf31729aad5787a4f3d8e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U22",
+            "fetched_at": "2026-09-24T20:56:13.174008Z"
+          },
+          "document_ref": "documents-dd6cc1539e51a793"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U23",
+      "documents": {
+        "documents-5f4912e254da1176": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U23",
+            "faces": [
+              {
+                "name": "砂浜の調べ・リテュエル",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "プリンセス"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "1",
+                "power": "0",
+                "hp": "1",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。このターン、自分のリーダーの{体力}を+4以上していたなら、それを破壊する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "LM7",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u23.png",
+                "trait_raw": "信仰・プリンセス"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1615",
+                "date": "2024-09-20",
+                "question": "自分のリーダーの体力が1で自分の場に『古き護り手』が1枚、相手の場に『ターミナルウェポン』1体がいる状況で、自分のターン中に、相手の『ターミナルウェポン』を破壊し、《ラストワード》で自分のリーダーは4ダメージを受けました。この場合、自分のリーダーの体力は-3になり、その後、『古き護り手』の能力によって1になりますが、『砂浜の調べ・リテュエル』の《ファンファーレ》能力にある「このターン、自分のリーダーの《体力》を+4以上していたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。\n自分のリーダーの体力が-3から1になっているため、+4以上されており「このターン、自分のリーダーの《体力》を+4以上していたなら、」の条件を満たします。"
+              },
+              {
+                "id": "Q1614",
+                "date": "2024-09-20",
+                "question": "「自分のリーダーは《体力》+1する。」と「自分のリーダーは《体力》+3する。」という能力によって、1ターン中に合計で自分のリーダーの体力を+4以上していた場合、このフォロワーの《ファンファーレ》能力にある「このターン、自分のリーダーの《体力》を+4以上していたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              },
+              {
+                "id": "Q1613",
+                "date": "2024-09-20",
+                "question": "何らかの能力により、自分のリーダーの体力を+4した後に、自分のリーダーが4ダメージを受けていた場合、このフォロワーの《ファンファーレ》能力にある「このターン、自分のリーダーの《体力》を+4以上していたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              },
+              {
+                "id": "Q1612",
+                "date": "2024-09-20",
+                "question": "このターン中に自分のリーダーの体力を+4以上している状況で、相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイして1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができず、1枚引くことができません。"
+              },
+              {
+                "id": "Q1611",
+                "date": "2024-09-20",
+                "question": "このターン中に自分のリーダーの体力を+4以上していない場合でも、このフォロワーの《ファンファーレ》能力によって相手の場のフォロワーを選ぶことで、1枚引くことはできますか？",
+                "answer": "いいえ。自分のリーダーの体力を+4以上していない場合、それ以降の効果は働かず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1b9233bc6fe0e6c88fd123257014efa01cd8210440685c1fb7518dca1b31f400",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U23",
+            "fetched_at": "2026-09-24T20:56:16.178189Z"
+          },
+          "document_ref": "documents-5f4912e254da1176"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U24",
+      "documents": {
+        "documents-43dc5394a05960d5": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U24",
+            "faces": [
+              {
+                "name": "希望導く聖乙女・ジャンヌ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "先導"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}1枚引く。自分の墓場の「カード名に『ジャンヌ』を含むフォロワー」が2枚以上なら、これは{攻撃力}+1/{体力}+1して、【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u24.png",
+                "trait_raw": "信仰・先導"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-127"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-099"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U25"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e2614c4ec758f7f58348929c5965a056ffe4fc3502b0c1f934f20989769bc54a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U24",
+            "fetched_at": "2026-09-24T20:56:18.910010Z"
+          },
+          "document_ref": "documents-43dc5394a05960d5"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U25",
+      "documents": {
+        "documents-a5ff4b1d69581f9e": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U25",
+            "faces": [
+              {
+                "name": "希望導く聖乙女・ジャンヌ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "先導"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "4",
+                "text": "【攻撃時】自分の場の元のコスト2以下の{ビショップ}フォロワー1体を選ぶ。それは{攻撃力}+1する。\n【進化時】自分の手札の元のコスト2以下の{ビショップ}フォロワー1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u25.png",
+                "trait_raw": "信仰・先導"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SP01-U24"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f1c7a2953f6cbbb4debe954864d6b101a75a668252c5f4ebf50d45c90cc3d8b9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U25",
+            "fetched_at": "2026-09-24T20:56:21.712551Z"
+          },
+          "document_ref": "documents-a5ff4b1d69581f9e"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U26",
+      "documents": {
+        "documents-f40a2cce92597cf1": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U26",
+            "faces": [
+              {
+                "name": "グランドナイト・ウィルバート",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "先導"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "【守護】\n自分の【守護】を持つフォロワーが場から墓場に置かれたとき、相手のリーダーすべてに1ダメージ。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、「これと同名を除く元のコスト5以下の【守護】を持つフォロワー」1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u26.png",
+                "trait_raw": "挑戦者・先導"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q851",
+                "date": "2023-06-09",
+                "question": "【守護】を持つ『グランドナイト・ウィルバート』自身が場から墓場に置かれた場合でも、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q850",
+                "date": "2023-06-09",
+                "question": "『守護の陽光』の能力によって、【守護】を付与されたフォロワーが場から墓場に置かれた場合でも、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q849",
+                "date": "2023-06-09",
+                "question": "スタンド状態の【守護】を持つフォロワーが場から墓場に置かれた場合でも、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q848",
+                "date": "2023-06-09",
+                "question": "自分の場の【守護】を持つフォロワーが「破壊」された場合、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。\n能力によって場のフォロワーが破壊されたり、体力が0以下になった場のフォロワーが破壊された場合、そのフォロワーを場から墓場に置きます。すなわち、『グランドナイト・ウィルバート』の能力の誘発条件を満たします。"
+              },
+              {
+                "id": "Q847",
+                "date": "2023-06-09",
+                "question": "自分の場に『グランドナイト・ウィルバート』と『聖なる槍使い』がいる状況で、『テミスの審判』がプレイされた場合、『グランドナイト・ウィルバート』の能力は何回誘発しますか？",
+                "answer": "2回誘発します。"
+              },
+              {
+                "id": "Q846",
+                "date": "2023-06-09",
+                "question": "自分の場に『グランドナイト・ウィルバート』が2体いる状況で、『テミスの審判』がプレイされた場合、『グランドナイト・ウィルバート』の能力は何回誘発しますか？",
+                "answer": "それぞれ『グランドナイト・ウィルバート』の能力が2回ずつ誘発し、合計で4回誘発します。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:afa0c2fa9e1d38b712c856d4e2626c34ee979ceae360eb164a3d48a35f12737a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U26",
+            "fetched_at": "2026-09-24T20:56:24.545612Z"
+          },
+          "document_ref": "documents-f40a2cce92597cf1"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U27",
+      "documents": {
+        "documents-c628109948a4d51b": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U27",
+            "faces": [
+              {
+                "name": "白翼の守護神・アイテール",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "先導",
+                  "光輝"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "7",
+                "power": "3",
+                "hp": "5",
+                "text": "【守護】\n{ファンファーレ}自分のデッキから「これと同名を除く、元のコストが自分のPP最大値より低い{ビショップ}フォロワー」1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u27.png",
+                "trait_raw": "信仰・先導・光輝"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:078e2e47765418537bec9d49c39504723033edec5f1dca12ec520e07ac70f35e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U27",
+            "fetched_at": "2026-09-24T20:56:27.239696Z"
+          },
+          "document_ref": "documents-c628109948a4d51b"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U28",
+      "documents": {
+        "documents-69e8b5ec895910d5": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U28",
+            "faces": [
+              {
+                "name": "不思議な青空・アリス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "童話"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}1枚引く。\n{ファンファーレ}元のコスト4以下の相手の場のフォロワー1体を選ぶ。これが手札以外から場に出ていたなら、それをEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u28.png",
+                "trait_raw": "童話"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1621",
+                "date": "2024-09-20",
+                "question": "エボルヴフォロワーの元のコストの値は、進化前のカードの元のコストの値ですか？",
+                "answer": "はい。進化前のカードの元のコストの値です。"
+              },
+              {
+                "id": "Q1620",
+                "date": "2024-09-20",
+                "question": "相手の場のフォロワーをEXエリアに置く場合、そのフォロワーは、それまでに与えられていたダメージや能力などはすべて失われますか？",
+                "answer": "はい。失われます。"
+              },
+              {
+                "id": "Q1619",
+                "date": "2024-09-20",
+                "question": "相手の場のアドバンスフォロワーをEXエリアに置いた場合、そのアドバンスフォロワーはエボルヴデッキの上に表向きで置かれますか？",
+                "answer": "いいえ。エボルヴデッキの上に表向きで置かれません。EXエリアに残り続けます。"
+              },
+              {
+                "id": "Q1618",
+                "date": "2024-09-20",
+                "question": "相手の場のトークン・フォロワーをEXエリアに置いた場合、そのトークン・フォロワーはゲームから取り除かれますか？",
+                "answer": "いいえ。ゲームからは取り除かれず、EXエリアに置かれます。\nトークンであるフォロワーやアミュレットは場とEXエリアと解決領域でのみ存在できます。それ以外の領域に移動した場合、移動した直後に取り除きます。"
+              },
+              {
+                "id": "Q1617",
+                "date": "2024-09-20",
+                "question": "相手のEXエリアにカードが5枚ある場合、選んだ相手の場のフォロワーをEXエリアに置くことができますか？",
+                "answer": "いいえ。EXエリアが上限枚数に達しているため、カードの移動は行われず、場に残ります。"
+              },
+              {
+                "id": "Q1616",
+                "date": "2024-09-20",
+                "question": "『不思議な青空・アリス』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:91e1221d18a88ec75afa8f0e8fdccbef091c246bc8571a185384aabd89dcdf41",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U28",
+            "fetched_at": "2026-09-24T20:56:30.116969Z"
+          },
+          "document_ref": "documents-69e8b5ec895910d5"
+        }
+      ]
+    },
+    {
+      "card_no": "SP01-U29",
+      "documents": {
+        "documents-6723761f88d53e6b": {
+          "region": "jp",
+          "record": {
+            "number": "SP01-U29",
+            "faces": [
+              {
+                "name": "ダークエンジェル・オリヴィエ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "UR",
+                "product": "スペシャルパック「シーサイド・メモリーズ」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}下記から2つまでチョイスする。【1】自分のEPを+1する。【2】自分のリーダーは{体力}+3する。【3】1枚引く。【4】相手プレイヤーすべては、自身の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SP01/sp01-u29.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2024-09-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q337",
+                "date": "2022-07-07",
+                "question": "EPが3ある状態で『ダークエンジェル・オリヴィエ』の能力でEPを+1できますか？",
+                "answer": "はい。EPは上限がないため、EPが3ある場合も新たにEPを得ます。"
+              },
+              {
+                "id": "Q336",
+                "date": "2022-07-07",
+                "question": "先攻のプレイヤーが『ダークエンジェル・オリヴィエ』の能力でEPを+1できますか？",
+                "answer": "はい。先攻後攻問わず、全てのプレイヤーは能力でEPを得ます。"
+              },
+              {
+                "id": "Q294",
+                "date": "2022-06-24",
+                "question": "2つ以上の選択肢をチョイスするとき、１つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q293",
+                "date": "2022-06-24",
+                "question": "2つ以上の選択肢をチョイスするとき、1つもチョイスしないことを選択することはできますか？",
+                "answer": "いいえ。必ず1つ以上チョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-ac9e8c14660ca665",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7e7a8d2d74a3c5e030d4a0fdf839121f59eb4abf7807a3b513e3c62ffc22b750",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SP01-U29",
+            "fetched_at": "2026-09-24T20:56:33.180072Z"
+          },
+          "document_ref": "documents-6723761f88d53e6b"
+        }
+      ]
+    }
+  ]
+}

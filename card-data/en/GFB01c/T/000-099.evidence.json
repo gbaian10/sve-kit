@@ -1,0 +1,176 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "GFB01c",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      },
+      "presence-9cf7031b2866d97f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "unknown",
+        "reason_code": "incomplete_source"
+      }
+    },
+    "products": {
+      "products-1d642a9739d425da": [
+        {
+          "ordinal": 0,
+          "name": "Gloryfinder Bundle #1 “Guide to Glory”",
+          "date_raw": "Jul. 19, 2024",
+          "href_raw": [
+            "/cards/searchresults?expansion=GFB01",
+            "https://en.shadowverse-evolve.com/products/gfb01/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFB01",
+            "https://en.shadowverse-evolve.com/products/gfb01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/gfb01/",
+              "expansion_code": "GFB01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-9cf14a5cb183cd86": [
+        {
+          "stable_source_key": "Q599",
+          "official_number": "Q599",
+          "locator": "qa-block:0",
+          "published_on": "2024-04-12",
+          "date_raw": "Apr. 12, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-052e017058d98dc8": [
+        "https://en.shadowverse-evolve.com/errata/mimi-infernal-right-paw/"
+      ],
+      "errata-146f6b76bd017d5f": [
+        "https://en.shadowverse-evolve.com/errata/coco-infernal-left-paw/"
+      ],
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:4e5c66c5d0876c6425fa23c88f40ac3e3616ee31ed90b667416543c67d19667b": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:7ade43e8dd9024121ec305f673257c85ad2f95e31239ffaa0f0cdddf51ba03fb",
+        "raw_bytes": 35699,
+        "first_receipt_id": "sha256:bf32e764cc2ce81ce4f6532014c765edf311dd215712168805681537f827a199",
+        "descriptor_sha256": "sha256:48c99241a4dd7c418990ac6eaf951209de037bc32978f33f64655b80489cf8c9",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-9cf7031b2866d97f",
+            "result_hash": "sha256:6292269c9a03ac4320a01f55d9e38d353e012568683ad9c9503f1e7bc71fce85"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1d642a9739d425da",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-052e017058d98dc8"
+      },
+      "content_hash": "sha256:b63072201b8bc6dea93c42f8367abd2a23121acb3c486418fb970f1a1c2d7db2"
+    },
+    "src:v1:ac9e32ad14e156af75c88e9b2504b545491373512d678178d6419c33e2bedc44": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:4f937ea9aca39876bb62ff0b3d9a50192889ea0e6f5409aa7b91dbec520b034b",
+        "raw_bytes": 36065,
+        "first_receipt_id": "sha256:6952bbe9cef711d6c287825eec634d2f2e8fd07bf559a699aaa67559883e8f67",
+        "descriptor_sha256": "sha256:eb36871b6106276e5c6d2ea9d8232e7e4a80de41158194981a157fe3774c4b78",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:88878539f40937c2bb16d40ceac36a9fa5a44208bc192735a4bc84a3ece022a2"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1d642a9739d425da",
+        "qa": "qa-9cf14a5cb183cd86",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:12e0a94cdeb1d6c8c925c87b072efdd6079731cbdd7963331144630833aaa43d"
+    },
+    "src:v1:be672af685e2c75fe0996169b25e2c6ec5f70e9c56317cea673be4f9d9ee55e5": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:8ffc8ae42efa1e950b0ef8d4d045592588002de9bcd53329aa97c50df693e2b4",
+        "raw_bytes": 35796,
+        "first_receipt_id": "sha256:833a40b9b9b3e6f253073d7d5a943876a015a44505c565b2fd3e1caef6aeb9b4",
+        "descriptor_sha256": "sha256:2716b5831454e5d015ce315db2d115ad11b9fb2cc063b7f66cb9fdf3b563d3b8",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-9cf7031b2866d97f",
+            "result_hash": "sha256:31dfada5ea2d25dc5709128db66daf10a605fd0933de1c5def6703d84796548f"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1d642a9739d425da",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-146f6b76bd017d5f"
+      },
+      "content_hash": "sha256:d9985bde225b1da75447d73d2353879a1153499aff3d1511b56682edc95fddc9"
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD06",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-760f626c950a7158": [
+        {
+          "ordinal": 0,
+          "name": "Showdown Deck: Havencraft",
+          "date_raw": "Mar. 20, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=SDD06",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SDD06",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sdd/",
+              "expansion_code": "SDD06"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:5405e29da58c21d41031c51456fd5985f4f6f5853059d6673eb3a62d69928202": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:5458f6b03b6ecd12af666659a83fddc39fa5c19351c43d98516fc5abcf7b08e5",
+        "raw_bytes": 35240,
+        "first_receipt_id": "sha256:466b9ce5f8197946acfb54fa160f918597d808dc40c31cfe54ce75f5b581b4be",
+        "descriptor_sha256": "sha256:bfe7f615130e561c2aa4709baecbaf1b5678cd4331521049f8e67e1fe4144124",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:237fdb06892705eb2d495b4e72754b5d319046d30a89096b087f3ff52103f00b"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-760f626c950a7158",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:256ce2f49e02b41e0aef97d1653f595d972af495b409df875cb641b27418f852"
+    }
+  }
+}

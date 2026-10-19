@@ -1,0 +1,122 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP16",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-d01d21d4875b4f08": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック「新たなる創世」",
+          "date_raw": "2025-07-11",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP16",
+            "https://dev.shadowverse-evolve.com/products/bp16/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP16",
+            "https://dev.shadowverse-evolve.com/products/bp16/"
+          ],
+          "matches": [
+            {
+              "kind": "expansion_link",
+              "search_url": "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP16",
+              "expansion_code": "BP16"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": [
+            "unverified_link"
+          ]
+        }
+      ]
+    },
+    "qa": {
+      "qa-40d9ef1ff369c0c5": [
+        {
+          "stable_source_key": "Q2079",
+          "official_number": "Q2079",
+          "locator": "qa-block:0",
+          "published_on": "2025-07-07",
+          "date_raw": "2025-07-07"
+        },
+        {
+          "stable_source_key": "Q2078",
+          "official_number": "Q2078",
+          "locator": "qa-block:1",
+          "published_on": "2025-07-07",
+          "date_raw": "2025-07-07"
+        }
+      ]
+    },
+    "related": {
+      "related-b77d4750f31d9b19": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=BP16-111"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:758c2f91fe090fe5b561c77373f9456685223b1e67f66b1a52b66aab13f99e6a": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:40838b4f610be8ea783cb0427b616de4abc5f5303ae128e950a0fa303b6362c6",
+        "raw_bytes": 38660,
+        "first_receipt_id": "sha256:c5d1959b0c90415c58e599398779157b970abd814b03f3956921347538fecae3",
+        "descriptor_sha256": "sha256:d71f5d29efe36a8f965ea3b3462aec40cb64d2c92686dbeea5829ac18f6e51c9",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:6e5f5fb0a17fc8a27fd6941a487f84a3c4245c26b50ac6bfa286b824e5a4ada3"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-d01d21d4875b4f08",
+        "qa": "qa-40d9ef1ff369c0c5",
+        "related": "related-b77d4750f31d9b19",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5f3799868dafb29db6fafd7d241c1915010bd6801ac58d753e6cf788d70b0ab3"
+    }
+  }
+}

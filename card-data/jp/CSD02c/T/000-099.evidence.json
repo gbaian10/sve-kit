@@ -1,0 +1,155 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD02c",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-7163c690ffd7c336": [
+        {
+          "ordinal": 0,
+          "name": "コラボスターターデッキ「Passion」",
+          "date_raw": "2023-08-25",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CSD02C",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CSD02C",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/csd02/",
+              "expansion_code": "CSD02C"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-2f0c4066272be740": [
+        {
+          "stable_source_key": "Q899",
+          "official_number": "Q899",
+          "locator": "qa-block:0",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        },
+        {
+          "stable_source_key": "Q898",
+          "official_number": "Q898",
+          "locator": "qa-block:1",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        },
+        {
+          "stable_source_key": "Q897",
+          "official_number": "Q897",
+          "locator": "qa-block:2",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        }
+      ]
+    },
+    "related": {
+      "related-3922dd9116203a39": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP02-T01"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=CP02-T02"
+        },
+        {
+          "locator": "related-link:2",
+          "href_raw": "/cardlist/?cardno=CP02-T03"
+        },
+        {
+          "locator": "related-link:3",
+          "href_raw": "/cardlist/?cardno=CP02-T04"
+        },
+        {
+          "locator": "related-link:4",
+          "href_raw": "/cardlist/?cardno=CP02-T05"
+        },
+        {
+          "locator": "related-link:5",
+          "href_raw": "/cardlist/?cardno=CP02-T06"
+        },
+        {
+          "locator": "related-link:6",
+          "href_raw": "/cardlist/?cardno=CP02-T08"
+        },
+        {
+          "locator": "related-link:7",
+          "href_raw": "/cardlist/?cardno=CP02-T09"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:b47f01688f5f5cc1c7c597c1381af718b33c880962437b3b53d0ef82d6642e4f": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:25ee887b994999358a90f00fe5dfcc80cfe31d126017bb028074f9ea38958a8c",
+        "raw_bytes": 41571,
+        "first_receipt_id": "sha256:575269cc43f4bc46663bd7ca16de5d82f897a3310aedbca6e28466fa91c29b95",
+        "descriptor_sha256": "sha256:01a1a2b49a0ff00936fbfcbcce0d264600fd9acb0e737a47e73c0fa1ab1a63ae",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:9a60f82c8dbefb2b1bf44f0b805d2d9cda1ac57de36e425008d8b0c9a207c4ec"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-7163c690ffd7c336",
+        "qa": "qa-2f0c4066272be740",
+        "related": "related-3922dd9116203a39",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:e1f18ca4601d572422734ad4b49bc6bf4d5110c9f347ed9585478198e736e768"
+    }
+  }
+}

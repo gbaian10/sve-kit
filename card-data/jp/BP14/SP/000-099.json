@@ -1,0 +1,143 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP14",
+  "range": "SP/000-099",
+  "products": {
+    "products-7b971fa41e192aae": [
+      {
+        "name": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+        "date": "2025-02-14",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP14",
+          "https://dev.shadowverse-evolve.com/products/bp14/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP14-SP01",
+      "documents": {
+        "documents-10d31c518611a5cf": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-SP01",
+            "faces": [
+              {
+                "name": "マーリン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキからスペル1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-sp01.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q185",
+                "date": "2022-04-26",
+                "question": "自分のデッキにスペルがないとき、このフォロワーの《ファンファーレ》能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、デッキの中身を全て確認したあと、スペルを手札に加えず、デッキをシャッフルします。"
+              }
+            ],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-053"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7ffd9e3bea0ba6a60cc612f5300e96e80e1e41ac958514147603ba6b92e1bb27",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-SP01",
+            "fetched_at": "2026-09-24T20:22:04.149092Z"
+          },
+          "document_ref": "documents-10d31c518611a5cf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-SP02",
+      "documents": {
+        "documents-6d8f5d25a0c7eb1e": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-SP02",
+            "faces": [
+              {
+                "name": "デモンズグリード・パラセリゼ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "宴楽",
+                  "魔界"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。それのリーダーに2ダメージ。自分のリーダーは{体力}+2する。自分のデッキの上1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-sp02.png",
+                "trait_raw": "宴楽・魔界"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1921",
+                "date": "2025-02-10",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイして、自分のリーダーを《体力》+2し、自分のデッキの上1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができず、自分のリーダーを《体力》+2し、自分のデッキの上1枚をEXエリアに置くことができません。"
+              }
+            ],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP14-072"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d29164ee077f118860729a8d0c13f8e1e5e352d81334e7ad84b127fedeb16fa6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-SP02",
+            "fetched_at": "2026-09-24T20:22:07.091661Z"
+          },
+          "document_ref": "documents-6d8f5d25a0c7eb1e"
+        }
+      ]
+    }
+  ]
+}

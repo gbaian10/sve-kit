@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP12",
+  "range": "unnumbered",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-36a9d0fcba3bf1b9": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック第12弾「黒鉄の侵略者」",
+          "date_raw": "2024-10-18",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP12",
+            "https://shadowverse-evolve.com/products/bp12/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP12",
+            "https://shadowverse-evolve.com/products/bp12/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp12/",
+              "expansion_code": "BP12"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:0bbbeddffc4861d2dc78016580165cefc9cb3b7f0086546e20eee31c648c6b62": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:c64988c3bd24d920c052d2f2dfb70c1d54d5cd853c2c27c51320e1e9028d6267",
+        "raw_bytes": 36520,
+        "first_receipt_id": "sha256:0501e043441f5eea1b14937b39ee10485d6fc2df19b84422ee9824c9a687f4fd",
+        "descriptor_sha256": "sha256:8eeefb41622d97f69a34e52bdff74624b4468292f996888c7f49f8f380e4b820",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:b8216c5141ab88e6e49f21ae28ed777be3489faafe6ce6a57a133b1bafcd6ce4"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-36a9d0fcba3bf1b9",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:030ba8fa117f65992a2c4941141c6f84264867e7a3c1367aee479765563ac940"
+    }
+  }
+}

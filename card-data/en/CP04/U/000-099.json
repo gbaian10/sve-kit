@@ -1,0 +1,985 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CP04",
+  "range": "U/000-099",
+  "products": {
+    "products-c8ed7541e7ada6a9": [
+      {
+        "name": "Crossover Set \"Princess Connect! Re: Dive\"",
+        "date": "Aug. 21, 2026",
+        "links": [
+          "/cards/searchresults?expansion=CP04",
+          "https://en.shadowverse-evolve.com/products/cp04/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CP04-U01EN",
+      "documents": {
+        "documents-f323eafc3fcb7af7": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U01EN",
+            "faces": [
+              {
+                "name": "Kokkoro",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Gourmet Guild",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "On Evolve - Draw a card.\nOn Super-Evolve - Give your leader {icon_hp|[defense]}+2. Draw a card.",
+                "sections": [],
+                "raw_text": "On Evolve - Draw a card.\nOn Super-Evolve - Give your leader {icon_hp|[defense]}+2. Draw a card.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U01EN.png",
+                "trait_raw": "PriConne / Gourmet Guild",
+                "traits": [
+                  "PriConne",
+                  "Gourmet Guild"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2331 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2330 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-001EN|Kokkoro}",
+                "href": "/cards/?cardno=CP04-001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4b69b4a81ace827e893c61a1a741be58da8ee72206d47cd8c858784a53b0aeb9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U01EN",
+            "fetched_at": "2026-09-27T13:50:26.499830Z"
+          },
+          "document_ref": "documents-f323eafc3fcb7af7"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U02EN",
+      "documents": {
+        "documents-350ae16040c0668c": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U02EN",
+            "faces": [
+              {
+                "name": "Eris",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "3",
+                  "power": "4"
+                },
+                "text": "{icon_UB|[UB]}{icon_act|[act]} {icon_stand|[engage]}: Select another PriConne follower on your field. Give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and, if {icon_UB|[UB]} abilities you control have executed at least 3 other times this turn, give it Storm.",
+                "sections": [
+                  "{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. You may reveal a PriConne card from among them and add it to your hand. Put the rest on the bottom of your deck in any order. The next PriConne card you play this turn costs 2 less."
+                ],
+                "raw_text": "{icon_UB|[UB]}{icon_act|[act]} {icon_stand|[engage]}: Select another PriConne follower on your field. Give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and, if {icon_UB|[UB]} abilities you control have executed at least 3 other times this turn, give it Storm.\n----------\n{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. You may reveal a PriConne card from among them and add it to your hand. Put the rest on the bottom of your deck in any order. The next PriConne card you play this turn costs 2 less.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U02EN.png",
+                "trait_raw": "PriConne",
+                "traits": [
+                  "PriConne"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2207 (Aug. 7, 2026)",
+                "question": "Two UB abilities I control have executed this turn. If I choose option 2 of an evolved Ameth's UB On Evolve ability and select this follower, will this follower's \"if UB abilities you control have executed at least 3 other times this turn\" condition be fulfilled?",
+                "answer": "Yes, it will."
+              },
+              {
+                "title": "Q2206 (Aug. 7, 2026)",
+                "question": "If this follower's UB ability has executed 3 times this turn, does that fulfill its own \"if UB abilities you control have executed at least 3 other times this turn\" condition when I activate it for a fourth time?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2df34ef92c747952b5af1d91a39b5a074a847887b5399116a31c4796cff1dc08",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U02EN",
+            "fetched_at": "2026-09-27T13:50:29.083528Z"
+          },
+          "document_ref": "documents-350ae16040c0668c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U03EN",
+      "documents": {
+        "documents-ad5e21d0c66cbc19": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U03EN",
+            "faces": [
+              {
+                "name": "Pecorine",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Gourmet Guild",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_UB|[UB]} On Evolve - Select an enemy follower on the field and deal it 4 damage.",
+                "sections": [
+                  "Ward.\nOn Super-Evolve - Deal 4 damage to each enemy leader."
+                ],
+                "raw_text": "{icon_UB|[UB]} On Evolve - Select an enemy follower on the field and deal it 4 damage.\n----------\nWard.\nOn Super-Evolve - Deal 4 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U03EN.png",
+                "trait_raw": "PriConne / Gourmet Guild",
+                "traits": [
+                  "PriConne",
+                  "Gourmet Guild"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2331 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2330 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q2228 (Aug. 7, 2026)",
+                "question": "If I can't select an enemy follower on the field, does this follower's UB ability still count as executed?",
+                "answer": "No. The ability wasn't successfully played, so it doesn't count as executed."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-019EN|Pecorine}",
+                "href": "/cards/?cardno=CP04-019EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:18180fd6d09bedae9b6e984fc7750b238bc34bfb493cc399d79a24dd4adf51f1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U03EN",
+            "fetched_at": "2026-09-27T13:50:31.958152Z"
+          },
+          "document_ref": "documents-ad5e21d0c66cbc19"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U04EN",
+      "documents": {
+        "documents-ebebd123f48e8ea8": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U04EN",
+            "faces": [
+              {
+                "name": "Christina",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Nightmare / Seven Crowns",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_UB|[UB]} Strike - Discard a card: Select an enemy follower on the field and deal it 5 damage.",
+                "sections": [
+                  "Storm.\n{icon_fanfare|[fanfare]} {icon_cost02|[cost02]}: Equip this with a Sanctum Blade Avalon token."
+                ],
+                "raw_text": "{icon_UB|[UB]} Strike - Discard a card: Select an enemy follower on the field and deal it 5 damage.\n----------\nStorm.\n{icon_fanfare|[fanfare]} {icon_cost02|[cost02]}: Equip this with a Sanctum Blade Avalon token.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U04EN.png",
+                "trait_raw": "PriConne / Nightmare / Seven Crowns",
+                "traits": [
+                  "PriConne",
+                  "Nightmare",
+                  "Seven Crowns"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2229 (Aug. 7, 2026)",
+                "question": "If I choose not to pay the cost of this follower's UB ability or can't select an enemy follower on the field, does its UB ability still count as executed?",
+                "answer": "No. The ability wasn't successfully played, so it doesn't count as executed."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-T03EN|Sanctum Blade Avalon}",
+                "href": "/cards/?cardno=CP04-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:25a7bbbba56ed01793ee16c0bd2845c71b5d03dccb748d7729fbe315ec0b3825",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U04EN",
+            "fetched_at": "2026-09-27T13:50:34.493978Z"
+          },
+          "document_ref": "documents-ebebd123f48e8ea8"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U05EN",
+      "documents": {
+        "documents-d0a258dafca2eb3a": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U05EN",
+            "faces": [
+              {
+                "name": "Karyl",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Gourmet Guild",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "4"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and deal it 5 damage.\nOn Super-Evolve - Select up to 2 spells in your cemetery with different names and put them into your EX area. They cost 2 less to play this turn.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and deal it 5 damage.\nOn Super-Evolve - Select up to 2 spells in your cemetery with different names and put them into your EX area. They cost 2 less to play this turn.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U05EN.png",
+                "trait_raw": "PriConne / Gourmet Guild",
+                "traits": [
+                  "PriConne",
+                  "Gourmet Guild"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2331 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2330 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-037EN|Karyl}",
+                "href": "/cards/?cardno=CP04-037EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:770aae66ccad016857420c329ecfb4c807c14ee0e9b1bdafdb51b55e5d4e5702",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U05EN",
+            "fetched_at": "2026-09-27T13:50:37.478619Z"
+          },
+          "document_ref": "documents-d0a258dafca2eb3a"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U06EN",
+      "documents": {
+        "documents-182a84efb7591f00": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U06EN",
+            "faces": [
+              {
+                "name": "Yuni, Chloe & Chieru",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Friendship Club",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Search your deck for up to 2 Friendship Club cards with different names that cost 2 or less, put them into your EX area, then shuffle. They cost 2 less to play this turn.",
+                "sections": [
+                  "Whenever a {icon_UB|[UB]} ability of another follower on your field is executed, the next PriConne spell you play this turn costs 2 less."
+                ],
+                "raw_text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Search your deck for up to 2 Friendship Club cards with different names that cost 2 or less, put them into your EX area, then shuffle. They cost 2 less to play this turn.\n----------\nWhenever a {icon_UB|[UB]} ability of another follower on your field is executed, the next PriConne spell you play this turn costs 2 less.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U06EN.png",
+                "trait_raw": "PriConne / Friendship Club",
+                "traits": [
+                  "PriConne",
+                  "Friendship Club"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2241 (Aug. 7, 2026)",
+                "question": "If I've played this follower's automatic ability 2 times this turn without playing a spell, does the next PriConne spell I play this turn cost 4 less?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q2210 (Aug. 7, 2026)",
+                "question": "If a UB ability I control executes during an opponent's turn, does that trigger this follower's \"whenever a UB ability of another follower on your field executes\" ability?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-039EN|Yuni}",
+                "href": "/cards/?cardno=CP04-039EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fd3a7235b1fcdba3cabd362aef042908211aa1d77b123487293c8bad0e721611",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U06EN",
+            "fetched_at": "2026-09-27T13:50:39.904006Z"
+          },
+          "document_ref": "documents-182a84efb7591f00"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U07EN",
+      "documents": {
+        "documents-5c16be283ecb338b": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U07EN",
+            "faces": [
+              {
+                "name": "Sheffy",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Gourmet Guild",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select up to 2 enemy followers on the field and deal 2 damage divided between them.\nOn Super-Evolve - Deal 3 damage to each enemy follower on the field.",
+                "sections": [],
+                "raw_text": "On Evolve - Select up to 2 enemy followers on the field and deal 2 damage divided between them.\nOn Super-Evolve - Deal 3 damage to each enemy follower on the field.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U07EN.png",
+                "trait_raw": "PriConne / Gourmet Guild",
+                "traits": [
+                  "PriConne",
+                  "Gourmet Guild"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2331 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2330 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-055EN|Sheffy}",
+                "href": "/cards/?cardno=CP04-055EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0f3f5e723058704e059ce677dc374e7a8c77a054e8147ff05d7dc049d2cc22c3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U07EN",
+            "fetched_at": "2026-09-27T13:50:42.649274Z"
+          },
+          "document_ref": "documents-5c16be283ecb338b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U08EN",
+      "documents": {
+        "documents-dcb06483783217bd": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U08EN",
+            "faces": [
+              {
+                "name": "Muimi",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Draw a card. Discard a card. If Overflow is active for you, equip this with a Precious Memento token. If you have 10 max play points, give this {icon_power|[attack]}+3.",
+                "sections": [],
+                "raw_text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Draw a card. Discard a card. If Overflow is active for you, equip this with a Precious Memento token. If you have 10 max play points, give this {icon_power|[attack]}+3.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U08EN.png",
+                "trait_raw": "PriConne",
+                "traits": [
+                  "PriConne"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-T09EN|Precious Memento}",
+                "href": "/cards/?cardno=CP04-T09EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d821201559b3af10205e27209566516a209fbc1951c4cff95f91ba2d02873129",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U08EN",
+            "fetched_at": "2026-09-27T13:50:45.682690Z"
+          },
+          "document_ref": "documents-dcb06483783217bd"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U09EN",
+      "documents": {
+        "documents-c5fb0278275d8890": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U09EN",
+            "faces": [
+              {
+                "name": "Illya",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Diabolos",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_UB|[UB]}{icon_act|[act]} {icon_stand|[engage]}, banish 5 cards from your cemetery: Select an enemy follower on the field. Deal it 3 damage and give your leader {icon_hp|[defense]}+3.",
+                "sections": [
+                  "On Evolve - Search your deck for a PriConne card, bury it, then shuffle.\nOn Super-Evolve - Select an enemy follower on the field and deal it 5 damage."
+                ],
+                "raw_text": "{icon_UB|[UB]}{icon_act|[act]} {icon_stand|[engage]}, banish 5 cards from your cemetery: Select an enemy follower on the field. Deal it 3 damage and give your leader {icon_hp|[defense]}+3.\n----------\nOn Evolve - Search your deck for a PriConne card, bury it, then shuffle.\nOn Super-Evolve - Select an enemy follower on the field and deal it 5 damage.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U09EN.png",
+                "trait_raw": "PriConne / Diabolos",
+                "traits": [
+                  "PriConne",
+                  "Diabolos"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2331 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2330 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q2258 (Aug. 7, 2026)",
+                "question": "When playing this follower's On Evolve ability, can I choose not to bury a PriConne card?",
+                "answer": "Yes. When searching your deck for a PriConne card, you can choose to \"not find\" one."
+              },
+              {
+                "title": "Q2257 (Aug. 7, 2026)",
+                "question": "If I can't select an enemy follower on the field, does this follower's UB ability still count as executed?",
+                "answer": "No. The ability wasn't successfully played, so it doesn't count as executed."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-073EN|Illya}",
+                "href": "/cards/?cardno=CP04-073EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:80511307566ddefd2d6141a62670d055d331f513331462330d72751f2be49a3f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U09EN",
+            "fetched_at": "2026-09-27T13:50:48.403425Z"
+          },
+          "document_ref": "documents-c5fb0278275d8890"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U10EN",
+      "documents": {
+        "documents-9a595049e1a92801": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U10EN",
+            "faces": [
+              {
+                "name": "Ranpha & Misora",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Rage Legion",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Select an enemy follower on the field. Deal it 5 damage and, if this wasn't put onto the field from hand, recover 2 play points.",
+                "sections": [
+                  "Whenever a {icon_UB|[UB]} ability of another follower on your field is executed, choose 1 that you haven't chosen this turn. (1) Deal 2 damage to each enemy leader. (2) Give your leader {icon_hp|[defense]}+2."
+                ],
+                "raw_text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Select an enemy follower on the field. Deal it 5 damage and, if this wasn't put onto the field from hand, recover 2 play points.\n----------\nWhenever a {icon_UB|[UB]} ability of another follower on your field is executed, choose 1 that you haven't chosen this turn. (1) Deal 2 damage to each enemy leader. (2) Give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U10EN.png",
+                "trait_raw": "PriConne / Rage Legion",
+                "traits": [
+                  "PriConne",
+                  "Rage Legion"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2259 (Aug. 7, 2026)",
+                "question": "I have 2 copies of this follower on my field. If their automatic abilities trigger and I choose option 1 for one of the copies, can I choose option 1 for the other copy too?",
+                "answer": "Yes. Each copy's \"choose 1 that you haven’t chosen this turn\" text only applies to itself."
+              },
+              {
+                "title": "Q2245 (Aug. 7, 2026)",
+                "question": "If I can't select an enemy follower on the field, does this follower's UB ability still count as executed?",
+                "answer": "No. The ability wasn't successfully played, so it doesn't count as executed."
+              },
+              {
+                "title": "Q2210 (Aug. 7, 2026)",
+                "question": "If a UB ability I control executes during an opponent's turn, does that trigger this follower's \"whenever a UB ability of another follower on your field executes\" ability?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-075EN|Ranpha}",
+                "href": "/cards/?cardno=CP04-075EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5a9b1d9d9277f1c0b492bc808629d405328a67d1b477c178c2dbb1c68904253c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U10EN",
+            "fetched_at": "2026-09-27T13:50:51.611665Z"
+          },
+          "document_ref": "documents-9a595049e1a92801"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U11EN",
+      "documents": {
+        "documents-f6f12c95b9d83c30": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U11EN",
+            "faces": [
+              {
+                "name": "Saren",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Sarendia Orphanage",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_UB|[UB]} On Evolve - Select an enemy follower on the field. Deal 4 damage to it and 1 damage to each other enemy follower on the field.",
+                "sections": [
+                  "On Super-Evolve - Deal 2 damage to each enemy leader and enemy follower on the field."
+                ],
+                "raw_text": "{icon_UB|[UB]} On Evolve - Select an enemy follower on the field. Deal 4 damage to it and 1 damage to each other enemy follower on the field.\n----------\nOn Super-Evolve - Deal 2 damage to each enemy leader and enemy follower on the field.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U11EN.png",
+                "trait_raw": "PriConne / Sarendia Orphanage",
+                "traits": [
+                  "PriConne",
+                  "Sarendia Orphanage"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2331 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              },
+              {
+                "title": "Q2330 (Aug. 7, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q2228 (Aug. 7, 2026)",
+                "question": "If I can't select an enemy follower on the field, does this follower's UB ability still count as executed?",
+                "answer": "No. The ability wasn't successfully played, so it doesn't count as executed."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-091EN|Saren}",
+                "href": "/cards/?cardno=CP04-091EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3414468c601caa98c8e84a2a926218321313edc680235dc2b6942cd1a5a1e105",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U11EN",
+            "fetched_at": "2026-09-27T13:50:54.233585Z"
+          },
+          "document_ref": "documents-f6f12c95b9d83c30"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U12EN",
+      "documents": {
+        "documents-d3c5d5858c8205ae": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U12EN",
+            "faces": [
+              {
+                "name": "Nozomi, Chika & Tsumugi",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Carmina",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Search your deck for an amulet, reveal it, add it to your hand, then shuffle.",
+                "sections": [
+                  "{icon_act|[act]} {icon_stand|[engage]} an amulet on your field: Select an enemy follower on the field and deal it 1 damage.\n{icon_act|[act]} {icon_stand|[engage]}, bury 3 amulets: Select an enemy follower on the field. Deal 3 damage to it and its leader."
+                ],
+                "raw_text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Search your deck for an amulet, reveal it, add it to your hand, then shuffle.\n----------\n{icon_act|[act]} {icon_stand|[engage]} an amulet on your field: Select an enemy follower on the field and deal it 1 damage.\n{icon_act|[act]} {icon_stand|[engage]}, bury 3 amulets: Select an enemy follower on the field. Deal 3 damage to it and its leader.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U12EN.png",
+                "trait_raw": "PriConne / Carmina",
+                "traits": [
+                  "PriConne",
+                  "Carmina"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2334 (Aug. 7, 2026)",
+                "question": "When playing this follower's UB Fanfare ability, can I choose not to find an amulet? Will it count as executed?",
+                "answer": "Yes, and yes."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": [
+              {
+                "label": "{CP04-093EN|Nozomi}",
+                "href": "/cards/?cardno=CP04-093EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5a6bf3b580d1caf10feb372d2c992a5a3de41b6f2742889fdaa92f38cc12cad9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U12EN",
+            "fetched_at": "2026-09-27T13:50:56.740979Z"
+          },
+          "document_ref": "documents-d3c5d5858c8205ae"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-U13EN",
+      "documents": {
+        "documents-ba55e08d9d4f3901": {
+          "region": "en",
+          "record": {
+            "number": "CP04-U13EN",
+            "faces": [
+              {
+                "name": "Lyrael",
+                "info": {
+                  "Card Set": "Crossover Set \"Princess Connect! Re: Dive\"",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "PriConne / Geo Theogonia",
+                  "Universe": "Princess Connect! Re: Dive"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Select up to 3 followers in your cemetery with different names that cost 2 or less and summon them.",
+                "sections": [
+                  "Whenever a {icon_UB|[UB]} ability of another follower on your field is executed, give that follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+                ],
+                "raw_text": "{icon_UB|[UB]}{icon_fanfare|[fanfare]} Select up to 3 followers in your cemetery with different names that cost 2 or less and summon them.\n----------\nWhenever a {icon_UB|[UB]} ability of another follower on your field is executed, give that follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/CP04-U13EN.png",
+                "trait_raw": "PriConne / Geo Theogonia",
+                "traits": [
+                  "PriConne",
+                  "Geo Theogonia"
+                ]
+              }
+            ],
+            "release_date": "Aug. 21, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2337 (Aug. 7, 2026)",
+                "question": "If there are no cards in my cemetery, can I play this follower's UB Fanfare ability? Will it count as executed?",
+                "answer": "Yes, and yes. \"Select up to 3\" includes 0."
+              },
+              {
+                "title": "Q2280 (Aug. 7, 2026)",
+                "question": "If I summon multiple followers with Fanfare abilities, in what order do I resolve them?",
+                "answer": "You can resolve them in any order."
+              },
+              {
+                "title": "Q2210 (Aug. 7, 2026)",
+                "question": "If a UB ability I control executes during an opponent's turn, does that trigger this follower's \"whenever a UB ability of another follower on your field executes\" ability?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-c8ed7541e7ada6a9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f7494aa89f2fd1d6a57caaacb43587b93a92fd1f8f774f9d44f180c17acfc31",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CP04-U13EN",
+            "fetched_at": "2026-09-27T13:50:59.698996Z"
+          },
+          "document_ref": "documents-ba55e08d9d4f3901"
+        }
+      ]
+    }
+  ]
+}

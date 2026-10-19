@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "EBD02",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-5c462088073dcff3": [
+        {
+          "ordinal": 0,
+          "name": "EXビギナーデッキ「ウィッチ」",
+          "date_raw": "2025-11-21",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=EBD02",
+            "https://shadowverse-evolve.com/products/ebd01_04/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=EBD02",
+            "https://shadowverse-evolve.com/products/ebd01_04/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/ebd01_04/",
+              "expansion_code": "EBD02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:7f0f9da2647db071183516686c4086d455fd59cb0d553f9b9a4959c711034d36": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:0ae7b285e98649696df2cb7ff7b97267dfa344a69b12f354f625c6c006d53075",
+        "raw_bytes": 37347,
+        "first_receipt_id": "sha256:bfa5f06483b2dbbffcea3758645b359555f324519024b9eb88250ce163024926",
+        "descriptor_sha256": "sha256:be58a88573166d14f353e07ca09575d7aab465a74352e9806dbfe48e2429035d",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:ce9f4fc38e37ed476ae8f4738942fc4042cbcdd128999a5ebd4bb8e0cc6ccec3"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5c462088073dcff3",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:f68fb88e4dba94be66baf243eeac3b02018208159a1225cf8401e8fea26c900e"
+    }
+  }
+}

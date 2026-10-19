@@ -1,0 +1,1177 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "ETD02",
+  "range": "000-099",
+  "products": {
+    "products-dbf8d0d72e1e2d46": [
+      {
+        "name": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+        "date": "2022-11-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=ETD02",
+          "https://shadowverse-evolve.com/products/etd01-03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "ETD02-001",
+      "documents": {
+        "documents-ee38f2df5a28732e": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-001",
+            "faces": [
+              {
+                "name": "プチゴースト・バケルス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "GR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "これは『ゴースト』でもある。\n{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の場に『ジャイアントゴースト』がいるなら、1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-001.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q498",
+                "date": "2022-12-09",
+                "question": "『プチゴースト・バケルス（EVOLVE）』が破壊され、《ラストワード》能力が誘発する処理はどのように行われますか？",
+                "answer": "『プチゴースト・バケルス（EVOLVE）』はエボルヴデッキの上に表向きで置かれ、進化前の『プチゴースト・バケルス』はEXエリアに置かれます。\n以下、詳細に説明します。まず『プチゴースト・バケルス（EVOLVE）』が破壊され墓場に移動し、《ラストワード》能力が誘発します。墓場に移動した直後に『プチゴースト・バケルス』との関連付けが失われた『プチゴースト・バケルス（EVOLVE）』はエボルヴデッキの上に表向きで置きます。その後、誘発した《ラストワード》の解決を行い、進化前の『プチゴースト・バケルス』をEXエリアに置きます。"
+              },
+              {
+                "id": "Q425",
+                "date": "2022-11-11",
+                "question": "例えば「『ゴースト』1体を出す」という能力を解決するとき、トークンである『ゴースト』ではなく、「これは『ゴースト』でもある。」という能力を持つ『プチゴースト・バケルス』を場に出すことができますか？",
+                "answer": "いいえ。『プチゴースト・バケルス』を場に出すことはできません。「『ゴースト』1体を出す」という能力はトークンである『ゴースト』を指定しています。"
+              },
+              {
+                "id": "Q424",
+                "date": "2022-11-11",
+                "question": "このフォロワーの能力「これは『ゴースト』でもある。」とは何ですか？",
+                "answer": "このフォロワーが場にいるとき、このカードに追加のカード名として『ゴースト』を持たせる能力です。このフォロワーが場にいるとき、このカードは『プチゴースト・バケルス』と『ゴースト』の2つのカード名を持ちます。また、『ゴースト』の持つ【疾走】や「自分のエンドフェイズが来たとき、これは消滅する。」という能力を『プチゴースト・バケルス』が持つことはありません。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-002"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2e5639eacf453050120a32b70c94816b829664bcaf95fbb24727745ea69659ca",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-001",
+            "fetched_at": "2026-09-24T23:00:26.793063Z"
+          },
+          "document_ref": "documents-ee38f2df5a28732e"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-002",
+      "documents": {
+        "documents-4c39a28326b45463": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-002",
+            "faces": [
+              {
+                "name": "プチゴースト・バケルス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "GR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "これは『ゴースト』でもある。\n{ラストワード}これをEXエリアに置く。",
+                "sections": [],
+                "flavor": "何やってんだ……俺。シャドバとか、ガラにもねー……。\n――真壁スバル",
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-002.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q499",
+                "date": "2022-12-09",
+                "question": "トークンである『ゴースト』から『プチゴースト・バケルス（EVOLVE）』へ進化することはできますか？",
+                "answer": "いいえ。進化することはできません。"
+              },
+              {
+                "id": "Q498",
+                "date": "2022-12-09",
+                "question": "『プチゴースト・バケルス（EVOLVE）』が破壊され、《ラストワード》能力が誘発する処理はどのように行われますか？",
+                "answer": "『プチゴースト・バケルス（EVOLVE）』はエボルヴデッキの上に表向きで置かれ、進化前の『プチゴースト・バケルス』はEXエリアに置かれます。\n以下、詳細に説明します。まず『プチゴースト・バケルス（EVOLVE）』が破壊され墓場に移動し、《ラストワード》能力が誘発します。墓場に移動した直後に『プチゴースト・バケルス』との関連付けが失われた『プチゴースト・バケルス（EVOLVE）』はエボルヴデッキの上に表向きで置きます。その後、誘発した《ラストワード》の解決を行い、進化前の『プチゴースト・バケルス』をEXエリアに置きます。"
+              },
+              {
+                "id": "Q428",
+                "date": "2022-11-11",
+                "question": "進化後の『プチゴースト・バケルス』が破壊され、《ラストワード》が誘発する処理はどのように行われますか？",
+                "answer": "エボルヴフォロワー『プチゴースト・バケルス』はエボルヴデッキの上に表向きで置かれ、進化前の『プチゴースト・バケルス』はEXエリアに置かれます。\n以下、詳細に説明します。まず『プチゴースト・バケルス』が破壊され墓場に移動し、《ラストワード》が誘発します。墓場に移動した直後にエボルヴフォロワー『プチゴースト・バケルス』との関連付けが失われ、エボルヴフォロワー『プチゴースト・バケルス』はエボルヴデッキの上に表向きで置きます。その後、誘発した《ラストワード》の解決を行い、進化前の『プチゴースト・バケルス』をEXエリアに置きます。"
+              },
+              {
+                "id": "Q427",
+                "date": "2022-11-11",
+                "question": "トークンである『ゴースト』からエボルヴフォロワー『プチゴースト・バケルス』へ進化することができますか？",
+                "answer": "いいえ。進化することはできません。"
+              },
+              {
+                "id": "Q426",
+                "date": "2022-11-11",
+                "question": "このフォロワーの能力「これは『ゴースト』でもある。」とは何ですか？",
+                "answer": "このフォロワーが場にいるとき、このカードに追加のカード名として『ゴースト』を持たせる能力です。このフォロワーが場にいるとき、このカードは『プチゴースト・バケルス』と『ゴースト』の2つのカード名を持ちます。また、『ゴースト』の持つ【疾走】や「自分のエンドフェイズが来たとき、これは消滅する。」という能力を『プチゴースト・バケルス』は持ちません。"
+              },
+              {
+                "id": "Q424",
+                "date": "2022-11-11",
+                "question": "このフォロワーの能力「これは『ゴースト』でもある。」とは何ですか？",
+                "answer": "このフォロワーが場にいるとき、このカードに追加のカード名として『ゴースト』を持たせる能力です。このフォロワーが場にいるとき、このカードは『プチゴースト・バケルス』と『ゴースト』の2つのカード名を持ちます。また、『ゴースト』の持つ【疾走】や「自分のエンドフェイズが来たとき、これは消滅する。」という能力を『プチゴースト・バケルス』が持つことはありません。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-001"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cd639ecaa0856a40231ce0739a52d10d2eff40e3d77e9f1c95273515b2365d63",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-002",
+            "fetched_at": "2026-09-24T23:00:29.760915Z"
+          },
+          "document_ref": "documents-4c39a28326b45463"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-003",
+      "documents": {
+        "documents-da9f204bde037fc6": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-003",
+            "faces": [
+              {
+                "name": "トリックデュラハン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}『ゴースト』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに3枚。（自分の墓場が10枚以上なら、【ネクロチャージ_10】の後の能力が働く）",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-003.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:11ec1a3c9149561e8eb143cc1714a3b48623ef97e42f3bd79bacdb47c5149d57",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-003",
+            "fetched_at": "2026-09-24T23:00:32.560470Z"
+          },
+          "document_ref": "documents-da9f204bde037fc6"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-004",
+      "documents": {
+        "documents-4814d641035b4ca5": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-004",
+            "faces": [
+              {
+                "name": "悪戯なネクロマンサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死霊術師"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "おばあちゃんにならった降霊術……うまく出来るかな！？\nよーっし、いっくよー！",
+                "illustrator": "TEDDY",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-004.png",
+                "trait_raw": "死霊術師"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-005"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d3460ff90804dd08c773fb449a43e2e1b0c11c26af3b98c2110907d87574b45d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-004",
+            "fetched_at": "2026-09-24T23:00:35.473060Z"
+          },
+          "document_ref": "documents-4814d641035b4ca5"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-005",
+      "documents": {
+        "documents-f7b53f8c1eebdbd9": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-005",
+            "faces": [
+              {
+                "name": "悪戯なネクロマンサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "死霊術師"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】『ゴースト』3体を出す。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "TEDDY",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-005.png",
+                "trait_raw": "死霊術師"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q113",
+                "date": "2022-04-26",
+                "question": "自分の場が上限まで残り1枚のとき、このフォロワーの能力で『ゴースト』1体を場に出すことはできますか？",
+                "answer": "はい。『ゴースト』1体を場に出すことができます。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-004"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c7935dc3d5730699499f7573b78bb5e591e603a1a7dbdd275383cdc6e2b1d404",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-005",
+            "fetched_at": "2026-09-24T23:00:38.207376Z"
+          },
+          "document_ref": "documents-f7b53f8c1eebdbd9"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-006",
+      "documents": {
+        "documents-cf8a5f2aa604ae17": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-006",
+            "faces": [
+              {
+                "name": "ファントムハウル",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "『ゴースト』4体を出す。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "mstk",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-006.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5e220bdfcd48cae67d590418b0b54b007b69cc99f30d929042b6edd742ed8348",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-006",
+            "fetched_at": "2026-09-24T23:00:41.127495Z"
+          },
+          "document_ref": "documents-cf8a5f2aa604ae17"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-007",
+      "documents": {
+        "documents-e9f62880d41dc16b": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-007",
+            "faces": [
+              {
+                "name": "ソウルコンバージョン",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n自分のフォロワー1体を選ぶ。それを破壊する。2枚引く。",
+                "sections": [],
+                "flavor": "余すところなく食べられる、この美味しすぎる代物が、\n生態系の頂点を名乗るのだから、おかしくってたまらない。",
+                "illustrator": "松吉",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-007.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:44088a500ea17709649a28456a09babe3b7d23832b93a168b2b196e00b104fc4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-007",
+            "fetched_at": "2026-09-24T23:00:43.364085Z"
+          },
+          "document_ref": "documents-e9f62880d41dc16b"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-008",
+      "documents": {
+        "documents-7a843f36f87d9f53": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-008",
+            "faces": [
+              {
+                "name": "パンプキンネクロマンサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}『ジャイアントゴースト』1枚をEXエリアに置く。",
+                "sections": [
+                  "『ジャイアントゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}3/{体力}3【守護】自分のメインフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "りょうへい",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-008.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:53f6c43989adfa0d39f31d81bae43efe47dc93276ded725386d3a7960ca343d0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-008",
+            "fetched_at": "2026-09-24T23:00:46.005904Z"
+          },
+          "document_ref": "documents-7a843f36f87d9f53"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-009",
+      "documents": {
+        "documents-afe857b431c2672c": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-009",
+            "faces": [
+              {
+                "name": "パレードレイヴン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "{ファンファーレ}他のフォロワー1体を墓場に置く：自分の墓場のコスト5以下のフォロワー1枚を選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": "必死になったり焦ったり、したいところなんですけどねぇ……！\n――真壁スバル",
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-009.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q430",
+                "date": "2022-11-11",
+                "question": "このフォロワーの《ファンファーレ》で墓場のカードを選ぶとき、このフォロワーの《ファンファーレ》のコストで墓場に置くフォロワーを選ぶことができますか？",
+                "answer": "いいえ。コストを支払う前に目標を選ぶ必要があるため、選ぶことはできません。"
+              },
+              {
+                "id": "Q429",
+                "date": "2022-11-11",
+                "question": "このフォロワーの《ファンファーレ》のコストで相手の場のフォロワーを墓場に置くことができますか？",
+                "answer": "いいえ。自分の場の他のフォロワーのみを墓場に置くことができます。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9f1bacfdccea861eef201190e4e1c6be775cba8acedaccf42c41088e07ac7ff9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-009",
+            "fetched_at": "2026-09-24T23:00:49.121558Z"
+          },
+          "document_ref": "documents-afe857b431c2672c"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-010",
+      "documents": {
+        "documents-c67a807396c9a7a4": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-010",
+            "faces": [
+              {
+                "name": "ミスチーフゾンビ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}手札1枚を捨てる：『ゴースト』1体を出す。死者・カードを捨てたなら、1枚引く。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-010.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-011"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bee126748e6beea29e416e705c7b1fe390f8cf3d5ad63dfc961349e2dbceaa95",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-010",
+            "fetched_at": "2026-09-24T23:00:52.079530Z"
+          },
+          "document_ref": "documents-c67a807396c9a7a4"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-011",
+      "documents": {
+        "documents-17cf4908824ef709": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-011",
+            "faces": [
+              {
+                "name": "ミスチーフゾンビ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分の『ゴースト』1体を選ぶ。それは【必殺】を持つ。（【必殺】を持つフォロワーと交戦した相手のフォロワーは、ダメージを与え合ったあと破壊される）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-011.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q431",
+                "date": "2022-11-11",
+                "question": "このフォロワーの【進化時】能力で、自分の場にいる『プチゴースト・バケルス』を選ぶことができますか？",
+                "answer": "はい。自分の場にいる『プチゴースト・バケルス』は能力により追加のカード名として『ゴースト』を持つため、選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-010"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:13834398cebf4a6bdf65d8991e0872c563a6e33b2e155464faab851631e70b0c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-011",
+            "fetched_at": "2026-09-24T23:00:54.877286Z"
+          },
+          "document_ref": "documents-17cf4908824ef709"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-012",
+      "documents": {
+        "documents-2638e2847d14e9af": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-012",
+            "faces": [
+              {
+                "name": "ソウルミニデビル",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "自分のフォロワーが進化したとき、相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "「人間さんからできるもの、キラキラしてて好きなんだ。\nステキだね、ステキだね。街も、金貨も、魂も」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-012.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9f992108098fce711c0303a16cec1e0dc34c2eefb8574a2fedeba3c7be11c4be",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-012",
+            "fetched_at": "2026-09-24T23:00:57.686654Z"
+          },
+          "document_ref": "documents-2638e2847d14e9af"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-013",
+      "documents": {
+        "documents-6480df35077d8236": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-013",
+            "faces": [
+              {
+                "name": "ボーンキマイラ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "1",
+                "text": "【ネクロチャージ_7】これは【突進】【必殺】を持つ。（【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）\n{ファンファーレ}自分のデッキの上3枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-013.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q313",
+                "date": "2022-06-24",
+                "question": "このフォロワーの【ネクロチャージ_7】の条件を満たしている状態で墓場のカードが移動し、墓場のカードが6枚以下になったとき、このフォロワーの【突進】と【必殺】は失われますか？",
+                "answer": "はい。失われます。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:71c8246f1f685ba2e4bcb817b99dae1a4443f7c9077d7bb5847351689ef6dbb5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-013",
+            "fetched_at": "2026-09-24T23:01:00.807891Z"
+          },
+          "document_ref": "documents-6480df35077d8236"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-014",
+      "documents": {
+        "documents-3d31f0fe419ed6be": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-014",
+            "faces": [
+              {
+                "name": "スパルトイサージェント",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": "その胸に宿る意志は、ただ一つ。\n血と、死を、主に捧げよ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-014.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q117",
+                "date": "2022-04-26",
+                "question": "自分のデッキが1枚以下のとき、このフォロワーの能力をプレイすることはできませんか？",
+                "answer": "いいえ。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:735c97bb67def374b3cd555a480e587d4affac080dbb178e892b0c580c3a6908",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-014",
+            "fetched_at": "2026-09-24T23:01:03.331582Z"
+          },
+          "document_ref": "documents-3d31f0fe419ed6be"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-015",
+      "documents": {
+        "documents-e3a933dc98c7a061": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-015",
+            "faces": [
+              {
+                "name": "ネクロカーニバル",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【ネクロチャージ_10】代わりに2つまで。\n【1】自分の墓場のコスト2以下のフォロワー1枚を選ぶ。それを場に出す。【2】『ゴースト』2体を出す。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "ラエル",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-015.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q294",
+                "date": "2022-06-24",
+                "question": "2つ以上の選択肢をチョイスするとき、１つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q293",
+                "date": "2022-06-24",
+                "question": "2つ以上の選択肢をチョイスするとき、1つもチョイスしないことを選択することはできますか？",
+                "answer": "いいえ。必ず1つ以上チョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:409e806366cfe2573cd57a947a0b1f1dc74f62f321a69596931e00890d1285b1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-015",
+            "fetched_at": "2026-09-24T23:01:06.316108Z"
+          },
+          "document_ref": "documents-e3a933dc98c7a061"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-016",
+      "documents": {
+        "documents-6f70480cc8f4da11": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-016",
+            "faces": [
+              {
+                "name": "消えぬ怨恨",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに3ダメージ。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-016.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q125",
+                "date": "2022-04-26",
+                "question": "相手の場にフォロワーがないとき、このスペルをプレイして、自分のデッキの上1枚を墓場に置くことはできますか？",
+                "answer": "いいえ。このスペルで選ぶフォロワーがないため、プレイをすることができず、自分のデッキの上を墓場に置くことはできません。"
+              },
+              {
+                "id": "Q124",
+                "date": "2022-04-26",
+                "question": "相手の場に選ぶことができるフォロワーがあり、自分のデッキが0枚のとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7f8bfc95d174b772607db632e2562ac31d22fbea879b910aa82cba86c4215f5a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-016",
+            "fetched_at": "2026-09-24T23:01:09.201558Z"
+          },
+          "document_ref": "documents-6f70480cc8f4da11"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-017",
+      "documents": {
+        "documents-b93f007f51428969": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-017",
+            "faces": [
+              {
+                "name": "ゴブリンマウントデーモン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ゴブリン"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "5",
+                "power": "6",
+                "hp": "6",
+                "text": "{進化}{コスト0}：これは進化する。\n【守護】\n{ファンファーレ}自分の他のフォロワーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "honart",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-017.png",
+                "trait_raw": "ゴブリン"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-018"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0957093384fa5e533e0d86fbbb6035bd57eb4ef196a7194c45c2d4e02d789dbc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-017",
+            "fetched_at": "2026-09-24T23:01:12.221337Z"
+          },
+          "document_ref": "documents-b93f007f51428969"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-018",
+      "documents": {
+        "documents-1cdaa3e273ca668b": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-018",
+            "faces": [
+              {
+                "name": "ゴブリンマウントデーモン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ゴブリン"
+                ],
+                "rarity": "SR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "-",
+                "power": "7",
+                "hp": "7",
+                "text": "【守護】",
+                "sections": [],
+                "flavor": "これは人間においても言えることなのだが、\n上に立つ者が必ずしも賢いとは限らない。",
+                "illustrator": "honart",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-018.png",
+                "trait_raw": "ゴブリン"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=ETD02-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f42411880f733f24d18ac61eb0700bb4ac6a7d0ed96dcadd0c62c7f779c16bbd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-018",
+            "fetched_at": "2026-09-24T23:01:14.779417Z"
+          },
+          "document_ref": "documents-1cdaa3e273ca668b"
+        }
+      ]
+    },
+    {
+      "card_no": "ETD02-019",
+      "documents": {
+        "documents-aac8ef969bfdc662": {
+          "region": "jp",
+          "record": {
+            "number": "ETD02-019",
+            "faces": [
+              {
+                "name": "エンジェルバレッジ",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": "許されざる者らには速やかなる罰を。\n放たれた矢は幾筋もの光となり、悪しき者らの胸を次々と貫く。",
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/ETD02/etd02-019.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-11-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q64",
+                "date": "2022-04-26",
+                "question": "相手の場に【オーラ】を持つフォロワーがあるとき、このスペルで相手の【オーラ】を持つフォロワーにダメージを与えることはできますか？",
+                "answer": "はい。与えることができます。"
+              }
+            ],
+            "products_ref": "products-dbf8d0d72e1e2d46",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6b9dc2c6f53ef6cb2d15edc39f4198b371651e0ae12e4861dd955d5b962131d9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=ETD02-019",
+            "fetched_at": "2026-09-24T23:01:17.649312Z"
+          },
+          "document_ref": "documents-aac8ef969bfdc662"
+        }
+      ]
+    }
+  ]
+}

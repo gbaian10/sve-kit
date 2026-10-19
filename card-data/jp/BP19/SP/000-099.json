@@ -1,0 +1,86 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP19",
+  "range": "SP/000-099",
+  "products": {
+    "products-a899716ab2a7fb7e": [
+      {
+        "name": "ブースターパック「天魔八虐」",
+        "date": "2026-03-27",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP19",
+          "https://shadowverse-evolve.com/products/bp19/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP19-SP01",
+      "documents": {
+        "documents-5866f31763438312": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-SP01",
+            "faces": [
+              {
+                "name": "出航の咎人・バルバロス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "八獄",
+                  "盗賊"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\nこれが場にいる限り、自分のターン中、自分がEXエリアの財宝・カードをプレイする際、コストを-1する。\n{ファンファーレ}『戦慄の海賊旗』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "従う者達は唱和する――優しい人に。親友に。理解者に。\n乾杯の言葉は違えども、捧げる相手はただ一人。",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-sp01.png",
+                "trait_raw": "八獄・盗賊"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2562",
+                "date": "2026-03-25",
+                "question": "自分の場に『出航の咎人・バルバロス』が2体いる状況で、自分のターン中、自分がEXエリアの財宝・カードをプレイする際、そのコストを-2しますか？",
+                "answer": "はい。それぞれの『出航の咎人・バルバロス』の能力が適用されるため、そのコストを-2します。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-020"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:081404081c6d3d91414ef10eb4d5844b75df753838d42a1154efb104cf516bc8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-SP01",
+            "fetched_at": "2026-09-24T18:58:07.456964Z"
+          },
+          "document_ref": "documents-5866f31763438312"
+        }
+      ]
+    }
+  ]
+}

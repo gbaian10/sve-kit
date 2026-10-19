@@ -1,0 +1,1221 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "EBD02",
+  "range": "000-099",
+  "products": {
+    "products-ca93161acb15d2e1": [
+      {
+        "name": "EXビギナーデッキ「ウィッチ」",
+        "date": "2025-11-21",
+        "links": [
+          "/cardlist/cardsearch?expansion=EBD02",
+          "https://shadowverse-evolve.com/products/ebd01_04/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "EBD02-001",
+      "documents": {
+        "documents-9b3dd98295e6c1ca": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-001",
+            "faces": [
+              {
+                "name": "真理の大文豪・ユキシマ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "宴楽",
+                  "魔法使い",
+                  "禁忌"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "自分が元のコスト3以下の宴楽・カードか元のコスト3以下の魔法使い・カードをプレイしたとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}このターン、次に自分が元のコスト3以下の宴楽・カードか元のコスト3以下の魔法使い・カードをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-001.png",
+                "trait_raw": "宴楽・魔法使い・禁忌"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1894",
+                "date": "2025-02-10",
+                "question": "自分が元のコスト3以下の宴楽・魔法使い・カードをプレイした場合、このフォロワーの「自分が元のコスト3以下の宴楽・カードか元のコスト3以下の魔法使い・カードをプレイしたとき、～」という能力は2回誘発しますか？",
+                "answer": "いいえ。1回誘発します。「自分が元のコスト3以下の宴楽・カードか元のコスト3以下の魔法使い・カードをプレイしたとき、～」という能力の誘発条件は、自分がプレイしたタイプに宴楽を持つカードやタイプに魔法使いを持つカードの片方もしくは両方に該当するカードを参照します。"
+              },
+              {
+                "id": "Q1893",
+                "date": "2025-02-10",
+                "question": "相手のターン中に自分が元のコスト3以下の魔法使い・カードをプレイした場合、このフォロワーの「自分が元のコスト3以下の宴楽・カードか元のコスト3以下の魔法使い・カードをプレイしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eb24029eb144abed01b83ef994cc24fb5a2634827e49ec1f51df7ba3772d6c6a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-001",
+            "fetched_at": "2026-09-24T19:22:39.256717Z"
+          },
+          "document_ref": "documents-9b3dd98295e6c1ca"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-002",
+      "documents": {
+        "documents-eeeb3d7e2281d41a": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-002",
+            "faces": [
+              {
+                "name": "インフィニットウィッチ・ドロシー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、魔法使い・フォロワーと魔法使い・スペルそれぞれ1枚まで公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}：自分の手札の{ウィッチ}スペル1枚をEXエリアに置いてよい。このターン、それをプレイする際、コストを-3する。この能力は自分の墓場の魔法使い・フォロワーが5枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-002.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1651",
+                "date": "2024-10-15",
+                "question": "このフォロワーの《ファンファーレ》能力でデッキから見たカードがすべて魔法使い・フォロワーであり、魔法使い・スペルがなかった場合、その中から魔法使い・フォロワー1枚のみを公開して手札に加えることができますか？",
+                "answer": "はい。手札に加えることができます。また、デッキから見たカードがすべて魔法使い・スペルであり、魔法使い・フォロワーがなかった場合も同様に、その中から魔法使い・スペル1枚のみを公開して手札に加えることができます。"
+              },
+              {
+                "id": "Q1650",
+                "date": "2024-10-15",
+                "question": "このフォロワーの《起動》能力で『次元の超越』をEXエリアに置き、そのターン中に、墓場のスペル10枚を消滅させて『次元の超越』をプレイする場合、コスト4でプレイすることができますか？",
+                "answer": "はい。『次元の超越』の能力でコスト7になった後、コストが-3されるためコスト4でプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4e8dd60eadddb6ad1b0d2be53248502a304a9a96d3123ea19a8c5ddcdbf76517",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-002",
+            "fetched_at": "2026-09-24T19:22:41.935001Z"
+          },
+          "document_ref": "documents-eeeb3d7e2281d41a"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-003",
+      "documents": {
+        "documents-12187825add936d5": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-003",
+            "faces": [
+              {
+                "name": "あどけない飛沫・プリス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "5",
+                "text": "自分が魔法使い・カードをプレイしたとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、元のコスト3以下の魔法使い・フォロワーと元のコスト3以下の魔法使い・スペルそれぞれ1枚までEXエリアに置いてよい。残りを好きな順にデッキの下に置く。このターン、それをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-003.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1604",
+                "date": "2024-09-20",
+                "question": "『あどけない飛沫・プリス』の「自分が魔法使い・カードをプレイしたとき、～」という能力は、この能力を持つ『あどけない飛沫・プリス』自身をプレイした場合でも誘発しますか？",
+                "answer": "いいえ。誘発しません。『あどけない飛沫・プリス』をプレイしたとき、その『あどけない飛沫・プリス』は場におらず、その能力は有効ではありません。"
+              },
+              {
+                "id": "Q1603",
+                "date": "2024-09-20",
+                "question": "相手のターン中、相手のフォロワーが攻撃を宣言した後に訪れるクイックタイミングにおいて、自分が魔法使い・スペルをプレイした場合、自分の場にいる『あどけない飛沫・プリス』の能力は誘発しますか？",
+                "answer": "はい。誘発します。\nまた、クイックタイミングにおいて自分がプレイしたスペルの解決後、誘発した『あどけない飛沫・プリス』の能力を解決します。これは、相手のフォロワーが攻撃目標に対してダメージを与える前に行います。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0130ad1b610f89c7581c2f41719e64980c1f2c473b461529ceeb9988e7206901",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-003",
+            "fetched_at": "2026-09-24T19:22:44.620118Z"
+          },
+          "document_ref": "documents-12187825add936d5"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-004",
+      "documents": {
+        "documents-92378eba73b9528a": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-004",
+            "faces": [
+              {
+                "name": "マーリン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキからスペル1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "「鳥が命を運ぶと信じるのは、幼き子供。\n運ぶべき命を選び取るのが、私の役目」",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-004.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q185",
+                "date": "2022-04-26",
+                "question": "自分のデッキにスペルがないとき、このフォロワーの《ファンファーレ》能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、デッキの中身を全て確認したあと、スペルを手札に加えず、デッキをシャッフルします。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-005"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:59cbf3ad60b42797ca16b7e344bcc94d0bfd8c0c90cf922267d29b53c27ebffb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-004",
+            "fetched_at": "2026-09-24T19:22:47.487325Z"
+          },
+          "document_ref": "documents-92378eba73b9528a"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-005",
+      "documents": {
+        "documents-37e8eae98bc00d32": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-005",
+            "faces": [
+              {
+                "name": "マーリン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "3",
+                "text": "【進化時】自分の墓場の元のコスト3以下のスペル1枚を選ぶ。それのコストを0にしてプレイする。",
+                "sections": [],
+                "flavor": "運ばれるまま進むだけでは、生まれた意味など見つからない。\n命を燃やし、眼を凝らして、ようやく運命は見つかるのだ。",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-005.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q246",
+                "date": "2022-05-06",
+                "question": "自分の墓場のスペルが10枚で、このフォロワーの能力をプレイして自分の墓場から『運命の導き』をプレイしたとき、『運命の導き』の【スペルチェイン_10】は条件を満たしますか？",
+                "answer": "いいえ。『運命の導き』はプレイしたとき墓場ではなく解決領域にあるため、墓場のスペルは9枚となり、【スペルチェイン_10】の条件は満たしません。"
+              },
+              {
+                "id": "Q186",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力でプレイしたスペルは、効果の解決後、墓場に置かれますか？",
+                "answer": "はい。効果の解決後、墓場に置かれます。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2e98063011079284e992a850858850a3b803dd37299bbf4c28c316d24fe4b051",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-005",
+            "fetched_at": "2026-09-24T19:22:50.339714Z"
+          },
+          "document_ref": "documents-37e8eae98bc00d32"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-006",
+      "documents": {
+        "documents-08bdf970bb438c12": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-006",
+            "faces": [
+              {
+                "name": "一世の探究",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "宴楽",
+                  "魔法使い",
+                  "禁忌"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のデッキの上4枚を見る。その中から、2枚を公開して手札に加える。残りを墓場に置く。自分の場に『真理の大文豪・ユキシマ』がいるなら、自分のPPを1回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "AOGIRI",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-006.png",
+                "trait_raw": "宴楽・魔法使い・禁忌"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1901",
+                "date": "2025-02-10",
+                "question": "このスペルをプレイして自分のデッキの上4枚を見た場合、その中のカードを手札に加えない選択ができますか？",
+                "answer": "いいえ。このスペルをプレイして自分のデッキの上4枚を見た中から、2枚を公開して手札に加える必要があります。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-001"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fdccb442865559792312040b949a53daff26af4bf27ca33ed5c652123e898aad",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-006",
+            "fetched_at": "2026-09-24T19:22:53.174968Z"
+          },
+          "document_ref": "documents-08bdf970bb438c12"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-007",
+      "documents": {
+        "documents-4c8d561d77da7187": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-007",
+            "faces": [
+              {
+                "name": "次元の超越",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "12",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、墓場のスペル10枚を消滅：コストを7にする。\nこのターンのあと、自分の追加ターンを行う。",
+                "sections": [],
+                "flavor": "常識は無駄。法則は無視。誰も彼女を縛れない。\n「さぁ、飛ぶわよ！」",
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-007.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q329",
+                "date": "2022-07-07",
+                "question": "『次元の魔女・ドロシー(EVOLVE)』の【進化時】能力でコストが-5された『次元の超越』をプレイする際、さらに『次元の超越』の能力でコストを7にする場合、コストは7から-5をし、コスト2でプレイできますか？",
+                "answer": "はい。コスト2でプレイすることができます。"
+              },
+              {
+                "id": "Q193",
+                "date": "2022-04-26",
+                "question": "このスペルをプレイし、その効果で得た追加ターンでもう1枚のこのカードをプレイしたとき、同様に追加ターンを行いますか？",
+                "answer": "はい。行います。"
+              },
+              {
+                "id": "Q192",
+                "date": "2022-04-26",
+                "question": "このスペルをプレイする際、墓場のスペルを消滅させるときに、プレイしているこのカードを消滅させるスペルとして数えることはできますか？",
+                "answer": "いいえ。プレイするこのカードは墓場にないため、数えることはできません。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:313ab5aab46de32687047779c837121d605ab52e8af82e55627f4b463d951e60",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-007",
+            "fetched_at": "2026-09-24T19:22:56.008025Z"
+          },
+          "document_ref": "documents-4c8d561d77da7187"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-008",
+      "documents": {
+        "documents-054553b876c29cd1": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-008",
+            "faces": [
+              {
+                "name": "グリモアソーサラー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "禁忌"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "右から襲おうが無駄無意味。左から来ようがコチラが速い。\n背面不意打ち？甘い甘い！魔導書完璧、私は無敵！",
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-008.png",
+                "trait_raw": "魔法使い・禁忌"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-009"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4c85b35101e6dee80fb5de5cc49b6eaa5aebaa30e57ec6a16ad2ba5c65692c50",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-008",
+            "fetched_at": "2026-09-24T19:22:58.776685Z"
+          },
+          "document_ref": "documents-054553b876c29cd1"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-009",
+      "documents": {
+        "documents-15a1805bb344a30c": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-009",
+            "faces": [
+              {
+                "name": "グリモアソーサラー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "禁忌"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分の手札の魔法使い・スペル1枚をEXエリアに置いてよい。このターン、それをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": "正面突破……フッ、その発想はなかった。よし、タンマ！\n今思い出すから。えー、魔導書なしの魔法は、あー……。",
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-009.png",
+                "trait_raw": "魔法使い・禁忌"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-008"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cdae965c69729a885a80017f89ea6f7fb7e510e973e49fb7bcb480afee4773c8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-009",
+            "fetched_at": "2026-09-24T19:23:01.728239Z"
+          },
+          "document_ref": "documents-15a1805bb344a30c"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-010",
+      "documents": {
+        "documents-d63d4e5bb486985a": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-010",
+            "faces": [
+              {
+                "name": "カオスウィザード",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "禁忌"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【スペルチェイン_5】自分のPPを2回復する。（自分の墓場のスペルが5枚以上なら、【スペルチェイン_5】の後の能力が働く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-010.png",
+                "trait_raw": "魔法使い・禁忌"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-011"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:425440dd84e62d824c1c17ccbfc80a8c9726d19e5e3814f9b0572d420f985acd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-010",
+            "fetched_at": "2026-09-24T19:23:04.284540Z"
+          },
+          "document_ref": "documents-d63d4e5bb486985a"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-011",
+      "documents": {
+        "documents-363e6963cfba9e6c": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-011",
+            "faces": [
+              {
+                "name": "カオスウィザード",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "禁忌"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに2ダメージ。自分の墓場の魔法使い・フォロワーが5枚以上なら、1枚引く。",
+                "sections": [],
+                "flavor": "らしさがないのが、私らしさだ。\n禁忌、真理、よりどりみどりさ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-011.png",
+                "trait_raw": "魔法使い・禁忌"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1656",
+                "date": "2024-10-15",
+                "question": "自分の墓場の魔法使い・フォロワーが5枚以上の状況で、相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイして1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができず、自分の墓場の魔法使い・フォロワーが5枚以上であっても1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-010"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ac6110512a780154a422b937a54509053bff542a0b95ccf741618c36fec07e5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-011",
+            "fetched_at": "2026-09-24T19:23:06.961407Z"
+          },
+          "document_ref": "documents-363e6963cfba9e6c"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-012",
+      "documents": {
+        "documents-4d1edd7a2c4f8e55": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-012",
+            "faces": [
+              {
+                "name": "グランドブレイク",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それに2ダメージ。自分の場の魔法使い・フォロワーが2体以上なら、代わりに4ダメージ。それのリーダーに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ショースケ",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-012.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a83126a9dcfc1067a3bac862a2d35cde94eee914123fa53b4db9ea3d848326a4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-012",
+            "fetched_at": "2026-09-24T19:23:09.936007Z"
+          },
+          "document_ref": "documents-4d1edd7a2c4f8e55"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-013",
+      "documents": {
+        "documents-ef39cda4dc5c4c20": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-013",
+            "faces": [
+              {
+                "name": "真実の宣告",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "絶傑",
+                  "魔法使い"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。自分の場の魔法使い・フォロワーが2体以上なら、代わりに2つまで。\n【1】2枚引く。【2】相手のリーダーすべてに3ダメージ。【3】相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-013.png",
+                "trait_raw": "絶傑・魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1715",
+                "date": "2024-11-08",
+                "question": "自分の場に魔法使い・フォロワーが2体いる状況で、【1】と【3】をチョイスして『真実の宣告』をプレイしました。この場合、【1】の効果によって2枚引いて、その内容を確認してから、相手の場のフォロワー1体を選択することができますか？",
+                "answer": "いいえ。カードや能力によって目標を選ぶ場合、そのカードや能力をプレイする際に目標を選びます。そのため【1】と【3】をチョイスした場合、相手の場のフォロワー1体を先に選択し、その後カードを2枚引き、選択したフォロワーに3ダメージを与えます。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cce18bccbe619c37ddcddce8c07bfdd4fdb150f5bd0c1e1e542ff48f58ca3beb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-013",
+            "fetched_at": "2026-09-24T19:23:12.899607Z"
+          },
+          "document_ref": "documents-ef39cda4dc5c4c20"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-014",
+      "documents": {
+        "documents-b81ab4c94d377021": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-014",
+            "faces": [
+              {
+                "name": "精神統一",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーは{体力}+3する。1枚引く。【土の秘術】代わりに2枚。",
+                "sections": [],
+                "flavor": "本の中にあるものが、魔術の全てだと思ってはならない。\n神髄はいつだって、自分の中から湧き出るものだ。",
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-014.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-050"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fd8eb517d311ab965fb788fe590ab162093246a79e0c84faccfde36526e5e7f2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-014",
+            "fetched_at": "2026-09-24T19:23:15.643505Z"
+          },
+          "document_ref": "documents-b81ab4c94d377021"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-015",
+      "documents": {
+        "documents-2e7dbcc748641259": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-015",
+            "faces": [
+              {
+                "name": "ファイアーチェイン",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手の場のフォロワー2体まで選ぶ。それに3ダメージを割りふる。",
+                "sections": [],
+                "flavor": "無作為に燃え広がるが自然の炎。\n魔術の炎は狙いを定め、一度、二度と連鎖する。",
+                "illustrator": "まじ",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-015.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q279",
+                "date": "2022-06-24",
+                "question": "相手の場にフォロワーがないとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。2体まで選ぶとき、0体を選ぶことができるため、プレイすることができます。"
+              },
+              {
+                "id": "Q79",
+                "date": "2022-04-26",
+                "question": "このスペルで相手のフォロワー2体を選んでプレイした時、選んだ片方のフォロワーに0ダメージ、もう片方のフォロワーに3ダメージ与えることはできますか？",
+                "answer": "いいえ。「割りふる」の場合、選んだフォロワーには少なくとも1以上のダメージを割りふらなければならないため、0ダメージを与えることはできません。"
+              },
+              {
+                "id": "Q78",
+                "date": "2022-04-26",
+                "question": "このスペルをプレイするとき、相手のフォロワー0体を選ぶことはできますか？",
+                "answer": "はい。0体を選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:149deaf64286173f5c7964f59bf7202abe0a58f835e90d059c3d6a4e56ecebc1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-015",
+            "fetched_at": "2026-09-24T19:23:18.228058Z"
+          },
+          "document_ref": "documents-2e7dbcc748641259"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-016",
+      "documents": {
+        "documents-75acbd6bc0f0b298": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-016",
+            "faces": [
+              {
+                "name": "水晶の魔剣士",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}1枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "水晶玉。昔の僕の相棒さ。占い師はもうやめたんだ。\n先を見通せたって、悲しい未来は悲しいままだから……。",
+                "illustrator": "原田いすか",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-016.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:16a43988904ae67251547618ac6ab3082fe254a99d083f606d0bc47c53788b25",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-016",
+            "fetched_at": "2026-09-24T19:23:21.034599Z"
+          },
+          "document_ref": "documents-75acbd6bc0f0b298"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-017",
+      "documents": {
+        "documents-5f5695261176d44c": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-017",
+            "faces": [
+              {
+                "name": "水晶の魔剣士",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】自分の手札の{ウィッチ}スペル1枚をEXエリアに置いてよい。このターン、それをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": "水晶剣。今の僕の相棒さ。これで僕は未来を切り開いた。\nそう、大事なのは見る事じゃない。行動する事なんだ！",
+                "illustrator": "原田いすか",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-017.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1529",
+                "date": "2024-08-20",
+                "question": "このフォロワーの【進化時】能力で『次元の超越』をEXエリアに置き、そのターン中に、墓場のスペル10枚を消滅させて『次元の超越』をプレイする場合、コスト4でプレイすることができますか？",
+                "answer": "はい。『次元の超越』の能力でコスト7になった後、コストが-3されるためコスト4でプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-016"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1af2ac4956572a58131af29d1daeec86e25b508d6b080cafc35197374afb837b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-017",
+            "fetched_at": "2026-09-24T19:23:23.698968Z"
+          },
+          "document_ref": "documents-5f5695261176d44c"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-018",
+      "documents": {
+        "documents-580a97e767a1f023": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-018",
+            "faces": [
+              {
+                "name": "獣面の魔術師",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ラストワード}『大地の魔片』1つを出す。\n{起動}これを{アクト}【土の秘術】：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [
+                  "『大地の魔片』{ウィッチ}土の印・アミュレット{コスト1}【スタック】"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-018.png",
+                "trait_raw": "魔法使い・獣"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD02-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0bf117c5d0b00d2e167e10208bd1b6f03b7d3b586a773c48299fb3e5f52db198",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-018",
+            "fetched_at": "2026-09-24T19:23:26.230947Z"
+          },
+          "document_ref": "documents-580a97e767a1f023"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-019",
+      "documents": {
+        "documents-9d31c9fbbc6ed60f": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-019",
+            "faces": [
+              {
+                "name": "連鎖する雷",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のエンドフェイズが来たとき、自分のEXエリアのこれを墓場に置く。",
+                "sections": [
+                  "相手のリーダーすべてに4ダメージ。自分の場の魔法使い・フォロワーが2体以上なら、これをEXエリアに置く。"
+                ],
+                "flavor": null,
+                "illustrator": "okojo",
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-019.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1664",
+                "date": "2024-10-15",
+                "question": "『連鎖する雷』がEXエリアにある状況で、『連鎖する雷』の「自分のエンドフェイズが来たとき、自分のEXエリアのこれを墓場に置く。」の能力をプレイしたとき、自分の場に『アグネスタキオン』がいる場合、『アグネスタキオン』の「自分がスペルをプレイしたとき、～」という能力は誘発しますか？",
+                "answer": "いいえ。『連鎖する雷』の「自分のエンドフェイズが来たとき、自分のEXエリアのこれを墓場に置く。」は、『連鎖する雷』が自分のEXエリアにある状況で、自分のエンドフェイズを迎えたときに誘発する自動能力であり、自動能力のプレイはスペルのプレイとは異なるため、『アグネスタキオン』の能力は誘発しません。"
+              },
+              {
+                "id": "Q1663",
+                "date": "2024-10-15",
+                "question": "自分のEXエリアに『連鎖する雷』が2枚ある状況で、自分のエンドフェイズが来た場合、『連鎖する雷』の「自分のエンドフェイズが来たとき、自分のEXエリアのこれを墓場に置く。」はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              },
+              {
+                "id": "Q1662",
+                "date": "2024-10-15",
+                "question": "「自分のエンドフェイズが来たとき、自分のEXエリアのこれを墓場に置く。」という能力は、『連鎖する雷』がEXエリアにある場合に有効となる能力ですか？",
+                "answer": "はい。『連鎖する雷』がEXエリアにある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:05544a227c33320cccb3ae78bf8e8b7a9dcef511c411bf777385c474c0ee63e9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-019",
+            "fetched_at": "2026-09-24T19:23:29.274013Z"
+          },
+          "document_ref": "documents-9d31c9fbbc6ed60f"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD02-020",
+      "documents": {
+        "documents-dd00502c647ee637": {
+          "region": "jp",
+          "record": {
+            "number": "EBD02-020",
+            "faces": [
+              {
+                "name": "アブソーブスペル",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ウィッチ」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分の場の魔法使い・フォロワーが2体以上なら、自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/EBD02/ebd02-020.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1665",
+                "date": "2024-10-15",
+                "question": "自分の場の魔法使い・フォロワーが2体以上の状況で、相手の場のフォロワーを選ぶことが出来ない場合、このスペルをプレイして自分のリーダーの体力を+2することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、自分の場の魔法使い・フォロワーが2体以上であっても自分のリーダーの体力を+2することができません。"
+              }
+            ],
+            "products_ref": "products-ca93161acb15d2e1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:afc9ca67a9edd27d23f3d1c17c5b7c1071180989c702eb0da5a88a2e522d7e02",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD02-020",
+            "fetched_at": "2026-09-24T19:23:32.286221Z"
+          },
+          "document_ref": "documents-dd00502c647ee637"
+        }
+      ]
+    }
+  ]
+}

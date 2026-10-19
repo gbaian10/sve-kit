@@ -1,0 +1,163 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP06",
+  "range": "SP/000-099",
+  "products": {
+    "products-32707fb1f5d81ffd": [
+      {
+        "name": "ブースターパック第6弾「絶対なる覇者」",
+        "date": "2023-06-16",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP06",
+          "https://shadowverse-evolve.com/products/bp06/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP06-SP01",
+      "documents": {
+        "documents-de7a9bc4bdf7eff8": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SP01",
+            "faces": [
+              {
+                "name": "澄明なる頭脳・博衣こより",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "陰陽師"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "15",
+                "power": "5",
+                "hp": "5",
+                "text": "これをプレイする際、コストを-Xする。Xは「自分の墓場の陰陽師・カードやスペルの枚数の合計」である。\n{ファンファーレ}自分の場に『天后』がいないなら、『天后』1体を出す。\n{起動}これを{アクト}：自分の場の式神・フォロワー2体まで選ぶ。それは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sp01.png",
+                "trait_raw": "挑戦者・陰陽師"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q808",
+                "date": "2023-06-09",
+                "question": "タイプに陰陽師を持ち、スペルでもある『式神の使役』は、「自分の墓場の陰陽師・カードやスペルの枚数の合計」によって参照する際に、2枚分数えますか？",
+                "answer": "いいえ。『式神の使役』は1枚分として数えます。\n「自分の墓場の陰陽師・カードやスペルの枚数の合計」とは、自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの合計枚数です。"
+              },
+              {
+                "id": "Q807",
+                "date": "2023-06-09",
+                "question": "「自分の墓場の陰陽師・カードやスペルの枚数の合計」とはどのようなカードの枚数を参照しますか？",
+                "answer": "自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの枚数を参照します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-035"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5a6dcb44d49f55b7ddf72d79939172b512abcae4d5443f55c6b65dc87c4d5ec3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SP01",
+            "fetched_at": "2026-09-24T22:24:13.387827Z"
+          },
+          "document_ref": "documents-de7a9bc4bdf7eff8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SP02",
+      "documents": {
+        "documents-ebbc27e2e5046c53": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SP02",
+            "faces": [
+              {
+                "name": "滄海の捕食者・沙花叉クロヱ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "3",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それをアクトする。それは次の相手のスタートフェイズにスタンドしない。\n{ファンファーレ}【覚醒】状態なら、自分のデッキから『銀氷の吐息』1枚を探し、EXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sp02.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q821",
+                "date": "2023-06-09",
+                "question": "《ファンファーレ》能力によって、自分のデッキに『銀氷の吐息』がないことが分かっている場合でも、【覚醒】状態なら、デッキの『銀氷の吐息』を探し、見つけない選択をしてデッキをシャッフルする必要がありますか？",
+                "answer": "はい。その場合でもデッキをシャッフルする必要があります。"
+              },
+              {
+                "id": "Q820",
+                "date": "2023-06-09",
+                "question": "《ファンファーレ》能力によって、アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしませんか？",
+                "answer": "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしません。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「それは次の相手のスタートフェイズにスタンドしない。」が適用されます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-056"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-062"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d0cdf73024e1673b6f623d7b0ac2e7f14113064c493553b65e5fda7e0c7f5d2e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SP02",
+            "fetched_at": "2026-09-24T22:24:15.901812Z"
+          },
+          "document_ref": "documents-ebbc27e2e5046c53"
+        }
+      ]
+    }
+  ]
+}

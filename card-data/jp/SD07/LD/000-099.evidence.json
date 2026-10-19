@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD07",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-35467a19f93ac700": [
+        {
+          "ordinal": 0,
+          "name": "スターターデッキ「新たなる戦場」",
+          "date_raw": "2025-06-27",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=SD07",
+            "https://shadowverse-evolve.com/products/sd07_08/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=SD07",
+            "https://shadowverse-evolve.com/products/sd07_08/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/sd07_08/",
+              "expansion_code": "SD07"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:00c8336eb176d37b9b6d628fe250936a95e1a73a0228a09d43a478dabf1bc5d0": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:86aab57e15fba2cb68ee28c52c70cb880ef7080a7e49c0df34dc39f6387acd55",
+        "raw_bytes": 36556,
+        "first_receipt_id": "sha256:66a574802c98cefef4217e41ecce581f9bd8288360baf55fbdb805ce24e17105",
+        "descriptor_sha256": "sha256:5710b06f44106c8db431337848d74c5a24645b5f89b92ca32867f64cd31d6e26",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:f01d56b242416cecd25e53a6314f03e077b7b64d1bdd3f94a3dc1ca18ae9d2d7"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-35467a19f93ac700",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:bb3e7db0712673671381497814b5abd67e0a3308ae2848a56ecadbe581cfd841"
+    }
+  }
+}

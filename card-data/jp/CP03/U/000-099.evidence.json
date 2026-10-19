@@ -1,0 +1,477 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CP03",
+  "range": "U/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-1f79f9873af019ff": [
+        {
+          "ordinal": 0,
+          "name": "コラボパック「カードファイト!! ヴァンガード」",
+          "date_raw": "2024-06-28",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CP03",
+            "https://shadowverse-evolve.com/products/cp03/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CP03",
+            "https://shadowverse-evolve.com/products/cp03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/cp03/",
+              "expansion_code": "CP03"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-18dac3bbfc8cafd3": [
+        {
+          "stable_source_key": "Q1481",
+          "official_number": "Q1481",
+          "locator": "qa-block:0",
+          "published_on": "2024-07-08",
+          "date_raw": "2024-07-08"
+        },
+        {
+          "stable_source_key": "Q1408",
+          "official_number": "Q1408",
+          "locator": "qa-block:1",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1407",
+          "official_number": "Q1407",
+          "locator": "qa-block:2",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1380",
+          "official_number": "Q1380",
+          "locator": "qa-block:3",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        }
+      ],
+      "qa-2ac2bd405214eaa4": [
+        {
+          "stable_source_key": "Q1481",
+          "official_number": "Q1481",
+          "locator": "qa-block:0",
+          "published_on": "2024-07-08",
+          "date_raw": "2024-07-08"
+        },
+        {
+          "stable_source_key": "Q1436",
+          "official_number": "Q1436",
+          "locator": "qa-block:1",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1435",
+          "official_number": "Q1435",
+          "locator": "qa-block:2",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1380",
+          "official_number": "Q1380",
+          "locator": "qa-block:3",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        }
+      ],
+      "qa-4c234f9e2c2bde15": [
+        {
+          "stable_source_key": "Q1481",
+          "official_number": "Q1481",
+          "locator": "qa-block:0",
+          "published_on": "2024-07-08",
+          "date_raw": "2024-07-08"
+        },
+        {
+          "stable_source_key": "Q1424",
+          "official_number": "Q1424",
+          "locator": "qa-block:1",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1423",
+          "official_number": "Q1423",
+          "locator": "qa-block:2",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1380",
+          "official_number": "Q1380",
+          "locator": "qa-block:3",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        }
+      ],
+      "qa-62d2027250e95f17": [
+        {
+          "stable_source_key": "Q1481",
+          "official_number": "Q1481",
+          "locator": "qa-block:0",
+          "published_on": "2024-07-08",
+          "date_raw": "2024-07-08"
+        },
+        {
+          "stable_source_key": "Q1378",
+          "official_number": "Q1378",
+          "locator": "qa-block:1",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1377",
+          "official_number": "Q1377",
+          "locator": "qa-block:2",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1376",
+          "official_number": "Q1376",
+          "locator": "qa-block:3",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1375",
+          "official_number": "Q1375",
+          "locator": "qa-block:4",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1374",
+          "official_number": "Q1374",
+          "locator": "qa-block:5",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        }
+      ],
+      "qa-7146f3f5142a7ca2": [
+        {
+          "stable_source_key": "Q1481",
+          "official_number": "Q1481",
+          "locator": "qa-block:0",
+          "published_on": "2024-07-08",
+          "date_raw": "2024-07-08"
+        },
+        {
+          "stable_source_key": "Q1399",
+          "official_number": "Q1399",
+          "locator": "qa-block:1",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1378",
+          "official_number": "Q1378",
+          "locator": "qa-block:2",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1377",
+          "official_number": "Q1377",
+          "locator": "qa-block:3",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        }
+      ],
+      "qa-eb9adb2b6f96c007": [
+        {
+          "stable_source_key": "Q1481",
+          "official_number": "Q1481",
+          "locator": "qa-block:0",
+          "published_on": "2024-07-08",
+          "date_raw": "2024-07-08"
+        },
+        {
+          "stable_source_key": "Q1416",
+          "official_number": "Q1416",
+          "locator": "qa-block:1",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1415",
+          "official_number": "Q1415",
+          "locator": "qa-block:2",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1378",
+          "official_number": "Q1378",
+          "locator": "qa-block:3",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        },
+        {
+          "stable_source_key": "Q1377",
+          "official_number": "Q1377",
+          "locator": "qa-block:4",
+          "published_on": "2024-06-24",
+          "date_raw": "2024-06-24"
+        }
+      ]
+    },
+    "related": {
+      "related-05442c1c2a374d96": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP03-086"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=CSD03a-003"
+        }
+      ],
+      "related-360a601ddfefc5ad": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP03-084"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=CP03-085"
+        }
+      ],
+      "related-4f53cda18c2baa0c": [],
+      "related-649b4241e946b117": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CSD03b-001"
+        }
+      ],
+      "related-7394fbe37b97ddd9": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP03-002"
+        }
+      ],
+      "related-e6eabab51bd68a1b": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP03-105"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=CP03-115"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:1d20018cf43b754bf0140b77c48f8fa748b61f8e777b9ba46d729f4afaeade69": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:aa4e9e6adf79a490fe650a7de92946507e6efebb4c53111e05c94941c407c4c2",
+        "raw_bytes": 41818,
+        "first_receipt_id": "sha256:1f3f30ba75e1a8334120c103a46920c554fcf69cd05dfcfa5d01b9ed4033f50f",
+        "descriptor_sha256": "sha256:3bfe41685f2df5592cfe9f42a0cbd5706748e03536f1a0d2b5723b0b8ae5b13f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:5f962da8fef354e1b4172572be6d681934451fecd3c089e0272466bdd307ad85"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1f79f9873af019ff",
+        "qa": "qa-7146f3f5142a7ca2",
+        "related": "related-05442c1c2a374d96",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:b4736d19e371a17e252ecb7b214a184fc583e7f87833e861a696ec84f61488d2"
+    },
+    "src:v1:8c854867d5d90fe87cd5a14bae14b965776e945f0d10caebd279f8c7bec1323d": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:b2b3d1a65e0c79f6ac5dc53d7bfc2d726f8f4408bd0be6a3c726cbec282ebc71",
+        "raw_bytes": 41824,
+        "first_receipt_id": "sha256:25bc7113eb1872b9895ba35b493d7d47302facd0a1f4bcc71d66ec81343b6ff2",
+        "descriptor_sha256": "sha256:a99c69cdef0dbcf5491d3bf5c8cb70e3ab8c6715fbbd68c2a845e2cdff7c815d",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:ea923686c558473410e17373f52fe182cdb6db20a3b355bb433e0904b693e4fb"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1f79f9873af019ff",
+        "qa": "qa-eb9adb2b6f96c007",
+        "related": "related-649b4241e946b117",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:f15448e3ed6a81f0d5c3fb8856f3555af062bcaaa8744ec9d0f26e1cb0b9f45c"
+    },
+    "src:v1:8db50f4890c6c38607ef6bb8560af1f136026c4f59be7b96098255b0e277dca8": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:ba44fb1d4805ab1c66cbed98cfb0067c630379a30eb60cc4e03dd3d4d7a92f16",
+        "raw_bytes": 41787,
+        "first_receipt_id": "sha256:4f26b513422f2193f24c6798d3da01b502b7c8ca2a8de4e07525656d86f43fbd",
+        "descriptor_sha256": "sha256:f0ccc359ce9dad9b0a5ad77ce38d76d1bf6c943a6d93d782e8a48b7e3b104747",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:04fc3ba095ed1f120c8c7ad5020590b2d40b82b9eaa8cd7667636cf3506a1928"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1f79f9873af019ff",
+        "qa": "qa-2ac2bd405214eaa4",
+        "related": "related-e6eabab51bd68a1b",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:c2569810293d63e4e93c0805b7b950864348ded21ea0ea50bf32f77e5959138e"
+    },
+    "src:v1:99337352450ccc506781c5552e967819d226a5b241856d56547c17a3f5f30297": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:dd118ddeec567acaed28d6a3288d335302efd5363d1277179218c05ccd57c68c",
+        "raw_bytes": 43250,
+        "first_receipt_id": "sha256:a4e415a44c0383e2a4186d33e40742c4bac51ef45b451388b49dcccb736738f6",
+        "descriptor_sha256": "sha256:a029295fec6d3113cd1b5c0c05a5952d7725ad2e7ad1ae4fb36b8bf539eda7b3",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:beaef887f339b4d2ed8df2c978230e1819e63d40f309e424ca99a66271bc5589"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1f79f9873af019ff",
+        "qa": "qa-62d2027250e95f17",
+        "related": "related-7394fbe37b97ddd9",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:abf76ce3b9112e6964bb28389f90f21f2203eee4ee87be9779a34bf4a1444dec"
+    },
+    "src:v1:d4235acef4978e522675e92bce22877b0ace20b1ce5a455a8bc7dbb0f7545331": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:6a32d85d26473d488d67f81f6fbdd81b1d9207dc35b8decf5eb61fa67699ac03",
+        "raw_bytes": 42369,
+        "first_receipt_id": "sha256:be63326c91695de286119742a87670ae5c1742b40c4bc0811cfe8ed9abd2d8df",
+        "descriptor_sha256": "sha256:f2dfb8413fa31d36db78dfa3bb63677af2a793efe4c75d4cd7d0259915f1d994",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:0b5d3e4586a88605456bded56dd061eef61412ba1a2c20251fa1fcd4ed40830f"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1f79f9873af019ff",
+        "qa": "qa-4c234f9e2c2bde15",
+        "related": "related-360a601ddfefc5ad",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:057b97a7d996276305b84ff1e515b7423ad8841cea0c6f3867c3dfeff245a645"
+    },
+    "src:v1:d99a09952bc0696651765233d9064deef72a2dd6001ccc6acb24721e2025340a": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:3f8d743bf867055df4c3efe5f5eeffcc29f0e93059ea4b4808f551321fab02fb",
+        "raw_bytes": 42841,
+        "first_receipt_id": "sha256:344d422599cddf3a1c1428dcf3eddebc511b6fcdf3172c50e89d80cff03debac",
+        "descriptor_sha256": "sha256:1543f3220a3f11d606f72afd4785c1c417008e8f7188fd1cc1e47424dbffcfba",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:9dedad4e1bb3ed14b221b66a8cd49d2a5df8008a29488ea23cfb6659ee7d81ea"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-1f79f9873af019ff",
+        "qa": "qa-18dac3bbfc8cafd3",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:2e304dcc372f36eb86d088953f4825fc299893a44948ac541ce30aa2c46319c1"
+    }
+  }
+}

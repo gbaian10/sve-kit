@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SS02",
+  "range": "U/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-b986a5c8f96dbc97": [
+        {
+          "ordinal": 0,
+          "name": "Worlds Beyond Dragoncraft Starter Set",
+          "date_raw": "Jun. 20, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=SS02",
+            "https://en.shadowverse-evolve.com/products/wbss/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SS02",
+            "https://en.shadowverse-evolve.com/products/wbss/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/wbss/",
+              "expansion_code": "SS02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:04dfcb4bb406138551b5ea2edf9d044b17b8e6df6a315d71cb7017df2090e187": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:02c55254b7b7727c9bebac221c160674447af51aecfbd6df4f83c087edc6bf6e",
+        "raw_bytes": 35558,
+        "first_receipt_id": "sha256:9de067e3a4b9b9093cd6f39c15966640f27f105613d92318cc2bf62e135e12fe",
+        "descriptor_sha256": "sha256:e26a37fe8a39a8291d00db55d458de62da74469d937eeae99ed9b8495f60f134",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:9e1f327015142140904373c5471f5ed4205d1b912b97ad3c1496f2d71cf97ce9"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-b986a5c8f96dbc97",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:211e104acb292b940f8b1d3d4821161cce5d7f9285a43d17bbe3de7e0781d658"
+    }
+  }
+}

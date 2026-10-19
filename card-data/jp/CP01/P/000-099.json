@@ -1,0 +1,3637 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CP01",
+  "range": "P/000-099",
+  "products": {
+    "products-c0d990734a32541c": [
+      {
+        "name": "コラボパック「ウマ娘 プリティーダービー」",
+        "date": "2022-10-01",
+        "links": [
+          "/cardlist/cardsearch?expansion=CP01",
+          "https://shadowverse-evolve.com/products/cp_umamusume/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CP01-P01",
+      "documents": {
+        "documents-ec2105d006f94142": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P01",
+            "faces": [
+              {
+                "name": "ゴールドシチー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\nお互いの場のカードが8枚以上ある限り、これは【疾走】を持つ。\n{ファンファーレ}自分のPPを3回復する。",
+                "sections": [],
+                "flavor": "（アタシ今、最ッ高に上がってる……！）\n雨も泥も汗もアクセサリー。アタシが輝くランウェイはココだ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p01.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q357",
+                "date": "2022-09-22",
+                "question": "このフォロワーが自身の能力で【疾走】を持ち、場に出たターンに攻撃を宣言しました。その時なんらかの理由で場のカードが7枚以下になり【疾走】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【疾走】を失っていても、その攻撃は行われます。"
+              },
+              {
+                "id": "Q356",
+                "date": "2022-09-22",
+                "question": "このフォロワーの能力で、お互いの場のカードが8枚以上ある状態から7枚以下になった時に【疾走】は失いますか？",
+                "answer": "はい、失います。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:10069970df0acea236c9f5d17bb8eac063d7205fb5ba1acb7f7fa8fe7e96ad8e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P01",
+            "fetched_at": "2026-09-24T23:13:22.764803Z"
+          },
+          "document_ref": "documents-ec2105d006f94142"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P02",
+      "documents": {
+        "documents-aa74ae327c364be1": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P02",
+            "faces": [
+              {
+                "name": "はやい！うまい！はやい！",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分のデッキから【疾走】を持つフォロワー1枚を探し、手札に加える。【2】【疾走】を持つ自分のフォロワー1体を選ぶ。それは{攻撃力}+3する。",
+                "sections": [],
+                "flavor": "どうぞご覧あれ！これこそがザ・学級委員長のお弁当ですッ！\nさあッ！バクシンで召し上がれッ！！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p02.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q359",
+                "date": "2022-09-22",
+                "question": "【2】の選択肢をチョイスし、始めから【疾走】をもつフォロワーではなく『ゴールドシチー』のように【疾走】を能力によって持ったフォロワーを選ぶことはできますか？",
+                "answer": "はい、選べます。"
+              },
+              {
+                "id": "Q358",
+                "date": "2022-09-22",
+                "question": "【1】の選択肢をチョイスし、自分のデッキから『ゴールドシチー』を探して手札に加えることはできますか？",
+                "answer": "いいえ。場以外の領域では「お互いの場のカードが8枚以上ある限り、これは【疾走】を持つ。」の効果は有効ではなく『ゴールドシチー』は【疾走】を持っていないので、デッキから探して手札に加えることはできません。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:440160ee8ec24f8183f69158d908b9ac774214681bc52670c450cd697cdf72b0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P02",
+            "fetched_at": "2026-09-24T23:13:23.797372Z"
+          },
+          "document_ref": "documents-aa74ae327c364be1"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P03",
+      "documents": {
+        "documents-bb9390a80d401fe8": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P03",
+            "faces": [
+              {
+                "name": "シンコウウインディ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}自分のデッキの上1枚を見る。それをデッキの下に置いてよい。",
+                "sections": [],
+                "flavor": "ゲート練習ぅ～？合図するまで待つ練習ぅぅ～？ヨユーなのだ！\n……。……。……ンガァーッ！なんで合図しないのだ！？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p03.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d1b264adb47ea08c07a15c57b10100462957c745fc544a3c77a75a94573ceabf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P03",
+            "fetched_at": "2026-09-24T23:13:26.440736Z"
+          },
+          "document_ref": "documents-bb9390a80d401fe8"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P04",
+      "documents": {
+        "documents-34756ff57a31df4c": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P04",
+            "faces": [
+              {
+                "name": "エイシンフラッシュ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。相手のフォロワー1体まで選ぶ。それを手札に戻す。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p04.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4b6f2505461af54990accc8ed99fc2f49e7d4616786869ec714e66104503d79a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P04",
+            "fetched_at": "2026-09-24T23:13:29.243834Z"
+          },
+          "document_ref": "documents-34756ff57a31df4c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P05",
+      "documents": {
+        "documents-143c91b9a1cc3e32": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P05",
+            "faces": [
+              {
+                "name": "鍛えぬくトモ",
+                "card_class": "エルフ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "これが場を離れたとき、自分のウマ娘・フォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。\n{ファンファーレ}1枚引く。",
+                "sections": [],
+                "flavor": "はぁ……はぁ……発汗、体温上昇、確認。\nですが、負荷は不十分。もう1SET……えい、えい、おー。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p05.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:223c5d3f58947b43122b62b94549fc5159d6f8735d16280cf9c3b14ff74e42d0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P05",
+            "fetched_at": "2026-09-24T23:13:31.900920Z"
+          },
+          "document_ref": "documents-143c91b9a1cc3e32"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P06",
+      "documents": {
+        "documents-585fc0a7594d0306": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P06",
+            "faces": [
+              {
+                "name": "マーベラスサンデー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}場の他のカード1枚を手札に戻す：自分のリーダーは{体力}+2する。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": "ハイハーイ、全世界にマーベラスな気持ちを届けるよ！\nマーベラスサンデーでーす！みんなも一緒にマーベラース！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p06.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9a14debbb4a9670969a96d98588263fc39df80ba9a31784fcea1f69b70ba4fea",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P06",
+            "fetched_at": "2026-09-24T23:13:34.808741Z"
+          },
+          "document_ref": "documents-585fc0a7594d0306"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P07",
+      "documents": {
+        "documents-6974cb3e59cb6fea": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P07",
+            "faces": [
+              {
+                "name": "ユキノビジン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【守護】\n{ファンファーレ}場の他のカード1枚を手札に戻す：これは{攻撃力}+1/{体力}+1する。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p07.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q361",
+                "date": "2022-09-22",
+                "question": "このフォロワーの《ファンファーレ》のコストで相手の場のカードを手札に戻すことはできますか？",
+                "answer": "いいえ。自分の場のカードのみを手札に戻すことができます。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f0b10326c2489248f72fed4e44bc0dcbc605696c1bd99a6f13e8da100dc79ddd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P07",
+            "fetched_at": "2026-09-24T23:13:37.502883Z"
+          },
+          "document_ref": "documents-6974cb3e59cb6fea"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P08",
+      "documents": {
+        "documents-1c9c0e478b67fd27": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P08",
+            "faces": [
+              {
+                "name": "アイネスフウジン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "6",
+                "power": "7",
+                "hp": "7",
+                "text": "{食事}{コスト1}：これは出走する。\n【突進】【指定攻撃】\n{ファンファーレ}自分の他のカード1枚を選ぶ。それを手札に戻す。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p08.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q362",
+                "date": "2022-09-22",
+                "question": "このフォロワーの能力で、墓場やEXエリアのカードを手札に戻すことはできますか？",
+                "answer": "いいえ。このフォロワーの能力では自分の場の他のカードを手札に戻すことができます。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:21e7695df39d63bf6df38f82c0df459a400cd1b5fb3f23d2b6813172840f7549",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P08",
+            "fetched_at": "2026-09-24T23:13:40.176848Z"
+          },
+          "document_ref": "documents-1c9c0e478b67fd27"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P09",
+      "documents": {
+        "documents-46fc344e1611bdfc": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P09",
+            "faces": [
+              {
+                "name": "タイキシャトル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\nこれが場から手札に戻ったとき、相手のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "ハウディ！タイキシャトルです！\nワタシのパワフルな走りでみんなをハッピーにしちゃいマース！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p09.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:03ed3e113cf2c20c62e63d1fbc708a71fe6e522df4c70290c5092a1666928c77",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P09",
+            "fetched_at": "2026-09-24T23:13:42.795384Z"
+          },
+          "document_ref": "documents-46fc344e1611bdfc"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P10",
+      "documents": {
+        "documents-1824b40d80c677b4": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P10",
+            "faces": [
+              {
+                "name": "ハルウララ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。このターン、これはダメージを受けない。",
+                "sections": [],
+                "flavor": "わたし、ハルウララ！にんじんとね、走るのがだ～い好き♪\n1着めざして、めいっぱいがんばるぞーっ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p10.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bc3d7f01562ef1fc6d4b531bf2a1c804006adcc5b53868955ac5012971824bbb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P10",
+            "fetched_at": "2026-09-24T23:13:45.560560Z"
+          },
+          "document_ref": "documents-1824b40d80c677b4"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P11",
+      "documents": {
+        "documents-0e338675e9fb4be3": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P11",
+            "faces": [
+              {
+                "name": "ウイニングチケット",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘",
+                  "BNW"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n【疾走】\n{ファンファーレ}自分の墓場に『検証、開始』と『ナリタタイシン』があるなら、これは{攻撃力}+3/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p11.png",
+                "trait_raw": "ウマ娘・BNW"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-P15"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-P17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc69305faa04c8c68b6213e4c00efcb1784689215937f8b74a83d2936193c093",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P11",
+            "fetched_at": "2026-09-24T23:13:47.994187Z"
+          },
+          "document_ref": "documents-0e338675e9fb4be3"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P12",
+      "documents": {
+        "documents-6cf5f9e7a43fdc9d": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P12",
+            "faces": [
+              {
+                "name": "迫る熱に押されて",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のフォロワー1体を選ぶ。それは【疾走】を持つ。それがウマ娘・フォロワーなら、それは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "僅かな差で負けた記憶――もう絶対に負けない。負けたくない。\n「勝負はここから……！今度はあたしが勝つからね！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p12.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:80c3dd063f84957b6eb61c95af9c8a39ed9b79faa1f024439c76ab75945a2144",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P12",
+            "fetched_at": "2026-09-24T23:13:50.976808Z"
+          },
+          "document_ref": "documents-6cf5f9e7a43fdc9d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P13",
+      "documents": {
+        "documents-ad9da26c424f59f3": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P13",
+            "faces": [
+              {
+                "name": "エアグルーヴ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。自分の他のフォロワー1体まで選ぶ。それをスタンドする。このターン、それは相手を攻撃できない。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p13.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q365",
+                "date": "2022-09-22",
+                "question": "このフォロワーの能力でスタンドしたフォロワーは、コストに「これを《アクト》」を持つ能力を使うことはできますか？",
+                "answer": "はい。能力のコストの「これを《アクト》」は攻撃ではないため、使うことができます。"
+              },
+              {
+                "id": "Q364",
+                "date": "2022-09-22",
+                "question": "このフォロワーの【出走時】能力で目標に選んだフォロワーは、相手の場のアクトしているフォロワーを攻撃することはできますか？",
+                "answer": "いいえ。相手のリーダーや相手のフォロワーを攻撃することはできません。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7c1f40a5735eac033b01bdbdc62f800a6fa2b769b53de6c2164cb77fb20771bd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P13",
+            "fetched_at": "2026-09-24T23:13:53.639117Z"
+          },
+          "document_ref": "documents-ad9da26c424f59f3"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P14",
+      "documents": {
+        "documents-bac35c6271bd6c25": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P14",
+            "faces": [
+              {
+                "name": "ヒシアマゾン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "4",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n【突進】\n{ファンファーレ}{コスト3}：自分のデッキからコスト3のウマ娘・フォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p14.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:870e2147d6942a7b22f5d4cf89ccac9af97deac5e03907abf60b83a4af722461",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P14",
+            "fetched_at": "2026-09-24T23:13:56.438053Z"
+          },
+          "document_ref": "documents-bac35c6271bd6c25"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P15",
+      "documents": {
+        "documents-ad710d95f206f353": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P15",
+            "faces": [
+              {
+                "name": "検証、開始",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘",
+                  "BNW"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分のデッキの上2枚を見る。その中から、ウマ娘・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。【2】自分の墓場のBNW・フォロワー1枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p15.png",
+                "trait_raw": "ウマ娘・BNW"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:228df632b4c68933a0bd5f5e1f7ee62e95aff565d65055eee0b50064f653df92",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P15",
+            "fetched_at": "2026-09-24T23:13:59.586090Z"
+          },
+          "document_ref": "documents-ad710d95f206f353"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P16",
+      "documents": {
+        "documents-ad64460549db247b": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P16",
+            "faces": [
+              {
+                "name": "シリウスシンボリ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{食事}{コスト1}：これは出走する。\n【必殺】",
+                "sections": [],
+                "flavor": "シリウスシンボリだ！レースに御託はいらねぇ。黙って見てな。\n世界を獲って“最強”を証明してやるよ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p16.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e0c7f40791ec99ee25000dd64172e7b56e96103b07af69ed8812cde3716cb34f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P16",
+            "fetched_at": "2026-09-24T23:14:02.034983Z"
+          },
+          "document_ref": "documents-ad64460549db247b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P17",
+      "documents": {
+        "documents-0d39883f7d115464": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P17",
+            "faces": [
+              {
+                "name": "ナリタタイシン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘",
+                  "BNW"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n【突進】",
+                "sections": [],
+                "flavor": "ナリタタイシン。以上。……ほっといて。\nアタシはただ、バカにした奴らにわからせたいだけだから。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p17.png",
+                "trait_raw": "ウマ娘・BNW"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e5000f25cd2756de72ae27480e5cdda09ad18757183759dd22a78a86425f573a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P17",
+            "fetched_at": "2026-09-24T23:14:04.395855Z"
+          },
+          "document_ref": "documents-0d39883f7d115464"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P18",
+      "documents": {
+        "documents-0d0b85a242064384": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P18",
+            "faces": [
+              {
+                "name": "シンボリルドルフ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n{ラストワード}自分のデッキから『トウカイテイオー』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "私はシンボリルドルフ。ウマ娘を導く“皇帝”たらんとする者。\n同じ志を抱く者よ、共に勇往邁進して征こう。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p18.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6189cf56c882e637d12a3b6aff6a2bb28dd1967ecb7877443b1aa47540730cdf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P18",
+            "fetched_at": "2026-09-24T23:14:07.254763Z"
+          },
+          "document_ref": "documents-0d0b85a242064384"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P19",
+      "documents": {
+        "documents-b939349ea681a9a0": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P19",
+            "faces": [
+              {
+                "name": "ビコーペガサス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】相手のフォロワー1体を選ぶ。それをアクトする。",
+                "sections": [],
+                "flavor": "正義のヒーロー、ビコーペガサス参上！\nアタシの走りはどんな強敵もバーンと倒すんだ！すごいだろ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p19.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:96fcde9af2bbb5c818f75e67157125e157e3782ba800afdfc7eca93fcf6bdd9e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P19",
+            "fetched_at": "2026-09-24T23:14:10.062591Z"
+          },
+          "document_ref": "documents-b939349ea681a9a0"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P20",
+      "documents": {
+        "documents-3e4f2ea798a690be": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P20",
+            "faces": [
+              {
+                "name": "フジキセキ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n{起動}{コスト3}これを{アクト}：相手のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": "みんなを楽しませる漆黒のエンターテイナー、フジキセキだよ！\n最高の“キセキ”で、君を必ず笑顔にしてみせるからね！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p20.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b72fd86110ee1dbe3da942fa1ecb6264ffe99ab5e0b43b5f4971197537363339",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P20",
+            "fetched_at": "2026-09-24T23:14:12.718544Z"
+          },
+          "document_ref": "documents-3e4f2ea798a690be"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P21",
+      "documents": {
+        "documents-b84e4c56165684b2": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P21",
+            "faces": [
+              {
+                "name": "ウオッカ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "これをプレイする際、自分の場に『ダイワスカーレット』がいるなら、コストを-2する。\n{食事}{コスト1}：これは出走する。\nターンごとに1回、自分がスペルをプレイしたとき、自分のウマ娘・フォロワーすべては{攻撃力}+1/{体力}+1して、【突進】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p21.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q377",
+                "date": "2022-09-22",
+                "question": "自分の場に『ダイワスカーレット』が2体いるとき、このフォロワーをプレイする際のコストは-4しますか？",
+                "answer": "いいえ、コストは-2となります。"
+              },
+              {
+                "id": "Q376",
+                "date": "2022-09-22",
+                "question": "自分のターンだけでなく、相手のターン中に自分がクイックでスペルをプレイした場合、このフォロワーの能力は誘発しますか？",
+                "answer": "はい、誘発します。自分のターンだけでなく相手のターンでもそれぞれのターンごとに1回ずつ能力を誘発させることができます。"
+              },
+              {
+                "id": "Q375",
+                "date": "2022-09-22",
+                "question": "このフォロワーが自分の場に2体いて自分がスペルをプレイしたとき、このフォロワーの能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ1ターンに1回ずつ能力が誘発します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f483b6eea7cce239750ff87a40e3b73d778375b201bd8466be02a3a45ef816e9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P21",
+            "fetched_at": "2026-09-24T23:14:15.652567Z"
+          },
+          "document_ref": "documents-b84e4c56165684b2"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P22",
+      "documents": {
+        "documents-b4c14bf2b13a9f65": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P22",
+            "faces": [
+              {
+                "name": "おどれ・さわげ・フェスれ！",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに3ダメージ。自分の場にウマ娘・カードがあるなら、代わりに4ダメージ。",
+                "sections": [],
+                "flavor": "マジみんな波来てんね、ノッてんね！？よきよきのよきすぎ！\nんじゃ、最強で最高なライブ、スタートでよろ～☆",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p22.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e761e14af49a29c3c8da1ec35d987ab72a8e142afcea73bb76f7318e08a40079",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P22",
+            "fetched_at": "2026-09-24T23:14:18.108606Z"
+          },
+          "document_ref": "documents-b4c14bf2b13a9f65"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P23",
+      "documents": {
+        "documents-39857223faacf9b0": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P23",
+            "faces": [
+              {
+                "name": "ゼンノロブロイ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "0",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n自分の他のフォロワーが出走したとき、自分のデッキの上4枚を見る。その中から、スペルかアミュレット1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p23.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q378",
+                "date": "2022-09-22",
+                "question": "1体のフォロワーが3回出走した場合、このフォロワーの「自分の他のフォロワーが出走したとき～」の能力は3回誘発しますか？",
+                "answer": "はい。3回誘発します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ac68f58826a646258493f1523d96ad2c00335e81a4ce63c838bda43c1d35acf5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P23",
+            "fetched_at": "2026-09-24T23:14:20.799142Z"
+          },
+          "document_ref": "documents-39857223faacf9b0"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P24",
+      "documents": {
+        "documents-f7e8d0835f5dfcc7": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P24",
+            "faces": [
+              {
+                "name": "アグネスデジタル",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】1枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "「ゆるにゃん可愛いよ～！……ッ！？え、ちょ、目、合っ――」\n※しばらくお待ちください※",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p24.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:af1863cd05bac498e105415433eb84710ff3396fe0e6adbe248466a9cd70d977",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P24",
+            "fetched_at": "2026-09-24T23:14:23.459277Z"
+          },
+          "document_ref": "documents-f7e8d0835f5dfcc7"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P25",
+      "documents": {
+        "documents-338fa5dfb3ba078f": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P25",
+            "faces": [
+              {
+                "name": "見習い魔女と長い夜",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。自分の場に出走したフォロワーがいるなら、代わりに3ダメージ。",
+                "sections": [],
+                "flavor": "『誰でも言うことを聞かせられる魔法』……ふっふっふ～。\nカンペキだわ。これで明日のゴミ捨て当番、回避ねっ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p25.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:42d9ca721a6edeb7d3ee59dd4cfb8c5ad4963f118a12df8b4637864740306883",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P25",
+            "fetched_at": "2026-09-24T23:14:26.515995Z"
+          },
+          "document_ref": "documents-338fa5dfb3ba078f"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P26",
+      "documents": {
+        "documents-f97cc770d4510e0c": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P26",
+            "faces": [
+              {
+                "name": "アドマイヤベガ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n{起動}これを{アクト}：自分の手札のコスト2以下のスペル1枚を選ぶ。それをEXエリアに置く。このターン、それをプレイする際、コストを0にする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p26.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q379",
+                "date": "2022-09-22",
+                "question": "自分のEXエリアが5枚あり、このフォロワーの能力で手札のスペルを選んだとき、選んだスペルはコスト0で手札からプレイすることはできますか？",
+                "answer": "いいえ。選んだカードをEXエリアに置かない場合、コスト0でプレイすることはできません。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5c11d8000b1a10fa01823de92ef62f4b42ed32fa654c4a061fc755561035dc60",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P26",
+            "fetched_at": "2026-09-24T23:14:29.155540Z"
+          },
+          "document_ref": "documents-f97cc770d4510e0c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P27",
+      "documents": {
+        "documents-024410005f71515c": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P27",
+            "faces": [
+              {
+                "name": "カワカミプリンセス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}手札1枚を捨てる：相手のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "おーっほっほ！私はカワカミプリンセス。気品高き姫の中の姫！\nレースでも可憐にぶっ飛ばして差し上げますわっ！！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p27.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:56713ba5122128bfdb6b5a0fbf11168fc14928ff415589243332e0e1ebad155c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P27",
+            "fetched_at": "2026-09-24T23:14:31.647361Z"
+          },
+          "document_ref": "documents-024410005f71515c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P28",
+      "documents": {
+        "documents-8577b998cdecfdf9": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P28",
+            "faces": [
+              {
+                "name": "ナカヤマフェスタ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "9",
+                "power": "7",
+                "hp": "7",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}相手のリーダーすべてと相手のフォロワーすべてに5ダメージ。自分の手札すべてを捨てる。",
+                "sections": [],
+                "flavor": "ナカヤマフェスタだ。生ぬるいレースじゃ、スリルを感じねぇ。\nなァ……もっとアツくヒリつかせてくれよ……！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p28.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q380",
+                "date": "2022-09-22",
+                "question": "自分の手札が0枚のとき、このフォロワーの《ファンファーレ》能力は使うことはできますか？",
+                "answer": "はい。自分の手札が0枚のときでも《ファンファーレ》能力をプレイすることができ、相手のリーダーと相手のフォロワーに5ダメージを与えます。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:df4964e7f4ed430b816bc00ba3886d12b91e7e2104fcb3872ca5693f7d71acb3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P28",
+            "fetched_at": "2026-09-24T23:14:34.289362Z"
+          },
+          "document_ref": "documents-8577b998cdecfdf9"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P29",
+      "documents": {
+        "documents-d107d4fd7aaaca81": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P29",
+            "faces": [
+              {
+                "name": "トーセンジョーダン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n{ラストワード}自分の墓場のスペル1枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": "あたしはトーセンジョーダン。夢とか固い話NGだからよろ～☆\nとりまネイル見てよ？イケてるっしょ？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p29.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1873c0a2ac07b6dd4d45e07a8a2725a081608b71f3e2373cc0f07550cc1f1525",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P29",
+            "fetched_at": "2026-09-24T23:14:36.901509Z"
+          },
+          "document_ref": "documents-d107d4fd7aaaca81"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P30",
+      "documents": {
+        "documents-d0bc2e1f209f497d": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P30",
+            "faces": [
+              {
+                "name": "ナリタトップロード",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。2枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "こんにちは、ナリタトップロードです！\nみなさんの期待に応えられるよう、全力を尽くします！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p30.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:241795513813ee5036e6a1f72d7391831602ae89ef66d43fd628a8ec6e2ccb46",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P30",
+            "fetched_at": "2026-09-24T23:14:39.533035Z"
+          },
+          "document_ref": "documents-d0bc2e1f209f497d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P31",
+      "documents": {
+        "documents-d651d8967d014b64": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P31",
+            "faces": [
+              {
+                "name": "セイウンスカイ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "1",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【疾走】【威圧】\n【攻撃時】これは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "にゃはは～っ！『逃げまくって休んじゃえ』作戦大成功♪\n捕まえられるものなら捕まえてごらん。雲に形はないけどねー♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p31.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e9d718cf41d8e7ed22bbc2cceaef1a3b2abb8c819574aea8426fd5b71da810a6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P31",
+            "fetched_at": "2026-09-24T23:14:42.288034Z"
+          },
+          "document_ref": "documents-d651d8967d014b64"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P32",
+      "documents": {
+        "documents-27a80980411cdb5b": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P32",
+            "faces": [
+              {
+                "name": "パッションチャンピオーナ！",
+                "card_class": "ドラゴン",
+                "card_type": "アミュレット",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "7",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のメインフェイズが来たとき、相手のリーダー1人か相手のフォロワー1体を選ぶ。それに4ダメージ。\n{ファンファーレ}自分の場に他のウマ娘・カードがあるなら、相手のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p32.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e060c48e71f344ab9b8c6f9ab5602b833c7b7bdd2b2d3381cf44e8d493458e0d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P32",
+            "fetched_at": "2026-09-24T23:14:44.857804Z"
+          },
+          "document_ref": "documents-27a80980411cdb5b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P33",
+      "documents": {
+        "documents-d17ebcc80b5fe92f": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P33",
+            "faces": [
+              {
+                "name": "キングヘイロー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "6",
+                "power": "4",
+                "hp": "4",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}下記から1つチョイスする。【1】自分のデッキの上1枚をEXエリアに置く。これを3回くり返す。【2】自分のデッキから『カワカミプリンセス』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p330.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": "https://shadowverse-evolve.com/errata/cp01-045/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q386",
+                "date": "2022-09-22",
+                "question": "このフォロワーの能力「これを3回くり返す。」はどの処理を3回くり返しますか？",
+                "answer": "「自分のデッキの上1枚をEXエリアに置く。」を3回くり返します。「下記から1つチョイスする。」は含まないのでくり返しません。"
+              },
+              {
+                "id": "Q385",
+                "date": "2022-09-22",
+                "question": "自分のEXエリアが3枚のとき、このフォロワーの能力で【1】の選択肢をチョイスすることはできますか？",
+                "answer": "はい。チョイスすることができます。その場合「自分のデッキの上1枚をEXエリアに置く」を2回くり返します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-P27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0816341290558a97b653985bdc1b553bb52b0ca2605ac0704f4facfa1058060f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P33",
+            "fetched_at": "2026-09-24T23:14:47.785757Z"
+          },
+          "document_ref": "documents-d17ebcc80b5fe92f"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P34",
+      "documents": {
+        "documents-338a8b2b901514eb": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P34",
+            "faces": [
+              {
+                "name": "タマモクロス",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。相手のフォロワー1体まで選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "どや！ふんわりもっちり！これが関西の『いか焼き』や！\n……にしし、うまいやろ！そのええ顔、関西人冥利に尽きるわ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p34.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ca467126cce6f8cbd861fbaf24be37ba7119f6fd7b74942ddd30f50bdb4fd1c2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P34",
+            "fetched_at": "2026-09-24T23:14:50.784710Z"
+          },
+          "document_ref": "documents-338a8b2b901514eb"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P35",
+      "documents": {
+        "documents-a09d0ef942008318": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P35",
+            "faces": [
+              {
+                "name": "あなたにささげる",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のウマ娘・フォロワー1体を選ぶ。それは{攻撃力}+1する。1枚引く。それが『セイウンスカイ』なら、さらに{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "デイジーの花言葉は『無邪気』。それから『ありのまま』……。\nスカイさんがデイジーを好きだといいな。私は、大好きだから。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p35.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q388",
+                "date": "2022-09-22",
+                "question": "このスペルの能力「それが『セイウンスカイ』なら、」は、このスペルの能力「1枚引く。」で1枚手札に加えたカードが『セイウンスカイ』の場合ですか？",
+                "answer": "いいえ。このスペルで選んだフォロワーが『セイウンスカイ』の場合です。"
+              },
+              {
+                "id": "Q387",
+                "date": "2022-09-22",
+                "question": "このスペルで『セイウンスカイ』を目標に選んだとき、『セイウンスカイ』は「それは《攻撃力》+1」も解決しますか？",
+                "answer": "はい。『セイウンスカイ』を選んだ場合、「それは《攻撃力》+1」を解決し、1枚引き、その後に『《攻撃力》+1/《体力》+1」も解決します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-P31"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:977b8cc3169c3c34eb1f3bb7e438b3ae33dda559a2d1d3511d7bea4225090229",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P35",
+            "fetched_at": "2026-09-24T23:14:53.473279Z"
+          },
+          "document_ref": "documents-a09d0ef942008318"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P36",
+      "documents": {
+        "documents-e93fa2b338487ca5": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P36",
+            "faces": [
+              {
+                "name": "バンブーメモリー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}手札1枚を捨てる：相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "ちわっス！バンブーメモリーっス！\n鬼の風紀委員長の名にかけてビシバシ走るっスよー！！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p36.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6d09600f3c42cda7a52a727d1795df5214b0b9f09275134d66205883f7e00563",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P36",
+            "fetched_at": "2026-09-24T23:14:56.315984Z"
+          },
+          "document_ref": "documents-e93fa2b338487ca5"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P37",
+      "documents": {
+        "documents-e0b772ee9973f2aa": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P37",
+            "faces": [
+              {
+                "name": "ヤエノムテキ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。自分の他のフォロワー1体まで選ぶ。それは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "ヤエノムテキです。強者とのレースを所望します。\n金剛八重垣流の門弟として……いざ、尋常に勝負！！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p37.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b3cf6b4b997f0442a4e3e29c1fac4f6c866990f97dbc536da8a8af0ba4dc6a5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P37",
+            "fetched_at": "2026-09-24T23:14:59.139286Z"
+          },
+          "document_ref": "documents-e0b772ee9973f2aa"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P38",
+      "documents": {
+        "documents-94317c70ba84ae98": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P38",
+            "faces": [
+              {
+                "name": "グラスワンダー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}相手のフォロワーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "グラスワンダーと申します。果てまで窮めたいものですね。\nウマ娘として生まれたからには、その“道”を。ふふっ♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p38.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a2a4a209a3e05c86c5c1207b7332901293b8d937c6bc6c800587b51cb998d5f1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P38",
+            "fetched_at": "2026-09-24T23:15:02.213222Z"
+          },
+          "document_ref": "documents-94317c70ba84ae98"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P39",
+      "documents": {
+        "documents-436c4cfa7bcbb558": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P39",
+            "faces": [
+              {
+                "name": "スーパークリーク",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "{食事}{コスト1}：これは出走する。\n【守護】\n{ファンファーレ}自分のリーダーは{体力}+5する。",
+                "sections": [],
+                "flavor": "うふふっ、スーパークリークですよ～。\nみんなの笑顔のためなら、頑張っちゃいます。お任せください♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p39.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3baaa724080b2cadc425af6baf9459f91b132ca8e7a8ec743b9bf18ddec3bd7e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P39",
+            "fetched_at": "2026-09-24T23:15:04.630648Z"
+          },
+          "document_ref": "documents-436c4cfa7bcbb558"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P40",
+      "documents": {
+        "documents-77a9a9c4010ff7ca": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P40",
+            "faces": [
+              {
+                "name": "ヒシアケボノ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "10",
+                "power": "10",
+                "hp": "10",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}自分のリーダーは{体力}+10する。",
+                "sections": [],
+                "flavor": "ボノボーノ♪ヒシアケボノだよ～☆よろしくね～♪\n料理も走りも、大っっきな愛情込めてみんなに届けるから！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p40.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b185228e8c9a65b63e049e79b8a1df81fcf27c8253c58485803fa5c105b0b0ac",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P40",
+            "fetched_at": "2026-09-24T23:15:07.496438Z"
+          },
+          "document_ref": "documents-77a9a9c4010ff7ca"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P41",
+      "documents": {
+        "documents-fa5c209bbfcd7c30": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P41",
+            "faces": [
+              {
+                "name": "ナイスネイチャ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}相手のフォロワー1体を選ぶ。それは{攻撃力}-1/{体力}-1する。\n{ラストワード}相手プレイヤーすべては、自身の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "勝つのは主役。脇役は報われない。……ほんっと、笑っちゃう。\nだって、わかってるのに走るんだもん。輝けるいつかを夢見て。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p41.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ad2b7941874791b2a40025cccda74d920cb3d8566fa0441e8aac8b79ed68bc05",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P41",
+            "fetched_at": "2026-09-24T23:15:10.235112Z"
+          },
+          "document_ref": "documents-fa5c209bbfcd7c30"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P42",
+      "documents": {
+        "documents-3c1e3195098795ff": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P42",
+            "faces": [
+              {
+                "name": "7センチの先へ",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "5",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、自分の墓場のウマ娘・カードが19枚以下なら、プレイできない。\n相手のフォロワーすべてを破壊する。3枚引く。相手プレイヤーすべては、自身の手札3枚を捨てる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p42.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4a26ef9285a071a13736621058655f591f4da84ac933cca3c79e803129fe33e6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P42",
+            "fetched_at": "2026-09-24T23:15:12.895562Z"
+          },
+          "document_ref": "documents-3c1e3195098795ff"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P43",
+      "documents": {
+        "documents-30f4631f54560b88": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P43",
+            "faces": [
+              {
+                "name": "ファインモーション",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。自分のリーダーは{体力}+2する。自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": "黄金色のスープ、綺麗に揃った麺、ほぐれるチャーシュー。\nお腹が空くとラーメンを考えちゃう。私に感動をくれた食べ物！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p43.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5d88ebf8966d92ca508f40d544da060253b37e780d4c4d01058aa9f870c6dcd3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P43",
+            "fetched_at": "2026-09-24T23:04:43.711090Z"
+          },
+          "document_ref": "documents-30f4631f54560b88"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P44",
+      "documents": {
+        "documents-d9f79994a17ca5cc": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P44",
+            "faces": [
+              {
+                "name": "マヤノトップガン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n【突進】\n{ファンファーレ}自分の他のウマ娘・カードが4枚なら、これは【疾走】を持つ。\n{ファンファーレ}自分の墓場のウマ娘・カードが5枚以上なら、これは{攻撃力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p44.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c5eaefeb18fa87de573c36f335f4bd751e846b1b2d6a629646f1f19832c7f862",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P44",
+            "fetched_at": "2026-09-24T23:04:46.700607Z"
+          },
+          "document_ref": "documents-d9f79994a17ca5cc"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P45",
+      "documents": {
+        "documents-be0bd52dc20e3e20": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P45",
+            "faces": [
+              {
+                "name": "雨の独奏、私の独創",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\nこれをプレイする際、自分の墓場のウマ娘・カードが10枚以上なら、コストを-2する。\n相手のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p45.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c2ed15c883a0232d07b60b0beaa0687081c63aa7e78828163a29dc22473a54f6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P45",
+            "fetched_at": "2026-09-24T23:04:49.007672Z"
+          },
+          "document_ref": "documents-be0bd52dc20e3e20"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P46",
+      "documents": {
+        "documents-b35ec15e4056e618": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P46",
+            "faces": [
+              {
+                "name": "カレンチャン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n{起動}{コスト1}これを{アクト}：相手のフォロワー1体を選ぶ。それに1ダメージ。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": "Currenこと、カレンチャンでーす！\n世界を“カワイイ”で包んじゃいます☆カレンだけを見ててね♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p46.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q390",
+                "date": "2022-09-22",
+                "question": "このフォロワーの起動能力で、相手のフォロワーを選ぶことができない場合、自分のデッキの上1枚を墓場に置くことができますか？",
+                "answer": "いいえ。選ぶことができないのでこの能力をプレイすることはできず、自分のデッキの上1枚を墓場に置くことができません。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c928f32f4498606b9bd956289d87e1ab6c4a6276184a0f221196f77dd0e8b8e8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P46",
+            "fetched_at": "2026-09-24T23:04:51.873647Z"
+          },
+          "document_ref": "documents-b35ec15e4056e618"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P47",
+      "documents": {
+        "documents-ca74b2d3a33dfd6b": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P47",
+            "faces": [
+              {
+                "name": "ツインターボ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "3",
+                "hp": "1",
+                "text": "{食事}{コスト1}：これは出走する。\n【指定攻撃】\n{ファンファーレ}自分の墓場のウマ娘・カードが10枚以上なら、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p47.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c3df25f6176702e8f325205d68892241a9779c2babed2731f8e87cc8b263bc97",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P47",
+            "fetched_at": "2026-09-24T23:04:54.453630Z"
+          },
+          "document_ref": "documents-ca74b2d3a33dfd6b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P48",
+      "documents": {
+        "documents-1afd7e9df11956e4": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P48",
+            "faces": [
+              {
+                "name": "サクラチヨノオー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。自分の墓場のウマ娘・カード1枚まで選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": "サ、サクラチヨノオーです！この想い、花開かせてみせます。\n憧れのあの人と、夢の舞台に立つためにっ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p48.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c17d97c85b7985a7901c5a493e527963a25359d15587cb6745488b639357541c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P48",
+            "fetched_at": "2026-09-24T23:04:57.103426Z"
+          },
+          "document_ref": "documents-1afd7e9df11956e4"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P49",
+      "documents": {
+        "documents-b07871bfcce7fa64": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P49",
+            "faces": [
+              {
+                "name": "シーキングザパール",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n{ラストワード}自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": "ほーっほっほっほ！シーキングザパールよ！知ってる？\n世界は可能性に満ちているの。私がそれを証明してみせるわ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p49.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c26ba1063eb7e4560f593c01ce29bbb14d01f0da75501d8249aebeb91417531d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P49",
+            "fetched_at": "2026-09-24T23:04:59.960906Z"
+          },
+          "document_ref": "documents-b07871bfcce7fa64"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P50",
+      "documents": {
+        "documents-bfe3e8b4bec1dfce": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P50",
+            "faces": [
+              {
+                "name": "マチカネタンホイザ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}相手のアミュレット1つを選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": "やっほー、マチカネタンホイザだよ。\nみんなに負けないよう、張り切って練習……今日はお休み！？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p50.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b32e48462b8347caa801c66714bdc602a512f3a89c6fd423f1327e647bdd719e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P50",
+            "fetched_at": "2026-09-24T23:05:02.654635Z"
+          },
+          "document_ref": "documents-bfe3e8b4bec1dfce"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P51",
+      "documents": {
+        "documents-513c7557b4bed7cf": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P51",
+            "faces": [
+              {
+                "name": "イクノディクタス",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "{食事}{コスト1}：これは出走する。\n【守護】\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、ウマ娘・カードかアミュレット1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p51.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q392",
+                "date": "2022-09-22",
+                "question": "このフォロワーの《ファンファーレ》能力でタイプにウマ娘を持たないアミュレットを手札に加えることはできますか？",
+                "answer": "はい。このフォロワーの《ファンファーレ》能力はタイプにウマ娘を持つカードか、もしくはアミュレットの中から1枚を公開して手札に加えることができます。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2e2bd67326a13a41c0047ad9b2bfbb7cd4eac6d8e48ba284896203859cf9be71",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P51",
+            "fetched_at": "2026-09-24T23:05:05.249110Z"
+          },
+          "document_ref": "documents-513c7557b4bed7cf"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P52",
+      "documents": {
+        "documents-06818c3fd42d760a": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P52",
+            "faces": [
+              {
+                "name": "その背中を越えて",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。\n{起動}{コスト2}これを{アクト}墓場に置く：1枚引く。",
+                "sections": [],
+                "flavor": "懸命な横顔。同じ気持ちだってわかるから。だから、私も――\n「このレース……勝たせていただきます！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p52.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q393",
+                "date": "2022-09-22",
+                "question": "このアミュレットの《ファンファーレ》能力で、自分のデッキの上か下に置くカードは、相手に公開しますか？",
+                "answer": "いいえ。相手には公開しません。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6ccc7f103b9362b856b523f9eb550181f049bea138aef5e58f9c69a7eab79320",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P52",
+            "fetched_at": "2026-09-24T23:05:08.018646Z"
+          },
+          "document_ref": "documents-06818c3fd42d760a"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P53",
+      "documents": {
+        "documents-7677bebfc14d9e2b": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P53",
+            "faces": [
+              {
+                "name": "メイショウドトウ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。自分のデッキからコスト1のアミュレット1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "「幸せの……れ、れっつ、ふぁいと……れっつ、かいうんっ！」\n頑張ればきっと報われる。だって、幸せは意外と傍にあるから。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p53.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q394",
+                "date": "2022-09-22",
+                "question": "このフォロワーの【出走時】能力でデッキからコスト1のアミュレット1枚を探し場に出さなかったとき、《攻撃力》+1/《体力》+1しますか？",
+                "answer": "はい。《攻撃力》+1/《体力》+1します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:85d75a3de128319371ae201424969dbf4e3cc7134cd62d4ddaeadc13d3dc51fc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P53",
+            "fetched_at": "2026-09-24T23:05:10.779262Z"
+          },
+          "document_ref": "documents-7677bebfc14d9e2b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P54",
+      "documents": {
+        "documents-ac312c68c1004f60": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P54",
+            "faces": [
+              {
+                "name": "メジロライアン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘",
+                  "メジロ家"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n自分のメジロ家・フォロワーかアミュレットが場を離れたとき、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": "「ありがとう！その声援に、筋肉が奮い立ったよ！」\nシュートしたのは、ゴールネットか。それとも観客のハートか。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p54.png",
+                "trait_raw": "ウマ娘・メジロ家"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q396",
+                "date": "2022-09-22",
+                "question": "メジロ家・フォロワーが場を離れたあと、このフォロワーを場に出したとき、このフォロワーは【疾走】を持ちますか？",
+                "answer": "いいえ。このフォロワーの能力は場以外では誘発しないため、【疾走】は持ちません。"
+              },
+              {
+                "id": "Q395",
+                "date": "2022-09-22",
+                "question": "メジロ家でないアミュレットが場を離れたとき、このフォロワーの「メジロ家・フォロワーかアミュレットが場を離れたとき～」で始まる能力は誘発しますか？",
+                "answer": "はい、誘発します。このフォロワーの能力はタイプにメジロ家を持つフォロワーか、もしくはアミュレットを参照します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fecd267f3ef7198f741b09ed45e3c909c9b88de03af5da0306f6934cce40f2b4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P54",
+            "fetched_at": "2026-09-24T23:05:13.801487Z"
+          },
+          "document_ref": "documents-ac312c68c1004f60"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P55",
+      "documents": {
+        "documents-ec8f100d24747f67": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P55",
+            "faces": [
+              {
+                "name": "運の行方",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}相手のフォロワー1体を選ぶ。それを破壊する。\n{起動}これを{アクト}墓場に置く：自分のデッキの上1枚を見る。その中から、コスト7のカード1枚を公開して手札に加えてよい。",
+                "sections": [],
+                "flavor": "運は凶から吉に……いえ、大吉。もうひと声、大大吉に成らん！\n「来ませり！開運必勝シラオキ様！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p55.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q397",
+                "date": "2022-09-22",
+                "question": "このアミュレットの《起動》能力で自分のデッキから見たカードの中にコスト7のカードがあるとき、それを手札に加えないことを選択できますか？",
+                "answer": "はい。選択できます。\nその場合カードは公開せず、デッキの上に戻します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6998095312204c7b9793d51504488161b27f2cc675bdf7863dd603b8116ae4eb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P55",
+            "fetched_at": "2026-09-24T23:05:16.372676Z"
+          },
+          "document_ref": "documents-ec8f100d24747f67"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P56",
+      "documents": {
+        "documents-b24831be533c6858": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P56",
+            "faces": [
+              {
+                "name": "イナリワン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}手札のアミュレット1枚を捨てる：これは{攻撃力}+2して、【突進】を持つ。",
+                "sections": [],
+                "flavor": "あたしはイナリワンってんだ！チャキチャキの江戸っ子でい！\n誰よりでっかいウマ娘になってやらぁっ！てやんでい！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p56.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:213adb50029faf59bbe03710495225920a6518e168210f95a47a4e2e6c35dde5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P56",
+            "fetched_at": "2026-09-24T23:05:19.014792Z"
+          },
+          "document_ref": "documents-b24831be533c6858"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P57",
+      "documents": {
+        "documents-45d4c10dd1f232fb": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P57",
+            "faces": [
+              {
+                "name": "メジロドーベル",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘",
+                  "メジロ家"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{食事}{コスト1}：これは出走する。\n【出走時】これは{攻撃力}+1/{体力}+1する。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "えっと、メジロドーベルです。アタシもメジロ家のウマ娘だし。\nそれに恥じない走り……をするつもり、です。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p57.png",
+                "trait_raw": "ウマ娘・メジロ家"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b371d90b1ad5971310ac368603754f3e188f08bfbbbda12900d97cd1d15ef882",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P57",
+            "fetched_at": "2026-09-24T23:05:21.777824Z"
+          },
+          "document_ref": "documents-45d4c10dd1f232fb"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P58",
+      "documents": {
+        "documents-cc6631b2d01c7348": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P58",
+            "faces": [
+              {
+                "name": "メジロアルダン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘",
+                  "メジロ家"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "1",
+                "power": "3",
+                "hp": "3",
+                "text": "{食事}{コスト1}：これは出走する。\n【守護】\n自分のメインフェイズが来たとき、自分の場に「これと同名でないメジロ家・フォロワー」がいないなら、これを手札に戻す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p58.png",
+                "trait_raw": "ウマ娘・メジロ家"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e0979545e07cd246f4998736b274ce998aa884b4e2fd6150b4e3bd9976770237",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P58",
+            "fetched_at": "2026-09-24T23:05:24.277459Z"
+          },
+          "document_ref": "documents-cc6631b2d01c7348"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P59",
+      "documents": {
+        "documents-7c17fd5b08a6b98e": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P59",
+            "faces": [
+              {
+                "name": "メジロパーマー",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘",
+                  "メジロ家"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}自分のデッキからメジロ家・フォロワー1枚を探し、手札に加える。\n{ファンファーレ}自分の墓場に『おどれ・さわげ・フェスれ！』があるなら、これは{攻撃力}+1/{体力}+1して、【突進】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p59.png",
+                "trait_raw": "ウマ娘・メジロ家"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-P22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6613a495141351319d67c5121fb1f654bb95d7c843b6c9e68df318d4fef1f76c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P59",
+            "fetched_at": "2026-09-24T23:05:26.940699Z"
+          },
+          "document_ref": "documents-7c17fd5b08a6b98e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P60",
+      "documents": {
+        "documents-ca29f3fdbe3885dd": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P60",
+            "faces": [
+              {
+                "name": "テイエムオペラオー",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ウマ娘"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "{食事}{コスト1}：これは出走する。\n{ファンファーレ}相手のフォロワー1体を選ぶ。それを消滅させる。1枚引く。",
+                "sections": [],
+                "flavor": "はーっはっはっは！ボクこそが最も強く美しい“覇王”！\nテイエムオペラオーさ！いざ、伝説を始めようじゃないか！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p60.png",
+                "trait_raw": "ウマ娘"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9565a235b2cdc97ed51e72b0efa34149477a40a24db5a26193d96124ce3e2a29",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P60",
+            "fetched_at": "2026-09-24T23:05:30.049705Z"
+          },
+          "document_ref": "documents-ca29f3fdbe3885dd"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P61",
+      "documents": {
+        "documents-6270aca709b3232e": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P61",
+            "faces": [
+              {
+                "name": "ブスッといっとく？",
+                "card_class": "ニュートラル",
+                "card_type": "アミュレット",
+                "traits": [
+                  "トレセン学園"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のメインフェイズが来たとき、サイコロをふる。1なら、自分のリーダーに5ダメージ。2から5なら、1枚引く。6なら、自分のリーダーは{体力}+3して、これを破壊する。",
+                "sections": [],
+                "flavor": "さすが師匠から（勝手に）借りた笹針師の秘伝書！\n分厚くてカップ麺のフタ止めに最適！ワォ、あんし～ん☆",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p61.png",
+                "trait_raw": "トレセン学園"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q402",
+                "date": "2022-09-22",
+                "question": "このカードの能力によってこれを破壊するのは、サイコロの目がいくつのときですか？",
+                "answer": "サイコロの目が6のときのみ破壊します。"
+              },
+              {
+                "id": "Q401",
+                "date": "2022-09-22",
+                "question": "「サイコロをふる」とはなんですか？",
+                "answer": "1~6までの数字が無作為に決まるように、一般的な6面ダイスを1個ふることです。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3f91d6e2875fcdbe40c734d17df8114cfddf1be292cd700e1cdad110799ce798",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P61",
+            "fetched_at": "2026-09-24T23:05:33.007989Z"
+          },
+          "document_ref": "documents-6270aca709b3232e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P62",
+      "documents": {
+        "documents-57611cc2d93f9092": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P62",
+            "faces": [
+              {
+                "name": "〔共に同じ道を！〕 桐生院葵",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "トレセン学園"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "【守護】\n自分のフォロワーが出走したとき、それは{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分のエボルヴデッキに表向きで置いた『にんじん』1枚を選ぶ。それを裏向きにする。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p62.png",
+                "trait_raw": "トレセン学園"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q404",
+                "date": "2022-09-22",
+                "question": "このフォロワーの《ファンファーレ》で表向きに置いた『にんじん』１枚を選ぶことができない場合、１枚引くことができますか？",
+                "answer": "いいえ。選ぶことができないのでこの能力をプレイすることはできず、１枚引くことはできません。"
+              },
+              {
+                "id": "Q403",
+                "date": "2022-09-22",
+                "question": "1体のフォロワーが3回出走した場合、そのフォロワーは《攻撃力》+3/《体力》+3しますか？",
+                "answer": "はい。出走した回数と同数《攻撃力》+1/《体力》+1するため、3回出走したフォロワーは《攻撃力》+3/《体力》+3します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP01-085"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b70032f8558f28e2f81f2c3fdddfa716e345cdb51316989b130b4cbea20264b7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P62",
+            "fetched_at": "2026-09-24T23:05:35.964996Z"
+          },
+          "document_ref": "documents-57611cc2d93f9092"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P63",
+      "documents": {
+        "documents-d6050d774e268b88": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P63",
+            "faces": [
+              {
+                "name": "安心沢刺々美",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "トレセン学園"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分のデッキの上1枚を公開する。それのコストが奇数なら、相手のリーダーすべてに2ダメージ。偶数なら、自分のリーダーに2ダメージ。",
+                "sections": [],
+                "flavor": "凄腕笹針師（の弟子）、安心沢刺々美よ。\nあたしにかかればブスッとパワーアップ！ワォ、あんし～ん☆",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p63.png",
+                "trait_raw": "トレセン学園"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q406",
+                "date": "2022-09-22",
+                "question": "このフォロワーで公開したカードがコスト0のとき、どちらのリーダーにダメージを与えますか？",
+                "answer": "コスト0は偶数のため、自分のリーダーに2ダメージ与えます。"
+              },
+              {
+                "id": "Q405",
+                "date": "2022-09-22",
+                "question": "このフォロワーの能力で公開したカードは、能力の解決後、どこに置かれますか？",
+                "answer": "元の位置に裏向きで戻します。"
+              }
+            ],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c5c11ae268bf4f790fcca21a0ab6073b4b66984f779acb76c9d9b773e9e88383",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P63",
+            "fetched_at": "2026-09-24T23:05:38.666876Z"
+          },
+          "document_ref": "documents-d6050d774e268b88"
+        }
+      ]
+    },
+    {
+      "card_no": "CP01-P64",
+      "documents": {
+        "documents-9347d9632f867f44": {
+          "region": "jp",
+          "record": {
+            "number": "CP01-P64",
+            "faces": [
+              {
+                "name": "駿川たづな",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "トレセン学園"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「ウマ娘 プリティーダービー」",
+                "title": "ウマ娘 プリティーダービー",
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "【守護】\n{ファンファーレ}自分のウマ娘・フォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+2する。",
+                "sections": [],
+                "flavor": "こんにちは、トレセン学園の理事長秘書、駿川たづなです。\nみなさんがより良い学園生活を送れるよう、支えてまいります♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP01/cp01-p64.png",
+                "trait_raw": "トレセン学園"
+              }
+            ],
+            "release_date": "2022-10-01",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c0d990734a32541c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:07e7be22e912448fae80ebaa8c5915ada4e799b3eb25f729eaf9168727fb7bef",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP01-P64",
+            "fetched_at": "2026-09-24T23:05:41.691787Z"
+          },
+          "document_ref": "documents-9347d9632f867f44"
+        }
+      ]
+    }
+  ]
+}

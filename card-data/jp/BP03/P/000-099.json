@@ -1,0 +1,1976 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP03",
+  "range": "P/000-099",
+  "products": {
+    "products-506ae043c034d76f": [
+      {
+        "name": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+        "date": "2022-12-16",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP03",
+          "https://shadowverse-evolve.com/products/bp03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP03-P01",
+      "documents": {
+        "documents-71664cb1de338e53": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P01",
+            "faces": [
+              {
+                "name": "エルフの双撃",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー2体まで選ぶ。それにXダメージを割りふる。Xは「自分のEXエリアのカードの枚数」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "u介",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p01.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q448",
+                "date": "2022-12-09",
+                "question": "相手の場に『ダイヤモンドマスター』が2体いるとき、このスペルは2体とも目標に選ぶ必要がありますか？",
+                "answer": "はい。2体とも選ぶ必要があります。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f75decf0e6866b03bc92d5537771d85c3ad93318143a0114d46c68d297217a94",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P01",
+            "fetched_at": "2026-09-24T22:59:06.496321Z"
+          },
+          "document_ref": "documents-71664cb1de338e53"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P02",
+      "documents": {
+        "documents-deb5cfa84f6e42bf": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P02",
+            "faces": [
+              {
+                "name": "ガーベラベアー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のカードが場から手札に戻ったとき、自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "anchobi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p02.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1ba6c18b32dc32d6e5d06ff062fe977144d4f127746746c85d551b79e2532168",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P02",
+            "fetched_at": "2026-09-24T22:59:09.294495Z"
+          },
+          "document_ref": "documents-deb5cfa84f6e42bf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P03",
+      "documents": {
+        "documents-1fc449fda2277578": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P03",
+            "faces": [
+              {
+                "name": "ガーベラベアー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "自分のカードが場から手札に戻ったとき、自分のリーダーは{体力}+1する。\n【進化時】自分のデッキから『フラワーブリーズ』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "anchobi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p03.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P02"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2a6413be55be0942d0ee587f36356973e467878d12efa2f8a4dcffada2cd07ef",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P03",
+            "fetched_at": "2026-09-24T22:59:12.279157Z"
+          },
+          "document_ref": "documents-1fc449fda2277578"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P04",
+      "documents": {
+        "documents-9e85f0fa7832964f": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P04",
+            "faces": [
+              {
+                "name": "茨の森",
+                "card_class": "エルフ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のメインフェイズが来たとき、これを破壊する。\nこれがある限り、自分のフォロワーすべては「【攻撃時】フォロワーへ攻撃したなら、それに2ダメージ」を持つ。\n{ファンファーレ}『フェアリー』1体を出す。【コンボ_3】それは【突進】を持つ。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "ASO",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p04.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q451",
+                "date": "2022-12-09",
+                "question": "このアミュレットの《ファンファーレ》能力で『フェアリー』を場に出したとき、それはカードのプレイに数えますか？",
+                "answer": "いいえ。能力によって場に出たカードはプレイ枚数に数えません。"
+              },
+              {
+                "id": "Q450",
+                "date": "2022-12-09",
+                "question": "「【攻撃時】フォロワーへ攻撃したなら、それに2ダメージ」を持った自分のフォロワーは【オーラ】を持つ相手のフォロワーに2ダメージ与えますか？",
+                "answer": "はい。2ダメージ与えます。"
+              },
+              {
+                "id": "Q449",
+                "date": "2022-12-09",
+                "question": "「【攻撃時】フォロワーへ攻撃したなら、それに2ダメージ」を持った自分のフォロワーが、体力が2の相手のフォロワーに攻撃した場合、どうなりますか？",
+                "answer": "自分のフォロワーはアクト状態で場に残り、相手のフォロワーは破壊されます。\n以下、詳細に説明します。まず、相手のフォロワーを攻撃目標に選択し、自分のフォロワーをアクトします。【攻撃時】の能力によって相手のフォロワーに2ダメージ与え、相手のフォロワーの体力が0になり、その後のチェックタイミングによって相手のフォロワーが破壊されます。相手のフォロワーがおらず、ダメージを与え合う交戦はしないため、攻撃の処理が終了し、自分のフォロワーはアクト状態で場に残ります。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d900c1e647124640773471d894d30e4fff1b9eb6a4565a514fc84dcf833c1d97",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P04",
+            "fetched_at": "2026-09-24T22:59:15.184988Z"
+          },
+          "document_ref": "documents-9e85f0fa7832964f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P05",
+      "documents": {
+        "documents-2e13f380b5c89147": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P05",
+            "faces": [
+              {
+                "name": "フラワーブリーズ",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "植物族",
+                  "獣"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場のカード1枚を選ぶ。それを手札に戻す。自分のリーダーは{体力}+1する。（手札に戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": "やりたいことがあるなら、諦めなくてもいいんじゃないかな？\n――蜜田川イツキ",
+                "illustrator": "anchobi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p05.png",
+                "trait_raw": "植物族・獣"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bcae580a9406c1d884eb57a38643648761f1d300c467df1cc9e4cca06213b052",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P05",
+            "fetched_at": "2026-09-24T22:59:17.981484Z"
+          },
+          "document_ref": "documents-2e13f380b5c89147"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P06",
+      "documents": {
+        "documents-4c444c37e0b15b27": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P06",
+            "faces": [
+              {
+                "name": "赤ずきん・メイジー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "暗殺者",
+                  "童話"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}自分の場に他の童話・フォロワーがいるなら、これに童話カウンター1つを置く。\n{起動}{コスト1}これを{アクト}これの童話カウンター1つを取る：相手のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "TEDDY",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p06.png",
+                "trait_raw": "暗殺者・童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1739928da819c68c15ab9a95c3ee071e14e6ed864a793600bd8dc1d8afa81b54",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P06",
+            "fetched_at": "2026-09-24T22:59:20.934564Z"
+          },
+          "document_ref": "documents-4c444c37e0b15b27"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P07",
+      "documents": {
+        "documents-3d53e239de9dcdc2": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P07",
+            "faces": [
+              {
+                "name": "若き鬼狩人・モモ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "童話"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "5",
+                "text": "【指定攻撃】\n【攻撃時】体力5以下のフォロワーへの攻撃なら、1枚引く。自分の手札1枚を捨てる。\n{ファンファーレ}自分の場に他の童話・フォロワーがいるなら、これは【突進】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p07.png",
+                "trait_raw": "兵士・童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q466",
+                "date": "2022-12-09",
+                "question": "攻撃目標のフォロワーの体力が6以上の場合でも、このフォロワーの【攻撃時】能力で自分の手札を1枚捨てますか？",
+                "answer": "いいえ。捨てません。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c944851f0bd36a393bb24ef9f3a03951bde9d83d4e04e481b769beb55b7e642f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P07",
+            "fetched_at": "2026-09-24T22:59:23.370912Z"
+          },
+          "document_ref": "documents-3d53e239de9dcdc2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P08",
+      "documents": {
+        "documents-d34f5f79e67d1347": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P08",
+            "faces": [
+              {
+                "name": "マッハナイト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "ヒーロー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}これが手札以外から場に出ていたなら、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": "勇気は必ず力をくれる！私が好きなヒーローの言葉なんです！\n――風祭レン",
+                "illustrator": "あかかがち",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p08.png",
+                "trait_raw": "兵士・ヒーロー"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f8d6803adeeb1ff951951fec65030f1b6bb2c27d4b36f80cffbc60443c0837e5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P08",
+            "fetched_at": "2026-09-24T22:59:26.038195Z"
+          },
+          "document_ref": "documents-d34f5f79e67d1347"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P09",
+      "documents": {
+        "documents-cf31b200cea04d64": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P09",
+            "faces": [
+              {
+                "name": "マッハナイト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士",
+                  "ヒーロー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手のフォロワー1体を選ぶ。それに2ダメージ。自分の墓場のヒーロー・カードが2枚以上なら、代わりに4ダメージ。",
+                "sections": [],
+                "flavor": "シャドバでなら自由になれる！だからすっごく楽しいです！\n――風祭レン",
+                "illustrator": "あかかがち",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p09.png",
+                "trait_raw": "兵士・ヒーロー"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:554c68afdb9d659202dff8c2e583c2674117ad884914143c1a75e0226a87c3bc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P09",
+            "fetched_at": "2026-09-24T22:50:52.112980Z"
+          },
+          "document_ref": "documents-cf31b200cea04d64"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P10",
+      "documents": {
+        "documents-be660d4631356cb2": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P10",
+            "faces": [
+              {
+                "name": "鉄壁のガードナー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "ヒーロー"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分の墓場のヒーロー・カードが2枚以上なら、これは{体力}+1して、【守護】を持つ。",
+                "sections": [],
+                "flavor": "誰かと繋がることは、無意味じゃないと思います！\n――風祭レン",
+                "illustrator": "あかかがち",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p10.png",
+                "trait_raw": "兵士・ヒーロー"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q650",
+                "date": "2023-03-08",
+                "question": "自分の墓場にヒーロー・カードが１枚ある状態で『ヒロイックエントリー！』をプレイし、『鉄壁のガードナー』を場に出した場合、『鉄壁のガードナー』の《ファンファーレ》能力で《体力》+1して【守護】を持つことはできますか？",
+                "answer": "はい。『鉄壁のガードナー』の《ファンファーレ》能力をプレイする時点で、プレイした『ヒロイックエントリー！』は墓場に移動しており、墓場のヒーロー・カードが2枚あるため、《体力》+1して【守護】を持つことができます。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3828c579bd80fb7eab9bf7a57b14ad0533e6c9d9fddb45f534a2e29d9f2f76b4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P10",
+            "fetched_at": "2026-09-24T22:50:54.855817Z"
+          },
+          "document_ref": "documents-be660d4631356cb2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P11",
+      "documents": {
+        "documents-d5eadf7d53e97c43": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P11",
+            "faces": [
+              {
+                "name": "ルナルの魔術師・プリス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "5",
+                "text": "{ファンファーレ}【土の秘術】これは【疾走】を持つ。\n{ファンファーレ}【スペルチェイン_7】相手のフォロワーすべてに4ダメージ。",
+                "sections": [],
+                "flavor": "「孤独だって構わない。好きになじって呼んだらいい。\n幸せに笑う奴らなんかに、アタシは絶対負けないから！」",
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p11.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b5d93ff530fe74806351f458f6c33852c978a90052f36b1a444138552c0d29c7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P11",
+            "fetched_at": "2026-09-24T22:50:57.481695Z"
+          },
+          "document_ref": "documents-d5eadf7d53e97c43"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P12",
+      "documents": {
+        "documents-fb1afbf99a678145": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P12",
+            "faces": [
+              {
+                "name": "闇魔法の教師・ハインライン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{ファンファーレ}自分のデッキの上4枚を墓場に置く。自分のPPを「これによって墓場に置いたスペルの枚数」と同じだけ回復する。\n{起動}これを{アクト}手札のスペル1枚を捨てる：相手のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p12.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e3c0c62057ba2391d14d6faa93c51174f2eb72ec026fe91175cbb27cf46a49f2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P12",
+            "fetched_at": "2026-09-24T22:51:00.358425Z"
+          },
+          "document_ref": "documents-fb1afbf99a678145"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P13",
+      "documents": {
+        "documents-6f9b3fc1e25ea060": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P13",
+            "faces": [
+              {
+                "name": "マジカルナイト",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "チェス"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n自分の場に他のチェス・フォロワーが出たとき、それは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "ボクは知っている！シャドバのことも、ボク自身のことも！\n――乙坂シオン",
+                "illustrator": "ヒダヤーマン",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p13.png",
+                "trait_raw": "チェス"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q479",
+                "date": "2022-12-09",
+                "question": "『マジカルビショップ』と『マジカルナイト』が同時に自分の場に出たとき、『マジカルナイト』の持つ「自分の場に他のチェス・フォロワーが出たとき、それは《攻撃力》+1する。」という自動能力は『マジカルビショップ』に対して誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P14"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3d5fb6745d5f1cc5912a42e6730d23e3d6787f8812f50244f4a2a7b209de1f1b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P13",
+            "fetched_at": "2026-09-24T22:51:02.894823Z"
+          },
+          "document_ref": "documents-6f9b3fc1e25ea060"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P14",
+      "documents": {
+        "documents-fbf1fba4ddf162aa": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P14",
+            "faces": [
+              {
+                "name": "マジカルナイト",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "チェス"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "自分の場に他のチェス・フォロワーが出たとき、それは{攻撃力}+1する。\n【進化時】『マジカルポーン』1体を出す。",
+                "sections": [
+                  "『マジカルポーン』{ウィッチ}チェス・フォロワー{コスト1}{攻撃力}2/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "ヒダヤーマン",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p14.png",
+                "trait_raw": "チェス"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9c4ac588dfe7834f0b3cedd8be0cfa13efde9e7dd5f329ab5de1d4e1b2c075ac",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P14",
+            "fetched_at": "2026-09-24T22:51:05.881182Z"
+          },
+          "document_ref": "documents-fbf1fba4ddf162aa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P15",
+      "documents": {
+        "documents-3503f1ad0baa0cf4": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P15",
+            "faces": [
+              {
+                "name": "魔女の大釜",
+                "card_class": "ウィッチ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "魔法使い",
+                  "土の印"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "【スタック】\n{ファンファーレ}自分のデッキの上4枚を見る。その中から、【土の秘術】を持つカード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p15.png",
+                "trait_raw": "魔法使い・土の印"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q481",
+                "date": "2022-12-09",
+                "question": "このアミュレットの《ファンファーレ》能力で、『魔女の大釜』を手札に加えることはできますか？",
+                "answer": "いいえ。『魔女の大釜』は【土の秘術】を持たないため、手札に加えることはできません。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:521f1311bbae534bb29ba11e7c4e47729035fc3e5eafea08aad6b65bcc93a2b3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P15",
+            "fetched_at": "2026-09-24T22:51:08.678362Z"
+          },
+          "document_ref": "documents-3503f1ad0baa0cf4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P16",
+      "documents": {
+        "documents-2a0152f20a481694": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P16",
+            "faces": [
+              {
+                "name": "無謀なる戦",
+                "card_class": "ドラゴン",
+                "card_type": "アミュレット",
+                "traits": [
+                  "童話"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "6",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}{コスト3}これを{アクト}：自分の手札のフォロワー1枚を場に出してよい。それは「自分のエンドフェイズが来たとき、これを破壊する」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "SEMSEI",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p16.png",
+                "trait_raw": "童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q487",
+                "date": "2022-12-09",
+                "question": "このアミュレットの能力で場に出したフォロワーが進化した場合でも、そのフォロワーは自分のエンドフェイズが来たときに破壊されますか？",
+                "answer": "はい。破壊されます。"
+              },
+              {
+                "id": "Q486",
+                "date": "2022-12-09",
+                "question": "このアミュレットの起動能力で手札から『ルシフェル』を場に出し、エンドフェイズが来たとき、『ルシフェル』の持つ「自分のエンドフェイズが来たとき、自分のリーダーは《体力》+4する。」という能力は誘発しますか？",
+                "answer": "はい。「自分のエンドフェイズが来たとき、これを破壊する」と「自分のエンドフェイズが来たとき、自分のリーダーは《体力》+4する。」は自分のエンドフェイズが来たとき、同時に誘発します。その後、この待機状態になった自動能力を任意の順で解決することができます。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc8cd9b7e3553c9f236379db85053b12abfa53119b31e704ae05b27f72ce662e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P16",
+            "fetched_at": "2026-09-24T22:51:11.504690Z"
+          },
+          "document_ref": "documents-2a0152f20a481694"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P17",
+      "documents": {
+        "documents-8a57e8b4fbaca4aa": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P17",
+            "faces": [
+              {
+                "name": "ハンマードラゴニュート",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキの上4枚を見る。その中から、武装・スペル1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p17.png",
+                "trait_raw": "ドラゴニュート・竜族・武装"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:45a5d5a1221ae9d3e8a8fac5a26fffa8f3e776792d68548385c4b9198d7ccc05",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P17",
+            "fetched_at": "2026-09-24T22:51:14.370363Z"
+          },
+          "document_ref": "documents-8a57e8b4fbaca4aa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P18",
+      "documents": {
+        "documents-65a2e195d3a6d234": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P18",
+            "faces": [
+              {
+                "name": "ハンマードラゴニュート",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ドラゴニュート",
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "だから本音で語り合える……だからシャドバは、面白い！\n――天竜ライト",
+                "illustrator": "akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p18.png",
+                "trait_raw": "ドラゴニュート・竜族・武装"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:02e0752443e0eb579f2b5dd77b7e7297925036217aec255d0865655cb9907062",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P18",
+            "fetched_at": "2026-09-24T22:51:17.042069Z"
+          },
+          "document_ref": "documents-65a2e195d3a6d234"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P19",
+      "documents": {
+        "documents-b06109e16211bf24": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P19",
+            "faces": [
+              {
+                "name": "ドラゴンスマッシュ",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "ドラゴニュート",
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに3ダメージ。『ドラゴウェポン』1つを出す。",
+                "sections": [
+                  "『ドラゴウェポン』{ドラゴン}武装・アミュレット{コスト1}{起動}これを{アクト}墓場に置く：自分の{ドラゴン}フォロワー1体を選ぶ。それは{体力}+1して、武装・タイプを持つ。"
+                ],
+                "flavor": null,
+                "illustrator": "akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p19.png",
+                "trait_raw": "ドラゴニュート・竜族・武装"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9b6b57ed461c40458fdb2b3b63c5b9a4cef50d9501fee297b1f43dc7f19a4b45",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P19",
+            "fetched_at": "2026-09-24T22:51:19.571021Z"
+          },
+          "document_ref": "documents-b06109e16211bf24"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P20",
+      "documents": {
+        "documents-b910776203fa1d1f": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P20",
+            "faces": [
+              {
+                "name": "ランスリザード",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "自分のターンごとに1回、これが能力によって選ばれたとき、これは{攻撃力}+1する。相手のリーダーすべてに1ダメージ。\n{ファンファーレ}【覚醒】状態なら、『ドラゴウェポン』1つを出す。",
+                "sections": [
+                  "『ドラゴウェポン』{ドラゴン}武装・アミュレット{コスト1}{起動}これを{アクト}墓場に置く：自分の{ドラゴン}フォロワー1体を選ぶ。それは{体力}+1して、武装・タイプを持つ。"
+                ],
+                "flavor": null,
+                "illustrator": "ヒダヤーマン",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p20.png",
+                "trait_raw": "竜族・武装"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b1a28c153b8cd647ea468e608b1741a6068518e1c2985ab4cadfce7c0d21cbc2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P20",
+            "fetched_at": "2026-09-24T22:51:22.257270Z"
+          },
+          "document_ref": "documents-b910776203fa1d1f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P21",
+      "documents": {
+        "documents-02ec8bd74518f13c": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P21",
+            "faces": [
+              {
+                "name": "ブラックスワン・オディール",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "童話"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "5",
+                "power": "6",
+                "hp": "4",
+                "text": "【攻撃時】相手のリーダーすべてと相手のフォロワーすべてに2ダメージ。\n{ファンファーレ}相手のリーダーすべてと相手のフォロワーすべてに2ダメージ。【ネクロチャージ_20】これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p21.png",
+                "trait_raw": "童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fc87ff2276c91f3ab5945a33d5ab64e1d32ba9b749f711a0e517e3023a987a44",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P21",
+            "fetched_at": "2026-09-24T22:51:25.201912Z"
+          },
+          "document_ref": "documents-02ec8bd74518f13c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P22",
+      "documents": {
+        "documents-72514d56da72f7e8": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P22",
+            "faces": [
+              {
+                "name": "デモンコンダクター",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{起動}リーダーの{体力}-2：1枚引く。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": "だったら聴かせてみろ！抗うためのリズムをよ！\n――邪星リョウガ",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p22.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2a45c0d4d5c8268e33477ed2aadadf7bb453360741f96dd42253c0359fb36177",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P22",
+            "fetched_at": "2026-09-24T22:51:28.224705Z"
+          },
+          "document_ref": "documents-72514d56da72f7e8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P23",
+      "documents": {
+        "documents-8e1831edb82a48db": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P23",
+            "faces": [
+              {
+                "name": "トロンボーンデビル",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のエンドフェイズが来たとき、【真紅】状態なら、相手のリーダー1人か相手のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p23.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P24"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f064ce7d6c53536d8ad5d012a24ff26ecf52f75f6abe364221b1e97b12b2d63",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P23",
+            "fetched_at": "2026-09-24T22:51:30.954856Z"
+          },
+          "document_ref": "documents-8e1831edb82a48db"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P24",
+      "documents": {
+        "documents-29ad209c0d293dda": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P24",
+            "faces": [
+              {
+                "name": "トロンボーンデビル",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "自分のエンドフェイズが来たとき、【真紅】状態なら、相手のリーダー1人か相手のフォロワー1体を選ぶ。それに3ダメージ。\n【進化時】リーダーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p24.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q500",
+                "date": "2022-12-09",
+                "question": "このフォロワーの【進化時】能力は、相手のリーダーだけでなく自分のリーダーにも1ダメージ与えますか？",
+                "answer": "はい。相手だけでなく自分も含めてリーダーすべてに1ダメージを与えます。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P23"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:51ba0bde522e4ba8b194b19f965b4c60940586064907bc51c0d5860f8719a7fd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P24",
+            "fetched_at": "2026-09-24T22:51:33.829001Z"
+          },
+          "document_ref": "documents-29ad209c0d293dda"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P25",
+      "documents": {
+        "documents-5a85cdc781574844": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P25",
+            "faces": [
+              {
+                "name": "パンプキンネクロマンサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}『ジャイアントゴースト』1枚をEXエリアに置く。",
+                "sections": [
+                  "『ジャイアントゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}3/{体力}3【守護】自分のメインフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "りょうへい",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p25.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-T06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:37a6aa46d6c95550dce5c2b49f12da2f5246d20670363fc526e9b7948fc493c0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P25",
+            "fetched_at": "2026-09-24T22:51:36.481332Z"
+          },
+          "document_ref": "documents-5a85cdc781574844"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P26",
+      "documents": {
+        "documents-e7f1a2ceb1929a77": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P26",
+            "faces": [
+              {
+                "name": "アリスの冒険",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "童話"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキから童話・カード1枚を探し、手札に加える。\n{起動}{コスト1}これを{アクト}墓場に置く：自分の童話・フォロワー1体を選ぶ。それは【突進】【指定攻撃】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p26.png",
+                "trait_raw": "童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:221e63f7da08efdaa290388603f49b0515a8b9cd897c574517c1e78a56465a1c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P26",
+            "fetched_at": "2026-09-24T22:51:39.397902Z"
+          },
+          "document_ref": "documents-e7f1a2ceb1929a77"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P27",
+      "documents": {
+        "documents-049f722c68c4f754": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P27",
+            "faces": [
+              {
+                "name": "ルビーファルコン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "鳥族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n自分の他の「【疾走】や【守護】を持つフォロワー」が攻撃するとき、相手のリーダーすべてに1ダメージ。\n{起動}{コスト2}：これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p27.png",
+                "trait_raw": "信仰・鳥族"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q514",
+                "date": "2022-12-09",
+                "question": "このフォロワーの「自分の他の「【疾走】や【守護】を持つフォロワー」が攻撃するとき」の能力は、【疾走】と【守護】両方を持つフォロワーが攻撃するときのみ誘発しますか？",
+                "answer": "いいえ。【疾走】か【守護】どちらかのみを持つフォロワーが攻撃するときも誘発します。"
+              },
+              {
+                "id": "Q513",
+                "date": "2022-12-09",
+                "question": "このフォロワーの起動能力で【疾走】を持ち、その後このフォロワーが進化しました。このとき、進化したこのフォロワーは【疾走】を持ちますか？",
+                "answer": "はい。【疾走】を持ったままです。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P28"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d4fa87e05a7e6177e1d2f6a11840ad63c8b47e1dc40544defb39f4c060bbb37d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P27",
+            "fetched_at": "2026-09-24T22:51:42.491915Z"
+          },
+          "document_ref": "documents-049f722c68c4f754"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P28",
+      "documents": {
+        "documents-940d8a421183a19a": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P28",
+            "faces": [
+              {
+                "name": "ルビーファルコン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "鳥族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【守護】\n自分の他の「【疾走】や【守護】を持つフォロワー」が攻撃するとき、相手のリーダーすべてに1ダメージ。\n【進化時】相手のフォロワー1体を選ぶ。それに2ダメージ。\n{起動}{コスト2}：これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p28.png",
+                "trait_raw": "信仰・鳥族"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q514",
+                "date": "2022-12-09",
+                "question": "このフォロワーの「自分の他の「【疾走】や【守護】を持つフォロワー」が攻撃するとき」の能力は、【疾走】と【守護】両方を持つフォロワーが攻撃するときのみ誘発しますか？",
+                "answer": "いいえ。【疾走】か【守護】どちらかのみを持つフォロワーが攻撃するときも誘発します。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc9a570deed012e5ea78b869dbe5e3fb2c0050968d375ba00da8f84a54cf80e2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P28",
+            "fetched_at": "2026-09-24T22:51:45.345669Z"
+          },
+          "document_ref": "documents-940d8a421183a19a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P29",
+      "documents": {
+        "documents-fa07bc287b53e2fe": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P29",
+            "faces": [
+              {
+                "name": "三月ウサギのお茶会",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "童話"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキの上5枚を見る。その中から、コスト5以下の童話・フォロワー1枚を場に出してよい。残りを好きな順にデッキの下に置く。\n{起動}{コスト2}これを{アクト}墓場に置く：自分の墓場のコスト3以下の童話・フォロワー1枚を選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p29.png",
+                "trait_raw": "信仰・童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:039c891196f99d0617cab6d4edee4ee3846729646b8fe8ad0b3dc0c23621fbf6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P29",
+            "fetched_at": "2026-09-24T22:51:48.194963Z"
+          },
+          "document_ref": "documents-fa07bc287b53e2fe"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P30",
+      "documents": {
+        "documents-f8d11844fac57a7f": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P30",
+            "faces": [
+              {
+                "name": "アメシストレオ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "1",
+                "text": "【疾走】\n{ファンファーレ}自分の他の「【疾走】や【守護】を持つフォロワー」1体を選ぶ。それは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p30.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:241bba31a6044ba0b425575071538bca32b5916624c83b6a85c1f3244dc41cc9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P30",
+            "fetched_at": "2026-09-24T22:51:51.197725Z"
+          },
+          "document_ref": "documents-f8d11844fac57a7f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P31",
+      "documents": {
+        "documents-f23b9b74cd543ca2": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P31",
+            "faces": [
+              {
+                "name": "ラプンツェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリンセス",
+                  "童話"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "5",
+                "text": "【守護】\nこれに童話カウンターが置かれていないなら、これは相手を攻撃できない。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p31.png",
+                "trait_raw": "プリンセス・童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q546",
+                "date": "2022-12-09",
+                "question": "このフォロワーの能力にある「これは相手を攻撃できない」とはどのような能力ですか？",
+                "answer": "「これは相手を攻撃できない」とは、相手のフォロワーや相手のリーダーを攻撃目標に選択することができず、攻撃することができないという能力です。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fa40662b4d9cc5e79f1c47b8ff788002e6d9798933369bd30aaad6487f878289",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P31",
+            "fetched_at": "2026-09-24T22:51:53.913759Z"
+          },
+          "document_ref": "documents-f23b9b74cd543ca2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P32",
+      "documents": {
+        "documents-a163fdbde246b06f": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P32",
+            "faces": [
+              {
+                "name": "歌劇姫・フェリア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "シンガー",
+                  "童話",
+                  "プリンセス"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{起動}これを{アクト}：自分の他の童話・フォロワー1体を選ぶ。それに童話カウンター1つを置く。",
+                "sections": [],
+                "flavor": "鳥のように歌い、花のように舞って、女神のように微笑む。\n舞台を彩る才華に俗世は薄れ、人々の心を物語の深きへと誘う。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p32.png",
+                "trait_raw": "シンガー・童話・プリンセス"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f3c11d7f5406c9b2ea075642ab5a096d9067b9bc80b95eb1b619f67923aefedb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P32",
+            "fetched_at": "2026-09-24T22:51:56.771176Z"
+          },
+          "document_ref": "documents-a163fdbde246b06f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P33",
+      "documents": {
+        "documents-1a5f0ebc16fb38ff": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P33",
+            "faces": [
+              {
+                "name": "漆黒の使徒",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "{起動}これを{アクト}堕天使・フォロワー1体を墓場に置く：相手のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "君たちも対価を支払うべきだよね。\n――白銀ミカド",
+                "illustrator": "あかかがち",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p33.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q552",
+                "date": "2022-12-09",
+                "question": "このフォロワーの起動能力のコストで、このフォロワー自身を墓場に置くことはできますか？",
+                "answer": "はい。このフォロワーも自分の場にいる堕天使・フォロワーなので、コストとして墓場に置くことができます。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:32f9c1faa42eb420266b10a565fe2e3c481eda553b2d5add7900fb74e0ebbd18",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P33",
+            "fetched_at": "2026-09-24T22:51:59.666378Z"
+          },
+          "document_ref": "documents-1a5f0ebc16fb38ff"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P34",
+      "documents": {
+        "documents-be4973262a297d36": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P34",
+            "faces": [
+              {
+                "name": "暗黒の御使い",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": "人だけじゃなくカードにまで頼るんだ？\n――白銀ミカド",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p34.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P35"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ad739ddb98c61bd9b060d17043454c9d8ef04c2bd62f214ddd00499c4d2c884d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P34",
+            "fetched_at": "2026-09-24T22:52:02.557592Z"
+          },
+          "document_ref": "documents-be4973262a297d36"
+        }
+      ]
+    },
+    {
+      "card_no": "BP03-P35",
+      "documents": {
+        "documents-5105a234157557f7": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-P35",
+            "faces": [
+              {
+                "name": "暗黒の御使い",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手のリーダーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": "才能がない人の気持ちってホントに難しいね。\n――白銀ミカド",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-p35.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-P34"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ea6680b570e738cb8ae9b61150ec33f98a21369d94037e31f41a5d940306867b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-P35",
+            "fetched_at": "2026-09-24T22:52:05.098799Z"
+          },
+          "document_ref": "documents-5105a234157557f7"
+        }
+      ]
+    }
+  ]
+}

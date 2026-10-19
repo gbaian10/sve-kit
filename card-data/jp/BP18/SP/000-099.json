@@ -1,0 +1,429 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP18",
+  "range": "SP/000-099",
+  "products": {
+    "products-f1ae3c2a2c597478": [
+      {
+        "name": "ブースターパック「新約都市・透京」",
+        "date": "2025-11-21",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP18",
+          "https://shadowverse-evolve.com/products/bp18/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP18-SP01",
+      "documents": {
+        "documents-65b2c6b6a50d1342": {
+          "region": "jp",
+          "record": {
+            "number": "BP18-SP01",
+            "faces": [
+              {
+                "name": "カースドクイーン・ナハト・ナハト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "指揮官"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「新約都市・透京」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のデッキから元のコスト1の{ロイヤル}カード1枚を探し、EXエリアに置く。\n{起動}{コスト0}：相手の場のフォロワー1体を選ぶ。それをアクトする。次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にする。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP18/bp18-sp01.png",
+                "trait_raw": "荒野・指揮官"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1718",
+                "date": "2024-11-08",
+                "question": "《憑依》し、ドライブを持った相手の場のフォロワーを【箱詰め】状態にしました。その後、相手のターンが終了し【箱詰め】状態が解除された場合、そのフォロワーの【突進】や【シングルドライブ】はどうなりますか？",
+                "answer": "【箱詰め】状態の間は【突進】や【シングルドライブ】を失いますが、【箱詰め】状態が解除された場合、持っていた【突進】や【シングルドライブ】などの能力は元に戻り有効となります。"
+              },
+              {
+                "id": "Q1717",
+                "date": "2024-11-08",
+                "question": "『死の祝福』によって、【守護】を持った相手の場のフォロワーを【箱詰め】状態にしました。その後、相手のターンが終了し【箱詰め】状態が解除された場合、『死の祝福』によって持った【守護】はどうなりますか？",
+                "answer": "【箱詰め】状態の間は【守護】を失いますが、【箱詰め】状態が解除された場合、持っていた【守護】などの能力は元に戻り有効となります。"
+              },
+              {
+                "id": "Q1502",
+                "date": "2024-08-20",
+                "question": "『カースドクイーン・ナハト・ナハト』の《起動》能力によって、相手の場の『カオスルーラー・アイシィレンドリング』を選んだ場合、『カオスルーラー・アイシィレンドリング』の「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、チェックタイミングで解決します。"
+              },
+              {
+                "id": "Q1501",
+                "date": "2024-08-20",
+                "question": "《起動》能力によって、アクト状態の相手の場のフォロワーを選んだ場合でも、次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にすることができますか？",
+                "answer": "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にすることができます。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にする。」が適用されます。"
+              },
+              {
+                "id": "Q1500",
+                "date": "2024-08-20",
+                "question": "『ドラゴウェポン』の効果によって武装・タイプを持ったフォロワーが【箱詰め】状態になった場合、そのフォロワーは武装・タイプを失いますか？",
+                "answer": "いいえ。失いません。"
+              },
+              {
+                "id": "Q1499",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーに『守護の陽光』の《ファンファーレ》能力で【守護】を付与することはできますか？",
+                "answer": "はい。【箱詰め】状態のフォロワーに対して【守護】などの能力を付与することができます。"
+              },
+              {
+                "id": "Q1498",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーが場から手札に戻った場合、そのフォロワーの「これが場から手札に戻ったとき、」という能力は誘発しますか？",
+                "answer": "いいえ。能力を失っているので誘発しません。"
+              },
+              {
+                "id": "Q1497",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーが墓場に置かれた場合、そのフォロワーの《ラストワード》能力は誘発しますか？",
+                "answer": "いいえ。能力を失っているので《ラストワード》能力は誘発しません。"
+              }
+            ],
+            "products_ref": "products-f1ae3c2a2c597478",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ee91528ad27396fa611a850c6481d9c425c0968f775ea1eb4e93fa6ccaef6372",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP18-SP01",
+            "fetched_at": "2026-09-24T19:30:23.651152Z"
+          },
+          "document_ref": "documents-65b2c6b6a50d1342"
+        }
+      ]
+    },
+    {
+      "card_no": "BP18-SP02",
+      "documents": {
+        "documents-6a0ab783d5f9ee05": {
+          "region": "jp",
+          "record": {
+            "number": "BP18-SP02",
+            "faces": [
+              {
+                "name": "ダークドラグーン・フォルテ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「新約都市・透京」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "1",
+                "text": "{進化}{コスト2}：これは進化する。\n【疾走】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP18/bp18-sp02.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f1ae3c2a2c597478",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-077"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e9dcc7fd80cb4de51b29c9c46f546f6f0aa3838414ee0f5e675c664511223780",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP18-SP02",
+            "fetched_at": "2026-09-24T19:30:26.281221Z"
+          },
+          "document_ref": "documents-6a0ab783d5f9ee05"
+        }
+      ]
+    },
+    {
+      "card_no": "BP18-SP03",
+      "documents": {
+        "documents-1b4899974a63acd0": {
+          "region": "jp",
+          "record": {
+            "number": "BP18-SP03",
+            "faces": [
+              {
+                "name": "九火石炎・セッカ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・アドバンス",
+                "traits": [
+                  "荒野",
+                  "狩人",
+                  "獣"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「新約都市・透京」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】自分のデッキから『九尾の決意』1枚を探し、手札に加える。【2】自分の墓場の『九尾の決意』1枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP18/bp18-sp03.png",
+                "trait_raw": "荒野・狩人・獣"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1722",
+                "date": "2024-12-13",
+                "question": "『生命の量産』によって、自分のエボルヴデッキの表向きのアドバンスフォロワーを選ぶことができますか？",
+                "answer": "いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。"
+              },
+              {
+                "id": "Q1721",
+                "date": "2024-12-13",
+                "question": "『白霜の風』によって、相手の場のアドバンスフォロワーを選ぶことができますか？",
+                "answer": "はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。"
+              },
+              {
+                "id": "Q1720",
+                "date": "2024-12-13",
+                "question": "自分の墓場の『九尾の決意』を選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【2】をチョイスすることができず、【1】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-f1ae3c2a2c597478",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-001"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-008"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:562a9d64f70485e533b17192bae2edc4ed0c5fa6fbcb53ea51129c5048bc8123",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP18-SP03",
+            "fetched_at": "2026-09-24T19:30:29.120328Z"
+          },
+          "document_ref": "documents-1b4899974a63acd0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP18-SP04",
+      "documents": {
+        "documents-219c464689b5d471": {
+          "region": "jp",
+          "record": {
+            "number": "BP18-SP04",
+            "faces": [
+              {
+                "name": "ジャンヌダルク",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「新約都市・透京」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}相手の場のフォロワーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP18/bp18-sp04.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f1ae3c2a2c597478",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-128"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c0cde012081a48153b6bf4b471feb4293f7e3c70a3c662db75a2ff80ba79b864",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP18-SP04",
+            "fetched_at": "2026-09-24T19:30:32.102318Z"
+          },
+          "document_ref": "documents-219c464689b5d471"
+        }
+      ]
+    },
+    {
+      "card_no": "BP18-SP05",
+      "documents": {
+        "documents-3722b5b16102c683": {
+          "region": "jp",
+          "record": {
+            "number": "BP18-SP05",
+            "faces": [
+              {
+                "name": "マーリン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「新約都市・透京」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキからスペル1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP18/bp18-sp05.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q185",
+                "date": "2022-04-26",
+                "question": "自分のデッキにスペルがないとき、このフォロワーの《ファンファーレ》能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、デッキの中身を全て確認したあと、スペルを手札に加えず、デッキをシャッフルします。"
+              }
+            ],
+            "products_ref": "products-f1ae3c2a2c597478",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-053"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:251d4b902e71790a432fab4d98f1c4839dd3bbcfd8d1b403aee12a260b39faaa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP18-SP05",
+            "fetched_at": "2026-09-24T19:30:34.938511Z"
+          },
+          "document_ref": "documents-3722b5b16102c683"
+        }
+      ]
+    },
+    {
+      "card_no": "BP18-SP06",
+      "documents": {
+        "documents-8013de9c9cce5729": {
+          "region": "jp",
+          "record": {
+            "number": "BP18-SP06",
+            "faces": [
+              {
+                "name": "デモンズグリード・パラセリゼ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "宴楽",
+                  "魔界"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「新約都市・透京」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。それのリーダーに2ダメージ。自分のリーダーは{体力}+2する。自分のデッキの上1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP18/bp18-sp06.png",
+                "trait_raw": "宴楽・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1921",
+                "date": "2025-02-10",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイして、自分のリーダーを《体力》+2し、自分のデッキの上1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができず、自分のリーダーを《体力》+2し、自分のデッキの上1枚をEXエリアに置くことができません。"
+              }
+            ],
+            "products_ref": "products-f1ae3c2a2c597478",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP14-072"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:91417488a147af9b78a2a1e3c82b28b72c3010d4a20a07ed3c668d054d368513",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP18-SP06",
+            "fetched_at": "2026-09-24T19:30:37.752678Z"
+          },
+          "document_ref": "documents-8013de9c9cce5729"
+        }
+      ]
+    }
+  ]
+}

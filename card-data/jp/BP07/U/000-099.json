@@ -1,0 +1,481 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP07",
+  "range": "U/000-099",
+  "products": {
+    "products-0eef63b68124d284": [
+      {
+        "name": "ブースターパック第7弾「森羅鋼鉄」",
+        "date": "2023-10-27",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP07",
+          "https://shadowverse-evolve.com/products/bp07/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP07-U01",
+      "documents": {
+        "documents-4125fa6c091f9fb5": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-U01",
+            "faces": [
+              {
+                "name": "回帰する抱擁・ラティカ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "自然",
+                  "獣"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "【疾走】\n自分の場に『ナテラの大樹』が出たとき、自分のPPを1回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-u01.png",
+                "trait_raw": "自然・獣"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q975",
+                "date": "2023-10-20",
+                "question": "『回帰する抱擁・ラティカ』が自分の場に2体いる状況で、自分の場に『ナテラの大樹』が出た場合、『回帰する抱擁・ラティカ』の「自分の場に『ナテラの大樹』が出たとき、自分のPPを1回復する。」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              },
+              {
+                "id": "Q974",
+                "date": "2023-10-20",
+                "question": "何らかの能力によって、『ナテラの大樹』が相手ターン中に自分の場に出た場合、『回帰する抱擁・ラティカ』の「自分の場に『ナテラの大樹』が出たとき、自分のPPを1回復する。」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-001"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7c221707b2819b466d05a415420c8783a958095023051b0134bdfd2639d5144a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-U01",
+            "fetched_at": "2026-09-24T21:58:27.958387Z"
+          },
+          "document_ref": "documents-4125fa6c091f9fb5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-U02",
+      "documents": {
+        "documents-fe956b57c35146f5": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-U02",
+            "faces": [
+              {
+                "name": "妖刀の鬼・ツバキ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "暗殺者",
+                  "忍者"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "3",
+                "text": "自分の墓場に{ロイヤル}フォロワーが10枚以上ある限り、これは【疾走】を持つ。\n{ファンファーレ}自分の墓場の{ロイヤル}フォロワーが5枚以上なら、相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-u02.png",
+                "trait_raw": "暗殺者・忍者"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q994",
+                "date": "2023-10-20",
+                "question": "『妖刀の鬼・ツバキ』の「自分の墓場に《ロイヤル》フォロワーが10枚以上ある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場に《ロイヤル》フォロワーが10枚以上ある限り、『妖刀の鬼・ツバキ』は【疾走】を持ちます。\n『妖刀の鬼・ツバキ』を場に出した後に自分の墓場の《ロイヤル》フォロワーが9枚以下から10枚以上になった場合、【疾走】を持ちます。\n『妖刀の鬼・ツバキ』を場に出した後に自分の墓場の《ロイヤル》フォロワーが10枚以上から9枚以下になった場合、【疾走】を失います。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:483839f321f0c6f4d056f1aac72b89a9be31f131896c913170c2ff61d8d62fea",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-U02",
+            "fetched_at": "2026-09-24T21:58:30.701944Z"
+          },
+          "document_ref": "documents-fe956b57c35146f5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-U03",
+      "documents": {
+        "documents-53b82bb3bae47a4b": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-U03",
+            "faces": [
+              {
+                "name": "エレメントシャーマン・ライリー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "{ファンファーレ}【土の秘術】下記から1つチョイスする。これが墓場から場に出ていたなら、代わりに3つまで。\n【1】相手の場のフォロワー1体を選ぶ。それに5ダメージ。【2】これは{攻撃力}+3する。【3】2枚引く。\n{起動}{コスト6}：自分の墓場のこれを場に出す。これは【疾走】と「{ラストワード}これは消滅する」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-u03.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1592",
+                "date": "2024-08-20",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】や【3】をチョイスする必要があります。"
+              },
+              {
+                "id": "Q1008",
+                "date": "2023-10-20",
+                "question": "2つ以上の選択肢をチョイスするとき、１つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q1007",
+                "date": "2023-10-20",
+                "question": "自分の場に『天界への階段』がある状況で、自身の《起動》能力によって、「《ラストワード》これは消滅する」を持った自分の場の『エレメントシャーマン・ライリー』が破壊された場合、『天界への階段』に魂カウンターを置くことができますか？",
+                "answer": "はい。自身の《起動》能力によって、「《ラストワード》これは消滅する」を持った自分の場の『エレメントシャーマン・ライリー』が破壊された場合、場から墓場に移動し、そのタイミングで『エレメントシャーマン・ライリー』の《ラストワード》能力と『天界への階段』の「自分のフォロワーが場から墓場に置かれたとき、」という能力がそれぞれ誘発します。誘発した『天界への階段』の能力を解決することで、『天界への階段』に魂カウンターを置くことができます。また、墓場に置かれた『エレメントシャーマン・ライリー』は《ラストワード》能力によって、墓場から消滅領域に移動します。"
+              },
+              {
+                "id": "Q1006",
+                "date": "2023-10-20",
+                "question": "「《起動》《コスト6》：自分の墓場のこれを場に出す。これは【疾走】と「《ラストワード》これは消滅する」を持つ。」という《起動》能力は、『エレメントシャーマン・ライリー』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『エレメントシャーマン・ライリー』が墓場にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d74614fc161a0e9e279d984d0e1b3d613da9d1b8784db037a10c03d99e875b0c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-U03",
+            "fetched_at": "2026-09-24T21:58:33.463426Z"
+          },
+          "document_ref": "documents-53b82bb3bae47a4b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-U04",
+      "documents": {
+        "documents-556cf180564a1d5c": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-U04",
+            "faces": [
+              {
+                "name": "呪われし影・ヴァイディ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "自然",
+                  "ドラゴニュート"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分のデッキから『影の侵食』1枚を探し、EXエリアに置く。【2】自分の墓場の『影の侵食』1枚を選ぶ。それのコストを0にしてプレイする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-u04.png",
+                "trait_raw": "自然・ドラゴニュート"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1015",
+                "date": "2023-10-20",
+                "question": "自分の墓場に『影の侵食』がある状況で、相手の場のフォロワーを選ぶことができない場合の『呪われし影・ヴァイディ（EVOLVE）』の【進化時】能力によって【2】をチョイスした際の処理について教えてください。",
+                "answer": "自分の墓場の『影の侵食』1枚を選びます。ただ、相手の場のフォロワーを選ぶことができないので、『影の侵食』をプレイすることができず、何も起こりません。"
+              },
+              {
+                "id": "Q1014",
+                "date": "2023-10-20",
+                "question": "このフォロワーの【進化時】能力によって【2】をチョイスしてプレイした『影の侵食』は、効果の解決後、墓場に置かれますか？",
+                "answer": "いいえ。『影の侵食』の「自分の場に『呪われし影・ヴァイディ』がいるなら、」の能力によってEXエリアに置かれます。"
+              },
+              {
+                "id": "Q1013",
+                "date": "2024-08-20",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力で【1】をチョイスし、自分のデッキから『影の侵食』を探してEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、【1】をチョイスすることができず、自分のデッキから『影の侵食』を探してEXエリアに置くことができません。\nまた、自分の墓場の『影の侵食』を選ぶことができる場合は、【2】をチョイスする必要があります。（どちらも選べない場合は、【進化時】能力をプレイすることができず、何も起こりません。）"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-052"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-058"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bc55d9ab9434a0b97eb1b078e446bb711d09869411321e9f39b96556c40604fa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-U04",
+            "fetched_at": "2026-09-24T21:58:36.203577Z"
+          },
+          "document_ref": "documents-556cf180564a1d5c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-U05",
+      "documents": {
+        "documents-fedf7dc8b98b3396": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-U05",
+            "faces": [
+              {
+                "name": "真紅の抗戦者・モノ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "機械",
+                  "魔界"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "4",
+                "text": "【疾走】\n{起動}{コスト2}墓場の『ファースト・ワン』1枚を消滅：自分の場の機械・フォロワーすべては{攻撃力}+2/{体力}+2して、【突進】を持つ。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-u05.png",
+                "trait_raw": "機械・魔界"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-069"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-075"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae96d3ac9f09ca474599e0808459baa4266f4c0c5f810e4dcc40d390c307f863",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-U05",
+            "fetched_at": "2026-09-24T21:58:38.698259Z"
+          },
+          "document_ref": "documents-fedf7dc8b98b3396"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-U06",
+      "documents": {
+        "documents-68556d08d973fde6": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-U06",
+            "faces": [
+              {
+                "name": "輝く熾天使・ラピス",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "先導",
+                  "光輝"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "7",
+                "text": "【守護】\nこれが場を離れたとき、これに置かれていた祈りカウンター1つにつき、1枚引く。\n自分のエンドフェイズが来たとき、自分の場のカード1枚を選ぶ。それに祈りカウンター1つを置く。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-u06.png",
+                "trait_raw": "信仰・先導・光輝"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1032",
+                "date": "2023-10-20",
+                "question": "自分の場に『輝く熾天使・ラピス』と『封じられし熾天使』がある状況で、自分のエンドフェイズを迎えた場合、「自分のエンドフェイズが来たとき、」という能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c2e4b85242e223459f5a4cec65c7752620eaa09934227f37e961dfb7995350f3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-U06",
+            "fetched_at": "2026-09-24T21:58:41.635355Z"
+          },
+          "document_ref": "documents-68556d08d973fde6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-U07",
+      "documents": {
+        "documents-c4c7668192e3eb8b": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-U07",
+            "faces": [
+              {
+                "name": "機械神",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "大神"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "{ファンファーレ}墓場の機械・カード3枚を消滅：下記から2つまでチョイスする。【1】相手の場のフォロワー1体を選ぶ。それを破壊する。【2】相手の場のアミュレット1つを選ぶ。それを破壊する。【3】相手のリーダーすべてに3ダメージ。【4】自分のデッキから「これと同名を除く機械・カード」1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-u07.png",
+                "trait_raw": "機械・大神"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1593",
+                "date": "2024-08-20",
+                "question": "相手の場のフォロワーやアミュレットを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】や【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】や【2】をチョイスすることができず、【3】や【4】をチョイスする必要があります。（【3】や【4】をチョイスし、コストを支払わずに何も起こらないことを選択できます。）"
+              },
+              {
+                "id": "Q1008",
+                "date": "2023-10-20",
+                "question": "2つ以上の選択肢をチョイスするとき、１つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:07302ad152945d4e03d5c0f9dbe2c55b6674e20c59eb1c7b92bc973c551e50bd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-U07",
+            "fetched_at": "2026-09-24T21:58:44.381995Z"
+          },
+          "document_ref": "documents-c4c7668192e3eb8b"
+        }
+      ]
+    }
+  ]
+}

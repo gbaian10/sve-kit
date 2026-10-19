@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD03b",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-66aae72f22a3d0d0": [
+        {
+          "ordinal": 0,
+          "name": "コラボスターターデッキ「黙示録の炎」",
+          "date_raw": "2024-06-28",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CSD03B",
+            "https://shadowverse-evolve.com/products/csd03/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CSD03B",
+            "https://shadowverse-evolve.com/products/csd03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/csd03/",
+              "expansion_code": "CSD03B"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:a4c6921f86c16587ae6e11bfc01fadf76932399a1f01f8df49bd3a0502397126": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:42da1666edc3c996780a783cae1603ba299216745ee2381ba5375b0b71050cc4",
+        "raw_bytes": 36782,
+        "first_receipt_id": "sha256:81fc3f9cba701cfb018b22754fe8bbce62d75582b525c00d3b19a888062abe97",
+        "descriptor_sha256": "sha256:52c68e03bf8fb273537d2a22ffdc0b3e7796824c180f38dccd5e4d88e85a1f7b",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:9aa56e08c7c440258e73996be5f0444c7e212a2745e19f366bd4455e6cd0e68e"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-66aae72f22a3d0d0",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:56e811b52bc315c5c1893808aaffdf20fd6888f6d2e84bc6e312ad3f42f67486"
+    }
+  }
+}

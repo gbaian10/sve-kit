@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SD05",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-aff1c3ca46dd1ad4": [
+        {
+          "ordinal": 0,
+          "name": "Starter Deck #5 “Waltz of the Undying Night”",
+          "date_raw": "Jun. 30, 2023",
+          "href_raw": [
+            "/cards/searchresults?expansion=SD05",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SD05",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sd0106/",
+              "expansion_code": "SD05"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:f794e157a85d2f80cfc066009976183d14adb71a2d1f1c7c767e143d151e3324": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:1420803d98228ad73ff9d864b2f8ab3ff780abadcd667d23ce2137469e193a48",
+        "raw_bytes": 35264,
+        "first_receipt_id": "sha256:35d69ffda479be327bbbabe5053adc77d590215821aa097069a49913f479caea",
+        "descriptor_sha256": "sha256:9cb1020c0a9649c0200c6d435a5c9d95359adddc61e8d32dc6463672eba38341",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:b81782bbbaee8f839b237ab33b2064721f10fed10804c3e3a03f1c59311bbcd2"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-aff1c3ca46dd1ad4",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:dbd5017b669ba50e2ceffc5bf115df43ecedeed6bb1dffebedb702c6ac18ebfa"
+    }
+  }
+}

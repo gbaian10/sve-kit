@@ -1,0 +1,445 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP04",
+  "range": "U/000-099",
+  "products": {
+    "products-1e0c5988e89bf1eb": [
+      {
+        "name": "ブースターパック第4弾「天星神話」",
+        "date": "2023-02-24",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP04",
+          "https://shadowverse-evolve.com/products/bp04/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP04-U01",
+      "documents": {
+        "documents-7e90ffdcdb1b5dd2": {
+          "region": "jp",
+          "record": {
+            "number": "BP04-U01",
+            "faces": [
+              {
+                "name": "カシオペア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊",
+                  "星神"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第4弾「天星神話」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "{ファンファーレ}相手のフォロワーを好きな枚数選ぶ。それにXダメージを割りふる。Xは「自分の手札とEXエリアのカードの合計」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP04/bp04-u01.png",
+                "trait_raw": "精霊・星神"
+              }
+            ],
+            "release_date": "2023-02-24",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q557",
+                "date": "2023-02-20",
+                "question": "相手のフォロワーを2体以上選んでダメージを割り振るとき、体力が1の相手のフォロワーに2以上のダメージを割り振ることはできますか？",
+                "answer": "はい。可能です。"
+              },
+              {
+                "id": "Q556",
+                "date": "2023-02-20",
+                "question": "このフォロワーの《ファンファーレ》能力で相手のフォロワーを選ぶとき、選ばないことを選択できますか？（0枚を選ぶことは可能ですか？）",
+                "answer": "はい。好きな枚数なので可能です。（0枚を選ぶ。）"
+              }
+            ],
+            "products_ref": "products-1e0c5988e89bf1eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a943896aa78270f32321cbf038864579c9861cbcd890c6d2eb36fefde871d8f3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP04-U01",
+            "fetched_at": "2026-09-24T22:44:20.392186Z"
+          },
+          "document_ref": "documents-7e90ffdcdb1b5dd2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP04-U02",
+      "documents": {
+        "documents-de23ab5918e90517": {
+          "region": "jp",
+          "record": {
+            "number": "BP04-U02",
+            "faces": [
+              {
+                "name": "円卓の騎士・ガウェイン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "円卓"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第4弾「天星神話」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "【突進】\nこれがいる限り、自分が指揮官・カードをプレイする際、このターン中に1枚目の指揮官・カードなら、コストを-1する。\n{ファンファーレ}手札の指揮官・カードや円卓・カード2枚を公開：自分のPPを2回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP04/bp04-u02.png",
+                "trait_raw": "兵士・円卓"
+              }
+            ],
+            "release_date": "2023-02-24",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q575",
+                "date": "2023-02-20",
+                "question": "『円卓の騎士・ガウェイン』の《ファンファーレ》のコストである「手札の指揮官・カードや円卓・カード2枚を公開」は、指揮官・カード1枚と円卓・カード1枚や、指揮官・カード2枚、円卓・カード2枚のような組み合わせで、カードを公開してコストを支払うことができますか？",
+                "answer": "はい。指揮官・カードや円卓・カードに該当するカードの中から合わせて2枚を公開してコストを支払うことができます。"
+              },
+              {
+                "id": "Q574",
+                "date": "2023-02-20",
+                "question": "『円卓の騎士・ガウェイン』が自分の場に2体いて、自分がこのターン中に1枚目の指揮官・カードをプレイする際、コストを-2しますか？",
+                "answer": "はい、コストを-2します。"
+              },
+              {
+                "id": "Q573",
+                "date": "2023-02-20",
+                "question": "自分の残りPPが0で『円卓の騎士・ガウェイン』が自分の場にいるとき、このターン中1枚目の指揮官・カードとしてプレイする元のコストが1の『円卓会議』をコスト0でプレイすることができますか？",
+                "answer": "はい。『円卓会議』のコストが0になるため、残りPPが0でもプレイできます。"
+              },
+              {
+                "id": "Q572",
+                "date": "2023-02-20",
+                "question": "自分のターン中、1枚目の指揮官・カードをプレイしたあとに『円卓の騎士・ガウェイン』を場に出した場合、次にプレイする指揮官・カードのコストを-1することができますか？",
+                "answer": "いいえ。すでにそのターン中、1枚目の指揮官・カードをプレイしており、次にプレイする指揮官・カードはそのターン中に2枚目の指揮官・カードとなるので、『円卓の騎士・ガウェイン』の能力でコストを-1することができません。"
+              }
+            ],
+            "products_ref": "products-1e0c5988e89bf1eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5556833ab09ec1abf816f2563de23d17dc54b4651fd06fce3faf0be9548d59bf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP04-U02",
+            "fetched_at": "2026-09-24T22:44:23.234401Z"
+          },
+          "document_ref": "documents-de23ab5918e90517"
+        }
+      ]
+    },
+    {
+      "card_no": "BP04-U03",
+      "documents": {
+        "documents-ffde26c14ba4acc9": {
+          "region": "jp",
+          "record": {
+            "number": "BP04-U03",
+            "faces": [
+              {
+                "name": "エウロペ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "星神"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第4弾「天星神話」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "【疾走】【必殺】【守護】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP04/bp04-u03.png",
+                "trait_raw": "魔法使い・星神"
+              }
+            ],
+            "release_date": "2023-02-24",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-1e0c5988e89bf1eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:29e96a57d7c2346ecf0a7c89990c74f5290078cbf47eec8b5e5726f566377f71",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP04-U03",
+            "fetched_at": "2026-09-24T22:44:26.097226Z"
+          },
+          "document_ref": "documents-ffde26c14ba4acc9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP04-U04",
+      "documents": {
+        "documents-3dc43ad56a083898": {
+          "region": "jp",
+          "record": {
+            "number": "BP04-U04",
+            "faces": [
+              {
+                "name": "原初の竜使い",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第4弾「天星神話」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "5",
+                "text": "自分の場に他のコスト3以下の{ドラゴン}フォロワーが出たとき、相手のフォロワー1体を選ぶ。それに2ダメージ。それのリーダーに1ダメージ。\n{ファンファーレ}【覚醒】状態なら、これは{攻撃力}+1/{体力}+1して、【威圧】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP04/bp04-u04.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2023-02-24",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q599",
+                "date": "2023-02-20",
+                "question": "自分の場に他のコスト3以下の《ドラゴン》フォロワーが複数体同時に場に出たとき、その数と同じ回数、このフォロワーの能力は誘発しますか？",
+                "answer": "はい。その数と同じ回数、誘発します。"
+              },
+              {
+                "id": "Q598",
+                "date": "2023-02-20",
+                "question": "このフォロワーが場に2体いる状態で、自分の場に他のコスト3以下の《ドラゴン》フォロワーが出たとき、このフォロワーの能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              },
+              {
+                "id": "Q597",
+                "date": "2023-02-20",
+                "question": "相手の場に選ぶことができるフォロワーがいない状態で、自分の場に他のコスト3以下の《ドラゴン》フォロワーが出たとき、相手のリーダーに1ダメージを与えることはできますか？",
+                "answer": "いいえ。選ぶことができないので、この能力をプレイすることができず、相手のリーダーに1ダメージ与えることができません。"
+              }
+            ],
+            "products_ref": "products-1e0c5988e89bf1eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:50e2a7755b3cf5fa0477cdc57a0ee527e977048cbcb76979fd7023a3e45b7f79",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP04-U04",
+            "fetched_at": "2026-09-24T22:44:28.645239Z"
+          },
+          "document_ref": "documents-3dc43ad56a083898"
+        }
+      ]
+    },
+    {
+      "card_no": "BP04-U05",
+      "documents": {
+        "documents-c182b4d26060c916": {
+          "region": "jp",
+          "record": {
+            "number": "BP04-U05",
+            "faces": [
+              {
+                "name": "毒牙の姫・メドゥーサ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界",
+                  "ゴルゴーン"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第4弾「天星神話」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{起動}{コスト0}：『毒蛇』1体を出す。この能力は1ターンに1回使える。\n{Q}{起動}これを{アクト}『毒蛇』2体を墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP04/bp04-u05.png",
+                "trait_raw": "魔界・ゴルゴーン"
+              }
+            ],
+            "release_date": "2023-02-24",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q622",
+                "date": "2023-02-20",
+                "question": "『毒蛇』と交戦したフォロワーは、交戦後、『毒蛇』の持つ【必殺】の効果によって破壊されますか？",
+                "answer": "はい。破壊されます。\n【必殺】という能力は、実際に（攻撃力が0等で）ダメージを与えていない場合でも、交戦することのみを条件としているため、交戦したフォロワーは破壊されます。"
+              },
+              {
+                "id": "Q610",
+                "date": "2023-02-20",
+                "question": "このフォロワーの起動能力のコストの支払いは、このフォロワーを墓場に置くことも含まれますか？",
+                "answer": "いいえ。このフォロワーの起動能力のコストは、このフォロワーを《アクト》し、自分の場の『毒蛇』2体を墓場に置くことで支払われます。"
+              }
+            ],
+            "products_ref": "products-1e0c5988e89bf1eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ab2e1d61a6ef128c7799d3c071171d96b398f6cfc16c003cfb2bd6b1886d2cb5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP04-U05",
+            "fetched_at": "2026-09-24T22:44:31.415926Z"
+          },
+          "document_ref": "documents-c182b4d26060c916"
+        }
+      ]
+    },
+    {
+      "card_no": "BP04-U06",
+      "documents": {
+        "documents-2d4a6252858b4b77": {
+          "region": "jp",
+          "record": {
+            "number": "BP04-U06",
+            "faces": [
+              {
+                "name": "白翼の守護神・アイテール",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "先導",
+                  "光輝"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第4弾「天星神話」",
+                "title": null,
+                "cost": "7",
+                "power": "3",
+                "hp": "5",
+                "text": "【守護】\n{ファンファーレ}自分のデッキから「これと同名を除く、自分のPP最大値より低いコストの{ビショップ}フォロワー」1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP04/bp04-u06.png",
+                "trait_raw": "信仰・先導・光輝"
+              }
+            ],
+            "release_date": "2023-02-24",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-1e0c5988e89bf1eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e5b70e5cad84f4ad854684e48b9107448bce1016e9d41f737f62f6a16af206bd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP04-U06",
+            "fetched_at": "2026-09-24T22:44:34.321816Z"
+          },
+          "document_ref": "documents-2d4a6252858b4b77"
+        }
+      ]
+    },
+    {
+      "card_no": "BP04-U07",
+      "documents": {
+        "documents-36289365ddad83d8": {
+          "region": "jp",
+          "record": {
+            "number": "BP04-U07",
+            "faces": [
+              {
+                "name": "イスラーフィール",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使",
+                  "大神"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第4弾「天星神話」",
+                "title": null,
+                "cost": "-",
+                "power": "10",
+                "hp": "10",
+                "text": "【攻撃時】相手のフォロワーすべてに5ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "乃木Lief",
+                "image": "/wordpress/wp-content/images/cardlist/BP04/bp04-u07.png",
+                "trait_raw": "天使・大神"
+              }
+            ],
+            "release_date": "2023-02-24",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-1e0c5988e89bf1eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a2167e3f08e49dac1b9213205ee43c06e0035736a31fb242ddd0fccf7a57731b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP04-U07",
+            "fetched_at": "2026-09-24T22:44:36.998168Z"
+          },
+          "document_ref": "documents-36289365ddad83d8"
+        }
+      ]
+    }
+  ]
+}

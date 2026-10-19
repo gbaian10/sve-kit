@@ -1,0 +1,142 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP15",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-32e3ea705cc80348": [
+        {
+          "ordinal": 0,
+          "name": "Combined Set \"Banquet of Dreams & Trial of the Omens\"",
+          "date_raw": "Jan. 23, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP14-BP15",
+            "https://en.shadowverse-evolve.com/products/bp14-bp15/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP14-BP15",
+            "https://en.shadowverse-evolve.com/products/bp14-bp15/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp14-bp15/",
+              "expansion_code": "BP14-BP15"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-11847212090040a5": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP15-PR27EN"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cards/?cardno=BP05-103EN"
+        }
+      ],
+      "related-592acdd2a97a0543": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP15-114EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:03fa15ac1d46d15b1b2368244003d13f84555db458cbb9a335ff066d580d37da": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:1b57695943836a1654c89f9e374daf30cd7a1335508f813b6b6578cf56cc993f",
+        "raw_bytes": 36165,
+        "first_receipt_id": "sha256:c163ef44e27458fea951f50d87668999da35fbc3f39ea99363549769172d2dcc",
+        "descriptor_sha256": "sha256:086e7aa6918fe47281f45ad9cb3fb263c33e30d99536669eb95fbfdc2521d465",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:52f2cf38d86fb2747989a92fb2d8a94658ac1e9c23051ea0cbdcac8e6378a6e4"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-32e3ea705cc80348",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-592acdd2a97a0543",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:1a1a7fb27948e0f0ab455aa9de09b57a12508e1fb99f78ccc9d522df7517f702"
+    },
+    "src:v1:e43f98420af5b526486687d3cdcdaa34d0d2b1ac30b6f5239c8e54da2e628d20": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:7f742714705625bbcbcba5b3e3e7a54045d271f21f19bf9522933e85f361b038",
+        "raw_bytes": 36449,
+        "first_receipt_id": "sha256:125e1495e017c5e7dc2796607afa5eb50ff797def3f9b6b8a505f60035a2dbd7",
+        "descriptor_sha256": "sha256:5c3db339bbed2619cae64f4d8016596e8bab7a7b3438f687e77629f085a8f6e5",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:8651f3c764667af8467bf830e7a59cc4450c61155c2120ad60ce98ed5530327f"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-32e3ea705cc80348",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-11847212090040a5",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:cc69dfb338c66e7cc28076442d7c469afbe84b77eee252996f38a3091f999e90"
+    }
+  }
+}

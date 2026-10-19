@@ -1,0 +1,1200 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD06",
+  "range": "000-099",
+  "products": {
+    "products-174a01c2cfcbd84a": [
+      {
+        "name": "スターターデッキ第6弾「穢れし洗礼」",
+        "date": "2022-04-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=SD06",
+          "https://shadowverse-evolve.com/products/sd01_06/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SD06-001",
+      "documents": {
+        "documents-cbededc84a8ef887": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-001",
+            "faces": [
+              {
+                "name": "スカルフェイン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狂信",
+                  "偶像"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "自分のアミュレットが場を離れたとき、相手のリーダーすべてと相手のフォロワーすべてに2ダメージ。\n{ファンファーレ}自分のデッキの上4枚を見る。その中から、アミュレット1枚を場に出してよい。残りを墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "SEMSEI",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-001.png",
+                "trait_raw": "狂信・偶像"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q128",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーと『夢想の白兎』があり、『夢想の白兎』の「《起動》《コスト10》これを《アクト》墓場に置く：フォロワーすべてを消滅させる。」をプレイしたとき、このフォロワーは消滅しますが、このフォロワーの「自分のアミュレットが場を離れたとき、相手のリーダーすべてと相手のフォロワーすべてに2ダメージ。」の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q127",
+                "date": "2022-04-26",
+                "question": "自分の場のアミュレットが複数同時に場を離れたとき、このフォロワーの『自分のアミュレットが場を離れたとき、相手のリーダーすべてと相手のフォロワーすべてに2ダメージ』の能力は、場を離れたアミュレットの数だけ誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:65d2cdfafc4ee8f71a62b4a9a9c88f4d176df1882be3dd20d071c63a5aeb0b6c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-001",
+            "fetched_at": "2026-09-24T23:42:55.875842Z"
+          },
+          "document_ref": "documents-cbededc84a8ef887"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-002",
+      "documents": {
+        "documents-02194dc9c6ebee23": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-002",
+            "faces": [
+              {
+                "name": "夢想の白兎",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "GR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "0",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}これを{アクト}墓場に置く：相手のフォロワー1体を選ぶ。それをアクトする。\n{起動}{コスト10}これを{アクト}墓場に置く：フォロワーすべてを消滅させる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "けりる",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-002.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q265",
+                "date": "2022-05-19",
+                "question": "『夢想の白兎』の「《起動》これを《アクト》墓場に置く：相手のフォロワー1体を選ぶ。それをアクトする。」という能力は、相手の場にフォロワーがない場合や、【オーラ】を持つフォロワーしかない場合でも、目標を選ばずにプレイすることはできますか？",
+                "answer": "いいえ。相手の場にフォロワーがない場合や、【オーラ】を持つフォロワーしかなければプレイすることはできず。コストを支払いこのアミュレットを墓場に置くこともできません。また、相手の場にアクト状態の【オーラ】を持たないフォロワーがある場合、そのフォロワーを選んでこの能力をプレイすることができます。その場合、選ばれたフォロワーは状態が変わることなく、アクト状態のままとなります。"
+              },
+              {
+                "id": "Q130",
+                "date": "2022-04-26",
+                "question": "このアミュレットの「《起動》《コスト10》これを《アクト》墓場に置く：フォロワーすべてを消滅させる。」をプレイしたとき、相手の場のフォロワーのみ消滅しますか？",
+                "answer": "いいえ。自分の場と相手の場にあるフォロワー全てが消滅します。"
+              },
+              {
+                "id": "Q129",
+                "date": "2022-04-26",
+                "question": "このアミュレットの《起動》能力は、このアミュレットがアクトしているとき、コストを支払うことはできますか？",
+                "answer": "いいえ。それぞれの能力のコストに、このアミュレットをアクトすることが求められているため、アクト状態ではコストを支払うことはできません。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f9e3cf2bbd642771eac74b509de443df62b79699646da6d44a532dfa7bfb33b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-002",
+            "fetched_at": "2026-09-24T23:42:58.433109Z"
+          },
+          "document_ref": "documents-02194dc9c6ebee23"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-003",
+      "documents": {
+        "documents-def11065026630c8": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-003",
+            "faces": [
+              {
+                "name": "鉄槌の僧侶",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "悪行はそこまでじゃ！\nキサマの正体……この目でしかと見破ってやろう！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-003.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:56701b876ac5a16ad0e6cab0552fe65bf8a4b6365cfb0716703bc18de3a13311",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-003",
+            "fetched_at": "2026-09-24T23:43:01.147348Z"
+          },
+          "document_ref": "documents-def11065026630c8"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-004",
+      "documents": {
+        "documents-cf9c08defb1a0ab8": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-004",
+            "faces": [
+              {
+                "name": "鉄槌の僧侶",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】体力3以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
+                "sections": [],
+                "flavor": "ワシの目には貴様の弱点、ビシっと見えたぞ！\nこのメイスでその頭、砕いてくれるぞ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-004.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:313491179a3f5f9c121cd2cae9b51c446dd08c342ced074dfee2f50db520cd89",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-004",
+            "fetched_at": "2026-09-24T23:43:03.864107Z"
+          },
+          "document_ref": "documents-cf9c08defb1a0ab8"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-005",
+      "documents": {
+        "documents-4b1864db1f2382fa": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-005",
+            "faces": [
+              {
+                "name": "破邪の光",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それを消滅させる。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Tob",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-005.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q131",
+                "date": "2022-04-26",
+                "question": "相手の場にフォロワーがないとき、このスペルをプレイして、自分のリーダーを《体力》+2することはできますか？",
+                "answer": "いいえ。このスペルで選ぶフォロワーがないため、プレイをすることができず、自分のリーダーを《体力》+2することはできません。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0827bfdeefb4379fda2cf8703c76c8d4104fd41a49402c0132ddff766e27ef38",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-005",
+            "fetched_at": "2026-09-24T23:43:06.762708Z"
+          },
+          "document_ref": "documents-4b1864db1f2382fa"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-006",
+      "documents": {
+        "documents-4df06cf438faf5ce": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-006",
+            "faces": [
+              {
+                "name": "二対の炎",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}『ホーリータイガー』1体を出す。\n{起動}{コスト2}これを{アクト}墓場に置く：『ホーリータイガー』1体を出す。",
+                "sections": [
+                  "『ホーリータイガー』{ビショップ}獣・フォロワー{コスト4}{攻撃力}4/{体力}4【突進】"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-006.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q133",
+                "date": "2022-04-26",
+                "question": "自分の場が上限かつ、このアミュレットの《起動》能力をプレイしたとき、『ホーリータイガー』1体を場に出すことはできますか？",
+                "answer": "はい。このアミュレットはコストを支払った時点から自分の場を離れており、能力を解決するときには自分の場の上限まで残り1枚のため、『ホーリータイガー』1体を場に出すことができます。"
+              },
+              {
+                "id": "Q132",
+                "date": "2022-04-26",
+                "question": "このアミュレットの《起動》能力は、このアミュレットがアクトしているとき、コストを支払うことはできますか？",
+                "answer": "いいえ。能力のコストに、このアミュレットをアクトすることが求められているため、アクト状態ではコストを支払うことはできません。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:83c3b006026affabbbbdc4cd8441334b9afed928a127fe187e9571a4ae50ae26",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-006",
+            "fetched_at": "2026-09-24T23:43:09.639726Z"
+          },
+          "document_ref": "documents-4df06cf438faf5ce"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-007",
+      "documents": {
+        "documents-3288cd19954c5ba5": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-007",
+            "faces": [
+              {
+                "name": "残忍な修道女",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狂信"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}自分の墓場のコスト5以下のアミュレット1枚を選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": "邪神を崇める子羊たちよ！\n我らの戦に全てを捧げ、信仰心を示すのだ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-007.png",
+                "trait_raw": "狂信"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q134",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力で自分の墓場のアミュレットを場に出すとき、そのアミュレットのコストは支払う必要がありますか？",
+                "answer": "いいえ。支払う必要はありません。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eae2d428ffec1c8e7579ab67ad75d8d13cbe5ef17f9cc03cce048fa187df54b9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-007",
+            "fetched_at": "2026-09-24T23:43:12.287152Z"
+          },
+          "document_ref": "documents-3288cd19954c5ba5"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-008",
+      "documents": {
+        "documents-68d24a134c2547a1": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-008",
+            "faces": [
+              {
+                "name": "スネークプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狂信"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "3",
+                "text": "【守護】(これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない)",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "COGA",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-008.png",
+                "trait_raw": "狂信"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:61bc095e2726bbf654fa550108f0085f7f9626f2b4a664a88a09e9d1d54efe30",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-008",
+            "fetched_at": "2026-09-24T23:43:15.145681Z"
+          },
+          "document_ref": "documents-68d24a134c2547a1"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-009",
+      "documents": {
+        "documents-400e2bb6aaf253f6": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-009",
+            "faces": [
+              {
+                "name": "アーデントシスター",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n相手のターン中、これが与えるダメージを+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-009.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-010"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dca45ca9cc65d53ed2f20f3bed95ef19ad6890ed1d38255c955939bb44c4ea3c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-009",
+            "fetched_at": "2026-09-24T23:43:17.862492Z"
+          },
+          "document_ref": "documents-400e2bb6aaf253f6"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-010",
+      "documents": {
+        "documents-6202ec95ecc118f9": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-010",
+            "faces": [
+              {
+                "name": "アーデントシスター",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【守護】\n相手のターン中、これが与えるダメージを+2する。",
+                "sections": [],
+                "flavor": "私は主の代行者として汝らを裁き続けます。\n穢れ無き魂を持った者らが居る限り！",
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-010.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-009"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dea0f7e70727b0658e519a3eed1a7d9bf02c6202625f51ed942a346e61ef01d8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-010",
+            "fetched_at": "2026-09-24T23:43:21.462251Z"
+          },
+          "document_ref": "documents-6202ec95ecc118f9"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-011",
+      "documents": {
+        "documents-553a16c2c4605fd7": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-011",
+            "faces": [
+              {
+                "name": "ガーディアンシスター",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}自分の場にアミュレットがあるなら、これは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "lack",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-011.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q135",
+                "date": "2022-04-26",
+                "question": "自分の場にアミュレットが2つあるとき、このフォロワーは《体力》+2されますか？",
+                "answer": "いいえ。自分の場のアミュレットが1つ以上あれば、その枚数にかかわらず《体力》+1のみされます。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-012"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7c87aac77b8f712534f6e0e49661ae889587528d321317b6a5d349745376a70a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-011",
+            "fetched_at": "2026-09-24T23:43:23.300717Z"
+          },
+          "document_ref": "documents-553a16c2c4605fd7"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-012",
+      "documents": {
+        "documents-06157dfe5c7c84c1": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-012",
+            "faces": [
+              {
+                "name": "ガーディアンシスター",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【守護】\n【進化時】自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "この場所は人々の希望なのだ。\nだからこそ……貴様らなどに踏み入らせはしない！",
+                "illustrator": "lack",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-012.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q136",
+                "date": "2022-04-26",
+                "question": "自分のリーダーの《体力》が20のとき、このフォロワーの【進化時】で自分のリーダーを《体力》+2することはできますか？",
+                "answer": "はい。《体力》+2することができます。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-011"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ccba71b1eaa381fa37859da7986d788b9adeced2cca94ae4bdc8423f965ac417",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-012",
+            "fetched_at": "2026-09-24T23:43:26.115799Z"
+          },
+          "document_ref": "documents-06157dfe5c7c84c1"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-013",
+      "documents": {
+        "documents-4fbd9e00791f8fa2": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-013",
+            "faces": [
+              {
+                "name": "気高き教理",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n自分のデッキの上5枚を見る。その中から、アミュレット1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "五十嵐",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-013.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q138",
+                "date": "2022-04-26",
+                "question": "このスペルで、自分のエボルヴデッキを見ることはできますか？",
+                "answer": "いいえ。メインデッキのみを見ることができます。"
+              },
+              {
+                "id": "Q137",
+                "date": "2022-04-26",
+                "question": "自分のデッキが4枚以下のとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、自分のデッキ全てを見ます。また、残りのカードをデッキの下に戻すとき、カードを好きな順番でデッキ置き場に置きます。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ec2de18098ee132e475aa71302f436ef553d88c3e8153e534ec14bc12cd0ad35",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-013",
+            "fetched_at": "2026-09-24T23:43:28.731113Z"
+          },
+          "document_ref": "documents-4fbd9e00791f8fa2"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-014",
+      "documents": {
+        "documents-e4db4b22c698edee": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-014",
+            "faces": [
+              {
+                "name": "死の宣告",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "狂信"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "これはアクト状態で場に出る。\n{起動}これを{アクト}墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-014.png",
+                "trait_raw": "狂信"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q140",
+                "date": "2022-04-26",
+                "question": "このアミュレットの《起動》能力は、このアミュレットがアクトしているとき、コストを支払うことはできますか？",
+                "answer": "いいえ。能力のコストに、このアミュレットをアクトすることが求められているため、アクト状態ではコストを支払うことができません。"
+              },
+              {
+                "id": "Q139",
+                "date": "2022-04-26",
+                "question": "このアミュレットが場に出るとき、一度スタンド状態で場に出てからアクトされますか？",
+                "answer": "いいえ。一度もスタンド状態になることはなく、場に出す時点からアクト状態です。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0eff102415d31fe34689c619ef7809b41d6906c8ef6eb5fbb3ccfdf3c3685159",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-014",
+            "fetched_at": "2026-09-24T23:43:31.286562Z"
+          },
+          "document_ref": "documents-e4db4b22c698edee"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-015",
+      "documents": {
+        "documents-ab7d561f5577a0c8": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-015",
+            "faces": [
+              {
+                "name": "白翼への祈り",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "鳥族"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}{コスト1}これを{アクト}墓場に置く：『ホーリーファルコン』1体を出す。",
+                "sections": [
+                  "『ホーリーファルコン』{ビショップ}鳥族・フォロワー{コスト3}{攻撃力}2/{体力}2【疾走】"
+                ],
+                "flavor": null,
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-015.png",
+                "trait_raw": "信仰・鳥族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q142",
+                "date": "2022-04-26",
+                "question": "自分の場が上限かつ、このアミュレットの《起動》能力をプレイしたとき、『ホーリーファルコン』1体を場に出すことはできますか？",
+                "answer": "はい。このアミュレットはコストを支払った時点から自分の場を離れており、能力を解決するときには自分の場の上限まで残り1枚のため、『ホーリーファルコン』1体を場に出すことができます。"
+              },
+              {
+                "id": "Q141",
+                "date": "2022-04-26",
+                "question": "このアミュレットの能力は、このアミュレットがアクトしているとき、コストを支払うことはできますか？",
+                "answer": "いいえ。能力のコストに、このアミュレットをアクトすることが求められているため、アクト状態ではコストを支払うことができません。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:978744d7778fb2a755466b6ad7e30ea04d0461008c58327d898579e1be02a47d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-015",
+            "fetched_at": "2026-09-24T23:43:33.900407Z"
+          },
+          "document_ref": "documents-ab7d561f5577a0c8"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-016",
+      "documents": {
+        "documents-97fcf185b522fd07": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-016",
+            "faces": [
+              {
+                "name": "聖獣への誓い",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "これはアクト状態で場に出る。\n{起動}{コスト1}これを{アクト}墓場に置く：『ホーリータイガー』1体を出す。",
+                "sections": [
+                  "『ホーリータイガー』{ビショップ}獣・フォロワー{コスト4}{攻撃力}4/{体力}4【突進】"
+                ],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-016.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q145",
+                "date": "2022-04-26",
+                "question": "自分の場が上限かつ、このアミュレットの《起動》能力をプレイしたとき、『ホーリータイガー』1体を場に出すことはできますか？",
+                "answer": "はい。このアミュレットはコストを支払った時点から自分の場を離れており、能力を解決するときには自分の場の上限まで残り1枚のため、『ホーリータイガー』1体を場に出すことができます。"
+              },
+              {
+                "id": "Q144",
+                "date": "2022-04-26",
+                "question": "このアミュレットの《起動》能力は、このアミュレットがアクトしているとき、コストを支払うことはできますか？",
+                "answer": "いいえ。能力のコストに、このアミュレットをアクトすることが求められているため、アクト状態ではコストを支払うことはできません。"
+              },
+              {
+                "id": "Q143",
+                "date": "2022-04-26",
+                "question": "このアミュレットが場に出るとき、一度スタンド状態で場に出てからアクトされますか？",
+                "answer": "いいえ。一度もスタンド状態になることはなく、場に出す時点からアクト状態です。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD06-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4867eb996814fe7638ae8cc03231716c89c4377730fc97d83ac6d95a9363aa8c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-016",
+            "fetched_at": "2026-09-24T23:43:36.695315Z"
+          },
+          "document_ref": "documents-97fcf185b522fd07"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-017",
+      "documents": {
+        "documents-140844940e239466": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-017",
+            "faces": [
+              {
+                "name": "天剣の乙女",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "6",
+                "text": "【守護】(これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない)",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Melodyoflost",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-017.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3728f612de9c14b310c29ddc67f1092f3419cbfae730bb50cfaf4c4892e438f7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-017",
+            "fetched_at": "2026-09-24T23:43:39.645175Z"
+          },
+          "document_ref": "documents-140844940e239466"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-018",
+      "documents": {
+        "documents-0d703b62eba55ae0": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-018",
+            "faces": [
+              {
+                "name": "ヒーリングエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": "戦場で傷ついた体を、私に託してください。\n私が必ず、その痛みを和らげて差し上げます……。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-018.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q98",
+                "date": "2022-04-26",
+                "question": "自分のリーダーの《体力》が20のとき、このフォロワーの《ファンファーレ》能力で自分のリーダーを《体力》+1することはできますか？",
+                "answer": "はい。《体力》+1することができます。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d97168d7f67498d53c82b97542a8cc8b325ac7c7fb96ed5acaea560d4989958d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-018",
+            "fetched_at": "2026-09-24T23:43:42.423254Z"
+          },
+          "document_ref": "documents-0d703b62eba55ae0"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-019",
+      "documents": {
+        "documents-76489923c9c918e8": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-019",
+            "faces": [
+              {
+                "name": "ヒーリングエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "【進化時】自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "戦い疲れた戦士たちに、愛の癒しを与えましょう。\nこの光に身を委ねれば……再び勇気の炎が灯るでしょう。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-019.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q99",
+                "date": "2022-04-26",
+                "question": "自分のリーダーの《体力》が20のとき、このフォロワーの能力で自分のリーダーを《体力》+2することはできますか？",
+                "answer": "はい。《体力》+2することができます。"
+              }
+            ],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:728da61c39f7acc81d4fc8e165beaf52110f1f43269bf8ab6056fed12ec583c2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-019",
+            "fetched_at": "2026-09-24T23:43:45.354510Z"
+          },
+          "document_ref": "documents-76489923c9c918e8"
+        }
+      ]
+    },
+    {
+      "card_no": "SD06-020",
+      "documents": {
+        "documents-ca11d5acc4cafe56": {
+          "region": "jp",
+          "record": {
+            "number": "SD06-020",
+            "faces": [
+              {
+                "name": "エンジェルスナイプ",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第6弾「穢れし洗礼」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "許されざる者には速やかなる罰を。\n放たれた一矢は光となり、悪しき者の胸を貫く。",
+                "illustrator": "廣岡政樹",
+                "image": "/wordpress/wp-content/images/cardlist/SD06/SD06-020.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-174a01c2cfcbd84a",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8df3591bb193bd655b4c1a4dbcab1f3920253e0d6c64fffabca35a3e060f1dd7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD06-020",
+            "fetched_at": "2026-09-24T23:43:48.207331Z"
+          },
+          "document_ref": "documents-ca11d5acc4cafe56"
+        }
+      ]
+    }
+  ]
+}

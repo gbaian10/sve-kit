@@ -1,0 +1,161 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "GFD01",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      },
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-67bc6234f49f5869": [
+        {
+          "ordinal": 0,
+          "name": "Gloryfinder Starter Deck \"Luxheart Legends\"",
+          "date_raw": "Jul. 25, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=GFD01",
+            "https://en.shadowverse-evolve.com/products/gfd01_02/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFD01",
+            "https://en.shadowverse-evolve.com/products/gfd01_02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/gfd01_02/",
+              "expansion_code": "GFD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:5eec2f246e59c5a3a113801ad9676cf714ed81bc28a4c235328b4da4410a8e4e": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:d43c7ea3330523412082caea7c5cce66d2bfed43deacf900ae6a1769ca457a34",
+        "raw_bytes": 35298,
+        "first_receipt_id": "sha256:e18d8f81e6d8fec019245abca51d50f51be8adbe3d6f246e9f210ac4bf1d3ad9",
+        "descriptor_sha256": "sha256:d76093525aa2623fcc452047cc4080e0e056dd744498d575457386bc07a284ad",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:f475e289ed7d8716d9f0c8822e090827716a6062e453b8a1f0251214c26e1626"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-67bc6234f49f5869",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:c164cd50cba1b0ecbedd4357c4502dfdce2f0a4b52d77d855cd384aca3b6fdbb"
+    },
+    "src:v1:7be75db46f4bbb58bf1a785b7957a7c9fc5ca38da95121d18a8ef49e1a54eca7": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:481f132e02ce91b9b93cb757fbfb30b44fec4b1d6b5b5832b5decb001468632e",
+        "raw_bytes": 35413,
+        "first_receipt_id": "sha256:f00c2cdc9104d9993a7acfa95c8c5bafc81ed90f67af8dea389785c91b2f698c",
+        "descriptor_sha256": "sha256:10da4d172e62df6a9d54cf17739fd061ba093ca656b410a42a073dcf96c3dcaa",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:af2cec5698b842286dc37051a818f49a7d518ddee7660038e1cb40e364bfde5b"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-67bc6234f49f5869",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:e38aa447dfe49ec0ebb2ac44a862e81382ad61486bb2fb0e01ec95a8cfd20818"
+    },
+    "src:v1:7bedf42a6bb830f3074a6301066b069b1f2ea4defcd55d6ebca036013c49bb42": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:c78fe555bba335aa04b4b5d41bef308714a5e712efc9c853d0d348782df1b9dc",
+        "raw_bytes": 35318,
+        "first_receipt_id": "sha256:903bf0b4d1a12bb59abc920d84d0ea55b3c268f87d2e8f9d498098dba45ff35f",
+        "descriptor_sha256": "sha256:1433a6cddee27cadd2107a9071e852a47f8f9880087f8b6da588eb548b1b7e30",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:e78e9fecf9202fb30ebf7d7aec772044bfd79863502230c00ae6d6beec6a34bd"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-67bc6234f49f5869",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:2cabb252f715a1eb581415d5ab0897bf8053d934892796108df697e4aad58321"
+    }
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP03",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-4d182cd72e2919de": [
+        {
+          "ordinal": 0,
+          "name": "Booster Set #3 “Flame of Lævateinn”",
+          "date_raw": "Feb. 2, 2024",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP03",
+            "https://en.shadowverse-evolve.com/products/bp03/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP03",
+            "https://en.shadowverse-evolve.com/products/bp03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp03/",
+              "expansion_code": "BP03"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-7ee75941673c09a4": [
+        {
+          "stable_source_key": "Q457",
+          "official_number": "Q457",
+          "locator": "qa-block:0",
+          "published_on": "2024-01-31",
+          "date_raw": "Jan. 31, 2024"
+        },
+        {
+          "stable_source_key": "Q456",
+          "official_number": "Q456",
+          "locator": "qa-block:1",
+          "published_on": "2024-01-31",
+          "date_raw": "Jan. 31, 2024"
+        },
+        {
+          "stable_source_key": "Q455",
+          "official_number": "Q455",
+          "locator": "qa-block:2",
+          "published_on": "2024-01-31",
+          "date_raw": "Jan. 31, 2024"
+        },
+        {
+          "stable_source_key": "Q454",
+          "official_number": "Q454",
+          "locator": "qa-block:3",
+          "published_on": "2024-01-31",
+          "date_raw": "Jan. 31, 2024"
+        },
+        {
+          "stable_source_key": "Q453",
+          "official_number": "Q453",
+          "locator": "qa-block:4",
+          "published_on": "2024-01-31",
+          "date_raw": "Jan. 31, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-6f904bb10bf27d30": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP03-035EN"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cards/?cardno=BP03-T03EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:17f2614a389b500637c1b01a16429dd624319ebab9876f8a752ebf98abbd4be5": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:97d123f1d6e28dee0e7f033f73f111c2fc5daa2ccbacadd09b66b6f3e0fd1b40",
+        "raw_bytes": 38733,
+        "first_receipt_id": "sha256:60aea8477eaa7461cc1e60893aa5cd9368311525cfca702df8c68096267d69f3",
+        "descriptor_sha256": "sha256:e608d97042ba9ed48aef78a37675e13263e6e28e7fac293210c24aa3c147132b",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:af1f220f9ad3c6349a7634302c9baa565c16ae6bd2141eeef8a47def2e4f7f3a"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-4d182cd72e2919de",
+        "qa": "qa-7ee75941673c09a4",
+        "related": "related-6f904bb10bf27d30",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:673333c3fc6010bc323e1746f488637cdda840e11a24a116097833c84695350d"
+    }
+  }
+}

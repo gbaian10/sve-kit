@@ -1,0 +1,509 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP14",
+  "range": "T/000-099",
+  "products": {
+    "products-7b971fa41e192aae": [
+      {
+        "name": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+        "date": "2025-02-14",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP14",
+          "https://dev.shadowverse-evolve.com/products/bp14/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP14-T01",
+      "documents": {
+        "documents-be91ddf804950b17": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T01",
+            "faces": [
+              {
+                "name": "旅籠煤",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "宴楽"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【守護】\n{ラストワード}相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t01.png",
+                "trait_raw": "宴楽"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:549cbe18e7fcf9ab6d24fc4f938e058af386ace7e38217c3249928a2b90f5b59",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T01",
+            "fetched_at": "2026-09-24T20:22:10.013995Z"
+          },
+          "document_ref": "documents-be91ddf804950b17"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T02",
+      "documents": {
+        "documents-5290f8464bb7dc77": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T02",
+            "faces": [
+              {
+                "name": "輝く金貨",
+                "card_class": "ロイヤル",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "宴楽",
+                  "盗賊",
+                  "財宝"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "0",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}{コスト1}EXエリアのこれと『輝く金貨』2枚を消滅：自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "AOGIRI",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t02.png",
+                "trait_raw": "宴楽・盗賊・財宝"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1968",
+                "date": "2025-03-19",
+                "question": "スペル・トークンである『輝く金貨』自身を0コストのスペルとしてプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、スペルとしての能力は持っていないので、特に何も起こらず、『輝く金貨』は墓場に置かれます。（『輝く金貨』はトークンなので、墓場に置かれた直後に消去されます。）"
+              }
+            ],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cf12fe2c682af9f4e9c105ad81a80c8d562fa57ecd2a771167e22cf54f5b15b1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T02",
+            "fetched_at": "2026-09-24T20:22:12.419197Z"
+          },
+          "document_ref": "documents-5290f8464bb7dc77"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T03",
+      "documents": {
+        "documents-e64fe8f830a90a8d": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T03",
+            "faces": [
+              {
+                "name": "炎将の二槍",
+                "card_class": "ロイヤル",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "指揮官",
+                  "星神"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場のフォロワーが進化したとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{起動}{コスト1}これを{アクト}墓場に置く：自分の場の指揮官・フォロワー1体を選ぶ。それは「【攻撃時】相手のリーダーすべてに2ダメージ」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t03.png",
+                "trait_raw": "指揮官・星神"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0a0d1be9d780da2284fd2fc272d63bd7902d043461298ca10147b4d405bbdb3a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T03",
+            "fetched_at": "2026-09-24T20:22:15.319826Z"
+          },
+          "document_ref": "documents-e64fe8f830a90a8d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T04",
+      "documents": {
+        "documents-e940b70200e5d701": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T04",
+            "faces": [
+              {
+                "name": "波濤の暴圧",
+                "card_class": "ドラゴン",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "宴楽",
+                  "ドラゴニュート"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それに4ダメージ。【覚醒】状態なら、代わりに6ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t04.png",
+                "trait_raw": "宴楽・ドラゴニュート"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ef2466efd482e71cde25fdd6188e61c7dfded651941c60d858c04951394669e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T04",
+            "fetched_at": "2026-09-24T20:22:18.228830Z"
+          },
+          "document_ref": "documents-e940b70200e5d701"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T05",
+      "documents": {
+        "documents-98021d7c0a8ec44e": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T05",
+            "faces": [
+              {
+                "name": "幼狼奮闘",
+                "card_class": "ナイトメア",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "宴楽",
+                  "魔界",
+                  "獣"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "0",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それに1ダメージ。自分の手札1枚を捨ててよい。そうしたなら、自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t05.png",
+                "trait_raw": "宴楽・魔界・獣"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1962",
+                "date": "2025-02-10",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルをプレイして自分の手札1枚を捨て、自分のデッキの上1枚を墓場に置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、自分の手札1枚を捨て、自分のデッキの上1枚を墓場に置くことができません。"
+              }
+            ],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c680c649e45746c967a7438ce93f4ebd86e1c938828b14f8a1461e66b5147f06",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T05",
+            "fetched_at": "2026-09-24T20:22:21.153390Z"
+          },
+          "document_ref": "documents-98021d7c0a8ec44e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T06",
+      "documents": {
+        "documents-a4bec36ff580452e": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T06",
+            "faces": [
+              {
+                "name": "招来の狐",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "宴楽",
+                  "狂信",
+                  "獣"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "1",
+                "power": "0",
+                "hp": "1",
+                "text": "【守護】\n{ファンファーレ}自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t06.png",
+                "trait_raw": "宴楽・狂信・獣"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:500ceac98458e79c16eb0b85fccd1d5b4db57a67cd5c6adba218b536d5118f57",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T06",
+            "fetched_at": "2026-09-24T20:22:24.201930Z"
+          },
+          "document_ref": "documents-a4bec36ff580452e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T07",
+      "documents": {
+        "documents-c7d6df45a4ff352c": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T07",
+            "faces": [
+              {
+                "name": "水銀の断絶",
+                "card_class": "ビショップ",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "信仰",
+                  "超克"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\nこのターン、自分のリーダーが受けるダメージを-1する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t07.png",
+                "trait_raw": "信仰・超克"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1966",
+                "date": "2025-02-10",
+                "question": "『水銀の断絶』を2回プレイした場合、このターン、自分のリーダーが受けるダメージを-2しますか？",
+                "answer": "はい。自分のリーダーが受けるダメージを-2します。"
+              },
+              {
+                "id": "Q1965",
+                "date": "2025-02-10",
+                "question": "【攻撃時】能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【攻撃時】能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1964",
+                "date": "2025-02-10",
+                "question": "自分のリーダーの体力が11以上で『水銀の断絶』の効果が有効な場合、相手の『アザゼル（EVOLVE）』の【進化時】能力で相手のリーダーの体力は10になりますか？",
+                "answer": "はい。ダメージではないため、自分のリーダーの体力は10になります。"
+              },
+              {
+                "id": "Q1963",
+                "date": "2025-02-10",
+                "question": "自分の『水銀の断絶』の効果が有効な状況で、自分の『絶望の聖女・ジャンヌ』の《ファンファーレ》能力のコストにある「リーダーの《体力》-2」が適用された場合、自分のリーダーの体力を-2しますか？",
+                "answer": "はい。自分のリーダーの体力を-2します。「《体力》-2」はダメージではないので、『水銀の断絶』の効果が適用されません。"
+              }
+            ],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ca84131c2fc89dad2df3f25195352e49667d96bbcd435b2a9eba526735c9a8a7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T07",
+            "fetched_at": "2026-09-24T20:22:26.903481Z"
+          },
+          "document_ref": "documents-c7d6df45a4ff352c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T08",
+      "documents": {
+        "documents-b3b6bc57339293ac": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T08",
+            "faces": [
+              {
+                "name": "操り人形",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "人形"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【突進】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t08.png",
+                "trait_raw": "人形"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c671a01523a99351c3146c6ca7592e6f1d71f6ba70c418408183e1d9aa825362",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T08",
+            "fetched_at": "2026-09-24T20:22:29.881907Z"
+          },
+          "document_ref": "documents-b3b6bc57339293ac"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-T09",
+      "documents": {
+        "documents-28a7bf400f6dc2ea": {
+          "region": "jp",
+          "record": {
+            "number": "BP14-T09",
+            "faces": [
+              {
+                "name": "エンシェントアーティファクト",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第14弾「夢幻の饗󠄀宴」",
+                "title": null,
+                "cost": "1",
+                "power": "3",
+                "hp": "1",
+                "text": "【突進】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP14/bp14-t09.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2025-02-14",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7b971fa41e192aae",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f77f405ccd97fb4767b429553677ccb2bd3b48767db3d657c917045be6093007",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP14-T09",
+            "fetched_at": "2026-09-24T20:22:32.741185Z"
+          },
+          "document_ref": "documents-28a7bf400f6dc2ea"
+        }
+      ]
+    }
+  ]
+}

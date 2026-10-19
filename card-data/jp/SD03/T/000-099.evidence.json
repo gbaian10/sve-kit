@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD03",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-59c637fba5ea80ba": [
+        {
+          "ordinal": 0,
+          "name": "スターターデッキ第3弾「神秘錬成」",
+          "date_raw": "2022-04-28",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=SD03",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=SD03",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/sd01_06/",
+              "expansion_code": "SD03"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:487943d30a1d56ebabb9b6766e328cc5838b4b28e3a7cb494c3691f4e1b99d1b": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:a819f033136ff3ae5a9bf9b7d26682f35cca431e4dc5f2a2440fcc3f834811f2",
+        "raw_bytes": 36871,
+        "first_receipt_id": "sha256:e5c94cb1833ee802fa51d6aa066e78fa62b2f7ec87e7ca0d4d0990536f491f9a",
+        "descriptor_sha256": "sha256:ce2cf3bb8aa336b089ec9635d3b051474a0f490c272e4e348b46da7e97c3fd67",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:7fdf221bf9bc3b460a261df0d6a216a2a26c3734f68b6a21162d21f52f69bfd5"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-59c637fba5ea80ba",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:ee788220d0e04427c78de7dd0b9ff9b03d2200d273032023efcd871669618f91"
+    },
+    "src:v1:fcb466fe84ce81d50668d3c14007c81296753713f7fa5f8999c82bf51a67e9a3": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:f1b911b20fce5a848107a9e3588d909510b52dc30d74051f4734b9cc94c879e1",
+        "raw_bytes": 36793,
+        "first_receipt_id": "sha256:bb0d2f7184ebe374de57c8ed5aff9db9887f219c6b82822128d12e9cc3390375",
+        "descriptor_sha256": "sha256:90b4d9add4be6a0a30db3a8928f71e04d274af9bc6ddedd481b6138a5f0fde67",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:b4b2def1ae9b398f6460ab8c4011123358e844e897c2b4c9959ba444aabe06e2"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-59c637fba5ea80ba",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:1f57302b2a428a576377c93c7b97e6628ac558f1c9735824ca7c574099c0c3cc"
+    }
+  }
+}

@@ -1,0 +1,596 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP17",
+  "range": "U/000-099",
+  "products": {
+    "products-01767a532f36f86e": [
+      {
+        "name": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+        "date": "2025-09-26",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP17",
+          "https://dev.shadowverse-evolve.com/products/bp17/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP17-U01",
+      "documents": {
+        "documents-a74ce9b40b5212c6": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U01",
+            "faces": [
+              {
+                "name": "深緑の弓使い・アリサ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}『ゲイルアロー』1枚か『ストームアロー』1枚をEXエリアに置く。\n{起動}これを{アクト}：自分のデッキから『森番の弓』1枚を探し、場に出す。この能力は「このターン中に自分がプレイしたカードの枚数」が5枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u01.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-008"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T02"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1f2c8da719b4d94b7c5aeae8f536fbf53036376f61816fc5c8f77062f33fe4e5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U01",
+            "fetched_at": "2026-09-24T19:40:56.705122Z"
+          },
+          "document_ref": "documents-a74ce9b40b5212c6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U02",
+      "documents": {
+        "documents-414793b62683bba6": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U02",
+            "faces": [
+              {
+                "name": "万緑の回帰・ラティカ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "自然",
+                  "獣"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。『ナテラの大樹』1枚をEXエリアに置く。それに「自分のEXエリアの『ナテラの大樹』の枚数」と同じダメージ。\n【超進化時】相手の場のフォロワー1体を選ぶ。『ナテラの大樹』1枚をEXエリアに置く。それとそれのリーダーに「自分のEXエリアの『ナテラの大樹』の枚数」と同じダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u02.png",
+                "trait_raw": "自然・獣"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2285",
+                "date": "2025-09-22",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2284",
+                "date": "2025-09-22",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2219",
+                "date": "2025-09-22",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【超進化時】能力をプレイして『ナテラの大樹』1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【超進化時】能力をプレイすることができないため、『ナテラの大樹』1枚をEXエリアに置くことができません。"
+              },
+              {
+                "id": "Q2218",
+                "date": "2025-09-22",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイして『ナテラの大樹』1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができないため、『ナテラの大樹』1枚をEXエリアに置くことができません。"
+              }
+            ],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-002"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3ff6cda54a54c9325a2563351145438e9b7ea129aa5b2a284cc31ff36f8f47c0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U02",
+            "fetched_at": "2026-09-24T19:40:59.320032Z"
+          },
+          "document_ref": "documents-414793b62683bba6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U03",
+      "documents": {
+        "documents-2bcdaa227aa9a2d9": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U03",
+            "faces": [
+              {
+                "name": "忠義の剣士・エリカ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "暗殺者",
+                  "メイド"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "【疾走】\n【攻撃時】自分の場の{ロイヤル}カードが5枚なら、これは{攻撃力}+2する。\n{ファンファーレ}『スティールナイト』1体か『シールドガーディアン』1体か『ナイト』1体を場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u03.png",
+                "trait_raw": "兵士・暗殺者・メイド"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2287",
+                "date": "2025-09-22",
+                "question": "自分の場の《ロイヤル》カードが5枚の状況で、自分の場の『忠義の剣士・エリカ』で相手のリーダーを攻撃したとき、相手のクイックタイミングで自分の場の《ロイヤル》カードが4枚以下になった場合、【攻撃時】能力でこれは《攻撃力》+2することができますか？",
+                "answer": "はい。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れるので、クイックタイミングで自分の場の《ロイヤル》カードが4枚以下になった場合でも、【攻撃時】能力でこれは《攻撃力》+2することができます。"
+              }
+            ],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:27a7ef6f6bc1371333d8fbb20efacc09073bf482ef59ff98d79f41db46d28cd6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U03",
+            "fetched_at": "2026-09-24T19:41:02.172186Z"
+          },
+          "document_ref": "documents-2bcdaa227aa9a2d9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U04",
+      "documents": {
+        "documents-68ff044308023880": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U04",
+            "faces": [
+              {
+                "name": "栄光の華・エレノア",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}墓場の{ウィッチ}カード1枚を消滅：1枚引く。\n{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。自分の消滅領域が5枚以上なら、それに1ダメージ。自分の消滅領域が10枚以上なら、代わりに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ラエル",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u04.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:59c704df38f560047c2ad7ae7b923bbd6adee10a58c7f86073d362d705ac9d22",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U04",
+            "fetched_at": "2026-09-24T19:41:05.306892Z"
+          },
+          "document_ref": "documents-68ff044308023880"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U05",
+      "documents": {
+        "documents-e357d65e63bb3cf3": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U05",
+            "faces": [
+              {
+                "name": "清澄の蒼・テトラ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "機械",
+                  "ゴーレム"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上4枚を見る。その中から、機械・カードと『ソニック・フォー』それぞれ1枚まで公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n【超進化時】このターン、これは「自分が機械・カードをプレイしたとき、相手のリーダーすべてと相手の場のフォロワーすべてに1ダメージ」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u05.png",
+                "trait_raw": "機械・ゴーレム"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2285",
+                "date": "2025-09-22",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2284",
+                "date": "2025-09-22",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2240",
+                "date": "2025-09-22",
+                "question": "このフォロワーの【進化時】能力でデッキから見たカードがすべて機械・カードであり、『ソニック・フォー』がなかった場合、その中から機械・カード1枚のみを公開して手札に加えることができますか？",
+                "answer": "はい。手札に加えることができます。また、デッキから見たカードに『ソニック・フォー』があり、他の機械・カードがなかった場合も同様に、その中から『ソニック・フォー』1枚のみを公開して手札に加えることができます。"
+              }
+            ],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-041"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-041"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ca76bc018466b6929895ff0bae10a988acb2caf13927b62fbfe659a94947027d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U05",
+            "fetched_at": "2026-09-24T19:41:07.863030Z"
+          },
+          "document_ref": "documents-e357d65e63bb3cf3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U06",
+      "documents": {
+        "documents-d7eac2bd56786884": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U06",
+            "faces": [
+              {
+                "name": "竜槍の戦士・ローウェン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族",
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "2",
+                "text": "【突進】【指定攻撃】\n【攻撃時】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【覚醒】状態なら、それのリーダーに1ダメージ。\n{ファンファーレ}『黒龍の呪い』1枚をEXエリアに置く。\n{起動}{コスト4}：相手の場のフォロワー1体を選ぶ。それに3ダメージ。それのリーダーに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Mew",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u06.png",
+                "trait_raw": "竜族・武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:470ea574dfcd2e2219071c1d26e9009e0764599a2d4b6a9486288f51d60e2d5c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U06",
+            "fetched_at": "2026-09-24T19:41:10.767816Z"
+          },
+          "document_ref": "documents-d7eac2bd56786884"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U07",
+      "documents": {
+        "documents-3484700c311b3f2d": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U07",
+            "faces": [
+              {
+                "name": "友魂の少女・ルナ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死霊術師"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "1",
+                "power": "0",
+                "hp": "2",
+                "text": "{ファンファーレ}『ルナの人形』1枚をEXエリアに置く。\n{起動}これを{アクト}：自分の墓場の「これと同名を除く元のコスト2以下の{ナイトメア}フォロワー」1枚を選ぶ。それを手札に加える。この能力は自分の墓場が10枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u07.png",
+                "trait_raw": "死霊術師"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-T08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:be5a2f3564d8dbea2e6629aa21b001d623fdeeb6a53117c541506b58e9883092",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U07",
+            "fetched_at": "2026-09-24T19:41:13.230807Z"
+          },
+          "document_ref": "documents-3484700c311b3f2d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U08",
+      "documents": {
+        "documents-27784f14dc4ebc70": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U08",
+            "faces": [
+              {
+                "name": "贖罪の司祭・イリス",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "{アドバンス起動}{コスト3}これを墓場に置く：自分のエボルヴデッキの『レリックゴッデス』1枚を場に出してよい。この能力は自分の場のアミュレットが4つ以上なら使える。\n{ファンファーレ}自分の場のアミュレット2つにつき、相手の場のフォロワーを1体まで選ぶ。それを消滅させる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "根岸千秋",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u08.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2259",
+                "date": "2025-09-22",
+                "question": "このフォロワーの《アドバンス起動》能力をプレイした場合、そのターン中に自分の場の『ゴブリン』を進化させることができますか。",
+                "answer": "いいえ。《アドバンス起動》能力や《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。"
+              }
+            ],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-092"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:51d7ade872550ad44d5df87eb915939606e610379a49909f48016f4571e2440d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U08",
+            "fetched_at": "2026-09-24T19:41:16.236862Z"
+          },
+          "document_ref": "documents-27784f14dc4ebc70"
+        }
+      ]
+    },
+    {
+      "card_no": "BP17-U09",
+      "documents": {
+        "documents-8d171096d3f2fb43": {
+          "region": "jp",
+          "record": {
+            "number": "BP17-U09",
+            "faces": [
+              {
+                "name": "粛清の器・メイシア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "自分の墓場にフォロワーが10枚以上ある限り、これは【疾走】を持つ。\n【進化時】1枚引く。\n{起動}{コスト0}：相手の場のフォロワー1体を選ぶ。自分の墓場のフォロワー5枚につき、それに4ダメージ。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP17/bp17-u09.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2025-09-26",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2273",
+                "date": "2025-09-22",
+                "question": "『粛清の器・メイシア』の「自分の墓場にフォロワーが10枚以上ある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場にフォロワーが10枚以上ある限り、『粛清の器・メイシア』は【疾走】を持ちます。\n『粛清の器・メイシア』を場に出した後に自分の墓場のフォロワーが9枚以下から10枚以上になった場合、【疾走】を持ちます。\n『粛清の器・メイシア』を場に出した後に自分の墓場のフォロワーが10枚以上から9枚以下になった場合、【疾走】を失います。"
+              }
+            ],
+            "products_ref": "products-01767a532f36f86e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP17-110"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f9c16aec2a223bb351eacdfa16274b0d1a29a38b043a3d3cf60c2c121027f0a6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP17-U09",
+            "fetched_at": "2026-09-24T19:41:19.196680Z"
+          },
+          "document_ref": "documents-8d171096d3f2fb43"
+        }
+      ]
+    }
+  ]
+}

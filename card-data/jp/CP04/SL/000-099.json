@@ -1,0 +1,1881 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CP04",
+  "range": "SL/000-099",
+  "products": {
+    "products-d3cc46f3296eae7f": [
+      {
+        "name": "コラボパック「プリンセスコネクト！Re:Dive」",
+        "date": "2026-01-30",
+        "links": [
+          "/cardlist/cardsearch?expansion=CP04",
+          "https://shadowverse-evolve.com/products/cp04/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CP04-SL01",
+      "documents": {
+        "documents-1b9b51293ea9d64f": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL01",
+            "faces": [
+              {
+                "name": "コッコロ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{UB}{ファンファーレ}自分のリーダーは{体力}+1する。",
+                "sections": [
+                  "{進化}{コスト1}：これは進化する。\n{ファンファーレ}{コスト2}：これは『アメスアミュレット』1枚を装備する。",
+                  "『アメスアミュレット』{エルフ}プリコネ・美食殿・イクイップメント{コスト2}これを装備しているフォロワーは「{起動}これを{アクト}：自分の場のフォロワーすべては{攻撃力}+1/{体力}+1する」を持つ。"
+                ],
+                "flavor": "主さまにお仕えするのは、お役目だけでなくわたくしの意志。\n全力でご奉仕いたします。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl01.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2524",
+                "date": "2026-01-26",
+                "question": "『コッコロ』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR27"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bb6bb2d57f066a209efa7c889d41ef2a2855d5b9edbae251cc952cb179a03827",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL01",
+            "fetched_at": "2026-09-24T19:10:12.528264Z"
+          },
+          "document_ref": "documents-1b9b51293ea9d64f"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL02",
+      "documents": {
+        "documents-1c1f603882278385": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL02",
+            "faces": [
+              {
+                "name": "コッコロ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】1枚引く。\n【超進化時】自分のリーダーは{体力}+2する。1枚引く。",
+                "sections": [],
+                "flavor": "見ていてくださいまし、主さま。\nわたくし……今なら何でもできそうです……♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl02.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2529",
+                "date": "2026-01-26",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2528",
+                "date": "2026-01-26",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:298d1f393b29efe274adb0db82653870b843200bc72a0cc5d76db4aa898b6566",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL02",
+            "fetched_at": "2026-09-24T19:10:15.204726Z"
+          },
+          "document_ref": "documents-1c1f603882278385"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL03",
+      "documents": {
+        "documents-a123ec93eb7997e8": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL03",
+            "faces": [
+              {
+                "name": "エリス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "4",
+                "power": "4",
+                "hp": "3",
+                "text": "{UB}{起動}これを{アクト}：自分の場の他のプリコネ・フォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。これを含めず、このターン中に自分の{UB}能力が3回以上発動していたなら、それは【疾走】を持つ。",
+                "sections": [
+                  "{ファンファーレ}自分のデッキの上4枚を見る。その中から、プリコネ・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。このターン、次に自分がプリコネ・カードをプレイする際、コストを-2する。"
+                ],
+                "flavor": "二人だけの世界は望めない。それならせめて、二人だけの時を。\n全ての命が消えてもなお残る、騎士クンとわたしが紡ぐ物語を。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl03.png",
+                "trait_raw": "プリコネ"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2391",
+                "date": "2026-02-06",
+                "question": "このターン、自分が《UB》能力を2回発動している状況で、『アメス（EVOLVE）』の《UB》【進化時】能力で【2】をチョイスし自分の場の『エリス』を選んだ場合、『エリス』の《UB》《起動》能力にある「これを含めず、このターン中に自分の《UB》能力が3回以上発動していたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。（『アメス（EVOLVE）』の《UB》能力の発動の時点で、このターン計3回の《UB》能力の発動を満たしています）\nこの場合、選んだ自分の場の他のプリコネ・フォロワー1体は《攻撃力》+1/《体力》+1して、【疾走】を持ちます。"
+              },
+              {
+                "id": "Q2390",
+                "date": "2026-01-26",
+                "question": "このターン、『エリス』の《UB》《起動》能力を3回発動していた場合、『エリス』の《UB》《起動》能力にある「これを含めず、このターン中に自分の《UB》能力が3回以上発動していたなら、」という条件を満たしますか？",
+                "answer": "はい。4回目以降『エリス』の《UB》《起動》能力をプレイした場合、条件を満たします。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:92463a0754c533298fe06b3ea4d20bf23583d97e4a940fa98961681df7063946",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL03",
+            "fetched_at": "2026-09-24T19:10:17.866930Z"
+          },
+          "document_ref": "documents-a123ec93eb7997e8"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL04",
+      "documents": {
+        "documents-61634311bc23d983": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL04",
+            "faces": [
+              {
+                "name": "ネフィ＝ネラ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "〈ジオ・ゲヘナ〉"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "5",
+                "power": "3",
+                "hp": "4",
+                "text": "{UB}{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分のデッキの上1枚をEXエリアに置く。",
+                "sections": [
+                  "これが場にいる限り、自分がEXエリアの元のコスト1のプリコネ・フォロワーをプレイする際、コストを-1する。\n自分の場の他のフォロワーの{UB}能力が発動したとき、自分のデッキの上1枚をEXエリアに置く。"
+                ],
+                "flavor": "さぁ皆の者、百鬼夜行と参ろうぞ。\n此処は煉獄、『ジオ・ゲヘナ』。強者のみ生き残る穢土なれば。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl04.png",
+                "trait_raw": "プリコネ・〈ジオ・ゲヘナ〉"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2394",
+                "date": "2026-01-26",
+                "question": "相手のターン中に自分が《UB》能力を発動した場合、このフォロワーの「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q2393",
+                "date": "2026-01-26",
+                "question": "自分の場に『ネフィ＝ネラ』が2体いる状況で、自分のEXエリアから元のコスト1のプリコネ・フォロワーをプレイする場合、そのコストを-2しますか？",
+                "answer": "はい。それぞれの『ネフィ＝ネラ』の能力が適用されるため、そのコストを-2します。"
+              },
+              {
+                "id": "Q2392",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《ファンファーレ》能力をプレイして自分のデッキの上1枚をEXエリアに置くことができますか？また《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《ファンファーレ》能力をプレイすることができず、自分のデッキの上1枚をEXエリアに置くことができません。また《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ccdf68860d5c8eb15c73d7c0c37691bcf4420d8547e5fc3f94a463bc64d0e232",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL04",
+            "fetched_at": "2026-09-24T19:10:20.703926Z"
+          },
+          "document_ref": "documents-61634311bc23d983"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL05",
+      "documents": {
+        "documents-67c382fc4c27046b": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL05",
+            "faces": [
+              {
+                "name": "ペコリーヌ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}{コスト2}：これは『プリンセスソード』1枚を装備する。",
+                "sections": [
+                  "『プリンセスソード』{ロイヤル}プリコネ・美食殿・イクイップメント{コスト2}これを装備しているフォロワーが与えるダメージを+2する。これを装備しているフォロワーが受けるダメージを-2する。"
+                ],
+                "flavor": "ごはんは命のエネルギー☆\n一緒に食べて、一緒に冒険しましょうー！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl05.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR28"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a7759ee3183b8fbf0a4ff650f13168612eb4f8ddbfe15f7810655ccaa3f1f9b1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL05",
+            "fetched_at": "2026-09-24T19:10:23.521156Z"
+          },
+          "document_ref": "documents-67c382fc4c27046b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL06",
+      "documents": {
+        "documents-3547042a158e1781": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL06",
+            "faces": [
+              {
+                "name": "ペコリーヌ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "{UB}【進化時】相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [
+                  "【守護】\n【超進化時】相手のリーダーすべてに4ダメージ。"
+                ],
+                "flavor": "あなたが側にいるだけで、体の奥から勇気が溢れちゃいます！\nやばいですね☆",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl06.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2529",
+                "date": "2026-01-26",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2528",
+                "date": "2026-01-26",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2416",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができずこのフォロワーの《UB》【進化時】能力をプレイできなかった場合、《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ff5b7f8265e710cf2242f866b630682b0c79327a33fedf2c30ce7fef4c67ad85",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL06",
+            "fetched_at": "2026-09-24T19:10:26.073358Z"
+          },
+          "document_ref": "documents-3547042a158e1781"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL07",
+      "documents": {
+        "documents-c0ba3e1b36fde8b5": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL07",
+            "faces": [
+              {
+                "name": "クリスティーナ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "NIGHTMARE",
+                  "七冠"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{UB}【攻撃時】手札1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに5ダメージ。",
+                "sections": [
+                  "【疾走】\n{ファンファーレ}{コスト2}：これは『聖域剣アヴァロン』1枚を装備する。"
+                ],
+                "flavor": "ややこしい話し合いは面倒だ！物事はシンプルに解決しよう。\nそう、生きるか死ぬかの本気の殺り合いでな☆",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl07.png",
+                "trait_raw": "プリコネ・NIGHTMARE・七冠"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2417",
+                "date": "2026-01-26",
+                "question": "このフォロワーの《UB》【攻撃時】能力のコストを支払わない選択をした場合や、相手の場のフォロワーを選ぶことができずプレイできなかった場合、《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR29"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed82d51d8f85bb5b82dcf367f18af5f07f12eb4828df9457eb8179fbdb2d5375",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL07",
+            "fetched_at": "2026-09-24T19:10:28.780044Z"
+          },
+          "document_ref": "documents-c0ba3e1b36fde8b5"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL08",
+      "documents": {
+        "documents-97fd47f41ca68797": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL08",
+            "faces": [
+              {
+                "name": "ラビリスタ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "ラビリンス",
+                  "七冠"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{UB}{起動}これを{アクト}：これは{攻撃力}+1する。",
+                "sections": [
+                  "自分のエンドフェイズが来たとき、自分の場の元のコスト1のフォロワーの攻撃力の合計が10以上なら、相手の場のフォロワーすべてに2ダメージ。\n{ファンファーレ}自分の場のフォロワーが4体以上なら、これは『クイーンズコンソール』1枚を装備する。"
+                ],
+                "flavor": "迷宮女王とプリンセスナイトが力を合わせれば、\nどんな敵が相手でも勝てるさ。さあ少年、一緒に迎え撃とう！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl08.png",
+                "trait_raw": "プリコネ・ラビリンス・七冠"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2418",
+                "date": "2026-01-26",
+                "question": "自分の場の元のコスト1のフォロワーの攻撃力の合計が9の状況で、自分のエンドフェイズを迎えました。何らかのエンドフェイズが来たときに誘発する能力によって自分の場の『ラビリスタ』の《攻撃力》が+1された場合、『ラビリスタ』の「自分のエンドフェイズが来たとき、～」という能力をプレイし、相手の場のフォロワーすべてに2ダメージを与えることができますか？",
+                "answer": "はい。この場合、相手の場のフォロワーすべてに2ダメージを与えることができます。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR30"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:073ac7ef588350596ae49470393cf511b3da27df0063cf8f525fb3e9bec0a9c4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL08",
+            "fetched_at": "2026-09-24T19:10:31.774121Z"
+          },
+          "document_ref": "documents-97fd47f41ca68797"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL09",
+      "documents": {
+        "documents-a6b86fe9abcafae0": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL09",
+            "faces": [
+              {
+                "name": "キャル",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{UB}{ファンファーレ}手札のスペル1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。1枚引く。",
+                "sections": [
+                  "{進化}{コスト1}：これは進化する。\n{ファンファーレ}{コスト2}：これは『ケイオスグリモワール』1枚を装備する。"
+                ],
+                "flavor": "見たわね、秘密の魔法特訓。\nみんなにばらしたら、ぶっ殺すわよ♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl09.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2525",
+                "date": "2026-01-26",
+                "question": "『キャル』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2430",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《ファンファーレ》能力をプレイして、1枚引くことができますか？また《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《ファンファーレ》能力をプレイすることができず、1枚引くことができません。また《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR32"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ad66cde1ab00928aba3c4eccdde93abe0b35e055c7313398e941e50a226581a6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL09",
+            "fetched_at": "2026-09-24T19:10:34.694408Z"
+          },
+          "document_ref": "documents-a6b86fe9abcafae0"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL10",
+      "documents": {
+        "documents-b4c72c8383bc2f13": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL10",
+            "faces": [
+              {
+                "name": "キャル",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。\n【超進化時】自分の墓場のスペルをカード名が異なるように2枚まで選ぶ。それをEXエリアに置く。このターン、それをプレイする際、コストを-2する。",
+                "sections": [],
+                "flavor": "あたしの魔法、けっこうすごいでしょ？\nふふ～ん♪もっと褒めて褒めて♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl10.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2529",
+                "date": "2026-01-26",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2528",
+                "date": "2026-01-26",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:163021d83d840353eac3d2d732a728ac198fa6a6f8003c78bf6ca8cbd4db6613",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL10",
+            "fetched_at": "2026-09-24T19:10:37.591044Z"
+          },
+          "document_ref": "documents-b4c72c8383bc2f13"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL11",
+      "documents": {
+        "documents-5d085ecf625cc7f8": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL11",
+            "faces": [
+              {
+                "name": "ユニ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "なかよし部"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{UB}{ファンファーレ}自分のデッキから元のコスト2以下のなかよし部・カードをカード名が異なるように2枚まで探し、EXエリアに置く。このターン、それをプレイする際、コストを-2する。",
+                "sections": [
+                  "自分の場の他のフォロワーの{UB}能力が発動したとき、このターン、次に自分がプリコネ・スペルをプレイする際、コストを-2する。"
+                ],
+                "flavor": "学びは最高の快楽だよ。それは脳を耕し、心を潤す。\n差しあたっては……そうだな、君のことをもっと知りたい。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl11.png",
+                "trait_raw": "プリコネ・なかよし部"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2431",
+                "date": "2026-01-26",
+                "question": "自分がプリコネ・スペルをプレイすることなく、このフォロワーの「自分の場の他のフォロワーの《UB》能力が発動したとき、このターン、次に自分がプリコネ・スペルをプレイする際、コストを-2する。」という能力を2回プレイした場合、そのターン中に次に自分がプレイするプリコネ・スペルのコストは-4されますか？",
+                "answer": "はい。-4されます。"
+              },
+              {
+                "id": "Q2394",
+                "date": "2026-01-26",
+                "question": "相手のターン中に自分が《UB》能力を発動した場合、このフォロワーの「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f6b2f6fec85e4e18ecd8a2605bfcd69a895904be4dc61cb9ad122e55227be127",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL11",
+            "fetched_at": "2026-09-24T19:10:40.432941Z"
+          },
+          "document_ref": "documents-5d085ecf625cc7f8"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL12",
+      "documents": {
+        "documents-676712330bf6f514": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL12",
+            "faces": [
+              {
+                "name": "ネネカ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "七冠"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "2",
+                "power": "0",
+                "hp": "1",
+                "text": "{UB}{ファンファーレ}自分の場に『ミラーイメージ・ネネカ』がいないなら、『ミラーイメージ・ネネカ』1体を場に出す。",
+                "sections": [
+                  "{ファンファーレ}{コスト2}：これは『ワンドオブミラージュ』1枚を装備する。\n{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに1ダメージ。"
+                ],
+                "flavor": "鏡よ鏡……世界で最も賢く強いのは誰ですか？\n……ええその通り。当然私です。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl12.png",
+                "trait_raw": "プリコネ・七冠"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2526",
+                "date": "2026-01-26",
+                "question": "『ネネカ』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR31"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR33"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:94f969ef542dc54dd4b2ffd1cb2cd9e163e83ac5b4afaf4731dbb48332fb4626",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL12",
+            "fetched_at": "2026-09-24T19:10:43.007948Z"
+          },
+          "document_ref": "documents-676712330bf6f514"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL13",
+      "documents": {
+        "documents-0324091ea5c3a49c": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL13",
+            "faces": [
+              {
+                "name": "シェフィ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{UB}{ファンファーレ}相手の場のフォロワー1体を選ぶ。それは次のそれのプレイヤーのスタートフェイズにスタンドしない。",
+                "sections": [
+                  "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【覚醒】状態なら、これは『氷竜剣』1枚を装備する。（自分のPP最大値が7以上なら、【覚醒】状態になる）"
+                ],
+                "flavor": "必ず、みんなを守ってみせる！\nだって、みんなの隣が『今の私』の居場所だから！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl13.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2527",
+                "date": "2026-01-26",
+                "question": "『シェフィ』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2435",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができずこのフォロワーの《UB》《ファンファーレ》能力をプレイできなかった場合、《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR34"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL14"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5aaa2cdbbafe8ee49da1472988983c2e3695eba74f674a4c186537d886dfb29c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL13",
+            "fetched_at": "2026-09-24T19:10:45.534731Z"
+          },
+          "document_ref": "documents-0324091ea5c3a49c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL14",
+      "documents": {
+        "documents-c6ed1c7838131d57": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL14",
+            "faces": [
+              {
+                "name": "シェフィ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "プリコネ",
+                  "美食殿"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー2体まで選ぶ。それに2ダメージを割りふる。\n【超進化時】相手の場のフォロワーすべてに3ダメージ。",
+                "sections": [],
+                "flavor": "私は【美食殿】のシェフィ……今なら胸を張ってそう言える。\nだからあなたのそばにいたいって気持ちも、もう隠さない。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl14.png",
+                "trait_raw": "プリコネ・美食殿"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2529",
+                "date": "2026-01-26",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2528",
+                "date": "2026-01-26",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3f4b40dfa1e8bc6f42e730428d4eaeb41ba487178c2cf8ce2bfaa438c17f6bfe",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL14",
+            "fetched_at": "2026-09-24T19:10:48.035155Z"
+          },
+          "document_ref": "documents-c6ed1c7838131d57"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL15",
+      "documents": {
+        "documents-0a5393e9c650cc09": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL15",
+            "faces": [
+              {
+                "name": "ホマレ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "ドラゴンズネスト"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "{UB}{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに5ダメージ。【覚醒】状態なら、自分のPPを2回復する。（自分のPP最大値が7以上なら、【覚醒】状態になる）",
+                "sections": [
+                  "自分の場の他のフォロワーの{UB}能力が発動したとき、自分のPP最大値を+1する。\n{ファンファーレ}自分のPP最大値を+1する。"
+                ],
+                "flavor": "ふふっ……あははっ♪戦うのって、本っ当に面白い……。\nそれじゃあいくよ、とっておき☆ドラゴンズドゥーム！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl15.png",
+                "trait_raw": "プリコネ・ドラゴンズネスト"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2439",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《起動》能力をプレイして、自分のPPを2回復することができますか？また《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《起動》能力をプレイすることができず、自分のPPを2回復することができません。また《UB》能力が発動したことを満たしません。"
+              },
+              {
+                "id": "Q2394",
+                "date": "2026-01-26",
+                "question": "相手のターン中に自分が《UB》能力を発動した場合、このフォロワーの「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:04c1ab681b179af874e7b1141925e2a872cdc918f01e2326da260829e7367aa2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL15",
+            "fetched_at": "2026-09-24T19:10:50.697061Z"
+          },
+          "document_ref": "documents-0a5393e9c650cc09"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL16",
+      "documents": {
+        "documents-171d26583aa6351a": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL16",
+            "faces": [
+              {
+                "name": "ムイミ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{UB}{ファンファーレ}1枚引く。自分の手札1枚を捨てる。【覚醒】状態なら、これは『絆の証』1枚を装備する。自分のPP最大値が10なら、これは{攻撃力}+3する。（自分のPP最大値が7以上なら、【覚醒】状態になる）",
+                "sections": [
+                  "『絆の証』{ドラゴン}プリコネ・イクイップメント{コスト2}これを装備しているフォロワーは【疾走】と「【攻撃時】相手の場のフォロワー2体まで選ぶ。それに3ダメージ」を持つ。"
+                ],
+                "flavor": "王様だろうが神様だろうが、誰かを苦しめる悪いヤツは、\nアタシと天楼覇断剣がキレイにバッサリぶった斬るぞ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl16.png",
+                "trait_raw": "プリコネ"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR35"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:70dd770c03372aa58763dfbc50dfcf3e3f058bf96edbcc90b9ab3d44a7f4a160",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL16",
+            "fetched_at": "2026-09-24T19:10:53.588628Z"
+          },
+          "document_ref": "documents-171d26583aa6351a"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL17",
+      "documents": {
+        "documents-3bd047f8b770f144": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL17",
+            "faces": [
+              {
+                "name": "イリヤ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "ディアボロス"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{UB}{起動}これを{アクト}墓場のカード5枚を消滅：相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のリーダーは{体力}+3する。",
+                "sections": [
+                  "{進化}{コスト1}：これは進化する。\n{ファンファーレ}{コスト2}：これは『闇斧ナハトファング』1枚を装備する。"
+                ],
+                "flavor": "わらわこそ夜を統べる者……。\nお主もわらわを崇め、ひれ伏すがよい。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl17.png",
+                "trait_raw": "プリコネ・ディアボロス"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2450",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《起動》能力をプレイして、自分のリーダーは《体力》+3することができますか？また《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《起動》能力をプレイすることができず、自分のリーダーは《体力》+3することができません。また《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR37"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dad3021297512406023a49ace57179fb769f2f413f82b097344d81eba5ef72fb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL17",
+            "fetched_at": "2026-09-24T19:10:56.323266Z"
+          },
+          "document_ref": "documents-3bd047f8b770f144"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL18",
+      "documents": {
+        "documents-e4f3621876a6bf35": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL18",
+            "faces": [
+              {
+                "name": "イリヤ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "プリコネ",
+                  "ディアボロス"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "{UB}{起動}これを{アクト}墓場のカード5枚を消滅：相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のリーダーは{体力}+3する。",
+                "sections": [
+                  "【進化時】自分のデッキからプリコネ・カード1枚を探し、墓場に置く。\n【超進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。"
+                ],
+                "flavor": "世界を征服した暁には、その半分をお主に分け与えよう。\nど、どういう意味かわかるな？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl18.png",
+                "trait_raw": "プリコネ・ディアボロス"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2529",
+                "date": "2026-01-26",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2528",
+                "date": "2026-01-26",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2451",
+                "date": "2026-01-26",
+                "question": "このフォロワーの【進化時】能力をプレイした場合、プリコネ・カード1枚を墓場に置かないという選択をすることは可能ですか？",
+                "answer": "はい。可能です。デッキからカードを探す際に、プリコネ・カードを見つけない選択をすることで墓場に置かないことができます。"
+              },
+              {
+                "id": "Q2450",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《起動》能力をプレイして、自分のリーダーは《体力》+3することができますか？また《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《UB》《起動》能力をプレイすることができず、自分のリーダーは《体力》+3することができません。また《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:392f4086efe49c5efc43b8bce3fb8a1927c75ceb02bb3d875b89afcf61922c75",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL18",
+            "fetched_at": "2026-09-24T19:10:58.959989Z"
+          },
+          "document_ref": "documents-e4f3621876a6bf35"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL19",
+      "documents": {
+        "documents-99486ea3348b7f48": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL19",
+            "faces": [
+              {
+                "name": "ランファ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "〈レイジ・レギオン〉"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "{UB}{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに5ダメージ。これが手札以外から場に出ていたなら、自分のPPを2回復する。",
+                "sections": [
+                  "自分の場の他のフォロワーの{UB}能力が発動したとき、下記から1つチョイスする。このターン、この能力でチョイスした選択肢はチョイスできない。【1】相手のリーダーすべてに2ダメージ。【2】自分のリーダーは{体力}+2する。"
+                ],
+                "flavor": "人を傷つけるためではなく……守るために、歌います。\nもう二度と、大切な人を失わないように……。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl19.png",
+                "trait_raw": "プリコネ・〈レイジ・レギオン〉"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2532",
+                "date": "2026-01-26",
+                "question": "このフォロワーが墓場から場に出た場合、《UB》《ファンファーレ》能力の「これが手札以外から場に出ていたなら、」の条件を満たしますか？",
+                "answer": "はい。EXエリアやデッキや墓場などから出た場合、条件を満たします。"
+              },
+              {
+                "id": "Q2453",
+                "date": "2026-01-26",
+                "question": "自分の場に『ランファ』が2体いる状況で、一方の『ランファ』の「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力で【1】をチョイスした場合、そのターン中、もう一方の『ランファ』の「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力で【1】をチョイスすることができますか？",
+                "answer": "はい。【1】をチョイスすることができます。\n一方の『ランファ』の「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力で【1】をチョイスした場合、そのターン中、その『ランファ』の「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力で再度【1】をチョイスすることはできません。"
+              },
+              {
+                "id": "Q2452",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイして、自分のPPを2回復することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができず、自分のPPを2回復することができません。"
+              },
+              {
+                "id": "Q2435",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができずこのフォロワーの《UB》《ファンファーレ》能力をプレイできなかった場合、《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。《UB》能力が発動したことを満たしません。"
+              },
+              {
+                "id": "Q2394",
+                "date": "2026-01-26",
+                "question": "相手のターン中に自分が《UB》能力を発動した場合、このフォロワーの「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f0a4350a74a300a64da1052d0e162dd09bccda534d4a0c498cf50582a7cdd664",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL19",
+            "fetched_at": "2026-09-24T19:11:02.123601Z"
+          },
+          "document_ref": "documents-99486ea3348b7f48"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL20",
+      "documents": {
+        "documents-166e87f21723dc87": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL20",
+            "faces": [
+              {
+                "name": "ヴァイオレット",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "〈ジオ・ニヴルヘル〉"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{UB}{ファンファーレ}自分の墓場の元のコスト3以下のプリコネ・フォロワー1枚を選ぶ。それを場に出す。",
+                "sections": [
+                  "{起動}手札2枚を捨てる：自分の墓場のこれをEXエリアに置く。"
+                ],
+                "flavor": "屍人でも、胸はときめくのですね……。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl20.png",
+                "trait_raw": "プリコネ・〈ジオ・ニヴルヘル〉"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2455",
+                "date": "2026-01-26",
+                "question": "自分の墓場の元のコスト3以下のプリコネ・フォロワーを選ぶことができずこのフォロワーの《UB》《ファンファーレ》能力をプレイできなかった場合、《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。《UB》能力が発動したことを満たしません。"
+              },
+              {
+                "id": "Q2454",
+                "date": "2026-01-26",
+                "question": "「《起動》手札2枚を捨てる：自分の墓場のこれをEXエリアに置く。」という《起動》能力は、『ヴァイオレット』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『ヴァイオレット』が墓場にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3795c31829560903bf438e7b42680a4ee306f875936fcaf91e3e179f6811f1fd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL20",
+            "fetched_at": "2026-09-24T19:11:04.668617Z"
+          },
+          "document_ref": "documents-166e87f21723dc87"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL21",
+      "documents": {
+        "documents-a8bad14dcc765aa3": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL21",
+            "faces": [
+              {
+                "name": "サレン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "サレンディア救護院"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "5",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}下記から1つチョイスする。自分のリーダーの体力が10以下なら、代わりに2つまで。\n【1】これは『グロリアスフェザー』1枚を装備する。【2】自分のデッキからサレンディア救護院・フォロワーを元のコストの合計が3以下になるように2枚まで探し、場に出す。",
+                "sections": [],
+                "flavor": "サレンディア救護院は、あたしの……いいえ。\n子供たちみんなの大事な場所なんだから。絶対に護るわ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl21.png",
+                "trait_raw": "プリコネ・サレンディア救護院"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-PR38"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:769ed65dfcc43fd2162da3b9e82e896c3ef51523d120214da0970d4c46137922",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL21",
+            "fetched_at": "2026-09-24T19:11:07.717768Z"
+          },
+          "document_ref": "documents-a8bad14dcc765aa3"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL22",
+      "documents": {
+        "documents-f99feff8101555c2": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL22",
+            "faces": [
+              {
+                "name": "サレン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "プリコネ",
+                  "サレンディア救護院"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "{UB}【進化時】相手の場のフォロワー1体を選ぶ。それに4ダメージ。それ以外の相手の場のフォロワーすべてに1ダメージ。",
+                "sections": [
+                  "【超進化時】相手のリーダーすべてと相手の場のフォロワーすべてに2ダメージ。"
+                ],
+                "flavor": "見てのとおりあたしはいつだって大忙し！\nだけど何か困ったことがあったらすぐに言うのよ、いいわね？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl22.png",
+                "trait_raw": "プリコネ・サレンディア救護院"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2529",
+                "date": "2026-01-26",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2528",
+                "date": "2026-01-26",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2416",
+                "date": "2026-01-26",
+                "question": "相手の場のフォロワーを選ぶことができずこのフォロワーの《UB》【進化時】能力をプレイできなかった場合、《UB》能力が発動したことを満たしますか？",
+                "answer": "いいえ。《UB》能力が発動したことを満たしません。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d2b68bbd0de09c233d94fa63ada4ca5635bb750ea733fac4bc62d62de638c03c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL22",
+            "fetched_at": "2026-09-24T19:11:10.373480Z"
+          },
+          "document_ref": "documents-f99feff8101555c2"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL23",
+      "documents": {
+        "documents-de81df8889ceee6a": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL23",
+            "faces": [
+              {
+                "name": "ノゾミ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "カルミナ"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "3",
+                "power": "1",
+                "hp": "3",
+                "text": "{UB}{ファンファーレ}自分のデッキからアミュレット1枚を探し、手札に加える。",
+                "sections": [
+                  "{起動}場のアミュレット1つを{アクト}：相手の場のフォロワー1体を選ぶ。それに1ダメージ。\n{起動}これを{アクト}場のアミュレット3つを墓場に置く：相手の場のフォロワー1体を選ぶ。それとそれのリーダーに3ダメージ。"
+                ],
+                "flavor": "この歌、片思いの女の子の心がよく出てるねって？\n……ふふふ、キミって鈍感♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl23.png",
+                "trait_raw": "プリコネ・カルミナ"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2533",
+                "date": "2026-01-26",
+                "question": "このフォロワーの《UB》《ファンファーレ》能力をプレイして、自分のデッキのアミュレットを見つけない選択をした場合、《UB》能力が発動したことを満たしますか？",
+                "answer": "はい。《UB》能力が発動したことを満たします。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:491c55b8ed8e36a99c6d3ac37394b3aa3034593e6ceda555be92e9772a7f5e6c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL23",
+            "fetched_at": "2026-09-24T19:11:13.001517Z"
+          },
+          "document_ref": "documents-de81df8889ceee6a"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL24",
+      "documents": {
+        "documents-51f8a05057ccafbd": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL24",
+            "faces": [
+              {
+                "name": "アキノ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "メルクリウス財団"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "{UB}{起動}これを{アクト}：相手の場のフォロワー2体まで選ぶ。それに「自分の手札の枚数」と同じダメージ。",
+                "sections": [
+                  "【守護】\n{ファンファーレ}自分のリーダーは{体力}+3する。3枚引く。"
+                ],
+                "flavor": "『一人前の商人とは一人前の武人でもある！』\nウィスタリア家の教えを今こそ守りますわ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl24.png",
+                "trait_raw": "プリコネ・メルクリウス財団"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:66aa35681928bf51c9130e34bc6a930ce25f9714de7c2d01902ec607d8b2b523",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL24",
+            "fetched_at": "2026-09-24T19:11:15.970621Z"
+          },
+          "document_ref": "documents-51f8a05057ccafbd"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL25",
+      "documents": {
+        "documents-718dc26dfe506c0d": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL25",
+            "faces": [
+              {
+                "name": "カイザーインサイト",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "七冠"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}手札のプリコネ・カード2枚を捨てる：2枚引く。相手プレイヤーすべては、自身の手札2枚を捨てる。",
+                "sections": [],
+                "flavor": "私を否定する世界はいらないの。全て作り変えるわ、全てね。\nだから何もかも終わらせるの。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl25.png",
+                "trait_raw": "プリコネ・七冠"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL26"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b104e22a95944851529afa000aa326e3b798e17f053a70d0a1299f53371fe200",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL25",
+            "fetched_at": "2026-09-24T19:11:18.686162Z"
+          },
+          "document_ref": "documents-718dc26dfe506c0d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL26",
+      "documents": {
+        "documents-bbab4928eb1a6fb0": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL26",
+            "faces": [
+              {
+                "name": "カイザーインサイト",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "プリコネ",
+                  "七冠"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "-",
+                "power": "7",
+                "hp": "7",
+                "text": "{UB}【進化時】相手の場のフォロワーすべてに7ダメージ。",
+                "sections": [],
+                "flavor": "あなた、私と一緒に戦うなんておかしな未来を選んだのね。\n後悔しても、もう遅いわよ？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl26.png",
+                "trait_raw": "プリコネ・七冠"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP04-SL25"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:09fc61b828b78f768e405dfe04f8b5b88ef8a0a91542d825abe3c51fc02916f1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL26",
+            "fetched_at": "2026-09-24T19:11:21.355956Z"
+          },
+          "document_ref": "documents-bbab4928eb1a6fb0"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL27",
+      "documents": {
+        "documents-f32040293b77bc9e": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL27",
+            "faces": [
+              {
+                "name": "ミソラ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "〈レイジ・レギオン〉"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "{UB}{ファンファーレ}相手の場のフォロワーを好きな枚数選ぶ。それに8ダメージを割りふる。",
+                "sections": [
+                  "{ラストワード}自分のデッキから元のコスト4のプリコネ・フォロワー1枚を探し、EXエリアに置く。"
+                ],
+                "flavor": "これまでわたし、ひどいコトたくさんしちゃいました……。\nそのぶん、わたしにどんなコトしてもイイんですよ？騎士さん♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl27.png",
+                "trait_raw": "プリコネ・〈レイジ・レギオン〉"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2535",
+                "date": "2026-01-26",
+                "question": "相手の場にフォロワーがいない場合、このフォロワーの《UB》《ファンファーレ》能力をプレイすることができますか？また《UB》能力が発動したことを満たしますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、このフォロワーの《UB》《ファンファーレ》能力をプレイすることができます。また《UB》能力が発動したことを満たします。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:36ac2bc5738a0053e8d6621b8747bffd09e4e47577693cf085439a0f550e31e9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL27",
+            "fetched_at": "2026-09-24T19:11:24.177850Z"
+          },
+          "document_ref": "documents-f32040293b77bc9e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP04-SL28",
+      "documents": {
+        "documents-98fc45fa0bf62759": {
+          "region": "jp",
+          "record": {
+            "number": "CP04-SL28",
+            "faces": [
+              {
+                "name": "ライラエル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリコネ",
+                  "〈ジオ・テオゴニア〉"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「プリンセスコネクト！Re:Dive」",
+                "title": "プリンセスコネクト！Re:Dive",
+                "cost": "7",
+                "power": "3",
+                "hp": "4",
+                "text": "{UB}{ファンファーレ}自分の墓場の元のコスト2以下のフォロワーをカード名が異なるように3枚まで選ぶ。それを場に出す。",
+                "sections": [
+                  "自分の場の他のフォロワーの{UB}能力が発動したとき、それは{攻撃力}+1/{体力}+1する。"
+                ],
+                "flavor": "天使のように見えた……ですか。それは羽のせいでしょうか。\nあるいは……別の理由が？ふふ、教えてくださいませんか♪",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP04/cp04-sl28.png",
+                "trait_raw": "プリコネ・〈ジオ・テオゴニア〉"
+              }
+            ],
+            "release_date": "2026-01-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2536",
+                "date": "2026-01-26",
+                "question": "自分の墓場が0枚の場合、このフォロワーの《UB》《ファンファーレ》能力をプレイすることができますか？また《UB》能力が発動したことを満たしますか？",
+                "answer": "はい。自分の墓場が0枚の場合でも、自分の墓場のフォロワー0枚を選ぶことによって、このフォロワーの《UB》《ファンファーレ》能力をプレイすることができます。また《UB》能力が発動したことを満たします。"
+              },
+              {
+                "id": "Q2477",
+                "date": "2026-01-26",
+                "question": "『ライラエル』の《UB》《ファンファーレ》能力によって《ファンファーレ》能力を持つフォロワー3体を場に出した場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2394",
+                "date": "2026-01-26",
+                "question": "相手のターン中に自分が《UB》能力を発動した場合、このフォロワーの「自分の場の他のフォロワーの《UB》能力が発動したとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-d3cc46f3296eae7f",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:270c87ac0699cd38c3177808d51867ba2c84d9ddbc799b1e1dacfc5f201aa68b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL28",
+            "fetched_at": "2026-09-24T19:11:26.995414Z"
+          },
+          "document_ref": "documents-98fc45fa0bf62759"
+        }
+      ]
+    }
+  ]
+}

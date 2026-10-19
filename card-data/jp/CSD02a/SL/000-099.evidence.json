@@ -1,0 +1,184 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD02a",
+  "range": "SL/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-c22285be27e7aaca": [
+        {
+          "ordinal": 0,
+          "name": "コラボスターターデッキ「Cute」",
+          "date_raw": "2023-08-25",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CSD02A",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CSD02A",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/csd02/",
+              "expansion_code": "CSD02A"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-b41633725043e978": [
+        {
+          "stable_source_key": "Q890",
+          "official_number": "Q890",
+          "locator": "qa-block:0",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        }
+      ],
+      "qa-c630d6347f1416df": [
+        {
+          "stable_source_key": "Q891",
+          "official_number": "Q891",
+          "locator": "qa-block:0",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        },
+        {
+          "stable_source_key": "Q890",
+          "official_number": "Q890",
+          "locator": "qa-block:1",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        }
+      ]
+    },
+    "related": {
+      "related-2544c78c91a87232": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CSD02a-T01"
+        }
+      ],
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:2796aaffbe0e084bc1ea28582bd394f8a566e514ede6b1cea8c370afd1c1b026": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:fca2979bd6b23e798ed3daa939cb22ba01163635ae1395b6c8d3a0b4b6a4842a",
+        "raw_bytes": 38904,
+        "first_receipt_id": "sha256:2650e07eed473d4710103e68f9f61c6572a634e0fa121c73160b160a1d584c29",
+        "descriptor_sha256": "sha256:512868eb3985fc23b63e92407eaa500de1e8cd1f8c92b916b803eb2c9f66f6b0",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:b952ffed3703d5893795a9b761e9d635bcb3c3ba1ef6646c00644733e05e3356"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-c22285be27e7aaca",
+        "qa": "qa-b41633725043e978",
+        "related": "related-2544c78c91a87232",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:7ddaf8839cb5bae49f544f3554719852816ecea5357efb7a0c9116ef57e9e3c3"
+    },
+    "src:v1:2ed2b96c99c4feff1289b69a73cb2e9581602bcf90b36a848590b4a71de2894f": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:ad3c9cb6d7c18149771bbaeacbc72d77d8ef61d87c23bba234ffad4b6ba9ec3d",
+        "raw_bytes": 38484,
+        "first_receipt_id": "sha256:e78d287541eb648b5dd6839b6073d03130e9892c63a427f48ce7b5f4ab8052a9",
+        "descriptor_sha256": "sha256:0f3642fc00ab0a232cf992a2345179b17bc21b285a0a0256826c73412710552d",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:7fa80d474a833ed79dc6682a81357db610111df8362a6c0899bba8a3d9d6df8f"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-c22285be27e7aaca",
+        "qa": "qa-c630d6347f1416df",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:8481e9faebfbd33a7d5ba2a35b1d4eded75a114698dd11bb09215f41119dc803"
+    },
+    "src:v1:a90a790e60ba2e1b567085a3e7e8b0a836808ce1eeb1625dbd1440f51083b3e6": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:b4fd6eba44574c0679df031a03a0c168b1f8acca7df62623a0dcde45fb193695",
+        "raw_bytes": 38804,
+        "first_receipt_id": "sha256:18827cf0610a106230b8c66d5fff99af27637f2f85f19ae9d061be577925ebc2",
+        "descriptor_sha256": "sha256:89a064a30e220da9b1676cae2d8c6e2582af48a090f32104f7fde64f9d2688b8",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:4ae25ad32366ac3e430c6ffc189de08eda8b3160355fdd03dcd35d07f54af107"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-c22285be27e7aaca",
+        "qa": "qa-b41633725043e978",
+        "related": "related-2544c78c91a87232",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:dc83d6e16e20cc48e59557637405589162049d27bec711e6a98c15217a0f820b"
+    }
+  }
+}

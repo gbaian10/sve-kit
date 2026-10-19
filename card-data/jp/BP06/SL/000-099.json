@@ -1,0 +1,1445 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP06",
+  "range": "SL/000-099",
+  "products": {
+    "products-32707fb1f5d81ffd": [
+      {
+        "name": "ブースターパック第6弾「絶対なる覇者」",
+        "date": "2023-06-16",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP06",
+          "https://shadowverse-evolve.com/products/bp06/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP06-SL01",
+      "documents": {
+        "documents-a10325af16834aaf": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL01",
+            "faces": [
+              {
+                "name": "フォレストエース・リマーガ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "狩人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。\n【疾走】【必殺】\n{ファンファーレ}自分のデッキの上4枚を見る。その中から、元のコスト4以下の狩人・フォロワー1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "BIYO",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl01.png",
+                "trait_raw": "挑戦者・狩人"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3130cde4be06e304c7cb09cf5a5b9d751dd4fb3bf67921a7d415a2f5b93d932d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL01",
+            "fetched_at": "2026-09-24T22:23:15.437095Z"
+          },
+          "document_ref": "documents-a10325af16834aaf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL02",
+      "documents": {
+        "documents-91faacc68bc6ca65": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL02",
+            "faces": [
+              {
+                "name": "フォレストエース・リマーガ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "挑戦者",
+                  "狩人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【疾走】【必殺】\n【進化時】自分のデッキの上4枚を見る。その中から、元のコスト4以下の狩人・フォロワー1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "BIYO",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl02.png",
+                "trait_raw": "挑戦者・狩人"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a40d24e80d441e38248bc01a3120a2483cf17e124bf787723a8bce0c95faafdb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL02",
+            "fetched_at": "2026-09-24T22:23:18.364797Z"
+          },
+          "document_ref": "documents-91faacc68bc6ca65"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL03",
+      "documents": {
+        "documents-74107d32bd22a41f": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL03",
+            "faces": [
+              {
+                "name": "フェアリーブレイダー・アマツ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族",
+                  "精霊"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}『フェアリー』1枚をEXエリアに置く。自分のEXエリアの妖精・フォロワーすべては{攻撃力}+1/{体力}+1する。\n{起動}これを{アクト}：元のコスト1以下の自分の場の妖精・フォロワー2体まで選ぶ。それは【疾走】を持つ。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "mstk",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl03.png",
+                "trait_raw": "エルフ族・精霊"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q784",
+                "date": "2023-06-09",
+                "question": "『フェアリーブレイダー・アマツ』の能力によって、《攻撃力》+1/《体力》+1された自分のEXエリアの妖精・フォロワーが場に出た後、『妖精の奔流』の能力によってEXエリアに置かれた場合、そのEXエリアに置かれたフォロワーは《攻撃力》+1/《体力》+1された状態のまま継続されますか？",
+                "answer": "いいえ。EXエリアに置かれたフォロワーは《攻撃力》+1/《体力》+1された状態のまま継続されません。\n場のカードが何らかの理由によって、別の領域に移動する場合、付与された効果はすべて継続せず、消去します。（場から別の領域へ移動したカードは、その新しい領域の新しいカードであるとみなされるため）"
+              },
+              {
+                "id": "Q783",
+                "date": "2023-06-09",
+                "question": "このフォロワーの《ファンファーレ》能力によって、《攻撃力》+1/《体力》+1された自分のEXエリアの妖精・フォロワーが、直接場に出る場合やプレイして場に出る場合、その妖精・フォロワーは《攻撃力》+1/《体力》+1された状態で場に出ますか？",
+                "answer": "はい。《攻撃力》+1/《体力》+1された状態で場に出ます。EXエリアのカードに何らかの効果が適用されている状態で、そのカードが直接場に出る場合やプレイされて場に出る場合、場に出たカードにも同じ効果が適用されます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9d244e684b5af46bb6b9c11c2008bf5aab6180ad6428149b5ff1dfc5c240f150",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL03",
+            "fetched_at": "2026-09-24T22:23:21.269238Z"
+          },
+          "document_ref": "documents-74107d32bd22a41f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL04",
+      "documents": {
+        "documents-08dc28c990c05f5f": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL04",
+            "faces": [
+              {
+                "name": "無敗の剣聖・カゲミツ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "兵士"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【突進】\n{ファンファーレ}これは{攻撃力}+X/{体力}+Xする。Xは「自分のエボルヴデッキの表向きのエボルヴフォロワーの枚数」である。Xが3以上なら、これは【指定攻撃】を持つ。Xが7以上なら、これは「【攻撃時】これをスタンドする。この能力は1ターンに1回働く」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl04.png",
+                "trait_raw": "挑戦者・兵士"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q798",
+                "date": "2023-06-09",
+                "question": "表向きの『にんじん』は、表向きのエボルヴフォロワーの枚数に含まれますか？",
+                "answer": "いいえ。含まれません。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d2162b8ae2916169e4b71bb961b3705b50de64670ec8fb6a7fba9bb443d50e03",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL04",
+            "fetched_at": "2026-09-24T22:23:23.906144Z"
+          },
+          "document_ref": "documents-08dc28c990c05f5f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL05",
+      "documents": {
+        "documents-1de5ae24475d2945": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL05",
+            "faces": [
+              {
+                "name": "音速の機構・ララミア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト3}：これは進化する。\nこれの{進化}コストは「自分の場の他のフォロワーの数」と同じだけ-1する。\n【突進】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl05.png",
+                "trait_raw": "兵士・超克"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q799",
+                "date": "2023-06-09",
+                "question": "『音速の機構・ララミア』の他に、自分の場にフォロワーが4体いる場合、『音速の機構・ララミア』の《進化》コストは0になりますか？",
+                "answer": "はい。《進化》コストが-4されるので-1となり、コスト0で進化することができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:982d591a826ee4437d258fbcdea80db284cacc697babb191d552129257d5c3a3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL05",
+            "fetched_at": "2026-09-24T22:23:26.738790Z"
+          },
+          "document_ref": "documents-1de5ae24475d2945"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL06",
+      "documents": {
+        "documents-9ccc0941690f5090": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL06",
+            "faces": [
+              {
+                "name": "音速の機構・ララミア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "3",
+                "text": "【疾走】\n【進化時】{コスト3}：これは{攻撃力}+X/{体力}+Xする。Xは「自分の場の他のフォロワーの数」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl06.png",
+                "trait_raw": "兵士・超克"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:56e9c01e14bdbb89968116875a697e0b9c7595b44ec28241f1ea70c433f5cfe9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL06",
+            "fetched_at": "2026-09-24T22:23:29.295734Z"
+          },
+          "document_ref": "documents-9ccc0941690f5090"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL07",
+      "documents": {
+        "documents-8fa89f32afaaa5c2": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL07",
+            "faces": [
+              {
+                "name": "陰陽の開祖・クオン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "陰陽師"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "15",
+                "power": "5",
+                "hp": "5",
+                "text": "これをプレイする際、コストを-Xする。Xは「自分の墓場の陰陽師・カードやスペルの枚数の合計」である。\n{ファンファーレ}自分の場に『天后』がいないなら、『天后』1体を出す。\n{起動}これを{アクト}：自分の場の式神・フォロワー2体まで選ぶ。それは【疾走】を持つ。",
+                "sections": [
+                  "『天后』{ウィッチ}式神・フォロワー{コスト4}{攻撃力}4/{体力}5【オーラ】"
+                ],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl07.png",
+                "trait_raw": "挑戦者・陰陽師"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q808",
+                "date": "2023-06-09",
+                "question": "タイプに陰陽師を持ち、スペルでもある『式神の使役』は、「自分の墓場の陰陽師・カードやスペルの枚数の合計」によって参照する際に、2枚分数えますか？",
+                "answer": "いいえ。『式神の使役』は1枚分として数えます。\n「自分の墓場の陰陽師・カードやスペルの枚数の合計」とは、自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの合計枚数です。"
+              },
+              {
+                "id": "Q807",
+                "date": "2023-06-09",
+                "question": "「自分の墓場の陰陽師・カードやスペルの枚数の合計」とはどのようなカードの枚数を参照しますか？",
+                "answer": "自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの枚数を参照します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c1ea6ccf452d081f14fad3e03c7d312dd205e54a3338bbb04c933cd6a13e5c79",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL07",
+            "fetched_at": "2026-09-24T22:23:31.927213Z"
+          },
+          "document_ref": "documents-8fa89f32afaaa5c2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL08",
+      "documents": {
+        "documents-b5b0466bc8581f35": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL08",
+            "faces": [
+              {
+                "name": "魔術の始祖・マナリア",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\nこれがいる限り、自分が学院・フォロワーをプレイする際、コストを-1する。\n{ファンファーレ}手札の学院・フォロワー1枚を公開：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl08.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1253",
+                "date": "2024-03-01",
+                "question": "自分の場に『魔術の始祖・マナリア』が2体いる状況で、自分が学院・フォロワーをプレイする際、そのコストを-2しますか？",
+                "answer": "はい。それぞれの『魔術の始祖・マナリア』の能力が適用されるため、そのコストを-2します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:28a94c423e1285d698f42e4c211d20b0fff7c6c1b515d7345f2270206e910847",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL08",
+            "fetched_at": "2026-09-24T22:23:34.568705Z"
+          },
+          "document_ref": "documents-b5b0466bc8581f35"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL09",
+      "documents": {
+        "documents-f94bd9ffcf4cc312": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL09",
+            "faces": [
+              {
+                "name": "魔術の始祖・マナリア",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "これがいる限り、自分が学院・フォロワーをプレイする際、コストを-1する。\n【進化時】相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl09.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1253",
+                "date": "2024-03-01",
+                "question": "自分の場に『魔術の始祖・マナリア』が2体いる状況で、自分が学院・フォロワーをプレイする際、そのコストを-2しますか？",
+                "answer": "はい。それぞれの『魔術の始祖・マナリア』の能力が適用されるため、そのコストを-2します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9c3f8281a774c975aee73bf6194b214c35b495b890e9314a08d3f968254d1142",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL09",
+            "fetched_at": "2026-09-24T22:23:37.548079Z"
+          },
+          "document_ref": "documents-f94bd9ffcf4cc312"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL10",
+      "documents": {
+        "documents-80df8c4b0f6d6e3c": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL10",
+            "faces": [
+              {
+                "name": "覇道の龍人・ガリュウ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "ドラゴニュート"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\nこれがいる限り、自分の場の他の{ドラゴン}フォロワーすべては【守護】を持つ。\n{ファンファーレ}1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl10.png",
+                "trait_raw": "挑戦者・ドラゴニュート"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q881",
+                "date": "2023-07-13",
+                "question": "自分の場に『覇道の龍人・ガリュウ』がいる状況で、【守護】を持たない《ドラゴン》フォロワーを場に出した場合、そのフォロワーは【守護】の能力によって、スタンド状態で場に置く際に、代わりにスタンド状態で場に置き、アクトすることができますか？",
+                "answer": "はい。アクトすることができます。"
+              },
+              {
+                "id": "Q819",
+                "date": "2023-06-09",
+                "question": "何らかの理由によって、相手の場にアクト状態の【守護】と【威圧】を持つフォロワーがいる場合、自分が攻撃目標を選択する際に、そのアクト状態の【守護】と【威圧】を持つフォロワーを攻撃目標として選択する必要がありますか？",
+                "answer": "いいえ。アクト状態の【守護】と【威圧】を持つフォロワーを攻撃目標として選択する必要はなく、また攻撃目標として選択することができません。"
+              },
+              {
+                "id": "Q818",
+                "date": "2023-06-09",
+                "question": "相手の場に『覇道の龍人・ガリュウ』と、『覇道の龍人・ガリュウ』の能力によって【守護】を持ったアクト状態の『深緑龍の軍師』がおり、自分の場の『〔徹底管理主義〕樫本理子』が相手の場のアクト状態の『深緑龍の軍師』を攻撃目標に選択し攻撃を宣言しました。次に、『〔徹底管理主義〕樫本理子』の【攻撃時】能力によって、相手の場の『覇道の龍人・ガリュウ』を破壊しました。\nこの場合、自分の『〔徹底管理主義〕樫本理子』の攻撃目標は相手のリーダーに変更することはできますか？",
+                "answer": "いいえ。既に攻撃している『〔徹底管理主義〕樫本理子』の攻撃目標は『深緑龍の軍師』から変更されることはなく、相手のリーダーに攻撃目標を変更することはできません。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f19d7d497a9da532841056d2f63950d77b2751f7cf4a063cfa5f99909ab3dfc9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL10",
+            "fetched_at": "2026-09-24T22:23:40.159300Z"
+          },
+          "document_ref": "documents-80df8c4b0f6d6e3c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL11",
+      "documents": {
+        "documents-0bf3ba6206c0a9d2": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL11",
+            "faces": [
+              {
+                "name": "覇道の龍人・ガリュウ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "挑戦者",
+                  "ドラゴニュート"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "これがいる限り、自分の場の他の{ドラゴン}フォロワーすべては【守護】を持つ。\n【進化時】自分の手札の元のコスト5以下の{ドラゴン}フォロワー1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl11.png",
+                "trait_raw": "挑戦者・ドラゴニュート"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q881",
+                "date": "2023-07-13",
+                "question": "自分の場に『覇道の龍人・ガリュウ』がいる状況で、【守護】を持たない《ドラゴン》フォロワーを場に出した場合、そのフォロワーは【守護】の能力によって、スタンド状態で場に置く際に、代わりにスタンド状態で場に置き、アクトすることができますか？",
+                "answer": "はい。アクトすることができます。"
+              },
+              {
+                "id": "Q819",
+                "date": "2023-06-09",
+                "question": "何らかの理由によって、相手の場にアクト状態の【守護】と【威圧】を持つフォロワーがいる場合、自分が攻撃目標を選択する際に、そのアクト状態の【守護】と【威圧】を持つフォロワーを攻撃目標として選択する必要がありますか？",
+                "answer": "いいえ。アクト状態の【守護】と【威圧】を持つフォロワーを攻撃目標として選択する必要はなく、また攻撃目標として選択することができません。"
+              },
+              {
+                "id": "Q818",
+                "date": "2023-06-09",
+                "question": "相手の場に『覇道の龍人・ガリュウ』と、『覇道の龍人・ガリュウ』の能力によって【守護】を持ったアクト状態の『深緑龍の軍師』がおり、自分の場の『〔徹底管理主義〕樫本理子』が相手の場のアクト状態の『深緑龍の軍師』を攻撃目標に選択し攻撃を宣言しました。次に、『〔徹底管理主義〕樫本理子』の【攻撃時】能力によって、相手の場の『覇道の龍人・ガリュウ』を破壊しました。\nこの場合、自分の『〔徹底管理主義〕樫本理子』の攻撃目標は相手のリーダーに変更することはできますか？",
+                "answer": "いいえ。既に攻撃している『〔徹底管理主義〕樫本理子』の攻撃目標は『深緑龍の軍師』から変更されることはなく、相手のリーダーに攻撃目標を変更することはできません。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:03a694158f782a4fcbaa302b14f5a17165042c2989c5592aec8b1442fd1b5344",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL11",
+            "fetched_at": "2026-09-24T22:23:43.163459Z"
+          },
+          "document_ref": "documents-0bf3ba6206c0a9d2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL12",
+      "documents": {
+        "documents-589845469226deef": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL12",
+            "faces": [
+              {
+                "name": "銀氷のドラゴニュート・フィルレイン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "3",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それをアクトする。それは次の相手のスタートフェイズにスタンドしない。\n{ファンファーレ}【覚醒】状態なら、自分のデッキから『銀氷の吐息』1枚を探し、EXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl12.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q821",
+                "date": "2023-06-09",
+                "question": "《ファンファーレ》能力によって、自分のデッキに『銀氷の吐息』がないことが分かっている場合でも、【覚醒】状態なら、デッキの『銀氷の吐息』を探し、見つけない選択をしてデッキをシャッフルする必要がありますか？",
+                "answer": "はい。その場合でもデッキをシャッフルする必要があります。"
+              },
+              {
+                "id": "Q820",
+                "date": "2023-06-09",
+                "question": "《ファンファーレ》能力によって、アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしませんか？",
+                "answer": "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、それは次の相手のスタートフェイズにスタンドしません。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「それは次の相手のスタートフェイズにスタンドしない。」が適用されます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-061"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8bf77d03ef42844e73a12ca59dc2c32b23ded3d128b5ea69981cfbba6e304141",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL12",
+            "fetched_at": "2026-09-24T22:23:46.108258Z"
+          },
+          "document_ref": "documents-589845469226deef"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL13",
+      "documents": {
+        "documents-02a3b52924270920": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL13",
+            "faces": [
+              {
+                "name": "大妖狐・ギンセツ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "妖怪"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "6",
+                "power": "1",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『一ツ尾狐』5枚をEXエリアに置く。",
+                "sections": [
+                  "『一ツ尾狐』{ナイトメア}妖怪・フォロワー{コスト2}{攻撃力}1/{体力}3【突進】【守護】"
+                ],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl13.png",
+                "trait_raw": "挑戦者・妖怪"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q829",
+                "date": "2023-06-09",
+                "question": "自分のEXエリアに既にカードが3枚置かれている状態で『大妖狐・ギンセツ』の《ファンファーレ》能力を解決する場合、自分のEXエリアに『一ツ尾狐』は何枚置きますか？",
+                "answer": "既に自分のEXエリアにカードが3枚置かれている場合、EXエリアの上限枚数である5枚になるように、自分のEXエリアに『一ツ尾狐』を2枚置きます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a99b997318d83929c7a5beff06e165ecb878bce25e08b34c9b3a98ca307eb899",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL13",
+            "fetched_at": "2026-09-24T22:23:48.837576Z"
+          },
+          "document_ref": "documents-02a3b52924270920"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL14",
+      "documents": {
+        "documents-e09b9c6e477ba7d1": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL14",
+            "faces": [
+              {
+                "name": "大妖狐・ギンセツ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "挑戦者",
+                  "妖怪"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "1",
+                "hp": "9",
+                "text": "これがいる限り、自分が妖怪・フォロワーをプレイする際、コストを-2する。\nこれがいる限り、自分の場の妖怪・フォロワーが与えるダメージを+1する。\n自分の妖怪・フォロワーが場を離れたとき、これは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl14.png",
+                "trait_raw": "挑戦者・妖怪"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2775",
+                "date": "2026-07-27",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』2体がいる場合、自分の場の妖怪・フォロワーが与えるダメージを+2しますか？",
+                "answer": "はい。自分の場の妖怪・フォロワーが与えるダメージを+2します。"
+              },
+              {
+                "id": "Q838",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』1体と『一ツ尾狐』4体がいる状況で、相手の『ハンプティダンプティ（EVOLVE）』の【進化時】能力による全体ダメージで、自分の『一ツ尾狐』4体が破壊された場合、『大妖狐・ギンセツ（EVOLVE）』の「自分の妖怪・フォロワーが場を離れたとき、これは《攻撃力》+1する。」という能力は4回誘発しますか？",
+                "answer": "はい。妖怪・フォロワーである『一ツ尾狐』4体が場を離れているので、『大妖狐・ギンセツ（EVOLVE）』の能力が4回誘発し、攻撃力を+4します。"
+              },
+              {
+                "id": "Q837",
+                "date": "2023-06-09",
+                "question": "「これがいる限り、自分の場の妖怪・フォロワーが与えるダメージを+1する。」とは、具体的にどのようなダメージを+1しますか？",
+                "answer": "自分の場の妖怪・フォロワーが相手のリーダーや相手のフォロワーに攻撃して与えるダメージや自分の場の、妖怪・フォロワーの能力によって与えるダメージが+1されます。"
+              },
+              {
+                "id": "Q836",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』と、何らかの理由によって攻撃力が0になった『一ツ尾狐』がいる状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『一ツ尾狐』が相手のリーダーに攻撃した場合、相手のリーダーに1ダメージ与えますか？",
+                "answer": "いいえ。相手のリーダーにダメージは与えません。\n攻撃力が0の『一ツ尾狐』が相手のリーダーに攻撃した場合、『一ツ尾狐』の攻撃力が0であるため、ダメージを与えるという行動が起こりません。すなわち、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」を適用する際に、ダメージを与えるという行動自体が存在しないため、何も適用されず、最終的に「ダメージを与えない」となります。"
+              },
+              {
+                "id": "Q835",
+                "date": "2023-06-09",
+                "question": "自分の場に攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』がいて、相手の場に『安息の領域』がある状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『大妖狐・ギンセツ（EVOLVE）』が攻撃し、相手のリーダーを攻撃目標に選択しました。次に、その後のクイックタイミングにおいて、『安息の領域』の《起動》能力が使われ、相手のリーダーに「リーダーが受ける5以上のダメージを4にする」が適用されました。\nこの場合、自分の攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』は、相手のリーダーに何ダメージ与えますか？",
+                "answer": "相手プレイヤーの選択により、「4ダメージ」もしくは「5ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、相手のリーダーがダメージを受けるので、相手が適用順を選択します。\n攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』に適用されている「与えるダメージを+1」と相手のリーダーに適用されている「リーダーが受ける5以上のダメージを4にする」を任意の順で適用することができます。\n\n①「与えるダメージを+1」→「リーダーが受ける5以上のダメージを4にする」の順で適用する場合\n「与えるダメージを+1」を適用し、攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが7ダメージになります。その後、「リーダーが受ける5以上のダメージを4にする」を適用し、『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが4ダメージになります。\n\n②「リーダーが受ける5以上のダメージを4にする」→「与えるダメージを+1」の順で適用する場合\n「リーダーが受ける5以上のダメージを4にする」を適用し、攻撃力が6の『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが4ダメージになります。その後、「与えるダメージを+1」を適用し、『大妖狐・ギンセツ（EVOLVE）』が与えるダメージが5ダメージになります。"
+              },
+              {
+                "id": "Q834",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』と攻撃力が1の『一ツ尾狐』がいて、相手の場に『レーヴァテインドラゴン・ディフェンスモード』がいる状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『一ツ尾狐』の攻撃によって、相手の『レーヴァテインドラゴン・ディフェンスモード』と交戦しました。\nこの場合、自分の『一ツ尾狐』は、相手の『レーヴァテインドラゴン・ディフェンスモード』に何ダメージ与えますか？",
+                "answer": "『レーヴァテインドラゴン・ディフェンスモード』が場にいる方のプレイヤー（相手）の選択により、「ダメージを与えない」もしくは「1ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるフォロワーは『レーヴァテインドラゴン・ディフェンスモード』なので、相手が適用順を選択します。（『レーヴァテインドラゴン・ディフェンスモード』のマスターが適用順を選択します。）\n『一ツ尾狐』に適用されている「与えるダメージを+1」と『レーヴァテインドラゴン・ディフェンスモード』の「受けるダメージを-1」を任意の順で適用することができます。\n\n①「受けるダメージを-1」→「与えるダメージを+1」の順で適用する場合\n「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが0ダメージになります。この時点で、0ダメージ与える行動は全く行われなくなるため、ダメージを与えるという行動自体が存在しなくなります。その後、「与えるダメージを+1」を適用しますが、ダメージを与えるという行動自体がすでに存在しないため、何も適用されません。よって、最終的に「ダメージを与えない」となります。\n\n②「与えるダメージを+1」→「受けるダメージを-1」の順で適用する場合\n「与えるダメージを+1」を適用し、『一ツ尾狐』が与えるダメージが2ダメージになります。その後、「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが1ダメージになります。"
+              },
+              {
+                "id": "Q833",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』と攻撃力が3の『火車』がいて、相手の場に『レーヴァテインドラゴン・ディフェンスモード』がいる状況です。\nこの状況で、「自分の場の妖怪・フォロワーが与えるダメージを+1する。」が適用されている自分の場の『火車』の攻撃によって、相手の『レーヴァテインドラゴン・ディフェンスモード』と交戦しました。\nこの場合、自分の『火車』は、相手の『レーヴァテインドラゴン・ディフェンスモード』に何ダメージ与えますか？",
+                "answer": "3ダメージです。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるフォロワーは『レーヴァテインドラゴン・ディフェンスモード』なので、相手が適用順を選択します。（『レーヴァテインドラゴン・ディフェンスモード』のマスターが適用順を選択します。）\n『火車』に適用されている「与えるダメージを+1」と『レーヴァテインドラゴン・ディフェンスモード』の「受けるダメージを-1」を適用し、最終的に3ダメージになります。"
+              },
+              {
+                "id": "Q832",
+                "date": "2023-06-09",
+                "question": "『変装の牙』によって「【攻撃時】相手のフォロワー1体を選ぶ。それに「これの攻撃力」と同じダメージ」という能力が付与された妖怪・フォロワーが、この能力によって与えるダメージは+1されますか？",
+                "answer": "はい。『変装の牙』によって付与された【攻撃時】能力で与えるダメージも+1されます。"
+              },
+              {
+                "id": "Q831",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』がいる状態で、自分のEXエリアから『一ツ尾狐』をプレイする場合、そのコストを-2しますか？",
+                "answer": "はい。トークンである『一ツ尾狐』もタイプに妖怪を持つフォロワ―であるため、プレイする際のコストを-2します。"
+              },
+              {
+                "id": "Q830",
+                "date": "2023-06-09",
+                "question": "自分の場に『大妖狐・ギンセツ（EVOLVE）』が2体いる場合、自分が妖怪・フォロワーをプレイする際、そのコストを-4しますか？",
+                "answer": "はい。それぞれの『大妖狐・ギンセツ（EVOLVE）』の能力が適用されるため、そのコストを-4します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:da04aa9de4fd97016c84341f1e298c03fc0310542592025b9046f1a9134840cc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL14",
+            "fetched_at": "2026-09-24T22:23:51.516414Z"
+          },
+          "document_ref": "documents-e09b9c6e477ba7d1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL15",
+      "documents": {
+        "documents-ebb016777f2998ab": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL15",
+            "faces": [
+              {
+                "name": "ウールヴヘジン・アラガヴィ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "3",
+                "text": "自分のエンドフェイズが来たとき、【真紅】状態なら、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n{ファンファーレ}{コスト5}：場の他のフォロワーすべてに5ダメージ。これは{攻撃力}+2/{体力}+2して、【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl15.png",
+                "trait_raw": "挑戦者・獣"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:73ecb06933cf7b6d2cd5bf672caafe1e53df37d071fc9de100f2c8b44b6440c1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL15",
+            "fetched_at": "2026-09-24T22:23:54.451015Z"
+          },
+          "document_ref": "documents-ebb016777f2998ab"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL16",
+      "documents": {
+        "documents-afef0db14233afc4": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL16",
+            "faces": [
+              {
+                "name": "グランドナイト・ウィルバート",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "先導"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "【守護】\n自分の【守護】を持つフォロワーが場から墓場に置かれたとき、相手のリーダーすべてに1ダメージ。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、「これと同名を除く元のコスト5以下の【守護】を持つフォロワー」1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl16.png",
+                "trait_raw": "挑戦者・先導"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q851",
+                "date": "2023-06-09",
+                "question": "【守護】を持つ『グランドナイト・ウィルバート』自身が場から墓場に置かれた場合でも、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q850",
+                "date": "2023-06-09",
+                "question": "『守護の陽光』の能力によって、【守護】を付与されたフォロワーが場から墓場に置かれた場合でも、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q849",
+                "date": "2023-06-09",
+                "question": "スタンド状態の【守護】を持つフォロワーが場から墓場に置かれた場合でも、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q848",
+                "date": "2023-06-09",
+                "question": "自分の場の【守護】を持つフォロワーが「破壊」された場合、『グランドナイト・ウィルバート』の能力は誘発しますか？",
+                "answer": "はい。誘発します。\n能力によって場のフォロワーが破壊されたり、体力が0以下になった場のフォロワーが破壊された場合、そのフォロワーを場から墓場に置きます。すなわち、『グランドナイト・ウィルバート』の能力の誘発条件を満たします。"
+              },
+              {
+                "id": "Q847",
+                "date": "2023-06-09",
+                "question": "自分の場に『グランドナイト・ウィルバート』と『聖なる槍使い』がいる状況で、『テミスの審判』がプレイされた場合、『グランドナイト・ウィルバート』の能力は何回誘発しますか？",
+                "answer": "2回誘発します。"
+              },
+              {
+                "id": "Q846",
+                "date": "2023-06-09",
+                "question": "自分の場に『グランドナイト・ウィルバート』が2体いる状況で、『テミスの審判』がプレイされた場合、『グランドナイト・ウィルバート』の能力は何回誘発しますか？",
+                "answer": "それぞれ『グランドナイト・ウィルバート』の能力が2回ずつ誘発し、合計で4回誘発します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b46c70103cf8fed631d1ff80457d47a89e1e5eacf98d69771a87bae44c17563a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL16",
+            "fetched_at": "2026-09-24T22:23:57.045461Z"
+          },
+          "document_ref": "documents-afef0db14233afc4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL17",
+      "documents": {
+        "documents-22c79f8a64f0f9b4": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL17",
+            "faces": [
+              {
+                "name": "アーツマスター・カルラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "信仰"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のエンドフェイズが来たとき、自分の残りPPが2以上なら、相手のリーダーすべてに2ダメージ。自分の残りPPが4以上なら、1枚引く。自分の残りPPが6以上なら、相手の場のフォロワー1体まで選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl17.png",
+                "trait_raw": "挑戦者・信仰"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q884",
+                "date": "2023-07-13",
+                "question": "自分のエンドフェイズが来たとき、自分の残りPPが6の場合、1枚引いて、その内容を確認してから、相手の場のフォロワーを選ぶことができますか？",
+                "answer": "いいえ。1枚引く前に、相手の場のフォロワーを1体まで選ぶ必要があります。（0体を選ぶことはできます。）\n能力によって目標を選ぶ場合、その能力をプレイする際に目標を選びます。その後テキストの効果を表記の順に従って実行します。"
+              },
+              {
+                "id": "Q864",
+                "date": "2023-06-09",
+                "question": "「自分のエンドフェイズが来たとき、～」という能力を持つカードが自分の場に複数枚のある状況で、エンドフェイズを迎えた場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\n自分のエンドフェイズを迎えた場合、「自分のエンドフェイズが来たとき、～」という能力がすべて誘発し、待機状態になります。その後、待機状態になった能力を任意の順で1つずつ解決します。"
+              },
+              {
+                "id": "Q852",
+                "date": "2023-06-09",
+                "question": "自分の場に『デウスエクスマキナ』と『アーツマスター・カルラ』がいて、自分のPP最大値が6、自分の残りPPが0の状況です。\nこの状況でエンドフェイズが来たとき、誘発したそれぞれの能力を、『デウスエクスマキナ』の能力から解決して、自分のPPを4回復し、その後『アーツマスター・カルラ』の能力を解決して、相手のリーダーに2ダメージ与え、1枚引くことができますか？",
+                "answer": "はい。その順で能力を解決し、それらの効果を適用することができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b8d66e5067d5e5a6ba905400d853eb5cb0c177d9c82a6c007d55bfb488b50a9d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL17",
+            "fetched_at": "2026-09-24T22:23:59.863498Z"
+          },
+          "document_ref": "documents-22c79f8a64f0f9b4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL18",
+      "documents": {
+        "documents-85009f3739b39177": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL18",
+            "faces": [
+              {
+                "name": "アーツマスター・カルラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "挑戦者",
+                  "信仰"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、自分のPPを2回復する。その後、自分の残りPPが2以上なら、相手のリーダーすべてに2ダメージ。自分の残りPPが4以上なら、1枚引く。自分の残りPPが6以上なら、相手の場のフォロワー1体まで選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl18.png",
+                "trait_raw": "挑戦者・信仰"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q885",
+                "date": "2023-07-13",
+                "question": "自分のエンドフェイズが来たとき、自分の残りPPが4の場合、『アーツマスター・カルラ（EVOLVE）』の能力によってPPを2回復し（この時点で残りPPは6）、その後1枚引いて、その内容を確認してから、相手の場のフォロワーを選ぶことができますか？",
+                "answer": "いいえ。「1枚引く」や「自分のPPを2回復する」より前に、相手の場のフォロワーを1体まで選ぶ必要があります。（0体を選ぶことはできます。）\n能力によって目標を選ぶ場合、その能力をプレイする際に目標を選びます。その後テキストの効果を表記の順に従って実行します。"
+              },
+              {
+                "id": "Q864",
+                "date": "2023-06-09",
+                "question": "「自分のエンドフェイズが来たとき、～」という能力を持つカードが自分の場に複数枚のある状況で、エンドフェイズを迎えた場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\n自分のエンドフェイズを迎えた場合、「自分のエンドフェイズが来たとき、～」という能力がすべて誘発し、待機状態になります。その後、待機状態になった能力を任意の順で1つずつ解決します。"
+              },
+              {
+                "id": "Q853",
+                "date": "2023-06-09",
+                "question": "自分の場に『デウスエクスマキナ』と『アーツマスター・カルラ（EVOLVE）』がいて、自分のPP最大値が6、自分の残りPPが0の状況です。\nこの状況でエンドフェイズが来たとき、誘発したそれぞれの能力を、『デウスエクスマキナ』の能力から解決して、自分のPPを4回復し、その後『アーツマスター・カルラ（EVOLVE）』の能力を解決して、自分のPPを2回復し（この時点で残りPPは6）、相手のリーダーに2ダメージ与え、1枚引き、相手のフォロワーを1体破壊することはできますか？",
+                "answer": "はい。その順で能力を解決し、それらの効果を適用することができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1f6ddec7006baa05625c38010e7d9a00e5d852cf286ff201c4e3fc15cec76b83",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL18",
+            "fetched_at": "2026-09-24T22:24:02.541928Z"
+          },
+          "document_ref": "documents-85009f3739b39177"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL19",
+      "documents": {
+        "documents-a36d7d30de528505": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL19",
+            "faces": [
+              {
+                "name": "ゴッドコロシアムマンモス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "大神",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "7",
+                "power": "7",
+                "hp": "8",
+                "text": "{ファンファーレ}各プレイヤーは、自身の場のフォロワー1体を残し、それ以外の自身の場のフォロワーすべてを墓場に置く。\n{ラストワード}自分のデッキから『頂きの闘技場』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "藤木ゆう",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl19.png",
+                "trait_raw": "大神・獣"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": "https://shadowverse-evolve.com/errata/bp06-107/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q867",
+                "date": "2023-06-09",
+                "question": "《ラストワード》能力によって、自分のデッキに『頂きの闘技場』がないことが分かっている場合でも、デッキの『頂きの闘技場』を探し、見つけない選択をしてデッキをシャッフルする必要がありますか？",
+                "answer": "はい。その場合でもデッキをシャッフルする必要があります。"
+              },
+              {
+                "id": "Q866",
+                "date": "2023-06-09",
+                "question": "『ゴッドコロシアムマンモス』の《ファンファーレ》能力を解決する場合、各プレイヤーの処理順はどのようになりますか？",
+                "answer": "複数のプレイヤーが同時になんらかの選択を伴う処理を行うよう求められた場合、ターンプレイヤーから先に処理を行います。非ターンプレイヤーは、ターンプレイヤーの処理の内容を知ってから自分の選択を行います。\n以下、処理順です。\n\n①ターンプレイヤーは、自身の場のフォロワー1体を残し、それ以外の自身の場のフォロワーすべてを墓場に置きます。\n②非ターンプレイヤーは、自身の場のフォロワー1体を残し、それ以外の自身の場のフォロワーすべてを墓場に置きます。（ターンプレイヤーの処理の内容を知ってから自身の選択を行うことができます。）"
+              },
+              {
+                "id": "Q865",
+                "date": "2023-06-09",
+                "question": "相手の場に『ヘヴンリーイージス』が2体のみいる状況で、自分は『ゴッドコロシアムマンモス』をプレイした場合、《ファンファーレ》能力によって、相手はどちらかの『ヘヴンリーイージス』を墓場に置きますか？",
+                "answer": "はい。相手はどちらか1つ目の『ヘヴンリーイージス』を残し、2つ目の『ヘヴンリーイージス』を墓場に置きます。\nまた、「墓場に置く」という処理は能力による破壊ではないので、『ヘヴンリーイージス』の「これは能力によって破壊されない。」という能力は働きません。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P31"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b1056cff9197e6b40b9604af71067a4c2928dcf501173813e3636e6a8f1e2466",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL19",
+            "fetched_at": "2026-09-24T22:24:05.015754Z"
+          },
+          "document_ref": "documents-a36d7d30de528505"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL20",
+      "documents": {
+        "documents-c8a5c3d9e596d622": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL20",
+            "faces": [
+              {
+                "name": "バイヴカハ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "大神",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}下記から1つチョイスする。【1】自分の場の他のフォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。【2】自分のリーダーは{体力}+2する。【3】自分のデッキの上3枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl20.png",
+                "trait_raw": "大神・光輝"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1595",
+                "date": "2024-08-20",
+                "question": "自分の場の他のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】や【3】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:352719c24713356030c96ed05eea0095669830d089931626643674e6ca19b533",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL20",
+            "fetched_at": "2026-09-24T22:24:07.805140Z"
+          },
+          "document_ref": "documents-c8a5c3d9e596d622"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-SL21",
+      "documents": {
+        "documents-21b8edabe1ce32c7": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-SL21",
+            "faces": [
+              {
+                "name": "バイヴカハ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "大神",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "【進化時】下記から1つチョイスする。【1】相手の場のフォロワーすべてをアクトする。【2】相手のリーダーすべてに2ダメージ。【3】自分のデッキの上1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-sl21.png",
+                "trait_raw": "大神・光輝"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-SL20"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9d9dbf7c2c9980c743768b5830307b963ff35ebb92d7082a415c987eae6c64ba",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-SL21",
+            "fetched_at": "2026-09-24T22:24:10.668481Z"
+          },
+          "document_ref": "documents-21b8edabe1ce32c7"
+        }
+      ]
+    }
+  ]
+}

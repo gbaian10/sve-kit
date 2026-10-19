@@ -1,0 +1,1857 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP21",
+  "range": "SL/000-099",
+  "products": {
+    "products-16b81cb0ff373351": [
+      {
+        "name": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+        "date": "2026-07-31",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP21",
+          "https://shadowverse-evolve.com/products/bp21/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP21-SL01",
+      "documents": {
+        "documents-a596ac1621f9fa9b": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL01",
+            "faces": [
+              {
+                "name": "新緑の新入生・カステル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族",
+                  "学院",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。\n{ファンファーレ}自分の場の学院・フォロワーや獣・フォロワーが3体以上なら、『緑の顕現』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "お姉ちゃんは、私にとっても優しい。私を見てくれる。\nそんなお姉ちゃんが好き。大好きだから、私は……。",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl01.png",
+                "trait_raw": "エルフ族・学院・超克"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2786",
+                "date": "2026-08-24",
+                "question": "自分の場に『屍術王・コルネリウス』、相手の場に『新緑の新入生・カステル』と『農作のエルフ（EVOLVE）』がいる状況で、『屍術王・コルネリウス』が超進化しました。誘発した能力の中から最初に【進化時】能力を解決し、自分の墓場の『エンペラーフィスト・ガロム』を場に出しました。その後の処理はどのようになりますか？また「【超進化時】下記を3回くり返す。サイコロをふる。」から解決し、サイコロの出た目が「4→1→2」の順だった場合、『エンペラーフィスト・ガロム』の能力で先に2ダメージを『新緑の新入生・カステル』に与えて破壊した後、4ダメージを『農作のエルフ（EVOLVE）』に与えるような処理を行うことはできますか？",
+                "answer": "その状況におけるその後の処理は以下の通りです。\n誘発し待機状態となっている『屍術王・コルネリウス』の【超進化時】能力と『エンペラーフィスト・ガロム』の《ファンファーレ》能力を任意の順で解決することができます。\n『屍術王・コルネリウス』の【超進化時】能力から解決する場合の処理を記載します。サイコロを3回ふります。出た目が「4→1→2」だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・『エンペラーフィスト・ガロム』の《ファンファーレ》能力\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n次にこれら4つの誘発し待機状態となっている能力を任意の順で解決することができます。\n『エンペラーフィスト・ガロム』の《ファンファーレ》能力を先に解決する場合の処理を記載します。サイコロをふります。出た目が3だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が3に対応する相手のフォロワーに3ダメージ与える『エンペラーフィスト・ガロム』の能力\nこれらを任意の順で解決できます。\n\n『新緑の新入生・カステル』に2ダメージ与える『エンペラーフィスト・ガロム』の能力から先に解決することは可能です。その場合、次のチェックタイミングにおいて体力が0以下になった『新緑の新入生・カステル』は破壊され、残りの誘発し待機状態となっている能力を任意の順で解決することができます。\n先に『新緑の新入生・カステル』を破壊しておくことで、「これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。」という効果が適用されなくなった状態の『農作のエルフ（EVOLVE）』に4ダメージ与えることも可能になります。"
+              },
+              {
+                "id": "Q2705",
+                "date": "2026-07-27",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P64"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:10f65c942dd01c36643e3ec0b7de056a4aabbacab9366b81c4fc1d442a121f4c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL01",
+            "fetched_at": "2026-09-24T18:34:28.978926Z"
+          },
+          "document_ref": "documents-a596ac1621f9fa9b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL02",
+      "documents": {
+        "documents-ad4a3870f38b7c6f": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL02",
+            "faces": [
+              {
+                "name": "無謬の偶像・ライル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "人形",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}手札の人形・カード1枚を捨てる：2枚引く。",
+                "sections": [],
+                "flavor": "僕たちが知るべきは、魔法の使い方――勝ち方。\nこの『学園』を変えるのに必要なものは、勝利のみ。",
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl02.png",
+                "trait_raw": "人形・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:788dde8e8433c44422ba2b13c77af2c5394c678e898d27e899da76bf5a6784c6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL02",
+            "fetched_at": "2026-09-24T18:34:31.819678Z"
+          },
+          "document_ref": "documents-ad4a3870f38b7c6f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL03",
+      "documents": {
+        "documents-6815b5806e0ee9ba": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL03",
+            "faces": [
+              {
+                "name": "無謬の偶像・ライル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "人形",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "4",
+                "text": "【進化時】『ライルの人形』1枚をEXエリアに置く。\n【超進化時】自分のEXエリアの人形・トークン・フォロワー1体を選ぶ。自分の墓場の人形・カードが3枚以上なら、それは{攻撃力}+4/{体力}+4する。",
+                "sections": [
+                  "『ライルの人形』{エルフ}人形・学院・フォロワー{コスト0}{攻撃力}1/{体力}1これは場にいる限り、『操り人形』でもある。【疾走】【必殺】【守護】"
+                ],
+                "flavor": "こんなところで、負けるわけにはいかないんです。\n……僕は、あの人を超えるのだから。",
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl03.png",
+                "trait_raw": "人形・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2707",
+                "date": "2026-07-27",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2706",
+                "date": "2026-07-27",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P63"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:167327f4ef9d0446803a3aa27bc555445abbd7369c27950abd1df004646fdf22",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL03",
+            "fetched_at": "2026-09-24T18:34:34.556621Z"
+          },
+          "document_ref": "documents-6815b5806e0ee9ba"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL04",
+      "documents": {
+        "documents-7c7f6a899e3a115a": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL04",
+            "faces": [
+              {
+                "name": "翅の女王・ティターニア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}自分のEXエリアの妖精・カードが2枚以上なら、自分のデッキから「これと同名を除く元のコスト3以下の妖精・フォロワー」1枚を探し、場に出す。\n{起動}{コスト1}これを{アクト}墓場に置く：相手の場のフォロワー1体を選ぶ。それを破壊する。それのプレイヤーは『フェアリー』1体を場に出す。この能力は自分のEXエリアの妖精・カードが5枚なら使える。",
+                "sections": [],
+                "flavor": "迷い人よ、手伝いなさい。お付きを撒きたいのです。\nえ？翅がないのに跳ねっ返り？う、うるさいですね！",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl04.png",
+                "trait_raw": "妖精・プリンセス"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-T11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6466f07ea317a0418be982e0e96b792f391ec1e1464fe8c57fd6223b85e55ed7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL04",
+            "fetched_at": "2026-09-24T18:34:37.158610Z"
+          },
+          "document_ref": "documents-7c7f6a899e3a115a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL05",
+      "documents": {
+        "documents-96c40296a76db5e1": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL05",
+            "faces": [
+              {
+                "name": "学び舎の黄昏・リーシャ＆ナノ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "兵士",
+                  "学院",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "自分の場に他の学院・フォロワーがいる限り、これは【必殺】を持つ。\n{ファンファーレ}自分のデッキから元のコスト1のフォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "「アタシも手伝うっ！一緒にがんばろうね、リーシャ！」\n「そうだね！成長してモニカ提督を驚かせよう、ナノ！」",
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl05.png",
+                "trait_raw": "指揮官・兵士・学院・超克"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2713",
+                "date": "2026-07-27",
+                "question": "『学び舎の黄昏・リーシャ＆ナノ』の「自分の場に他の学院・フォロワーがいる限り、これは【必殺】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の場に他の学院・フォロワーがいる限り、『学び舎の黄昏・リーシャ＆ナノ』は【必殺】を持ちます。\n『学び舎の黄昏・リーシャ＆ナノ』を場に出した後に他の学院・フォロワーを出した場合、【必殺】を持ちます。\n『学び舎の黄昏・リーシャ＆ナノ』を場に出した後に他の学院・フォロワーが0体になった場合、【必殺】を失います。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0c729d2f909243b74cd04191ad2629b1386fc501606cd04a25f48c19866d4e92",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL05",
+            "fetched_at": "2026-09-24T18:34:39.817300Z"
+          },
+          "document_ref": "documents-96c40296a76db5e1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL06",
+      "documents": {
+        "documents-2d2e7ca4a60be08f": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL06",
+            "faces": [
+              {
+                "name": "英傑の学園長・ガルドル",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "学院",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}{コスト2}：自分のデッキから元のコスト2以下の学院・フォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "『クソ蛙』を卒業し、彼は英雄の一歩を踏み出した。\n英雄譚を成し、引退した彼の次なる道は決まっていた。",
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl06.png",
+                "trait_raw": "指揮官・学院・獣"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1be83eb189e1b87251fc37692974625866c3e47d320eb821828336ea5458d492",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL06",
+            "fetched_at": "2026-09-24T18:34:42.322521Z"
+          },
+          "document_ref": "documents-2d2e7ca4a60be08f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL07",
+      "documents": {
+        "documents-11d8681c3edc80a1": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL07",
+            "faces": [
+              {
+                "name": "英傑の学園長・ガルドル",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "学院",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】自分のデッキから元のコスト3以下の学院・フォロワー1枚を探し、場に出す。\n【超進化時】これは「これが場にいる限り、自分の場の学院・フォロワーが受けるダメージを-2する」を持つ。",
+                "sections": [],
+                "flavor": "新入生諸君、今この時をもって君たちは『クソ蛙』だ。\n全員揃って卒業させてやる。まずは格闘術の訓練からだ！",
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl07.png",
+                "trait_raw": "指揮官・学院・獣"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2714",
+                "date": "2026-07-27",
+                "question": "「これが場にいる限り、自分の場の学院・フォロワーが受けるダメージを-2する」が適用されているフォロワーを目標に『デッドペナルティ』をプレイした場合、そのフォロワーの攻撃力と体力は-2されますか？",
+                "answer": "はい。『デッドペナルティ』の能力はダメージを与える能力ではないため、攻撃力と体力が-2されます。"
+              },
+              {
+                "id": "Q2707",
+                "date": "2026-07-27",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2706",
+                "date": "2026-07-27",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:55d3cdf0a1d7f8a5220b832049655ae66f0a620626a86fa58888afbb19f21024",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL07",
+            "fetched_at": "2026-09-24T18:34:44.835603Z"
+          },
+          "document_ref": "documents-11d8681c3edc80a1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL08",
+      "documents": {
+        "documents-522d2af61f9151d7": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL08",
+            "faces": [
+              {
+                "name": "レヴィオンの超越者・ユリウス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "貴族",
+                  "レヴィオン"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "{ファンファーレ}手札のレヴィオン・カード2枚を公開：下記から1つチョイスする。自分の墓場のレヴィオン・カードが5枚以上なら、代わりに3つまで。\n【1】相手の場のフォロワー1体を選ぶ。それを破壊する。【2】相手のリーダーすべてに3ダメージ。【3】2枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "何故、私を赦す？ああ、やはり絆など理解は出来ない……\n出来るのはせいぜい、互いに己の信じる道を歩むことだ。",
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl08.png",
+                "trait_raw": "貴族・レヴィオン"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2717",
+                "date": "2026-07-27",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q2716",
+                "date": "2026-07-27",
+                "question": "このフォロワーの《ファンファーレ》能力で【1】と【3】をチョイスした場合、【3】の効果を解決して引いたカードの内容を確認してから、【1】の効果を解決し、破壊する相手の場のフォロワーを選ぶことはできますか？",
+                "answer": "いいえ。できません。カードや能力によって目標を選ぶ場合、そのカードや能力をプレイする際に目標を選びます。今回の場合はチョイスによる選択肢を決定した後、目標を選びます。その後、能力に示された効果を、表記の順にしたがって実行します。"
+              },
+              {
+                "id": "Q2715",
+                "date": "2026-07-27",
+                "question": "相手の場のフォロワーを選ぶことができない場合、【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】をチョイスすることができず、【2】や【3】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a1be930a078664bc7432d8c3ecf0514670557b63c05b2e07d22be3bd8954eb5a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL08",
+            "fetched_at": "2026-09-24T18:34:47.899075Z"
+          },
+          "document_ref": "documents-522d2af61f9151d7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL09",
+      "documents": {
+        "documents-593f96e5fd7e85c9": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL09",
+            "faces": [
+              {
+                "name": "御伽の姫・アマリリス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "1",
+                "power": "0",
+                "hp": "3",
+                "text": "自分のエンドフェイズが来たとき、自分のデッキの上1枚を墓場に置いてよい。\nターンごとに1回、これが能力ダメージを受けたとき、これは{攻撃力}+2する。\n{ファンファーレ}自分の墓場の学院・カードが10枚以上なら、『痛苦』1枚をEXエリアに置く。",
+                "sections": [
+                  "『痛苦』{ウィッチ}魔法使い・学院・プリンセス・スペル{コスト1}相手のリーダーすべてと相手の場のフォロワーすべてと自分の場の『御伽の姫・アマリリス』すべてに2ダメージ。"
+                ],
+                "flavor": "……まぁ、まぁ！こんにちは、はじめまして。\nここに来たってことは、もしかして――あなたが、私の騎士様？",
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl09.png",
+                "trait_raw": "魔法使い・学院・プリンセス"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2722",
+                "date": "2026-07-27",
+                "question": "「自分のエンドフェイズが来たとき、自分のデッキの上1枚を墓場に置いてよい。」という能力で、自分のデッキの上1枚を墓場に置く際、そのカードを確認してから墓場に置くかどうか選択することはできますか？",
+                "answer": "いいえ、できません。任意の効果である「自分のデッキの上1枚を墓場に置いてよい」で墓場に置く選択をとった場合、自分のデッキの上1枚を確認することなく墓場に置きます。カードの内容を確認した上で墓場に置かない選択をとることはできません。"
+              },
+              {
+                "id": "Q2705",
+                "date": "2026-07-27",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P65"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0438ce2b7365e96dd097d4439e942d46ccf3adb069288fa719a47e19d9ed8b61",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL09",
+            "fetched_at": "2026-09-24T18:34:50.600946Z"
+          },
+          "document_ref": "documents-593f96e5fd7e85c9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL10",
+      "documents": {
+        "documents-d355669b8951b7cc": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL10",
+            "faces": [
+              {
+                "name": "精彩の魔導・アン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}手札の学院・カード1枚を捨てる：1枚引く。",
+                "sections": [],
+                "flavor": "魔導姫は、欠けた魔法陣に自身の魔法陣を混ぜ合わせた。\n混ざり合った魔法陣が、鮮やかな魔力のオーロラとなる。",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl10.png",
+                "trait_raw": "魔法使い・学院・プリンセス"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:463763d065a8c1d7e3739f495eb0a46988a4bf8a3f90f0d4cfe4dad1c797e18b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL10",
+            "fetched_at": "2026-09-24T18:34:53.252149Z"
+          },
+          "document_ref": "documents-d355669b8951b7cc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL11",
+      "documents": {
+        "documents-ff293c5e0a878ebc": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL11",
+            "faces": [
+              {
+                "name": "精彩の魔導・アン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】『アンの大英霊』1体を場に出す。自分の墓場の学院・カードが10枚以上なら、それは【指定攻撃】を持つ。\n【超進化時】自分のデッキから『アンの大魔法』1枚を探し、手札に加える。このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。",
+                "sections": [],
+                "flavor": "魔導姫アンの宣言に、生徒たちの歓声が重なった。\n「マナリアとルナルの、永遠の友情を祝して！」",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl11.png",
+                "trait_raw": "魔法使い・学院・プリンセス"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2724",
+                "date": "2026-07-27",
+                "question": "「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」という能力は、『アンの大魔法』を手札以外からプレイする際もコストを-5しますか？",
+                "answer": "はい。手札以外からプレイする際もコストを-5します。"
+              },
+              {
+                "id": "Q2723",
+                "date": "2026-07-27",
+                "question": "【超進化時】能力でデッキから『アンの大魔法』を見つけない選択をした場合、「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」は有効ですか？",
+                "answer": "はい。自分のデッキから『アンの大魔法』を見つけない選択をした場合でも「このターン、次に自分が『アンの大魔法』をプレイする際、コストを-5する。」は有効です。"
+              },
+              {
+                "id": "Q2707",
+                "date": "2026-07-27",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2706",
+                "date": "2026-07-27",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-P29"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL10"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01a-P02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:63f4e355a59069551af8e567e863ce3b3fcd7339d17afad9ba83944aad2be5f8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL11",
+            "fetched_at": "2026-09-24T18:34:56.171287Z"
+          },
+          "document_ref": "documents-ff293c5e0a878ebc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL12",
+      "documents": {
+        "documents-8829ae5a4e9087a2": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL12",
+            "faces": [
+              {
+                "name": "双魂の久遠・ケリドウェン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "錬金術師",
+                  "禁忌"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。このターン中に自分の【土の秘術】によって自分の場の【スタック】を1個以上取っていたなら、それに2ダメージ。\n{ファンファーレ}【土の秘術】自分のデッキから元のコスト1以下の【土の秘術】を持つフォロワーか元のコスト1以下の土の印・アミュレット1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "……ああ、もう。喧しいわね、分かっているわよ。\n薬を探しに来たあの子にこれをあげたいのよね、タリエ。",
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl12.png",
+                "trait_raw": "錬金術師・禁忌"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2726",
+                "date": "2026-07-27",
+                "question": "『双魂の久遠・ケリドウェン』の《ファンファーレ》能力をプレイした後に、『ルナルの教会長・グリュネ』の《ファンファーレ》能力をプレイしていた場合、『双魂の久遠・ケリドウェン』の「自分のエンドフェイズが来たとき、～」という能力にある「このターン中に自分の【土の秘術】によって自分の場の【スタック】を1個以上取っていたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              },
+              {
+                "id": "Q2725",
+                "date": "2026-07-27",
+                "question": "『エクステンドマジック』をプレイし【土の秘術_2】を行っていた場合、『双魂の久遠・ケリドウェン』の「自分のエンドフェイズが来たとき、～」という能力にある「このターン中に自分の【土の秘術】によって自分の場の【スタック】を1個以上取っていたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c811b66b29dfbccbbf82bc1981fc60eda5f4be317f85d3b7b3a83485b06ea369",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL12",
+            "fetched_at": "2026-09-24T18:34:59.055250Z"
+          },
+          "document_ref": "documents-8829ae5a4e9087a2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL13",
+      "documents": {
+        "documents-4a8015f52c932125": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL13",
+            "faces": [
+              {
+                "name": "竜の魔女・リリウム",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "私は、ずっと待っていたんです。\nあの子を救い出してくれる、騎士様が現れるのを。",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl13.png",
+                "trait_raw": "竜使い・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL14"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6a9054b89376f4e608e7afb1e848e0176f6602660c24bc140bcedee8034c43d0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL13",
+            "fetched_at": "2026-09-24T18:35:01.750343Z"
+          },
+          "document_ref": "documents-4a8015f52c932125"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL14",
+      "documents": {
+        "documents-5615df25123a177f": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL14",
+            "faces": [
+              {
+                "name": "竜の魔女・リリウム",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜使い",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "自分のエンドフェイズが来たとき、自分の場の学院・フォロワーが3体以上なら、『リリウムの幼竜』1体を場に出す。\n【進化時】自分のデッキから「これと同名を除く学院・フォロワー」1枚を探し、手札に加える。\n【超進化時】『リリウムの巨竜』1体を場に出す。",
+                "sections": [],
+                "flavor": "囚われの姫は、助けられなければいけません。\nどうか私たちにハッピーエンドを……素敵な騎士様。",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl14.png",
+                "trait_raw": "竜使い・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2707",
+                "date": "2026-07-27",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2706",
+                "date": "2026-07-27",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P66"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P67"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:96cd0a978aa8ff71f3a47b8bebb5f8ba8516a37b04ea025264bb5a72a7ad5d99",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL14",
+            "fetched_at": "2026-09-24T18:35:04.543638Z"
+          },
+          "document_ref": "documents-5615df25123a177f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL15",
+      "documents": {
+        "documents-8a15ddd60f4f5676": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL15",
+            "faces": [
+              {
+                "name": "熱血の竜教師・ジョー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "自分の場に学院・フォロワーが出たとき、自分のEXエリアのこれに情熱カウンター1個を置く。\n{起動}これを{アクト}：これか自分のEXエリアのカード1枚の情熱カウンターが10個以上なら、相手のリーダーすべてと相手の場のフォロワーすべてに5ダメージ。これは{体力}+6する。\n{起動}{コスト0}：自分の手札のこれをEXエリアに置く。",
+                "sections": [],
+                "flavor": "今、燃えねぇでいつ燃える？眠ってんなよ、未来の竜共！\n自分って殻を破れ、お前らは何処にだって飛んでいける！",
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl15.png",
+                "trait_raw": "ドラゴニュート・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2740",
+                "date": "2026-07-27",
+                "question": "学院・フォロワーが2体同時に場に出た場合、『熱血の竜教師・ジョー』の「自分の場に学院・フォロワーが出たとき、～」という能力は2回誘発しますか？",
+                "answer": "はい。2回誘発します。"
+              },
+              {
+                "id": "Q2739",
+                "date": "2026-07-27",
+                "question": "カードが場を離れるとき、そのカードに置かれていたカウンターは消えますか？",
+                "answer": "はい。消えます。"
+              },
+              {
+                "id": "Q2738",
+                "date": "2026-07-27",
+                "question": "「《起動》《コスト0》：自分の手札のこれをEXエリアに置く。」という能力は、『熱血の竜教師・ジョー』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『熱血の竜教師・ジョー』が手札にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q2737",
+                "date": "2026-07-27",
+                "question": "情熱カウンターが10個置かれたEXエリアにある『熱血の竜教師・ジョー』をプレイして場に出した場合、場に出た『熱血の竜教師・ジョー』は情熱カウンターが10個置かれていますか？",
+                "answer": "はい。EXエリアから場に出たカードはカウンターが置かれたまま場に出ます。"
+              },
+              {
+                "id": "Q2736",
+                "date": "2026-07-27",
+                "question": "「自分の場に学院・フォロワーが出たとき、自分のEXエリアのこれに情熱カウンター1個を置く。」という能力は、『熱血の竜教師・ジョー』がEXエリアにある場合に有効となる能力ですか？",
+                "answer": "はい。『熱血の竜教師・ジョー』がEXエリアにある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0277527495c6f247346d0a8fed404b4bc6fdb016bcab0b14263df5deb270a3b7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL15",
+            "fetched_at": "2026-09-24T18:35:07.223980Z"
+          },
+          "document_ref": "documents-8a15ddd60f4f5676"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL16",
+      "documents": {
+        "documents-aa066e30c7de0c55": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL16",
+            "faces": [
+              {
+                "name": "金色の威信・リュミオール",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、自分の場のドラゴニュート・フォロワーが3体以上なら、相手のリーダーすべてと相手の場のフォロワーすべてに3ダメージ。\n{ファンファーレ}手札1枚を捨てる：自分のデッキから元のコスト2のドラゴニュート・フォロワー1枚と元のコスト1のドラゴニュート・フォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "アタシは特別だって証明する。姉として、皆のお手本として！\nさぁ、可愛い弟妹たち！あとはこのお姉様に任せなさい！",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl16.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2741",
+                "date": "2026-07-27",
+                "question": "《ファンファーレ》能力によって、自分のデッキから元のコスト2のドラゴニュート・フォロワー1枚を場に出し、元のコスト1のドラゴニュート・フォロワー1枚を場に出さないという選択をすることは可能ですか？",
+                "answer": "はい。可能です。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b7e4a80e78e8f98545015b2d5ba2e9e3774cf9d86a20fbcbd9c0160c0327716f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL16",
+            "fetched_at": "2026-09-24T18:35:10.061456Z"
+          },
+          "document_ref": "documents-aa066e30c7de0c55"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL17",
+      "documents": {
+        "documents-889feea890d1379e": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL17",
+            "faces": [
+              {
+                "name": "屍術王・コルネリウス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死霊術師",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の墓場の元のコスト2以下の学院・フォロワー1枚を選ぶ。それを場に出す。それは「自分のエンドフェイズが来たとき、これを墓場に置く」を持つ。",
+                "sections": [],
+                "flavor": "教えられ、育つ。人はみな、その可能性を宿している。\n若き才を集め、磨くことで、独りでは届かぬ高みへ至る。",
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl17.png",
+                "trait_raw": "死霊術師・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2786",
+                "date": "2026-08-24",
+                "question": "自分の場に『屍術王・コルネリウス』、相手の場に『新緑の新入生・カステル』と『農作のエルフ（EVOLVE）』がいる状況で、『屍術王・コルネリウス』が超進化しました。誘発した能力の中から最初に【進化時】能力を解決し、自分の墓場の『エンペラーフィスト・ガロム』を場に出しました。その後の処理はどのようになりますか？また「【超進化時】下記を3回くり返す。サイコロをふる。」から解決し、サイコロの出た目が「4→1→2」の順だった場合、『エンペラーフィスト・ガロム』の能力で先に2ダメージを『新緑の新入生・カステル』に与えて破壊した後、4ダメージを『農作のエルフ（EVOLVE）』に与えるような処理を行うことはできますか？",
+                "answer": "その状況におけるその後の処理は以下の通りです。\n誘発し待機状態となっている『屍術王・コルネリウス』の【超進化時】能力と『エンペラーフィスト・ガロム』の《ファンファーレ》能力を任意の順で解決することができます。\n『屍術王・コルネリウス』の【超進化時】能力から解決する場合の処理を記載します。サイコロを3回ふります。出た目が「4→1→2」だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・『エンペラーフィスト・ガロム』の《ファンファーレ》能力\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n次にこれら4つの誘発し待機状態となっている能力を任意の順で解決することができます。\n『エンペラーフィスト・ガロム』の《ファンファーレ》能力を先に解決する場合の処理を記載します。サイコロをふります。出た目が3だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が3に対応する相手のフォロワーに3ダメージ与える『エンペラーフィスト・ガロム』の能力\nこれらを任意の順で解決できます。\n\n『新緑の新入生・カステル』に2ダメージ与える『エンペラーフィスト・ガロム』の能力から先に解決することは可能です。その場合、次のチェックタイミングにおいて体力が0以下になった『新緑の新入生・カステル』は破壊され、残りの誘発し待機状態となっている能力を任意の順で解決することができます。\n先に『新緑の新入生・カステル』を破壊しておくことで、「これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。」という効果が適用されなくなった状態の『農作のエルフ（EVOLVE）』に4ダメージ与えることも可能になります。"
+              },
+              {
+                "id": "Q2749",
+                "date": "2026-07-27",
+                "question": "『屍術王・コルネリウス』の《ファンファーレ》能力によって、墓場の『スマートゴブリン』を場に出した状況で、この『屍術王・コルネリウス』が何らかの能力によって場を離れた場合、この『スマートゴブリン』は自分のエンドフェイズが来たとき、墓場に置きますか？",
+                "answer": "はい。墓場に置きます。\n『屍術王・コルネリウス』の《ファンファーレ》能力で場に出した『スマートゴブリン』は「自分のエンドフェイズが来たとき、これを墓場に置く」を持ち、『屍術王・コルネリウス』が場を離れたとしても、この能力は有効です。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e8f7f9b04e9c4e4f4c58c9b7c9b299277478a5e30767d49b42a3873ae359437f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL17",
+            "fetched_at": "2026-09-24T18:35:13.030762Z"
+          },
+          "document_ref": "documents-889feea890d1379e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL18",
+      "documents": {
+        "documents-425c3a136f6099ab": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL18",
+            "faces": [
+              {
+                "name": "屍術王・コルネリウス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "死霊術師",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分の墓場の元のコスト3以下の学院・フォロワー1枚を選ぶ。それを場に出す。\n【超進化時】下記を3回くり返す。サイコロをふる。",
+                "sections": [],
+                "flavor": "この私すら、果てのない学びの途中さ。\n魔法の真髄とは――礎なくして辿り着けないのだから。",
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl18.png",
+                "trait_raw": "死霊術師・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2786",
+                "date": "2026-08-24",
+                "question": "自分の場に『屍術王・コルネリウス』、相手の場に『新緑の新入生・カステル』と『農作のエルフ（EVOLVE）』がいる状況で、『屍術王・コルネリウス』が超進化しました。誘発した能力の中から最初に【進化時】能力を解決し、自分の墓場の『エンペラーフィスト・ガロム』を場に出しました。その後の処理はどのようになりますか？また「【超進化時】下記を3回くり返す。サイコロをふる。」から解決し、サイコロの出た目が「4→1→2」の順だった場合、『エンペラーフィスト・ガロム』の能力で先に2ダメージを『新緑の新入生・カステル』に与えて破壊した後、4ダメージを『農作のエルフ（EVOLVE）』に与えるような処理を行うことはできますか？",
+                "answer": "その状況におけるその後の処理は以下の通りです。\n誘発し待機状態となっている『屍術王・コルネリウス』の【超進化時】能力と『エンペラーフィスト・ガロム』の《ファンファーレ》能力を任意の順で解決することができます。\n『屍術王・コルネリウス』の【超進化時】能力から解決する場合の処理を記載します。サイコロを3回ふります。出た目が「4→1→2」だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・『エンペラーフィスト・ガロム』の《ファンファーレ》能力\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n次にこれら4つの誘発し待機状態となっている能力を任意の順で解決することができます。\n『エンペラーフィスト・ガロム』の《ファンファーレ》能力を先に解決する場合の処理を記載します。サイコロをふります。出た目が3だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が3に対応する相手のフォロワーに3ダメージ与える『エンペラーフィスト・ガロム』の能力\nこれらを任意の順で解決できます。\n\n『新緑の新入生・カステル』に2ダメージ与える『エンペラーフィスト・ガロム』の能力から先に解決することは可能です。その場合、次のチェックタイミングにおいて体力が0以下になった『新緑の新入生・カステル』は破壊され、残りの誘発し待機状態となっている能力を任意の順で解決することができます。\n先に『新緑の新入生・カステル』を破壊しておくことで、「これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。」という効果が適用されなくなった状態の『農作のエルフ（EVOLVE）』に4ダメージ与えることも可能になります。"
+              },
+              {
+                "id": "Q2750",
+                "date": "2026-07-27",
+                "question": "「サイコロをふる」とはなんですか？",
+                "answer": "1~6までの数字が無作為に決まるように、一般的な6面ダイスを1個ふることです。"
+              },
+              {
+                "id": "Q2707",
+                "date": "2026-07-27",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2706",
+                "date": "2026-07-27",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7e70353a468185679ae169f778eed947af0fbed700512cf5b448129cbfd9a7ef",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL18",
+            "fetched_at": "2026-09-24T18:35:15.991461Z"
+          },
+          "document_ref": "documents-425c3a136f6099ab"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL19",
+      "documents": {
+        "documents-547ca50ee8614e5a": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL19",
+            "faces": [
+              {
+                "name": "エンペラーフィスト・ガロム",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "自分がサイコロをふったとき、相手の場のフォロワー1体を選ぶ。それに「出た目」と同じダメージ。\n自分がサイコロをふったとき、出た目が6なら、相手のリーダーすべてに4ダメージ。\n{ファンファーレ}サイコロをふる。",
+                "sections": [],
+                "flavor": "……『帝拳《エンペラーフィスト》』ガロムに、挑むか。\n意気だけは、買おう……それ以外には、何の価値も無い。",
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl19.png",
+                "trait_raw": "魔界・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2786",
+                "date": "2026-08-24",
+                "question": "自分の場に『屍術王・コルネリウス』、相手の場に『新緑の新入生・カステル』と『農作のエルフ（EVOLVE）』がいる状況で、『屍術王・コルネリウス』が超進化しました。誘発した能力の中から最初に【進化時】能力を解決し、自分の墓場の『エンペラーフィスト・ガロム』を場に出しました。その後の処理はどのようになりますか？また「【超進化時】下記を3回くり返す。サイコロをふる。」から解決し、サイコロの出た目が「4→1→2」の順だった場合、『エンペラーフィスト・ガロム』の能力で先に2ダメージを『新緑の新入生・カステル』に与えて破壊した後、4ダメージを『農作のエルフ（EVOLVE）』に与えるような処理を行うことはできますか？",
+                "answer": "その状況におけるその後の処理は以下の通りです。\n誘発し待機状態となっている『屍術王・コルネリウス』の【超進化時】能力と『エンペラーフィスト・ガロム』の《ファンファーレ》能力を任意の順で解決することができます。\n『屍術王・コルネリウス』の【超進化時】能力から解決する場合の処理を記載します。サイコロを3回ふります。出た目が「4→1→2」だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・『エンペラーフィスト・ガロム』の《ファンファーレ》能力\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n次にこれら4つの誘発し待機状態となっている能力を任意の順で解決することができます。\n『エンペラーフィスト・ガロム』の《ファンファーレ》能力を先に解決する場合の処理を記載します。サイコロをふります。出た目が3だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が3に対応する相手のフォロワーに3ダメージ与える『エンペラーフィスト・ガロム』の能力\nこれらを任意の順で解決できます。\n\n『新緑の新入生・カステル』に2ダメージ与える『エンペラーフィスト・ガロム』の能力から先に解決することは可能です。その場合、次のチェックタイミングにおいて体力が0以下になった『新緑の新入生・カステル』は破壊され、残りの誘発し待機状態となっている能力を任意の順で解決することができます。\n先に『新緑の新入生・カステル』を破壊しておくことで、「これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。」という効果が適用されなくなった状態の『農作のエルフ（EVOLVE）』に4ダメージ与えることも可能になります。"
+              },
+              {
+                "id": "Q2750",
+                "date": "2026-07-27",
+                "question": "「サイコロをふる」とはなんですか？",
+                "answer": "1~6までの数字が無作為に決まるように、一般的な6面ダイスを1個ふることです。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c4d5c0a019f2f25bfcda26e77729d2039e2cdabe58aac23e42d89a98e75c97c1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL19",
+            "fetched_at": "2026-09-24T18:35:18.971514Z"
+          },
+          "document_ref": "documents-547ca50ee8614e5a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL20",
+      "documents": {
+        "documents-aeb2d67539f82296": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL20",
+            "faces": [
+              {
+                "name": "逢魔の校長・ヴォルガス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分のデッキの上2枚を見る。その中から、学院・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。このターン、次に自分が元のコスト2以下の学院・カードをプレイする際、コストを-2する。\n{起動}これを{アクト}場の他のカード1枚を墓場に置く：相手の場のフォロワー1体を選ぶ。それに3ダメージ。1枚引く。この能力はこのターン、自分がサイコロをふっていたなら使える。",
+                "sections": [],
+                "flavor": "人は、己を揺るがす苦難、魔に逢いし数だけ成長する。\n清濁善悪、隔てず集い切磋琢磨――これぞ儂の学園なり！",
+                "illustrator": "ezusuke",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl20.png",
+                "trait_raw": "魔界・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2751",
+                "date": "2026-07-27",
+                "question": "『逢魔の校長・ヴォルガス』が場に出る前に自分がサイコロをふっていた場合、そのターン中に『逢魔の校長・ヴォルガス』の「この能力はこのターン、自分がサイコロをふっていたなら使える。」という条件を満たしますか？",
+                "answer": "はい。『逢魔の校長・ヴォルガス』が場に出る前に自分がサイコロをふっていた場合でも、このターンに自分がサイコロをふっていたため条件を満たします。"
+              },
+              {
+                "id": "Q2730",
+                "date": "2026-07-27",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイして、1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイすることができず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:311bcb39d1279ccd57e009a1db4be793ddf1ae52feb7b6a98bd4d317d0c3341d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL20",
+            "fetched_at": "2026-09-24T18:35:21.877997Z"
+          },
+          "document_ref": "documents-aeb2d67539f82296"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL21",
+      "documents": {
+        "documents-f5b5be13c604150a": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL21",
+            "faces": [
+              {
+                "name": "異端の指導者・ベルディリア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。これが能力によって場に出ていたなら、それに2ダメージ。",
+                "sections": [],
+                "flavor": "面倒ばかり起こる場所だな、この『学園』は……。\nまぁ……私なりに、やってみるしかないか。",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl21.png",
+                "trait_raw": "先導・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2718",
+                "date": "2026-07-27",
+                "question": "このフォロワーが相手のターン中に何らかの能力によって場に出た場合でも、「これが能力によって場に出ていたなら、」を満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fda69dd031a0b2563b7c745a89ca68514abeb8e4b50e51ec3fdd46016d7c8462",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL21",
+            "fetched_at": "2026-09-24T18:35:24.800783Z"
+          },
+          "document_ref": "documents-f5b5be13c604150a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL22",
+      "documents": {
+        "documents-57d3e78a1afe34ad": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL22",
+            "faces": [
+              {
+                "name": "異端の指導者・ベルディリア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "先導",
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【守護】\n【進化時】自分のリーダーは{体力}+1する。1枚引く。\n【超進化時】『長久の導き』1枚をEXエリアに置く。",
+                "sections": [
+                  "『長久の導き』{ビショップ}先導・学院・スペル{コスト2}相手の場のフォロワーX体まで選ぶ。それに5ダメージ。自分の場の学院・フォロワーすべては{攻撃力}+1/{体力}+1する。Xは「このターン中に自分のリーダーの{体力}を+した回数」である。"
+                ],
+                "flavor": "どんな性格か、どんな能力か。そして――どんな信仰か。\n正しく理解すれば、自ずと導く方向が見えてくる。",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl22.png",
+                "trait_raw": "先導・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2707",
+                "date": "2026-07-27",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2706",
+                "date": "2026-07-27",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P69"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a4f2d95ab30bd00bfa2e77cfb859da044337718ca39e636d0b5d53c2f798160f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL22",
+            "fetched_at": "2026-09-24T18:35:27.356930Z"
+          },
+          "document_ref": "documents-57d3e78a1afe34ad"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL23",
+      "documents": {
+        "documents-f38140cc9b625079": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL23",
+            "faces": [
+              {
+                "name": "華麗なる淑女・エルヴィーラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "学院",
+                  "光輝"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "ターンごとに2回、自分のリーダーの{体力}を+したとき、自分の場の他のフォロワーすべては{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分の手札の「これと同名を除く元のコストX以下の学院・フォロワー」1枚を場に出してよい。Xは「自分の残りPP」である。",
+                "sections": [],
+                "flavor": "貴方はわたくしを諦めないでくれた。\nもうこの手は離しません。ずっと共に咲き続けましょう。",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl23.png",
+                "trait_raw": "信仰・学院・光輝"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2756",
+                "date": "2026-07-27",
+                "question": "相手のターン中に自分のリーダーの《体力》を+した場合、このフォロワーの「ターンごとに2回、自分のリーダーの《体力》を+したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:48635e7d664941855c933320ef9f35d0c3db4a4eee6c98d4e62c5c9234ee4674",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL23",
+            "fetched_at": "2026-09-24T18:35:30.167761Z"
+          },
+          "document_ref": "documents-f38140cc9b625079"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL24",
+      "documents": {
+        "documents-8bbe4fe4dc554271": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL24",
+            "faces": [
+              {
+                "name": "嗚咽の聖騎士・ウィルバート",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "挑戦者",
+                  "先導"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}『聖騎兵』1体を場に出す。",
+                "sections": [
+                  "『聖騎兵』{ビショップ}先導・フォロワー{コスト1}{攻撃力}1/{体力}2【守護】これの{攻撃力}を+したとき、これは【突進】を持つ。"
+                ],
+                "flavor": "犠牲を希望と呼ぶほどの、無知さは最早ないけれど――\n悲嘆の中で、哀しみに溺れても、なお、彼は騎士。",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl24.png",
+                "trait_raw": "挑戦者・先導"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P68"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL25"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ffb1933de5f0389d771de799c048e4059a37974c77e6b94ec9bea48c5c6f0bf1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL24",
+            "fetched_at": "2026-09-24T18:35:32.742019Z"
+          },
+          "document_ref": "documents-8bbe4fe4dc554271"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL25",
+      "documents": {
+        "documents-60adf86cf1ae0bf3": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL25",
+            "faces": [
+              {
+                "name": "嗚咽の聖騎士・ウィルバート",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "挑戦者",
+                  "先導"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【守護】\n【進化時】下記から1つチョイスする。【1】『聖騎兵』1体を場に出す。自分の場の『聖騎兵』すべては{攻撃力}+1して、【指定攻撃】を持つ。【2】『クレスト 嗚咽の聖騎士・ウィルバート』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "悪夢の如き苦難でさえも、彼の罪は雪げない。\nリシャールが鳴きゼノンが嘆く――無情の嗚咽は永遠に。",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl25.png",
+                "trait_raw": "挑戦者・先導"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P68"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-P70"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL24"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:225943ed3da895071b2c712c6437d5933cd117e31939d269327cedca3f40deb8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL25",
+            "fetched_at": "2026-09-24T18:35:35.567088Z"
+          },
+          "document_ref": "documents-60adf86cf1ae0bf3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL26",
+      "documents": {
+        "documents-094a22d9ac2b033a": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL26",
+            "faces": [
+              {
+                "name": "レジェンドティーチャー・ルシウス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": "「迷える者を救うために、今はこの白刃を振るっている」\n数多のジョブ歴を持つ渡り鳥。男は次の運命に誘われる。",
+                "illustrator": "ニジハヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl26.png",
+                "trait_raw": "学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [
+              "※このカードは「+1アディショナルパック」からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1e83bde7f616292456faae437dbb4268a19348e4d1539fd71e9dddceb7db4b9c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL26",
+            "fetched_at": "2026-09-24T18:35:38.154983Z"
+          },
+          "document_ref": "documents-094a22d9ac2b033a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL27",
+      "documents": {
+        "documents-04a6621ecb2a2480": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL27",
+            "faces": [
+              {
+                "name": "レジェンドティーチャー・ルシウス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "学院"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "【進化時】手札の学院・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "「多くの若者が迷い、苦しんでいる？ならば俺は――！」\n斯くして男は、聖騎士から教師へジョブチェンジした。",
+                "illustrator": "ニジハヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl27.png",
+                "trait_raw": "学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-SL26"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9712fda930b6ad9e2a054827c33024fad6dedf302b7cc47849af87352feefda6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL27",
+            "fetched_at": "2026-09-24T18:35:41.018244Z"
+          },
+          "document_ref": "documents-04a6621ecb2a2480"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SL28",
+      "documents": {
+        "documents-7f30bee946a92a12": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-SL28",
+            "faces": [
+              {
+                "name": "駆動の領域・グレティナ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "学院",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "5",
+                "text": "自分のSEPが0である限り、これは【疾走】を持つ。\n{起動}手札の学院・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに5ダメージ。1枚引く。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": "楽をしたい、楽にやりたい。その願いこそ進歩発展の源。\nようこそ、ロボティクス・テクニカル・スクールへ！",
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-sl28.png",
+                "trait_raw": "機械・学院・超克"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2764",
+                "date": "2026-07-27",
+                "question": "『駆動の領域・グレティナ』の「自分のSEPが0である限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分のSEPが0である限り、『駆動の領域・グレティナ』は【疾走】を持ちます。\n『駆動の領域・グレティナ』を場に出した後に自分のSEPが1以上から0以下になった場合、【疾走】を持ちます。\n『駆動の領域・グレティナ』を場に出した後に自分のSEPが0以下から1以上になった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q2730",
+                "date": "2026-07-27",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイして、1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイすることができず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6f66aea734dab43ab23db460f90e7f12cf63113099a7b1355b24d63481ea8132",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL28",
+            "fetched_at": "2026-09-24T18:35:43.940366Z"
+          },
+          "document_ref": "documents-7f30bee946a92a12"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BSF2024",
+  "range": "000-099",
+  "products": {
+    "products-a13a5483ff5dbc17": [
+      {
+        "name": "Promo Cards",
+        "date": null,
+        "links": [
+          "/cards/searchresults?expansion=PR"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BSF2024-001EN",
+      "documents": {
+        "documents-ec3eb0190a5e53d4": {
+          "region": "en",
+          "record": {
+            "number": "BSF2024-001EN",
+            "faces": [
+              {
+                "name": "Bahamut",
+                "info": {
+                  "Card Set": "Promo Cards",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Promo",
+                  "Trait": "Deity / Supreme"
+                },
+                "stats": {
+                  "cost": "9",
+                  "hp": "9",
+                  "power": "9"
+                },
+                "text": "{icon_evolve|[evolve]}{icon_cost00|[cost00]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Destroy each other follower on the field.\nIf there are at least 2 enemy followers on the field, this follower can't attack enemy leaders.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]}{icon_cost00|[cost00]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Destroy each other follower on the field.\nIf there are at least 2 enemy followers on the field, this follower can't attack enemy leaders.",
+                "speech": null,
+                "illustrator": "Ryosuke Aiba (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/PR/BSF2024-001EN.png",
+                "trait_raw": "Deity / Supreme",
+                "traits": [
+                  "Deity",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a13a5483ff5dbc17",
+            "related_cards": [
+              {
+                "label": "{BP02-U07EN|Bahamut}",
+                "href": "/cards/?cardno=BP02-U07EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b2dd21afc86fd8be9810eb9ec85fd42f684ac1a407dbccf4507899b2bb375b72",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BSF2024-001EN",
+            "fetched_at": "2026-09-27T18:49:00.188028Z"
+          },
+          "document_ref": "documents-ec3eb0190a5e53d4"
+        }
+      ]
+    }
+  ]
+}

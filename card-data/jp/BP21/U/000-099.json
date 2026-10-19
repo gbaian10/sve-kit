@@ -1,0 +1,448 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP21",
+  "range": "U/000-099",
+  "products": {
+    "products-16b81cb0ff373351": [
+      {
+        "name": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+        "date": "2026-07-31",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP21",
+          "https://shadowverse-evolve.com/products/bp21/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP21-U01",
+      "documents": {
+        "documents-656b41a8d8a87a87": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-U01",
+            "faces": [
+              {
+                "name": "翅の女王・ティターニア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精",
+                  "プリンセス"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}自分のEXエリアの妖精・カードが2枚以上なら、自分のデッキから「これと同名を除く元のコスト3以下の妖精・フォロワー」1枚を探し、場に出す。\n{起動}{コスト1}これを{アクト}墓場に置く：相手の場のフォロワー1体を選ぶ。それを破壊する。それのプレイヤーは『フェアリー』1体を場に出す。この能力は自分のEXエリアの妖精・カードが5枚なら使える。",
+                "sections": [],
+                "flavor": "命と翅の溢れる地へ。\n――翅の女王・ティターニア",
+                "illustrator": "やまもも",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-u01.png",
+                "trait_raw": "妖精・プリンセス"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-T11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ed593bae25cb8db0a6717c15805e5101b127b3f21eed8b6ecbe33315e31749e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-U01",
+            "fetched_at": "2026-09-24T18:36:27.279909Z"
+          },
+          "document_ref": "documents-656b41a8d8a87a87"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-U02",
+      "documents": {
+        "documents-97a136ee01ebcf98": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-U02",
+            "faces": [
+              {
+                "name": "レヴィオンの超越者・ユリウス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "貴族",
+                  "レヴィオン"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "{ファンファーレ}手札のレヴィオン・カード2枚を公開：下記から1つチョイスする。自分の墓場のレヴィオン・カードが5枚以上なら、代わりに3つまで。\n【1】相手の場のフォロワー1体を選ぶ。それを破壊する。【2】相手のリーダーすべてに3ダメージ。【3】2枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "遥か高き境地へ至ろう。\n――レヴィオンの超越者・ユリウス",
+                "illustrator": "ヤナガワ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-u02.png",
+                "trait_raw": "貴族・レヴィオン"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2717",
+                "date": "2026-07-27",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q2716",
+                "date": "2026-07-27",
+                "question": "このフォロワーの《ファンファーレ》能力で【1】と【3】をチョイスした場合、【3】の効果を解決して引いたカードの内容を確認してから、【1】の効果を解決し、破壊する相手の場のフォロワーを選ぶことはできますか？",
+                "answer": "いいえ。できません。カードや能力によって目標を選ぶ場合、そのカードや能力をプレイする際に目標を選びます。今回の場合はチョイスによる選択肢を決定した後、目標を選びます。その後、能力に示された効果を、表記の順にしたがって実行します。"
+              },
+              {
+                "id": "Q2715",
+                "date": "2026-07-27",
+                "question": "相手の場のフォロワーを選ぶことができない場合、【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】をチョイスすることができず、【2】や【3】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c0816dbcac293e5ebe16c4151d05ca0817a148709736cd5093ae0c9566730d42",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-U02",
+            "fetched_at": "2026-09-24T18:36:30.224615Z"
+          },
+          "document_ref": "documents-97a136ee01ebcf98"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-U03",
+      "documents": {
+        "documents-b77bbfe7ecdeee85": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-U03",
+            "faces": [
+              {
+                "name": "双魂の久遠・ケリドウェン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "錬金術師",
+                  "禁忌"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。このターン中に自分の【土の秘術】によって自分の場の【スタック】を1個以上取っていたなら、それに2ダメージ。\n{ファンファーレ}【土の秘術】自分のデッキから元のコスト1以下の【土の秘術】を持つフォロワーか元のコスト1以下の土の印・アミュレット1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "愚かだから、生きるのね。\n――双魂の久遠・ケリドウェン",
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-u03.png",
+                "trait_raw": "錬金術師・禁忌"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2726",
+                "date": "2026-07-27",
+                "question": "『双魂の久遠・ケリドウェン』の《ファンファーレ》能力をプレイした後に、『ルナルの教会長・グリュネ』の《ファンファーレ》能力をプレイしていた場合、『双魂の久遠・ケリドウェン』の「自分のエンドフェイズが来たとき、～」という能力にある「このターン中に自分の【土の秘術】によって自分の場の【スタック】を1個以上取っていたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              },
+              {
+                "id": "Q2725",
+                "date": "2026-07-27",
+                "question": "『エクステンドマジック』をプレイし【土の秘術_2】を行っていた場合、『双魂の久遠・ケリドウェン』の「自分のエンドフェイズが来たとき、～」という能力にある「このターン中に自分の【土の秘術】によって自分の場の【スタック】を1個以上取っていたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:df2c3f429af02cc1f8aaac77bb98e838ab59ee38574150a279d046655ea16675",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-U03",
+            "fetched_at": "2026-09-24T18:36:32.662425Z"
+          },
+          "document_ref": "documents-b77bbfe7ecdeee85"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-U04",
+      "documents": {
+        "documents-e8a319869c69058b": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-U04",
+            "faces": [
+              {
+                "name": "金色の威信・リュミオール",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、自分の場のドラゴニュート・フォロワーが3体以上なら、相手のリーダーすべてと相手の場のフォロワーすべてに3ダメージ。\n{ファンファーレ}手札1枚を捨てる：自分のデッキから元のコスト2のドラゴニュート・フォロワー1枚と元のコスト1のドラゴニュート・フォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "轟け金色！我が名を刻め！\n――金色の威信・リュミオール",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-u04.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2741",
+                "date": "2026-07-27",
+                "question": "《ファンファーレ》能力によって、自分のデッキから元のコスト2のドラゴニュート・フォロワー1枚を場に出し、元のコスト1のドラゴニュート・フォロワー1枚を場に出さないという選択をすることは可能ですか？",
+                "answer": "はい。可能です。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f351dc91f10ecb4b5db8ce4974d569a2103505cf488c7bb11627d1c77de3d4b9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-U04",
+            "fetched_at": "2026-09-24T18:36:35.801505Z"
+          },
+          "document_ref": "documents-e8a319869c69058b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-U05",
+      "documents": {
+        "documents-10ea0652faacb0c1": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-U05",
+            "faces": [
+              {
+                "name": "エンペラーフィスト・ガロム",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界",
+                  "学院"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "自分がサイコロをふったとき、相手の場のフォロワー1体を選ぶ。それに「出た目」と同じダメージ。\n自分がサイコロをふったとき、出た目が6なら、相手のリーダーすべてに4ダメージ。\n{ファンファーレ}サイコロをふる。",
+                "sections": [],
+                "flavor": "弱い、柔い、脆い！\n――エンペラーフィスト・ガロム",
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-u05.png",
+                "trait_raw": "魔界・学院"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2786",
+                "date": "2026-08-24",
+                "question": "自分の場に『屍術王・コルネリウス』、相手の場に『新緑の新入生・カステル』と『農作のエルフ（EVOLVE）』がいる状況で、『屍術王・コルネリウス』が超進化しました。誘発した能力の中から最初に【進化時】能力を解決し、自分の墓場の『エンペラーフィスト・ガロム』を場に出しました。その後の処理はどのようになりますか？また「【超進化時】下記を3回くり返す。サイコロをふる。」から解決し、サイコロの出た目が「4→1→2」の順だった場合、『エンペラーフィスト・ガロム』の能力で先に2ダメージを『新緑の新入生・カステル』に与えて破壊した後、4ダメージを『農作のエルフ（EVOLVE）』に与えるような処理を行うことはできますか？",
+                "answer": "その状況におけるその後の処理は以下の通りです。\n誘発し待機状態となっている『屍術王・コルネリウス』の【超進化時】能力と『エンペラーフィスト・ガロム』の《ファンファーレ》能力を任意の順で解決することができます。\n『屍術王・コルネリウス』の【超進化時】能力から解決する場合の処理を記載します。サイコロを3回ふります。出た目が「4→1→2」だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・『エンペラーフィスト・ガロム』の《ファンファーレ》能力\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n次にこれら4つの誘発し待機状態となっている能力を任意の順で解決することができます。\n『エンペラーフィスト・ガロム』の《ファンファーレ》能力を先に解決する場合の処理を記載します。サイコロをふります。出た目が3だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が3に対応する相手のフォロワーに3ダメージ与える『エンペラーフィスト・ガロム』の能力\nこれらを任意の順で解決できます。\n\n『新緑の新入生・カステル』に2ダメージ与える『エンペラーフィスト・ガロム』の能力から先に解決することは可能です。その場合、次のチェックタイミングにおいて体力が0以下になった『新緑の新入生・カステル』は破壊され、残りの誘発し待機状態となっている能力を任意の順で解決することができます。\n先に『新緑の新入生・カステル』を破壊しておくことで、「これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。」という効果が適用されなくなった状態の『農作のエルフ（EVOLVE）』に4ダメージ与えることも可能になります。"
+              },
+              {
+                "id": "Q2750",
+                "date": "2026-07-27",
+                "question": "「サイコロをふる」とはなんですか？",
+                "answer": "1~6までの数字が無作為に決まるように、一般的な6面ダイスを1個ふることです。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:85a3ec31b97455ca626aad464dcad8dcb53e5eecac847b88d007928b0d97e472",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-U05",
+            "fetched_at": "2026-09-24T18:36:38.542260Z"
+          },
+          "document_ref": "documents-10ea0652faacb0c1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-U06",
+      "documents": {
+        "documents-4142345976db339b": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-U06",
+            "faces": [
+              {
+                "name": "華麗なる淑女・エルヴィーラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "学院",
+                  "光輝"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "ターンごとに2回、自分のリーダーの{体力}を+したとき、自分の場の他のフォロワーすべては{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分の手札の「これと同名を除く元のコストX以下の学院・フォロワー」1枚を場に出してよい。Xは「自分の残りPP」である。",
+                "sections": [],
+                "flavor": "華麗、美麗、淑女の所作を。\n――華麗なる淑女・エルヴィーラ",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-u06.png",
+                "trait_raw": "信仰・学院・光輝"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2756",
+                "date": "2026-07-27",
+                "question": "相手のターン中に自分のリーダーの《体力》を+した場合、このフォロワーの「ターンごとに2回、自分のリーダーの《体力》を+したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7bd2c346005306bcbe1e3e311f8f38fd93575471e7452c34896162445fa3d21e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-U06",
+            "fetched_at": "2026-09-24T18:36:41.434036Z"
+          },
+          "document_ref": "documents-4142345976db339b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-U07",
+      "documents": {
+        "documents-904b395de3efcdd9": {
+          "region": "jp",
+          "record": {
+            "number": "BP21-U07",
+            "faces": [
+              {
+                "name": "駆動の領域・グレティナ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "学院",
+                  "超克"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「Academy Royale/アカデミー・ロワイヤル」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "5",
+                "text": "自分のSEPが0である限り、これは【疾走】を持つ。\n{起動}手札の学院・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに5ダメージ。1枚引く。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": "欲望こそが発明を生む。\n――駆動の領域・グレティナ",
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/bp21-u07.png",
+                "trait_raw": "機械・学院・超克"
+              }
+            ],
+            "release_date": "2026-07-31",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2764",
+                "date": "2026-07-27",
+                "question": "『駆動の領域・グレティナ』の「自分のSEPが0である限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分のSEPが0である限り、『駆動の領域・グレティナ』は【疾走】を持ちます。\n『駆動の領域・グレティナ』を場に出した後に自分のSEPが1以上から0以下になった場合、【疾走】を持ちます。\n『駆動の領域・グレティナ』を場に出した後に自分のSEPが0以下から1以上になった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q2730",
+                "date": "2026-07-27",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイして、1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイすることができず、1枚引くことができません。"
+              }
+            ],
+            "products_ref": "products-16b81cb0ff373351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b16adcb0110f8739b64d81fc3203f61b1da17424b5a0557759dfc69af4838351",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP21-U07",
+            "fetched_at": "2026-09-24T18:36:44.009277Z"
+          },
+          "document_ref": "documents-904b395de3efcdd9"
+        }
+      ]
+    }
+  ]
+}

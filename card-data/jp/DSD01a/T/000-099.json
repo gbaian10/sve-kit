@@ -1,0 +1,83 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01a",
+  "range": "T/000-099",
+  "products": {
+    "products-78ede256f7a50fef": [
+      {
+        "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+        "date": "2024-04-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=DSD01",
+          "https://shadowverse-evolve.com/products/dsd01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "DSD01a-T01",
+      "documents": {
+        "documents-ca958912999f3e04": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01a-T01",
+            "faces": [
+              {
+                "name": "マナリアの魔弾",
+                "card_class": "ウィッチ",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "魔法使い",
+                  "学院"
+                ],
+                "rarity": "-",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分の墓場の学院・カードが10枚以上なら、それのリーダーに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "オーベン道玄坂",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01a-t01.png",
+                "trait_raw": "魔法使い・学院"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1244",
+                "date": "2024-03-01",
+                "question": "『マナリアの魔弾』をプレイした場合、自分の墓場の学院・カードの枚数にプレイしたこの『マナリアの魔弾』自身を含めることはできますか？",
+                "answer": "いいえ。効果の解決中、プレイしたこの『マナリアの魔弾』自身は墓場に置かれていないので、墓場の学院・カードの枚数に含めることはできません。"
+              },
+              {
+                "id": "Q1239",
+                "date": "2024-03-01",
+                "question": "自分の墓場の学院・カードが10枚以上の状況で、自分の場に『マナリアの竜姫・グレア（EVOLVE）』がいる場合、『マナリアの魔弾』が相手の場のフォロワーとそれのリーダーに与えるダメージはそれぞれ+1されますか？",
+                "answer": "はい。それぞれ+1され、相手の場のフォロワーに4ダメージ、それのリーダーに3ダメージ与えます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e5f3f7efb0f084c403fd2fd69addc5817d8837bb820ec3235f0eab3608270fab",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01a-T01",
+            "fetched_at": "2026-09-24T21:27:04.136521Z"
+          },
+          "document_ref": "documents-ca958912999f3e04"
+        }
+      ]
+    }
+  ]
+}

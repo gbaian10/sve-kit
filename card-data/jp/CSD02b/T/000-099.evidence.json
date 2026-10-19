@@ -1,0 +1,155 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD02b",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-a3fb556f032f1965": [
+        {
+          "ordinal": 0,
+          "name": "コラボスターターデッキ「Cool」",
+          "date_raw": "2023-08-25",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CSD02B",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CSD02B",
+            "https://shadowverse-evolve.com/products/csd02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/csd02/",
+              "expansion_code": "CSD02B"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-2f0c4066272be740": [
+        {
+          "stable_source_key": "Q899",
+          "official_number": "Q899",
+          "locator": "qa-block:0",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        },
+        {
+          "stable_source_key": "Q898",
+          "official_number": "Q898",
+          "locator": "qa-block:1",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        },
+        {
+          "stable_source_key": "Q897",
+          "official_number": "Q897",
+          "locator": "qa-block:2",
+          "published_on": "2023-07-28",
+          "date_raw": "2023-07-28"
+        }
+      ]
+    },
+    "related": {
+      "related-f271e7a8f335d962": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP02-T01"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=CP02-T02"
+        },
+        {
+          "locator": "related-link:2",
+          "href_raw": "/cardlist/?cardno=CP02-T03"
+        },
+        {
+          "locator": "related-link:3",
+          "href_raw": "/cardlist/?cardno=CP02-T05"
+        },
+        {
+          "locator": "related-link:4",
+          "href_raw": "/cardlist/?cardno=CP02-T06"
+        },
+        {
+          "locator": "related-link:5",
+          "href_raw": "/cardlist/?cardno=CP02-T07"
+        },
+        {
+          "locator": "related-link:6",
+          "href_raw": "/cardlist/?cardno=CP02-T08"
+        },
+        {
+          "locator": "related-link:7",
+          "href_raw": "/cardlist/?cardno=CP02-T09"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:dc3d72ccbf85963914f83916b873659ca32c091e84403eb6e38b9326021574d7": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:4284528cf705c1ce79a369f05c9db2f259118665c24f938993cc123ff63d93da",
+        "raw_bytes": 41553,
+        "first_receipt_id": "sha256:f85fa3097980bfb301e5a3e68a6df0e162fecdb1ea8576cc5f8b0ae6478d79b7",
+        "descriptor_sha256": "sha256:db86579f7702ae74401494d7defb623181a8688bd9f659dbe4307ebd83a5ad48",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:20f1efce8cf4f3b0178928b74631ce36a0249a7319f7ed9986457722bb272d47"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-a3fb556f032f1965",
+        "qa": "qa-2f0c4066272be740",
+        "related": "related-f271e7a8f335d962",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:0e69002fff566a99dee88d15c966f122c7b410825a92f22d55c95ec2033df75a"
+    }
+  }
+}

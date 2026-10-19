@@ -1,0 +1,106 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BSF2025",
+  "range": "000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-5bc33160d094c1f2": [
+        {
+          "ordinal": 0,
+          "name": "Promo Cards",
+          "date_raw": null,
+          "href_raw": [
+            "/cards/searchresults?expansion=PR"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=PR"
+          ],
+          "matches": [
+            {
+              "kind": "expansion_link",
+              "search_url": "https://en.shadowverse-evolve.com/cards/searchresults?expansion=PR",
+              "expansion_code": "PR"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-ed12a54115648459": [
+        {
+          "stable_source_key": "Q801",
+          "official_number": "Q801",
+          "locator": "qa-block:0",
+          "published_on": "2024-08-08",
+          "date_raw": "Aug. 8, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:cc9a2c530dc5d5428b3576ced77e8f3ca32f266d075437965f60e028c2160072": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:b6aace24b7b5175062afcd4146a35d5ef115c4b393e17e5233d557c64336d557",
+        "raw_bytes": 36258,
+        "first_receipt_id": "sha256:7fb6053687fb3534ec53af9d2d2320183d069de59ff835f3a1301f7c0592d499",
+        "descriptor_sha256": "sha256:609bf2488d2228bbe6f8334732084392dc4d48a9ad970bfda325cd8e6eadf96c",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:b15c365689f84cbef61b628905a4b451a13d715dcd9c14c7c6bfb7dcf4f607f7"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5bc33160d094c1f2",
+        "qa": "qa-ed12a54115648459",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:e6924d05ac9fc23003ecdf598e7494b214b7da614048ff470be2719c1a44249b"
+    }
+  }
+}

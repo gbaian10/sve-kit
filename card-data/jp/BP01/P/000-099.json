@@ -1,0 +1,2042 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP01",
+  "range": "P/000-099",
+  "products": {
+    "products-0066d46ee4f478d2": [
+      {
+        "name": "ブースターパック第1弾「創世の夜明け」",
+        "date": "2022-04-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP01",
+          "https://shadowverse-evolve.com/products/bp01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP01-P01",
+      "documents": {
+        "documents-1af67a68adfc69c1": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P01",
+            "faces": [
+              {
+                "name": "根源への回帰",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。【コンボ_5】それをデッキに置く代わりに、相手のフォロワーすべてをそれのプレイヤーはデッキの上か下に置く。（1体ずつ上か下か決める）（デッキに置いたトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p01.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": "https://shadowverse-evolve.com/errata/%e6%a0%b9%e6%ba%90%e3%81%b8%e3%81%ae%e5%9b%9e%e5%b8%b0/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q413",
+                "date": "2022-10-20",
+                "question": "相手の場に『ヘヴンリーイージス』のような【オーラ】を持つフォロワー1体と『ゴブリン』のような【オーラ】を持たないフォロワーが1体いるとき、【コンボ_5】の条件を満たした状態で『根源への回帰』をプレイすることができますか？",
+                "answer": "はい。【コンボ_5】の条件を満たした状態で『根源への回帰』をプレイする場合でも、相手のフォロワー1体を選ぶ必要があります。『ゴブリン』のような【オーラ】を持たないフォロワーを選ぶことによって問題なく『根源への回帰』をプレイすることができ、相手のフォロワーすべてに対して能力をプレイすることができます。"
+              },
+              {
+                "id": "Q412",
+                "date": "2022-10-20",
+                "question": "相手の場に『ヘヴンリーイージス』のような【オーラ】を持つフォロワーが1体だけいるとき、【コンボ_5】の条件を満たした状態で『根源への回帰』をプレイすることができますか？",
+                "answer": "いいえ。【コンボ_5】の条件を満たした状態で『根源への回帰』をプレイする場合でも、相手のフォロワー1体を選ぶ必要があります。相手のフォロワーを選ぶことができないので『根源への回帰』をプレイすることができません。"
+              },
+              {
+                "id": "Q156",
+                "date": "2022-04-26",
+                "question": "【コンボ_5】の条件を満たしており、相手がフォロワーを2枚以上デッキの上か下に置くとき、置く順番と上下に置く枚数は、相手が決めることができますか？",
+                "answer": "はい。デッキに置くフォロワーが2枚以上のとき、相手はそれらをデッキに置く順番や、上下にそれぞれ何枚置くかを好きなように決めることができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c4ac667625e65f88fe0e3c395e597a24ad7d1dd7a230bf2eb358963512d93fbe",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P01",
+            "fetched_at": "2026-09-24T23:28:25.415405Z"
+          },
+          "document_ref": "documents-1af67a68adfc69c1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P02",
+      "documents": {
+        "documents-fabfa40390572b9c": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P02",
+            "faces": [
+              {
+                "name": "ベビーエルフ・メイ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "これが場から手札に戻ったとき、相手のフォロワー1体を選ぶ。それに1ダメージ。\n{ファンファーレ}相手のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p02.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f669ea1b824b55d43d54a27b785c1e322898b494fdb98b49218f7dd8d73955e7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P02",
+            "fetched_at": "2026-09-24T23:28:27.977937Z"
+          },
+          "document_ref": "documents-fabfa40390572b9c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P03",
+      "documents": {
+        "documents-ac935831add6cba9": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P03",
+            "faces": [
+              {
+                "name": "アーチャー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n自分の場に他のフォロワーが出たとき、相手のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p03.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q326",
+                "date": "2022-07-07",
+                "question": "『エンシェントエルフ』の《ファンファーレ》能力のコストで『アーチャー』を選択した場合、『アーチャー』の能力はプレイしますか？",
+                "answer": "はい。一度誘発した自動能力は、そのカードが場を離れても能力をプレイできます。"
+              },
+              {
+                "id": "Q161",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーが2体あり、他のフォロワーが出たとき、このフォロワーの『自分の場に他のフォロワーが出たとき、相手のフォロワー1体を選ぶ。それに1ダメージ。』はそれぞれ誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:03fa79699d69c94f7ab3ddc6540dc7e9b1d292e395ec2234640b7ecf0fcec660",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P03",
+            "fetched_at": "2026-09-24T23:28:30.584540Z"
+          },
+          "document_ref": "documents-ac935831add6cba9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P04",
+      "documents": {
+        "documents-3dd2881df576fae0": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P04",
+            "faces": [
+              {
+                "name": "アーチャー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "1",
+                "hp": "4",
+                "text": "自分の場に他のフォロワーが出たとき、相手のフォロワー2体まで選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": "木々がざわめいた。獣が鳴いた。虫が蠢いた。\nこの森に足を踏み入れたその時から、警告はされていたのに。",
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p04.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q326",
+                "date": "2022-07-07",
+                "question": "『エンシェントエルフ』の《ファンファーレ》能力のコストで『アーチャー』を選択した場合、『アーチャー』の能力はプレイしますか？",
+                "answer": "はい。一度誘発した自動能力は、そのカードが場を離れても能力をプレイできます。"
+              },
+              {
+                "id": "Q163",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力で相手の場のフォロワー2体を選んだとき、それらのフォロワーにそれぞれ1ダメージを与えますか？",
+                "answer": "はい。それぞれに1ダメージを与えます。"
+              },
+              {
+                "id": "Q162",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーが2体あり、他のフォロワーが出たとき、このフォロワーの能力はそれぞれ誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:927027363b54e59066ceea975adac654f5ab92a805e491c52eaab3303a77bf3d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P04",
+            "fetched_at": "2026-09-24T23:28:33.278687Z"
+          },
+          "document_ref": "documents-3dd2881df576fae0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P05",
+      "documents": {
+        "documents-7d698d423d56b63e": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P05",
+            "faces": [
+              {
+                "name": "フェアリーサークル",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "『フェアリー』3枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "若月さな",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p05.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q60",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限のとき、このスペルで『フェアリー』をEXエリアに置くことはできますか？",
+                "answer": "いいえ。置くことはできません。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4e5b4d7df6647be6ba2598b009f90691d2276445a836e50b9c0fd67d1c4d97de",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P05",
+            "fetched_at": "2026-09-24T23:28:36.279688Z"
+          },
+          "document_ref": "documents-7d698d423d56b63e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P06",
+      "documents": {
+        "documents-bada83f02ee72873": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P06",
+            "faces": [
+              {
+                "name": "アルビダの号令",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "盗賊"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "5",
+                "power": "-",
+                "hp": "-",
+                "text": "『ヴァイキング』1体と『スティールナイト』1体と『ナイト』1体を出す。",
+                "sections": [
+                  "『ヴァイキング』{ロイヤル}盗賊・フォロワー{コスト3}{攻撃力}3/{体力}2【疾走】\n『スティールナイト』{ロイヤル}兵士・フォロワー{コスト2}{攻撃力}2/{体力}2\n『ナイト』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p06.png",
+                "trait_raw": "盗賊"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q171",
+                "date": "2022-04-26",
+                "question": "自分の場が上限まで残り1枚のとき、このスペルの能力で『ヴァイキング』と『スティールナイト』と『ナイト』のどれを場に出すかを選択することはできますか？",
+                "answer": "はい。選択することができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T05"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T06"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5608d602d8641aed6eaf13a1b0dd9234929ab56cb43c04fd44bef4e9d2a173cb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P06",
+            "fetched_at": "2026-09-24T23:28:38.752666Z"
+          },
+          "document_ref": "documents-bada83f02ee72873"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P07",
+      "documents": {
+        "documents-e0b72203100edca9": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P07",
+            "faces": [
+              {
+                "name": "メイドリーダー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "メイド"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト2}：これは進化する。",
+                "sections": [],
+                "flavor": "恩義ある主が、戦地から帰ってくる。\n奉仕する者は、元気よく声を出す。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p07.png",
+                "trait_raw": "兵士・メイド"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:62587c77ae7ae3cdc78226e14378581f559f31255c559f4168ed3dc5ea09236a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P07",
+            "fetched_at": "2026-09-24T23:28:41.584832Z"
+          },
+          "document_ref": "documents-e0b72203100edca9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P08",
+      "documents": {
+        "documents-22a289d886d9ad4d": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P08",
+            "faces": [
+              {
+                "name": "メイドリーダー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士",
+                  "メイド"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】自分のデッキから{進化}を持つフォロワー1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "鏡のような床、水のような硝子。全ては恩義に報いるために。\n「最高の笑顔でお迎え致しましょう！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p08.png",
+                "trait_raw": "兵士・メイド"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q174",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力で手札に加えるカードは、手札に加える前に公開しますか？",
+                "answer": "はい。指定されたカードであるかを確認する必要があるため、公開します。"
+              },
+              {
+                "id": "Q173",
+                "date": "2022-04-26",
+                "question": "自分のデッキに《進化》能力を持つフォロワーがないとき、このフォロワーの能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、デッキの中身を全て確認したあと、《進化》能力を持つフォロワーを手札に加えず、デッキをシャッフルします。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9a8c1fbe514be6653fb3ed4588d372aefc31c6c8c1b2074b5cef85fc04a79fc8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P08",
+            "fetched_at": "2026-09-24T23:28:44.606368Z"
+          },
+          "document_ref": "documents-22a289d886d9ad4d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P09",
+      "documents": {
+        "documents-b2eb395dbf173460": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P09",
+            "faces": [
+              {
+                "name": "セージコマンダー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}自分の他のフォロワーすべては{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "経験、分析、予測。そして兵の信頼があり、戦略は完成する。\n「私の策を信じるのだ」",
+                "illustrator": "ZEN",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p09.png",
+                "trait_raw": "指揮官"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:29b013ba790a37a3aaceb2809cd368d886c44b91abfc3264b8d2eea4bebed829",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P09",
+            "fetched_at": "2026-09-24T23:28:47.540144Z"
+          },
+          "document_ref": "documents-b2eb395dbf173460"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P10",
+      "documents": {
+        "documents-f066ee0b1f67de52": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P10",
+            "faces": [
+              {
+                "name": "ノーヴィストルーパー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【疾走】",
+                "sections": [],
+                "flavor": "緊張が体躯を熱し、鎧の下で汗が迸る。\nこれは若さゆえの先走りか、それとも栄光への先駆けか。",
+                "illustrator": "陽春",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p10.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6068f7605ea883a053f526ff00ae8a4a34a68a58a0b819af0cbc2f976a1ee4a7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P10",
+            "fetched_at": "2026-09-24T23:28:50.118560Z"
+          },
+          "document_ref": "documents-f066ee0b1f67de52"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P11",
+      "documents": {
+        "documents-f6ee1a35f97abd99": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P11",
+            "faces": [
+              {
+                "name": "次元の超越",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "12",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、墓場のスペル10枚を消滅：コストを7にする。\nこのターンのあと、自分の追加ターンを行う。",
+                "sections": [],
+                "flavor": "常識は無駄。法則は無視。誰も彼女を縛れない。\n「さぁ、飛ぶわよ！」",
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p11.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q329",
+                "date": "2022-07-07",
+                "question": "『次元の魔女・ドロシー(EVOLVE)』の【進化時】能力でコストが-5された『次元の超越』をプレイする際、さらに『次元の超越』の能力でコストを7にする場合、コストは7から-5をし、コスト2でプレイできますか？",
+                "answer": "はい。コスト2でプレイすることができます。"
+              },
+              {
+                "id": "Q193",
+                "date": "2022-04-26",
+                "question": "このスペルをプレイし、その効果で得た追加ターンでもう1枚のこのカードをプレイしたとき、同様に追加ターンを行いますか？",
+                "answer": "はい。行います。"
+              },
+              {
+                "id": "Q192",
+                "date": "2022-04-26",
+                "question": "このスペルをプレイする際、墓場のスペルを消滅させるときに、プレイしているこのカードを消滅させるスペルとして数えることはできますか？",
+                "answer": "いいえ。プレイするこのカードは墓場にないため、数えることはできません。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0297606a934ee7b17c2ebbf3a5ee3eaecaf011aa57c33b26c8c3add448531292",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P11",
+            "fetched_at": "2026-09-24T23:28:53.077201Z"
+          },
+          "document_ref": "documents-f6ee1a35f97abd99"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P12",
+      "documents": {
+        "documents-07fa3905d59e918b": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P12",
+            "faces": [
+              {
+                "name": "スペクトラルウィザード",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキの上1枚を見る。その中から、スペル1枚を公開して手札に加えてよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Hachi",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p12.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q195",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ファンファーレ》能力で自分のデッキから見たカードの中にスペルがあるとき、それを手札に加えないことを選択することはできますか？",
+                "answer": "はい。選択できます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dbedb9855649deb4b238cc4f3b6a64a2c4f2cafa1922cccbb673fac527526acd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P12",
+            "fetched_at": "2026-09-24T23:28:55.965394Z"
+          },
+          "document_ref": "documents-07fa3905d59e918b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P13",
+      "documents": {
+        "documents-42631807ba2335e9": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P13",
+            "faces": [
+              {
+                "name": "スペクトラルウィザード",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】手札のスペル1枚を捨てる：相手のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "知識を嫌うは愚鈍、蓄えるは平凡。\n賢明なる者は、知識捨て去るを恐れない。",
+                "illustrator": "Hachi",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p13.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:37bfed4c8c28b0ca14c56d1da24aa3afca0fbadca745a38b57131e98893ee85b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P13",
+            "fetched_at": "2026-09-24T23:28:58.613813Z"
+          },
+          "document_ref": "documents-42631807ba2335e9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P14",
+      "documents": {
+        "documents-9b97d8b1f06b8d5d": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P14",
+            "faces": [
+              {
+                "name": "錬金術の代償",
+                "card_class": "ウィッチ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "土の印"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "【スタック】\n{ファンファーレ}体力4以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
+                "sections": [],
+                "flavor": "有を無へと変え続ける、この一見無意味な行為こそが、\n無から有を生み出す領域へと……あぁ、もう聞こえていないか。",
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p14.png",
+                "trait_raw": "土の印"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:89642afa2d810b5e755ce80934d4636d024480e76c502fb6e49ce6f03f3f907d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P14",
+            "fetched_at": "2026-09-24T23:29:01.334309Z"
+          },
+          "document_ref": "documents-9b97d8b1f06b8d5d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P15",
+      "documents": {
+        "documents-78b27a25b23998b8": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P15",
+            "faces": [
+              {
+                "name": "魔力の蓄積",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n自分のデッキの上4枚を見る。その中から、スペル1枚を公開して手札に加えてよい。スペル1枚を墓場に置いてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "COGA",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p15.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q93",
+                "date": "2022-04-26",
+                "question": "このスペルで、スペル1枚を手札に加えないまたはスペル1枚を墓場に置かないことはできますか？",
+                "answer": "はい。どちらかを行わないことや、両方とも行わないこともできます。"
+              },
+              {
+                "id": "Q92",
+                "date": "2022-04-26",
+                "question": "自分のデッキが3枚以下のとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、自分のデッキ全てを見ます。また、残りのカードをデッキの下に戻すとき、カードを好きな順番でデッキ置き場に置きます。"
+              },
+              {
+                "id": "Q91",
+                "date": "2022-04-26",
+                "question": "このスペルで、自分のエボルヴデッキを見ることはできますか？",
+                "answer": "いいえ。メインデッキのみを見ることができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a7dd0cd4126111d389dfbcfcd5952e6d5b259132a6108cb1603c92e5ef8b1306",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P15",
+            "fetched_at": "2026-09-24T23:29:04.177767Z"
+          },
+          "document_ref": "documents-78b27a25b23998b8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P16",
+      "documents": {
+        "documents-d950aa7608724b49": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P16",
+            "faces": [
+              {
+                "name": "ドラゴンナイト・アイラ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "【指定攻撃】\n{ラストワード}自分のPP最大値を+1する。",
+                "sections": [],
+                "flavor": "「ねぇドラゴンさん、もう少しだけ待っててね。\n今は未熟な私だけど、必ず立派になってみせるから！」",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p16.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q202",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《ラストワード》能力で、自分のPP最大値を11以上にすることはできますか？",
+                "answer": "いいえ。PP最大値は10より多くなることはないため、自分のPP最大値を11以上にすることはできません。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e02ecd112c70e305fdda01a5aacd2b33b3ddd0b410d8db675334f27795cbb045",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P16",
+            "fetched_at": "2026-09-24T23:29:06.989966Z"
+          },
+          "document_ref": "documents-d950aa7608724b49"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P17",
+      "documents": {
+        "documents-7b582a2cc0f78f98": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P17",
+            "faces": [
+              {
+                "name": "神龍",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "{進化}{コスト2}：これは進化する。\n【守護】\n{ファンファーレ}2枚引く。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p17.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8fb5034335f06c681189be862636e880e03836bdeeb725ccb5d8a694fe797237",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P17",
+            "fetched_at": "2026-09-24T23:29:09.762931Z"
+          },
+          "document_ref": "documents-7b582a2cc0f78f98"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P18",
+      "documents": {
+        "documents-4c3bae0d621d2d81": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P18",
+            "faces": [
+              {
+                "name": "神龍",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "6",
+                "text": "【守護】\n【進化時】自分のリーダーは{体力}+5する。",
+                "sections": [],
+                "flavor": "悠久を積み重ね、神域にまで上り詰めた神秘の龍。\n無限に等しい知性にて、遥か彼方から人々を導くと言う。",
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p18.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1198977b2af4b6bb438e80bfb997354aa72e80c041eec86973b3e647f5e7dd04",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P18",
+            "fetched_at": "2026-09-24T23:29:12.641551Z"
+          },
+          "document_ref": "documents-4c3bae0d621d2d81"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P19",
+      "documents": {
+        "documents-f43675f797f8277f": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P19",
+            "faces": [
+              {
+                "name": "竜化の塔",
+                "card_class": "ドラゴン",
+                "card_type": "アミュレット",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "6",
+                "power": "-",
+                "hp": "-",
+                "text": "これがある限り、自分の『ドラゴン』すべては【突進】を持つ。\n{起動}これを{アクト}：フォロワー1体を選ぶ。それを破壊する。それのプレイヤーは『ドラゴン』1体を出す。",
+                "sections": [
+                  "『ドラゴン』{ドラゴン}竜族・フォロワー{コスト4}{攻撃力}5/{体力}5"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p19.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q208",
+                "date": "2022-04-26",
+                "question": "このアミュレットの『これがある限り、自分の『ドラゴン』すべては【突進】を持つ。』で、自分の《ドラゴン》フォロワーすべてに【突進】を持ちますか？",
+                "answer": "いいえ。トークンの『ドラゴン』のみが【突進】を持つため、それ以外の《ドラゴン》フォロワーはこのアミュレットの能力で【突進】を持ちません。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-T11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ed92c22a86345dbc2304a1b5d2c7cd44a8b50f80f4e3753b987287422c84d78",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P19",
+            "fetched_at": "2026-09-24T23:29:15.408449Z"
+          },
+          "document_ref": "documents-f43675f797f8277f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P20",
+      "documents": {
+        "documents-6372f8d60c3f520f": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P20",
+            "faces": [
+              {
+                "name": "ブレイジングブレス",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに2ダメージ。【覚醒】状態なら、代わりに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Illfill",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p20.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q106",
+                "date": "2022-04-26",
+                "question": "【覚醒】の条件を満たしているとき、このスペルは相手のフォロワー1体に6ダメージ与えますか？",
+                "answer": "いいえ。【覚醒】の条件を満たしているとき、このスペルは相手のフォロワー1体に4ダメージ与えます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:05e019f4040dccb7900bd3b8246752de18f60c5a82297e44d4bce41f69f40a1a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P20",
+            "fetched_at": "2026-09-24T23:29:18.135660Z"
+          },
+          "document_ref": "documents-6372f8d60c3f520f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P21",
+      "documents": {
+        "documents-6830d61754839c11": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P21",
+            "faces": [
+              {
+                "name": "デュエリスト・モルディカイ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{ラストワード}リーダーの{体力}-3：これを場に出す。",
+                "sections": [],
+                "flavor": "遠い昔の約束があった。今やもう、相手はいない。\n遠き日の決着をつけるため、今はもう、彷徨うばかり。",
+                "illustrator": "日田慶治",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p21.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:260fbaa92249177b4dce65113f82d14affd338b8ced405a58336a40ce92bc213",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P21",
+            "fetched_at": "2026-09-24T23:29:20.984238Z"
+          },
+          "document_ref": "documents-6830d61754839c11"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P22",
+      "documents": {
+        "documents-89333e9cda1f7f87": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P22",
+            "faces": [
+              {
+                "name": "狂気の処刑人",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "キラー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "殺人、処刑。強盗、処刑。脅迫、処刑。詐欺、処刑。\n侮辱、処刑。反抗、処刑。慟哭、処刑。死亡、処刑。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p22.png",
+                "trait_raw": "キラー"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P23"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5f24fa7a2814b6ef6ea8abe688db3fb6ea025cfecab33e2b16028896c91545aa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P22",
+            "fetched_at": "2026-09-24T23:29:23.749815Z"
+          },
+          "document_ref": "documents-89333e9cda1f7f87"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P23",
+      "documents": {
+        "documents-e5d2cbdd46111264": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P23",
+            "faces": [
+              {
+                "name": "狂気の処刑人",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "キラー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のリーダーに2ダメージ。相手プレイヤー1人は手札を公開する。自分はその中から1枚を選ぶ。相手はそれを捨てる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p23.png",
+                "trait_raw": "キラー"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q340",
+                "date": "2022-07-14",
+                "question": "相手の手札がない場合、このフォロワーの【進化時】能力で自分のリーダーに2ダメージを与えますか？",
+                "answer": "はい。相手の手札が0枚でも、このフォロワーの能力で自分のリーダーに2ダメージ与えます。"
+              },
+              {
+                "id": "Q221",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力で、相手の手札の【オーラ】を持つフォロワーを選ぶことはできますか？",
+                "answer": "はい。【オーラ】は場にあるときのみ選ばれないため、手札の【オーラ】を持つフォロワーを選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:403603373a4be992e092b9e34fffd8921cd263f421821a27c3d231d6f53dd244",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P23",
+            "fetched_at": "2026-09-24T23:29:26.399750Z"
+          },
+          "document_ref": "documents-e5d2cbdd46111264"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P24",
+      "documents": {
+        "documents-0d48b5286acfadae": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P24",
+            "faces": [
+              {
+                "name": "ダークジェネラル",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "5",
+                "text": "{ファンファーレ}【真紅】状態なら、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": "惰弱脆弱、等しく断罪。正義は我らが闇の中に在り。\n「我が胸に燃ゆる怒りを、力に変えて！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p24.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:18fe6c735d0ae74f38b4e4f2f3e28ff252746656a295464a6c5c883e1f3df653",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P24",
+            "fetched_at": "2026-09-24T23:29:29.173743Z"
+          },
+          "document_ref": "documents-0d48b5286acfadae"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P25",
+      "documents": {
+        "documents-6fab618c8a3b4c66": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P25",
+            "faces": [
+              {
+                "name": "ラビットネクロマンサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死霊術師"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ラストワード}リーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "可愛らしい見た目だが、被食者だったのは前世の話だ。\n「ぴょんぴょん跳ねて、可愛いでしょ！」",
+                "illustrator": "姚亮",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p25.png",
+                "trait_raw": "死霊術師"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d832d9d4c99621e3042d640e7e1b12d80e051dad1b864396231913b10bff42c8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P25",
+            "fetched_at": "2026-09-24T23:29:31.940652Z"
+          },
+          "document_ref": "documents-6fab618c8a3b4c66"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P26",
+      "documents": {
+        "documents-6fc8a7d90ec4f95a": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P26",
+            "faces": [
+              {
+                "name": "テミスの審判",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "5",
+                "power": "-",
+                "hp": "-",
+                "text": "フォロワーすべてを破壊する。",
+                "sections": [],
+                "flavor": "天上へ続く階段は、光となって訪れる。\n善悪区別なく、昇れ、昇れ、天まで昇れ。",
+                "illustrator": "sime",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p26.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q229",
+                "date": "2022-04-26",
+                "question": "このスペルの能力で、相手の場の【オーラ】を持つフォロワーを破壊することはできますか？",
+                "answer": "はい。破壊することができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c7c11f6b2e57e76f8e67e172c362c3b051db69fc1742e123b74e813e1b42758b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P26",
+            "fetched_at": "2026-09-24T23:29:34.675306Z"
+          },
+          "document_ref": "documents-6fc8a7d90ec4f95a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P27",
+      "documents": {
+        "documents-c07b87ddd670f894": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P27",
+            "faces": [
+              {
+                "name": "プリズムプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト2}：これは進化する。",
+                "sections": [],
+                "flavor": "「ヘイ、バッドボーイズ！\nワルいことをしちゃう子には、オシオキが必要デスねー！」",
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p27.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P28"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c759cd071ba7e3a245e486a1e5853befb59121238bd3ca75fd2b4a196fb20356",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P27",
+            "fetched_at": "2026-09-24T23:29:37.233910Z"
+          },
+          "document_ref": "documents-c07b87ddd670f894"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P28",
+      "documents": {
+        "documents-a7becdc37bb90b8f": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P28",
+            "faces": [
+              {
+                "name": "プリズムプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】自分のデッキからアミュレット1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "「グッバイ！バッドボーイズ！\nワタシのお祈りパワーでバキュン！と退治しちゃいマース！」",
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p28.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q232",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力で手札に加えるカードは、手札に加える前に公開しますか？",
+                "answer": "はい。指定されたカードであるかを確認する必要があるため、公開します。"
+              },
+              {
+                "id": "Q231",
+                "date": "2022-04-26",
+                "question": "自分のデッキにアミュレットがないとき、このフォロワーの能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、デッキの中身を全て確認したあと、アミュレットを手札に加えず、デッキをシャッフルします。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7fe2d931bca86fca984cabd7efbc3b9fec17e777b275b583a08f204ca8f2d90c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P28",
+            "fetched_at": "2026-09-24T23:29:40.009173Z"
+          },
+          "document_ref": "documents-a7becdc37bb90b8f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P29",
+      "documents": {
+        "documents-e5a3a4c283888e9c": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P29",
+            "faces": [
+              {
+                "name": "漆黒の法典",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "狂信"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n体力3以下の相手のフォロワー1体を選ぶ。それを消滅させる。",
+                "sections": [],
+                "flavor": "死した者を忘れぬようにと、教会はその名簿を作った。\n名と死因が連なる内に、名簿には死の匂いが染み付いた。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p29.png",
+                "trait_raw": "狂信"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q234",
+                "date": "2022-04-26",
+                "question": "このスペルは、元々の《体力》の数値が4以上かつ、ダメージなどにより現状の《体力》が3以下のフォロワーを選ぶことができますか？",
+                "answer": "はい。現状の《体力》を参照するため、選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b9a8b228ea039faac836da401dff7a6e94fcdb1b206bdd9126c9b38b78cced7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P29",
+            "fetched_at": "2026-09-24T23:29:42.915742Z"
+          },
+          "document_ref": "documents-e5a3a4c283888e9c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P30",
+      "documents": {
+        "documents-4b22cb744a43424a": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P30",
+            "faces": [
+              {
+                "name": "死の宣告",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "狂信"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "これはアクト状態で場に出る。\n{起動}これを{アクト}墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p30.png",
+                "trait_raw": "狂信"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q140",
+                "date": "2022-04-26",
+                "question": "このアミュレットの《起動》能力は、このアミュレットがアクトしているとき、コストを支払うことはできますか？",
+                "answer": "いいえ。能力のコストに、このアミュレットをアクトすることが求められているため、アクト状態ではコストを支払うことができません。"
+              },
+              {
+                "id": "Q139",
+                "date": "2022-04-26",
+                "question": "このアミュレットが場に出るとき、一度スタンド状態で場に出てからアクトされますか？",
+                "answer": "いいえ。一度もスタンド状態になることはなく、場に出す時点からアクト状態です。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ce311c12ceda7d1de97cf1b00dea6513a6c61947d1cca46e5e1f17f0a3cfe29a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P30",
+            "fetched_at": "2026-09-24T23:29:45.855975Z"
+          },
+          "document_ref": "documents-4b22cb744a43424a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P31",
+      "documents": {
+        "documents-bbeafc3dee8adf50": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P31",
+            "faces": [
+              {
+                "name": "風神",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "大神"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "4",
+                "power": "1",
+                "hp": "5",
+                "text": "自分のエンドフェイズが来たとき、自分のフォロワーすべては{攻撃力}+1する。\n{ファンファーレ}自分のフォロワー1体を選ぶ。それは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p31.png",
+                "trait_raw": "大神"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:152cd986d3a715201d41e451b4d4d46be62d8371cc9d73314dfbb5a4b00b07bc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P31",
+            "fetched_at": "2026-09-24T23:29:48.567333Z"
+          },
+          "document_ref": "documents-bbeafc3dee8adf50"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P32",
+      "documents": {
+        "documents-a26caff4bbec4773": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P32",
+            "faces": [
+              {
+                "name": "ベルエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "1",
+                "power": "0",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n【守護】\n{ラストワード}1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p32.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P33"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:39d303db48488940ea5fadd43134828bb2e8cd3625b1edf4bc5ad8d82a827798",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P32",
+            "fetched_at": "2026-09-24T23:29:51.501688Z"
+          },
+          "document_ref": "documents-a26caff4bbec4773"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P33",
+      "documents": {
+        "documents-20f1603518ff228a": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P33",
+            "faces": [
+              {
+                "name": "ベルエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "-",
+                "power": "0",
+                "hp": "2",
+                "text": "【守護】\n【進化時】相手のフォロワー1体を選ぶ。それに2ダメージ。\n{ラストワード}1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p33.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP01-P32"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:09605c5c7cc604fabf465f5a3fef41f2e089d313665f32b0a9a5858f46fef782",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P33",
+            "fetched_at": "2026-09-24T23:29:54.269197Z"
+          },
+          "document_ref": "documents-20f1603518ff228a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P34",
+      "documents": {
+        "documents-750da8927028c40f": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P34",
+            "faces": [
+              {
+                "name": "ツインプリズナー・フラム",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "悪魔"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "{起動}{コスト1}これと『ツインプリズナー・グラス』1体を墓場に置く：自分のデッキから『フラム＝グラス』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "己が母を燃やし尽くした。己が半身を救うために。\n「グラスをいじめるなら、焼き尽くす！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p34.png",
+                "trait_raw": "悪魔"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q241",
+                "date": "2022-04-26",
+                "question": "自分のデッキに『フラム=グラス』がないとき、このフォロワーの能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、デッキの中身を全て確認したあと、『フラム=グラス』を場に出さず、デッキをシャッフルします。また、この能力のコストで墓場に置かれたカードは、墓場に置かれたままとなります。"
+              }
+            ],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0532f5d6b02562dce7a4b033a3b611531f6a1bb58394bc4cf115ea7c0fa450f9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P34",
+            "fetched_at": "2026-09-24T23:29:56.728492Z"
+          },
+          "document_ref": "documents-750da8927028c40f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP01-P35",
+      "documents": {
+        "documents-578b45612d56182b": {
+          "region": "jp",
+          "record": {
+            "number": "BP01-P35",
+            "faces": [
+              {
+                "name": "ツインプリズナー・グラス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "悪魔"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第1弾「創世の夜明け」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}1枚引く。自分の手札1枚をデッキの下に置く。",
+                "sections": [],
+                "flavor": "己が父を凍てつかせた。己が半身を救うために。\n「フラムの邪魔をしないで！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP01/bp01_p35.png",
+                "trait_raw": "悪魔"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0066d46ee4f478d2",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:60327ba78e9a24f2272344c0ec9b8aa9684171934af815e9e7fe5ade03b62483",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP01-P35",
+            "fetched_at": "2026-09-24T23:29:59.727831Z"
+          },
+          "document_ref": "documents-578b45612d56182b"
+        }
+      ]
+    }
+  ]
+}

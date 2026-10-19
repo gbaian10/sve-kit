@@ -1,0 +1,105 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP17",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-87cc4652ff54d051": [
+        {
+          "ordinal": 0,
+          "name": "Booster Set \"Convergent Destinies\"",
+          "date_raw": "May 22, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP17",
+            "https://en.shadowverse-evolve.com/products/bp17"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP17",
+            "https://en.shadowverse-evolve.com/products/bp17"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp17",
+              "expansion_code": "BP17"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-3054da1cbb3c10d0": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP17-T08EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:e7abcccc866ba42832bf1e54c3b6b7f419bc61393c29dccc22c9039f651defca": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:5a441f6e0738e5eb0d6f8deb6a2ac061ce418f786557b87e5e377f93b53b6890",
+        "raw_bytes": 36404,
+        "first_receipt_id": "sha256:b74a1b03af6ee14ce286819674abd895efd3ca7c8761831d8dc197bec61dd912",
+        "descriptor_sha256": "sha256:aa41b1498f353c04876f9f2ba0c0e217489a41ad51cbce996f4cc86c184c5830",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:3f1dec4513a72c1cad89eae34199cfaa0ae2b9e354a806c482a92731d1ffbc7b"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-87cc4652ff54d051",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-3054da1cbb3c10d0",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:4153a480ec3591bc9ca24c22a206f0cc20e77476db05a9657fa1cdc290733e0e"
+    }
+  }
+}

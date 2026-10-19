@@ -1,0 +1,1367 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP11",
+  "range": "SL/000-099",
+  "products": {
+    "products-831c31c61323f193": [
+      {
+        "name": "ブースターパック第11弾「宿命の弾丸」",
+        "date": "2024-08-23",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP11",
+          "https://shadowverse-evolve.com/products/bp11/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP11-SL01",
+      "documents": {
+        "documents-c3dae24e97d07358": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL01",
+            "faces": [
+              {
+                "name": "開拓のロデオガイ・ロキサス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "エルフ族",
+                  "狩人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のターンごとに3回、自分がアミュレットをプレイしたとき、自分のPPを1回復する。\n{起動}場のアミュレット3つを{アクト}：1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl01.png",
+                "trait_raw": "荒野・エルフ族・狩人"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1483",
+                "date": "2024-08-20",
+                "question": "このフォロワーの《起動》能力を1ターンに2回以上使用することはできますか？",
+                "answer": "はい。2回以上使用することができます。"
+              },
+              {
+                "id": "Q1482",
+                "date": "2024-08-20",
+                "question": "自分の場に『開拓のロデオガイ・ロキサス』が2体いる状況で、自分がアミュレットをプレイした場合、『開拓のロデオガイ・ロキサス』の「自分のターンごとに3回、自分がアミュレットをプレイしたとき、～」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ自分のターンごとに3回ずつ誘発します。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bb479f28173400ba391878367cd2c8bf4a893cf4444cf8b7e242cc9fd04bd8e0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL01",
+            "fetched_at": "2026-09-24T21:03:26.486027Z"
+          },
+          "document_ref": "documents-c3dae24e97d07358"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL02",
+      "documents": {
+        "documents-02da5bfdc01b5a2c": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL02",
+            "faces": [
+              {
+                "name": "開拓のロデオガイ・ロキサス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "エルフ族",
+                  "狩人"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "自分のターンごとに1回、自分の乗物・カードが場を離れたとき、『従順な駿馬』『機動二輪車』『魔導装甲車』1枚ずつEXエリアに置く。自分のリーダーは{体力}+2する。\n{起動}場のアミュレット3つを消滅：下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それを破壊する。【2】自分の場の他のフォロワー1体を選ぶ。それは{攻撃力}+3/{体力}+3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl02.png",
+                "trait_raw": "荒野・エルフ族・狩人"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1486",
+                "date": "2024-08-20",
+                "question": "『開拓のロデオガイ・ロキサス（EVOLVE）』の《起動》能力で『ナテラの大樹』を消滅させた場合、『ナテラの大樹』の能力を処理してからチョイスする選択肢を決定することができますか？",
+                "answer": "いいえ。チョイスする選択肢を先に決定し、その後コストの支払いを行います。\nまた、『ナテラの大樹』が場を離れたときに誘発し待機状態になった能力は『開拓のロデオガイ・ロキサス（EVOLVE）』の《起動》能力の処理が終わった後のチェックタイミングで解決します。"
+              },
+              {
+                "id": "Q1485",
+                "date": "2024-08-20",
+                "question": "自分のEXエリアにカードが4枚ある状況で、『開拓のロデオガイ・ロキサス（EVOLVE）』の「自分のターンごとに1回、自分の乗物・カードが場を離れたとき、『従順な駿馬』『機動二輪車』『魔導装甲車』1枚ずつEXエリアに置く。」という能力をプレイした場合、『従順な駿馬』『機動二輪車』『魔導装甲車』の中から1枚を選択してEXエリアに置くことができますか？",
+                "answer": "はい。1枚を選択してEXエリアに置くことができます。\nまた自分のEXエリアのカードが3枚の場合は、2枚を選択してEXエリアに置くことができます。"
+              },
+              {
+                "id": "Q1484",
+                "date": "2024-08-20",
+                "question": "自分の場に『開拓のロデオガイ・ロキサス（EVOLVE）』が2体いる状況で、自分の乗物・カードが場を離れた場合、「自分のターンごとに1回、自分の乗物・カードが場を離れたとき、～」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ自分のターンごとに1回誘発します。"
+              },
+              {
+                "id": "Q1483",
+                "date": "2024-08-20",
+                "question": "このフォロワーの《起動》能力を1ターンに2回以上使用することはできますか？",
+                "answer": "はい。2回以上使用することができます。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-P31"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-P32"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-P33"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f969695be961a6003a8d9be961aff5331942aa68baefdfcc87f0c28d38539110",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL02",
+            "fetched_at": "2026-09-24T21:03:29.276232Z"
+          },
+          "document_ref": "documents-02da5bfdc01b5a2c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL03",
+      "documents": {
+        "documents-08ef24173c9f1b67": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL03",
+            "faces": [
+              {
+                "name": "優美な猫姉妹・シャム＆シャマ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狩人",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【疾走】\n【攻撃時】【コンボ_3】これは{攻撃力}+1/{体力}+1する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。【コンボ_5】それに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl03.png",
+                "trait_raw": "狩人・獣"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8a6b1e02f3c86f7f7fd7c8336d187ae0de12314df0bdd72f4de3afbc7125fbcc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL03",
+            "fetched_at": "2026-09-24T21:03:31.762540Z"
+          },
+          "document_ref": "documents-08ef24173c9f1b67"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL04",
+      "documents": {
+        "documents-52c90dcb019a929e": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL04",
+            "faces": [
+              {
+                "name": "カースドクイーン・ナハト・ナハト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "指揮官"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のデッキから元のコスト1の{ロイヤル}カード1枚を探し、EXエリアに置く。\n{起動}{コスト0}：相手の場のフォロワー1体を選ぶ。それをアクトする。次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にする。この能力は1ターンに1回使える。（【箱詰め】状態のフォロワーは、能力すべてを失い、スタートフェイズにスタンドしない）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl04.png",
+                "trait_raw": "荒野・指揮官"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1718",
+                "date": "2024-11-08",
+                "question": "《憑依》し、ドライブを持った相手の場のフォロワーを【箱詰め】状態にしました。その後、相手のターンが終了し【箱詰め】状態が解除された場合、そのフォロワーの【突進】や【シングルドライブ】はどうなりますか？",
+                "answer": "【箱詰め】状態の間は【突進】や【シングルドライブ】を失いますが、【箱詰め】状態が解除された場合、持っていた【突進】や【シングルドライブ】などの能力は元に戻り有効となります。"
+              },
+              {
+                "id": "Q1717",
+                "date": "2024-11-08",
+                "question": "『死の祝福』によって、【守護】を持った相手の場のフォロワーを【箱詰め】状態にしました。その後、相手のターンが終了し【箱詰め】状態が解除された場合、『死の祝福』によって持った【守護】はどうなりますか？",
+                "answer": "【箱詰め】状態の間は【守護】を失いますが、【箱詰め】状態が解除された場合、持っていた【守護】などの能力は元に戻り有効となります。"
+              },
+              {
+                "id": "Q1502",
+                "date": "2024-08-20",
+                "question": "『カースドクイーン・ナハト・ナハト』の《起動》能力によって、相手の場の『カオスルーラー・アイシィレンドリング』を選んだ場合、『カオスルーラー・アイシィレンドリング』の「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、チェックタイミングで解決します。"
+              },
+              {
+                "id": "Q1501",
+                "date": "2024-08-20",
+                "question": "《起動》能力によって、アクト状態の相手の場のフォロワーを選んだ場合でも、次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にすることができますか？",
+                "answer": "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にすることができます。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にする。」が適用されます。"
+              },
+              {
+                "id": "Q1500",
+                "date": "2024-08-20",
+                "question": "『ドラゴウェポン』の効果によって武装・タイプを持ったフォロワーが【箱詰め】状態になった場合、そのフォロワーは武装・タイプを失いますか？",
+                "answer": "いいえ。失いません。"
+              },
+              {
+                "id": "Q1499",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーに『守護の陽光』の《ファンファーレ》能力で【守護】を付与することはできますか？",
+                "answer": "はい。【箱詰め】状態のフォロワーに対して【守護】などの能力を付与することができます。"
+              },
+              {
+                "id": "Q1498",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーが場から手札に戻った場合、そのフォロワーの「これが場から手札に戻ったとき、」という能力は誘発しますか？",
+                "answer": "いいえ。能力を失っているので誘発しません。"
+              },
+              {
+                "id": "Q1497",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーが墓場に置かれた場合、そのフォロワーの《ラストワード》能力は誘発しますか？",
+                "answer": "いいえ。能力を失っているので《ラストワード》能力は誘発しません。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3963bfb5a6a46084df404a7e5aef3d9e11d793e1f3ae63b90fe4ea41a2c27aba",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL04",
+            "fetched_at": "2026-09-24T21:03:34.508771Z"
+          },
+          "document_ref": "documents-52c90dcb019a929e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL05",
+      "documents": {
+        "documents-807d08511caf39c6": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL05",
+            "faces": [
+              {
+                "name": "ファントムデュオ・バニー＆バロン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "盗賊"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "弱者は奪われ、潰されるのみ。それは運命、それは宿命。\nだが――その運命に抗うように、強きを挫く者達がいた。",
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl05.png",
+                "trait_raw": "荒野・盗賊"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:014e9939721d14531dd94c12dd15fd37fef27004348dd7965a6a06122651441c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL05",
+            "fetched_at": "2026-09-24T21:03:37.410023Z"
+          },
+          "document_ref": "documents-807d08511caf39c6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL06",
+      "documents": {
+        "documents-eb537515df3e46f7": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL06",
+            "faces": [
+              {
+                "name": "ファントムデュオ・バニー＆バロン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "盗賊"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】下記から1つチョイスする。【1】『魔導四輪車・V』1つを場に出す。【2】自分のデッキから『デスペラードショット』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl06.png",
+                "trait_raw": "荒野・盗賊"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-P06"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-P29"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b41bbd263bce85299f56053e5a4a6d5396162d890ad89098db75dcce3cf21d84",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL06",
+            "fetched_at": "2026-09-24T21:03:40.136332Z"
+          },
+          "document_ref": "documents-eb537515df3e46f7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL07",
+      "documents": {
+        "documents-1464021e6d998d5a": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL07",
+            "faces": [
+              {
+                "name": "ピースキーパー・ヴィンセント",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。この能力はこのターン、これの{攻撃力}や{体力}を+していたなら使える。\n{ファンファーレ}自分のデッキから荒野・カード1枚を探し、墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩オス",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl07.png",
+                "trait_raw": "荒野・魔法使い"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2074",
+                "date": "2025-06-23",
+                "question": "「このターン、これの《攻撃力》や《体力》を+していたなら、」という条件は、《進化》能力のコストを払うとき、追加でSEPを1つ裏向きにして超進化した場合でも満たしますか？",
+                "answer": "いいえ。《攻撃力》や《体力》を+していない場合、このフォロワーの《進化》能力をプレイすることができず、超進化することもできません。そのため「このターン、これの《攻撃力》や《体力》を+していたなら、」という条件を満たすことはできません。"
+              },
+              {
+                "id": "Q1513",
+                "date": "2024-08-20",
+                "question": "「このターン、これの《攻撃力》や《体力》を+していたなら、」という条件は、1ダメージを受けて体力が3になった後、体力を+1して体力が4になった場合でも満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b39487d42f676fe5c1d2ae6fb7e03a0a886488b1016b0399e5147af3567d584",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL07",
+            "fetched_at": "2026-09-24T21:03:42.744365Z"
+          },
+          "document_ref": "documents-1464021e6d998d5a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL08",
+      "documents": {
+        "documents-703b1d15afef9d17": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL08",
+            "faces": [
+              {
+                "name": "ピースキーパー・ヴィンセント",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】自分の墓場にあるカードの元のコストの種類数が3種類以上なら、自分のリーダーは{体力}+3する。6種類以上なら、1枚引く。9種類以上なら、相手の場のフォロワーすべてに9ダメージ。12種類以上なら、相手のリーダーすべてに12ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩オス",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl08.png",
+                "trait_raw": "荒野・魔法使い"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1514",
+                "date": "2024-08-20",
+                "question": "相手のリーダーの体力が12以下で、自分のデッキが0枚、自分の墓場にあるカードの元のコストの種類数が12種類の状況で、このフォロワーの【進化時】能力をプレイしました。この場合、相手のリーダーに12ダメージを与える前に自分が1枚引くため、自分がバトルに敗北しますか？",
+                "answer": "いいえ。引き分けになります。\n【進化時】能力の処理順は「1枚引く。」の後に「相手リーダーすべてに12ダメージ。」ですが、敗北処理はこの効果の解決後のチェックタイミングで同時に行われます。チェックタイミングの時点で自分と相手の両者が敗北条件を満たしているため、引き分けになります。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:806bf620362a60155fe791caa0085d96b3467ef629db8c48d5293d77bc6c3673",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL08",
+            "fetched_at": "2026-09-24T21:03:45.528929Z"
+          },
+          "document_ref": "documents-703b1d15afef9d17"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL09",
+      "documents": {
+        "documents-de49d4a0e8c16644": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL09",
+            "faces": [
+              {
+                "name": "アクセルヒーロー・マイザー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "自分のターンごとに1回、自分が元のコスト1以下のスペルをプレイしたとき、1枚引く。自分の手札1枚を捨てる。\n{ファンファーレ}『従順な駿馬』1つを場に出す。自分のデッキから『ラピッドファイア』1枚を探し、EXエリアに置く。【スペルチェイン_5】このターン、それをプレイする際、コストを-1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl09.png",
+                "trait_raw": "荒野・魔法使い"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1516",
+                "date": "2024-08-20",
+                "question": "自分の墓場の『ソニック・フォー』の「自分の場に『蒼の反逆者・テトラ』が出たとき、《コスト1》：自分の墓場のこれをEXエリアに置く。」という能力をプレイしたとき、『アクセルヒーロー・マイザー』の能力は誘発しますか？",
+                "answer": "いいえ。自動能力のプレイはスペルのプレイではないため、誘発しません。"
+              },
+              {
+                "id": "Q1515",
+                "date": "2024-08-20",
+                "question": "自分の場に『アクセルヒーロー・マイザー』が2体いる状況で、自分が元のコスト1以下のスペルをプレイした場合、『アクセルヒーロー・マイザー』の「自分のターンごとに1回、自分が元のコスト1以下のスペルをプレイしたとき、～」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ自分のターンごとに1回ずつ誘発します。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-P12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ed7c64d65ed6007d75901c2faf9cb7455db8b3b4149a8d5b36bdc04d34fc641",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL09",
+            "fetched_at": "2026-09-24T21:03:48.092652Z"
+          },
+          "document_ref": "documents-de49d4a0e8c16644"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL10",
+      "documents": {
+        "documents-0f0fd04b6f85c009": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL10",
+            "faces": [
+              {
+                "name": "烈覇のアルチザン・レジー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "竜族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n【覚醒】状態である限り、これは【疾走】を持つ。\n{ファンファーレ}自分の墓場の元のコスト2以下の荒野・フォロワー1枚を選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl10.png",
+                "trait_raw": "荒野・竜族"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1534",
+                "date": "2024-08-20",
+                "question": "『烈覇のアルチザン・レジー』の「【覚醒】状態である限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。【覚醒】状態である限り、『烈覇のアルチザン・レジー』は【疾走】を持ちます。\n『烈覇のアルチザン・レジー』を場に出した後に自分のPPが6以下から7以上になり【覚醒】状態を満たした場合、【疾走】を持ちます。\n『烈覇のアルチザン・レジー』を場に出した後に自分のPPが7以上から6以下になり【覚醒】状態を満たさなくなった場合、【疾走】を失います。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ce9e09ecacb15af69a88796e8095be9140c28347a1221f8fd57f12c52d93d85f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL10",
+            "fetched_at": "2026-09-24T21:03:50.959877Z"
+          },
+          "document_ref": "documents-0f0fd04b6f85c009"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL11",
+      "documents": {
+        "documents-2e7ca9274684564d": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL11",
+            "faces": [
+              {
+                "name": "烈覇のアルチザン・レジー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "竜族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【覚醒】状態である限り、これは【疾走】を持つ。\n【進化時】自分の場の他の荒野・フォロワーすべては{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "回転部に『竜炎ボルト』、『竜爪ツール』で工具を一つに。\n最後に『竜鱗ガード』で補強――あと少しで完成だ！",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl11.png",
+                "trait_raw": "荒野・竜族"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1534",
+                "date": "2024-08-20",
+                "question": "『烈覇のアルチザン・レジー』の「【覚醒】状態である限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。【覚醒】状態である限り、『烈覇のアルチザン・レジー』は【疾走】を持ちます。\n『烈覇のアルチザン・レジー』を場に出した後に自分のPPが6以下から7以上になり【覚醒】状態を満たした場合、【疾走】を持ちます。\n『烈覇のアルチザン・レジー』を場に出した後に自分のPPが7以上から6以下になり【覚醒】状態を満たさなくなった場合、【疾走】を失います。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:660e8fbd490dc2807e52ad124b6d1889f42d6b67503ebda62a44bae06239bc22",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL11",
+            "fetched_at": "2026-09-24T21:03:53.811754Z"
+          },
+          "document_ref": "documents-2e7ca9274684564d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL12",
+      "documents": {
+        "documents-aa583fcd15adf8c3": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL12",
+            "faces": [
+              {
+                "name": "万華の鳳凰",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "不死鳥"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}{コスト2}：【覚醒】状態なら、自分のデッキをシャッフルし、上1枚をEXエリアに置く。このターン、それをプレイする際、コストを0にする。\n{ラストワード}自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl12.png",
+                "trait_raw": "不死鳥"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1535",
+                "date": "2024-08-20",
+                "question": "相手の場に『沈黙の絶傑・ルルナイ』がいる状況で、『万華の鳳凰』の《ファンファーレ》能力によってEXエリアに置いた『灼熱の嵐』をプレイする際、コスト0でプレイすることができますか？",
+                "answer": "いいえ。『万華の鳳凰』の能力でコストが0になった後、『沈黙の絶傑・ルルナイ』の能力でコストが+1されるため、コスト1になります。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6c7ccdbe4c6c5536816c2f3a0d0d0db328067922811595221c53fb54eb2f94cf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL12",
+            "fetched_at": "2026-09-24T21:03:56.555367Z"
+          },
+          "document_ref": "documents-aa583fcd15adf8c3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL13",
+      "documents": {
+        "documents-ba3436c5ec272cf5": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL13",
+            "faces": [
+              {
+                "name": "カオスルーラー・アイシィレンドリング",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\nこれがアクトしたとき、相手プレイヤーすべては、自身の手札1枚を捨てる。\n{ファンファーレ}自分の場に『魔導列車』がないなら、『魔導列車』1つを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl13.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1502",
+                "date": "2024-08-20",
+                "question": "『カースドクイーン・ナハト・ナハト』の《起動》能力によって、相手の場の『カオスルーラー・アイシィレンドリング』を選んだ場合、『カオスルーラー・アイシィレンドリング』の「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、チェックタイミングで解決します。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-P30"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL14"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:69a797efa9dbdfde4cb15a844afc581449fb24d53fc9e7c6442ed8304e0f0692",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL13",
+            "fetched_at": "2026-09-24T21:03:59.313193Z"
+          },
+          "document_ref": "documents-ba3436c5ec272cf5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL14",
+      "documents": {
+        "documents-d9369618dab19f4c": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL14",
+            "faces": [
+              {
+                "name": "カオスルーラー・アイシィレンドリング",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "これがアクトしたとき、相手プレイヤーすべては、自身の手札1枚を捨てる。\n自分のターン中、いずれかのプレイヤーが自身の手札1枚を捨てたとき、相手の場のフォロワー1体を選ぶ。それをアクトする。\n【進化時】手札1枚を捨てる：自分の墓場のフォロワー2枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl14.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1544",
+                "date": "2024-08-20",
+                "question": "自分のターン中に、相手プレイヤーが自身の手札2枚を捨てた場合、このフォロワーの「自分のターン中、いずれかのプレイヤーが自身の手札1枚を捨てたとき、相手の場のフォロワー1体を選ぶ。それをアクトする。」は2回誘発しますか？",
+                "answer": "はい。2回誘発します。"
+              },
+              {
+                "id": "Q1543",
+                "date": "2024-08-20",
+                "question": "このフォロワーの【進化時】能力で墓場のカードを選ぶとき、このフォロワーの【進化時】能力のコストで捨てたカードを選ぶことはできますか？",
+                "answer": "いいえ。コストを支払う前に目標を選ぶ必要があるため、選ぶことはできません。"
+              },
+              {
+                "id": "Q1542",
+                "date": "2024-08-20",
+                "question": "自分の墓場のフォロワーが1枚以下の場合、『カオスルーラー・アイシィレンドリング（EVOLVE）』の【進化時】能力をプレイすることができますか？",
+                "answer": "いいえ。自分の墓場のフォロワー2枚を選ぶことができない場合、『カオスルーラー・アイシィレンドリング（EVOLVE）』の【進化時】能力をプレイすることができません。"
+              },
+              {
+                "id": "Q1502",
+                "date": "2024-08-20",
+                "question": "『カースドクイーン・ナハト・ナハト』の《起動》能力によって、相手の場の『カオスルーラー・アイシィレンドリング』を選んだ場合、『カオスルーラー・アイシィレンドリング』の「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、チェックタイミングで解決します。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76981add49c9701e66b3f93bc34f500c78008eaf9b336236bbd5f31ce91f9138",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL14",
+            "fetched_at": "2026-09-24T21:04:02.281763Z"
+          },
+          "document_ref": "documents-d9369618dab19f4c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL15",
+      "documents": {
+        "documents-86b0fdde72980514": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL15",
+            "faces": [
+              {
+                "name": "ストレイホロウ・イルガンノ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}自分の墓場の元のコスト3以下の荒野・フォロワー1枚を選ぶ。【ネクロチャージ_10】それを場に出してよい。そうしたなら、これは消滅する。\n{ラストワード}これをEXエリアに置く。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl15.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1548",
+                "date": "2024-08-20",
+                "question": "自分の墓場が10枚以上の状況で、『ネフティス』の《ファンファーレ》能力をプレイし、『ストレイホロウ・イルガンノ』を場に出して破壊しました。この場合、『ストレイホロウ・イルガンノ』の《ファンファーレ》能力で、墓場に置かれたこの『ストレイホロウ・イルガンノ』自身を選び、場に出すことができますか？",
+                "answer": "はい。《ファンファーレ》能力を解決する際に、その『ストレイホロウ・イルガンノ』は墓場に置かれているため、場に出すことができます。その場合、墓場から場に出た『ストレイホロウ・イルガンノ』は消滅しません。\nまた、《ファンファーレ》能力によって、その『ストレイホロウ・イルガンノ』を選び場に出した後、《ラストワード》能力を解決した場合、場の『ストレイホロウ・イルガンノ』はEXエリアに置かれません。"
+              },
+              {
+                "id": "Q1547",
+                "date": "2024-08-20",
+                "question": "自分の墓場が10枚以上の状況で、『ネフティス』の《ファンファーレ》能力をプレイし、『ストレイホロウ・イルガンノ』を場に出して破壊しました。この状況で『ストレイホロウ・イルガンノ』の《ファンファーレ》能力を解決し、自分の墓場の元のコスト3以下の荒野・フォロワーを場に出した場合、この『ストレイホロウ・イルガンノ』は消滅しますか？",
+                "answer": "いいえ。《ファンファーレ》能力を解決する際に、すでに場にいないため、その『ストレイホロウ・イルガンノ』は消滅しません。"
+              },
+              {
+                "id": "Q1546",
+                "date": "2024-08-20",
+                "question": "『ネフティス』の《ファンファーレ》能力によって、『ストレイホロウ・イルガンノ』を場に出して破壊した場合、《ラストワード》能力を先に解決することができますか？",
+                "answer": "はい。誘発して待機状態になっている《ファンファーレ》能力と《ラストワード》能力は任意の順番で解決できます。"
+              },
+              {
+                "id": "Q1545",
+                "date": "2024-08-20",
+                "question": "自分のEXエリアが上限枚数の状況で、このフォロワーが場から墓場に置かれた場合、《ラストワード》能力の処理はどうなりますか？",
+                "answer": "EXエリアに置くことができないので、墓場から移動しません。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:346a91abe45e907fc83db17f895383e7a0f8051e845d0dce7abd82379355634c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL15",
+            "fetched_at": "2026-09-24T21:04:05.051722Z"
+          },
+          "document_ref": "documents-86b0fdde72980514"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL16",
+      "documents": {
+        "documents-b0bf0c2c7f9b4f16": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL16",
+            "faces": [
+              {
+                "name": "メルティングシュガー・セリーナ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "信仰",
+                  "狂信"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "2",
+                "text": "【疾走】\n【攻撃時】自分のPPを2回復する。\n{ファンファーレ}自分のデッキの上4枚を見る。その中から、荒野・カードと元のコスト2以下のフォロワーそれぞれ1枚までEXエリアに置いてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl16.png",
+                "trait_raw": "荒野・信仰・狂信"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1561",
+                "date": "2024-08-20",
+                "question": "このフォロワーの《ファンファーレ》能力でデッキから見たカードがすべて荒野・カードであり、元のコスト2以下のフォロワーがなかった場合、その中から荒野・カード1枚のみをEXエリアに置くことができますか？",
+                "answer": "はい。EXエリアに置くことができます。また、デッキから見たカードがすべて元のコスト2以下のフォロワーであり、荒野・カードがなかった場合も同様に、その中から元のコスト2以下のフォロワー1枚のみをEXエリアに置くことができます。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:06ce35b8332f334f7ed549a7c43bf84a7c47359982aa1787be99059d66613330",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL16",
+            "fetched_at": "2026-09-24T21:04:07.729664Z"
+          },
+          "document_ref": "documents-b0bf0c2c7f9b4f16"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL17",
+      "documents": {
+        "documents-c11a9db3ca609e52": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL17",
+            "faces": [
+              {
+                "name": "双砲の神罰・アンヴェルト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "信仰"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "6",
+                "power": "4",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}相手の場のフォロワー2体まで選ぶ。それに3ダメージ。自分のEXエリアに荒野・カードがあるなら、相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ワダナカ",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl17.png",
+                "trait_raw": "荒野・信仰"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1562",
+                "date": "2024-08-20",
+                "question": "自分のEXエリアに荒野・カードがある状況で、相手の場にフォロワーがいない場合、このフォロワーの《ファンファーレ》能力をプレイして相手のリーダーに2ダメージを与えることができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、このフォロワーの《ファンファーレ》能力をプレイすることができます。そのため、自分のEXエリアに荒野・カードがある状況で、相手の場にフォロワーがいない場合でも、このフォロワーの《ファンファーレ》能力をプレイして相手のリーダーすべてに2ダメージを与えることができます。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fac5378537030da529763f31ec0aa04d58a83da098d3ff7a828250daf7803643",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL17",
+            "fetched_at": "2026-09-24T21:04:10.428304Z"
+          },
+          "document_ref": "documents-c11a9db3ca609e52"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL18",
+      "documents": {
+        "documents-26f9ea0d8a6883eb": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL18",
+            "faces": [
+              {
+                "name": "双砲の神罰・アンヴェルト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "信仰"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "6",
+                "text": "【守護】\n【進化時】相手の場のフォロワー2体まで選ぶ。それに3ダメージ。自分のEXエリアに荒野・カードがあるなら、相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ワダナカ",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl18.png",
+                "trait_raw": "荒野・信仰"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1563",
+                "date": "2024-08-20",
+                "question": "自分のEXエリアに荒野・カードがある状況で、相手の場にフォロワーがいない場合、このフォロワーの【進化時】能力をプレイして相手のリーダーに2ダメージを与えることができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、このフォロワーの【進化時】能力をプレイすることができます。そのため、自分のEXエリアに荒野・カードがある状況で、相手の場にフォロワーがいない場合でも、このフォロワーの【進化時】能力をプレイして相手のリーダーすべてに2ダメージを与えることができます。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6bbea9087ccbb0c93810b4b3a7f7d726a87e831a294b2f3744abfc21e5290ac5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL18",
+            "fetched_at": "2026-09-24T21:04:13.204674Z"
+          },
+          "document_ref": "documents-26f9ea0d8a6883eb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL19",
+      "documents": {
+        "documents-5a2cd33098749e2e": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL19",
+            "faces": [
+              {
+                "name": "均衡の刃・シルヴィア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}これは進化する。",
+                "sections": [],
+                "flavor": "人々が選びし答。それは、開くことの絶望。\n故に我が止めるわよ。最初の決意、折れるまで。",
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl19.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1571",
+                "date": "2024-08-20",
+                "question": "『メイドリーダー（EVOLVE）』の【進化時】能力によって、自分のデッキから『均衡の刃・シルヴィア』を探して手札に加えることができますか？",
+                "answer": "いいえ。『均衡の刃・シルヴィア』は《進化》能力（進化することができる起動能力・「丸E」のアイコン）を持たないので『メイドリーダー（EVOLVE）』の【進化時】能力によって、手札に加えることができません。"
+              },
+              {
+                "id": "Q1570",
+                "date": "2024-08-20",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL20"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:59f4754a52125c0e1347a6b351d59548363ba0f2abf4a816c9e3c8f1ed386eac",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL19",
+            "fetched_at": "2026-09-24T21:04:15.950348Z"
+          },
+          "document_ref": "documents-5a2cd33098749e2e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-SL20",
+      "documents": {
+        "documents-51a810db387b3519": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-SL20",
+            "faces": [
+              {
+                "name": "均衡の刃・シルヴィア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。自分のエボルヴデッキの表向きのエボルヴフォロワーが5枚以上なら、それに5ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-sl20.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1573",
+                "date": "2024-08-20",
+                "question": "『均衡の刃・シルヴィア』が進化した場合、その『均衡の刃・シルヴィア』自身は、エボルヴデッキの表向きのエボルヴフォロワーの枚数に含まれますか？",
+                "answer": "いいえ。含まれません。"
+              },
+              {
+                "id": "Q1572",
+                "date": "2024-08-20",
+                "question": "表向きの『ドライブポイント』やアドバンスフォロワーは、エボルヴデッキの表向きのエボルヴフォロワーの枚数に含まれますか？",
+                "answer": "いいえ。含まれません。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-SL19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cb688b2aaf063aacf818f4d587e3ff6b5dccf2db233a4c9b85862c821fc301a5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-SL20",
+            "fetched_at": "2026-09-24T21:04:18.600155Z"
+          },
+          "document_ref": "documents-51a810db387b3519"
+        }
+      ]
+    }
+  ]
+}

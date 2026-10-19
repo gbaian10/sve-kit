@@ -33,8 +33,8 @@ For data contribution formats, see [authored layout](docs/schema/domains/authore
 
 ## Parsed card inputs
 
-The format, generator and validator for reviewed Japanese and English SVE inputs
-are implemented; baseline import and build integration are planned for `card-data/`. Follow the
+The reviewed Japanese and English SVE baseline is stored in `card-data/`, with
+a generator and validator. Build integration is still planned. Follow the
 [parsed-input contract](docs/schema/ingest/parsed-card-inputs.md) for generation,
 fixed card-number ranges and validation against the previous data tree. Keep raw
 archives and old observations: parsing is reproducible only from preserved sources,

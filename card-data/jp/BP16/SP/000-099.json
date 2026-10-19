@@ -1,0 +1,87 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP16",
+  "range": "SP/000-099",
+  "products": {
+    "products-a51314f0b685530b": [
+      {
+        "name": "ブースターパック「新たなる創世」",
+        "date": "2025-07-11",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP16",
+          "https://dev.shadowverse-evolve.com/products/bp16/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP16-SP01",
+      "documents": {
+        "documents-edfa36a68b5acb61": {
+          "region": "jp",
+          "record": {
+            "number": "BP16-SP01",
+            "faces": [
+              {
+                "name": "勇壮の堕天使・オリヴィエ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "堕天使"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「新たなる創世」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。\n【超進化時】自分のリーダーは{体力}+3する。自分のPPを3回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/BP16/bp16-sp01.png",
+                "trait_raw": "堕天使"
+              }
+            ],
+            "release_date": "2025-07-11",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2079",
+                "date": "2025-07-07",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2078",
+                "date": "2025-07-07",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-a51314f0b685530b",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP16-111"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:758c2f91fe090fe5b561c77373f9456685223b1e67f66b1a52b66aab13f99e6a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP16-SP01",
+            "fetched_at": "2026-09-24T19:59:35.051295Z"
+          },
+          "document_ref": "documents-edfa36a68b5acb61"
+        }
+      ]
+    }
+  ]
+}
