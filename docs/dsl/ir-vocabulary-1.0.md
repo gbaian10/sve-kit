@@ -15,7 +15,7 @@ CR 1.27.0、2026-09-26 日文卡表（含所有面與 sections／Q&A）及設計
 | R-0001 | 五種關鍵字誘發頭的冒號成本是 K.pay PlayParameter，先目標後費用；保留 family provenance，不能展開成 auto 後改時點                                                 | generalized |
 | R-0002 | K.if 在結算處理到條件時判，不成立則其段落不做；誘發部分由 R-0009 取代                                                                                            | official    |
 | R-0003 | 攻擊時等關鍵字後條件也是本文 K.if，不控制 B.trigger；仍受合法目標／付款限制，非無條件能打出                                                                      | official    |
-| R-0004 | D.play-param Targets 不被普通本文條件關閉；SC／NC 仍按 V.spell-chain／V.necro-charge 特定捕捉                                                                    | generalized |
+| R-0004 | D.play-param Targets 不被普通本文條件關閉；revision 2 納入版次共用 DSL 與 E.targeted 旁證；SC／NC 仍按 V.spell-chain／V.necro-charge 特定捕捉                    | generalized |
 | R-0005 | 土の秘術付款只控制本文，不控制選目標；刪 targets.if(paid)，結果讀 PaymentComplete                                                                                | official    |
 | R-0006 | spell／模式內冒號 D.play-param{OptionalCost}＋K.pay PlayParameter；先決定 Modes、Targets、X、各組是否付款，合計費用在 play 之前支付；付不起依 CR 10.6.2.5.4 取消 | official    |
 | R-0007 | K.if／自我取代的條件延伸至段落／模式邊界；取代後的後句也受保護                                                                                                   | official    |
@@ -66,7 +66,7 @@ T 型別、R 引用、D 決定、C 捕捉、B 能力、I 指示、K 組合、X �
 ### 單一判定順序
 
 1. 確認有效能力／指示上下文及已明示的 P.start。卡文前提不成立，或 C33(c)① 的原定強制單位 ≤0，指示不開始，沒有下層輸入；記原因，不假記成 Decline。
-2. `D.play-param` 屬當次打出；固定數目的必要目標不合法即不能打出。不得拿結算時「盡可能做」放寬打出目標。可選費用是否支付仍是合法參數。同一選擇者的參數併入原決定；C§9.12 的異玩家模式交接及 C16 的效果中重打能力，協定可用 `resolve-choice` 承載內層 play 參數並計 occurrence，語義仍是 PlayParameter。
+2. `D.play-param` 屬當次打出；固定數目的必要目標不合法即不能打出。不得拿結算時「盡可能做」放寬打出目標。可選費用是否支付仍是合法參數。同一選擇者的參數併入原決定；C§9.12 的異玩家模式交接及 C16 的效果中重打能力，協定可用 `resolve-choice` 承載內層 play 參數並計 occurrence，語義仍是 PlayParameter。Targets 的等價省略例外見[條件效果的選擇省略](engine-boundaries.md#條件效果的選擇省略)，只略過玩家輸入，保留合法性與選取事實。
 3. `D.quick-window` 一律保留。普通規則程序依自身規則在無候選時略過；容量、守護等有玩家選擇的具體規則不可只套「RuleChoice 空集都略過」。
 4. 已開始的效果指示，只要要求玩家選／決定做不做，就保留輸入，即使只有唯一物件、空集合或 Decline。容量由規則截成 0 仍不等於原指示是強制 0。
 5. actor 是執行移動／建立指示者；destination owner、controller、owner 是不同角色，不互相代替。多玩家順序見 K.each-player。
@@ -391,6 +391,8 @@ CharacteristicPatch 初版參數為 `GrantAbility / SuppressAbility / SetKind / 
 `RulingRecord {id,question,decision,evidence:List<Evidence>,strength:Official|Generalized|Inferred|Undecided,decided_on:Date,applies_to:List<TemplateId | IrElementId>,hint:{zh-TW,ja},supersedes?,note?}`。`Evidence {ref,kind,quote?,question?,date?,version?,url?,reason?,note?}`，`kind` 封閉為 direct／supporting／counter／terminology／community／project：CR 條文用 `ref: "CR x.y.z"`＋`quote`＋`version`；Q&A 用 `ref: "Q####"`＋`quote`（回答）＋`question`＋`date`；卡文用 `ref: <卡號>`＋`quote`＋`date`（發售日）；英文官網等外部來源另附 `url`；專案決定用 `ref: project, kind: project`＋`reason`＋`date`，不假造官方編號。`applies_to` 的值是句型 ID（`T…`，來自全卡句型分類）或 IR 元素 ID（如 `E.stat-change`）；後者用於影響不限於封閉句型集合的引擎層語義。同一 Q&A 去重並保留適用情境。Undecided 不能驅動規則提示或自動結算；Inferred 提示必說本專案解讀。
 
 正式封套為 `format: 2, kind: ruling`，`revision` 為 authored 明示的正整數；未編版內容按[四層契約 §9](../schema/domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)初始化，不追認舊歷史。
+
+R-0004 revision 2 納入維護者 2026-10-19 對三組舊新版次共用 DSL 的判斷，追加四個指定模板與 Q417 選取事件旁證；一般先選後判的既有證據與 generalized 強度維持不變。
 
 正式位置是 `authored/rules/rulings/`：R-0001～R-0009 經使用者裁定；六項專案解讀登錄為 R-0010～R-0015，標 strength: inferred。不存 `decided_by` 的決定者，裁定日期以頂層 `decided_on` 保留；證據、結論與強度仍完整保留。條文更新按依賴圖反查 IR、巨集與卡片 meta 重審。`supersedes` 保存被取代範圍，effective view 僅採目前有效部分；R-0002 的結算條件及段落範圍仍有效。
 來源互相衝突時保留 disputed 與相反證據，不以模型投票決定官方答案。提示按具體結論標強度並提供介面語言回退；新裁定不自動提升能力為 verified。
