@@ -504,3 +504,60 @@ def test_shared_basis_uses_rules_text_instead_of_an_empty_printing(
                 if full_day is None
                 else "latest_known_release"
             )
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("correct_source", [False, True])
+def test_corrected_missing_rule_is_not_reported_as_a_reminder(
+    tmp_path: Path, inputs: Inputs, region: Region, correct_source: bool
+) -> None:
+    if region == "en":
+        del inputs.en["GF01-001EN"]
+        del inputs.mapping.targets["GF01-001EN"]
+        inputs.mapping.reskins = {}
+        inputs.en["PR-002EN"] = card("PR-002EN", "Name", english=True)
+        inputs.mapping.targets["PR-002EN"] = "BP02-071"
+        inputs.mapping.original_art.add("PR-002EN")
+        inputs.decisions.art_groups = [["BP02-070EN", "PR-002EN"]]
+    cards = inputs.jp if region == "jp" else inputs.en
+    incomplete, complete = tuple(cards.values())
+    complete.faces[0].name = incomplete.faces[0].name
+    incomplete.faces[0].text = "【疾走】" if region == "jp" else "Storm."
+    complete.faces[0].text = (
+        incomplete.faces[0].text + "\nResolve a synthetic end rule."
+    )
+    case = (
+        make_correction_case(
+            tmp_path, inputs, region=region, corrected=complete.faces[0].text[:-1] + ";"
+        ).texts
+        if correct_source
+        else make_case(tmp_path / "authored", inputs, regions=(region,))
+    )
+    group = next(group for group in case.plan.groups if group.region == region)
+    with create_database(compile_build(("en", "related", "correction"))) as db:
+        with db.transaction():
+            case.stage(db)
+        case.compose().import_into(
+            db, build=case.context(), vocabulary=case.vocabulary, published=()
+        )
+        for item in group.observations:
+            product(db, item.printing_id, "2026-01-01")
+        with db.transaction():
+            for row in db.rows("face_wording"):
+                db.delete(
+                    "face_wording",
+                    {key: row.values[key] for key in ("face_id", "region")},
+                )
+            populate_wording_basis(db, case.plan)
+        assessment = next(
+            row.values
+            for row in db.rows("face_wording")
+            if row.values["region"] == region
+        )
+        assert assessment["classification"] == (
+            "same_effect" if correct_source else "pending_review"
+        )
+        assert assessment["method"] == ("mechanical" if correct_source else "none")
+        assert assessment["reason"] == (
+            "source_correction" if correct_source else "semantic_review_required"
+        )

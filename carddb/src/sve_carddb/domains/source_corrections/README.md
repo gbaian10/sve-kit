@@ -31,6 +31,8 @@ its correction. No effective date is invented.
 Replacement occurs before candidate comparison, without filling printed text or
 claiming wording equivalence. All exact raw/current-bearing fields remain in the
 immutable input plan; missing effects still obey the existing report-only rule.
+Mechanical comparisons that use corrected candidates report `source_correction`
+instead of attributing the repaired source text to reminders or punctuation.
 
 F1 includes each correction comparison and image evidence use, with its exact
 locator, parser, batch, descriptor and first receipt. The pinned configuration

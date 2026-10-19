@@ -499,6 +499,7 @@ class _Comparison:
     fingerprint: str
     all_equivalent: bool
     equivalent: bool
+    source_corrected: bool
     excludes_empty: bool
     candidates: tuple[WordingCandidate, ...]
     printings: frozenset[str]
@@ -520,18 +521,13 @@ def _comparison(
         if item.printing_id in printings
         and (eligible == view.candidates or candidate_revision_id(item) not in empty)
     )
-    dated = tuple(
-        item.content for item in selected if dates[item.printing_id] is not None
-    )
-    contents = (
-        tuple(item.content for item in selected)
-        if not dated and eligible != view.candidates
-        else dated
-    )
+    dated = tuple(item for item in selected if dates[item.printing_id] is not None)
+    compared = selected if not dated and eligible != view.candidates else dated
     return _Comparison(
         fingerprint=comparison_hash(raw),
         all_equivalent=equivalent(raw),
-        equivalent=equivalent(contents),
+        equivalent=equivalent(tuple(item.content for item in compared)),
+        source_corrected=any(item.correction_keys for item in compared),
         excludes_empty=eligible != view.candidates,
         candidates=eligible,
         printings=printings,
@@ -553,6 +549,8 @@ def _classification(
         return "pending_review", "none", "semantic_review_required"
     if comparison.excludes_empty:
         return "same_effect", "mechanical", "empty_wording_excluded"
+    if comparison.source_corrected:
+        return "same_effect", "mechanical", "source_correction"
     return (
         "same_effect",
         "mechanical",
