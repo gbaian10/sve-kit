@@ -101,6 +101,11 @@ class FrameUse:
         )
 
 
+def source_scope(occurrence: OccurrenceKey) -> Scope:
+    """Historical and current uses share one syntactic scope, without semantic inference."""
+    return Scope(role=occurrence.role, domain=occurrence.field)
+
+
 def key(value: RecordData) -> bytes:
     """Use complete typed identities rather than ID prefixes or display wording."""
     return canonical(value.model_dump(mode="json"))

@@ -8,6 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.rulings import (
     Legacy,
+    LegacyReference,
     Mapping,
     PendingReason,
     Resolution,
@@ -15,6 +16,7 @@ from sve_carddb.contracts.rulings import (
     RulingRef,
 )
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.rulings.mapping import source_scope
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.four_layer import OccurrenceKey
@@ -194,7 +196,39 @@ def build(documents: tuple[Document, ...], rebuild: Rebuild | None = None) -> Re
             ref = RulingRef(
                 id=ruling.id, revision=ruling.revision, reference_ordinal=ordinal
             )
-            if re.fullmatch(r"[EDL]\.[a-z][a-z0-9_.-]*", identifier):
+            if isinstance(identifier, LegacyReference):
+                if rebuild is None:
+                    raise ValueError(
+                        "Explicit historical domain requires verified build sources"
+                    )
+                proven = rebuild.definitions.get(identifier.legacy, ())
+                selected = [d for n, d in proven if n.code == identifier.namespace]
+                if len(selected) != 1 or selected[0].uses is None:
+                    raise ValueError(
+                        "Explicit historical domain lacks verified definition"
+                    )
+                if {(u.occurrence, u.scope) for u in selected[0].uses} != {
+                    (
+                        u.occurrence,
+                        source_scope(u.occurrence),
+                    )
+                    for u in identifier.uses
+                }:
+                    raise ValueError(
+                        "Explicit historical domain differs from verified definition"
+                    )
+                resolutions.extend(
+                    _occurrence(
+                        document,
+                        ref,
+                        identifier.namespace,
+                        identifier.legacy,
+                        use,
+                        rebuild,
+                    )
+                    for use in selected[0].uses
+                )
+            elif re.fullmatch(r"[EDL]\.[a-z][a-z0-9_.-]*", identifier):
                 retained.append(
                     RetainedReference(
                         ruling_ref=ref,

@@ -53,6 +53,7 @@ from sve_carddb.domains.registry.preview.review_inputs import (
 )
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
 from sve_carddb.domains.rulings.reader import load as load_rulings
 from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
 from sve_carddb.domains.rulings.storage import write as write_rulings
@@ -627,7 +628,18 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             )
             mark("db: self keyword declaration projection")
             link_uses = () if link_result is None else link_result.record.uses
-            ruling_report = write_rulings(db, rulings, inputs.revision)
+            ruling_report = write_rulings(
+                db,
+                rulings,
+                inputs.revision,
+                rebuild=rebuild_rulings(
+                    db,
+                    rulings,
+                    name_sources,
+                    jp.card_batch,
+                    () if template_report is None else template_report.compiled,
+                ),
+            )
             name_uses = () if name_result is None else name_result.record.uses
             mark("db: rulings")
             record = input_record(

@@ -67,3 +67,34 @@ and checks that target/candidate frames and their verified bindings exist in thi
 build before writing. The authored ruling format and `applies_to` contents are
 unchanged here. A future authored reference format must preserve the source-use
 scope before mechanical rebinding can enable it.
+
+## Capturing historical evidence
+
+`evidence.capture(catalog, identifiers, verify_catalog=..., resolve_member=...)`
+materializes the old domain from a verified historical classification catalog.
+The first callback must prove its namespace, ID recipe, normalizer, definition
+hashes and complete membership against the frozen historical inputs. The second
+must resolve each old member using that input's complete source field, owner and
+independently reconstructed body segments. A current exact body match alone is
+insufficient. Declared source/hash/owner conflicts raise; unavailable evidence
+returns `Missing` with the member identity and a reason.
+
+One missing member keeps the entire definition at `uses=None`, including members
+that already have candidates. Multiple printings may identify the same exact old
+occurrence; those collapse only if their scope and parameters also agree. The
+original ruling reference ordinals never collapse. The catalog family is retained
+as historical classification provenance, not promoted to a verified semantic
+variant. The returned `LegacyInputs` uses the existing `Rebuild` boundary.
+
+`reconciliation.reconcile(documents, catalog, frames, rebuild=...)` reports every
+original reference, including IR references and definitions that are unavailable.
+Its candidate categories distinguish single current frames, multiple frames,
+historical sources and unmatched members. These are diagnostics beside the
+resolver's report, not `Target` records and never executable applicability.
+Reference counts and occurrence counts remain separate. Rerun both boundaries
+after rekeying frames; no saved candidate list may silently become resolved.
+
+Capture and reconciliation outputs are disposable build reports. They do not
+change authored rulings, activate pending semantics, or create a permanent
+allowlist. The frozen-source adapters remain responsible for validating inputs;
+these functions do not crawl, consult Git at runtime, or write a source store.
