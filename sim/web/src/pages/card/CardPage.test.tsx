@@ -522,7 +522,7 @@ describe("plain wording on the card page", () => {
     expect(note()).toHaveTextContent("BP-OTHER")
   })
   it.each(["errata", "pending_review"] as const)(
-    "says the effect may differ when the wording is classified %s",
+    "says the newer wording applies when the wording is classified %s",
     async (classification) => {
       state.available = true
       state.current = true
@@ -534,7 +534,7 @@ describe("plain wording on the card page", () => {
       expect(screen.getByText("合成舊版譯文")).toBeVisible()
       expect(screen.getByText("Synthetic older effect")).toBeVisible()
       expect(document.querySelector("[data-wording-note]")).toHaveTextContent(
-        "與 PR-SYNTHETIC 的卡文不同，效果可能有差異。",
+        "與 PR-SYNTHETIC 文字描述略有差異，以較新的寫法為準。",
       )
       expect(screen.queryByText(/意思相同/)).not.toBeInTheDocument()
     },

@@ -297,7 +297,7 @@ export default {
       shown: "Currently displayed text",
       unavailable: "Text for these printings is still being checked",
       printedSameEffect: "Worded slightly differently from {{printings}}; the meaning is the same.",
-      printedDifferent: "The text differs from {{printings}}; the effect may differ.",
+      printedDifferent: "Wording differs slightly from {{printings}}; the newer wording applies.",
       printingJoiner: ", ",
       borrowedTranslation:
         "This printing's text has no translation yet; the latest wording's translation is shown.",
