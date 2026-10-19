@@ -299,8 +299,7 @@ export default {
       shown: "現在表示中のテキスト",
       unavailable: "これらの版のテキストは確認中です",
       printedSameEffect: "{{printings}} とは文字表現がわずかに異なりますが、意味は同じです。",
-      printedDifferent:
-        "{{printings}} とはカードテキストが異なり、効果に違いがある可能性があります。",
+      printedDifferent: "{{printings}} と文言が少し異なります。より新しい表記に従います。",
       printingJoiner: "、",
       borrowedTranslation:
         "この版のテキストにはまだ訳文がないため、最新の表記の訳文を表示しています。",

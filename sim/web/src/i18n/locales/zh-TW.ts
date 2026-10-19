@@ -281,7 +281,7 @@ const zhTW = {
       shown: "目前顯示的卡文",
       unavailable: "這些版次的卡文還在確認中",
       printedSameEffect: "與 {{printings}} 文字描述略有差異，但意思相同。",
-      printedDifferent: "與 {{printings}} 的卡文不同，效果可能有差異。",
+      printedDifferent: "與 {{printings}} 文字描述略有差異，以較新的寫法為準。",
       printingJoiner: "、",
       borrowedTranslation: "此版次的卡文尚無譯文，顯示的是最新寫法的譯文。",
       provisional: "卡文未定：尚無採納的現行卡文",
