@@ -380,12 +380,6 @@ export default {
     trait: "タイプ",
     separator: "・",
     backFace: "裏面",
-    shell: {
-      results: "検索結果",
-      resultsPending: "検索結果の一覧は V4b で接続します。",
-      qa: "Q&A",
-      qaPending: "Q&A は V5 で接続します。",
-    },
     related: {
       title: "関連カード",
       evolve: "進化",

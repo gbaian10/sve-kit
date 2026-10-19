@@ -609,15 +609,18 @@ describe("plain wording on the card page", () => {
     expect(screen.getByText("合成新版譯文")).toBeVisible()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
     expect(screen.getByText("此版次的原文")).toBeVisible()
-    // The shared translation and this printing's original share the desktop pair container.
-    const pair = document.querySelector("[data-text-pair]")
-    expect(pair).not.toBeNull()
-    expect(within(pair as HTMLElement).getByText("合成新版譯文")).toBeVisible()
-    expect(within(pair as HTMLElement).getByText("Synthetic older effect")).toBeVisible()
+    // The shared translation stacks above this printing's original, never beside it.
+    expect(
+      screen
+        .getByText("合成新版譯文")
+        .compareDocumentPosition(screen.getByText("Synthetic older effect")) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
     act(() => {
       prefsStore.set({ effectLanguage: "original" })
     })
-    expect(document.querySelector("[data-text-pair]")).toBeNull()
+    expect(screen.queryByText("合成新版譯文")).not.toBeInTheDocument()
+    expect(screen.getByText("Synthetic older effect")).toBeVisible()
     act(() => {
       prefsStore.set({ effectLanguage: "translated" })
     })
@@ -933,74 +936,19 @@ describe("route failures", () => {
   })
 })
 
-describe("desktop shell", () => {
-  it("places the pending result and Q&A columns beside the page", async () => {
+describe("page layout", () => {
+  it("shows the card beside its text with no side columns", async () => {
     state.available = true
     await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(screen.getByRole("complementary", { name: "結果" })).toHaveTextContent(
-      "結果列表由 V4b 接入",
-    )
-    expect(screen.getByRole("complementary", { name: "Q&A" })).toHaveTextContent("Q&A 由 V5 接入")
-  })
-
-  it("keeps the overlay free of the shell columns", async () => {
-    state.available = true
-    function Framed() {
-      const { catalog, client, status } = useCardSnapshot()
-      const row = catalog?.index.printingByCardNo("jp", "BP-SYNTHETIC")
-      return (
-        <CardView
-          client={client}
-          status={status}
-          catalog={catalog}
-          resolved={
-            row
-              ? {
-                  id: stringValue(row["id"]),
-                  cardId: "c:synthetic",
-                  cardOwner: "BP-SYNTHETIC",
-                  printingOwner: "BP-SYNTHETIC",
-                  region: "jp",
-                  cardNo: "BP-SYNTHETIC",
-                  cardNoState: "official",
-                }
-              : undefined
-          }
-          frame={{
-            entry: {},
-            key: "BP-SYNTHETIC",
-            link: () => ({ to: "/cards", state: null }),
-            onClose: () => undefined,
-          }}
-        />
-      )
-    }
-    await renderRoutes(
-      [
-        {
-          path: "/cards",
-          element: (
-            <ToastProvider>
-              <Framed />
-            </ToastProvider>
-          ),
-        },
-      ],
-      { initialEntries: ["/cards?card=BP-SYNTHETIC"] },
-    )
-    expect(screen.getByRole("heading", { level: 2, name: "BP-SYNTHETIC" })).toBeVisible()
+    expect(screen.getByRole("heading", { level: 1, name: "BP-SYNTHETIC" })).toBeVisible()
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
   })
 
-  it.each([
-    ["both", 1],
-    ["translated", 0],
-    ["original", 0],
-  ] as const)(
-    "a printing whose text is the shared revision pairs only inside its own box (%s)",
-    async (effectLanguage, pairs) => {
+  it.each(["both", "translated", "original"] as const)(
+    "a printing whose text is the shared revision shows one effect section (%s)",
+    async (effectLanguage) => {
       state.available = true
       state.translated = true
       state.candidates = [{ printing_id: "p:synthetic", revision_id: "rev:synthetic" }]
@@ -1010,15 +958,11 @@ describe("desktop shell", () => {
         initialEntries: ["/cards/BP-SYNTHETIC"],
       })
       expect(document.querySelectorAll('[data-field="effect"]')).toHaveLength(1)
-      const found = document.querySelectorAll("[data-text-pair]")
-      expect(found).toHaveLength(pairs)
-      // The only pair is the text's own section, never an outer wrapper around a single box.
-      for (const pair of found) expect(pair.getAttribute("data-field")).toBe("effect")
       expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
     },
   )
 
-  it("renders the translation and the original as one pair when both are shown", async () => {
+  it("stacks the translation above the original when both are shown", async () => {
     state.available = true
     state.translated = true
     // This printing's own text is the displayed one, so the box shows its translation and original.
@@ -1028,9 +972,14 @@ describe("desktop shell", () => {
     await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    const pair = document.querySelector("[data-text-pair]")
-    expect(pair).not.toBeNull()
-    expect(within(pair as HTMLElement).getByText("合成新版譯文")).toBeVisible()
-    expect(within(pair as HTMLElement).getByText("Synthetic selected effect")).toBeVisible()
+    const section = document.querySelector('[data-field="effect"]') as HTMLElement
+    const translated = within(section).getByText("合成新版譯文")
+    const original = within(section).getByText("Synthetic selected effect")
+    expect(translated).toBeVisible()
+    expect(original).toBeVisible()
+    expect(section.className).not.toContain("grid")
+    expect(
+      translated.compareDocumentPosition(original) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 })

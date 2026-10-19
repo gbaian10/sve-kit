@@ -58,26 +58,9 @@ import { routeInput, useCardContent } from "./useCardContent"
 
 const ICON_BUTTON =
   "flex size-11 shrink-0 items-center justify-center rounded-button text-text-1 hover:bg-surface-2"
-// Phone: 72% of the width, as the reference sites do; tablet: 340px; the desktop middle column
-// (design 06b) holds 280px beside the narrow side columns at 1180 and 340px from 1440.
-const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-70 xl:w-85"
-const IMAGE_SIZES =
-  "(min-width: 1440px) 340px, (min-width: 1000px) 280px, (min-width: 600px) 340px, 72vw"
-// Design 06b: results on the left, Q&A on the right; both narrow at 1180 and full from 1440.
-const SHELL_GRID =
-  "lg:grid lg:grid-cols-[220px_minmax(0,1fr)_280px] lg:gap-x-5 xl:grid-cols-[260px_minmax(0,1fr)_300px]"
-
-/** A side column of the desktop shell whose content a later issue delivers: says so, draws nothing else. */
-function ShellAside({ heading, note }: { readonly heading: string; readonly note: string }) {
-  return (
-    <aside aria-label={heading} className="hidden lg:sticky lg:top-4 lg:block lg:self-start">
-      <div className="rounded-block border border-dashed border-border-strong p-4">
-        <h2 className="text-13 font-semibold text-text-2">{heading}</h2>
-        <p className="mt-1 text-13 text-text-3">{note}</p>
-      </div>
-    </aside>
-  )
-}
+// Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
+const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
+const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
 
 export function CardPage() {
   const { cardNo, intId } = useParams()
@@ -637,10 +620,7 @@ export function CardView({
   return (
     <article
       aria-busy={pending}
-      className={cn(
-        "relative w-full",
-        frame ? "flex min-h-full flex-col" : "mx-auto max-w-270 lg:max-w-none",
-      )}
+      className={cn("relative w-full", frame ? "flex min-h-full flex-col" : "mx-auto max-w-270")}
     >
       {pending && showPending && catalog && (
         <p
@@ -654,345 +634,323 @@ export function CardView({
         </p>
       )}
       {!frame && <StatusStrip readiness={readiness} />}
-      <div className={cn(frame === undefined && SHELL_GRID)}>
-        {!frame && (
-          <ShellAside
-            heading={t("cardPage.shell.results")}
-            note={t("cardPage.shell.resultsPending")}
-          />
+      {/* Top row (design 06): back 44, set tag 28, number centred in Plex 600 15px, copy link 44. */}
+      <div
+        className={cn(
+          "flex h-13 items-center gap-1",
+          frame && "sticky top-0 z-20 bg-surface-1 px-4",
         )}
-        <div className="min-w-0">
-          {/* Top row (design 06): back 44, set tag 28, number centred in Plex 600 15px, copy link 44. */}
-          <div
-            className={cn(
-              "flex h-13 items-center gap-1",
-              frame && "sticky top-0 z-20 bg-surface-1 px-4",
-            )}
+      >
+        {frame ? null : fromList ? (
+          <button
+            type="button"
+            aria-label={t("cardPage.back")}
+            title={t("cardPage.back")}
+            onClick={() => void navigate(-1)}
+            className={ICON_BUTTON}
           >
-            {frame ? null : fromList ? (
-              <button
-                type="button"
-                aria-label={t("cardPage.back")}
-                title={t("cardPage.back")}
-                onClick={() => void navigate(-1)}
-                className={ICON_BUTTON}
-              >
-                <ArrowLeft className="size-5.5" aria-hidden="true" />
-              </button>
-            ) : (
-              <RouterLink
-                to={region === "en" ? "/cards?ed=en" : "/cards"}
-                aria-label={t("cardPage.back")}
-                title={t("cardPage.back")}
-                className={ICON_BUTTON}
-              >
-                <ArrowLeft className="size-5.5" aria-hidden="true" />
-              </RouterLink>
-            )}
-            {setCode !== undefined && (
-              <RouterLink
-                to={`/sets/${encodeURIComponent(setCode)}${region === "en" ? "?ed=en" : ""}`}
-                aria-label={t("cardPage.set", { code: setCode })}
-                className="flex h-7 shrink-0 items-center rounded-sm bg-surface-2 px-2 text-12 font-semibold text-text-2 hover:bg-surface-3"
-              >
-                {setCode}
-              </RouterLink>
-            )}
-            <Heading className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
-              {resolved?.cardNo ?? frame?.key ?? cardNo ?? intId}
-            </Heading>
+            <ArrowLeft className="size-5.5" aria-hidden="true" />
+          </button>
+        ) : (
+          <RouterLink
+            to={region === "en" ? "/cards?ed=en" : "/cards"}
+            aria-label={t("cardPage.back")}
+            title={t("cardPage.back")}
+            className={ICON_BUTTON}
+          >
+            <ArrowLeft className="size-5.5" aria-hidden="true" />
+          </RouterLink>
+        )}
+        {setCode !== undefined && (
+          <RouterLink
+            to={`/sets/${encodeURIComponent(setCode)}${region === "en" ? "?ed=en" : ""}`}
+            aria-label={t("cardPage.set", { code: setCode })}
+            className="flex h-7 shrink-0 items-center rounded-sm bg-surface-2 px-2 text-12 font-semibold text-text-2 hover:bg-surface-3"
+          >
+            {setCode}
+          </RouterLink>
+        )}
+        <Heading className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
+          {resolved?.cardNo ?? frame?.key ?? cardNo ?? intId}
+        </Heading>
+        <button
+          type="button"
+          aria-label={t("cardPage.copyLink")}
+          title={t("cardPage.copyLink")}
+          onClick={() => void copyLink()}
+          className={ICON_BUTTON}
+        >
+          <Link2 className="size-5" aria-hidden="true" />
+        </button>
+        {frame && (
+          <>
             <button
               type="button"
-              aria-label={t("cardPage.copyLink")}
-              title={t("cardPage.copyLink")}
-              onClick={() => void copyLink()}
+              aria-label={t("cardPage.fullscreen")}
+              title={t("cardPage.fullscreen")}
+              disabled={!summary}
+              onClick={openFullPage}
               className={ICON_BUTTON}
             >
-              <Link2 className="size-5" aria-hidden="true" />
+              <Maximize2 className="size-5" aria-hidden="true" />
             </button>
-            {frame && (
-              <>
-                <button
-                  type="button"
-                  aria-label={t("cardPage.fullscreen")}
-                  title={t("cardPage.fullscreen")}
-                  disabled={!summary}
-                  onClick={openFullPage}
-                  className={ICON_BUTTON}
-                >
-                  <Maximize2 className="size-5" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  aria-label={t("cardPage.closePanel")}
-                  title={t("cardPage.closePanel")}
-                  onClick={frame.onClose}
-                  className={ICON_BUTTON}
-                >
-                  <X className="size-5" aria-hidden="true" />
-                </button>
-              </>
-            )}
-          </div>
-          {/* The desktop middle column is the container the original/translation pair measures
-          itself against; phones and tablets keep the pair stacked. */}
-          <div
-            className={cn(
-              frame === undefined && "lg:@container/text",
-              // The drawer and the modal are containers: side by side only once they are wide enough.
-              frame !== undefined &&
-                "px-4 @4xl:grid @4xl:grid-cols-[280px_minmax(0,1fr)] @4xl:gap-x-6",
-            )}
-            onClickCapture={(event) => {
-              if (
-                pending &&
-                event.target instanceof Element &&
-                !event.target.closest("[data-card-navigation]")
-              ) {
-                event.preventDefault()
-                event.stopPropagation()
-              }
-            }}
-          >
-            <div
-              className={cn(
-                "mt-1 flex flex-col items-center gap-3",
-                frame !== undefined && "@4xl:sticky @4xl:top-13 @4xl:self-start",
-              )}
+            <button
+              type="button"
+              aria-label={t("cardPage.closePanel")}
+              title={t("cardPage.closePanel")}
+              onClick={frame.onClose}
+              className={ICON_BUTTON}
             >
-              {views.map(
-                ({ faceId, ordinal, faceSummary, name }) =>
-                  faceSummary &&
-                  name && (
-                    <button
-                      key={faceId}
-                      type="button"
-                      disabled={pending}
-                      aria-label={t("cardPage.zoom", { name: name.primary.text })}
-                      onClick={() => {
-                        setZoomed(faceId)
-                      }}
-                      className={cn(
-                        "block rounded-card shadow-lg transition-transform hover:scale-[1.01]",
-                        frame === undefined && IMAGE_SLOT,
-                        frame !== undefined && "w-[64%] max-w-64 @4xl:w-full @4xl:max-w-none",
-                      )}
-                    >
-                      <CardImage
-                        summary={faceSummary}
-                        onReady={ordinal === 0 ? imageReady : undefined}
-                        name={name.primary}
-                        images={images}
-                        alt="decorative"
-                        sizes={IMAGE_SIZES}
-                        className="w-full"
-                      />
-                    </button>
-                  ),
-              )}
-            </div>
-            <div className="mt-4 min-w-0">
-              {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
-                const basics =
-                  faceCatalog && printingId
-                    ? faceBasics(faceCatalog.index, faceId, region, printingId)
-                    : undefined
-                const nameRevisionId = basics?.revision?.["id"]
-                const values = basics?.values
-                const classCode =
-                  typeof values?.["class_code"] === "string"
-                    ? values["class_code"]
-                    : values?.["class_code"] === null
-                      ? null
-                      : undefined
-                const typeCode =
-                  typeof values?.["type_code"] === "string" ? values["type_code"] : null
-                const traits = (values?.["traits"] ?? []) as string[]
-                const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
-                const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
-                const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
-                return (
-                  <section
-                    key={faceId}
-                    aria-label={name?.primary.text ?? faceId}
-                    className={cn(ordinal > 0 && "mt-6 border-t border-border pt-4")}
-                  >
-                    {faceSummary && name && (
-                      <div className="flex flex-col gap-1.5">
-                        {ordinal > 0 && (
-                          <Badge className="self-start">{t("cardPage.backFace")}</Badge>
-                        )}
-                        <div className="flex items-start gap-2">
-                          {classCode !== undefined && (
-                            <img
-                              src={CLASS_ICON[classStyle(classCode)]}
-                              alt=""
-                              className="mt-0.5 size-5 shrink-0"
-                            />
-                          )}
-                          <div className="min-w-0 flex-1">
-                            {typeof nameRevisionId === "string" ? (
-                              <CardNameHeading
-                                client={client}
-                                edition={region}
-                                resolver={null}
-                                owner={{ kind: "face_revision", id: nameRevisionId }}
-                                fallback={name}
-                              />
-                            ) : (
-                              <PlainNameHeading name={name} />
-                            )}
-                          </div>
-                        </div>
-                        <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-13 text-text-2">
-                          <RarityBadges {...faceSummary} />
-                          <span className="font-mono tabular-nums">{faceSummary.cardNo}</span>
-                          {classCode !== undefined && (
-                            <span>
-                              {joiner}
-                              {classCode === null ? t("search.neutral") : label("class", classCode)}
-                            </span>
-                          )}
-                        </p>
-                        {(typeCode !== null || traits.length > 0) && (
-                          <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13">
-                            {typeCode !== null && (
-                              <>
-                                <span className="text-text-3">{t("cardPage.cardType")}</span>
-                                <Badge>{label("type", typeCode)}</Badge>
-                              </>
-                            )}
-                            {traits.length > 0 && (
-                              <>
-                                <span className={cn("text-text-3", typeCode !== null && "ml-1.5")}>
-                                  {t("cardPage.trait")}
-                                </span>
-                                {traits.map((code) => (
-                                  <span
-                                    key={code}
-                                    className="inline-flex h-6 items-center rounded-pill border border-border px-2 text-12 text-text-2"
-                                  >
-                                    {label("trait", code)}
-                                  </span>
-                                ))}
-                              </>
-                            )}
-                          </p>
-                        )}
-                        <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
-                        {!frame && ordinal === 0 && navigation && (
-                          <div className="mt-2 flex gap-2">{navigation}</div>
-                        )}
-                      </div>
-                    )}
-                    {printingId && catalog && (
-                      <CardTextPanel
-                        key={printingId}
-                        client={client}
-                        edition={region}
-                        printingId={printingId}
-                        faceId={faceId}
-                      >
-                        <CardWording
-                          client={client}
-                          edition={region}
-                          catalog={catalog}
-                          printingId={printingId}
-                          wording={wording}
-                          revision={revision}
-                          entry={entry}
-                        />
-                      </CardTextPanel>
-                    )}
-                  </section>
-                )
-              })}
-              {showOther && !other.catalog && !other.error && (
-                <p role="status" className="mt-6 text-13 text-text-2">
-                  {t("cardPage.switchingEdition")}
-                </p>
-              )}
-              {(other.error !== undefined || completePrintings?.error !== undefined) && (
-                <div role="alert" className="mt-6 text-13 text-text-2">
-                  {t("cardPage.otherEditionFailed")}
-                  <Button
-                    onClick={() => {
-                      other.retry()
-                      setPrintingAttempt((value) => value + 1)
-                    }}
-                  >
-                    {t("status.retry")}
-                  </Button>
-                </div>
-              )}
-              {printings.length > 1 && (
-                <section className="mt-6" aria-label={t("cardPage.printings")}>
-                  <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
-                  {printingEntries.map(
-                    ({ region: printingRegion, printings: regionalPrintings }) => (
-                      <div key={printingRegion} className="mt-1.5 flex items-start gap-2">
-                        <span className="inline-flex h-8 items-center text-13 font-semibold text-text-3">
-                          {printingRegion.toUpperCase()}:
-                        </span>
-                        <ul
-                          aria-label={printingRegion.toUpperCase()}
-                          className="flex flex-wrap gap-2"
-                        >
-                          {regionalPrintings.map(({ id, cardNo: no, rarity, link }) => (
-                            <li key={id}>
-                              <RouterLink
-                                to={link.to}
-                                state={link.state}
-                                replace
-                                preventScrollReset
-                                aria-current={id === printingId ? "page" : undefined}
-                                className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
-                              >
-                                {no}
-                                {rarity !== undefined && rarity !== "" && ` (${rarity})`}
-                              </RouterLink>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ),
-                  )}
-                </section>
-              )}
-              {catalog && cardId !== undefined && printingId !== null && (
-                <RelatedCards
-                  key={cardId}
-                  client={client}
-                  catalog={catalog}
-                  edition={region}
-                  cardId={cardId}
-                  printingId={printingId}
-                  revisionIds={views.flatMap(({ revision }) =>
-                    typeof revision?.["id"] === "string" ? [revision["id"]] : [],
-                  )}
-                  printings={printingThumbnails}
-                  imageClient={imageClient}
-                  linkTo={(target) =>
-                    cardLink(
-                      {
-                        cardNo: target.cardNo,
-                        ...(target.cardNoState === undefined
-                          ? {}
-                          : { cardNoState: target.cardNoState }),
-                        ...(target.intId === undefined ? {} : { intId: target.intId }),
-                        ...routeState(target),
-                      },
-                      false,
-                    )
-                  }
-                />
-              )}
-            </div>
-          </div>
-        </div>
-        {!frame && (
-          <ShellAside heading={t("cardPage.shell.qa")} note={t("cardPage.shell.qaPending")} />
+              <X className="size-5" aria-hidden="true" />
+            </button>
+          </>
         )}
+      </div>
+      {/* Phone and tablet: the large image first, then the text; desktop: a sticky image column. */}
+      <div
+        className={cn(
+          frame === undefined && "lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-x-10",
+          // The drawer and the modal are containers: side by side only once they are wide enough.
+          frame !== undefined && "px-4 @4xl:grid @4xl:grid-cols-[280px_minmax(0,1fr)] @4xl:gap-x-6",
+        )}
+        onClickCapture={(event) => {
+          if (
+            pending &&
+            event.target instanceof Element &&
+            !event.target.closest("[data-card-navigation]")
+          ) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+        }}
+      >
+        <div
+          className={cn(
+            "mt-1 flex flex-col items-center gap-3",
+            frame === undefined && "lg:sticky lg:top-4 lg:self-start",
+            frame !== undefined && "@4xl:sticky @4xl:top-13 @4xl:self-start",
+          )}
+        >
+          {views.map(
+            ({ faceId, ordinal, faceSummary, name }) =>
+              faceSummary &&
+              name && (
+                <button
+                  key={faceId}
+                  type="button"
+                  disabled={pending}
+                  aria-label={t("cardPage.zoom", { name: name.primary.text })}
+                  onClick={() => {
+                    setZoomed(faceId)
+                  }}
+                  className={cn(
+                    "block rounded-card shadow-lg transition-transform hover:scale-[1.01]",
+                    frame === undefined && IMAGE_SLOT,
+                    frame !== undefined && "w-[64%] max-w-64 @4xl:w-full @4xl:max-w-none",
+                  )}
+                >
+                  <CardImage
+                    summary={faceSummary}
+                    onReady={ordinal === 0 ? imageReady : undefined}
+                    name={name.primary}
+                    images={images}
+                    alt="decorative"
+                    sizes={IMAGE_SIZES}
+                    className="w-full"
+                  />
+                </button>
+              ),
+          )}
+        </div>
+        <div className="mt-4 min-w-0 lg:mt-1">
+          {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
+            const basics =
+              faceCatalog && printingId
+                ? faceBasics(faceCatalog.index, faceId, region, printingId)
+                : undefined
+            const nameRevisionId = basics?.revision?.["id"]
+            const values = basics?.values
+            const classCode =
+              typeof values?.["class_code"] === "string"
+                ? values["class_code"]
+                : values?.["class_code"] === null
+                  ? null
+                  : undefined
+            const typeCode = typeof values?.["type_code"] === "string" ? values["type_code"] : null
+            const traits = (values?.["traits"] ?? []) as string[]
+            const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
+            const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
+            const defense = typeof values?.["defense"] === "number" ? values["defense"] : null
+            return (
+              <section
+                key={faceId}
+                aria-label={name?.primary.text ?? faceId}
+                className={cn(ordinal > 0 && "mt-6 border-t border-border pt-4")}
+              >
+                {faceSummary && name && (
+                  <div className="flex flex-col gap-1.5">
+                    {ordinal > 0 && <Badge className="self-start">{t("cardPage.backFace")}</Badge>}
+                    <div className="flex items-start gap-2">
+                      {classCode !== undefined && (
+                        <img
+                          src={CLASS_ICON[classStyle(classCode)]}
+                          alt=""
+                          className="mt-0.5 size-5 shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        {typeof nameRevisionId === "string" ? (
+                          <CardNameHeading
+                            client={client}
+                            edition={region}
+                            resolver={null}
+                            owner={{ kind: "face_revision", id: nameRevisionId }}
+                            fallback={name}
+                          />
+                        ) : (
+                          <PlainNameHeading name={name} />
+                        )}
+                      </div>
+                    </div>
+                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-13 text-text-2">
+                      <RarityBadges {...faceSummary} />
+                      <span className="font-mono tabular-nums">{faceSummary.cardNo}</span>
+                      {classCode !== undefined && (
+                        <span>
+                          {joiner}
+                          {classCode === null ? t("search.neutral") : label("class", classCode)}
+                        </span>
+                      )}
+                    </p>
+                    {(typeCode !== null || traits.length > 0) && (
+                      <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13">
+                        {typeCode !== null && (
+                          <>
+                            <span className="text-text-3">{t("cardPage.cardType")}</span>
+                            <Badge>{label("type", typeCode)}</Badge>
+                          </>
+                        )}
+                        {traits.length > 0 && (
+                          <>
+                            <span className={cn("text-text-3", typeCode !== null && "ml-1.5")}>
+                              {t("cardPage.trait")}
+                            </span>
+                            {traits.map((code) => (
+                              <span
+                                key={code}
+                                className="inline-flex h-6 items-center rounded-pill border border-border px-2 text-12 text-text-2"
+                              >
+                                {label("trait", code)}
+                              </span>
+                            ))}
+                          </>
+                        )}
+                      </p>
+                    )}
+                    <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
+                    {!frame && ordinal === 0 && navigation && (
+                      <div className="mt-2 flex gap-2">{navigation}</div>
+                    )}
+                  </div>
+                )}
+                {printingId && catalog && (
+                  <CardTextPanel
+                    key={printingId}
+                    client={client}
+                    edition={region}
+                    printingId={printingId}
+                    faceId={faceId}
+                  >
+                    <CardWording
+                      client={client}
+                      edition={region}
+                      catalog={catalog}
+                      printingId={printingId}
+                      wording={wording}
+                      revision={revision}
+                      entry={entry}
+                    />
+                  </CardTextPanel>
+                )}
+              </section>
+            )
+          })}
+          {showOther && !other.catalog && !other.error && (
+            <p role="status" className="mt-6 text-13 text-text-2">
+              {t("cardPage.switchingEdition")}
+            </p>
+          )}
+          {(other.error !== undefined || completePrintings?.error !== undefined) && (
+            <div role="alert" className="mt-6 text-13 text-text-2">
+              {t("cardPage.otherEditionFailed")}
+              <Button
+                onClick={() => {
+                  other.retry()
+                  setPrintingAttempt((value) => value + 1)
+                }}
+              >
+                {t("status.retry")}
+              </Button>
+            </div>
+          )}
+          {printings.length > 1 && (
+            <section className="mt-6" aria-label={t("cardPage.printings")}>
+              <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
+              {printingEntries.map(({ region: printingRegion, printings: regionalPrintings }) => (
+                <div key={printingRegion} className="mt-1.5 flex items-start gap-2">
+                  <span className="inline-flex h-8 items-center text-13 font-semibold text-text-3">
+                    {printingRegion.toUpperCase()}:
+                  </span>
+                  <ul aria-label={printingRegion.toUpperCase()} className="flex flex-wrap gap-2">
+                    {regionalPrintings.map(({ id, cardNo: no, rarity, link }) => (
+                      <li key={id}>
+                        <RouterLink
+                          to={link.to}
+                          state={link.state}
+                          replace
+                          preventScrollReset
+                          aria-current={id === printingId ? "page" : undefined}
+                          className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
+                        >
+                          {no}
+                          {rarity !== undefined && rarity !== "" && ` (${rarity})`}
+                        </RouterLink>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          )}
+          {catalog && cardId !== undefined && printingId !== null && (
+            <RelatedCards
+              key={cardId}
+              client={client}
+              catalog={catalog}
+              edition={region}
+              cardId={cardId}
+              printingId={printingId}
+              revisionIds={views.flatMap(({ revision }) =>
+                typeof revision?.["id"] === "string" ? [revision["id"]] : [],
+              )}
+              printings={printingThumbnails}
+              imageClient={imageClient}
+              linkTo={(target) =>
+                cardLink(
+                  {
+                    cardNo: target.cardNo,
+                    ...(target.cardNoState === undefined
+                      ? {}
+                      : { cardNoState: target.cardNoState }),
+                    ...(target.intId === undefined ? {} : { intId: target.intId }),
+                    ...routeState(target),
+                  },
+                  false,
+                )
+              }
+            />
+          )}
+        </div>
       </div>
       {frame && navigation && (
         <div className="sticky bottom-0 z-20 mt-auto flex gap-2 border-t border-border bg-surface-1 px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">

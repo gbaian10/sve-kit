@@ -362,12 +362,6 @@ const zhTW = {
     trait: "類型",
     separator: "・",
     backFace: "背面",
-    shell: {
-      results: "結果",
-      resultsPending: "結果列表由 V4b 接入。",
-      qa: "Q&A",
-      qaPending: "Q&A 由 V5 接入。",
-    },
     related: {
       title: "關聯卡牌",
       evolve: "進化",

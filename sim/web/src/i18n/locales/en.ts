@@ -381,12 +381,6 @@ export default {
     trait: "Trait",
     separator: " · ",
     backFace: "Back face",
-    shell: {
-      results: "Results",
-      resultsPending: "The result list arrives with V4b.",
-      qa: "Q&A",
-      qaPending: "Q&A arrives with V5.",
-    },
     related: {
       title: "Related Cards",
       evolve: "Evolves",

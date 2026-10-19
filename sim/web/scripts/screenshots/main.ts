@@ -251,8 +251,7 @@ async function capture(
       undefined,
       { timeout: 60_000 },
     )
-    // A card with pending wording has no effect section; the face heading (name) is the ready
-    // signal. The desktop shell's side columns carry headings of their own, hidden on phones.
+    // A card with pending wording has no effect section; the face heading (name) is the ready signal.
     await page.waitForSelector("article section h2, [role=alert]")
     await page
       .waitForSelector('[data-field="effect"] p:not([role])', { timeout: 20_000 })

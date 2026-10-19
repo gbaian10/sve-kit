@@ -9,8 +9,7 @@ import { type CardRouteInput, locateCard } from "../../data"
 import type { Region } from "../../domain/search"
 import type { CardViewProps } from "./CardPage"
 
-const IMAGE_SIZES =
-  "(min-width: 1440px) 340px, (min-width: 1000px) 280px, (min-width: 600px) 340px, 72vw"
+const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
 // Each prepared card keeps its own catalog and text closure (several MB), so only nearby cards stay.
 const PREPARED_CARDS = 4
 

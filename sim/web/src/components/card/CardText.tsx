@@ -25,9 +25,6 @@ import { TranslationSourceLine } from "./TranslationSourceLine"
 const BODY = "text-16 leading-effect"
 const TEXT_BOX =
   "rounded-block border border-border bg-surface-1 text-14 leading-effect text-text-2"
-// Side by side only inside the desktop page's `text` container (design 06b); elsewhere stacked.
-export const TEXT_PAIR =
-  "@xl/text:grid @xl/text:grid-cols-2 @xl/text:items-start @xl/text:gap-3 @xl/text:space-y-0"
 
 function TextBox({
   kind,
@@ -390,12 +387,7 @@ export function CardText({
   if (boxed) {
     if (showOriginal)
       return (
-        <section
-          className={cn("mt-3 space-y-2", TEXT_PAIR)}
-          aria-label={heading}
-          data-field={field}
-          data-text-pair
-        >
+        <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
           <TextBox heading={heading}>{content}</TextBox>
           <TextBox kind={`${field}Original`} heading={t("card.originalText")}>
             {original}
