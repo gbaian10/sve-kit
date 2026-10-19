@@ -13,16 +13,16 @@ if TYPE_CHECKING:
 
 class _Uses:
     def __init__(
-        self, originals: Sequence[Record], translations: Sequence[Record]
+        self, field_annotations: Sequence[Record], translations: Sequence[Record]
     ) -> None:
         self.fields = {
             canonical({key: row[key] for key in ("owner", "field", "ordinal")}): string(
                 row["annotation_set_id"]
             )
-            for row in originals
+            for row in field_annotations
         }
         self.sections: dict[bytes, set[str]] = defaultdict(set)
-        for row in originals:
+        for row in field_annotations:
             if row["field"] == "section":
                 self.sections[canonical(row["owner"])].add(
                     string(row["annotation_set_id"])
@@ -63,12 +63,12 @@ def _targets(annotation: Record, targets: Mapping[str, tuple[str, ...]]) -> set[
 
 def mentioned_by(
     view: View,
-    originals: Sequence[Record],
+    field_annotations: Sequence[Record],
     annotations: Mapping[str, Record],
     targets: Mapping[str, tuple[str, ...]],
 ) -> list[Record]:
     """Union selected languages; the index describes card faces, not UI language."""
-    uses = _Uses(originals, view["translation"])
+    uses = _Uses(field_annotations, view["translation"])
     revisions = {row["id"]: row for row in view["face_revision"]}
     cards = {string(row["id"]) for row in view["card"]}
     edges: set[tuple[str, str, str]] = set()

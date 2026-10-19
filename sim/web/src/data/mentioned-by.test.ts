@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { memoryCache } from "../test-utils/cache"
 import { createSnapshotClient } from "./client"
 import { arrayValue, canonical, type JsonObject, objectValue, stringValue } from "./format-v3/json"
-import { isCompatible, readContainer } from "./format-v3/reader"
+import { isCompatible, readContainer, readManifest } from "./format-v3/reader"
 import { digest } from "./format-v3/sha256"
 import { createLocator, homeSetOwner } from "./locator"
 import { v3Fixture } from "./v3-fixture"
@@ -98,5 +98,23 @@ describe("current card-name back references", () => {
     expect(() => readContainer({ ...file, region: "jp" }, value)).toThrow(
       "back references require shared engine",
     )
+  })
+  it("accepts both manifests in the shared mixed reader-minimum window", () => {
+    const mixed = arrayValue(v3Fixture("index-cases.json"))
+      .map((raw) => objectValue(raw))
+      .find((item) => item["name"] === "mixed-reader-minimum-window")
+    if (!mixed) throw new Error("missing mixed-window fixture")
+    const index = objectValue(mixed["index"])
+    const entries = [objectValue(index["current"]), objectValue(index["previous"])]
+    expect(entries.map((entry) => entry["min_reader_version"])).toEqual(["4.0.1", "4.0.0"])
+    for (const entry of entries) {
+      expect(isCompatible(entry)).toBe(true)
+      const manifest = objectValue(
+        objectValue(mixed["manifests"])[stringValue(entry["manifest_sha256"])],
+      )
+      expect(readManifest(manifest).manifest["min_reader_version"]).toBe(
+        entry["min_reader_version"],
+      )
+    }
   })
 })

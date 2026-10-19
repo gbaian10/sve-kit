@@ -17187,7 +17187,10 @@
           "uniqueItems": true
         },
         "min_reader_version": {
-          "const": "4.0.1"
+          "enum": [
+            "4.0.0",
+            "4.0.1"
+          ]
         },
         "required_capabilities": {
           "const": [

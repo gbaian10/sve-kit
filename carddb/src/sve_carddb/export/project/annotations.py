@@ -33,13 +33,11 @@ def annotations(
         for row in source.rows("translation_use_annotation", "use_id,annotation_set_id")
     }
     fields: dict[bytes, Record] = {}
-    originals: list[Record] = []
     for use in source.rows("translation_use", USE_FIELDS):
         identifier = use_annotations.get(string(use["id"]))
         if identifier is None or identifier not in sets:
             continue
         location = pointer(use)
-        originals.append(location | {"annotation_set_id": identifier})
         if canonical(location["owner"]) not in owners.by_owner:
             continue
         if owners.pointer(location) != sets[identifier]["text_unit_id"]:
@@ -57,7 +55,7 @@ def annotations(
     assign_name_concepts(view)
     _concepts(source, view, decisions)
     view["card_mentioned_by"] = mentioned_by(
-        view, originals, sets, decisions.card_name_targets
+        view, view["field_annotation"], sets, decisions.card_name_targets
     )
     validate_completeness(view, tuple(fields.values()), translated)
 
