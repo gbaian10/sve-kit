@@ -59,16 +59,24 @@ class Document(RecordData):
     document: Annotated[JPContent | ENContent, Field(discriminator="region")]
 
 
+class DocumentRef(RecordData):
+    source: SourceRef
+    document_ref: Key
+
+
 class CardDocuments(RecordData):
     card_no: Text
-    observations: tuple[Document, ...]
+    documents: dict[
+        Key, Annotated[JPContent | ENContent, Field(discriminator="region")]
+    ]
+    observations: tuple[DocumentRef, ...]
 
 
 class CardFile(RecordData):
     format: Literal[1] = 1
     region: Region
     family: Family
-    band: str | None
+    range: str
     products: dict[Key, tuple[extract_jp.ProductHint, ...]]
     cards: tuple[CardDocuments, ...]
 
@@ -121,7 +129,6 @@ class Shared(RecordData):
     qa: dict[Key, tuple[QAIdentity, ...]]
     related: dict[Key, tuple[RelatedLink, ...]]
     errata_urls: dict[Key, tuple[str, ...]]
-    batches: dict[Key, Hash]
 
 
 class RawEvidence(RecordData):
@@ -147,24 +154,17 @@ class LayoutRefs(RecordData):
     errata_urls: Key
 
 
-class BatchRef(RecordData):
-    batch: Key
-    current: bool
-    receipt_id: Hash | None
-
-
 class ObservationEvidence(RecordData):
     recipe: Key
     raw: RawEvidence
     layout: LayoutRefs
     content_hash: Hash
-    memberships: tuple[BatchRef, ...]
 
 
 class EvidenceFile(RecordData):
     format: Literal[1] = 1
     region: Region
     family: Family
-    band: str | None
+    range: str
     shared: Shared
     observations: dict[Version, ObservationEvidence]

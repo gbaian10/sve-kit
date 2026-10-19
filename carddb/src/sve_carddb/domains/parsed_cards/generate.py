@@ -5,20 +5,20 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import digest
 from sve_carddb.domains.card_extras.archive import card_number
+from sve_carddb.domains.parsed_cards.batches import parts
 from sve_carddb.domains.parsed_cards.codec import encode
-from sve_carddb.domains.parsed_cards.filing import band as number_band
-from sve_carddb.domains.parsed_cards.filing import shard_path
+from sve_carddb.domains.parsed_cards.filing import file_path, number_range
 from sve_carddb.domains.parsed_cards.models import (
     MAX_BYTES,
     RECIPE,
+    BatchPartPin,
     BatchPin,
+    BatchSelection,
     Card,
+    FilePair,
+    FilePin,
     Index,
-    Membership,
     ParsedObservation,
-    Shard,
-    ShardPin,
-    SplitFamily,
 )
 from sve_carddb.domains.parsed_cards.projection import extract
 from sve_carddb.domains.parsed_cards.serialization import separate
@@ -34,64 +34,67 @@ if TYPE_CHECKING:
 def assemble(
     observations: Iterable[ParsedObservation],
     filing: Mapping[tuple[Region, str], str],
-    batches: Iterable[BatchPin],
-    *,
-    split_families: tuple[SplitFamily, ...] = (),
+    batches: Iterable[BatchSelection],
 ) -> Catalog:
     """Group complete histories using the explicit family and fixed numeric ranges."""
-    splits = {(s.region, s.family) for s in split_families}
-    groups: dict[tuple[Region, str, str | None], dict[str, list[ParsedObservation]]] = (
+    groups: dict[tuple[Region, str, str], dict[str, list[ParsedObservation]]] = (
         defaultdict(lambda: defaultdict(list))
     )
+    versions: set[str] = set()
     for item in observations:
+        version = item.evidence.descriptor.id
+        if version in versions:
+            raise ValueError("Duplicate parsed source version")
+        versions.add(version)
         region, number = item.document.region, item.document.record.number
-        family = filing[region, number]
-        band = number_band(number, region) if (region, family) in splits else None
-        groups[region, family, band][number].append(item)
-    members: dict[str, tuple[Shard, ShardPin]] = {}
-    for (region, family, band), cards in groups.items():
-        shard = Shard(
+        family = filing.get((region, number))
+        if family is None:
+            raise ValueError("Missing explicit parsed card filing")
+        groups[region, family, number_range(number, region)][number].append(item)
+    members: dict[str, tuple[FilePair, FilePin]] = {}
+    for (region, family, interval), cards in groups.items():
+        pair = FilePair(
             region=region,
             family=family,
-            band=band,
+            range=interval,
             cards=tuple(
                 Card(
                     card_no=number,
                     observations=tuple(
-                        sorted(
-                            items, key=lambda o: (o.evidence.descriptor.id, o.recipe)
-                        )
+                        sorted(items, key=lambda o: o.evidence.descriptor.id)
                     ),
                 )
                 for number, items in sorted(cards.items())
             ),
         )
-        cards_file, evidence_file = separate(shard)
+        cards_file, evidence_file = separate(pair)
         raw, evidence_raw = encode(cards_file), encode(evidence_file)
         if max(len(raw), len(evidence_raw)) > MAX_BYTES:
-            raise ValueError(
-                f"Parsed member exceeds 1 MiB; review fixed filing for {region}/{family}"
-            )
-        path = shard_path(region, family, shard.cards[0].card_no, splits)
+            raise ValueError("Parsed file exceeds 1 MiB; review the format contract")
+        path = file_path(region, family, pair.cards[0].card_no)
         members[path] = (
-            shard,
-            ShardPin(
+            pair,
+            FilePin(
                 path=path,
                 sha256=digest(raw),
                 bytes=len(raw),
                 evidence_sha256=digest(evidence_raw),
                 evidence_bytes=len(evidence_raw),
-                cards=len(shard.cards),
-                observations=sum(len(c.observations) for c in shard.cards),
+                cards=len(pair.cards),
+                observations=sum(len(c.observations) for c in pair.cards),
             ),
         )
     ordered = [members[k] for k in sorted(members)]
+    selections = tuple(sorted(batches, key=lambda b: b.id))
     index = Index(
-        split_families=split_families,
-        shards=tuple(p for _, p in ordered),
-        batches=tuple(sorted(batches, key=lambda b: b.id)),
+        files=tuple(p for _, p in ordered),
+        batches=tuple(_batch_pin(b) for b in selections),
     )
-    return Catalog(index=index, shards=tuple(s for s, _ in ordered))
+    result = Catalog(
+        index=index, files=tuple(s for s, _ in ordered), batches=selections
+    )
+    result.validate_batches()
+    return result
 
 
 def generate(
@@ -99,28 +102,30 @@ def generate(
     filing: Mapping[tuple[Region, str], str],
     *,
     producer_revision: str,
-    split_families: tuple[SplitFamily, ...] = (),
     previous: Catalog | None = None,
 ) -> Catalog:
-    """Append verified source versions while retaining every reviewed observation."""
+    """Append source versions and independent batch selections without rewriting old files."""
     observations = {} if previous is None else previous.observations()
-    batches = {} if previous is None else {b.id: b for b in previous.index.batches}
+    batches = {} if previous is None else {b.id: b for b in previous.batches}
+    effective = _filing(filing, previous)
     for region, source_batch in sources:
         inventory = source_batch.inventory
         if inventory.missing or inventory.history_gaps:
             raise ValueError("Cannot admit an incomplete source batch")
         current = {entry.source_version_id for entry in inventory.current}
-        pin = BatchPin(
+        selection = BatchSelection(
             id=source_batch.batch_id,
             region=region,
-            versions=len(inventory.entries),
-            current=len(current),
-            created_at=inventory.created_at,
-            manifest=inventory.manifest,
+            versions={
+                entry.source_version_id: entry.source_version_id in current
+                for entry in sorted(
+                    inventory.entries, key=lambda e: e.source_version_id
+                )
+            },
         )
-        if pin.id in batches and batches[pin.id] != pin:
+        if selection.id in batches and batches[selection.id] != selection:
             raise ValueError("Source batch changed under an existing pin")
-        batches[pin.id] = pin
+        batches[selection.id] = selection
         for entry in inventory.entries:
             source, raw, descriptor = source_batch.read(
                 entry.source_version_id, parser_version=RECIPE
@@ -134,28 +139,16 @@ def generate(
                 raise ValueError(
                     "Parsed batch must contain only same-region SVE card pages"
                 )
-            if (region, number) not in filing:
+            if (region, number) not in effective:
                 raise ValueError("Missing explicit parsed card filing")
-            membership = Membership(
-                batch_id=pin.id,
-                current=descriptor.id in current,
-                receipt_id=entry.receipt_id,
-            )
-            old = observations.get(descriptor.id)
-            memberships = tuple(
-                sorted(
-                    {membership, *(old.memberships if old else ())},
-                    key=lambda m: m.batch_id,
-                )
-            )
             item = extract(
                 raw,
                 source,
                 descriptor,
                 region=region,
                 producer_revision=producer_revision,
-                memberships=memberships,
             )
+            old = observations.get(descriptor.id)
             if old is not None:
                 # A producer commit change alone must not rewrite previously reviewed results.
                 same_producer = item.model_copy(
@@ -165,11 +158,31 @@ def generate(
                     raise ValueError(
                         "Reparsing changed an existing recipe; publish a new recipe"
                     )
-                item = old.model_copy(update={"memberships": memberships})
+                item = old
             observations[descriptor.id] = item
-    result = assemble(
-        observations.values(), filing, batches.values(), split_families=split_families
-    )
+    result = assemble(observations.values(), effective, batches.values())
     if previous is not None:
         result.validate_update(previous)
     return result
+
+
+def _batch_pin(batch: BatchSelection) -> BatchPin:
+    return BatchPin(
+        id=batch.id,
+        parts=tuple(
+            BatchPartPin(sha256=digest(raw), bytes=len(raw))
+            for part in parts(batch)
+            for raw in (encode(part),)
+        ),
+    )
+
+
+def _filing(
+    filing: Mapping[tuple[Region, str], str], previous: Catalog | None
+) -> dict[tuple[Region, str], str]:
+    effective = {} if previous is None else previous.filing()
+    for key, family in filing.items():
+        if key in effective and effective[key] != family:
+            raise ValueError("Parsed request conflicts with existing filing")
+        effective[key] = family
+    return effective

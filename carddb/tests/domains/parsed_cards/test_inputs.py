@@ -13,9 +13,9 @@ from sve_carddb.domains import physical_sources
 from sve_carddb.domains.parsed_cards import batches
 from sve_carddb.domains.parsed_cards.codec import decode, encode
 from sve_carddb.domains.parsed_cards.commands import app
-from sve_carddb.domains.parsed_cards.filing import band
+from sve_carddb.domains.parsed_cards.filing import number_range
 from sve_carddb.domains.parsed_cards.generate import generate
-from sve_carddb.domains.parsed_cards.models import Index, SplitFamily
+from sve_carddb.domains.parsed_cards.models import Index
 from sve_carddb.domains.parsed_cards.projection import replay
 from sve_carddb.domains.parsed_cards.serialization import combine, separate
 from sve_carddb.domains.parsed_cards.storage import load, write
@@ -40,12 +40,14 @@ def _raw(region: Region) -> tuple[str, bytes]:
 
 
 def _batch(
-    tmp_path: Path, region: Region, *, changed: bool = False
+    tmp_path: Path, region: Region, *, changed: bool = False, layout_only: bool = False
 ) -> tuple[FrozenSources, str]:
     store = _store(tmp_path)
     number, raw = _raw(region)
     if changed:
         raw = raw.replace(b"Synthetic front", b"Revised synthetic front")
+    if layout_only:
+        raw += b"<!-- synthetic layout revision -->"
     adapter = official_jp if region == "jp" else official_en
     resource = replace(
         _resource(adapter.card_url(number), "raw/card.html", raw, Kind.CARD),
@@ -78,12 +80,12 @@ def test_roundtrip_all_projections_without_archive(
     )
     sources.root.rename(tmp_path / "unmounted")
     restored = load(root)
-    assert (
-        batches.inventory(restored, sources.batch_id, sources.store_id)
-        == sources.inventory
-    )
+    assert batches.selection(restored, sources.batch_id).versions == {
+        entry.source_version_id: True for entry in sources.inventory.entries
+    }
     assert (
         batches.source(
+            restored,
             restored.observations()[version],
             batch_id=sources.batch_id,
             store_id=sources.store_id,
@@ -91,8 +93,6 @@ def test_roundtrip_all_projections_without_archive(
         )
         == source
     )
-    with pytest.raises(ValueError, match="original batch identity"):
-        batches.inventory(restored, sources.batch_id, "incorrect-store")
     actual = replay(restored.observations()[version], source)
     assert actual.record.get() == expected.record.get()
     assert actual.observation.get() == expected.observation.get()
@@ -117,20 +117,22 @@ def test_roundtrip_all_projections_without_archive(
         ("en", "PR-399EN", "300-399"),
         ("en", "PR-400EN", "400-499"),
         ("jp", "CP04-SP01", "SP/000-099"),
-        ("en", "BP03-LDⓈ01EN", "LDⓈ/000-099"),
+        ("jp", "CP04-P01", "P/000-099"),
+        ("en", "BP03-LDS01EN", "LDS/000-099"),
+        ("en", "BP03-LDⓈ01EN", "LD_circled_s/000-099"),
         ("jp", "SYN-1234a", "1200-1299"),
         ("jp", "SYN-EP", "unnumbered"),
         ("jp", "SYN-SEP", "unnumbered"),
     ],
 )
 def test_fixed_ranges(region: Region, number: str, expected: str) -> None:
-    assert band(number, region) == expected
+    assert number_range(number, region) == expected
 
 
 @pytest.mark.parametrize("number", ["NO-HYPHEN", "SYN12", "SYN-12-34x56", "SYN-١٢"])
 def test_unknown_number_requires_explicit_exception(number: str) -> None:
     with pytest.raises(ValueError, match="range"):
-        band(number, "jp")
+        number_range(number, "jp")
 
 
 def test_split_and_history_cannot_be_reassigned(tmp_path: Path) -> None:
@@ -139,9 +141,8 @@ def test_split_and_history_cannot_be_reassigned(tmp_path: Path) -> None:
         [("en", sources)],
         {("en", number): "SYN"},
         producer_revision=REVISION,
-        split_families=(SplitFamily(region="en", family="SYN"),),
     )
-    assert catalog.index.shards[0].path == "en/SYN/100-199.json"
+    assert catalog.index.files[0].path == "en/SYN/100-199.json"
     assert write(tmp_path / "split", catalog) == catalog
     changed = generate(
         [("en", sources)], {("en", number): "OTHER"}, producer_revision=REVISION
@@ -156,9 +157,17 @@ def test_split_and_history_cannot_be_reassigned(tmp_path: Path) -> None:
         replacement.validate_update(catalog)
 
 
-@pytest.mark.parametrize("change", ["text", "region", "face", "recipe", "unknown"])
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ("text", "Parsed content hash mismatch"),
+        ("face", "Parsed face evidence belongs to another source/face"),
+        ("recipe", "Parsed data does not match its schema"),
+        ("unknown", "Parsed data does not match its schema"),
+    ],
+)
 def test_tampering_rejected_even_with_updated_outer_hash(
-    tmp_path: Path, change: str
+    tmp_path: Path, change: str, message: str
 ) -> None:
     sources, number = _batch(tmp_path, "en")
     catalog = generate(
@@ -166,25 +175,23 @@ def test_tampering_rejected_even_with_updated_outer_hash(
     )
     root = tmp_path / "inputs"
     write(root, catalog)
-    pin = catalog.index.shards[0]
+    pin = catalog.index.files[0]
     sidecar = change in {"face", "recipe"}
     path = root / (pin.evidence_path if sidecar else pin.path)
     value = json.loads(path.read_bytes())
     observation = (
         next(iter(value["observations"].values()))
         if sidecar
-        else value["cards"][0]["observations"][0]
+        else next(iter(value["cards"][0]["documents"].values()))
     )
     if change == "text":
-        observation["document"]["record"]["faces"][0]["name"] = "Changed"
-    elif change == "region":
-        observation["document"]["region"] = "jp"
+        observation["record"]["faces"][0]["name"] = "Changed"
     elif change == "face":
         observation["layout"]["presence"].reverse()
     elif change == "recipe":
         next(iter(value["shared"]["recipes"].values()))["recipe"] = "unknown-parser"
     else:
-        observation["document"]["record"]["unrecognized"] = "unexpected"
+        observation["record"]["unrecognized"] = "unexpected"
     raw = (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode()
     path.write_bytes(raw)
     prefix = "evidence_" if sidecar else ""
@@ -192,9 +199,9 @@ def test_tampering_rejected_even_with_updated_outer_hash(
         update={prefix + "sha256": digest(raw), prefix + "bytes": len(raw)}
     )
     (root / "index.json").write_bytes(
-        encode(catalog.index.model_copy(update={"shards": (changed_pin,)}))
+        encode(catalog.index.model_copy(update={"files": (changed_pin,)}))
     )
-    with pytest.raises(ValueError, match=r"schema|Parsed"):
+    with pytest.raises(ValueError, match=message):
         load(root)
 
 
@@ -207,7 +214,7 @@ def test_missing_duplicate_and_unlisted_members(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match=r"Duplicate|duplicate"):
         decode(Index, raw.replace(b'"format": 1,', b'"format": 1, "format": 1,'))
     with pytest.raises(ValueError, match="canonical"):
-        decode(CardFile, encode(separate(catalog.shards[0])[0]) + b"\n")
+        decode(CardFile, encode(separate(catalog.files[0])[0]) + b"\n")
     root = tmp_path / "inputs"
     write(root, catalog)
     extra = root / "unlisted.json"
@@ -215,11 +222,11 @@ def test_missing_duplicate_and_unlisted_members(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="unlisted"):
         load(root)
     extra.unlink()
-    shard = root / catalog.index.shards[0].path
-    shard.unlink()
+    pair = root / catalog.index.files[0].path
+    pair.unlink()
     with pytest.raises(FileNotFoundError):
         load(root)
-    shard.symlink_to(root / "index.json")
+    pair.symlink_to(root / "index.json")
     with pytest.raises(ValueError, match="symlink"):
         load(root)
 
@@ -294,8 +301,8 @@ def test_cards_are_readable_without_sidecar_and_evidence_is_shared(
         {("en", number): "SYN"},
         producer_revision=REVISION,
     )
-    cards, evidence = separate(catalog.shards[0])
-    assert combine(cards, evidence) == catalog.shards[0]
+    cards, evidence = separate(catalog.files[0])
+    assert combine(cards, evidence) == catalog.files[0]
     assert len(cards.products) == 1
     assert len(evidence.shared.products) == 1
     assert len(evidence.shared.recipes) == 1
@@ -303,12 +310,10 @@ def test_cards_are_readable_without_sidecar_and_evidence_is_shared(
     assert len({o.layout.products for o in evidence.observations.values()}) == 1
     root = tmp_path / "inputs"
     write(root, catalog)
-    pin = catalog.index.shards[0]
+    pin = catalog.index.files[0]
     (root / pin.evidence_path).unlink()
     readable = decode(CardFile, (root / pin.path).read_bytes())
-    assert {
-        o.document.record.faces[0].name for o in readable.cards[0].observations
-    } == {
+    assert {o.record.faces[0].name for o in readable.cards[0].documents.values()} == {
         "Synthetic front",
         "Revised synthetic front",
     }
@@ -323,7 +328,7 @@ def test_sidecar_shared_reference_must_exist(tmp_path: Path, location: str) -> N
     catalog = generate(
         [("en", sources)], {("en", number): "SYN"}, producer_revision=REVISION
     )
-    cards, evidence = separate(catalog.shards[0])
+    cards, evidence = separate(catalog.files[0])
     if location == "cards":
         cards = cards.model_copy(update={"products": {}})
     else:
@@ -344,8 +349,8 @@ def test_new_history_keeps_existing_shared_keys_and_observation_bytes(
     after = generate(
         [("en", second)], filing, producer_revision=REVISION, previous=before
     )
-    old_cards, old_evidence = separate(before.shards[0])
-    new_cards, new_evidence = separate(after.shards[0])
+    old_cards, old_evidence = separate(before.files[0])
+    new_cards, new_evidence = separate(after.files[0])
     for key, value in old_cards.products.items():
         assert new_cards.products[key] == value
     old_shared = old_evidence.shared.model_dump(mode="json")
@@ -366,7 +371,7 @@ def test_sidecar_rejects_foreign_and_surplus_evidence(
     catalog = generate(
         [("en", sources)], {("en", number): "SYN"}, producer_revision=REVISION
     )
-    cards, evidence = separate(catalog.shards[0])
+    cards, evidence = separate(catalog.files[0])
     if change == "foreign":
         evidence = evidence.model_copy(update={"family": "OTHER"})
     elif change == "extra":
@@ -379,5 +384,10 @@ def test_sidecar_rejects_foreign_and_surplus_evidence(
         evidence = evidence.model_copy(
             update={"shared": evidence.shared.model_copy(update={"products": products})}
         )
-    with pytest.raises(ValueError, match=r"another|closure|canonically"):
+    message = {
+        "foreign": "Parsed evidence belongs to another card file",
+        "extra": "Parsed evidence/card source closure differs",
+        "unused": "Parsed evidence is not canonically interned",
+    }[change]
+    with pytest.raises(ValueError, match=message):
         combine(cards, evidence)

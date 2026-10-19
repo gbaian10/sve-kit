@@ -1,5 +1,27 @@
 {
   "$defs": {
+    "BatchPartPin": {
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1048576,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes"
+      ],
+      "title": "BatchPartPin",
+      "type": "object"
+    },
     "BatchPin": {
       "additionalProperties": false,
       "properties": {
@@ -8,77 +30,23 @@
           "title": "Id",
           "type": "string"
         },
-        "region": {
-          "enum": [
-            "jp",
-            "en"
-          ],
-          "title": "Region",
-          "type": "string"
-        },
-        "versions": {
-          "maximum": 9007199254740991,
-          "minimum": 0,
-          "title": "Versions",
-          "type": "integer"
-        },
-        "current": {
-          "maximum": 9007199254740991,
-          "minimum": 0,
-          "title": "Current",
-          "type": "integer"
-        },
-        "created_at": {
-          "minLength": 1,
-          "title": "Created At",
-          "type": "string"
-        },
-        "manifest": {
-          "$ref": "#/$defs/ManifestPointer"
+        "parts": {
+          "items": {
+            "$ref": "#/$defs/BatchPartPin"
+          },
+          "minItems": 1,
+          "title": "Parts",
+          "type": "array"
         }
       },
       "required": [
         "id",
-        "region",
-        "versions",
-        "current",
-        "created_at",
-        "manifest"
+        "parts"
       ],
       "title": "BatchPin",
       "type": "object"
     },
-    "ManifestPointer": {
-      "additionalProperties": false,
-      "properties": {
-        "path": {
-          "const": "manifest.sqlite",
-          "default": "manifest.sqlite",
-          "title": "Path",
-          "type": "string"
-        },
-        "sha256": {
-          "title": "Sha256",
-          "type": "string"
-        },
-        "bytes": {
-          "title": "Bytes",
-          "type": "integer"
-        },
-        "schema_version": {
-          "title": "Schema Version",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "sha256",
-        "bytes",
-        "schema_version"
-      ],
-      "title": "ManifestPointer",
-      "type": "object"
-    },
-    "ShardPin": {
+    "FilePin": {
       "additionalProperties": false,
       "properties": {
         "path": {
@@ -128,32 +96,7 @@
         "cards",
         "observations"
       ],
-      "title": "ShardPin",
-      "type": "object"
-    },
-    "SplitFamily": {
-      "additionalProperties": false,
-      "properties": {
-        "region": {
-          "enum": [
-            "jp",
-            "en"
-          ],
-          "title": "Region",
-          "type": "string"
-        },
-        "family": {
-          "maxLength": 64,
-          "pattern": "^[A-Za-z0-9_-]+$",
-          "title": "Family",
-          "type": "string"
-        }
-      },
-      "required": [
-        "region",
-        "family"
-      ],
-      "title": "SplitFamily",
+      "title": "FilePin",
       "type": "object"
     }
   },
@@ -177,19 +120,11 @@
       "title": "Range Width",
       "type": "integer"
     },
-    "split_families": {
-      "default": [],
+    "files": {
       "items": {
-        "$ref": "#/$defs/SplitFamily"
+        "$ref": "#/$defs/FilePin"
       },
-      "title": "Split Families",
-      "type": "array"
-    },
-    "shards": {
-      "items": {
-        "$ref": "#/$defs/ShardPin"
-      },
-      "title": "Shards",
+      "title": "Files",
       "type": "array"
     },
     "batches": {
@@ -201,7 +136,7 @@
     }
   },
   "required": [
-    "shards",
+    "files",
     "batches"
   ],
   "title": "Index",

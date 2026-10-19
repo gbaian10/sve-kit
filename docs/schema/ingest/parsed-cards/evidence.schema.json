@@ -1,38 +1,5 @@
 {
   "$defs": {
-    "BatchRef": {
-      "additionalProperties": false,
-      "properties": {
-        "batch": {
-          "pattern": "^[a-z]+-[0-9a-f]{16}$",
-          "title": "Batch",
-          "type": "string"
-        },
-        "current": {
-          "title": "Current",
-          "type": "boolean"
-        },
-        "receipt_id": {
-          "anyOf": [
-            {
-              "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Receipt Id"
-        }
-      },
-      "required": [
-        "batch",
-        "current",
-        "receipt_id"
-      ],
-      "title": "BatchRef",
-      "type": "object"
-    },
     "ExpansionLink": {
       "additionalProperties": false,
       "properties": {
@@ -156,21 +123,13 @@
           "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
           "title": "Content Hash",
           "type": "string"
-        },
-        "memberships": {
-          "items": {
-            "$ref": "#/$defs/BatchRef"
-          },
-          "title": "Memberships",
-          "type": "array"
         }
       },
       "required": [
         "recipe",
         "raw",
         "layout",
-        "content_hash",
-        "memberships"
+        "content_hash"
       ],
       "title": "ObservationEvidence",
       "type": "object"
@@ -644,17 +603,6 @@
           "title": "Errata Urls",
           "type": "object",
           "additionalProperties": false
-        },
-        "batches": {
-          "patternProperties": {
-            "^[a-z]+-[0-9a-f]{16}$": {
-              "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
-              "type": "string"
-            }
-          },
-          "title": "Batches",
-          "type": "object",
-          "additionalProperties": false
         }
       },
       "required": [
@@ -665,8 +613,7 @@
         "products",
         "qa",
         "related",
-        "errata_urls",
-        "batches"
+        "errata_urls"
       ],
       "title": "Shared",
       "type": "object"
@@ -694,16 +641,9 @@
       "title": "Family",
       "type": "string"
     },
-    "band": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Band"
+    "range": {
+      "title": "Range",
+      "type": "string"
     },
     "shared": {
       "$ref": "#/$defs/Shared"
@@ -722,7 +662,7 @@
   "required": [
     "region",
     "family",
-    "band",
+    "range",
     "shared",
     "observations"
   ],

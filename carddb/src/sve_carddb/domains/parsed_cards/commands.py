@@ -13,7 +13,7 @@ from sve_carddb.core.provenance import Revision
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.parsed_cards import codec
 from sve_carddb.domains.parsed_cards.generate import generate
-from sve_carddb.domains.parsed_cards.models import Family, Index, SplitFamily
+from sve_carddb.domains.parsed_cards.models import BatchFile, Family, Index
 from sve_carddb.domains.parsed_cards.storage import load, write
 from sve_carddb.domains.parsed_cards.wire import CardFile, EvidenceFile
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
@@ -38,7 +38,6 @@ class Request(RecordData):
     sources: tuple[SourceBatch, ...]
     filing: tuple[Filing, ...]
     producer_revision: Revision
-    split_families: tuple[SplitFamily, ...] = ()
 
     @model_validator(mode="after")
     def check_filing(self) -> Self:
@@ -74,7 +73,6 @@ def generate_command(
             sources,
             filing,
             producer_revision=spec.producer_revision,
-            split_families=spec.split_families,
             previous=load(_absolute(previous)) if previous else None,
         )
         write(_absolute(output), result)
@@ -84,9 +82,7 @@ def generate_command(
             "Parsed candidate generation failed; inspect the inputs locally.", err=True
         )
         raise typer.Exit(1) from None
-    typer.echo(
-        f"Validated {len(result.index.shards)} shards; no publication performed."
-    )
+    typer.echo(f"Validated {len(result.index.files)} files; no publication performed.")
 
 
 @app.command("validate")
@@ -101,7 +97,7 @@ def validate_command(
     except OSError, ValueError:
         typer.echo("Parsed input validation failed.", err=True)
         raise typer.Exit(1) from None
-    typer.echo(f"Validated {len(catalog.index.shards)} shards.")
+    typer.echo(f"Validated {len(catalog.index.files)} files.")
 
 
 @app.command("schema")
@@ -110,6 +106,7 @@ def schema_command(output: Path) -> None:
     _absolute(output).mkdir(parents=True)
     for name, model in (
         ("index", Index),
+        ("batch", BatchFile),
         ("cards", CardFile),
         ("evidence", EvidenceFile),
     ):

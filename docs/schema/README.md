@@ -25,6 +25,7 @@
 | 文件 | 內容 |
 | --- | --- |
 | [來源歸檔與凍結輸入](ingest/source-archive.md) | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復 |
+| [解析卡片輸入](ingest/parsed-card-inputs.md) | 已審查卡片內容、來源證據、固定卡號區段與歷史驗證 |
 | [受保護抓取的操作條件](ingest/refresh-operation.md) | refresh 前置保護、來源封存與中斷恢復 |
 
 ### 建置（build）

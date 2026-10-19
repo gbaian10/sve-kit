@@ -6,18 +6,19 @@ from pydantic import Field, model_validator
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, Instant, RecordData, Text, UInt
-from sve_carddb.core.provenance import Revision
+from sve_carddb.core.provenance import Revision, Version
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.card_extras.models import RelatedLink
 from sve_carddb.domains.products.identity_models import Match
 from sve_carddb.domains.text_observations.presence import EffectPresence
-from sve_carddb.ingest.archive.source_archive import Descriptor, ManifestPointer
+from sve_carddb.ingest.archive.source_archive import Descriptor
 from sve_carddb.parse.pages import extract_en, extract_jp, official_en, official_jp
 
 RECIPE: Final = "sve-parsed-card-v1"
 MAX_BYTES = 1024 * 1024
 MAX_FACES = 2
 RANGE_WIDTH: Final = 100
+BATCH_PART_SIZE: Final = 1000
 Family = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+$", max_length=64)]
 
 
@@ -94,12 +95,6 @@ class ENDocument(RecordData):
     record: extract_en.CardRecord
 
 
-class Membership(RecordData):
-    batch_id: Hash
-    current: bool
-    receipt_id: Hash
-
-
 class ParsedObservation(RecordData):
     recipe: Literal["sve-parsed-card-v1"] = RECIPE
     producer_revision: Revision
@@ -107,15 +102,10 @@ class ParsedObservation(RecordData):
     document: Annotated[JPDocument | ENDocument, Field(discriminator="region")]
     layout: LayoutEvidence
     content_hash: Hash
-    memberships: tuple[Membership, ...]
 
     def calculated_hash(self) -> str:
-        """Bind the parse result independently of later batch memberships."""
-        return digest(
-            canonical(
-                self.model_dump(mode="json", exclude={"content_hash", "memberships"})
-            )
-        )
+        """Bind the parse result independently of later batch selections."""
+        return digest(canonical(self.model_dump(mode="json", exclude={"content_hash"})))
 
     @model_validator(mode="after")
     def check_content(self) -> Self:
@@ -141,10 +131,6 @@ class ParsedObservation(RecordData):
                 raise ValueError("Parsed face evidence belongs to another source/face")
         if len(self.layout.qa) != len(record.qa):
             raise ValueError("Parsed Q&A evidence is incomplete")
-        if not self.memberships or tuple(m.batch_id for m in self.memberships) != tuple(
-            sorted({m.batch_id for m in self.memberships})
-        ):
-            raise ValueError("Parsed batch memberships must be sorted and unique")
         if self.content_hash != self.calculated_hash():
             raise ValueError("Parsed content hash mismatch")
         return self
@@ -157,7 +143,7 @@ class Card(RecordData):
     @model_validator(mode="after")
     def check_observations(self) -> Self:
         """Keep all source observations in deterministic, unambiguous order."""
-        keys = tuple((o.evidence.descriptor.id, o.recipe) for o in self.observations)
+        keys = tuple(o.evidence.descriptor.id for o in self.observations)
         if not keys or keys != tuple(sorted(set(keys))):
             raise ValueError("Parsed observations must be sorted and unique")
         if any(o.document.record.number != self.card_no for o in self.observations):
@@ -165,11 +151,11 @@ class Card(RecordData):
         return self
 
 
-class Shard(RecordData):
+class FilePair(RecordData):
     format: Literal[1] = 1
     region: Region
     family: Family
-    band: str | None
+    range: str
     cards: tuple[Card, ...]
 
     @model_validator(mode="after")
@@ -181,11 +167,11 @@ class Shard(RecordData):
         if any(
             o.document.region != self.region for c in self.cards for o in c.observations
         ):
-            raise ValueError("Parsed shard region mismatch")
+            raise ValueError("Parsed pair region mismatch")
         return self
 
 
-class ShardPin(RecordData):
+class FilePin(RecordData):
     path: Text
     sha256: Hash
     bytes: Annotated[int, Field(gt=0, le=MAX_BYTES)]
@@ -200,38 +186,53 @@ class ShardPin(RecordData):
         return self.path.removesuffix(".json") + ".evidence.json"
 
 
-class BatchPin(RecordData):
+class BatchSelection(RecordData):
+    format: Literal[1] = 1
     id: Hash
     region: Region
-    versions: UInt
-    current: UInt
-    created_at: Text
-    manifest: ManifestPointer
+    versions: dict[Version, bool]
+
+    @model_validator(mode="after")
+    def check_order(self) -> Self:
+        """Keep selection maps stable without disclosing archive inventory metadata."""
+        if not self.versions or list(self.versions) != sorted(self.versions):
+            raise ValueError("Parsed batch versions must be nonempty and sorted")
+        return self
 
 
-class SplitFamily(RecordData):
-    region: Region
-    family: Family
+class BatchFile(BatchSelection):
+    part: UInt
+    versions: Annotated[dict[Version, bool], Field(max_length=BATCH_PART_SIZE)]
+
+
+class BatchPartPin(RecordData):
+    sha256: Hash
+    bytes: Annotated[int, Field(gt=0, le=MAX_BYTES)]
+
+
+class BatchPin(RecordData):
+    id: Hash
+    parts: Annotated[tuple[BatchPartPin, ...], Field(min_length=1)]
+
+    def path(self, part: int) -> str:
+        """Give each immutable batch selection part a separate member."""
+        return f"batches/{self.id[7:]}/{part:04d}.json"
 
 
 class Index(RecordData):
     format: Literal[1] = 1
     recipe: Literal["sve-parsed-card-v1"] = RECIPE
     range_width: Literal[100] = RANGE_WIDTH
-    split_families: tuple[SplitFamily, ...] = ()
-    shards: tuple[ShardPin, ...]
+    files: tuple[FilePin, ...]
     batches: tuple[BatchPin, ...]
 
     @model_validator(mode="after")
     def check_order(self) -> Self:
         """Require a single deterministic order for the complete input closure."""
         for keys in (
-            tuple(s.path for s in self.shards),
+            tuple(s.path for s in self.files),
             tuple(b.id for b in self.batches),
         ):
             if not keys or keys != tuple(sorted(set(keys))):
                 raise ValueError("Parsed index entries must be sorted and unique")
-        splits = tuple((s.region, s.family) for s in self.split_families)
-        if splits != tuple(sorted(set(splits))):
-            raise ValueError("Parsed split families must be sorted and unique")
         return self

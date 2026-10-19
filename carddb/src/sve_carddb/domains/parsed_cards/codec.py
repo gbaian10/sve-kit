@@ -8,7 +8,7 @@ from jsonschema_rs import Draft202012Validator
 
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.models import RecordData
-from sve_carddb.domains.parsed_cards.models import Index
+from sve_carddb.domains.parsed_cards.models import BatchFile, Index
 from sve_carddb.domains.parsed_cards.wire import CardFile, EvidenceFile
 
 if TYPE_CHECKING:
@@ -49,7 +49,7 @@ def schema(model: type[RecordData]) -> dict[str, JsonValue]:
 
 @cache
 def _validator(name: str) -> Draft202012Validator:
-    models = {m.__name__: m for m in (Index, CardFile, EvidenceFile)}
+    models = {m.__name__: m for m in (Index, CardFile, EvidenceFile, BatchFile)}
     return Draft202012Validator(schema(models[name]))
 
 

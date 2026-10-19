@@ -5,16 +5,19 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import digest
+from sve_carddb.domains.parsed_cards import batches as batch_files
 from sve_carddb.domains.parsed_cards.codec import decode, encode
-from sve_carddb.domains.parsed_cards.filing import band as number_band
-from sve_carddb.domains.parsed_cards.filing import shard_path
+from sve_carddb.domains.parsed_cards.filing import file_path, number_range
 from sve_carddb.domains.parsed_cards.models import (
     MAX_BYTES,
+    BatchFile,
+    BatchPin,
+    BatchSelection,
     Card,
+    FilePair,
+    FilePin,
     Index,
     ParsedObservation,
-    Shard,
-    ShardPin,
 )
 from sve_carddb.domains.parsed_cards.serialization import combine, separate
 from sve_carddb.domains.parsed_cards.wire import CardFile, EvidenceFile
@@ -39,16 +42,47 @@ def member(root: Path, name: str) -> Path:
 @dataclass(frozen=True)
 class Catalog:
     index: Index
-    shards: tuple[Shard, ...]
+    files: tuple[FilePair, ...]
+    batches: tuple[BatchSelection, ...]
 
     def observations(self) -> dict[str, ParsedObservation]:
         """Expose only validated complete source observations."""
-        return {
-            o.evidence.descriptor.id: o
-            for s in self.shards
-            for c in s.cards
-            for o in c.observations
-        }
+        result = {}
+        for pair in self.files:
+            for card in pair.cards:
+                for value in card.observations:
+                    version = value.evidence.descriptor.id
+                    if version in result:
+                        raise ValueError("Duplicate parsed source version")
+                    result[version] = value
+        return result
+
+    def filing(self) -> dict[tuple[Region, str], str]:
+        """Carry reviewed family assignments into incremental requests."""
+        return {(p.region, c.card_no): p.family for p in self.files for c in p.cards}
+
+    def validate_batches(self) -> None:
+        """Check exact selection closure without reconstructing a private inventory."""
+        observations = self.observations()
+        selected = set()
+        if tuple(b.id for b in self.batches) != tuple(b.id for b in self.index.batches):
+            raise ValueError("Parsed batch index differs from selection files")
+        for batch in self.batches:
+            current_urls = set()
+            for version, current in batch.versions.items():
+                value = observations.get(version)
+                if value is None or value.document.region != batch.region:
+                    raise ValueError(
+                        "Parsed batch has an absent or foreign source version"
+                    )
+                selected.add(version)
+                if current:
+                    url = value.evidence.descriptor.url
+                    if url in current_urls:
+                        raise ValueError("Multiple current versions of a parsed page")
+                    current_urls.add(url)
+        if selected != observations.keys():
+            raise ValueError("Parsed observation is absent from every batch")
 
     def validate_update(self, previous: Catalog) -> None:
         """A self-consistent new index cannot authorize deleting old source evidence."""
@@ -59,22 +93,20 @@ class Catalog:
                 raise ValueError(
                     "Parsed update deletes or replaces a historical observation"
                 )
-            if not set(old.memberships) <= set(new.memberships):
-                raise ValueError("Parsed update drops historical batch membership")
-        old_batches = {b.id: b for b in previous.index.batches}
+        old_batches = {b.id: b for b in previous.batches}
         if any(
-            old_batches.get(b.id, b) != b for b in self.index.batches
-        ) or not old_batches.keys() <= {b.id for b in self.index.batches}:
+            old_batches.get(b.id, b) != b for b in self.batches
+        ) or not old_batches.keys() <= {b.id for b in self.batches}:
             raise ValueError("Parsed update changes a historical batch")
         old_filing = {
-            (s.region, c.card_no): (s.family, s.band)
-            for s in previous.shards
+            (s.region, c.card_no): (s.family, s.range)
+            for s in previous.files
             for c in s.cards
         }
         if any(
-            old_filing.get((s.region, c.card_no), (s.family, s.band))
-            != (s.family, s.band)
-            for s in self.shards
+            old_filing.get((s.region, c.card_no), (s.family, s.range))
+            != (s.family, s.range)
+            for s in self.files
             for c in s.cards
         ):
             raise ValueError("Parsed update changes existing filing")
@@ -82,67 +114,46 @@ class Catalog:
 
 @dataclass
 class _Closure:
-    index: Index
     cards: set[tuple[Region, str]] = field(default_factory=set)
     versions: set[str] = field(default_factory=set)
-    batches: dict[str, list[bool]] = field(default_factory=dict)
-    current_urls: set[tuple[str, str]] = field(default_factory=set)
 
-    def observation(self, value: ParsedObservation, region: Region) -> None:
+    def observation(self, value: ParsedObservation) -> None:
         descriptor = value.evidence.descriptor
         if descriptor.id in self.versions:
             raise ValueError("Duplicate parsed source version")
         self.versions.add(descriptor.id)
-        regions = {b.id: b.region for b in self.index.batches}
-        for membership in value.memberships:
-            if regions.get(membership.batch_id) != region:
-                raise ValueError("Parsed source belongs to an unknown/foreign batch")
-            self.batches.setdefault(membership.batch_id, []).append(membership.current)
-            if membership.current:
-                current_key = membership.batch_id, descriptor.url
-                if current_key in self.current_urls:
-                    raise ValueError("Multiple current versions of a parsed page")
-                self.current_urls.add(current_key)
 
-    def card(self, card: Card, shard: Shard, path: str) -> None:
-        key = shard.region, card.card_no
-        splits = {(s.region, s.family) for s in self.index.split_families}
-        expected = shard_path(shard.region, shard.family, card.card_no, splits)
-        band = (
-            number_band(card.card_no, shard.region)
-            if (shard.region, shard.family) in splits
-            else None
-        )
-        if key in self.cards or path != expected or shard.band != band:
+    def card(self, card: Card, pair: FilePair, path: str) -> None:
+        key = pair.region, card.card_no
+        expected = file_path(pair.region, pair.family, card.card_no)
+        interval = number_range(card.card_no, pair.region)
+        if key in self.cards or path != expected or pair.range != interval:
             raise ValueError("Duplicate or incorrectly filed parsed card")
         self.cards.add(key)
         for observation in card.observations:
-            self.observation(observation, shard.region)
-
-    def finish(self) -> None:
-        for batch in self.index.batches:
-            items = self.batches.get(batch.id, [])
-            if (len(items), sum(items)) != (batch.versions, batch.current):
-                raise ValueError("Parsed batch is incomplete")
+            self.observation(observation)
 
 
-def _read_shard(root: Path, pin: ShardPin) -> Shard:
+def _read_pair(root: Path, pin: FilePin) -> FilePair:
     raw = member(root, pin.path).read_bytes()
     if len(raw) != pin.bytes or digest(raw) != pin.sha256:
-        raise ValueError("Parsed shard size/hash mismatch")
+        raise ValueError("Parsed pair size/hash mismatch")
     evidence_raw = member(root, pin.evidence_path).read_bytes()
     if (
         len(evidence_raw) != pin.evidence_bytes
         or digest(evidence_raw) != pin.evidence_sha256
     ):
         raise ValueError("Parsed evidence size/hash mismatch")
-    shard = combine(decode(CardFile, raw), decode(EvidenceFile, evidence_raw))
-    if (len(shard.cards), sum(len(c.observations) for c in shard.cards)) != (
+    pair = combine(decode(CardFile, raw), decode(EvidenceFile, evidence_raw))
+    cards, evidence = separate(pair)
+    if encode(cards) != raw or encode(evidence) != evidence_raw:
+        raise ValueError("Parsed file pair has noncanonical map order")
+    if (len(pair.cards), sum(len(c.observations) for c in pair.cards)) != (
         pin.cards,
         pin.observations,
     ):
-        raise ValueError("Parsed shard member count mismatch")
-    return shard
+        raise ValueError("Parsed pair member count mismatch")
+    return pair
 
 
 def load(root: Path) -> Catalog:
@@ -153,37 +164,58 @@ def load(root: Path) -> Catalog:
     if len(index_raw) > MAX_BYTES:
         raise ValueError("Parsed index exceeds 1 MiB")
     index = decode(Index, index_raw)
-    closure = _Closure(index)
-    shards: list[Shard] = []
-    for pin in index.shards:
-        shard = _read_shard(root, pin)
-        for card in shard.cards:
-            closure.card(card, shard, pin.path)
-        shards.append(shard)
-    closure.finish()
+    closure = _Closure()
+    files: list[FilePair] = []
+    for pin in index.files:
+        pair = _read_pair(root, pin)
+        for card in pair.cards:
+            closure.card(card, pair, pin.path)
+        files.append(pair)
+    batches = tuple(_read_batch(root, pin) for pin in index.batches)
     expected_paths = (
-        {p.path for p in index.shards}
-        | {p.evidence_path for p in index.shards}
+        {p.path for p in index.files}
+        | {p.evidence_path for p in index.files}
+        | {p.path(i) for p in index.batches for i in range(len(p.parts))}
         | {"index.json"}
     )
     actual_paths = {p.relative_to(root).as_posix() for p in root.rglob("*.json")}
     if expected_paths != actual_paths:
         raise ValueError("Parsed directory contains missing or unlisted JSON members")
-    return Catalog(index, tuple(shards))
+    result = Catalog(index, tuple(files), batches)
+    result.validate_batches()
+    return result
 
 
 def write(root: Path, catalog: Catalog) -> Catalog:
     """Publish a candidate only into a new directory; existing data is never replaced."""
     if not root.is_absolute() or root.exists():
         raise ValueError("Parsed output requires a new absolute directory")
-    if len(catalog.index.shards) != len(catalog.shards):
-        raise ValueError("Parsed candidate index differs from shards")
+    if len(catalog.index.files) != len(catalog.files):
+        raise ValueError("Parsed candidate index differs from files")
     root.mkdir(parents=True)
-    for pin, shard in zip(catalog.index.shards, catalog.shards, strict=True):
+    for pin, pair in zip(catalog.index.files, catalog.files, strict=True):
         path = member(root, pin.path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        cards, evidence = separate(shard)
+        cards, evidence = separate(pair)
         path.write_bytes(encode(cards))
         member(root, pin.evidence_path).write_bytes(encode(evidence))
+    for batch_pin, batch in zip(catalog.index.batches, catalog.batches, strict=True):
+        for part in batch_files.parts(batch):
+            path = member(root, batch_pin.path(part.part))
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(encode(part))
     member(root, "index.json").write_bytes(encode(catalog.index))
     return load(root)
+
+
+def _read_batch(root: Path, pin: BatchPin) -> BatchSelection:
+    members = []
+    for ordinal, part_pin in enumerate(pin.parts):
+        raw = member(root, pin.path(ordinal)).read_bytes()
+        if len(raw) != part_pin.bytes or digest(raw) != part_pin.sha256:
+            raise ValueError("Parsed batch size/hash mismatch")
+        batch = decode(BatchFile, raw)
+        if batch.id != pin.id:
+            raise ValueError("Parsed batch identity differs from pin")
+        members.append(batch)
+    return batch_files.join(tuple(members))

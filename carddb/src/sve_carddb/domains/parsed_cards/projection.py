@@ -12,7 +12,6 @@ from sve_carddb.domains.parsed_cards.models import (
     Evidence,
     JPDocument,
     LayoutEvidence,
-    Membership,
     ParsedObservation,
     ProductEvidence,
     QAIdentity,
@@ -38,7 +37,6 @@ def extract(
     *,
     region: Region,
     producer_revision: str,
-    memberships: tuple[Membership, ...],
 ) -> ParsedObservation:
     """Validate original bytes before admitting any portable parse evidence."""
     if digest(raw) != source.sha256 or descriptor.id != source.id:
@@ -88,7 +86,6 @@ def extract(
         document=document,
         layout=layout,
         content_hash="sha256:" + "0" * 64,
-        memberships=memberships,
     )
     return ParsedObservation.model_validate_json(
         candidate.model_copy(

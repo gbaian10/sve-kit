@@ -1,15 +1,12 @@
-"""Recover original inventory identity without an archive path or raw HTML."""
+"""Read portable batch selections and restore runtime source provenance."""
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import ArchivePin, Source
-from sve_carddb.ingest.archive.source_archive import (
-    Blob,
-    Current,
-    Entry,
-    Inventory,
-    Scope,
+from sve_carddb.domains.parsed_cards.models import (
+    BATCH_PART_SIZE,
+    BatchFile,
+    BatchSelection,
 )
 
 if TYPE_CHECKING:
@@ -23,53 +20,24 @@ def raw_path(value: ParsedObservation) -> str:
     return f"raw/sha256/{checksum[:2]}/{checksum}.raw"
 
 
-def inventory(catalog: Catalog, batch_id: str, store_id: str) -> Inventory:
-    """Require the reconstructed original inventory to match its unchanged hash."""
-    pin = next((p for p in catalog.index.batches if p.id == batch_id), None)
-    if pin is None:
-        raise ValueError("Parsed data does not include the requested batch")
-    entries: list[Entry] = []
-    current: list[Current] = []
-    for version, value in sorted(catalog.observations().items()):
-        memberships = [m for m in value.memberships if m.batch_id == batch_id]
-        if not memberships:
-            continue
-        membership = memberships[0]
-        descriptor = value.evidence.descriptor
-        entries.append(
-            Entry(
-                source_version_id=version,
-                receipt_id=membership.receipt_id,
-                descriptor_sha256=value.evidence.descriptor_sha256,
-                blob=Blob(
-                    store_id=store_id,
-                    path=raw_path(value),
-                    sha256=descriptor.raw_sha256,
-                    bytes=descriptor.raw_bytes,
-                ),
-            )
-        )
-        if membership.current:
-            current.append(Current(url=descriptor.url, source_version_id=version))
-    result = Inventory(
-        created_at=pin.created_at,
-        manifest=pin.manifest,
-        scope=[Scope(provider=pin.region, kind="card")],
-        current=sorted(current, key=lambda c: c.url),
-        entries=entries,
-        missing=[],
-        history_gaps=[],
-    )
-    if digest(canonical(result.model_dump(mode="json"))) != batch_id:
-        raise ValueError("Parsed inventory differs from the original batch identity")
-    return result
+def selection(catalog: Catalog, batch_id: str) -> BatchSelection:
+    """Return the reviewed source selection, not a reconstruction of private inventory."""
+    for batch in catalog.batches:
+        if batch.id == batch_id:
+            return batch
+    raise ValueError("Parsed data does not include the requested batch")
 
 
 def source(
-    value: ParsedObservation, *, batch_id: str, store_id: str, parser_version: str
+    catalog: Catalog,
+    value: ParsedObservation,
+    *,
+    batch_id: str,
+    store_id: str,
+    parser_version: str,
 ) -> Source:
     """Restore runtime provenance using an explicitly supplied logical store name."""
-    if not any(m.batch_id == batch_id for m in value.memberships):
+    if value.evidence.descriptor.id not in selection(catalog, batch_id).versions:
         raise ValueError("Parsed source version is absent from the requested batch")
     evidence = value.evidence
     descriptor = evidence.descriptor
@@ -90,3 +58,37 @@ def source(
             first_receipt_id=descriptor.first_receipt_id,
         ),
     )
+
+
+def parts(batch: BatchSelection) -> tuple[BatchFile, ...]:
+    """Bound each new immutable batch member without touching older batches."""
+    versions = sorted(batch.versions.items())
+    return tuple(
+        BatchFile(
+            id=batch.id,
+            region=batch.region,
+            part=offset // BATCH_PART_SIZE,
+            versions=dict(versions[offset : offset + BATCH_PART_SIZE]),
+        )
+        for offset in range(0, len(versions), BATCH_PART_SIZE)
+    )
+
+
+def join(members: tuple[BatchFile, ...]) -> BatchSelection:
+    """Reject duplicate, incomplete or reordered selection parts before use."""
+    if not members:
+        raise ValueError("Parsed batch requires selection parts")
+    versions = {}
+    for member in members:
+        for version, current in member.versions.items():
+            if version in versions:
+                raise ValueError("Duplicate parsed batch source version")
+            versions[version] = current
+    result = BatchSelection(
+        id=members[0].id,
+        region=members[0].region,
+        versions=dict(sorted(versions.items())),
+    )
+    if parts(result) != members:
+        raise ValueError("Parsed batch parts are not canonical")
+    return result

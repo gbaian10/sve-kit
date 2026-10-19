@@ -8,18 +8,17 @@ from sve_carddb.domains.parsed_cards.models import (
     Card,
     ENDocument,
     Evidence,
+    FilePair,
     JPDocument,
     LayoutEvidence,
-    Membership,
     ParsedObservation,
     ProductEvidence,
-    Shard,
 )
 from sve_carddb.domains.parsed_cards.wire import (
-    BatchRef,
     CardDocuments,
     CardFile,
     Document,
+    DocumentRef,
     EvidenceFile,
     LayoutRefs,
     ObservationEvidence,
@@ -87,16 +86,6 @@ def _observation(value: ParsedObservation, pool: _Pool) -> ObservationEvidence:
             errata_urls=pool.put("errata", layout["errata_urls"]),
         ),
         content_hash=value.content_hash,
-        memberships=tuple(
-            BatchRef(
-                batch=pool.put("batches", m.batch_id),
-                current=m.current,
-                receipt_id=None
-                if m.receipt_id == descriptor.first_receipt_id
-                else m.receipt_id,
-            )
-            for m in value.memberships
-        ),
     )
 
 
@@ -111,21 +100,28 @@ def _template(result: PresenceResult, pool: _Pool) -> str:
     return pool.put("presence", template.model_dump(mode="json"))
 
 
-def separate(shard: Shard) -> tuple[CardFile, EvidenceFile]:
+def separate(pair: FilePair) -> tuple[CardFile, EvidenceFile]:
     """Keep official records readable and put repeated build evidence in shared tables."""
     pool = _Pool()
+    versions = [
+        value.evidence.descriptor.id
+        for card in pair.cards
+        for value in card.observations
+    ]
+    if len(versions) != len(set(versions)):
+        raise ValueError("Duplicate parsed source version")
     observations = {
         value.evidence.descriptor.id: _observation(value, pool)
-        for card in shard.cards
+        for card in pair.cards
         for value in card.observations
     }
-    cards = _cards(shard)
+    cards = _cards(pair)
     # Category names are part of the wire contract; errata is a short reference prefix.
     pool.values["errata_urls"] = pool.values.pop("errata", {})
     evidence = EvidenceFile(
-        region=shard.region,
-        family=shard.family,
-        band=shard.band,
+        region=pair.region,
+        family=pair.family,
+        range=pair.range,
         shared=pool.shared(),
         observations=dict(sorted(observations.items())),
     )
@@ -191,25 +187,15 @@ def _restore(
             errata_urls=shared.errata_urls[refs.errata_urls],
         ),
         content_hash=evidence.content_hash,
-        memberships=tuple(
-            Membership(
-                batch_id=shared.batches[m.batch],
-                current=m.current,
-                receipt_id=raw.first_receipt_id
-                if m.receipt_id is None
-                else m.receipt_id,
-            )
-            for m in evidence.memberships
-        ),
     )
 
 
-def combine(cards: CardFile, evidence: EvidenceFile) -> Shard:
+def combine(cards: CardFile, evidence: EvidenceFile) -> FilePair:
     """Validate every join and reconstruct all original fields and content hashes."""
-    if (cards.region, cards.family, cards.band) != (
+    if (cards.region, cards.family, cards.range) != (
         evidence.region,
         evidence.family,
-        evidence.band,
+        evidence.range,
     ):
         raise ValueError("Parsed evidence belongs to another card file")
     versions = [d.source.id for c in cards.cards for d in c.observations]
@@ -218,16 +204,18 @@ def combine(cards: CardFile, evidence: EvidenceFile) -> Shard:
     ):
         raise ValueError("Parsed evidence/card source closure differs")
     try:
-        shard = Shard(
+        pair = FilePair(
             region=cards.region,
             family=cards.family,
-            band=cards.band,
+            range=cards.range,
             cards=tuple(
                 Card(
                     card_no=c.card_no,
                     observations=tuple(
                         _restore(
-                            d,
+                            Document(
+                                source=d.source, document=c.documents[d.document_ref]
+                            ),
                             evidence.observations[d.source.id],
                             evidence.shared,
                             cards,
@@ -240,9 +228,9 @@ def combine(cards: CardFile, evidence: EvidenceFile) -> Shard:
         )
     except KeyError:
         raise ValueError("Parsed evidence has a dangling shared reference") from None
-    if separate(shard) != (cards, evidence):
+    if separate(pair) != (cards, evidence):
         raise ValueError("Parsed evidence is not canonically interned")
-    return shard
+    return pair
 
 
 def _products(value: ParsedObservation) -> list[JsonValue]:
@@ -290,21 +278,37 @@ def _readable(value: ParsedObservation, pool: _Pool) -> Document:
     )
 
 
-def _cards(shard: Shard) -> CardFile:
+def _cards(pair: FilePair) -> CardFile:
     pool = _Pool()
-    cards = tuple(
-        CardDocuments(
-            card_no=card.card_no,
-            observations=tuple(_readable(value, pool) for value in card.observations),
+    cards = []
+    for card in pair.cards:
+        documents = _Pool()
+        observations = []
+        for value in card.observations:
+            readable = _readable(value, pool)
+            key = documents.put("documents", readable.document.model_dump(mode="json"))
+            observations.append(DocumentRef(source=readable.source, document_ref=key))
+        cards.append(
+            CardDocuments.model_validate_json(
+                canonical(
+                    {
+                        "card_no": card.card_no,
+                        "documents": dict(
+                            sorted(documents.values["documents"].items())
+                        ),
+                        "observations": [
+                            o.model_dump(mode="json") for o in observations
+                        ],
+                    }
+                )
+            )
         )
-        for card in shard.cards
-    )
     return CardFile.model_validate_json(
         canonical(
             {
-                "region": shard.region,
-                "family": shard.family,
-                "band": shard.band,
+                "region": pair.region,
+                "family": pair.family,
+                "range": pair.range,
                 "products": dict(sorted(pool.values.get("products", {}).items())),
                 "cards": [card.model_dump(mode="json") for card in cards],
             }

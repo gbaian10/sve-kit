@@ -8,9 +8,33 @@
           "title": "Card No",
           "type": "string"
         },
+        "documents": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "discriminator": {
+                "mapping": {
+                  "en": "#/$defs/ENContent",
+                  "jp": "#/$defs/JPContent"
+                },
+                "propertyName": "region"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/JPContent"
+                },
+                {
+                  "$ref": "#/$defs/ENContent"
+                }
+              ]
+            }
+          },
+          "title": "Documents",
+          "type": "object",
+          "additionalProperties": false
+        },
         "observations": {
           "items": {
-            "$ref": "#/$defs/Document"
+            "$ref": "#/$defs/DocumentRef"
           },
           "title": "Observations",
           "type": "array"
@@ -18,41 +42,29 @@
       },
       "required": [
         "card_no",
+        "documents",
         "observations"
       ],
       "title": "CardDocuments",
       "type": "object"
     },
-    "Document": {
+    "DocumentRef": {
       "additionalProperties": false,
       "properties": {
         "source": {
           "$ref": "#/$defs/SourceRef"
         },
-        "document": {
-          "discriminator": {
-            "mapping": {
-              "en": "#/$defs/ENContent",
-              "jp": "#/$defs/JPContent"
-            },
-            "propertyName": "region"
-          },
-          "oneOf": [
-            {
-              "$ref": "#/$defs/JPContent"
-            },
-            {
-              "$ref": "#/$defs/ENContent"
-            }
-          ],
-          "title": "Document"
+        "document_ref": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Document Ref",
+          "type": "string"
         }
       },
       "required": [
         "source",
-        "document"
+        "document_ref"
       ],
-      "title": "Document",
+      "title": "DocumentRef",
       "type": "object"
     },
     "ENContent": {
@@ -639,16 +651,9 @@
       "title": "Family",
       "type": "string"
     },
-    "band": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Band"
+    "range": {
+      "title": "Range",
+      "type": "string"
     },
     "products": {
       "patternProperties": {
@@ -674,7 +679,7 @@
   "required": [
     "region",
     "family",
-    "band",
+    "range",
     "products",
     "cards"
   ],
