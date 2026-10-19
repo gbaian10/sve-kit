@@ -40,7 +40,8 @@ member 的 `source` 引用自身卡號第一個 `-` 前的 owner 內文字版本
 文字分片與分類分片皆為必要入口，不接受找不到文字時退回舊 hash 的讀法。
 
 reader 重算文字版本 ID，驗證獨立保存的 body／raw 長度，再核對子句區段。
-不存在的引用、hash 不符、長度不符、區段越界、同 owner 重複版本、跨 namespace／basis 都失敗；
+不存在的引用、未被任何 member 引用的文字版本、hash 不符、長度不符、區段越界、
+同 owner 重複版本、跨 namespace／basis 都失敗；
 診斷不附卡文。raw／body 不進回傳 Catalog；Catalog 保留由精確文字算出的原有 hash。
 
 ### 可讀識別碼與省略值
@@ -62,23 +63,23 @@ reader 對這些 UID／CID 的精確 UTF-8 bytes 作 SHA-256，還原原本 Cata
 | relation endpoint `ability` | null |
 
 其餘資料不作省略推算；完整 members 集合、各類證據 hash、子句與 relation 順序皆保留。
-wire format 1 的 hash-only 分類分片不再接受；reader 的內部 resolved Shard 保留原格式，
-供 Catalog 與 matcher 使用，不是另一個 authored 入口。
+wire format 1 的 hash-only 分類分片不再接受。
 
 分類的 clauses／relations 描述一個代表 member，分類 clause ID 集合必須恰好涵蓋該 member
 的全部子句，且唯一屬於它；其他 member 的舊 C 樣板序列必須相同，依序對應。
 `members` 的順序沒有意義，不能用第一個 member 推斷代表；reader 驗證上述兩項不變式。
 
-`position` 恰有 `card_no`、`region: jp`、零起算 `face`、`field`、`ordinal`、`line`。
-effect 的 ordinal 為 null；section 的 ordinal 為非負整數。卡號保存原樣，不靠字串改寫推算身份。
+`position` 的可用欄位為 `card_no`、`region: jp`、零起算 `face`、`field`、`ordinal`、`line`。
+以上欄位的省略值依前表；effect 的 ordinal 為 null；section 的 ordinal 為非負整數。卡號保存原樣，不靠字串改寫推算身份。
 body/raw 範圍為 Unicode code-point 半開區間；雜湊則使用原始 UTF-8 bytes，不作 Unicode 正規化。
 
-ability 恰有 `id`、`head`、`ir`、`cost_timing`、`note_hash`。
-classified clause 恰有 `id`、`ability`、`decision`、`capture`、`stage`、`ir`、`author`、`note_hash`。
-timing 可為 null；保留舊原值，不將未知轉為 Defined。這些代號只是原分類的註記，不是通過 DSL schema 的 AST。
+ability 的可用欄位為 `id`、`head`、`ir`、`cost_timing`、`note_hash`。
+classified clause 的可用欄位為 `id`、`ability`、`decision`、`capture`、`stage`、`ir`、`author`、`note_hash`。
+上述欄位及端點欄位的省略值依前表。timing 可為 null；保留舊原值，不將未知轉為 Defined。
+`cost_timing: None` 中的 `None` 是 v0 原有的**字串分類值**，不是 YAML null，也不等同於省略此欄位。這些代號只是原分類的註記，不是通過 DSL schema 的 AST。
 
 relation 恰有 `type`、`sources`、`targets`、`note_hash`。type 可為 sequence、branch、cost-of、
-result-of、capture-of、scope-of、simultaneous。兩側為非空、有序端點列表，每個端點恰有
+result-of、capture-of、scope-of、simultaneous。兩側為非空、有序端點列表，每個端點的可用欄位為
 `clause` 與 `ability`；ability 可為 null，但該 clause 必須在本分類中只有一個 assignment。
 同一 clause 可分屬多個 ability；此時端點必須明示 ability。邊的順序與端點分組均保留，
 不把 relation 壓成只剩型別的計數，也不因同端點而去重。
@@ -95,6 +96,11 @@ namespace 為 `classification-v0`，recipe 為 `v0-classification-candidates-1`�
 `sha256:<hex>` 字串值的對照表的 core canonical JSON 雜湊。
 完整檔案 hash 清單保存在私有匯入證據；不將本機路徑寫入 authored。
 文字分片只保存此 v0 分類引用的日文 raw／body；這是本批匯入範圍，不定義其他卡片資料的存放政策。
+文字來自 [Shadowverse: EVOLVE 官方日文卡表](https://shadowverse-evolve.com/cardlist/)。
+v0 擷取索引使用 **2026-09-26 凍結、於 2026-09-27 分類流程使用**的卡表批次；
+原卡表 SHA-256 為 `4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632`。
+這段日期界定 v0 的輸入與分類時段，不是每張官方頁面的抓取日期，也不表示涵蓋其後的官方勘誤。
+`basis.inputs_hash` 固定該批 v0 索引、分類與標註的完整來源集合；文字版本 ID 另固定實際保存的 raw／body。
 官方文字與識別碼內的官方名稱不在專案授權範圍，依 [LICENSING](../../../LICENSING.md)。
 
 - T、C 與 family 代號原樣保留。authored 保存原始 UID／CID（可能含官方 token 名稱）；
