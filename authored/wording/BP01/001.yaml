@@ -220,9 +220,9 @@ records:
   - face_id: f:9e5c0522581d5167900899e68823293d
     region: jp
     comparison_hash: sha256:33b8ba5181a5e77f6e42be180844bbabdea5ff386dd0ffa29abee2f0bf1659cb
-    classification: errata
-    method: ai
-    reason: 費用篩選新增原始費用限定；可能改變可選卡片集合，不能視為標點或提醒文差異。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：較新版次補上「元の」只是寫清楚原本的原始費用意圖、避免爭議，不是規則改變。
   - face_id: f:ab01bf103af85ffc9d0e46688ca853d3
     region: en
     comparison_hash: sha256:9cb1c287460354b536007d2c5c7013cf0066ba74a3bb9153a7ba2426029e9c2f
