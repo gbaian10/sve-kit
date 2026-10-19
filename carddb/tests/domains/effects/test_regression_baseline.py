@@ -94,6 +94,7 @@ def test_review_drafts_are_bound_to_the_classifications_they_explain(
         record.id: fingerprint(record.model_dump(mode="json"))
         for record in classifications.classifications
     }
+    scenarios = (ROOT / "sim/engine/tests/boundaries.rs").read_text()
     seen: set[str] = set()
     conclusions = {"參數值差異", "等價寫法", "舊標註修正", "需來源變體", "尚未知"}
     for path in sorted((ROOT / "authored/rules/effect-reviews").glob("*.yaml")):
@@ -113,6 +114,52 @@ def test_review_drafts_are_bound_to_the_classifications_they_explain(
                 assert set(map(str, array(review[field]))) <= set(
                     map(str, array(group["uses"]))
                 ), identifier
+
+        for value in array(draft.get("handwritten_differences", [])):
+            difference = object_value(value)
+            for key, expected in object_value(difference["classifications"]).items():
+                assert records[key] == expected, key
+            assert f"fn {difference['scenario']}()" in scenarios
+            assert difference["conclusion"] in conclusions
+            assert difference["rationale"]
+
+
+def test_known_invalid_alignment_keeps_both_source_locations_visible() -> None:
+    draft = read_yaml(ROOT / "authored/rules/effect-reviews/BP07.yaml")
+    baseline = OBJECT.validate_json((BASELINE / "BP07.json").read_bytes())
+    exceptions = array(draft["positive_alignment_exceptions"])
+    assert exceptions
+    for value in exceptions:
+        row = object_value(value)
+        number = str(row["card_no"])
+        assert row["status"] == "known_invalid_alignment"
+        assert row["source_issue"] == "uncorrected_duplicate"
+        card = object_value(baseline[number])
+        source = object_value(row["position"])
+        target = object_value(row["proposed_position"])
+        positive = [
+            object_value(p)
+            for p in array(card["positions"])
+            if all(object_value(p)[key] == value for key, value in source.items())
+        ]
+        assert len(positive) == 1, number
+        assert row["ability"] in array(positive[0]["ability_indices"])
+        reverse = [
+            object_value(p)
+            for p in array(draft["reverse_positions"])
+            if object_value(p)["card_no"] == number
+            and all(object_value(p)[key] == value for key, value in target.items())
+        ]
+        assert len(reverse) == 1, number
+        assert object_value(reverse[0]["covered_by"])["ability"] == row["ability"]
+        corrections = array(
+            read_yaml(
+                ROOT / "authored/registry/source-correction/active/BP07/001.yaml"
+            )["records"]
+        )
+        assert row["source_correction"] in {
+            str(object_value(object_value(c)["data"])["id"]) for c in corrections
+        }
 
 
 def test_reverse_positions_preserve_concrete_cross_line_coverage() -> None:
