@@ -673,6 +673,59 @@ A 讀取裁定一次並驗封套、型別及 ID 唯一；B 從現行裁定檔保
 標明非模板保留，沿原裁定／IR 契約驗證。未通過其既有可執行檢查者不得進執行閉包，
 本節的保留紀錄不授予其有效性，也不算模板重鍵 resolved。
 
+### 9.1.1 明示歷史適用域
+
+`applies_to` 的陣列位置仍是原引用 ordinal。每一項可以是 IR 字串、
+尚未補證的裸 T 字串，或 `LegacyReference`：
+
+```yaml
+legacy: T0118c58cae
+namespace: classification-v0
+uses:
+  - cards: [BP20-041, BP20-SL13, BP20-U04]
+    occurrence:
+      owner: {kind: face_revision, revision_id: "rev:v1:..."}
+      field: effect
+      ordinal: null
+      source_hash: "..."
+      line_ordinal: 1
+      role: body
+      segments: [{start: 0, end: 1}]
+```
+
+以上座標與 hash 是形狀示意，不能直接當成資料。`legacy` 保存原 T ID；
+`uses` 是完整舊域，不得為空或重複 occurrence；每個 use 的 `cards` 是非空、
+不重複的日文卡號。來源必須是 face revision 的 effect 或 section，role 必為 body，
+segments 須按順序且互不重疊。同一命名空間與 T 在不同裁定中的 uses 必須一致。
+不把 frame ID、候選、處置或逐用途核可記錄寫進 authored。
+
+補證工具 `domains.rulings.evidence.capture` 要求來源邊界先證明凍結命名空間、
+ID 配方、完整定義及全體成員；任一成員缺證時，整個模板仍是引用層級 pending。
+印刷版本只有在 occurrence、scope 與參數全相同時才共用一個用途。
+
+資料提交前以 `domains.rulings.historical.validate` 對 A1 catalog 檢查：
+全部 cards × face／field／ordinal／line 必須恰好分割原模板的成員集合，
+每個 span 的文字長度與 hash 必須等於原成員 body。來源觀測由已驗的建置提供；
+同字不同 revision 的歷史選擇仍須以凍結舊快照與完整 face 證據審查，
+不能只靠當前 body 相同便宣稱證明了舊域。一次性遷移腳本與對帳產物不進版控。
+
+普通建置透過 `historical.rebuild` 重驗已提交的明示來源域：owner 存在、
+欄位全文 hash 相等、span 在指定行內，以及 cards 確實屬於該來源 face。
+這些來源事實錯誤直接使建置失敗；不重跑舊 normalizer，也不在執行時讀 Git 歷史。
+新舊 scope 均從 occurrence 的 role 與 field 產生，domain 使用 `effect` 或 `section`，
+它只界定來源欄位，不宣稱 token 定義的執行語義。
+
+當前候選只取本次翻譯建置已驗證且已寫入的完整欄位 binding；每次建置重算映射。
+缺 binding、切分變動或語義變體未定案保留用途 pending，不能回退為引用未知或
+把同 frame 的其他用途納入。明示引用若未提供已驗證的重建輸入，resolver 直接拒絕。
+舊 v0 沒有具型別的操作數，重建的空 parameters 表示未提供此證據，不能推論參數等價；
+frame family 中 `classification_v0.t...` 只是原定義的來源群組，不是已核定語義。
+
+`reconciliation.reconcile` 保留每個原 ordinal 與 IR 引用，分別報告候選分類及
+正式 resolution。候選分類沿 matcher 的 current 偏好，只用來與舊盤點比較；
+完整舊域仍以已證明的 occurrence 清單為準，不能用候選分類縮小歷史用途。
+裁定內容與適用域變動仍依 §9.1 明示升 revision，保留原強度、證據與日期。
+
 ### 9.2 已知舊域的 Mapping
 
 | Mapping 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
