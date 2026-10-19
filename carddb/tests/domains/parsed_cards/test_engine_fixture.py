@@ -56,6 +56,10 @@ def test_engine_selects_current_version_without_dropping_faces(tmp_path: Path) -
         ),
         batches=(batch,),
     )
+    with pytest.raises(ValueError, match="Duplicate current engine version"):
+        project(
+            replace(catalog, files=(*catalog.files, *catalog.files)), source.batch_id
+        )
     row = json.loads(project(catalog, source.batch_id))
     assert row["number"] == number
     assert row["faces"][0]["cost"] == "9"

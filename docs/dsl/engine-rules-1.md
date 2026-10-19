@@ -44,14 +44,14 @@ Catalog 必須驗證參照存在、與 scope 同區、沒有歧義且在輸入�
 不能把舊卡號定位器或私有名稱的 hash 冒稱永久身分。
 
 舊無 region 的 JP JSONL 只經明示 `legacy-jp` 載入邊界使用；該模式的 scope 必為 jp，
-所有 locator 亦須同區。名稱與 title label 從同一份釘版私有輸入解析，
+所有 locator 亦須同區。名稱與 title label 從同一份釘版 JP 輸入解析；目前由公開 `card-data/` 的明示批次產生暫存 JSONL，
 不由 EN 後綴去除、卡包、拼字或名稱相似性推導跨區配對。
 `resolved` 模式接受同批正式身分投影；兩種模式皆須驗 SHA 與引用背景，不互相猜測。
 
-作品文字的舊題庫轉接以 title 的 `anchor` face 建立私有 label ↔ title code 索引，
+作品文字的舊題庫轉接以 title 的 `anchor` face 建立 label ↔ title code 索引，
 同一 label 映到多個 code 應拒絕。未解析、缺採納或跨區資料不能先當正式登錄。
-新私有轉接檔若有必要，須先在私有 testdata 核對及釘版，再另更新公開鎖定清單；
-公開設定及合成測試不保存原值。
+索引由同批 JP 輸入與已採納 anchor 在載入時建立，不維護另一份轉接卡表。
+更新測試批次與投影時須核對來源並更新引擎輸入 pin；官方內容仍依 LICENSING 排除於專案授權。
 
 ## 3. 作品能力與 token 模板
 
@@ -127,7 +127,7 @@ stack 的 amount ≤ 0 不建立；已有 recipient 仍須選擇，沒有才由�
 磁碟與記憶體載入共用驗證；記憶體入口顯式收身分投影與規則文件，不能暗讀本機設定。
 一般合成 Catalog 可明示沒有特殊能力，遇到需角色但缺綁定時回 Unsupported，
 不能使用官方名稱常數作預設。凍結 v2.1 題庫的 title 文字由 engine adapter
-透過同批私有索引轉接；中立題庫及 scenario-runner 不加入 engine 特有語法。
+透過同批 JP 輸入的 anchor 索引轉接；中立題庫及 scenario-runner 不加入 engine 特有語法。
 
 仍使用原型 astra-save/1；本契約不承諾不同二進位版本的舊存檔可續玩。
 必要的 resolved binding／title code 隨 Catalog／Game 存檔，缺欄必須反序列化失敗，

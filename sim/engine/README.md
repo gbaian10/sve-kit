@@ -11,10 +11,20 @@ protocol types. `Replay` owns immutable branches; `Assist` owns sandbox and shad
 state. AI accepts a player packet and the public catalogue, with no reference to
 the source game.
 
-Run all four shared evaluations with the sealed common input:
+From the repository root, first generate the pinned JP input used by the prototype.
+Use the `batch_id` in `tests/engine/card-input.json`, absolute input/output paths,
+and a new output filename (the generator refuses to overwrite an existing file):
 
 ```bash
-cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards.jsonl . all target/prototype
+uv run --directory carddb --locked sve-carddb parsed-cards engine-fixture /absolute/path/to/card-data '<batch_id from tests/engine/card-input.json>' /absolute/path/to/new-cards.jsonl
+```
+
+This temporary projection comes from the admitted public `card-data/`; it is not
+a separately maintained snapshot. Remove it after the evaluation.
+Run all four shared evaluations with that generated input:
+
+```bash
+cargo run --locked --release -p sve-engine --bin sve-prototype -- /absolute/path/to/new-cards.jsonl . all target/prototype
 ```
 
 Modes are `all`, `g1`, `ai`, `replay`, `assist`, `validate`, `rules` and `gate`. Evaluation output
@@ -33,7 +43,7 @@ to run all 706 public scenarios, or supply a selection file as the final argumen
 for example the G1 selection:
 
 ```bash
-cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards.jsonl . rules target/prototype/g1 tests/rules-scenarios/g1-selection.yaml
+cargo run --locked --release -p sve-engine --bin sve-prototype -- /absolute/path/to/new-cards.jsonl . rules target/prototype/g1 tests/rules-scenarios/g1-selection.yaml
 ```
 
 `gate` runs every public scenario and fails unless the result matches
@@ -41,22 +51,19 @@ cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards
 
 Successful CLI exit means reports were written; inspect their statuses for failures.
 
-Tests use synthetic cards for boundaries and the immutable original snapshot for
-the shared suites. Without `SVE_TEST_SNAPSHOT`, local `cards` and `shared` tests
-return early; `-- --nocapture` displays the `SKIP` notice. These early returns
-appear as successful tests in libtest totals, not as tested private scenarios or
-full coverage acceptance. All synthetic tests still run. An explicitly supplied
-missing or invalid snapshot fails. Required mode (`SVE_PRIVATE_TESTDATA_MODE=required`) and full CI
-(`SVE_CI_TEST_MODE=full`, or `CI` without an explicit fork scope) require the snapshot and fails if it is unset; fork CI
-continues to exclude the two private targets through its existing selector.
-Supply the snapshot explicitly for the full coverage gate instead of maintaining
-another card table:
+Tests use synthetic cards for boundaries and a fresh projection of the pinned JP
+batch for the shared suites. The wrapper generates that input, replaces any inherited
+`SVE_TEST_SNAPSHOT`, runs the complete workspace, and deletes the temporary file.
+Project and fork CI run the same tests with the same 90% line coverage gate;
+no private checkout is required. Direct Cargo card tests fail when generated input
+is missing or has the wrong pin; they never return early or skip.
 
 ```bash
-export SVE_TEST_SNAPSHOT=/path/to/cards.jsonl
 cargo clippy --locked --workspace --all-targets -- -D warnings
-cargo llvm-cov --locked --workspace --fail-under-lines 90
+python3 .github/ci/rust_tests.py
 ```
+
+Mutation tests use the same wrapper through the manual `cargo-mutants` hook.
 
 The G1 regression requires all 41 scenarios to pass every checkpoint. The gate
 test requires all 706 public scenarios to pass or be listed in
@@ -80,7 +87,7 @@ hash from that same input. It does not infer JP/EN counterparts or invent IDs.
 See [engine rule identities](../../docs/dsl/engine-rules-1.md) for the contract.
 
 Player setup may provide `title_code`. Frozen runner title labels resolve through
-the validated private anchor index; a supplied code and label must agree. Empty
+the validated anchor index derived from the same generated JP input; a supplied code and label must agree. Empty
 capabilities are registered explicitly; unknown titles fail closed. Capabilities
 apply only to title construction. Resource costs match current effective names,
 including valid aliases, against resolved roles. The EX-to-banish counter uses

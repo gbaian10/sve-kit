@@ -24,8 +24,10 @@ def project(catalog: Catalog, batch_id: str) -> bytes:
         for card in pair.cards:
             for value in card.observations:
                 version = value.evidence.descriptor.id
-                if version not in current or version in seen:
+                if version not in current:
                     continue
+                if version in seen:
+                    raise ValueError("Duplicate current engine version")
                 seen.add(version)
                 record = value.document.record
                 if record.number in records:

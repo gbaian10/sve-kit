@@ -1,6 +1,5 @@
 """Select explicit test scopes without treating missing credentials as a fork."""
 
-import hashlib
 import json
 import os
 import re
@@ -8,7 +7,7 @@ import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed local Git commands
 import sys
 import tomllib
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import cast
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -97,33 +96,6 @@ def pin() -> dict[str, str]:
     return result
 
 
-def private_files() -> list[tuple[str, str]]:
-    """Validate the small Python fixture inventory before touching checkout files."""
-    index = mapping(
-        json.loads((ROOT / "carddb/tests/fixtures/private-pages.json").read_bytes())
-    )
-    cases = index.get("cases")
-    if not isinstance(cases, list) or not cases:
-        raise ValueError("Missing private fixture inventory")
-    result = []
-    for item in cases:
-        case = mapping(item)
-        path, checksum = text(case.get("path")), text(case.get("sha256"))
-        relative = PurePosixPath(path)
-        if (
-            relative.is_absolute()
-            or ".." in relative.parts
-            or relative.parts[:2] != ("fixtures", "carddb")
-            or relative.as_posix() != path
-            or not re.fullmatch(r"[0-9a-f]{64}", checksum)
-        ):
-            raise ValueError("Invalid private fixture pin")
-        result.append((path, checksum))
-    if len({path for path, _ in result}) != len(result):
-        raise ValueError("Duplicate private fixture path")
-    return result
-
-
 def append_environment(values: dict[str, str]) -> None:
     """Publish only validated configuration, never private input bytes."""
     with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as output:
@@ -182,15 +154,7 @@ def verify(component: str) -> None:
     if result.returncode or result.stdout.strip() != values["commit"]:
         msg = "Private test-data commit verification failed"
         raise ValueError(msg)
-    root = directory.resolve(strict=True)
-    for path, checksum in private_files():
-        fixture = (root / path).resolve(strict=True)
-        if not fixture.is_relative_to(root):
-            raise ValueError("Private fixture escapes checkout")
-        with fixture.open("rb") as source:
-            actual = hashlib.file_digest(source, "sha256").hexdigest()
-        if actual != checksum:
-            raise ValueError("Private page hash verification failed")
+    # Page tests own per-file and field hashes; CI only pins the checkout commit.
     append_environment({"SVE_PRIVATE_TESTDATA_DIR": str(directory)})
 
 

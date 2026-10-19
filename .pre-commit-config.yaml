@@ -174,7 +174,7 @@ repos:
       - id: cargo-mutants
         name: cargo mutants (tests catch every injected bug)
         language: system
-        entry: mise exec -- cargo mutants --workspace -j 4 --timeout 120
+        entry: python3 .github/ci/rust_tests.py mutants --workspace -j 4 --timeout 120
         pass_filenames: false
         always_run: true
         stages: [manual]

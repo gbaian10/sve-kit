@@ -2,7 +2,6 @@
 """Exercise trusted/fork scopes and failures with independent synthetic inputs."""
 
 import contextlib
-import hashlib
 import io
 import json
 import os
@@ -17,7 +16,6 @@ import testdata
 
 REPOSITORY = "owner/project"
 COMMIT = "a" * 40
-BODY = b"synthetic private page"
 
 
 def event(head: str = REPOSITORY) -> dict[str, object]:
@@ -56,12 +54,6 @@ class TestdataTests(unittest.TestCase):
             json.dumps(
                 {
                     "commit": COMMIT,
-                    "cases": [
-                        {
-                            "path": "fixtures/carddb/synthetic.html",
-                            "sha256": hashlib.sha256(BODY).hexdigest(),
-                        }
-                    ],
                 }
             ),
             encoding="utf-8",
@@ -159,11 +151,8 @@ class TestdataTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             testdata.threshold("python", "unknown")
 
-    def test_private_verification_is_trusted_and_exact(self) -> None:
-        """The checked-out commit and private bytes are separate fail-closed checks."""
-        snapshot = self.root / ".testdata/fixtures/carddb/synthetic.html"
-        snapshot.parent.mkdir(parents=True)
-        snapshot.write_bytes(BODY)
+    def test_private_verification_pins_the_trusted_checkout(self) -> None:
+        """CI pins Git; the page tests own the per-file hash checks."""
         success = subprocess.CompletedProcess([], 0, stdout=COMMIT + "\n")
         with (
             patch.dict(
@@ -174,9 +163,6 @@ class TestdataTests(unittest.TestCase):
             patch.object(subprocess, "run", return_value=success),
         ):
             testdata.verify("python")
-            snapshot.write_bytes(b"changed synthetic input")
-            with self.assertRaises(ValueError):
-                testdata.verify("python")
         with patch.dict(
             os.environ, {"SVE_PRIVATE_TESTDATA_MODE": "excluded"}, clear=True
         ):
@@ -199,17 +185,3 @@ class TestdataTests(unittest.TestCase):
             output.getvalue()
             == "Test scope or private test-data verification failed.\n"
         )
-
-    def test_private_inventory_rejects_escape_and_duplicates(self) -> None:
-        """A valid checkout cannot authorize paths outside its fixture root."""
-        index = self.root / "carddb/tests/fixtures/private-pages.json"
-        for path in ("../private", "/absolute", "fixtures/carddb/../outside"):
-            index.write_text(
-                json.dumps({"cases": [{"path": path, "sha256": "a" * 64}]})
-            )
-            with self.assertRaises(ValueError):
-                testdata.private_files()
-        case = {"path": "fixtures/carddb/synthetic.html", "sha256": "a" * 64}
-        index.write_text(json.dumps({"cases": [case, case]}))
-        with self.assertRaises(ValueError):
-            testdata.private_files()

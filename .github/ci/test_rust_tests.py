@@ -21,11 +21,18 @@ class RustTests(unittest.TestCase):
             (root / "tests/engine/card-input.json").write_text(
                 json.dumps({"batch_id": "synthetic"})
             )
-            for mode in ("full", "fork"):
-                generated = []
+            for mode, arguments in (
+                ("full", []),
+                ("fork", []),
+                ("full", ["mutants", "--workspace", "-j", "4", "--timeout", "120"]),
+            ):
+                generated: list[Path] = []
 
                 def execute(
-                    argv: list[str], generated: list[Path] = generated, **kwargs: object
+                    argv: list[str],
+                    generated: list[Path] = generated,
+                    arguments: list[str] = arguments,
+                    **kwargs: object,
                 ) -> subprocess.CompletedProcess[str]:
                     if argv[0] == "uv":
                         output = Path(argv[-1])
@@ -36,6 +43,13 @@ class RustTests(unittest.TestCase):
                     environment = kwargs["env"]
                     assert isinstance(environment, dict)
                     assert Path(environment["SVE_TEST_SNAPSHOT"]) == generated[0]
+                    assert argv == [
+                        "mise",
+                        "exec",
+                        "--",
+                        "cargo",
+                        *(arguments or rust_tests.DEFAULT),
+                    ]
                     assert "--test" not in argv
                     assert "--workspace" in argv
                     return subprocess.CompletedProcess(argv, 7)
@@ -54,5 +68,5 @@ class RustTests(unittest.TestCase):
                         },
                     ),
                 ):
-                    assert rust_tests.main([]) == 7
+                    assert rust_tests.main(arguments) == 7
                 assert not generated[0].exists()

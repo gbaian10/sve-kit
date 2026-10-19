@@ -465,7 +465,7 @@ rewriting or deleting history, then update the public pin in a separate PR.
 Project Python PRs and `main` use `SVE_PRIVATE_TESTDATA_MODE=required`; missing keys,
 checkouts, files or matching hashes fail. Forks are classified by head repository,
 not actor or credential availability. They use `excluded` only for the three
-remaining private cases, with their separately measured gate in
+remaining private cases, with the existing independent threshold in
 `.github/ci/fork-coverage.json` and an explicit remaining-test summary.
 
 Local Python defaults to `excluded` and runs public SVE plus synthetic cases.

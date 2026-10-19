@@ -40,12 +40,12 @@ _PARSERS = frozenset(
 )
 
 
-class PrivatePageError(ValueError):
+class PageFixtureError(ValueError):
     """A safe failure location, without private values or parser diagnostics."""
 
 
 @dataclass(frozen=True, repr=False)
-class PrivateInputs:
+class FixtureInputs:
     """Keep fixture arguments safe in pytest's default traceback."""
 
     _bodies: dict[str, bytes]
@@ -55,7 +55,7 @@ class PrivateInputs:
 
     @override
     def __repr__(self) -> str:
-        return "<private inputs>"
+        return "<fixture inputs>"
 
 
 @dataclass(frozen=True)
@@ -87,25 +87,25 @@ class Index:
 def mode(environment: Mapping[str, str]) -> str:
     value = environment.get(MODE_ENV, "excluded")
     if value not in {"required", "excluded"}:
-        raise PrivatePageError("private-page mode must be required or excluded")
+        raise PageFixtureError("private-page mode must be required or excluded")
     return value
 
 
 def _object(value: object, fields: set[str]) -> dict[str, object]:
     if not isinstance(value, dict) or set(value) != fields:
-        raise PrivatePageError("invalid private-page index object")
+        raise PageFixtureError("invalid page-fixture index object")
     return {str(key): item for key, item in value.items()}
 
 
 def _string(value: object) -> str:
     if not isinstance(value, str) or not value or any(ord(char) < 32 for char in value):
-        raise PrivatePageError("invalid private-page index string")
+        raise PageFixtureError("invalid page-fixture index string")
     return value
 
 
 def _integer(value: object) -> int:
     if type(value) is not int or value < 0:
-        raise PrivatePageError("invalid private-page index integer")
+        raise PageFixtureError("invalid page-fixture index integer")
     return value
 
 
@@ -113,14 +113,14 @@ def _pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
     values: dict[str, object] = {}
     for key, value in pairs:
         if key in values:
-            raise PrivatePageError("duplicate private-page index key")
+            raise PageFixtureError("duplicate page-fixture index key")
         values[key] = value
     return values
 
 
 def _check(value: object) -> Check:
     if not isinstance(value, dict):
-        raise PrivatePageError("invalid private-page check")
+        raise PageFixtureError("invalid page-fixture check")
     kind = _string(value.get("kind"))
     raw = _object(
         value,
@@ -129,7 +129,7 @@ def _check(value: object) -> Check:
     )
     path = raw["path"]
     if not isinstance(path, list) or not path:
-        raise PrivatePageError("invalid private-page check path")
+        raise PageFixtureError("invalid page-fixture check path")
     segments = [
         _integer(segment) if type(segment) is int else _string(segment)
         for segment in path
@@ -138,23 +138,23 @@ def _check(value: object) -> Check:
     if kind == "text":
         expected = _string(raw["expected"])
         if not _HASH.fullmatch(expected):
-            raise PrivatePageError("invalid private-page text hash")
+            raise PageFixtureError("invalid page-fixture text hash")
     elif kind in {"integer", "length"}:
         expected = _integer(raw["expected"])
     elif kind == "boolean":
         if type(raw["expected"]) is not bool:
-            raise PrivatePageError("invalid private-page boolean")
+            raise PageFixtureError("invalid page-fixture boolean")
         expected = raw["expected"]
     elif kind not in {"null", "mapping"}:
-        raise PrivatePageError("unknown private-page check kind")
+        raise PageFixtureError("unknown page-fixture check kind")
     return Check(tuple(segments), kind, expected)
 
 
-def _case(value: object) -> Case:
+def _case(value: object, *, public: bool) -> Case:
     raw = _object(value, {"id", "path", "sha256", "parser", "arguments", "checks"})
     identity = _string(raw["id"])
     if not _CASE_ID.fullmatch(identity):
-        raise PrivatePageError("invalid private-page case ID")
+        raise PageFixtureError("invalid page-fixture case ID")
     path = _string(raw["path"])
     relative = PurePosixPath(path)
     if (
@@ -162,20 +162,20 @@ def _case(value: object) -> Case:
         or ".." in relative.parts
         or relative.as_posix() != path
         or relative.parts[:2]
-        not in {
-            ("fixtures", "carddb"),
-            ("fixtures", "official_jp"),
-            ("fixtures", "official_en"),
-        }
+        not in (
+            {("fixtures", "official_jp"), ("fixtures", "official_en")}
+            if public
+            else {("fixtures", "carddb")}
+        )
         or relative.suffix not in {".html", ".json"}
     ):
-        raise PrivatePageError("unsafe private-page fixture path")
+        raise PageFixtureError("unsafe page-fixture fixture path")
     digest = _string(raw["sha256"])
     if not _HASH.fullmatch(digest):
-        raise PrivatePageError("invalid private-page fixture hash")
+        raise PageFixtureError("invalid page-fixture fixture hash")
     parser = _string(raw["parser"])
     if parser not in _PARSERS:
-        raise PrivatePageError("unknown private-page parser")
+        raise PageFixtureError("unknown page-fixture parser")
     fields = (
         {"number"}
         if parser in {"jp-card", "en-card"}
@@ -186,10 +186,10 @@ def _case(value: object) -> Case:
     args = _object(raw["arguments"], fields)
     checks = raw["checks"]
     if not isinstance(checks, list) or not checks:
-        raise PrivatePageError("private-page case has no checks")
+        raise PageFixtureError("page-fixture case has no checks")
     parsed = tuple(_check(check) for check in checks)
     if len({check.path for check in parsed}) != len(parsed):
-        raise PrivatePageError("duplicate private-page check path")
+        raise PageFixtureError("duplicate page-fixture check path")
     return Case(
         identity,
         path,
@@ -203,25 +203,25 @@ def _case(value: object) -> Case:
     )
 
 
-def load_index(path: Path = INDEX_PATH) -> Index:
+def load_index(path: Path = INDEX_PATH, *, public: bool = False) -> Index:
     try:
         document: object = json.loads(path.read_bytes(), object_pairs_hook=_pairs)
     except OSError, json.JSONDecodeError, UnicodeDecodeError:
-        raise PrivatePageError("cannot read private-page index") from None
+        raise PageFixtureError("cannot read page-fixture index") from None
     raw = _object(document, {"version", "commit", "cases"})
     if type(raw["version"]) is not int or raw["version"] != 1:
-        raise PrivatePageError("unsupported private-page index version")
+        raise PageFixtureError("unsupported page-fixture index version")
     commit = _string(raw["commit"])
     if not _COMMIT.fullmatch(commit):
-        raise PrivatePageError("invalid private-page commit pin")
+        raise PageFixtureError("invalid page-fixture commit pin")
     cases = raw["cases"]
     if not isinstance(cases, list) or not cases:
-        raise PrivatePageError("private-page index has no cases")
-    parsed = tuple(_case(case) for case in cases)
+        raise PageFixtureError("page-fixture index has no cases")
+    parsed = tuple(_case(case, public=public) for case in cases)
     if len({case.id for case in parsed}) != len(parsed) or len(
         {case.path for case in parsed}
     ) != len(parsed):
-        raise PrivatePageError("duplicate private-page case or fixture")
+        raise PageFixtureError("duplicate page-fixture case or fixture")
     return Index(commit, parsed)
 
 
@@ -229,20 +229,20 @@ def read_inputs(index: Index, directory: Path) -> dict[str, bytes]:
     try:
         root = directory.resolve(strict=True)
     except OSError:
-        raise PrivatePageError("private-page data directory is unavailable") from None
+        raise PageFixtureError("page-fixture data directory is unavailable") from None
     if not root.is_dir():
-        raise PrivatePageError("private-page data directory is unavailable")
+        raise PageFixtureError("page-fixture data directory is unavailable")
     bodies: dict[str, bytes] = {}
     for case in index.cases:
         try:
             path = (root / case.path).resolve(strict=True)
             if not path.is_relative_to(root) or not path.is_file():
-                raise PrivatePageError(f"{case.id}: unsafe fixture")
+                raise PageFixtureError(f"{case.id}: unsafe fixture")
             body = path.read_bytes()
         except OSError:
-            raise PrivatePageError(f"{case.id}: fixture unavailable") from None
+            raise PageFixtureError(f"{case.id}: fixture unavailable") from None
         if hashlib.sha256(body).hexdigest() != case.sha256:
-            raise PrivatePageError(f"{case.id}: fixture hash mismatch")
+            raise PageFixtureError(f"{case.id}: fixture hash mismatch")
         bodies[case.id] = body
     return bodies
 
@@ -283,8 +283,8 @@ def project(case: Case, body: bytes) -> dict[str, object]:
             }
     except ValueError, LookupError, TypeError:
         # Parser errors can quote private text; only expose the safe case location.
-        raise PrivatePageError(f"{case.id}: parser rejected fixture") from None
-    raise PrivatePageError(f"{case.id}: invalid parser arguments")
+        raise PageFixtureError(f"{case.id}: parser rejected fixture") from None
+    raise PageFixtureError(f"{case.id}: invalid parser arguments")
 
 
 def _matches(check: Check, value: object) -> bool:
@@ -322,6 +322,6 @@ def check_projection(case: Case, projection: dict[str, object]) -> None:
             if type(part) is int and isinstance(value, list) and part < len(value):
                 value = value[part]
                 continue
-            raise PrivatePageError(f"{case.id}: {location}: missing field")
+            raise PageFixtureError(f"{case.id}: {location}: missing field")
         if not _matches(check, value):
-            raise PrivatePageError(f"{case.id}: {location}: {check.kind} mismatch")
+            raise PageFixtureError(f"{case.id}: {location}: {check.kind} mismatch")

@@ -47,7 +47,6 @@ jobs:
           # Transitive inputs count: the engine compiles in dsl/ and its tests read tests/ and authored/.
           filters: |
             shared:
-              - 'card-data/**'
               - '.github/**'
               - '.pre-commit-config.yaml'
               - 'mise.toml'
@@ -66,6 +65,7 @@ jobs:
               - 'tools/schema-er/**'
               - 'authored/**' # the registry tests load and validate the real authored data
             rust:
+              - 'card-data/**'
               - 'carddb/src/**' # engine projection and its transitive schema/CLI dependencies
               - 'carddb/pyproject.toml'
               - 'carddb/uv.lock'

@@ -243,7 +243,11 @@ def rust_summary(folder: Path) -> str:
     skipped = sum(int(row[2]) for row in results)
     elapsed = number((folder / "elapsed.txt").read_text(encoding="utf-8").strip())
     seconds = sum(number(row[3]) for row in results)
-    coverage_line = scope_description() + "\n" + coverage_description(folder, rust=True)
+    coverage_line = (
+        scope_description("rust")
+        + "\n"
+        + coverage_description(folder, rust=True, kind="rust")
+    )
     locations = re.findall(
         r"^test ((?:r#)?[A-Za-z_][A-Za-z0-9_]*(?:::(?:r#)?[A-Za-z_][A-Za-z0-9_]*)*) \.\.\. FAILED$",
         source,

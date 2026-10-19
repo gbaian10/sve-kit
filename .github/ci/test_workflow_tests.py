@@ -321,8 +321,13 @@ class DirectTestTests(unittest.TestCase):
             for step in workflow["jobs"]["changes"]["steps"]
             if step.get("id") == "filter"
         )["with"]["filters"]
-        assert "card-data/**" in yaml.safe_load(filters)["shared"]
         rules = yaml.safe_load(filters)
+        for component in ("shared", "python", "web"):
+            assert not any(
+                fnmatchcase("card-data/jp/SYN/000-099.json", pattern)
+                for pattern in rules[component]
+            )
+        assert "card-data/**" in rules["card_data"]
         for path in (
             "card-data/jp/SYN/000-099.json",
             "carddb/src/sve_carddb/core/json.py",
@@ -336,6 +341,20 @@ class DirectTestTests(unittest.TestCase):
                 fnmatchcase(path, pattern)
                 for pattern in (*rules["shared"], *rules["rust"])
             )
+
+    def test_mutation_hook_generates_the_same_public_input(self) -> None:
+        """Mutation baseline tests need the same generated catalogue as coverage."""
+        repos = cast("list[dict[str, object]]", load_config()["repos"])
+        hook = next(
+            hook
+            for repo in repos
+            for hook in cast("list[dict[str, object]]", repo["hooks"])
+            if hook["id"] == "cargo-mutants"
+        )
+        assert (
+            hook["entry"]
+            == "python3 .github/ci/rust_tests.py mutants --workspace -j 4 --timeout 120"
+        )
 
     def test_python_coverage_contract_remains_combined_ninety(self) -> None:
         """Read the actual config so changing line-only or lowering the bar fails."""
