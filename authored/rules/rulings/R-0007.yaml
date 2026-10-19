@@ -1,7 +1,7 @@
 format: 2
 kind: ruling
 id: R-0007
-revision: 1
+revision: 2
 question: 「…なら、代わりに…。（獨立句）」後面的獨立句受不受條件管？【コンボ】【ネクロチャージ】【スペルチェイン】接「代わりに」時同。
 decision: '管到段落結尾（選項 A）：沒達成條件，後句也不做；是已裁定 #4 的延伸，「代わりに」與【コンボ】等關鍵字條件同樣適用。'
 evidence:
@@ -12,7 +12,80 @@ evidence:
   - {ref: CR 10.4.7.1, kind: supporting, quote: "10.4.7.1. このコストを支払った場合にのみ適用され\nる効果は、その文章の段落終わりまでか、チョ\nイスにおける選択肢区切り（5.18.1.1）までで\nす。", version: 1.27.0}
 strength: official
 decided_on: 2026-09-27
-applies_to: [Tf942d37add, T4397ce244e, Tdb4b122ff7, T716f8fd71e, T1502bd87c0, T3527fad6d1]
+applies_to:
+  - legacy: Tf942d37add
+    namespace: classification-v0
+    uses:
+      - cards: [BP21-042]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:685b8fb6e76143febe1764fa37769b79f947217a8f3f4b7588f8e5e345b798d5}
+          field: effect
+          ordinal:
+          source_hash: 3b8a60b45fa546eadf0a992ca31a10fb0294637d0d6ccb8010201db46d0212ff
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 75}]
+  - legacy: T4397ce244e
+    namespace: classification-v0
+    uses:
+      - cards: [BP20-008, BP20-P03]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:94726344d716579bc8946fbe926601061ccafe58a80dad5ee63a3abc7de5ed76}
+          field: effect
+          ordinal:
+          source_hash: 16e4792d3e9460f709cc5d200f39f681d0a507ac2a6a315453c0823d1125683c
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 73}]
+  - legacy: Tdb4b122ff7
+    namespace: classification-v0
+    uses:
+      - cards: [BP09-007, BP09-P03]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:4c45830f61b76e613334f67df0a296c793f750599b9a97dc8a4558507d9d41a8}
+          field: effect
+          ordinal:
+          source_hash: 76edbcb08045b3d3d988b986bc3caa169c98a147de2175e025c71d440b80b0b5
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 81}]
+  - legacy: T716f8fd71e
+    namespace: classification-v0
+    uses:
+      - cards: [BP07-064, BP07-P19]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:9d70f7fb26da60f633e3b59c202f3d7eb0fa26b320bdd36221849ab928d3cb5e}
+          field: effect
+          ordinal:
+          source_hash: 772a976af77a811e2e4e7ec95551b9df5fb23f4b19a7c0bbbccd9a71d1e0d3b5
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 52}]
+  - legacy: T1502bd87c0
+    namespace: classification-v0
+    uses:
+      - cards: [BP07-017, BP07-P05]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:337488983c356bb3493cb3d37d2e581434f0434bbdb1d7c20c802174eec91bcc}
+          field: effect
+          ordinal:
+          source_hash: 956df48bc18c1d45dd6a7d83dd717953e9c27b26071b08c9fa2f1a33e2f38e82
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 51}]
+  - legacy: T3527fad6d1
+    namespace: classification-v0
+    uses:
+      - cards: [BP10-053, PR-298]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:a217717b11c162c92f0d00fc1c37fed93df783e109600c7f619b77732e8b0b3a}
+          field: effect
+          ordinal:
+          source_hash: d0a824e1589ca85457439fef71f2abddfa42c533aa546a03ec5bc0a4ae3e79c1
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 48}]
 hint:
   zh-TW: 依 Q1506，「〜なら、代わりに…」的條件管到段落結尾；條件不成立，後面的句子也不做。
   ja: Q1506より、「～なら、代わりに…」の条件は段落の終わりまでかかります。満たさない場合、それ以降の効果は働きません。
+note: revision 2 只把 applies_to 改成明示舊適用域，裁定內容不變；沒有提升證據強度或授予可執行資格。
