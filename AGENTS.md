@@ -17,22 +17,23 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 
 ## 目錄與職責
 
-| 路徑        | 職責                                                                              | 技術        |
-| ----------- | --------------------------------------------------------------------------------- | ----------- |
-| `carddb/`   | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
-| `publish/`  | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；獨立 uv 專案                             | Python、uv  |
-| `authored/` | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
-| `dsl/`      | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
-| `sim/`      | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |
-| `docs/`     | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
+| 路徑         | 職責                                                                              | 技術        |
+| ------------ | --------------------------------------------------------------------------------- | ----------- |
+| `card-data/` | 規劃存放已審查的日英解析卡片輸入與來源證據                                        | JSON        |
+| `carddb/`    | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
+| `publish/`   | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；獨立 uv 專案                             | Python、uv  |
+| `authored/`  | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
+| `dsl/`       | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
+| `sim/`       | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |
+| `docs/`      | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
 
 專案用語（卡表快照、啟動包、分片、版次等）以根目錄 `GLOSSARY.md` 為準，新增或改名先在那份寫一兩句定義與「避免用」別名，不放實作細節。
 記錄架構決定時依 [ADR 規則](docs/adr/README.md) 判斷是否同時符合難以回頭、需背景解釋及真實取捨；規格細節留在對應契約。
 新增或修改 ADR、名詞表時參考 `mattpocock-skills` 的 `domain-modeling` skill（Claude Code 由 `.claude/settings.json` 啟用）；名詞表用繁體中文，與 skill 預設不同處以本 repo 規則為準。
 `docs/` 只放完成後仍成立的規格與決定；進度、排程、交付點與待決事項放 GitHub issue／milestone。
 
-依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`。
-`carddb` 匯出的有版號快照是卡片資料的**唯一權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
+依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`；規劃新增 `card-data/` → `carddb/`。
+`card-data/` 的格式與驗證器已實作，基線資料匯入與建置接線另行實作；`carddb` 匯出的有版號快照仍是使用者與模擬器的**唯一卡片資料權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
 但**不要維護另一份獨立的卡表**。
 
 `carddb/src/sve_carddb/` 依階段分層：基礎 `core/`、`contracts/`；來源 `ingest/`（`crawl/`、`http/`、`archive/`）、`parse/`；
@@ -55,6 +56,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | 可以隨時刪掉的暫存                         | `carddb/.cache/`                        | ❌            |
 | 建置產物（SQLite、JSON 快照）              | `carddb/dist/`                          | ❌            |
 | 人寫資料                                   | `authored/`                             | ✅            |
+| 日英解析卡片輸入與來源證據                 | `card-data/`                            | ✅ 審查後保存 |
 | 官方 SVE 日英卡文                          | `authored/` 證據資料、測試 fixture 等   | ✅            |
 | 私有測試原件與完整測試卡表                 | 專用私有 GitHub testdata repo           | 見下述流程    |
 
@@ -66,6 +68,8 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 
 原則：**能用程式重新產生的不進 git；專案共用的人寫資料與正式文件進 git。**
 官方 SVE 日文與英文卡文可以進 git，並記錄來源與版本；卡圖與語音仍不進 git。
+`card-data/` 是可由程式產生但須保留審查歷史的明示例外；原始歸檔與備份仍須保存。
+產生、驗證或更新解析輸入時，依[解析卡片輸入契約](docs/schema/ingest/parsed-card-inputs.md)檢查完整閉包與前一版歷史；只保存新解析結果，不覆寫舊來源觀測。
 此決定不涵蓋 SV1、Worlds Beyond 等其他遊戲的原檔。
 官方內容仍排除於專案的 Apache／CC0 授權之外，依 [LICENSING.md](LICENSING.md) 標示。
 個人設定、秘密、本機的研究筆記不屬於這個 repo。

@@ -1,0 +1,49 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": 1,
+      "default": 1,
+      "title": "Format",
+      "type": "integer"
+    },
+    "id": {
+      "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+      "title": "Id",
+      "type": "string"
+    },
+    "region": {
+      "enum": [
+        "jp",
+        "en"
+      ],
+      "title": "Region",
+      "type": "string"
+    },
+    "versions": {
+      "maxProperties": 1000,
+      "patternProperties": {
+        "^src:v1:[0-9a-f]{64}(?![\\s\\S])": {
+          "type": "boolean"
+        }
+      },
+      "title": "Versions",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "part": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "title": "Part",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "region",
+    "versions",
+    "part"
+  ],
+  "title": "BatchFile",
+  "type": "object"
+}

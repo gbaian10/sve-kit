@@ -29,3 +29,4 @@
 | [ADR-0015](0015-upload-from-export.md) | 上傳直接讀取匯出閉包 |
 | [ADR-0016](0016-four-layer-translation.md) | 翻譯與 DSL 共用四層來源綁定 |
 | [ADR-0017](0017-trust-image-inventory.md) | 卡圖上傳與快照分開並信任成功清單 |
+| [ADR-0018](0018-review-parsed-card-inputs.md) | 已審查的解析卡片輸入以純文字進版控 |

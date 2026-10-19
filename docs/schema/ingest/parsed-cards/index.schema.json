@@ -1,0 +1,144 @@
+{
+  "$defs": {
+    "BatchPartPin": {
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1048576,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes"
+      ],
+      "title": "BatchPartPin",
+      "type": "object"
+    },
+    "BatchPin": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Id",
+          "type": "string"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/$defs/BatchPartPin"
+          },
+          "minItems": 1,
+          "title": "Parts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "parts"
+      ],
+      "title": "BatchPin",
+      "type": "object"
+    },
+    "FilePin": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1048576,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "evidence_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Evidence Sha256",
+          "type": "string"
+        },
+        "evidence_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1048576,
+          "title": "Evidence Bytes",
+          "type": "integer"
+        },
+        "cards": {
+          "exclusiveMinimum": 0,
+          "title": "Cards",
+          "type": "integer"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "bytes",
+        "evidence_sha256",
+        "evidence_bytes",
+        "cards",
+        "observations"
+      ],
+      "title": "FilePin",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": 1,
+      "default": 1,
+      "title": "Format",
+      "type": "integer"
+    },
+    "recipe": {
+      "const": "sve-parsed-card-v1",
+      "default": "sve-parsed-card-v1",
+      "title": "Recipe",
+      "type": "string"
+    },
+    "range_width": {
+      "const": 100,
+      "default": 100,
+      "title": "Range Width",
+      "type": "integer"
+    },
+    "files": {
+      "items": {
+        "$ref": "#/$defs/FilePin"
+      },
+      "title": "Files",
+      "type": "array"
+    },
+    "batches": {
+      "items": {
+        "$ref": "#/$defs/BatchPin"
+      },
+      "title": "Batches",
+      "type": "array"
+    }
+  },
+  "required": [
+    "files",
+    "batches"
+  ],
+  "title": "Index",
+  "type": "object"
+}

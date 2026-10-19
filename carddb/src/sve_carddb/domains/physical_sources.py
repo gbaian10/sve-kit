@@ -69,15 +69,16 @@ def page(
     return sources.projection(
         version,
         parser_version="physical-page-v1:" + region,
-        extract=lambda _source, raw, descriptor: _extract(
+        extract=lambda _source, raw, descriptor: extract(
             source, raw, descriptor, region
         ),
     )
 
 
-def _extract(
+def extract(
     source: Source, raw: bytes, descriptor: Descriptor, region: Region
 ) -> PhysicalPage:
+    """Share the complete DOM recipe between archive reads and portable inputs."""
     from sve_carddb.domains.card_extras import archive as extras  # ruff: ignore[import-outside-top-level] -- avoid regional adapter initialization cycles
     from sve_carddb.domains.products import official as products  # ruff: ignore[import-outside-top-level] -- avoid regional adapter initialization cycles
 

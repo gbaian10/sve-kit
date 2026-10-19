@@ -31,6 +31,23 @@ For data contribution formats, see [authored layout](docs/schema/domains/authore
   contents; neither a source link nor this repository policy grants permission
   to relicense official or third-party material.
 
+## Parsed card inputs
+
+The format, generator and validator for reviewed Japanese and English SVE inputs
+are implemented; baseline import and build integration are planned for `card-data/`. Follow the
+[parsed-input contract](docs/schema/ingest/parsed-card-inputs.md) for generation,
+fixed card-number ranges and validation against the previous data tree. Keep raw
+archives and old observations: parsing is reproducible only from preserved sources,
+and updating a hash does not authorize replacing reviewed history.
+Card JSON contains readable records and minimal source references. Adjacent
+`.evidence.json` files hold build evidence with shared tables for repeated values;
+the complete reader requires both files and separate immutable batch selections,
+while reading card wording needs only the card file.
+Publishable files contain source URLs and hashes, never archive store names, local
+paths, credentials, card images or audio. A data PR must show its file count, byte
+sizes, included fields and representative records for maintainer review. Runtime
+consumers continue to use versioned snapshots.
+
 ## Languages
 
 | What                               | Language                                    |
@@ -207,8 +224,10 @@ use `#[allow]` only when the lint does not fire everywhere the attribute applies
 
 ## What goes into git
 
-- **In:** code, shared human-written data (`authored/`), formal docs (`docs/`).
-- **Out:** anything a program can regenerate (crawled HTML, images, audio, build output),
+- **In:** code, shared human-written data (`authored/`), formal docs (`docs/`),
+  reviewed parsed card inputs (`card-data/`, the explicit reproducible-data exception),
+  and permitted official SVE Japanese/English test fixtures.
+- **Out:** regenerable data outside those explicit exceptions (crawl caches, images, audio, build output),
   personal settings, secrets and local notes.
 - Files larger than 1 MiB (1024 KiB) are rejected by pre-commit. Split `authored/` data per card set.
 
