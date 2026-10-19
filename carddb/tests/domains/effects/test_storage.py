@@ -1,13 +1,16 @@
 """Readable evidence admits exact source versions without changing resolved identities."""
 
 import json
+import re
 from typing import TYPE_CHECKING
 
 import pytest
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.effects.classifications import Shard
 from sve_carddb.domains.effects.reader import catalog, document, load, source_document
+from sve_carddb.domains.effects.storage import StoredClassification
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -174,7 +177,9 @@ def test_changed_text_without_matching_version_hash_is_rejected(field: str) -> N
     text[field] = digest(b"wrong") if field == "id" else "must-not-echo-this-text"
     sources = source_payload()
     sources["records"] = [text]
-    with pytest.raises(ValueError, match=r"^Invalid classification source shard$"):
+    with pytest.raises(
+        ValueError, match=r"^Classification text version hash mismatch$"
+    ):
         source_document(canonical(sources))
 
 
@@ -197,9 +202,28 @@ def test_text_reference_must_exist_in_the_member_owner(change: str) -> None:
 def test_stored_lengths_and_spans_are_checked_against_exact_text(change: str) -> None:
     member = member_record()
     if change == "body-length":
-        member["body_length"] = 8
+        member.update(
+            body_length=8,
+            raw_length=9,
+            clauses=[
+                {
+                    "template": "C-example",
+                    "body": {"start": 0, "end": 8},
+                    "raw": {"start": 0, "end": 9},
+                }
+            ],
+        )
     elif change == "raw-length":
-        member["raw_length"] = 8
+        member.update(
+            raw_length=8,
+            clauses=[
+                {
+                    "template": "C-example",
+                    "body": {"start": 0, "end": 9},
+                    "raw": {"start": 0, "end": 8},
+                }
+            ],
+        )
     else:
         member["clauses"] = [
             {
@@ -211,9 +235,12 @@ def test_stored_lengths_and_spans_are_checked_against_exact_text(change: str) ->
                 "raw": {"start": 0, "end": 10 if change == "raw-overrun" else 9},
             }
         ]
-    with pytest.raises(
-        ValueError, match="Invalid classification source reference or record"
-    ):
+    message = (
+        "Classification text length mismatch"
+        if change in {"body-length", "raw-length"}
+        else "Invalid resolved classification record"
+    )
+    with pytest.raises(ValueError, match="^" + message + "$"):
         document(encoded([member]), (source_document(canonical(source_payload())),))
 
 
@@ -243,9 +270,13 @@ def test_formats_require_their_exact_integer(
     raw = canonical(source_payload()) if source else encoded()
     version = b'"format":1' if source else b'"format":2'
     raw = raw.replace(version, b'"format":' + json.dumps(replacement).encode())
-    read = source_document if source else document
-    with pytest.raises(ValueError, match="classification"):
-        read(raw)
+    if source:
+        with pytest.raises(ValueError, match=r"^Invalid classification source shard$"):
+            source_document(raw)
+    else:
+        sources = (source_document(canonical(source_payload())),)
+        with pytest.raises(ValueError, match=r"^Invalid classification shard$"):
+            document(raw, sources)
 
 
 @pytest.mark.parametrize(
@@ -253,10 +284,16 @@ def test_formats_require_their_exact_integer(
     [b"format: 2\nformat: 2\n", b"1: invalid\n", b"records: [", b"x" * 1048576],
     ids=["duplicate-key", "non-string-key", "invalid", "oversize"],
 )
-def test_invalid_yaml_diagnostics_are_bounded(raw: bytes) -> None:
-    with pytest.raises(ValueError, match="classification shard") as caught:
-        document(raw)
-    assert len(str(caught.value)) < 100
+def test_invalid_yaml_diagnostics_are_bounded(tmp_path: Path, raw: bytes) -> None:
+    records, _ = write_catalog(tmp_path)
+    records.write_bytes(raw)
+    message = (
+        "Authored input must be smaller than one MiB: authored/rules/classifications/TEST/001.yaml"
+        if len(raw) == 1048576
+        else "Invalid authored YAML input: authored/rules/classifications/TEST/001.yaml"
+    )
+    with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
+        load(tmp_path)
 
 
 @pytest.mark.parametrize("kind", ["member", "text"])
@@ -271,9 +308,24 @@ def test_file_owner_matches_member_and_text_owner(tmp_path: Path, kind: str) -> 
 
 
 @pytest.mark.parametrize(
-    "change", ["missing", "symlink", "unknown-path", "bad-yaml", "bad-record"]
+    ("change", "message"),
+    [
+        (
+            "missing",
+            "Missing authored data area: authored/rules/classification-sources",
+        ),
+        ("symlink", "Symlink authored data area"),
+        ("unknown-path", "Unsupported classification shard path"),
+        (
+            "bad-yaml",
+            "Invalid authored YAML input: authored/rules/classification-sources/TEST/001.yaml",
+        ),
+        ("bad-record", "Invalid classification source shard"),
+    ],
 )
-def test_source_area_is_required_and_validated(tmp_path: Path, change: str) -> None:
+def test_source_area_is_required_and_validated(
+    tmp_path: Path, change: str, message: str
+) -> None:
     _, sources = write_catalog(tmp_path)
     if change == "missing":
         sources.unlink()
@@ -289,9 +341,7 @@ def test_source_area_is_required_and_validated(tmp_path: Path, change: str) -> N
         sources.write_bytes(b"raw: [")
     else:
         sources.write_bytes(canonical({**source_payload(), "extra": "do-not-echo"}))
-    with pytest.raises(
-        ValueError, match=r"authored|Symlink|Unsupported|Invalid"
-    ) as caught:
+    with pytest.raises(ValueError, match="^" + re.escape(message) + "$") as caught:
         load(tmp_path)
     assert "do-not-echo" not in str(caught.value)
 
@@ -306,3 +356,28 @@ def test_invalid_classification_does_not_echo_payload(tmp_path: Path) -> None:
 def test_legacy_wire_format_is_not_accepted() -> None:
     with pytest.raises(ValueError, match="Invalid classification shard"):
         document(encoded().replace(b'"format":2', b'"format":1'))
+
+
+def test_unreferenced_text_version_is_rejected(tmp_path: Path) -> None:
+    _, sources = write_catalog(tmp_path)
+    payload = source_payload()
+    raw = "unused synthetic text"
+    payload["records"] = [
+        text_record(),
+        {"id": digest(canonical({"raw": raw, "body": raw})), "raw": raw},
+    ]
+    sources.write_bytes(canonical(payload))
+    with pytest.raises(ValueError, match=r"^Unreferenced classification text version$"):
+        load(tmp_path)
+
+
+def test_stored_records_cannot_enter_the_resolved_catalog() -> None:
+    stored = StoredClassification.model_validate_json(canonical(label_record()))
+    with pytest.raises(ValidationError):
+        Shard.model_validate(
+            {
+                "namespace": "fixture",
+                "basis": {"recipe": "fixture-v1", "inputs_hash": digest(b"inputs")},
+                "records": (stored,),
+            }
+        )

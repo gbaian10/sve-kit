@@ -21,6 +21,7 @@ from sve_carddb.domains.effects.storage import (
     StoredClassification,
     StoredMember,
     StoredShard,
+    TextVersionMismatchError,
 )
 
 if TYPE_CHECKING:
@@ -35,16 +36,17 @@ def document(raw: bytes, sources: tuple[SourceShard, ...] = ()) -> Shard:
 
 def source_document(raw: bytes) -> SourceShard:
     """Invalid text versions report no source wording."""
-    return _source_validated(_content(raw))
+    return _source_validated(_content(raw, source=True))
 
 
-def _content(raw: bytes) -> bytes:
+def _content(raw: bytes, *, source: bool = False) -> bytes:
+    kind = "classification source shard" if source else "classification shard"
     if len(raw) >= MAX_BYTES:
-        raise ValueError("Oversized classification shard")
+        raise ValueError("Oversized " + kind)
     try:
         return canonical(JSON_VALUE.validate_python(parse_yaml(raw), strict=True))
     except ValueError, TypeError:
-        raise ValueError("Invalid classification shard") from None
+        raise ValueError("Invalid " + kind) from None
 
 
 def _validated(content: bytes) -> StoredShard:
@@ -57,7 +59,12 @@ def _validated(content: bytes) -> StoredShard:
 def _source_validated(content: bytes) -> SourceShard:
     try:
         return SourceShard.model_validate_json(content)
-    except ValidationError:
+    except ValidationError as error:
+        if any(
+            isinstance(detail.get("ctx", {}).get("error"), TextVersionMismatchError)
+            for detail in error.errors(include_input=False)
+        ):
+            raise ValueError("Classification text version hash mismatch") from None
         raise ValueError("Invalid classification source shard") from None
 
 
@@ -85,13 +92,9 @@ def _resolve(stored: StoredShard, sources: tuple[SourceShard, ...]) -> Shard:
                 records.append(record.resolve(resolved_text))
             elif isinstance(record, StoredClassification):
                 records.append(record.resolve())
-        except ValidationError, ValueError, TypeError:
-            raise ValueError(
-                "Invalid classification source reference or record"
-            ) from None
+        except ValidationError:
+            raise ValueError("Invalid resolved classification record") from None
     return Shard(
-        format=1,
-        kind=stored.kind,
         namespace=stored.namespace,
         basis=stored.basis,
         records=tuple(records),
@@ -202,6 +205,15 @@ def load(authored: Path) -> Catalog:
         if name.split("/")[2] != source.owner:
             raise ValueError("Classification text owner differs from shard path")
         sources.append(source)
+    used = {
+        (record.owner, record.source)
+        for _, shard in stored
+        for record in shard.records
+        if isinstance(record, StoredMember)
+    }
+    available = {
+        (source.owner, text.id) for source in sources for text in source.records
+    }
     documents = []
     for name, shard in stored:
         if any(
@@ -210,4 +222,6 @@ def load(authored: Path) -> Catalog:
         ):
             raise ValueError("Classification member owner differs from shard path")
         documents.append(_resolve(shard, tuple(sources)))
+    if available - used:
+        raise ValueError("Unreferenced classification text version")
     return catalog(tuple(documents))

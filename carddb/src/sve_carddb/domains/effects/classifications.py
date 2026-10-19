@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, model_validator
 
 from sve_carddb.contracts.four_layer import Span
 from sve_carddb.core.models import Hash, RecordData, UInt
@@ -153,15 +153,6 @@ class Basis(RecordData):
 
 
 class Shard(RecordData):
-    format: Literal[1]
-    kind: Literal["effect_classification_shard"]
     namespace: Code
     basis: Basis
     records: Annotated[tuple[Record, ...], Field(min_length=1)]
-
-    @field_validator("format", mode="before")
-    @classmethod
-    def _integer(cls, value: object) -> object:
-        if type(value) is not int:
-            raise ValueError("Classification format must be integer one")
-        return value

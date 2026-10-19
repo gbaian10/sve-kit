@@ -11,15 +11,16 @@ from sve_carddb.domains.effects.classifications import (
     Ability,
     Basis,
     Classification,
-    Clause,
     Code,
-    Endpoint,
     Member,
     Position,
-    Relation,
 )
 
 Owner = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
+
+
+class TextVersionMismatchError(ValueError):
+    """A safe validation category distinguishable without returning source input."""
 
 
 class SourceText(RecordData):
@@ -35,7 +36,7 @@ class SourceText(RecordData):
     @model_validator(mode="after")
     def _version(self) -> Self:
         if self.id != digest(canonical({"raw": self.raw, "body": self.body_text})):
-            raise ValueError("Classification text version hash mismatch")
+            raise TextVersionMismatchError("Classification text version hash mismatch")
         return self
 
 
@@ -85,8 +86,6 @@ class StoredMember(RecordData):
 
     def resolve(self, text: SourceText) -> Member:
         """Recover old identities so existing scope checks remain independent."""
-        if text.id != self.source:
-            raise ValueError("Classification text reference mismatch")
         raw_length = self.body_length if self.raw_length is None else self.raw_length
         if self.body_length != len(text.body_text) or raw_length != len(text.raw):
             raise ValueError("Classification text length mismatch")
@@ -127,23 +126,45 @@ class StoredAbility(Ability):
     note_hash: Hash | None = None
 
 
-class StoredClause(Clause):
+class StoredClause(RecordData):
     id: Text
+    ability: Code
+    stage: Code
+    ir: tuple[Code, ...]
+    author: tuple[Code, ...]
+    note_hash: Hash
     decision: Code | None = None
     capture: Code | None = None
 
 
-class StoredEndpoint(Endpoint):
+class StoredEndpoint(RecordData):
     clause: Text
     ability: Code | None = None
 
 
-class StoredRelation(Relation):
+class StoredRelation(RecordData):
+    type: Literal[
+        "sequence",
+        "branch",
+        "cost-of",
+        "result-of",
+        "capture-of",
+        "scope-of",
+        "simultaneous",
+    ]
+    note_hash: Hash
     sources: Annotated[tuple[StoredEndpoint, ...], Field(min_length=1)]
     targets: Annotated[tuple[StoredEndpoint, ...], Field(min_length=1)]
 
 
-class StoredClassification(Classification):
+class StoredClassification(RecordData):
+    kind: Literal["classification"]
+    id: Code
+    status: Literal["candidate"]
+    family: Code
+    normalized_hash: Hash
+    definition_hash: Hash
+    label_hash: Hash
     members: Annotated[tuple[Text, ...], Field(min_length=1)]
     abilities: Annotated[tuple[StoredAbility, ...], Field(min_length=1)]
     clauses: Annotated[tuple[StoredClause, ...], Field(min_length=1)]

@@ -94,8 +94,6 @@ def classification() -> Classification:
 def encoded(records: list[JsonValue] | None = None) -> bytes:
     return canonical(
         {
-            "format": 1,
-            "kind": "effect_classification_shard",
             "namespace": "fixture",
             "basis": {"recipe": "fixture-v1", "inputs_hash": digest(b"inputs")},
             "records": records
