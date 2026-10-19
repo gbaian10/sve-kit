@@ -194,8 +194,12 @@ describe("opening a card beside the results", () => {
     expect(await navigator.clipboard.readText()).toBe("http://localhost:3000/cards/BP01-001")
 
     await user.click(within(aside).getByRole("button", { name: "全螢幕顯示" }))
+    // The page replaces the short address with its canonical one (number plus name slug) as soon
+    // as the card is prepared, possibly before the first check: wait for the settled address.
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/cards/BP01-001")
+      expect(router.state.location.pathname).toBe(
+        `/cards/BP01-001/${encodeURIComponent("試作の見習い兵")}`,
+      )
     })
     expect(router.state.location.state).toMatchObject({
       background: "?q=bp01",
