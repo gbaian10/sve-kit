@@ -17,7 +17,7 @@
 | `document` | 明示 `jp`／`en`、原卡號與完整 parser record，包含有序卡面、卡文、風味、商品、Q&A、相關卡、圖片 URL、繪師及來源日期 |
 | `layout` | 原 DOM 才能證明的主文存在狀態、空白主文、商品區塊與 Q&A／相關連結定位；沒有 HTML 也能還原相同下游投影 |
 | `content_hash` | 除自身與批次 membership 之外全部觀測欄位的 canonical JSON SHA-256 |
-| `memberships` | 原凍結批次 ID 與該批次是否為 current；依批次 ID 排序、不重複 |
+| `memberships` | 原凍結批次 ID、該批次 receipt hash 與是否為 current；依批次 ID 排序、不重複 |
 
 來源 ID 沿用歸檔演算法，不重新配號。地區與官方 URL／卡號須一致；卡面順序與各面的存在證據 source index 一致。
 圖片只保留原 URL；不包含圖片、音訊 bytes 或 raw HTML。
@@ -32,6 +32,7 @@
 
 一般包為 `<region>/<family>.json`，例如 `jp/BP01.json`。`family` 由明示的歸檔表指定，不從跨地區卡號猜測配對。
 `index.json` 記錄固定的 `split_families`、`range_width: 200`、全部分片 hash／bytes／卡數／觀測數與批次完整性計數。
+批次釘選另保留原始建立時間及 manifest hash／bytes／schema 版號；配合每筆 membership 的 receipt hash 與執行時明示的邏輯 store 名稱，可還原原始 inventory 並驗回原批次 hash，不需保存私人位置或讀取 HTML。此驗證不宣稱已重驗當下原始 bytes，raw 歸檔仍依原契約獨立保存。
 需切檔的包按卡號數字固定每 **200** 號保存：
 
 ```text

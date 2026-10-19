@@ -27,15 +27,55 @@
           "minimum": 0,
           "title": "Current",
           "type": "integer"
+        },
+        "created_at": {
+          "minLength": 1,
+          "title": "Created At",
+          "type": "string"
+        },
+        "manifest": {
+          "$ref": "#/$defs/ManifestPointer"
         }
       },
       "required": [
         "id",
         "region",
         "versions",
-        "current"
+        "current",
+        "created_at",
+        "manifest"
       ],
       "title": "BatchPin",
+      "type": "object"
+    },
+    "ManifestPointer": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "const": "manifest.sqlite",
+          "default": "manifest.sqlite",
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes",
+        "schema_version"
+      ],
+      "title": "ManifestPointer",
       "type": "object"
     },
     "ShardPin": {

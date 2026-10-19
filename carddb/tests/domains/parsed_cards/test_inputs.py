@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 from sve_carddb.core.json import digest
 from sve_carddb.core.regions import Region, SourceRegion
 from sve_carddb.domains import physical_sources
+from sve_carddb.domains.parsed_cards import batches
 from sve_carddb.domains.parsed_cards.codec import decode, encode
 from sve_carddb.domains.parsed_cards.commands import app
 from sve_carddb.domains.parsed_cards.filing import band
@@ -75,6 +76,21 @@ def test_roundtrip_all_projections_without_archive(
     )
     sources.root.rename(tmp_path / "unmounted")
     restored = load(root)
+    assert (
+        batches.inventory(restored, sources.batch_id, sources.store_id)
+        == sources.inventory
+    )
+    assert (
+        batches.source(
+            restored.observations()[version],
+            batch_id=sources.batch_id,
+            store_id=sources.store_id,
+            parser_version="synthetic-consumer",
+        )
+        == source
+    )
+    with pytest.raises(ValueError, match="original batch identity"):
+        batches.inventory(restored, sources.batch_id, "incorrect-store")
     actual = replay(restored.observations()[version], source)
     assert actual.record.get() == expected.record.get()
     assert actual.observation.get() == expected.observation.get()

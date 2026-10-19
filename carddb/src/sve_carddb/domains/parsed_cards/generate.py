@@ -111,6 +111,8 @@ def generate(
             region=region,
             versions=len(inventory.entries),
             current=len(current),
+            created_at=inventory.created_at,
+            manifest=inventory.manifest,
         )
         if pin.id in batches and batches[pin.id] != pin:
             raise ValueError("Source batch changed under an existing pin")
@@ -130,7 +132,11 @@ def generate(
                 )
             if (region, number) not in filing:
                 raise ValueError("Missing explicit parsed card filing")
-            membership = Membership(batch_id=pin.id, current=descriptor.id in current)
+            membership = Membership(
+                batch_id=pin.id,
+                current=descriptor.id in current,
+                receipt_id=entry.receipt_id,
+            )
             old = observations.get(descriptor.id)
             memberships = tuple(
                 sorted(

@@ -11,7 +11,7 @@ from sve_carddb.core.regions import Region
 from sve_carddb.domains.card_extras.models import RelatedLink
 from sve_carddb.domains.products.identity_models import Match
 from sve_carddb.domains.text_observations.presence import EffectPresence
-from sve_carddb.ingest.archive.source_archive import Descriptor
+from sve_carddb.ingest.archive.source_archive import Descriptor, ManifestPointer
 from sve_carddb.parse.pages import extract_en, extract_jp, official_en, official_jp
 
 RECIPE: Final = "sve-parsed-card-v1"
@@ -97,6 +97,7 @@ class ENDocument(RecordData):
 class Membership(RecordData):
     batch_id: Hash
     current: bool
+    receipt_id: Hash
 
 
 class ParsedObservation(RecordData):
@@ -197,6 +198,8 @@ class BatchPin(RecordData):
     region: Region
     versions: UInt
     current: UInt
+    created_at: Text
+    manifest: ManifestPointer
 
 
 class SplitFamily(RecordData):
