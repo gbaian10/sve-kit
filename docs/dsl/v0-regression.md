@@ -73,7 +73,7 @@ use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算�
 跨行涵蓋另附 `covered_by.ability` 與該 ability 內的 JSON pointer。
 定位覆蓋不證明其 body 全面正確，尤其位置錯標仍需單獨修正。
 
-| 分類 | 凍結數量 | 處理 |
+| 分類 | 數量 | 處理 |
 | --- | --- | --- |
 | token | 29 | 引用 token 的欄位不複製成本卡效果；token 自身仍需獨立覆蓋 |
 | 跨行涵蓋 | 16 | 指向 costs、additional_costs 或 body，模式本文須組裝 |
@@ -83,15 +83,10 @@ use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算�
 
 「通用規則」及「說明」只區分責任，不代表引擎已實作；例如ドライブチェック與タイトル構築開局配置仍須獨立確認支援。
 
-BP07-P06 的能力 2 已移至 effect line 3；傷害只執行一次，additional_costs 保留。
-來源更正 `x:d529a2a90bd757f2be41c721eb0eaf4b` 已清空整個錯植 section，
-因此移除原 section line 1 的 token 反向位置、effect line 3 的跨行反向位置，
-以及 `positive_alignment_exceptions` 的 `uncorrected_duplicate` 紀錄。
-該卡不再有未分類位置，也不把已移除的 token 定義當成卡片效果。
-
-effect line 3 的片段沿用上述凍結建置已有的完整 binding／use／frame／source hash／span；
-PR #824 保留相同三行本文，測試另以現行來源更正的全文 hash 與第三行範圍核對。
-基線的其餘卡片及片段沒有重錄；表中數量反映這次已採納的兩筆反向位置移除。
+BP07-P06 的基線依來源更正 `x:d529a2a90bd757f2be41c721eb0eaf4b` 不含補充段落的位置，
+因此與凍結建置刻意不同：凍結建置仍有 section 0 line 1／2。
+能力 2 對應的 effect line 3 片段取自凍結建置，其本文全文 hash 與現行更正相同；
+測試以更正後全文核對 hash 及第三行範圍。
 
 CSD01-T01 的兩行歸通用規則。其餘 15 個空 abilities 卡的主 effect
 為空；16 個空 abilities 卡都保留在測試基線內，不算作執行成功案例。
@@ -145,8 +140,7 @@ Python 基線測試驗證 AST、位置、分類版本與跨行 pointer；Rust �
   必須從契約記錄的凍結建置取得；若改用新建置，須一併更新 `basis`、來源版本及受影響範圍。
   缺少該輸入時保留失敗並取得凍結來源，不能清空片段或移除反向位置來使測試通過。
 - ability 改位置時，同時檢查原位置與新位置的來源、正向／反向集合及 `covered_by`。
-  若原位置是錯植或重複內容，須先由來源更正流程處理；在舊來源仍存在的建置中，
-  不得默默丟棄該行。新來源與定位都驗證後，才更新或移除對齊例外；
-  BP07-P06 已依此順序完成來源更正及錨點移動。
+  原位置若是錯植或重複內容，先由來源更正流程處理；更正採納前不移動 ability，
+  也不得從基線刪除原位置。更正採納且新位置片段驗證後，才移動 ability 並移除失效的反向位置。
 - BP18-059 修正 body 時保留清楚的行為差異證據，再更新 AST 期望與原 body 情境的預期結果；
   不再把已修正的行為稱為已知缺陷。
