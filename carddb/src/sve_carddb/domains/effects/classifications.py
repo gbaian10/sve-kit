@@ -1,4 +1,4 @@
-"""Closed candidate records retain classification scope without source wording."""
+"""Resolved candidate records retain the original classification identities and scope."""
 
 from typing import Annotated, Literal, Self
 

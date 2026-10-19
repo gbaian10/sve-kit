@@ -15,28 +15,87 @@ from sve_carddb.domains.effects.classifications import (
     Member,
     Shard,
 )
+from sve_carddb.domains.effects.storage import (
+    SourceShard,
+    SourceText,
+    StoredClassification,
+    StoredMember,
+    StoredShard,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-def document(raw: bytes) -> Shard:
-    """Diagnostics never echo potentially private source text from malformed inputs."""
+def document(raw: bytes, sources: tuple[SourceShard, ...] = ()) -> Shard:
+    """Decode readable evidence without exposing wording in validation diagnostics."""
+    stored = _validated(_content(raw))
+    return _resolve(stored, sources)
+
+
+def source_document(raw: bytes) -> SourceShard:
+    """Invalid text versions report no source wording."""
+    return _source_validated(_content(raw))
+
+
+def _content(raw: bytes) -> bytes:
     if len(raw) >= MAX_BYTES:
         raise ValueError("Oversized classification shard")
     try:
-        return _validated(
-            canonical(JSON_VALUE.validate_python(parse_yaml(raw), strict=True))
-        )
-    except ValidationError, ValueError, TypeError:
+        return canonical(JSON_VALUE.validate_python(parse_yaml(raw), strict=True))
+    except ValueError, TypeError:
         raise ValueError("Invalid classification shard") from None
 
 
-def _validated(content: bytes) -> Shard:
+def _validated(content: bytes) -> StoredShard:
     try:
-        return Shard.model_validate_json(content)
+        return StoredShard.model_validate_json(content)
     except ValidationError:
         raise ValueError("Invalid classification shard") from None
+
+
+def _source_validated(content: bytes) -> SourceShard:
+    try:
+        return SourceShard.model_validate_json(content)
+    except ValidationError:
+        raise ValueError("Invalid classification source shard") from None
+
+
+def _resolve(stored: StoredShard, sources: tuple[SourceShard, ...]) -> Shard:
+    texts: dict[tuple[str, str], SourceText] = {}
+    for source in sources:
+        if source.namespace != stored.namespace or source.basis != stored.basis:
+            raise ValueError("Classification source namespace or input basis differs")
+        for text in source.records:
+            key = (source.owner, text.id)
+            if key in texts:
+                raise ValueError("Duplicate classification text version")
+            texts[key] = text
+    records: list[Classification | Member] = []
+    for record in stored.records:
+        resolved_text = (
+            texts.get((record.owner, record.source))
+            if isinstance(record, StoredMember)
+            else None
+        )
+        if isinstance(record, StoredMember) and resolved_text is None:
+            raise ValueError("Missing classification text version")
+        try:
+            if isinstance(record, StoredMember) and resolved_text is not None:
+                records.append(record.resolve(resolved_text))
+            elif isinstance(record, StoredClassification):
+                records.append(record.resolve())
+        except ValidationError, ValueError, TypeError:
+            raise ValueError(
+                "Invalid classification source reference or record"
+            ) from None
+    return Shard(
+        format=1,
+        kind=stored.kind,
+        namespace=stored.namespace,
+        basis=stored.basis,
+        records=tuple(records),
+    )
 
 
 @dataclass(frozen=True)
@@ -116,9 +175,8 @@ def _member_index(members: tuple[Member, ...]) -> dict[str, Member]:
     return by_id
 
 
-def load(authored: Path) -> Catalog:
-    """Explicit admission keeps candidates out of snapshot and runtime consumers."""
-    directory = authored / "rules/classifications"
+def _check_area(authored: Path, area: str) -> None:
+    directory = authored / area
     require_directory(authored, directory)
     for path in directory.rglob("*"):
         check_path(authored, path)
@@ -128,9 +186,28 @@ def load(authored: Path) -> Catalog:
         )
         if re.fullmatch(pattern, name) is None:
             raise ValueError("Unsupported classification shard path")
-    return catalog(
-        tuple(
-            _validated(content)
-            for _, _, content in shards(authored, ("rules/classifications",))
-        )
+
+
+def load(authored: Path) -> Catalog:
+    """Explicit admission keeps candidates out of snapshot and runtime consumers."""
+    _check_area(authored, "rules/classifications")
+    stored = tuple(
+        (name, _validated(content))
+        for name, _, content in shards(authored, ("rules/classifications",))
     )
+    _check_area(authored, "rules/classification-sources")
+    sources = []
+    for name, _, content in shards(authored, ("rules/classification-sources",)):
+        source = _source_validated(content)
+        if name.split("/")[2] != source.owner:
+            raise ValueError("Classification text owner differs from shard path")
+        sources.append(source)
+    documents = []
+    for name, shard in stored:
+        if any(
+            isinstance(record, StoredMember) and record.owner != name.split("/")[2]
+            for record in shard.records
+        ):
+            raise ValueError("Classification member owner differs from shard path")
+        documents.append(_resolve(shard, tuple(sources)))
+    return catalog(tuple(documents))

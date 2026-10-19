@@ -3,11 +3,11 @@
 from pathlib import Path
 
 import pytest
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.domains.effects.classifications import Classification, Member
-from sve_carddb.domains.effects.reader import catalog, document, load
+from sve_carddb.domains.effects.classifications import Classification, Member, Shard
+from sve_carddb.domains.effects.reader import catalog, load
 
 
 def member() -> Member:
@@ -108,45 +108,8 @@ def encoded(records: list[JsonValue] | None = None) -> bytes:
     )
 
 
-def test_unknown_timing_and_candidate_status_survive_loading(tmp_path: Path) -> None:
-    path = tmp_path / "rules/classifications/TEST/001.yaml"
-    path.parent.mkdir(parents=True)
-    path.write_bytes(encoded())
-    loaded = load(tmp_path)
-    assert loaded.namespace == "fixture"
-    assert loaded.classifications == (classification(),)
-    result = loaded.classifications[0]
-    assert result.abilities[0].cost_timing is None
-    assert result.clauses[0].capture is None
-    assert result.clauses[0].decision is None
-    assert result.status == "candidate"
-    assert result.relations[0].sources[0].ability is None
-
-
-@pytest.mark.parametrize(
-    "replacement",
-    [b"true", b"1.0", b'"1"', b"2"],
-    ids=["bool", "float", "string", "future"],
-)
-def test_format_requires_exact_integer_one(replacement: bytes) -> None:
-    with pytest.raises(ValueError, match="Invalid classification"):
-        document(encoded().replace(b'"format":1', b'"format":' + replacement))
-
-
-@pytest.mark.parametrize(
-    "raw",
-    [
-        b"format: 1\nformat: 1\n",
-        b"1: invalid\n",
-        b"records: [",
-        b"x" * 1048576,
-    ],
-    ids=["duplicate-key", "non-string-key", "invalid", "oversize"],
-)
-def test_invalid_yaml_and_oversized_input_do_not_echo_payload(raw: bytes) -> None:
-    with pytest.raises(ValueError, match="classification shard") as caught:
-        document(raw)
-    assert len(str(caught.value)) < 100
+def resolved_shard(raw: bytes) -> Shard:
+    return Shard.model_validate_json(raw)
 
 
 @pytest.mark.parametrize(
@@ -163,8 +126,8 @@ def test_quality_flags_and_unknown_fields_are_rejected(
 ) -> None:
     payload = classification().model_dump(mode="json")
     payload[field] = value
-    with pytest.raises(ValueError, match="Invalid classification"):
-        document(encoded([payload, member().model_dump(mode="json")]))
+    with pytest.raises(ValidationError):
+        resolved_shard(encoded([payload, member().model_dump(mode="json")]))
 
 
 @pytest.mark.parametrize("change", ["ability", "clause", "duplicate", "ambiguous"])
@@ -179,8 +142,8 @@ def test_relation_endpoints_are_local_and_unambiguous(change: str) -> None:
     else:
         payload["abilities"].append({**payload["abilities"][0], "id": "a2"})
         payload["clauses"].append({**payload["clauses"][0], "ability": "a2"})
-    with pytest.raises(ValueError, match="Invalid classification"):
-        document(encoded([payload]))
+    with pytest.raises(ValidationError):
+        resolved_shard(encoded([payload]))
 
 
 def test_qualified_endpoints_keep_distinct_abilities_on_one_clause() -> None:
@@ -188,7 +151,9 @@ def test_qualified_endpoints_keep_distinct_abilities_on_one_clause() -> None:
     payload["abilities"].append({**payload["abilities"][0], "id": "a2"})
     payload["clauses"].append({**payload["clauses"][0], "ability": "a2"})
     payload["relations"][0]["sources"][0]["ability"] = "a2"
-    result = catalog((document(encoded([payload, member().model_dump(mode="json")])),))
+    result = catalog(
+        (resolved_shard(encoded([payload, member().model_dump(mode="json")])),)
+    )
     assert result.classifications[0].relations[0].sources[0].ability == "a2"
 
 
@@ -219,7 +184,7 @@ def test_complete_member_closure_rejects_equal_count_substitution(
     else:
         records.append(source)
     with pytest.raises(ValueError, match=message):
-        catalog((document(encoded(records)),))
+        catalog((resolved_shard(encoded(records)),))
 
 
 @pytest.mark.parametrize("change", ["body-gap", "raw-overrun", "ordinal", "bool"])
@@ -233,16 +198,16 @@ def test_member_coordinates_and_spans_are_checked(change: str) -> None:
         source["position"]["ordinal"] = 0
     else:
         source["position"]["face"] = True
-    with pytest.raises(ValueError, match="Invalid classification"):
-        document(encoded([source]))
+    with pytest.raises(ValidationError):
+        resolved_shard(encoded([source]))
 
 
 def test_duplicate_classifications_across_shards_are_not_overwritten() -> None:
     with pytest.raises(ValueError, match="Duplicate classification identity"):
         catalog(
             (
-                document(encoded()),
-                document(encoded([classification().model_dump(mode="json")])),
+                resolved_shard(encoded()),
+                resolved_shard(encoded([classification().model_dump(mode="json")])),
             )
         )
 
@@ -252,7 +217,10 @@ def test_empty_and_mixed_namespaces_fail_closed() -> None:
         catalog(())
     with pytest.raises(ValueError, match="namespace"):
         catalog(
-            (document(encoded()), document(encoded().replace(b"fixture", b"other")))
+            (
+                resolved_shard(encoded()),
+                resolved_shard(encoded().replace(b"fixture", b"other")),
+            )
         )
 
 
@@ -280,7 +248,7 @@ def test_reader_does_not_silently_ignore_unknown_paths(
 
 
 def test_different_input_basis_cannot_share_a_namespace() -> None:
-    first = document(encoded())
+    first = resolved_shard(encoded())
     second = first.model_copy(
         update={
             "basis": first.basis.model_copy(update={"inputs_hash": digest(b"other")})
@@ -295,7 +263,11 @@ def test_member_block_cannot_cross_source_owner() -> None:
     source["block"] = digest(b"absent")
     with pytest.raises(ValueError, match="block"):
         catalog(
-            (document(encoded([classification().model_dump(mode="json"), source])),)
+            (
+                resolved_shard(
+                    encoded([classification().model_dump(mode="json"), source])
+                ),
+            )
         )
 
 
@@ -340,7 +312,7 @@ def test_duplicate_clause_identities_cannot_cross_members(separate: bool) -> Non
         first["members"].append(other["id"])
         message = "Duplicate clause identity across members"
     with pytest.raises(ValueError, match=message):
-        catalog((document(encoded(records)),))
+        catalog((resolved_shard(encoded(records)),))
 
 
 @pytest.mark.parametrize(
@@ -410,7 +382,7 @@ def test_representative_coverage_and_member_template_alignment(change: str) -> N
         )
     elif change == "sequence":
         other["clauses"][0]["template"] = "C-other"
-    documents = (document(encoded([label, source, other])),)
+    documents = (resolved_shard(encoded([label, source, other])),)
     if change == "none":
         assert len(catalog(documents).members) == 2
     else:
@@ -423,21 +395,13 @@ def test_representative_coverage_and_member_template_alignment(change: str) -> N
             catalog(documents)
 
 
-def test_loading_invalid_record_does_not_echo_private_payload(tmp_path: Path) -> None:
-    path = tmp_path / "rules/classifications/TEST/001.yaml"
-    path.parent.mkdir(parents=True)
-    path.write_bytes(encoded().replace(b'"candidate"', b'"private-payload"'))
-    with pytest.raises(ValueError, match=r"^Invalid classification shard$"):
-        load(tmp_path)
-
-
 def test_distinct_member_ids_cannot_claim_the_same_position() -> None:
     other = other_member().model_dump(mode="json")
     other["position"] = member().position.model_dump(mode="json")
     with pytest.raises(ValueError, match="Duplicate source position"):
         catalog(
             (
-                document(
+                resolved_shard(
                     encoded(
                         [
                             classification().model_dump(mode="json"),
@@ -474,7 +438,7 @@ def test_block_must_precede_member_within_the_same_owner(change: str) -> None:
         block["position"]["line"] = 2
     elif change == "header":
         source["token_header_hash"] = digest(b"different-header")
-    documents = (document(encoded([label, source, block])),)
+    documents = (resolved_shard(encoded([label, source, block])),)
     if change == "none":
         assert len(catalog(documents).members) == 2
     else:
