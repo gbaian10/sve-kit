@@ -21,6 +21,7 @@ from sve_carddb.domains.parsed_cards.models import (
     SplitFamily,
 )
 from sve_carddb.domains.parsed_cards.projection import extract
+from sve_carddb.domains.parsed_cards.serialization import separate
 from sve_carddb.domains.parsed_cards.storage import Catalog
 
 if TYPE_CHECKING:
@@ -65,8 +66,9 @@ def assemble(
                 for number, items in sorted(cards.items())
             ),
         )
-        raw = encode(shard)
-        if len(raw) > MAX_BYTES:
+        cards_file, evidence_file = separate(shard)
+        raw, evidence_raw = encode(cards_file), encode(evidence_file)
+        if max(len(raw), len(evidence_raw)) > MAX_BYTES:
             raise ValueError(
                 f"Parsed member exceeds 1 MiB; review fixed filing for {region}/{family}"
             )
@@ -77,6 +79,8 @@ def assemble(
                 path=path,
                 sha256=digest(raw),
                 bytes=len(raw),
+                evidence_sha256=digest(evidence_raw),
+                evidence_bytes=len(evidence_raw),
                 cards=len(shard.cards),
                 observations=sum(len(c.observations) for c in shard.cards),
             ),

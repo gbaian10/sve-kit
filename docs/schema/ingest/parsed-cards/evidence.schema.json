@@ -1,0 +1,731 @@
+{
+  "$defs": {
+    "BatchRef": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Batch",
+          "type": "string"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Id"
+        }
+      },
+      "required": [
+        "batch",
+        "current",
+        "receipt_id"
+      ],
+      "title": "BatchRef",
+      "type": "object"
+    },
+    "ExpansionLink": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "expansion_link",
+          "title": "Kind",
+          "type": "string"
+        },
+        "search_url": {
+          "minLength": 1,
+          "title": "Search Url",
+          "type": "string"
+        },
+        "expansion_code": {
+          "minLength": 1,
+          "title": "Expansion Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "search_url",
+        "expansion_code"
+      ],
+      "title": "ExpansionLink",
+      "type": "object"
+    },
+    "LayoutRefs": {
+      "additionalProperties": false,
+      "properties": {
+        "presence": {
+          "items": {
+            "$ref": "#/$defs/PresenceRef"
+          },
+          "title": "Presence",
+          "type": "array"
+        },
+        "whitespace": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Whitespace",
+          "type": "array"
+        },
+        "products": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Products",
+          "type": "string"
+        },
+        "qa": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Qa",
+          "type": "string"
+        },
+        "related": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Related",
+          "type": "string"
+        },
+        "errata_urls": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Errata Urls",
+          "type": "string"
+        }
+      },
+      "required": [
+        "presence",
+        "whitespace",
+        "products",
+        "qa",
+        "related",
+        "errata_urls"
+      ],
+      "title": "LayoutRefs",
+      "type": "object"
+    },
+    "LocalSourceBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "source_block",
+          "title": "Kind",
+          "type": "string"
+        },
+        "product_block_ordinal": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Product Block Ordinal",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "product_block_ordinal"
+      ],
+      "title": "LocalSourceBlock",
+      "type": "object"
+    },
+    "ObservationEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "recipe": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Recipe",
+          "type": "string"
+        },
+        "raw": {
+          "$ref": "#/$defs/RawEvidence"
+        },
+        "layout": {
+          "$ref": "#/$defs/LayoutRefs"
+        },
+        "content_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "memberships": {
+          "items": {
+            "$ref": "#/$defs/BatchRef"
+          },
+          "title": "Memberships",
+          "type": "array"
+        }
+      },
+      "required": [
+        "recipe",
+        "raw",
+        "layout",
+        "content_hash",
+        "memberships"
+      ],
+      "title": "ObservationEvidence",
+      "type": "object"
+    },
+    "PresenceParser": {
+      "additionalProperties": false,
+      "properties": {
+        "recipe": {
+          "const": "effect-presence-v1",
+          "title": "Recipe",
+          "type": "string"
+        },
+        "parser_version": {
+          "const": "effect-presence-v1/detail-v1",
+          "title": "Parser Version",
+          "type": "string"
+        },
+        "template_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Template Id"
+        }
+      },
+      "required": [
+        "recipe",
+        "parser_version",
+        "template_id"
+      ],
+      "title": "PresenceParser",
+      "type": "object"
+    },
+    "PresenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "template": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Template",
+          "type": "string"
+        },
+        "result_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Result Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "template",
+        "result_hash"
+      ],
+      "title": "PresenceRef",
+      "type": "object"
+    },
+    "PresenceTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "parser": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Parser",
+          "type": "string"
+        },
+        "source_index": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Source Index",
+          "type": "integer"
+        },
+        "container_locator": {
+          "pattern": "^[a-z]+-[0-9a-f]{16}$",
+          "title": "Container Locator",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "present",
+            "absent",
+            "unknown"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "reason_code": {
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "parser",
+        "source_index",
+        "container_locator",
+        "state",
+        "reason_code"
+      ],
+      "title": "PresenceTemplate",
+      "type": "object"
+    },
+    "ProductLink": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "product_link",
+          "title": "Kind",
+          "type": "string"
+        },
+        "product_url": {
+          "minLength": 1,
+          "title": "Product Url",
+          "type": "string"
+        },
+        "expansion_code": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expansion Code"
+        }
+      },
+      "required": [
+        "kind",
+        "product_url",
+        "expansion_code"
+      ],
+      "title": "ProductLink",
+      "type": "object"
+    },
+    "ProductTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "ordinal": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "date_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date Raw"
+        },
+        "href_raw": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Href Raw",
+          "type": "array"
+        },
+        "resolved_urls": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resolved Urls",
+          "type": "array"
+        },
+        "matches": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "expansion_link": "#/$defs/ExpansionLink",
+                "product_link": "#/$defs/ProductLink",
+                "source_block": "#/$defs/LocalSourceBlock"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ProductLink"
+              },
+              {
+                "$ref": "#/$defs/ExpansionLink"
+              },
+              {
+                "$ref": "#/$defs/LocalSourceBlock"
+              }
+            ]
+          },
+          "title": "Matches",
+          "type": "array"
+        },
+        "diagnostics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ordinal",
+        "name",
+        "date_raw",
+        "href_raw",
+        "resolved_urls",
+        "matches",
+        "diagnostics"
+      ],
+      "title": "ProductTemplate",
+      "type": "object"
+    },
+    "QAIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "stable_source_key": {
+          "minLength": 1,
+          "title": "Stable Source Key",
+          "type": "string"
+        },
+        "official_number": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Official Number"
+        },
+        "locator": {
+          "minLength": 1,
+          "title": "Locator",
+          "type": "string"
+        },
+        "published_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Published On"
+        },
+        "date_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date Raw"
+        }
+      },
+      "required": [
+        "stable_source_key",
+        "official_number",
+        "locator",
+        "published_on",
+        "date_raw"
+      ],
+      "title": "QAIdentity",
+      "type": "object"
+    },
+    "RawEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "raw_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Raw Sha256",
+          "type": "string"
+        },
+        "raw_bytes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Raw Bytes",
+          "type": "integer"
+        },
+        "first_receipt_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "First Receipt Id",
+          "type": "string"
+        },
+        "descriptor_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Descriptor Sha256",
+          "type": "string"
+        },
+        "etag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Etag"
+        },
+        "last_modified": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Modified"
+        }
+      },
+      "required": [
+        "raw_sha256",
+        "raw_bytes",
+        "first_receipt_id",
+        "descriptor_sha256",
+        "etag",
+        "last_modified"
+      ],
+      "title": "RawEvidence",
+      "type": "object"
+    },
+    "Recipe": {
+      "additionalProperties": false,
+      "properties": {
+        "recipe": {
+          "const": "sve-parsed-card-v1",
+          "title": "Recipe",
+          "type": "string"
+        },
+        "producer_revision": {
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])",
+          "title": "Producer Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "recipe",
+        "producer_revision"
+      ],
+      "title": "Recipe",
+      "type": "object"
+    },
+    "RelatedLink": {
+      "additionalProperties": false,
+      "properties": {
+        "locator": {
+          "minLength": 1,
+          "title": "Locator",
+          "type": "string"
+        },
+        "href_raw": {
+          "minLength": 1,
+          "title": "Href Raw",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "href_raw"
+      ],
+      "title": "RelatedLink",
+      "type": "object"
+    },
+    "Shared": {
+      "additionalProperties": false,
+      "properties": {
+        "recipes": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "$ref": "#/$defs/Recipe"
+            }
+          },
+          "title": "Recipes",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "parsers": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "$ref": "#/$defs/PresenceParser"
+            }
+          },
+          "title": "Parsers",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "locators": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "title": "Locators",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "presence": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "$ref": "#/$defs/PresenceTemplate"
+            }
+          },
+          "title": "Presence",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "products": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "items": {
+                "$ref": "#/$defs/ProductTemplate"
+              },
+              "type": "array"
+            }
+          },
+          "title": "Products",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "qa": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "items": {
+                "$ref": "#/$defs/QAIdentity"
+              },
+              "type": "array"
+            }
+          },
+          "title": "Qa",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "related": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "items": {
+                "$ref": "#/$defs/RelatedLink"
+              },
+              "type": "array"
+            }
+          },
+          "title": "Related",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "errata_urls": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "title": "Errata Urls",
+          "type": "object",
+          "additionalProperties": false
+        },
+        "batches": {
+          "patternProperties": {
+            "^[a-z]+-[0-9a-f]{16}$": {
+              "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+              "type": "string"
+            }
+          },
+          "title": "Batches",
+          "type": "object",
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "recipes",
+        "parsers",
+        "locators",
+        "presence",
+        "products",
+        "qa",
+        "related",
+        "errata_urls",
+        "batches"
+      ],
+      "title": "Shared",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": 1,
+      "default": 1,
+      "title": "Format",
+      "type": "integer"
+    },
+    "region": {
+      "enum": [
+        "jp",
+        "en"
+      ],
+      "title": "Region",
+      "type": "string"
+    },
+    "family": {
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "title": "Family",
+      "type": "string"
+    },
+    "band": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Band"
+    },
+    "shared": {
+      "$ref": "#/$defs/Shared"
+    },
+    "observations": {
+      "patternProperties": {
+        "^src:v1:[0-9a-f]{64}(?![\\s\\S])": {
+          "$ref": "#/$defs/ObservationEvidence"
+        }
+      },
+      "title": "Observations",
+      "type": "object",
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "region",
+    "family",
+    "band",
+    "shared",
+    "observations"
+  ],
+  "title": "EvidenceFile",
+  "type": "object"
+}

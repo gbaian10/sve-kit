@@ -13,8 +13,9 @@ from sve_carddb.core.provenance import Revision
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.parsed_cards import codec
 from sve_carddb.domains.parsed_cards.generate import generate
-from sve_carddb.domains.parsed_cards.models import Family, Index, Shard, SplitFamily
+from sve_carddb.domains.parsed_cards.models import Family, Index, SplitFamily
 from sve_carddb.domains.parsed_cards.storage import load, write
+from sve_carddb.domains.parsed_cards.wire import CardFile, EvidenceFile
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 app = typer.Typer(no_args_is_help=True)
@@ -105,9 +106,13 @@ def validate_command(
 
 @app.command("schema")
 def schema_command(output: Path) -> None:
-    """Write both closed machine schemas into a new directory."""
+    """Write the closed index, card and evidence schemas into a new directory."""
     _absolute(output).mkdir(parents=True)
-    for name, model in (("index", Index), ("shard", Shard)):
+    for name, model in (
+        ("index", Index),
+        ("cards", CardFile),
+        ("evidence", EvidenceFile),
+    ):
         (output / f"{name}.schema.json").write_text(
             json.dumps(codec.schema(model), ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",

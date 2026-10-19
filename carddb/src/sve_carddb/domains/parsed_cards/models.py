@@ -189,8 +189,15 @@ class ShardPin(RecordData):
     path: Text
     sha256: Hash
     bytes: Annotated[int, Field(gt=0, le=MAX_BYTES)]
+    evidence_sha256: Hash
+    evidence_bytes: Annotated[int, Field(gt=0, le=MAX_BYTES)]
     cards: Annotated[int, Field(gt=0)]
     observations: Annotated[int, Field(gt=0)]
+
+    @property
+    def evidence_path(self) -> str:
+        """Keep build evidence beside the readable card file with a fixed suffix."""
+        return self.path.removesuffix(".json") + ".evidence.json"
 
 
 class BatchPin(RecordData):

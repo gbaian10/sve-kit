@@ -97,6 +97,17 @@
           "title": "Bytes",
           "type": "integer"
         },
+        "evidence_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Evidence Sha256",
+          "type": "string"
+        },
+        "evidence_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1048576,
+          "title": "Evidence Bytes",
+          "type": "integer"
+        },
         "cards": {
           "exclusiveMinimum": 0,
           "title": "Cards",
@@ -112,6 +123,8 @@
         "path",
         "sha256",
         "bytes",
+        "evidence_sha256",
+        "evidence_bytes",
         "cards",
         "observations"
       ],

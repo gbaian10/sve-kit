@@ -38,6 +38,9 @@ Reviewed Japanese and English SVE inputs live in `card-data/`. Follow the
 fixed card-number ranges and validation against the previous data tree. Keep raw
 archives and old observations: parsing is reproducible only from preserved sources,
 and updating a hash does not authorize replacing reviewed history.
+Card JSON contains readable records and minimal source references. Adjacent
+`.evidence.json` files hold build evidence with shared tables for repeated values;
+builds require both files, while reading card wording needs only the card file.
 Publishable files contain source URLs and hashes, never archive store names, local
 paths, credentials, card images or audio. A data PR must show its file count, byte
 sizes, included fields and representative records for maintainer review. Runtime

@@ -16,6 +16,8 @@ from sve_carddb.domains.parsed_cards.models import (
     Shard,
     ShardPin,
 )
+from sve_carddb.domains.parsed_cards.serialization import combine, separate
+from sve_carddb.domains.parsed_cards.wire import CardFile, EvidenceFile
 
 if TYPE_CHECKING:
     from sve_carddb.core.regions import Region
@@ -128,7 +130,13 @@ def _read_shard(root: Path, pin: ShardPin) -> Shard:
     raw = member(root, pin.path).read_bytes()
     if len(raw) != pin.bytes or digest(raw) != pin.sha256:
         raise ValueError("Parsed shard size/hash mismatch")
-    shard = decode(Shard, raw)
+    evidence_raw = member(root, pin.evidence_path).read_bytes()
+    if (
+        len(evidence_raw) != pin.evidence_bytes
+        or digest(evidence_raw) != pin.evidence_sha256
+    ):
+        raise ValueError("Parsed evidence size/hash mismatch")
+    shard = combine(decode(CardFile, raw), decode(EvidenceFile, evidence_raw))
     if (len(shard.cards), sum(len(c.observations) for c in shard.cards)) != (
         pin.cards,
         pin.observations,
@@ -153,7 +161,11 @@ def load(root: Path) -> Catalog:
             closure.card(card, shard, pin.path)
         shards.append(shard)
     closure.finish()
-    expected_paths = {p.path for p in index.shards} | {"index.json"}
+    expected_paths = (
+        {p.path for p in index.shards}
+        | {p.evidence_path for p in index.shards}
+        | {"index.json"}
+    )
     actual_paths = {p.relative_to(root).as_posix() for p in root.rglob("*.json")}
     if expected_paths != actual_paths:
         raise ValueError("Parsed directory contains missing or unlisted JSON members")
@@ -170,6 +182,8 @@ def write(root: Path, catalog: Catalog) -> Catalog:
     for pin, shard in zip(catalog.index.shards, catalog.shards, strict=True):
         path = member(root, pin.path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(encode(shard))
+        cards, evidence = separate(shard)
+        path.write_bytes(encode(cards))
+        member(root, pin.evidence_path).write_bytes(encode(evidence))
     member(root, "index.json").write_bytes(encode(catalog.index))
     return load(root)

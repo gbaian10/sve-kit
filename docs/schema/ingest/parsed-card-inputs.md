@@ -6,7 +6,12 @@
 
 ## 身分、證據與歷史
 
-每個地區、原樣卡號下保存依來源版本排序的 `observations`：
+每個地區、原樣卡號下保存依來源版本排序的 `observations`。每個分片由兩個純文字檔組成：
+
+- 卡片檔 `*.json`：檔頭是地區、包、區段及共用 `products` 表；每筆觀測只放 `source`（`id`、`url`、`fetched_at`）與 `document`。費用、名稱、主文及有序卡面直接保存在 `document.record`，不必開證據檔就能閱讀。原 record 的商品列表改為 `products_ref`，只參照同一張卡片檔的檔頭；商品名稱、日期、URL 仍在該檔內。
+- 證據檔 `*.evidence.json`：同地區、包與區段；`observations` 以來源 ID 對應證據，`shared` 共用表保存重複內容。建置 reader 合併兩檔後，還原下表的完整內部觀測模型。
+
+下表描述**合併後的語義欄位**，不是卡片檔逐筆重複的儲存格式：
 
 | 欄位 | 契約 |
 | --- | --- |
@@ -23,6 +28,16 @@
 圖片只保留原 URL；不包含圖片、音訊 bytes 或 raw HTML。
 `fetched_at` 是觀測時間，不能當成卡文生效日；本契約不推定未知的歷史或生效日。
 
+證據檔的 `shared` 分為 `recipes`、`parsers`、`locators`、`presence`、`products`、`qa`、`related`、`errata_urls`、`batches`。
+相同 parser／產生器版本、template／container locator、商品區塊（含 `resolved_urls`）及批次 ID 在單檔各表內只寫一次，再以 key 參照。
+key 是類別名稱加該共用值 canonical JSON SHA-256 的前 16 個十六進位字元；新增不同值不重新編號。若短 key 碰撞，產生器拒絕輸出，不以覆蓋解決；完整內容及檔案仍以完整 SHA-256 驗證。
+有序商品、Q&A、相關連結列表以完整有序值去重，不排序或合併來源差異。
+
+可無歧義還原的重複身分不重存：presence 與 `source_block` 商品 match 的來源 ID 取所屬觀測；descriptor 的地區、種類、URL、來源鍵由卡片來源參照依原歸檔演算法還原；membership 的 `receipt_id: null` 表示與 `first_receipt_id` 相同。
+其他 raw hash／bytes、receipt、descriptor hash、ETag、Last-Modified、whitespace、presence result hash 與 `content_hash` 都保存在證據檔。
+合併後重驗所有原始完整 hash，再重新拆分比較 canonical 共用表；懸空參照、未使用項目、不正確去重或多餘證據均拒絕讀取。
+此拆分不改變原觀測 `content_hash` 或原始批次 ID；序列化程式更新也不改寫既有 `producer_revision`。
+
 更新時追加新的來源版本，保留舊觀測、舊批次與舊分檔位置。
 驗證更新必須提供前一版完整根目錄：只驗當前自洽 hash 無法發現有人連同索引一起刪掉歷史。
 同一來源與 recipe 的重跑若改變解析結果即失敗；調整 parser 語義必須提出新的 recipe 契約與顯式遷移審查，不能藉更新 hash 覆蓋舊結果。
@@ -31,7 +46,8 @@
 ## 固定分檔表
 
 一般包為 `<region>/<family>.json`，例如 `jp/BP01.json`。`family` 由明示的歸檔表指定，不從跨地區卡號猜測配對。
-`index.json` 記錄固定的 `split_families`、`range_width: 100`、全部分片 hash／bytes／卡數／觀測數與批次完整性計數。
+`index.json` 記錄固定的 `split_families`、`range_width: 100`、全部卡片檔的 `path`／`sha256`／`bytes`／卡數／觀測數與批次完整性計數。
+每筆釘選另有 `evidence_sha256`／`evidence_bytes`，證據路徑固定將卡片路徑的 `.json` 換成 `.evidence.json`；例如 `jp/BP01.json` 配 `jp/BP01.evidence.json`，分段則 `jp/PR/000-099.json` 配 `jp/PR/000-099.evidence.json`。
 批次釘選另保留原始建立時間及 manifest hash／bytes／schema 版號；配合每筆 membership 的 receipt hash 與執行時明示的邏輯 store 名稱，可還原原始 inventory 並驗回原批次 hash，不需保存私人位置或讀取 HTML。此驗證不宣稱已重驗當下原始 bytes，raw 歸檔仍依原契約獨立保存。
 需切檔的包按卡號數字固定每 **100** 號保存：
 
@@ -60,10 +76,11 @@ UTF-8、無 BOM、LF、檔尾一個 LF、兩空格縮排、不轉義非 ASCII；
 嚴格 reader 完成整個閉包驗證後才交付資料，無網路、HTML、manifest 或 latest cache fallback。
 hash 是變更偵測與鎖定工具，不能代替來源核對、權利確認或 PR 審查。
 
-產生的機器 Schema：[索引](parsed-cards/index.schema.json)、[分片](parsed-cards/shard.schema.json)。
+產生的機器 Schema：[索引](parsed-cards/index.schema.json)、[卡片](parsed-cards/cards.schema.json)、[證據](parsed-cards/evidence.schema.json)。
 
-機器模型在 `carddb/src/sve_carddb/domains/parsed_cards/models.py`；`codec.schema` 產生封閉的 Draft 2020-12 JSON Schema。
-`sve-carddb parsed-cards schema <全新絕對目錄>` 可輸出 `index.schema.json`、`shard.schema.json`，runtime 同時驗 schema、身分關係與 canonical bytes。
+內部語義模型在 `carddb/src/sve_carddb/domains/parsed_cards/models.py`，卡片與證據檔模型在同目錄的 `wire.py`；`codec.schema` 產生封閉的 Draft 2020-12 JSON Schema。
+`sve-carddb parsed-cards schema <全新絕對目錄>` 可輸出 `index.schema.json`、`cards.schema.json`、`evidence.schema.json`，runtime 同時驗 schema、身分關係與 canonical bytes。
+卡片檔可單獨閱讀，但建置必須驗證配對證據與完整索引；缺證據不可視為可建置的輸入。
 
 ## 產生與驗收
 
