@@ -1,0 +1,149 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:23fdc1e8d5c1fe45354bd9c0e64a5c32654de4fe0ee7cc191c080d57eae4310e
+    priority: false
+    conclusion: 參數值差異
+    rationale: 進化時牌庫頂至 EX／墓場的目的 Zone 不同；有序頂牌與 EX 容量不得因省略 S.ordered／T.receipt 而消失。
+    classifications:
+      T1bd7986dc5: b7fca8e3a7d6703d318254194e072d5aed6a6ffd3a2230e15d664b16eb91dbd7
+      Tac75b03a5e: 5ddf52aa157b40dddcbfd0efdcce8e14018f56d62206976f39103ad443c89284
+    examples:
+      T1bd7986dc5:
+        - BP16-SL06
+        - BP16-020
+      Tac75b03a5e:
+        - BP08-077
+    frames:
+      - frame:44d21b6a60df6f3effaa7712a155c7808f7c7aa8757ca642ab7fce3f38c2d998
+      - frame:ee6f4d062930357785c9cf9d45e3c67963cfe917b31a855d621ab47fdd9456a4
+    uses:
+      - use:a9d94a032361a9573878111452d5ad563c365cf25bbd5884301f932526fd77bc
+      - use:f8d87c01b647634b3820f42cb0dcc7e7acb7c28a95e87ecb024b9347d8ca5812
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:ac5633f2f9a1c2aaceb7e4bb4b40cceff96d693bdc7a0d404c65455f618b6211
+    priority: true
+    conclusion: 舊標註修正
+    rationale: 使用時墓場門檻減費；T0adc0b8d2d 的 scope-of 自指改作條件 branch，所有組保留 C.at-play。這不是額外費用，trait／門檻／減值另作參數。
+    classifications:
+      T0adc0b8d2d: aebdb74bf9a16a6b7227f361e0bfbc4759d23ba8a9d2184ebc27456ad5095e6d
+      T7109c7f6fc: 10a405e5a177102423a65f39d20d06e6baeb31be213368c18cf6fef126a9807a
+      T7d68ec0d6e: 3271a785ae431645549c99faea040a4ff3eef67bb29753078de259c2e3b8fa44
+      Tda2c9328d0: 610eb255292acafd77ce3099c83e5ad5e1570b84992303ab20bb1e65b67f0575
+      Te8f7001b4f: 4063ca022a5cbad6babe3fdb6835067bb17fee4cd6a8e8053c3acce5a47a25fb
+    examples:
+      T0adc0b8d2d:
+        - BP13-053
+        - BP13-P12
+      T7109c7f6fc:
+        - CSD01-012
+        - CP01-P45
+        - CP01-060
+      T7d68ec0d6e:
+        - ECP02-SL33
+        - ECP02-SP13
+        - ECP02-U13
+      Tda2c9328d0:
+        - BP08-P17
+        - BP08-072
+      Te8f7001b4f:
+        - BP09-075
+        - PR-230
+        - PR-488
+    frames:
+      - frame:44fd37c71527c0f07e53fc9dc8ee77c96dbcfbb7ce1c10203f6f950234756c49
+      - frame:74e16c3b7fad3ad5ea4308bb0584f8fe38e8eb5395d9cc551cef016fd03fdbbe
+      - frame:c89a454bd3fb3a32edcbb2264a3f6fd54d66247575b40eacbea0f1484a39e8b5
+      - frame:f0bee19760f372eaba5322a3460f52ec8950c392058404ebbe5b28aa4a3ba9fe
+      - frame:f176f73488f0b9b6098cf0c52dd7181aa12431ac06bf4ee99620526314a16276
+    uses:
+      - use:16fa43d55c2b95dff298bd2180de0d6266a1131e83ffd21b03656958eab9fab8
+      - use:5dca7c14e6c8be465409e9a095bf0f1e8fb8e5d3e8309fbc420ee71bebcc8663
+      - use:a05e663e97031886c39e294cd4d5c54e02c16fa36183430a5f03e02de822470a
+      - use:ce84be74921c45fbcc5d2ad46d298da6160992cf9e0c7c195f1f7fe7d6fa4be8
+      - use:eea0cda340b3ac4e89e3ab2a2fcc7ffa389b0592e238298b9523d794f9303edf
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:5b58eb0c4ed9e5ce3167998b39e7e8fb5b59bd3365be4668625cd990f9876e58
+    priority: false
+    conclusion: 尚未知
+    rationale: 同為指定名稱進化及墓場 trait 使用門檻，但 B.limit／E.payment 的差異涉及一般進化限制與費用責任。未逐項核對通用規則 lowering 前不把兩份標註視為完整等價。
+    classifications:
+      T2846b5f071: a8b8c8214e8139b6829bf7c0dd01ec2fb5dadd8fc8cc3b54f6460452c8d2cc35
+      T53648ae96e: b61e06b988bb56787fee1c8e1710ab9817d1d472358b365985b84664a743b7c6
+    examples:
+      T2846b5f071:
+        - BP09-SL13
+        - BP09-069
+      T53648ae96e:
+        - SP01-002
+        - SP01-U02
+        - SP01-SL02
+    frames:
+      - frame:773b16c0b6baa543d89c23bbd66a2569754ee348303fbf643a9c3ed003ccfe60
+      - frame:7d5cd4290cd1e10400e72cb632e41e917e11b154bc32e8bca14be531fd11f6b5
+    uses: &id001
+      - use:7ce316378e67f7b82305e5fa5d88411718cde4016dcad65dc76e071a708271eb
+      - use:98e48c9684c95a7578cc7bb6ec2a196f40cf0e7575712502170fc9eebb268807
+    translation_review:
+      required_uses: []
+      conditional_uses: *id001
+      trigger: 來源變體／選取語義採納時逐 use 比對，只有語義、leaf 或中文 render 改變才重審。
+  - id: shape:9387f3bf4677c772441526b9e47989ee0174ae5b838e719dc2262c32c5fa10e9
+    priority: false
+    conclusion: 等價寫法
+    rationale: 進化時搜尋 trait spell 的複合／展開標註；同一 D.resolve-choice，保留篩選、展示及洗牌。
+    classifications:
+      T80124b5e8e: f374103665634bb2ca7068c95cb70e5410e93af4a7eb8ed15edc77815d4aaa91
+      T95fc441448: b25013d39ffca37a569ea803877721cd12568373be1aea9c07f2e324829fdb77
+    examples:
+      T80124b5e8e:
+        - ECP02-022
+        - ECP02-P10
+      T95fc441448:
+        - SP01-024
+        - SP01-SL24
+        - BP08-043
+    frames:
+      - frame:a8b19fea767508789793232a1f83f424c07992005e166dd4f3a22d0cb4415a0a
+      - frame:d826dbd84c49af0f1f49ba7bea5afbd3b29ec373c1e986735af54d7b0fd0f993
+    uses:
+      - use:13a784d4a10b90caed576b56d8f8b5c4e1afa8ce94ceca63496729a418fce4b2
+      - use:dfae27a0fe4bc472804ceab76eb37ce7f26a2c1cebca5e6667511428f0b34a7c
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP08-011
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:746f8a2fcab5dda38fd74b6a1ce0f9af7aad42d85e57da2fcd150cc0b987a176
+      - frame:9cac90db56ce93b74136618c41a67628774a184b17bf36d6e38176a7d2437781
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP08-011
+    face: 0
+    field: section
+    section: 0
+    line: 2
+    frame_ids:
+      - frame:024890191069564357bdd8b63930d20c6aaa4771a94519f6514adfc72bee9c11
+      - frame:4feee3777730b775472caa216c3a57749f2ee1e3d94a82600a95b4f456baba98
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

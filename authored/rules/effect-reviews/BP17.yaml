@@ -1,0 +1,46 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:e3292809807f2c3c0ac9705e965ddc504f57f811cce3ec5f2c91aa5723d032f9
+    priority: false
+    conclusion: 等價寫法
+    rationale: A.optional／A.may 與 A.sel 描述同一可選的手牌進場；兩組 D.resolve-choice、K.may 一致，仍以實際移動結果為準。
+    classifications:
+      Tc6705b36bc: 53fa9c6e1197f74c84409f7dc3136b996921ad181470927e6592cd106a095705
+      Tc7760edb7f: a137ae1e89508d9be209d485a11c1ff70cf5441c230744b161c2268f7d00146b
+    examples:
+      Tc6705b36bc:
+        - CP02-002
+        - CP02-SL02
+      Tc7760edb7f:
+        - BP17-101
+    frames:
+      - frame:1cfb0c2d6de897dc011aed0d9599fb5d494e7c82991a7dd4cfa081b6933b1c83
+      - frame:498c1d5d27be0f4fb0d382babaad822b94fc45e329847612f2f6ff7858d76771
+    uses:
+      - use:9ce4e9ba2dd5778f5918e3a43d39c2fcd1a49ee6737e2f32ed17e9283921e72b
+      - use:f188f5bdface8a04f6e893350b65a9a7d7048af4a1d865e1a1bb45faa7ef517a
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP17-044
+    face: 0
+    field: effect
+    section:
+    line: 2
+    frame_ids:
+      - frame:8a5d81a91d9343e65f5d142dfef46b0d863b42b46e88b40f222c7d79cf7c6d3b
+    category: 跨行涵蓋
+    rationale: 第三行 spell 的可選加費涵蓋第二行。
+    covered_by:
+      ability: 1
+      pointer: /additional_costs/0

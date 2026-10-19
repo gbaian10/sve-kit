@@ -1,0 +1,89 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:df46907772d757a70d294aa89d04c066db8b6909cf0809b224708664bd771087
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 同為入場選取後加能力值；補齊 A.sel、L.continuous，持續時間依原文，不由 family 名稱推定。
+    classifications:
+      T2b8542c426: c2f64003c5391083166d73eb53c0b8ebed26ece3b9be8dbc31e6ddf8e1dd2303
+      Tb8e8598433: b259a9944443c94f5dc2095f3c9d5bc4076ec997697ac4a3ce9d11ae211d8f49
+      Tcdbc8d7637: 78c04dce68fd4fbb0ab755840bb54d5a52a1322a8533a6ae76505450e29a5596
+    examples:
+      T2b8542c426:
+        - CSD02b-009
+        - CSD02b-P06
+      Tb8e8598433:
+        - BP16-SL07
+        - BP16-U02
+        - BP16-021
+      Tcdbc8d7637:
+        - BP18-P26
+        - BP18-066
+    frames:
+      - frame:0368db8cd60ff68908bde77f7ca29b6ba0e3ea0e34480d9e68e9642b5ac2c735
+      - frame:918d5e33cc9d38405fbf85064838e2316558c904dac2d85848147fe27de1653d
+      - frame:acc25fe79758bc897d30932b0099a080daf2421a736e15633c752d173fa6f354
+    uses:
+      - use:666be3af2d24e36f9dbf4f06959b49fa3b31c2dc5bffb1a60d6a71665901ad47
+      - use:7dba9e1d022c2860392568099c1bba865ce5f014a255a77d3f7d53038d1ee3c2
+      - use:ecb4d5a7c49b2379d395c99beeccce4290b264bde9df7b6f896a20282be66998
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP16-026
+    face: 0
+    field: effect
+    section:
+    line: 1
+    frame_ids:
+      - frame:1249343dd7b439c261bc0f87fb11b32f65f1c47696a88646c863f96c6a39bebd
+      - frame:a34835b8f9b33d25d306be56c06a85ca7b0852b5645e96dd695cb76dee989ed0
+    category: 跨行涵蓋
+    rationale: 追加 act 費用附於下一行 spell，括號是費用說明。
+    covered_by:
+      ability: 0
+      pointer: /costs
+  - card_no: BP16-036
+    face: 0
+    field: effect
+    section:
+    line: 2
+    frame_ids:
+      - frame:10117703d44cfa6d0ee3607878b34ce3d063ac6a087894d408e78da586b3856b
+    category: 跨行涵蓋
+    rationale: 第一行 choice 包含第二行的兩種模式。
+    covered_by:
+      ability: 0
+      pointer: /body/modes
+  - card_no: BP16-055
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:33a8febb6ed3b2eb58497e8c938db6843781ab327abbbf6c1c13c8d3ae879b94
+      - frame:4a9c988e93f1906bbd446d281fb1148f4722bd4032832d9b389c853e5040c29a
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP16-SL08
+    face: 0
+    field: effect
+    section:
+    line: 2
+    frame_ids:
+      - frame:7195d16354e1161e76007e9b2c8028d4130e4ce0ccb8ed6e869ab5957befe042
+    category: 跨行涵蓋
+    rationale: 第一行 choice 包含後續模式與各自決定。
+    covered_by:
+      ability: 0
+      pointer: /body/modes

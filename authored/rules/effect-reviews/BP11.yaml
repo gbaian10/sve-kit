@@ -1,0 +1,21 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups: []
+reverse_positions:
+  - card_no: BP11-027
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:19acb82188ab150d5509a17552ee59da57608852a06fbdf02a8c8dba54f29887
+      - frame:61f8191ec612f54e47fdd5a3c929a54ca95a8e2df8be36d44c61d674f12efc0c
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

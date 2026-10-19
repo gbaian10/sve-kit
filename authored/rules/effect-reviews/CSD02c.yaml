@@ -1,0 +1,36 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:5fd254e13b4fcb2102212f339b4c6c73eca71d5d9aa0472c1ee411f7750f5316
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 進化時棄牌作為費用再抽牌；A.act.discard 與 B.ability 缺標不改變已一致的 PlayParameter、K.pay。
+    classifications:
+      T19f4a7a627: b6dd573acb7edc83d793d2ccac1cb8a1b8bba1e3b40385f4c2ff71a62085c9c4
+      T64512beb9e: 9a219d0da655b61d1e6782d60b2e10444df0eac919b81dcd264290106a97e17a
+    examples:
+      T19f4a7a627:
+        - CSD02c-008
+        - CSD02c-P05
+      T64512beb9e:
+        - ECP01-SP18
+        - ECP01-SSP18
+        - ECP01-038
+    frames:
+      - frame:2b8bfe86a5aaadb2582962c21083a7e038e8b2b5e4f6ce85951a089147f58828
+      - frame:9491b0ca360b32a20614074d9892d3de2e4dc719afcfc545c5226d1a637cc295
+    uses:
+      - use:cefe3d301938def7cbe015f77efbbeb4c6cbf8b980cb0011dbe0af63b3d9792b
+      - use:efdf1684b58617a379299a6e69986751afe469ec81dd1992538b321dfab5f593
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions: []

@@ -1,0 +1,44 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:ff92b6ec4c66ee04e17e28e8d5f11a69f856306777cae9895251801bc61aad0b
+    priority: false
+    conclusion: 等價寫法
+    rationale: fanfare 搜尋低費 trait amulet／follower 進場，CardKind 為參數；I.search 與 I.shuffle 標註粒度不同，必須保存完整搜尋流程。
+    classifications:
+      T3a7dbb5fda: 987d1b1993cd76316689bcd99024b8660108bf0301228f2524c2cb0ed944e356
+      T48a6712874: 06ac0e218437ac2ada5562df3a4f03ac66dcfb4a269713ff3c596b073b56a8a2
+      Tba8bf7989f: 54a53dc108e6ed106190d1724e9f98a74fefe3c703f93586e9471a5c5e24eb5a
+    examples:
+      T3a7dbb5fda:
+        - ECP02-006
+        - ECP02-P01
+      T48a6712874:
+        - ECP02-SL32
+        - ECP02-SP12
+        - ECP02-U12
+      Tba8bf7989f:
+        - ECP01-016
+        - ECP01-P08
+    frames:
+      - frame:531ddec20ae1cc3858efddc13be933b7510bffdc7b6178d00776398c9e8ba823
+      - frame:85e39405198a2883e5065d925984de096d012ce96785d03f3e1f9426dc4deca1
+      - frame:ba05a349f53374a25ff3493f02477bf709830ac90bf3450f9c6ff09c6cfb3c01
+      - frame:ef25cf1dcdc37ccc53130b53225d6fc3e95bc46dfcde4151d9d4962b9ff57326
+    uses:
+      - use:221fa6fa5b642611b7d3d2a16cafc734db554ab5fb8ca3073e64a94c6de1ba03
+      - use:488814637f0f2caa60b4df6a833001318fc9b27fbb070c257b38dbb3884989a5
+      - use:99970b92d841022ec8f258a49651f049336d0999d0685bfd8184d8c74da4c41e
+      - use:9d8faabcfee6ba91b108d4aeddb37538368e0ed52e4c58c888d80a0e928b241c
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions: []

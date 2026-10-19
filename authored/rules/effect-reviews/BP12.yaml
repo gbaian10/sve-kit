@@ -1,0 +1,34 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups: []
+reverse_positions:
+  - card_no: BP12-073
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:3717b1096f4012d3b2c2063f9ca4190a670d6be34b7a421042b301f4307196c8
+      - frame:6c6dfd9816eaaae07a7cb172cad7719e0e0d846c6835fd6ce7103806a37b9b22
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP12-SL08
+    face: 0
+    field: effect
+    section:
+    line: 1
+    frame_ids:
+      - frame:4a335b2ed1c89b0fb6a2c82c64013abb56741821020889eecbabd9eb58cc28b3
+      - frame:bbdeb05a6f64d712d28c394fc9537c5d1cdfbb85f6a29262e2b4b8187deb68bb
+    category: 跨行涵蓋
+    rationale: 強制追加 act 費用附於下一行 spell，括號是費用說明。
+    covered_by:
+      ability: 0
+      pointer: /costs

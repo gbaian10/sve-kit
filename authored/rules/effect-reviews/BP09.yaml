@@ -1,0 +1,35 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:66a4fc6d3a4a95ed1ac7c36f5cdcdea715dfb73fc85f15dc10aea77a250852ad
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 入場時選另一 trait follower 加值；A.sel、B.ability、L.continuous 的不一致補齊，不能因此改成全體或永久效果。
+    classifications:
+      T01e3b2bf83: 4cbaaf6651411a966d881c2955e9e8120096c4d4dace6690e7a5186d43ce8aff
+      T214d6e6ecb: 9b7f47043ad3aef670fcf7d59e02329ffab7d4ec9cd0d33542da9c3a86831336
+    examples:
+      T01e3b2bf83:
+        - BP09-010
+      T214d6e6ecb:
+        - CSD02a-014
+        - CP02-P40
+        - CP02-049
+    frames:
+      - frame:8745ecad02e19831c795cc468786238c27c8e8232046eab90b5d767aba46c2f5
+      - frame:cfe898aee40ee3d6495d8caf33003545e72706e42df83a7c41f71f7e1f79fff9
+    uses:
+      - use:19a1d51d5fbf60a4c58a6aa4014f0e7eae6c16f8455e2496cb7778f4f474c61d
+      - use:521a747d4b2a4376ad7837301de294a0e632acf46f9d2b2930908bceef45c0b4
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions: []
