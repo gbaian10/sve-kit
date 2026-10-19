@@ -125,6 +125,9 @@ def test_review_drafts_are_bound_to_the_classifications_they_explain(
 
 
 def test_known_invalid_alignment_keeps_both_source_locations_visible() -> None:
+    for path in (ROOT / "authored/rules/effect-reviews").glob("*.yaml"):
+        if path.stem != "BP07":
+            assert "positive_alignment_exceptions" not in read_yaml(path), path.stem
     draft = read_yaml(ROOT / "authored/rules/effect-reviews/BP07.yaml")
     baseline = OBJECT.validate_json((BASELINE / "BP07.json").read_bytes())
     exceptions = array(draft["positive_alignment_exceptions"])
