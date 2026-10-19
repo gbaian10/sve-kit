@@ -220,7 +220,8 @@ const POLL = { timeout: 10_000 }
 // A card's representative may be a printing from another set, which is a locator until the
 // background printing download lands; `search` channels do not re-run on their own.
 const completions = (events: readonly SearchEvent[]) =>
-  events.filter((event) => event.kind === "background-ready").length
+  events.filter((event) => event.kind === "background-ready" && event.purpose === "mechanics")
+    .length
 
 describe("complete Worker catalog generations", () => {
   it("keeps only the last input and searches once after the whole download", async () => {
@@ -1313,28 +1314,35 @@ describe("persistent index images", () => {
     expect(after.page).toEqual(before.page)
   })
 
-  it("does not store a catalog-only index when the background printing download fails", async () => {
-    const storage = memoryCache()
-    const served = origin()
-    const product = (built.manifest["files"] as JsonObject[]).find(
-      (file) => file["purpose"] === "product" && file["region"] === "jp",
-    )
-    if (!product) throw new Error("fixture has no product file")
-    const path = stringValue(product["path"])
-    const bytes = served.files.get(path)
-    if (!bytes) throw new Error("product payload missing")
-    served.files.delete(path)
-    const first = harness(served, storage)
-    first.session.load(base, "jp", "preview")
-    await first.settled()
-    expect(first.status()).toMatchObject({ phase: "ready" })
-    served.files.set(path, bytes)
-    const second = harness(served, storage)
-    second.session.load(base, "jp", "preview")
-    await second.settled()
-    expect(readyMetrics(second.events).slice(-1)).toMatchObject([{ restored: false }])
-    expect(second.served.requests).toContain(path)
-  })
+  it.each(["printing", "mechanic"] as const)(
+    "does not store an incomplete index when the background %s download fails",
+    async (purpose) => {
+      const storage = memoryCache()
+      const served = origin()
+      const payload = (built.manifest["files"] as JsonObject[]).find((file) =>
+        purpose === "printing"
+          ? file["purpose"] === "product" && file["region"] === "jp"
+          : arrayValue(file["row_counts"]).some(
+              (count) => arrayValue(count)[0] === "mechanic_projection",
+            ),
+      )
+      if (!payload) throw new Error("background fixture missing")
+      const path = stringValue(payload["path"])
+      const bytes = served.files.get(path)
+      if (!bytes) throw new Error("background payload missing")
+      served.files.delete(path)
+      const first = harness(served, storage)
+      first.session.load(base, "jp", "preview")
+      await first.settled()
+      expect(first.status()).toMatchObject({ phase: "ready" })
+      served.files.set(path, bytes)
+      const second = harness(served, storage)
+      second.session.load(base, "jp", "preview")
+      await second.settled()
+      expect(readyMetrics(second.events).slice(-1)).toMatchObject([{ restored: false }])
+      expect(second.served.requests).toContain(path)
+    },
+  )
 
   it("rebuilds when the manifest, edition or build differs from the stored image", async () => {
     const storage = memoryCache()
@@ -2942,4 +2950,73 @@ it("keeps family label translations in set options and releases after index rest
       expect(set.name.translations["en"]).toBeUndefined()
     }
   }
+})
+
+it("loads keyword projections through the Worker and preserves them in a restored index", async () => {
+  const cache = memoryCache()
+  for (let run = 0; run < 2; run++) {
+    const h = harness(origin(), cache)
+    h.session.load(base, "jp", "preview")
+    await h.settled()
+    h.channel.search({ ...query, state: { ...CARD_QUERY, mechanics: { "kw:ward": "has" } } })
+    await h.queried()
+    const result = h.channel.getStatus().result
+    expect(result.phase).toBe("complete")
+    if (result.phase !== "complete") throw new Error("keyword query failed")
+    expect(result.page.items.map((item) => item.key)).toEqual([
+      "c:bp01-011",
+      "c:bp01-031",
+      "c:bp01-051",
+    ])
+    h.session.dispose()
+  }
+})
+
+it("keeps a keyword query pending until its projection and coverage closure completes", async () => {
+  const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>
+    arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "mechanic_projection"),
+  )
+  if (!engineFile) throw new Error("missing mechanic fixture")
+  const h = harness()
+  const release = h.served.hold(stringValue(engineFile["path"]))
+  h.session.load(base, "jp", "preview")
+  await expect.poll(() => h.status().phase, POLL).toBe("ready")
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, mechanics: { "kw:ward": "has" } } })
+  await h.queried()
+  expect(h.status().result.phase).toBe("pending")
+  release()
+  await h.settled()
+  expect(h.status().result).toMatchObject({ phase: "complete", page: { total: 3 } })
+  h.session.dispose()
+})
+
+it("finishes printing facets and merged units while mechanic payloads are pending", async () => {
+  const engineFile = (built.manifest["files"] as JsonObject[]).find((file) =>
+    arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "mechanic_projection"),
+  )
+  if (!engineFile) throw new Error("missing mechanic fixture")
+  const h = harness()
+  const release = h.served.hold(stringValue(engineFile["path"]))
+  h.session.load(base, "jp", "preview")
+  await expect.poll(() => h.status().phase, POLL).toBe("ready")
+  for (const change of [
+    { rarities: ["legend"] },
+    { altArtOnly: true },
+    { unit: "art" },
+    { unit: "card" },
+  ] as const) {
+    h.channel.view({ ...query, state: { ...DEFAULT_QUERY, ...change } })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("printing query failed")
+    expect(result.page.total).toBeGreaterThan(0)
+    expect(result.view?.options.keywordCoverage).toBe("pending")
+  }
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, mechanics: { "kw:ward": "has" } } })
+  await h.queried()
+  expect(h.status().result.phase).toBe("pending")
+  release()
+  await h.settled()
+  expect(h.status().result.phase).toBe("complete")
+  h.session.dispose()
 })

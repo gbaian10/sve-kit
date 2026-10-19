@@ -43,6 +43,7 @@ type ImageEncoder = (request: ImageRequest) => Promise<Uint8Array>
 
 export interface BuildOptions {
   readonly encodeImage: ImageEncoder
+  readonly cards?: readonly Card[]
 }
 
 export interface BuiltSnapshot {
@@ -1729,7 +1730,7 @@ function blob(value: JsonValue): { bytes: Uint8Array; hash: string; path: string
 }
 
 export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapshot> {
-  const cards = CARDS
+  const cards = options.cards ?? CARDS
   const dataVersion = "20260929T000000Z-0001"
   const publishedAt = "2026-09-29T00:00:00Z"
   const families = SETS

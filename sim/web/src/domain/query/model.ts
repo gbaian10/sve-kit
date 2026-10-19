@@ -37,7 +37,7 @@ export interface QueryState {
   readonly locations: readonly string[]
   /** Trait vocabulary codes; a card with any selected trait passes. */
   readonly traits: readonly string[]
-  /** Keyword ids not listed are "either". */
+  /** Unlisted keyword ids are "either"; has selections form a union, not selections all require absence. */
   readonly mechanics: Readonly<Record<string, MechanicState>>
   readonly sets: readonly string[]
   readonly rarities: readonly string[]

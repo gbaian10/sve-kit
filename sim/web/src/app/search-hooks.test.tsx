@@ -129,6 +129,8 @@ function answerViews(
           })),
         },
         options: {
+          keywords: [],
+          keywordCoverage: "unknown",
           types: [],
           typeCounts: {},
           locationCounts: {},
@@ -577,7 +579,18 @@ it("keeps rarity and type lists pending independently of the basic set and class
   const basic = requests.findLast((request) => request.query.state.rarities.length === 0)
   const rarity = requests.findLast((request) => request.query.state.rarities.includes("pr"))
   if (!basic || !rarity) throw new Error("missing option requests")
-  const answer = (request: typeof basic, prBadgeStyles: readonly string[]) => {
+  const keywords = [
+    {
+      id: "kw:synthetic",
+      code: "synthetic",
+      name: { original: { lang: "ja" as const, text: "合成" }, translations: {} },
+    },
+  ]
+  const answer = (
+    request: typeof basic,
+    prBadgeStyles: readonly string[],
+    keywordCoverage: "unknown" | "pending" = "unknown",
+  ) => {
     emit({
       kind: "view-result",
       generation: request.generation,
@@ -587,6 +600,8 @@ it("keeps rarity and type lists pending independently of the basic set and class
         query: request.query,
         page: { total: 0, offset: 0, items: [] },
         options: {
+          keywords,
+          keywordCoverage,
           types: [],
           typeCounts: { leader: 2 },
           locationCounts: { leader: 2, "leader:gold": 2 },
@@ -607,11 +622,15 @@ it("keeps rarity and type lists pending independently of the basic set and class
   answer(basic, [])
   expect(result.current.classes).toEqual([])
   expect(result.current.options).toBeUndefined()
+  answer(rarity, ["br", "unknown"], "pending")
+  expect(result.current.options?.rarity.styles).toEqual(["br", "unknown"])
+  expect(result.current.options?.keyword).toEqual({ keywords, coverage: "pending" })
   answer(rarity, ["br", "unknown"])
   expect(result.current.options).toEqual({
     rarity: { styles: ["br", "unknown"], counts: { pr: 2 } },
     type: { types: [], typeCounts: { leader: 2 } },
     location: { types: [], counts: { leader: 2, "leader:gold": 2 } },
     trait: { traits: [], counts: {} },
+    keyword: { keywords, coverage: "unknown" },
   })
 })

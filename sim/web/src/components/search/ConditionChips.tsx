@@ -17,6 +17,7 @@ export interface ConditionChipsProps {
   readonly classLabel: (code: string) => string
   readonly rarityLabel: (code: string) => string
   readonly typeLabel: (code: string) => string
+  readonly keywordLabel: (id: string) => string
   readonly traitLabel: (code: string) => string
   readonly setLabel: (code: string) => string
   /** A set implied by the page's path (`/sets/:code`): kept in the query, shown as no chip. */
@@ -51,6 +52,7 @@ export function ConditionChips({
   rarityLabel,
   typeLabel,
   traitLabel,
+  keywordLabel,
   setLabel,
   impliedSet,
   groups,
@@ -142,6 +144,18 @@ export function ConditionChips({
       key: `trait:${code}`,
       label: traitLabel(code),
       without: { ...query, traits: query.traits.filter((other) => other !== code) },
+    })),
+    ...Object.entries(query.mechanics).map(([id, state]) => ({
+      key: `mechanic:${id}`,
+      label: t(state === "has" ? "filters.keywordHas" : "filters.keywordNot", {
+        label: keywordLabel(id),
+      }),
+      without: {
+        ...query,
+        mechanics: Object.fromEntries(
+          Object.entries(query.mechanics).filter(([other]) => other !== id),
+        ),
+      },
     })),
     ...query.sets
       .filter((code) => code !== impliedSet)

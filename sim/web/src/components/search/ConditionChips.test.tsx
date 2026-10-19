@@ -26,6 +26,7 @@ function Harness({ initial }: { readonly initial: string }) {
         typeLabel={(code) => ({ spell: "法術", follower: "從者" })[code] ?? code}
         traitLabel={(code) => ({ pixie: "妖精" })[code] ?? code}
         setLabel={(code) => code}
+        keywordLabel={(id) => id}
         groups={GROUPS}
         onChange={setQuery}
         onClear={() => {

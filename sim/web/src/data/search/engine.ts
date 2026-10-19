@@ -75,6 +75,7 @@ export class SearchEngine {
         generation: number
         effects?: Promise<EffectIndex>
         printings?: Promise<void>
+        mechanics?: Promise<void>
         previews?: Promise<PreviewReader>
         index?: SearchIndex
         request: LoadRequest
@@ -194,8 +195,14 @@ export class SearchEngine {
               request.query.state.unit !== "printing")
           )
             await active.printings
+          if (
+            "query" in request &&
+            "mechanics" in request.query.state &&
+            Object.keys(request.query.state.mechanics).length
+          )
+            await active.mechanics
           const index = active.index
-          const printingsReady = active.printings === undefined
+          const fullyReady = active.printings === undefined && active.mechanics === undefined
           let eligible: ReadonlySet<string> | undefined
           if (index && ("query" in request || request.kind === "suggest")) {
             const term = effectTerm(
@@ -249,7 +256,7 @@ export class SearchEngine {
                   return {
                     view: completed,
                     // Locator-only summaries lack non-default printing badges and must refresh.
-                    stored: printingsReady
+                    stored: fullyReady
                       ? active.views.write(completed, active.hash)
                       : Promise.resolve(),
                   }
@@ -265,14 +272,14 @@ export class SearchEngine {
             }
             if (!cached) return
             const { view, stored } = cached
-            if (printingsReady) active.memory.set(key, cached)
+            if (fullyReady) active.memory.set(key, cached)
             while (active.memory.size > 8)
               active.memory.delete(active.memory.keys().next().value ?? "")
             event = { kind: "view-result", ...identity, view }
             const completed = view
             void stored.then(async () => {
               if (
-                printingsReady &&
+                fullyReady &&
                 request.remember &&
                 this.active === active &&
                 this.rememberedRequest === request
@@ -618,6 +625,7 @@ export class SearchEngine {
       if (
         this.active?.index &&
         !this.active.printings &&
+        !this.active.mechanics &&
         sameSource() &&
         this.active.hash === stringValue(entry["manifest_sha256"])
       ) {
@@ -753,9 +761,12 @@ export class SearchEngine {
       }
       const printingsGate = Promise.withResolvers<undefined>()
       void printingsGate.promise.catch(() => undefined)
+      const mechanicsGate = Promise.withResolvers<undefined>()
+      void mechanicsGate.promise.catch(() => undefined)
       const controller = new AbortController()
       const active: NonNullable<SearchEngine["active"]> = {
         printings: printingsGate.promise,
+        mechanics: mechanicsGate.promise,
         generation: request.generation,
         index,
         request,
@@ -797,23 +808,35 @@ export class SearchEngine {
       const backgroundBlobs = new SearchBlobs(request.base, this.backgroundFetch, this.storage)
       const backgroundFiles = [...files.values()].filter(
         (file) =>
-          ["print", "product"].includes(stringValue(file["purpose"])) &&
+          (["print", "product"].includes(stringValue(file["purpose"])) ||
+            arrayValue(file["row_counts"]).some((count) =>
+              ["mechanic_projection", "card_mechanic_coverage", "card_engine_support"].includes(
+                stringValue(arrayValue(count)[0]),
+              ),
+            )) &&
           (file["region"] === null || file["region"] === request.edition),
       )
-      let printingsApplied = false
+      let completed = false
       try {
-        const parts = await Promise.all(
-          backgroundFiles.map(async (file) =>
-            decodeMessage({
-              kind: "file",
-              file,
-              bytes: await backgroundBlobs.read(file, signal),
-              version,
-            }),
-          ),
-        )
-        signal.throwIfAborted()
-        if (this.active === active) {
+        for (const purpose of ["printings", "mechanics"] as const) {
+          const parts = await Promise.all(
+            backgroundFiles
+              .filter((file) =>
+                purpose === "printings"
+                  ? ["print", "product"].includes(stringValue(file["purpose"]))
+                  : !["print", "product"].includes(stringValue(file["purpose"])),
+              )
+              .map(async (file) =>
+                decodeMessage({
+                  kind: "file",
+                  file,
+                  bytes: await backgroundBlobs.read(file, signal),
+                  version,
+                }),
+              ),
+          )
+          signal.throwIfAborted()
+          if (this.active !== active) return
           for (const part of parts)
             if (part.kind === "fragments")
               catalogWork("background:ingest", () => {
@@ -823,22 +846,28 @@ export class SearchEngine {
             background.seal()
           })
           catalogWork("background:SearchIndex", () => {
-            index.completePrintings(background)
+            if (purpose === "printings") index.completePrintings(background)
+            else index.completeMechanics(background)
           })
           active.memory.clear()
           active.building.clear()
-          printingsApplied = true
-          printingsGate.resolve(undefined)
-          // Like a restored image, the context is now complete and an unchanged check may keep it.
-          delete active.printings
-          this.emit({ kind: "background-ready", generation: request.generation })
+          if (purpose === "printings") {
+            delete active.printings
+            printingsGate.resolve(undefined)
+          } else {
+            delete active.mechanics
+            mechanicsGate.resolve(undefined)
+          }
+          this.emit({ kind: "background-ready", generation: request.generation, purpose })
         }
+        completed = true
       } catch (error) {
         printingsGate.reject(error)
+        mechanicsGate.reject(error)
         signal.throwIfAborted()
       }
-      // A restored image is never supplemented again, so a catalog-only index is rebuilt next time.
-      if (!printingsApplied) return
+      // Restored indexes have no pending phases, so persist only after both closures succeed.
+      if (!completed) return
       await blobs.retainPlan(
         request.edition,
         [
