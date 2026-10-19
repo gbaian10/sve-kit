@@ -642,7 +642,7 @@ interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍�
 版本唯一差異的自動映射須先移除 normalizer_version 後比完整 frame-v1 payload bytes，並確認 occurrences／values／scope／接口語義不變、新目標存在且唯一。
 其他 canonical／schema 改動依精確來源用途重建，不因中文相同授予語義等價。interface_key 重算，相依 DSL 只延續實際存在且先前合格、通過既有型別／來源／可見範圍檢查的用途；不捏造 reviewed。
 不能從新版本重算未知歷史域，原 reference pending 與裁定 strength 保留。
-已知舊域的資料接口由 #499 補上；正式 reader 不因保留舊引用而恢復舊翻譯格式。
+明示舊域格式及建置重驗見 §9.1.1；正式 reader 不因保留舊引用而恢復舊翻譯格式。
 
 ### 9.1 裁定版本與引用來源
 
@@ -695,22 +695,21 @@ uses:
 
 以上座標與 hash 是形狀示意，不能直接當成資料。`legacy` 保存原 T ID；
 `uses` 是完整舊域，不得為空或重複 occurrence；每個 use 的 `cards` 是非空、
-不重複的日文卡號。來源必須是 face revision 的 effect 或 section，role 必為 body，
+不重複且按字典序排序的日文卡號；uses 依 occurrence 的 canonical JSON bytes 排序。
+來源必須是 face revision 的 effect 或 section，role 必為 body，
 segments 須按順序且互不重疊。同一命名空間與 T 在不同裁定中的 uses 必須一致。
+同一 T 不得在不同裁定或同份裁定中混用裸字串與明示域，以免替未補證引用借用其他裁定的域。
 不把 frame ID、候選、處置或逐用途核可記錄寫進 authored。
 
-補證工具 `domains.rulings.evidence.capture` 要求來源邊界先證明凍結命名空間、
-ID 配方、完整定義及全體成員；任一成員缺證時，整個模板仍是引用層級 pending。
-印刷版本只有在 occurrence、scope 與參數全相同時才共用一個用途。
-
-資料提交前以 `domains.rulings.historical.validate` 對 A1 catalog 檢查：
+普通建置若有明示引用，就載入 A1 catalog 並由
+`domains.rulings.historical.validate` 檢查完整舊域；沒有明示引用時不載入：
 全部 cards × face／field／ordinal／line 必須恰好分割原模板的成員集合，
 每個 span 的文字長度與 hash 必須等於原成員 body。來源觀測由已驗的建置提供；
 同字不同 revision 的歷史選擇仍須以凍結舊快照與完整 face 證據審查，
 不能只靠當前 body 相同便宣稱證明了舊域。一次性遷移腳本與對帳產物不進版控。
 
 普通建置透過 `historical.rebuild` 重驗已提交的明示來源域：owner 存在、
-欄位全文 hash 相等、span 在指定行內，以及 cards 確實屬於該來源 face。
+欄位全文 hash 相等、span 在指定行內（只有 LF 推進行號），以及 cards 確實屬於該來源 face。
 這些來源事實錯誤直接使建置失敗；不重跑舊 normalizer，也不在執行時讀 Git 歷史。
 新舊 scope 均從 occurrence 的 role 與 field 產生，domain 使用 `effect` 或 `section`，
 它只界定來源欄位，不宣稱 token 定義的執行語義。
@@ -721,9 +720,9 @@ ID 配方、完整定義及全體成員；任一成員缺證時，整個模板�
 舊 v0 沒有具型別的操作數，重建的空 parameters 表示未提供此證據，不能推論參數等價；
 frame family 中 `classification_v0.t...` 只是原定義的來源群組，不是已核定語義。
 
-`reconciliation.reconcile` 保留每個原 ordinal 與 IR 引用，分別報告候選分類及
-正式 resolution。候選分類沿 matcher 的 current 偏好，只用來與舊盤點比較；
-完整舊域仍以已證明的 occurrence 清單為準，不能用候選分類縮小歷史用途。
+一次性對帳須保留每個原 ordinal 與 IR 引用，分別報告候選分類及正式 resolution。
+候選分類只用來與舊盤點比較；完整舊域以已證明的 occurrence 清單為準，不能據此縮小歷史用途。
+rebuild 的 callback 保存上述已驗物件供 resolver 比對，不是另一層獨立來源驗證。
 裁定內容與適用域變動仍依 §9.1 明示升 revision，保留原強度、證據與日期。
 
 ### 9.2 已知舊域的 Mapping
@@ -788,23 +787,21 @@ no_candidate 的 candidates 必空；ambiguous_variant 至少有兩個不同且�
 unknown_legacy_scope 只用在引用層級。source_changed 表示舊 occurrence 已驗、
 新來源無法安全承接，不表示可忽略本次提供來源的 hash／owner 錯配。
 
-本次 #498 的正式建置直接讀現行 format 2 裁定檔，不要求 repo 外的一次性遷移輸入、
-永久 authored allowlist 或 runtime Git 查詢。舊 `T` 加十位小寫十六進位 hash 引用
-目前沒有已知舊域，直接按原 applies_to ordinal 產生引用層級 pending。
+正式建置直接讀現行 format 2 裁定檔，不要求 repo 外的一次性遷移輸入、
+永久 authored allowlist 或 runtime Git 查詢。裸 T 引用按原 applies_to ordinal
+產生引用層級 pending；明示域引用經 §9.1.1 重驗後產生完整用途層級結果。
 非模板 IR 引用原樣保留並獨立列帳；不符合支援形狀的引用拒絕建置。
 裁定來源記錄保留本次檔案 path 與實際 bytes hash。
-
-已知舊域的用途層級解析、完整用途集合與候選來源檢查由 #499 實作；
-以上用途層級形狀是後續契約，#498 不產生用途層級 resolved 或 pending。
 
 ### 9.4 完整性與執行邊界
 
 B 逐筆保留裁定原始 applies_to 清單與 ordinal，重複文字的引用仍各有一筆記錄。
-已知域的完整用途集合對帳由 #499 承接。
+明示舊域的完整用途集合依 §9.1.1 對 A1 catalog 驗證。
 對帳同時列出模板引用、非模板引用、引用層級 pending、用途層級 resolved／pending；
 不把引用數和用途列數相加，不以「輸出 0 個裁定」宣稱驗收完成。
 N0 的 resolution.build 依現行裁定的原始 ordinal 產生引用列；DB 檢查 SQL PK／FK 與逐列封閉型別。
-裁定邏輯鍵唯一／互斥、完整用途集合及用途候選來源檢查由 #499 接上；本次不宣稱 DB 已驗證這些集合條件（FL-027）。
+resolver 檢查裁定邏輯鍵唯一／互斥及完整用途集合；來源檢查由重建輸入邊界執行，
+DB 邊界另驗候選 frame 與 binding 都已存在於本次建置（FL-027）。
 
 active 裁定邊只能由已驗的用途層級 resolved 產生，且其 scope 僅限該用途。
 多個舊用途可 resolved 到同一新 frame；任何一筆都不代表適用新 frame 的所有卡。
@@ -813,11 +810,8 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 裁定正文仍可查讀，pending 原因仍可見；無用途級資格時不出適用該卡的肯定提示。
 有下游可執行資料要求 pending 引用時，拒絕該執行閉包，不把 pending 當 no-op。
 
-本次 #498 同批完成裁定封套／revision 的機械初始化、reader／validator／DB 邊界及引用層級完整對帳，
-用途層級對帳由 #499 承接。
-不改裁定正文、證據、日期、applies_to 內容與順序或 supersedes。
-已知舊域的用途解析、正式 authored 適用引用換鍵、補齊歷史語義證據、裁定內容與用途審查由 #499 承接；
-換鍵或內容變更須明示續版，舊引用與版本歷史仍可追溯。
+明示舊域格式與建置重驗不會自行改寫正式裁定資料。修改 applies_to、正文或其他
+已解析內容須明示續版，保留未變的證據、日期與強度；舊引用與版本歷史仍可追溯。
 映射成功不自動繼承既有 reviewed／verified，也不重寫過去裁定決定。
 
 ## 10. 舊責任對照與交付接口
