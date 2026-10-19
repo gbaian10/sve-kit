@@ -242,8 +242,17 @@ async function capture(
   }
   for (const cardNo of values.card) {
     await visit(`/cards/${encodeURIComponent(cardNo)}`)
-    // A card with pending wording has no effect section; the header (name) is the ready signal.
-    await page.waitForSelector("article h2, [role=alert]")
+    // An in-app switch keeps the previous card on screen while the next one is prepared: wait
+    // until the page shows this number and is no longer busy.
+    await page.waitForFunction(
+      `document.querySelector("[role=alert]") !== null ||
+        (document.querySelector("article h1")?.textContent === ${JSON.stringify(cardNo)} &&
+          document.querySelector("article")?.getAttribute("aria-busy") !== "true")`,
+      undefined,
+      { timeout: 60_000 },
+    )
+    // A card with pending wording has no effect section; the face heading (name) is the ready signal.
+    await page.waitForSelector("article section h2, [role=alert]")
     await page
       .waitForSelector('[data-field="effect"] p:not([role])', { timeout: 20_000 })
       .catch(() => undefined)

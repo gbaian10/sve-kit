@@ -28,6 +28,7 @@ import { editionUrl, querySearch } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
+import { representatives } from "../../pages/card/related-cards"
 import { usePrefs } from "../../settings"
 import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
@@ -88,17 +89,6 @@ function layOut(
 type Action =
   | { readonly kind: "card"; readonly cards: readonly CardSummary[] }
   | { readonly kind: "trait"; readonly code: string }
-
-/** One printing per linked card: the shown edition's, else whichever the snapshot holds. */
-function representatives(cards: readonly CardSummary[], edition: Region): CardSummary[] {
-  const byCard = new Map<string, CardSummary>()
-  for (const card of cards) {
-    const current = byCard.get(card.cardId)
-    if (!current || (current.region !== edition && card.region === edition))
-      byCard.set(card.cardId, card)
-  }
-  return [...byCard.values()]
-}
 
 // Only references a reader can follow get a control (maintainer, 2026-10-19); the rest stay text.
 function actionOf(reference: JsonObject, context: SelectedText, edition: Region): Action | null {

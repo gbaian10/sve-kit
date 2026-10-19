@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -107,6 +107,8 @@ async function setup(pendingCandidate = false, blockBackground = false) {
     releaseBackground = resolve
   })
   const pinnedSnapshot = snapshot
+  let foregroundReads = 0
+  let inflightReads = 0
   state.client = {
     ...source,
     snapshot: () => pinnedSnapshot,
@@ -116,18 +118,25 @@ async function setup(pendingCandidate = false, blockBackground = false) {
         backgroundSignals.push(backgroundSignal)
         if (blockBackground) await backgroundHold
         backgroundSignal.throwIfAborted()
+      } else {
+        foregroundReads += 1
+        inflightReads += 1
       }
-      const pending = hold
-      hold = undefined
-      await pending
-      if (pendingCandidate && key === historyKey) {
-        await historyHold
-        if (historyFailure) throw new Error("synthetic candidate history unavailable")
+      try {
+        const pending = hold
+        hold = undefined
+        await pending
+        if (pendingCandidate && key === historyKey) {
+          await historyHold
+          if (historyFailure) throw new Error("synthetic candidate history unavailable")
+        }
+        const purpose = pinnedSnapshot.files.get(key)?.["purpose"]
+        if (typeof purpose === "string" && failedPurposes.has(purpose))
+          throw new Error("synthetic read failure")
+        return await source.fragments(key, backgroundSignal)
+      } finally {
+        if (!backgroundSignal) inflightReads -= 1
       }
-      const purpose = pinnedSnapshot.files.get(key)?.["purpose"]
-      if (typeof purpose === "string" && failedPurposes.has(purpose))
-        throw new Error("synthetic read failure")
-      return source.fragments(key, backgroundSignal)
     },
   }
   const catalog = catalogOf(snapshot)
@@ -168,6 +177,16 @@ async function setup(pendingCandidate = false, blockBackground = false) {
   await waitFor(() =>
     expect(document.querySelector("article")).toHaveAttribute("aria-busy", "false"),
   )
+  // The page keeps reading after it is shown (printing metadata, related cards, thumbnails); a
+  // hold placed by a test must catch the navigation's read, not one of these.
+  await act(async () => {
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      const before = foregroundReads
+      await new Promise((resolve) => setTimeout(resolve, 30))
+      if (inflightReads === 0 && foregroundReads === before) return
+    }
+    throw new Error("synthetic page never settled")
+  })
   return {
     ...rendered,
     backgroundReads,
@@ -481,4 +500,34 @@ it("keeps the retained card paused when router context changes before the new co
   expect(h.router.state.location.key).not.toBe(initialEntry)
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-001")
   expect(signals.every((signal) => signal.aborted)).toBe(true)
+})
+
+describe("related cards", () => {
+  it("lists the official relations and the other printings read from the snapshot", async () => {
+    const user = userEvent.setup()
+    const h = await setup()
+    await user.click(screen.getByRole("button", { name: "下一張" }))
+    await screen.findByRole("heading", { name: "試作隊長" })
+    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
+    const related = await screen.findByRole("region", { name: "關聯卡牌" })
+    expect(
+      within(related)
+        .getAllByRole("tab")
+        .map((tab) => tab.textContent),
+    ).toEqual(["參考", "其他版本"])
+    // The synthetic relation names no evolve card and the text has no card-name annotation, so the
+    // card lands under the other official relations; the number is the label, the name the tooltip.
+    const official = within(related).getByRole("list", { name: "其他官方關聯" })
+    const link = within(official).getByRole("link", { name: "試作見習兵（BP01-001）" })
+    expect(link).toHaveTextContent("BP01-001")
+    expect(link).not.toHaveTextContent("試作見習兵")
+    expect(link).toHaveAttribute("href", "/cards/BP01-001")
+    await user.click(within(related).getByRole("tab", { name: "其他版本" }))
+    const printings = within(related).getByRole("list", { name: "其他版本" })
+    expect(within(printings).getAllByRole("link")).toHaveLength(2)
+    expect(within(printings).getByRole("link", { current: "page" })).toHaveTextContent("BP01-002")
+    expect(within(printings).getByRole("link", { current: "page" })).not.toHaveTextContent(
+      "BP01-002a",
+    )
+  })
 })

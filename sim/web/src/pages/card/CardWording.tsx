@@ -1,13 +1,15 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { Link as RouterLink } from "react-router"
 
+import { loadPrintedTextState } from "../../app/printing-detail"
 import { useAnnotatedText } from "../../app/snapshot"
 import { CardText } from "../../components/card/CardText"
 import { useTextLanguage } from "../../components/card/text-language"
-import { TextPurposeStatus } from "../../components/card/TextPurposeStatus"
 import { type Catalog, type Row, type SnapshotClient, stringValue } from "../../data"
 import type { Region } from "../../domain/search"
-import { usePrefs } from "../../settings"
+import { printingGroups } from "./printing-order"
+import type { CardLink } from "./RelatedCards"
 
 interface Candidate {
   readonly revisionId: string | null
@@ -60,96 +62,183 @@ function CandidateText({
   )
 }
 
+/** The printing that stands for another wording of the same face, for the note under the effect. */
+interface OtherWording {
+  readonly id: string
+  readonly cardNo: string
+}
+
+const PLACEHOLDER = "\u0000"
+
+/** The face's `printed_text_state` from the print-detail band; undefined until read or unknown. */
+function usePrintedTextState(
+  client: SnapshotClient,
+  printingId: string,
+  faceId: string,
+  homeSetId: string | undefined,
+  edition: Region,
+): string | undefined {
+  const snapshot = client.snapshot()
+  const key = JSON.stringify([
+    client.base,
+    snapshot?.manifestHash ?? null,
+    printingId,
+    faceId,
+    homeSetId ?? null,
+    edition,
+  ])
+  const [state, setState] = useState<{ readonly key: string; readonly value?: string }>()
+  useEffect(() => {
+    if (homeSetId === undefined) return
+    let active = true
+    void loadPrintedTextState(
+      client,
+      client.snapshot(),
+      printingId,
+      faceId,
+      homeSetId,
+      edition,
+    ).then(
+      (value) => {
+        if (active) setState(value === undefined ? { key } : { key, value })
+      },
+      () => {
+        if (active) setState({ key })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [client, printingId, faceId, homeSetId, edition, key])
+  return state?.key === key ? state.value : undefined
+}
+
+/**
+ * One printing's effect: the translation of the text it prints, its own text in the original
+ * box, and a note under the effect naming the printings worded differently. A revision without a
+ * translation borrows the latest wording's, still beside this printing's own original.
+ */
 function PrintingWording({
   client,
   edition,
+  printingId,
+  faceId,
+  homeSetId,
   ownRevisionId,
   translationRevisionId,
-  basisPrinting,
-  catalog,
-  faceId,
-  entry,
+  classification,
+  others,
+  linkOf,
 }: TextProps & {
+  readonly printingId: string
+  readonly faceId: string
+  readonly homeSetId: string | undefined
   readonly ownRevisionId: string
   readonly translationRevisionId: string
-  readonly basisPrinting: Candidate["printings"][number] | undefined
-  readonly catalog: Catalog
-  readonly faceId: string
-  readonly entry: unknown
+  readonly classification: unknown
+  readonly others: readonly OtherWording[]
+  readonly linkOf: (printingId: string) => CardLink | undefined
 }) {
   const { t } = useTranslation()
-  const prefs = usePrefs()
   const language = useTextLanguage()
-  const translation = useAnnotatedText(
+  const own = useAnnotatedText(
+    client,
+    { kind: "face_revision", id: ownRevisionId },
+    "effect",
+    language,
+    edition,
+  )
+  const latest = useAnnotatedText(
     client,
     { kind: "face_revision", id: translationRevisionId },
     "effect",
     language,
     edition,
   )
-  const source = translation.value?.selection?.["source"] as Row | undefined
-  const sourceOwner = source?.["owner"] as Row | undefined
-  const sourceId = sourceOwner?.["id"]
-  const jpWording = catalog.index.wording(faceId, "jp")
-  const sourceCandidate = ((jpWording?.["candidates"] ?? []) as Row[]).find(
-    (candidate) =>
-      candidate["revision_id"] === sourceId &&
-      candidate["printing_id"] === jpWording?.["basis_printing_id"],
-  )
-  const sourcePrinting = sourceCandidate
-    ? catalog.index.printing(stringValue(sourceCandidate["printing_id"]))
-    : undefined
-  const basisCardNo = sourcePrinting
-    ? stringValue(sourcePrinting["card_no"])
-    : basisPrinting?.cardNo
+  const printedTextState = usePrintedTextState(client, printingId, faceId, homeSetId, edition)
   const different = ownRevisionId !== translationRevisionId
-  const showTranslation =
-    prefs.effectLanguage !== "original" && translation.value?.translated !== undefined
+  // The official page prints nothing for this printing (an unconfirmed printed text): the latest
+  // wording stands alone with the printed-text state line, no original box, no note.
+  const blank =
+    different &&
+    own.value !== null &&
+    stringValue(own.value.original.unit["text"]) === "" &&
+    own.value.translated === undefined &&
+    (own.value.originalSections ?? []).length === 0
+  // Only a translation the latest wording actually has is worth borrowing; a language with no
+  // translation at all keeps this printing's own text.
+  const borrowed =
+    different &&
+    !blank &&
+    own.value !== null &&
+    own.value.translated === undefined &&
+    stringValue(own.value.original.unit["lang"]) !== language &&
+    latest.value?.translated !== undefined
+  const text =
+    classification === "same_effect"
+      ? t("card.wording.printedSameEffect", { printings: PLACEHOLDER })
+      : t("card.wording.printedDifferent", { printings: PLACEHOLDER })
+  const [before = "", after = ""] = text.split(PLACEHOLDER)
   return (
     <>
-      {different && prefs.effectLanguage !== "original" && (
+      {blank ? (
         <>
-          {translation.readiness.basic === "pending" && (
-            <p role="status" className="mt-3 text-13 text-text-2">
-              {t("card.annotationPending")}
-            </p>
+          <CardText
+            client={client}
+            edition={edition}
+            owner={{ kind: "face_revision", id: translationRevisionId }}
+            field="effect"
+          />
+          {printedTextState === "unknown" && (
+            <p className="mt-2 text-13 text-text-2">{t("card.printedUnconfirmed")}</p>
           )}
-          <TextPurposeStatus readiness={translation.readiness} />
+          {printedTextState === "derived" && (
+            <p className="mt-2 text-13 text-text-2">{t("card.printedDerived")}</p>
+          )}
         </>
-      )}
-      {different && showTranslation && (
+      ) : borrowed ? (
         <CardText
           client={client}
           edition={edition}
           owner={{ kind: "face_revision", id: translationRevisionId }}
           field="effect"
-          display="translated"
-          {...(basisCardNo
-            ? {
-                translationBasis: {
-                  cardNo: basisCardNo,
-                  to: `/cards/${encodeURIComponent(basisCardNo)}`,
-                  state: entry,
-                },
-              }
-            : {})}
+          printed={{ kind: "face_revision", id: ownRevisionId }}
+        />
+      ) : (
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: ownRevisionId }}
+          field="effect"
         />
       )}
-      <CardText
-        client={client}
-        edition={edition}
-        owner={{ kind: "face_revision", id: ownRevisionId }}
-        field="effect"
-        display={different ? "original" : undefined}
-        label={different ? t("card.wording.printingOriginal") : undefined}
-      />
-      {different &&
-        prefs.effectLanguage !== "original" &&
-        (translation.readiness.basic === "ready" || translation.readiness.basic === "none") &&
-        !showTranslation &&
-        language !== (edition === "jp" ? "ja" : "en") && (
-          <p className="mt-2 text-13 text-text-2">{t("card.translationMissing")}</p>
-        )}
+      {others.length > 0 && !blank && (
+        <p className="mt-2 text-12 text-text-3" data-wording-note>
+          {before}
+          {others.map((other, index) => {
+            const link = linkOf(other.id)
+            return (
+              <span key={other.id}>
+                {index > 0 && t("card.wording.printingJoiner")}
+                {link ? (
+                  <RouterLink
+                    to={link.to}
+                    state={link.state}
+                    replace
+                    preventScrollReset
+                    className="font-mono underline decoration-dotted underline-offset-2 hover:text-text-1"
+                  >
+                    {other.cardNo}
+                  </RouterLink>
+                ) : (
+                  <span className="font-mono">{other.cardNo}</span>
+                )}
+              </span>
+            )
+          })}
+          {after}
+        </p>
+      )}
     </>
   )
 }
@@ -161,13 +250,14 @@ export function CardWording({
   printingId,
   wording,
   revision,
-  entry,
+  linkOf,
 }: TextProps & {
   readonly catalog: Catalog
   readonly printingId: string
   readonly wording: Row | undefined
   readonly revision: Row | undefined
-  readonly entry: unknown
+  /** Where a printing chip of this card leads, for the note's card numbers. */
+  readonly linkOf: (printingId: string) => CardLink | undefined
 }) {
   const { t } = useTranslation()
   // A display without an adopted current: say so, whichever branch shows the printing's own text.
@@ -202,33 +292,54 @@ export function CardWording({
   if (displayId && !candidates.some((candidate) => candidate.revisionId === displayId))
     candidates.unshift({ revisionId: displayId, printings: [] })
   const display = wording?.["display"] as Row | undefined
-  const undated = (wording?.["undated_printing_ids"] ?? []) as string[]
-  const basisPrinting =
-    candidates
-      .flatMap((candidate) => candidate.printings)
-      .find((printing) => printing.id === wording?.["basis_printing_id"]) ??
-    candidates
-      .find((candidate) => candidate.revisionId === displayId)
-      ?.printings.find((p) => !undated.includes(p.id))
   const ownId = own.length === 1 ? own[0]?.revisionId : null
+  const homeSet = catalog.index.printing(printingId)?.["home_set_id"]
+  const homeSetId = typeof homeSet === "string" ? homeSet : undefined
+  // One printing stands for each other wording: the latest wording's basis printing, else the
+  // first of that wording's printings in chip order.
+  const chipOrder = new Map(
+    printingGroups(
+      candidates.flatMap((candidate) =>
+        candidate.printings.flatMap((p) => {
+          const row = catalog.index.printing(p.id)
+          return row ? [row] : []
+        }),
+      ),
+    )
+      .flatMap((group) => group.printings)
+      .map((row, index) => [stringValue(row["id"]), index] as const),
+  )
+  const others: OtherWording[] = candidates.flatMap((candidate) => {
+    if (candidate.revisionId === null || candidate.revisionId === ownId) return []
+    const basis =
+      candidate.revisionId === displayId
+        ? candidate.printings.find((p) => p.id === wording?.["basis_printing_id"])
+        : undefined
+    const first = [...candidate.printings].sort(
+      (a, b) => (chipOrder.get(a.id) ?? 0) - (chipOrder.get(b.id) ?? 0),
+    )[0]
+    const pick = basis ?? first
+    return pick ? [pick] : []
+  })
   let body
   if (
     ownId &&
     displayId &&
-    (wording?.["classification"] === "same_effect" || display?.["basis"] === "current") &&
-    basisPrinting
+    (wording?.["classification"] === "same_effect" || display?.["basis"] === "current")
   )
     body = (
       <PrintingWording
         key={printingId}
         client={client}
         edition={edition}
+        printingId={printingId}
+        faceId={stringValue(revision?.["face_id"] ?? "")}
+        homeSetId={homeSetId}
         ownRevisionId={ownId}
         translationRevisionId={displayId}
-        basisPrinting={basisPrinting}
-        catalog={catalog}
-        faceId={stringValue(revision?.["face_id"] ?? "")}
-        entry={entry}
+        classification={wording?.["classification"]}
+        others={others}
+        linkOf={linkOf}
       />
     )
   else if (!wording)

@@ -52,6 +52,7 @@ import { PageTitle } from "../PageTitle"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
 import { printingGroups } from "./printing-order"
+import { type CardLink, type PrintingEntry, RelatedCards } from "./RelatedCards"
 import { routeInput, useCardContent } from "./useCardContent"
 
 const ICON_BUTTON =
@@ -423,6 +424,73 @@ export function CardView({
   const label = (kind: VocabularyKind, code: string) =>
     index ? vocabularyLabel(index, kind, code, textLang) : code
   const joiner = t("cardPage.separator")
+  // Where a link to a card goes: inside the overlay when there is one, else to its page. Another
+  // printing of this card keeps the list entry (back, previous/next); another card starts afresh.
+  const cardLink = (
+    target: {
+      readonly cardNo: string
+      readonly cardNoState?: string
+      readonly intId?: number
+      readonly route?: CardEntryState["route"]
+    },
+    sameCard: boolean,
+  ): CardLink => {
+    const { cardNo, cardNoState, intId, route } = target
+    if (frame)
+      return frame.link({
+        cardNo,
+        ...(cardNoState === undefined ? {} : { cardNoState }),
+        ...(intId === undefined ? {} : { intId }),
+        ...(route === undefined ? {} : { route }),
+      })
+    const { resultKey: _resultKey, ...listEntry } = entry ?? {}
+    return {
+      to: printingPath(target),
+      state: { ...(sameCard ? entry : listEntry), ...(route === undefined ? {} : { route }) },
+    }
+  }
+  const printingEntries = printingGroups(printings).map(
+    ({ region: printingRegion, printings: regionalPrintings }) => ({
+      region: printingRegion,
+      printings: regionalPrintings.map((row) => {
+        const id = stringValue(row["id"])
+        const rarity =
+          typeof row["rarity_code"] === "string"
+            ? label("rarity", row["rarity_code"])
+            : typeof row["rarity_raw"] === "string"
+              ? row["rarity_raw"]
+              : undefined
+        const link = cardLink(
+          {
+            cardNo: stringValue(row["card_no"]),
+            ...(typeof row["card_no_state"] === "string"
+              ? { cardNoState: row["card_no_state"] }
+              : {}),
+            ...(typeof row["int_id"] === "number" ? { intId: row["int_id"] } : {}),
+            route: {
+              cardId: stringValue(row["card_id"]),
+              printingId: id,
+              cardOwner: stringValue(card?.["home_set_id"]),
+              printingOwner: stringValue(row["home_set_id"]),
+              region: printingRegion,
+            },
+          },
+          true,
+        )
+        return { id, cardNo: stringValue(row["card_no"]), rarity, link }
+      }),
+    }),
+  )
+  const printingLinks = new Map(
+    printingEntries.flatMap(({ printings: rows }) => rows.map(({ id, link }) => [id, link])),
+  )
+  // Thumbnails need the printing's summary, which arrives with the printing metadata.
+  const printingThumbnails: PrintingEntry[] = printingEntries.flatMap(({ printings: rows }) =>
+    rows.flatMap(({ id, rarity, link }) => {
+      const summary = (completePrintings?.value ?? catalog)?.summary(id)
+      return summary ? [{ summary, rarity, link }] : []
+    }),
+  )
 
   if (routeError || (catalog !== null && !printing)) {
     const kind = routeError instanceof CardRouteError ? routeError.kind : undefined
@@ -770,11 +838,13 @@ export function CardView({
                     <CardWording
                       client={client}
                       edition={region}
-                      catalog={catalog}
+                      // The completed printings carry rarity and premium, which order the chips
+                      // and so the printing named by the wording note.
+                      catalog={completePrintings?.value ?? catalog}
                       printingId={printingId}
                       wording={wording}
                       revision={revision}
-                      entry={entry}
+                      linkOf={(id) => printingLinks.get(id)}
                     />
                   </CardTextPanel>
                 )}
@@ -802,67 +872,59 @@ export function CardView({
           {printings.length > 1 && (
             <section className="mt-6" aria-label={t("cardPage.printings")}>
               <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
-              {printingGroups(printings).map(
-                ({ region: printingRegion, printings: regionalPrintings }) => (
-                  <div key={printingRegion} className="mt-1.5 flex items-start gap-2">
-                    <span className="inline-flex h-8 items-center text-13 font-semibold text-text-3">
-                      {printingRegion.toUpperCase()}:
-                    </span>
-                    <ul aria-label={printingRegion.toUpperCase()} className="flex flex-wrap gap-2">
-                      {regionalPrintings.map((row) => {
-                        const id = stringValue(row["id"])
-                        const no = stringValue(row["card_no"])
-                        const path = printingPath({
-                          cardNo: no,
-                          ...(typeof row["card_no_state"] === "string"
-                            ? { cardNoState: row["card_no_state"] }
-                            : {}),
-                          ...(typeof row["int_id"] === "number" ? { intId: row["int_id"] } : {}),
-                        })
-                        const rarity =
-                          typeof row["rarity_code"] === "string"
-                            ? label("rarity", row["rarity_code"])
-                            : row["rarity_raw"]
-                        const route = {
-                          cardId: stringValue(row["card_id"]),
-                          printingId: id,
-                          cardOwner: stringValue(card?.["home_set_id"]),
-                          printingOwner: stringValue(row["home_set_id"]),
-                          region: printingRegion,
-                        }
-                        const link = frame
-                          ? frame.link({
-                              cardNo: no,
-                              ...(typeof row["card_no_state"] === "string"
-                                ? { cardNoState: row["card_no_state"] }
-                                : {}),
-                              ...(typeof row["int_id"] === "number"
-                                ? { intId: row["int_id"] }
-                                : {}),
-                              route,
-                            })
-                          : { to: path, state: { ...entry, route } }
-                        return (
-                          <li key={id}>
-                            <RouterLink
-                              to={link.to}
-                              state={link.state}
-                              replace
-                              preventScrollReset
-                              aria-current={id === printingId ? "page" : undefined}
-                              className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
-                            >
-                              {no}
-                              {typeof rarity === "string" && rarity !== "" && ` (${rarity})`}
-                            </RouterLink>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                ),
-              )}
+              {printingEntries.map(({ region: printingRegion, printings: regionalPrintings }) => (
+                <div key={printingRegion} className="mt-1.5 flex items-start gap-2">
+                  <span className="inline-flex h-8 items-center text-13 font-semibold text-text-3">
+                    {printingRegion.toUpperCase()}:
+                  </span>
+                  <ul aria-label={printingRegion.toUpperCase()} className="flex flex-wrap gap-2">
+                    {regionalPrintings.map(({ id, cardNo: no, rarity, link }) => (
+                      <li key={id}>
+                        <RouterLink
+                          to={link.to}
+                          state={link.state}
+                          replace
+                          preventScrollReset
+                          aria-current={id === printingId ? "page" : undefined}
+                          className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
+                        >
+                          {no}
+                          {rarity !== undefined && rarity !== "" && ` (${rarity})`}
+                        </RouterLink>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </section>
+          )}
+          {catalog && cardId !== undefined && printingId !== null && (
+            <RelatedCards
+              key={cardId}
+              client={client}
+              catalog={catalog}
+              edition={region}
+              cardId={cardId}
+              printingId={printingId}
+              revisionIds={views.flatMap(({ revision }) =>
+                typeof revision?.["id"] === "string" ? [revision["id"]] : [],
+              )}
+              printings={printingThumbnails}
+              otherSnapshot={showOther ? other.snapshot : undefined}
+              linkTo={(target) =>
+                cardLink(
+                  {
+                    cardNo: target.cardNo,
+                    ...(target.cardNoState === undefined
+                      ? {}
+                      : { cardNoState: target.cardNoState }),
+                    ...(target.intId === undefined ? {} : { intId: target.intId }),
+                    ...routeState(target),
+                  },
+                  false,
+                )
+              }
+            />
           )}
         </div>
       </div>

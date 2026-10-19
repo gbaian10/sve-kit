@@ -15,7 +15,6 @@ import type { NameDisplay } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
 import { prefsStore, type TextBoxKind, usePrefs } from "../../settings"
 import { cn } from "../ui/cn"
-import { Link } from "../ui/Link"
 import { AnnotatedText } from "./AnnotatedText"
 import { useTextLanguage } from "./text-language"
 import { TextPurposeStatus } from "./TextPurposeStatus"
@@ -175,7 +174,7 @@ export function CardText({
   display,
   label,
   ordinal = null,
-  translationBasis,
+  printed,
 }: {
   readonly sharedResolver?: AnnotatedTextResolver | null
   readonly client: SnapshotClient
@@ -185,12 +184,11 @@ export function CardText({
   readonly ordinal?: number | null
   readonly display?: NameDisplay | undefined
   readonly label?: string | undefined
-  /** The printing whose shared wording this translation was made from, for the source area. */
-  readonly translationBasis?: {
-    readonly cardNo: string
-    readonly to: string
-    readonly state?: unknown
-  }
+  /**
+   * The text this printing actually prints when its own revision has no translation and the
+   * translation of `owner` (the latest wording) stands in: the original box shows this one.
+   */
+  readonly printed?: JsonObject
 }) {
   const { t } = useTranslation()
   const prefs = usePrefs()
@@ -208,6 +206,27 @@ export function CardText({
   const sectionStates = useAnnotatedTexts(
     client,
     sections.map((section) => ({ owner, field: "section" as const, ordinal: section.ordinal })),
+    language,
+    edition,
+    sharedResolver,
+  )
+  const printedText = useAnnotatedText(
+    client,
+    printed ?? owner,
+    field,
+    language,
+    edition,
+    sharedResolver,
+    ordinal,
+  )
+  const printedSections = printed ? (printedText.value?.originalSections ?? []) : []
+  const printedSectionStates = useAnnotatedTexts(
+    client,
+    printedSections.map((section) => ({
+      owner: printed ?? owner,
+      field: "section" as const,
+      ordinal: section.ordinal,
+    })),
     language,
     edition,
     sharedResolver,
@@ -241,8 +260,12 @@ export function CardText({
     value.translated !== undefined || sectionStates.some((state) => state.value?.translated)
   const foreign = (text: { readonly unit: JsonObject } | undefined) =>
     text !== undefined && stringValue(text.unit["lang"]) !== language
+  // A printing whose printed text differs shows it beside the latest wording even without a
+  // translation (the latest wording itself is the "translation" in the card's own language).
   const showOriginal =
-    translating && anyTranslated && (mode === "both" || value.selection?.["basis"] === "jp_source")
+    translating &&
+    (anyTranslated || printed !== undefined) &&
+    (mode === "both" || value.selection?.["basis"] === "jp_source")
   const boxed = field !== "name"
   // The printed state describes the printed name and effect, never the flavor.
   const printedState = field === "flavor" ? undefined : value.printedState
@@ -254,9 +277,14 @@ export function CardText({
   const sharedLine = sectionStates.every(
     (state) => !state.value?.translated || quality(state.value) === effectQuality,
   )
-  const sectionTexts = (show: "translated" | "original") =>
-    sections.flatMap((section, index) => {
-      const state = sectionStates[index]
+  const sectionTexts = (
+    show: "translated" | "original",
+    list: typeof sections = sections,
+    states: typeof sectionStates = sectionStates,
+    blank: boolean = blankEffect,
+  ) =>
+    list.flatMap((section, index) => {
+      const state = states[index]
       return state
         ? [
             <SectionText
@@ -267,7 +295,7 @@ export function CardText({
               language={language}
               emphasis={prefs.termEmphasis}
               sourceLine={!sharedLine}
-              rule={index > 0 || !blankEffect}
+              rule={index > 0 || !blank}
               noteMissing={anyTranslated}
               client={client}
               edition={edition}
@@ -297,57 +325,54 @@ export function CardText({
       sectionStates.some((state) => foreign(state.value?.original)))
       ? missingNote
       : null
-  const original = (
-    <div className="space-y-2">
-      {effectOriginal}
-      {sectionTexts("original")}
-    </div>
-  )
+  // The original box: this printing's own text when it differs, else the owner's.
+  let printedBody: ReactNode
+  if (!printed)
+    printedBody = (
+      <>
+        {effectOriginal}
+        {sectionTexts("original")}
+      </>
+    )
+  else if (printedText.readiness.basic === "pending")
+    printedBody = (
+      <p role="status" className="text-13">
+        {t("card.annotationPending")}
+      </p>
+    )
+  else if (printedText.readiness.basic === "error")
+    printedBody = (
+      <p role="alert" className="text-13">
+        {printedText.readiness.error?.kind === "validation"
+          ? t("card.textFailed")
+          : t("card.textLoadFailed")}
+      </p>
+    )
+  else if (!printedText.value) printedBody = <p className="text-13">{t("card.textUnavailable")}</p>
+  else {
+    const printedValue = printedText.value
+    const printedBlank = stringValue(printedValue.original.unit["text"]) === ""
+    printedBody = (
+      <>
+        {!printedBlank && (
+          <AnnotatedText
+            value={printedValue.original}
+            context={printedValue}
+            emphasis={prefs.termEmphasis}
+            annotationReady={
+              printedText.readiness.annotations === "ready" ||
+              printedText.readiness.annotations === "none"
+            }
+            client={client}
+            edition={edition}
+          />
+        )}
+        {sectionTexts("original", printedSections, printedSectionStates, printedBlank)}
+      </>
+    )
+  }
+  const original = <div className="space-y-2">{printedBody}</div>
   const jpSource = value.selection?.["basis"] === "jp_source"
-  const counterpartLang = value.counterpart ? stringValue(value.counterpart.unit["lang"]) : null
-  // Sources stay out of the reading flow (#521): one collapsed area, not a line per source.
-  const sourceEntries = [
-    ...(jpSource && readiness.source === "ready" && value.source
-      ? [
-          <div key="source">
-            <p className="text-12 text-text-3">{t("card.sourceText")}</p>
-            <AnnotatedText
-              value={value.source}
-              context={value}
-              emphasis={prefs.termEmphasis}
-              annotationReady={annotationReady}
-              client={client}
-              edition={edition}
-            />
-          </div>,
-        ]
-      : []),
-    ...(translationBasis
-      ? [
-          <p key="basis" className="text-13 text-text-2">
-            {t("card.wording.translationBasis")}{" "}
-            <Link to={translationBasis.to} state={translationBasis.state} replace>
-              {translationBasis.cardNo}
-            </Link>
-          </p>,
-        ]
-      : []),
-    ...(value.selection?.["basis"] === "official_counterpart" && counterpartLang !== null
-      ? [
-          <p key="counterpart" className="text-13 text-text-2">
-            {t("card.counterpartSource", {
-              edition: t(`options.edition.${counterpartLang === "ja" ? "jp" : "en"}`),
-            })}
-          </p>,
-        ]
-      : []),
-  ]
-  const sourceArea = value.translated && sourceEntries.length > 0 && (
-    <details className="text-15" data-source-area>
-      <summary className="cursor-pointer text-13 text-text-2">{t("card.sourceArea")}</summary>
-      <div className="mt-1 space-y-2">{sourceEntries}</div>
-    </details>
-  )
   const content = (
     <>
       {printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
@@ -358,6 +383,11 @@ export function CardText({
           {value.translated && sharedLine && <TranslationSourceLine value={value} />}
           {value.translated && jpSource && (
             <p className="text-12 text-text-3">{t("card.jpSource")}</p>
+          )}
+          {value.translated && printed !== undefined && (
+            <p className="text-12 text-text-3" data-borrowed-translation>
+              {t("card.wording.borrowedTranslation")}
+            </p>
           )}
           <div className={cn(BODY, "space-y-2")}>
             {value.translated ? (
@@ -377,7 +407,6 @@ export function CardText({
             {sectionTexts("translated")}
           </div>
           {boxMissing}
-          {sourceArea}
         </>
       ) : (
         <div className={BODY}>{original}</div>
