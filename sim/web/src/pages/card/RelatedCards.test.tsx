@@ -12,6 +12,7 @@ const state = vi.hoisted(() => {
   const texts: Record<string, string[]> = {}
   return {
     rows: [] as { from_card_id: string; to_card_id: string }[],
+    mentionedBy: [] as { card_id: string; region: string; from_card_id: string }[],
     failRows: false,
     failPin: false,
     /** Card ids named by the front face's effect text. */
@@ -26,7 +27,10 @@ vi.mock("../../app/card-related", () => ({
     state.loads.push(homeSetId)
     return state.failRows
       ? Promise.reject(new Error("synthetic engine failure"))
-      : Promise.resolve(state.rows.map((row, index) => ({ id: `r${String(index)}`, ...row })))
+      : Promise.resolve({
+          related: state.rows.map((row, index) => ({ id: `r${String(index)}`, ...row })),
+          mentionedBy: state.mentionedBy,
+        })
   },
 }))
 
@@ -190,6 +194,7 @@ async function open(
 
 beforeEach(() => {
   state.rows = []
+  state.mentionedBy = []
   state.failRows = false
   state.failPin = false
   state.mentions = []
@@ -201,6 +206,31 @@ afterEach(() => {
 })
 
 describe("RelatedCards", () => {
+  it("shows incoming references even without outgoing links and keeps them independent of displayed wording", async () => {
+    state.mentionedBy = [
+      { card_id: "c:base", region: "jp", from_card_id: "c:BP10-001" },
+      { card_id: "c:base", region: "jp", from_card_id: "c:BP04-001" },
+      { card_id: "c:base", region: "jp", from_card_id: "c:BP04-001" },
+      { card_id: "c:base", region: "en", from_card_id: "c:other" },
+      { card_id: "c:base", region: "jp", from_card_id: "c:base" },
+      { card_id: "c:other", region: "jp", from_card_id: "c:token" },
+    ]
+    const first = await open()
+    const incoming = await screen.findByRole("list", { name: "提到這張卡" })
+    const links = () =>
+      within(screen.getByRole("list", { name: "提到這張卡" }))
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href"))
+    expect(within(incoming).getAllByRole("link")).toHaveLength(2)
+    expect(links()).toEqual(["/cards/BP04-001", "/cards/BP10-001"])
+    expect(screen.getByRole("tab", { name: "參考" })).toHaveAttribute("aria-selected", "true")
+    expect(state.loads).toEqual(["BP05"])
+    first.unmount()
+    await open([], "c:base", ["rev:historical"])
+    await screen.findByRole("list", { name: "提到這張卡" })
+    expect(links()).toEqual(["/cards/BP04-001", "/cards/BP10-001"])
+  })
+
   it("renders nothing for a card with no relations, mentions or other printings", async () => {
     await open()
     await waitFor(() => {

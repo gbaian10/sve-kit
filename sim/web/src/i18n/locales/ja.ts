@@ -388,6 +388,7 @@ export default {
       reference: "参照",
       printings: "他の収録",
       mentions: "このカードが言及するカード",
+      mentionedBy: "このカードに言及するカード",
       otherOfficial: "その他の公式関連カード",
       loadFailed: "関連カードを読み込めませんでした。",
     },

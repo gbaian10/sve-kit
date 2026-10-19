@@ -388,6 +388,7 @@ export default {
       reference: "Referenced",
       printings: "Other Printings",
       mentions: "Mentioned by this card",
+      mentionedBy: "Cards mentioning this card",
       otherOfficial: "Other official relations",
       loadFailed: "Couldn't load related cards.",
     },

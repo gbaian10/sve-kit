@@ -23,7 +23,13 @@ import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { printingGroups } from "./printing-order"
-import { cardKindOf, mentionedCards, relatedGroups, representativeOf } from "./related-cards"
+import {
+  cardKindOf,
+  mentionedCards,
+  referencingCards,
+  relatedGroups,
+  representativeOf,
+} from "./related-cards"
 
 export interface CardLink {
   readonly to: To
@@ -43,10 +49,11 @@ const TAB_ORDER: readonly TabId[] = ["evolve", "reference", "printings"]
 interface RelatedState {
   readonly key: string
   readonly rows?: readonly Row[]
+  readonly mentionedBy?: readonly Row[]
   readonly error?: unknown
 }
 
-/** The official related rows of one card, reloaded when the card or the snapshot changes. */
+/** Reload references when the card or the snapshot changes. */
 function useCardRelated(
   client: SnapshotClient,
   catalog: Catalog,
@@ -64,8 +71,8 @@ function useCardRelated(
     if (!snapshot || typeof homeSetId !== "string") return
     let active = true
     void loadCardRelated(client, snapshot, homeSetId).then(
-      (rows) => {
-        if (active) setState({ key, rows })
+      ({ related: rows, mentionedBy }) => {
+        if (active) setState({ key, rows, mentionedBy })
       },
       (error: unknown) => {
         if (active) setState({ key, error })
@@ -269,6 +276,7 @@ export function RelatedCards({
     edition,
   )
   const rows = related?.rows ?? []
+  const mentionedBy = referencingCards(related?.mentionedBy ?? [], cardId, edition, catalog)
   const rowsFrom = (id: string) => rows.filter((row) => row["from_card_id"] === id)
   const groups = relatedGroups({
     cardId,
@@ -315,7 +323,7 @@ export function RelatedCards({
           : t("cardPage.related.evolvesInto"),
       content: <Group label={undefined} cards={evolvePrintings} images={images} linkTo={linkTo} />,
     })
-  if (groups.mentions.length > 0 || groups.otherOfficial.length > 0)
+  if (groups.mentions.length > 0 || mentionedBy.length > 0 || groups.otherOfficial.length > 0)
     tabs.push({
       id: "reference",
       label: t("cardPage.related.reference"),
@@ -324,6 +332,12 @@ export function RelatedCards({
           <Group
             label={t("cardPage.related.mentions")}
             cards={groups.mentions}
+            images={images}
+            linkTo={linkTo}
+          />
+          <Group
+            label={t("cardPage.related.mentionedBy")}
+            cards={mentionedBy}
             images={images}
             linkTo={linkTo}
           />
