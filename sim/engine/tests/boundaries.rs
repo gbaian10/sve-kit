@@ -265,7 +265,7 @@ fn movement_receipts_count_changes_and_bind_the_actual_results() {
 }
 
 #[test]
-fn dsl_a2_chosen_and_actual_movement_results_diverge_at_ex_capacity() {
+fn chosen_and_actual_movement_results_diverge_at_ex_capacity() {
     for (available, expected) in [(0_i64, 0_i64), (1, 1), (2, 2)] {
         for reference in ["chosen", "placed"] {
             let body = json!({"op":"seq","steps":[
@@ -288,7 +288,7 @@ fn dsl_a2_chosen_and_actual_movement_results_diverge_at_ex_capacity() {
                 &position,
                 &Value::Null,
                 &Value::Null,
-                "a2-results",
+                "movement-results",
             )
             .unwrap();
             engine
@@ -338,7 +338,7 @@ fn dsl_a2_chosen_and_actual_movement_results_diverge_at_ex_capacity() {
 }
 
 #[test]
-fn dsl_a2_original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
+fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
     let authored: Value =
         serde_saphyr::from_str(include_str!("../../../authored/rules/effects/BP18.yaml")).unwrap();
     for number in ["BP18-059", "BP18-SL14"] {
@@ -355,7 +355,7 @@ fn dsl_a2_original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
         let loaded = Catalog::from_documents(
             &facts,
             &registry(),
-            &[("a2-bp18".into(), document(body).to_string())],
+            &[("bp18".into(), document(body).to_string())],
         )
         .unwrap();
         let mut position = setup();
@@ -375,7 +375,7 @@ fn dsl_a2_original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
             &position,
             &Value::Null,
             &Value::Null,
-            "a2-remainder",
+            "remainder",
         )
         .unwrap();
         engine
@@ -393,6 +393,7 @@ fn dsl_a2_original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
         engine
             .decide(&json!({"do":"resolve-choice","select":[]}), "full")
             .unwrap();
+        // Freeze the known chosen-binding defect, not correct card semantics (docs/dsl/v0-regression.md).
         let (order, deck) = if number == "BP18-059" {
             (json!(["d3", "d2"]), json!(["d1", "d4", "d3", "d2"]))
         } else {
@@ -416,7 +417,7 @@ fn dsl_a2_original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
 }
 
 #[test]
-fn dsl_a2_authored_ride_costs_share_one_payment_and_reject_missing_resources() {
+fn authored_ride_costs_share_one_payment_and_reject_missing_resources() {
     let cp03: Value =
         serde_saphyr::from_str(include_str!("../../../authored/rules/effects/CP03.yaml")).unwrap();
     let csd03: Value =
@@ -446,9 +447,18 @@ fn dsl_a2_authored_ride_costs_share_one_payment_and_reject_missing_resources() {
                 &position,
                 &Value::Null,
                 &Value::Null,
-                "a2-cost",
+                "ride-cost",
             )
             .unwrap();
+            if !available {
+                assert!(
+                    !engine
+                        .legal()
+                        .unwrap()
+                        .iter()
+                        .any(|action| action["do"] == "activate")
+                );
+            }
             let before = engine.digest().unwrap();
             let step = engine.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"costs":{"1":["r2"]},"pay":{"pp":1_i64,"ep":0_i64}}),"ride").unwrap();
             if available {
