@@ -339,6 +339,16 @@ describe("CardsPage", () => {
     expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
   })
 
+  it("enables release-date sorting and writes it to the URL", async () => {
+    const { router } = await open("/cards?class=bishop")
+    const user = userEvent.setup()
+    const sort = await screen.findByRole("combobox", { name: "排序" })
+    expect(screen.getByRole("option", { name: "發售日" })).toBeEnabled()
+    await user.selectOptions(sort, "date")
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("date")
+    expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
+  })
+
   it("lists the snapshot and keeps the class filter in the URL", async () => {
     const { router } = await open()
     const user = userEvent.setup()

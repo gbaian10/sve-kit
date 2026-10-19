@@ -768,10 +768,7 @@ it("query failures are typed and isolated from other channels and load state", a
   const other = h.session.createChannel()
   h.session.load(base, "jp", "preview")
   await h.settled()
-  for (const [facets, changes] of [
-    [["mechanics"], { mechanics: { quick: "has" } }],
-    [["sort"], { sort: "date" }],
-  ] as const) {
+  for (const [facets, changes] of [[["mechanics"], { mechanics: { quick: "has" } }]] as const) {
     h.channel.search({ ...query, state: { ...CARD_QUERY, ...changes } })
     other.search(query)
     await h.queried()
@@ -3019,4 +3016,89 @@ it("finishes printing facets and merged units while mechanic payloads are pendin
   await h.settled()
   expect(h.status().result.phase).toBe("complete")
   h.session.dispose()
+})
+
+it("sorts release dates from inclusions, keeps unknown dates last and restores the index", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing fixture")
+  const source = new BootstrapColumns()
+  source.ingest(snapshot.bootstrap)
+  source.seal()
+  const state = { ...DEFAULT_QUERY, unit: "printing" as const }
+  const initial = new SearchIndex(source, "jp").search({
+    ...query,
+    state: { ...state, unit: "card" },
+  })
+  const ids = initial.items.slice(0, 5).map((item) => item.printingId)
+  expect(ids).toHaveLength(5)
+  const product = snapshot.bootstrap.find((fragment) => fragment.table === "product")
+  const inclusion = snapshot.bootstrap.find((fragment) => fragment.table === "printing_product")
+  if (!product || !inclusion) throw new Error("missing product fixture")
+  const staged = new BootstrapColumns()
+  staged.ingest(snapshot.bootstrap.filter((fragment) => fragment.table !== "printing_product"))
+  staged.ingest([
+    {
+      ...product,
+      rows: [
+        {
+          id: "release-test",
+          region: "jp",
+          family_ids: [],
+          released_on: "2020-01-01",
+          date_precision: "day",
+        },
+      ],
+    },
+    {
+      ...inclusion,
+      rows: ids.slice(0, 4).map((id, index) => ({
+        printing_id: id,
+        product_id: "release-test",
+        available_on: index === 0 ? "2023-01-01" : null,
+        date_precision: index === 0 ? "day" : index === 3 ? "month" : null,
+        date_raw: index === 3 ? "2020-01" : null,
+      })),
+    },
+  ])
+  staged.seal()
+  const created = new SearchIndex(staged, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    for (const unit of ["printing", "card"] as const) {
+      const selected = (order?: "desc") =>
+        index
+          .search({
+            ...query,
+            state: { ...state, unit, sort: "date", ...(order ? { order } : {}) },
+          })
+          .items.filter((item) => ids.includes(item.printingId))
+          .map((item) => item.printingId)
+      expect(selected()).toEqual([ids[1], ids[2], ids[0], ids[3], ids[4]])
+      expect(selected("desc")).toEqual([ids[0], ids[1], ids[2], ids[3], ids[4]])
+    }
+  }
+})
+
+it("waits for printing dates before returning a release-date-sorted printing query", async () => {
+  const served = origin()
+  const h = harness(served)
+  const print = (built.manifest["files"] as JsonObject[]).find(
+    (file) => file["purpose"] === "print" && file["region"] === "jp",
+  )
+  if (!print) throw new Error("missing printing fixture")
+  const release = served.hold(stringValue(print["path"]))
+  h.session.load(base, "jp", "preview")
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, sort: "date" } })
+  try {
+    await expect.poll(() => h.status().phase, POLL).toBe("ready")
+    for (let i = 0; i < 5; i += 1) await h.queried()
+    expect(h.status().result.phase).toBe("pending")
+    release()
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  } finally {
+    release()
+    h.session.dispose()
+  }
 })

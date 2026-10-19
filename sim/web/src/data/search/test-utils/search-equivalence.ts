@@ -80,7 +80,7 @@ export function compareSearchIndexes(actual: SearchApi, expected: SearchApi, edi
   ]
   for (const stat of ["cost", "attack", "defense"] as const)
     for (const values of [[0], [1], [9], [10], [0, 10]]) changes.push({ [stat]: values })
-  for (const sort of ["no", "name", "cost", "atk", "def"] as const)
+  for (const sort of ["no", "name", "cost", "atk", "def", "date"] as const)
     changes.push({ sort }, { sort, order: "desc" })
   for (const set of expected.options.sets.slice(0, 3))
     for (const rarity of Object.keys(expected.options.rarityCounts))

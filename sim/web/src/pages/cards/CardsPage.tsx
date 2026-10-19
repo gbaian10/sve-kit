@@ -853,7 +853,7 @@ export function CardsPage() {
                     }}
                   >
                     {QUERY_SORTS.map((sort) => (
-                      <option key={sort} value={sort} disabled={sort === "date"}>
+                      <option key={sort} value={sort}>
                         {t(`results.sortBy.${sort}`)}
                       </option>
                     ))}

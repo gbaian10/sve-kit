@@ -163,6 +163,7 @@ const PRINTING_COLUMNS = [
   "leaderFrame",
   "art",
   "alt",
+  "releaseDate",
 ] as const
 const uintColumns = <T extends string>(names: readonly T[]) =>
   Object.fromEntries(names.map((name) => [name, [] as number[]])) as Record<T, number[]>
@@ -172,7 +173,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 19
+export const INDEX_IMAGE_FORMAT = 20
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -452,7 +453,30 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
   }
 }
 
+function releaseDates(bootstrap: BootstrapColumns): Map<string, string | null> {
+  const products = new Map(bootstrap.rows("product").map((row) => [row["id"], row]))
+  const result = new Map<string, string | null>()
+  for (const row of bootstrap.rows("printing_product")) {
+    const product = products.get(row["product_id"])
+    const precision = row["date_precision"] ?? product?.["date_precision"]
+    const value = row["date_precision"] == null ? product?.["released_on"] : row["available_on"]
+    const date = precision === "day" && typeof value === "string" ? value : null
+    const id = stringValue(row["printing_id"])
+    const previous = result.get(id)
+    result.set(
+      id,
+      previous === null || date === null
+        ? null
+        : previous === undefined || date < previous
+          ? date
+          : previous,
+    )
+  }
+  return result
+}
+
 function build(bootstrap: BootstrapColumns, edition: Region): Parts {
+  const dates = releaseDates(bootstrap)
   const pool = new StringPool()
   const summaryColumns = new Columns(pool)
   const index = bootstrap.index()
@@ -540,6 +564,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       printings.art.push(intern(art || printing.id))
       printings.alt.push(Number(!!art && !!defaultArt && art !== defaultArt))
       printings.id.push(intern(printing.id))
+      printings.releaseDate.push(intern(dates.get(printing.id)))
       printings.lookup.push(intern(printing.lookupKey))
       printings.flat.push(intern(printing.flat))
       printings.set.push(intern(printing.key?.set))
@@ -773,6 +798,7 @@ export class SearchIndex {
 
   /** Locators already enumerate the printing IDs; completion replaces their metadata only. */
   completePrintings(bootstrap: BootstrapColumns): void {
+    const dates = releaseDates(bootstrap)
     const index = bootstrap.index()
     const slots = new Map(
       Array.from(this.printings.id, (id, ordinal) => [this.pool.get(id), ordinal]),
@@ -841,6 +867,7 @@ export class SearchIndex {
         printings.set[ordinal] = intern(key?.set)
         printings.number[ordinal] = intern(key?.number)
         printings.owner[ordinal] = intern(code)
+        printings.releaseDate[ordinal] = intern(dates.get(id))
         printings.leaderFrame[ordinal] = intern(frame)
         printings.rarity[ordinal] = intern(official)
         printings.badge[ordinal] = intern(badgeOf(row)?.style ?? "unknown")
@@ -1152,6 +1179,7 @@ export class SearchIndex {
       const summary = (p: number) =>
         this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
       const value = (p: number): number | string | null => {
+        if (state.sort === "date") return this.pool.get(this.printings.releaseDate[p] ?? 0) || null
         const row = summary(p)
         if (state.sort === "name") return row.name.original.text
         if (state.sort === "cost") return row.cost
@@ -1159,12 +1187,6 @@ export class SearchIndex {
         if (state.sort === "def") return row.defense
         return null
       }
-      if (state.sort === "date")
-        throw new SearchQueryError({
-          kind: "unsupported-query",
-          message: "release-date sorting is not ready",
-          facets: ["sort"],
-        })
       matches.sort((a, b) => {
         const first = value(a),
           second = value(b)
