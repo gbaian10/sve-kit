@@ -187,10 +187,11 @@ def verify_corrections(db: Database, plan: TextPlan, vocabulary: Vocabulary) -> 
                 "Correction result revision does not contain the corrected content"
             )
         for observation in (item, candidate):
+            identifier = revision_id(observation)
             actual = {
                 row.values["ordinal"]: units[row.values["text_unit_id"]]["text"]
                 for row in sections
-                if row.values["revision_id"] == revision_id(observation)
+                if row.values["revision_id"] == identifier
             }
             if actual != dict(enumerate(observation.content.sections)):
                 raise ValueError(

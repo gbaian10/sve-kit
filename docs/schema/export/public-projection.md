@@ -131,4 +131,4 @@ uv --directory carddb run pytest tests/export/test_snapshot_project.py
 
 ### 來源更正的補充段落
 
-同筆來源更正可原子修正本文／種類及整份補充段落；建置端保存原始與更正後 revision 的各自段落，不覆寫原始觀測。公開 `Correction` 沿用既有型別：主要欄位照原 field，補充段落以 `field=other`、`corrected_from` 為原段落文字（多段以空行連接）呈現，共用 reason 與 source_url。只有成功套用的 printing／face 與結果 revision 帶標記；conflict 不產生修正內容或標記，上游已全部修正時也不重貼標記。
+同筆來源更正可原子修正本文及整份補充段落；建置端保存原始與更正後 revision 的各自段落，不覆寫原始觀測。公開 `Correction` 沿用既有型別：主要欄位照原 field，補充段落以 `field=other`、`corrected_from` 為原段落文字（多段以空行連接）呈現，共用 reason 與 source_url。只有成功套用的 printing／face 與結果 revision 帶標記；conflict 不產生修正內容或標記，上游已全部修正時也不重貼標記。

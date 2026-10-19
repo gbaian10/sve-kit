@@ -81,7 +81,7 @@ use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算�
 「通用規則」及「說明」只區分責任，不代表引擎已實作；例如ドライブチェック與タイトル構築開局配置仍須獨立確認支援。
 
 780 個正向位置包含 BP07-P06 這 1 筆已知無效對齊：傷害 body 標成 section 0 line 2，
-實際應在 effect line 3，不新增第二份傷害。既有來源更正只補 effect，section 的 token 定義後仍有重複句。
+實際應在 effect line 3，不新增第二份傷害。來源更正已清空 section，對齊例外待 DSL 移位後移除。
 `positive_alignment_exceptions` 保存 `card_no`、`ability`、`status: known_invalid_alignment`、
 原 `position`、`source_issue: uncorrected_duplicate`、既有 `source_correction` ID 及
 `proposed_position`；兩個位置都含 face／field／section／line。測試驗證原位置在正向基線、

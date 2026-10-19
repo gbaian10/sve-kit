@@ -243,17 +243,12 @@ def verify_applications(
         raise ValueError("Correction application inventory mismatch")
     by_use = {(item.printing_id, item.face_id): item for item in observations}
     fields: set[tuple[str, str, str]] = set()
-    sections: set[tuple[str, str]] = set()
     for application in applications:
         data = application.data
         key = data.printing_id, data.face_id, data.field
         if key in fields or application.observation != by_use.get(key[:2]):
             raise ValueError("Correction field/source inventory mismatch")
         fields.add(key)
-        if data.sections is not None:
-            if key[:2] in sections:
-                raise ValueError("Correction sections overlap")
-            sections.add(key[:2])
         _verify_application(preview, application)
 
 
