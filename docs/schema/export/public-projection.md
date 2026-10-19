@@ -121,3 +121,10 @@ uv --directory carddb run pytest tests/export/test_snapshot_project.py
 提到者 `from_card_id`，依來源卡在公開 printing 出現的地區各出一列，不要求目標也有該區 printing。
 兩端都必須是公開 card；與標註反查聯集後，依 `(card_id,region,from_card_id)` 去重。
 官方關聯未必是卡文的字面提及；此表不據此推導雙向關係或規則語義。
+
+### 查卡的版次發售日
+
+版次日期由其 `printing_product` 的日期覆寫求得；覆寫 precision 為 null 時沿用該 `product` 的日期。
+只有 day 精度可用於發售日排序；月、年、明示未知或沒有商品收錄時，不補成完整日期。
+同一版次有多筆收錄時，所有收錄都能判定完整日期才取最早日；任何一筆日期未定均保留未知。
+查卡合併檢視採用篩選後代表版次的日期，不改用整張卡最早的日期。日期相同依卡號，未知日期在升冪與降冪都排最後。

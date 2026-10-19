@@ -189,6 +189,7 @@ export class SearchEngine {
               request.kind === "neighbours" ||
               request.kind === "count") &&
             (request.query.state.rarities.length ||
+              request.query.state.sort === "date" ||
               request.query.state.locations.some((token) => token.startsWith("leader:")) ||
               request.query.state.altArtOnly ||
               // A merged cell's representative needs every printing's rarity and art (#781).
