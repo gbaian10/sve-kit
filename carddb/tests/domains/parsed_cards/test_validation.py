@@ -262,6 +262,28 @@ def test_unchanged_batch_does_not_rewrite_card_or_evidence_files(
         assert private_field not in public
 
 
+def test_observation_must_be_selected_by_a_batch(tmp_path: Path) -> None:
+    first, number = _batch(tmp_path / "first", "en")
+    second, _ = _batch(tmp_path / "second", "en", changed=True)
+    catalog = generate(
+        [("en", first), ("en", second)],
+        {("en", number): "SYN"},
+        producer_revision=REVISION,
+    )
+    root = tmp_path / "inputs"
+    write(root, catalog)
+    removed, remaining = catalog.index.batches
+    for part in range(len(removed.parts)):
+        (root / removed.path(part)).unlink()
+    (root / "index.json").write_bytes(
+        encode(catalog.index.model_copy(update={"batches": (remaining,)}))
+    )
+    with pytest.raises(
+        ValueError, match="Parsed observation is absent from every batch"
+    ):
+        load(root)
+
+
 def test_template_only_change_reuses_card_document(tmp_path: Path) -> None:
     first, number = _batch(tmp_path / "first", "en")
     second, _ = _batch(tmp_path / "second", "en", layout_only=True)

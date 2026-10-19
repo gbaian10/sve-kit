@@ -135,7 +135,7 @@ def test_unknown_number_requires_explicit_exception(number: str) -> None:
         number_range(number, "jp")
 
 
-def test_split_and_history_cannot_be_reassigned(tmp_path: Path) -> None:
+def test_range_and_history_cannot_be_reassigned(tmp_path: Path) -> None:
     sources, number = _batch(tmp_path, "en")
     catalog = generate(
         [("en", sources)],
