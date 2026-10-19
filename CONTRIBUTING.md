@@ -34,7 +34,7 @@ For data contribution formats, see [authored layout](docs/schema/domains/authore
 ## Parsed card inputs
 
 The reviewed Japanese and English SVE baseline is stored in `card-data/`, with
-a generator and validator. Build integration is still planned. Follow the
+a generator and validator. Offline builds read these admitted inputs directly. Follow the
 [parsed-input contract](docs/schema/ingest/parsed-card-inputs.md) for generation,
 fixed card-number ranges and validation against the previous data tree. Keep raw
 archives and old observations: parsing is reproducible only from preserved sources,
@@ -43,6 +43,12 @@ Card JSON contains readable records and minimal source references. Adjacent
 `.evidence.json` files hold build evidence with shared tables for repeated values;
 the complete reader requires both files and separate immutable batch selections,
 while reading card wording needs only the card file.
+Generation and the `card-data` CI job validate schema, hashes, closure and history;
+the CI job runs when `card-data/**` changes and compares with the PR base tree.
+Ordinary builds use the trusted reader without repeating those checks. Local data
+edits must pass `sve-carddb parsed-cards validate` before building. Offline text and
+image-index builds default to parsed inputs; comparison runs explicitly set
+`source_mode: "archive"`. Missing parsed inputs never fall back to HTML.
 Publishable files contain source URLs and hashes, never archive store names, local
 paths, credentials, card images or audio. A data PR must show its file count, byte
 sizes, included fields and representative records for maintainer review. Runtime

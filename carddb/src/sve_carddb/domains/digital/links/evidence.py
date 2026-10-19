@@ -114,7 +114,7 @@ def batch_refs(
     for batch in batches:
         cache_key = batch.batch_id
         frozen = sources.batch(cache_key)
-        for current in frozen.inventory.current:
+        for current in frozen.current_versions:
             descriptor = frozen.descriptor(current.source_version_id)
             if descriptor.provider != game or descriptor.kind != "api":
                 continue

@@ -538,3 +538,18 @@ def test_reference_qualification_uses_term_source_shape_not_slug(
     else:
         assert names["term:name.synthetic_fragment"].text == "合成測試名"
         assert names["term:name.synthetic_fragment"].low_confidence
+
+
+def test_owner_uses_shared_projection_after_html_is_removed(
+    baseline: PolicyFixture, tmp_path: Path
+) -> None:
+    fixture = copied_policy(baseline, tmp_path / "owner")
+    sources = fixture.digital.sources()
+    owner = fixture.owner()
+    review = review_context(sources)
+    expected = owner_text(owner, sources, review)
+    assert owner.name_ref is not None
+    frozen = sources.batch(owner.name_ref.batch_id)
+    entry = frozen.entries[owner.name_ref.source_version_id]
+    (frozen.root / entry.blob.path).unlink()
+    assert owner_text(owner, sources, review) == expected

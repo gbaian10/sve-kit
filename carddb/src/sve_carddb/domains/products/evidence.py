@@ -32,11 +32,11 @@ def resolve_evidence(
             continue
         key = reference.batch_id
         frozen = batches.configured(stores, key)
-        if reference.source_version_id not in frozen.entries:
+        if reference.source_version_id not in frozen.version_ids:
             raise ValueError(
                 "Product evidence source version is absent from pinned batch"
             )
-        source, _, _ = frozen.read(
+        source, _ = frozen.metadata(
             reference.source_version_id, parser_version="archive-closure-v1"
         )
         result[reference] = CheckedSource(source)

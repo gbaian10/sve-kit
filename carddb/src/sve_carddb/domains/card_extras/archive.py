@@ -156,7 +156,7 @@ class FrozenCardExtras:
 
     def pages(self) -> Iterator[CardPage]:
         """Stream one explicit region from shared verified physical page projections."""
-        for entry in self.sources.inventory.current:
+        for entry in self.sources.current_versions:
             _, descriptor = self.sources.metadata(
                 entry.source_version_id,
                 parser_version=PARSER if self.region == "jp" else EN_PARSER,

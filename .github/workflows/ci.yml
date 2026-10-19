@@ -31,6 +31,7 @@ jobs:
     outputs:
       # Drafts cannot merge, so they skip the component test jobs; ci-ok fails until the PR is ready.
       draft: ${{ github.event.pull_request.draft == true }}
+      card_data: ${{ github.event.pull_request.draft != true && steps.filter.outputs.card_data == 'true' }}
       python: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.python == 'true' || steps.filter.outputs.shared == 'true') }}
       rust: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true') }}
       web: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true') }}
@@ -50,6 +51,8 @@ jobs:
               - '.pre-commit-config.yaml'
               - 'mise.toml'
               - 'tests/fixtures/snapshot-contract/**' # shared snapshot contract, read by all three components
+            card_data:
+              - 'card-data/**'
             python:
               - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
               - 'publish/**'
@@ -73,6 +76,40 @@ jobs:
               - 'sim/web/**'
               - 'docs/schema/export/public-annotation-cases.json'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
+
+  card-data:
+    needs: changes
+    if: needs.changes.outputs.card_data == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          clean: true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          path: .card-data-base
+          sparse-checkout: card-data
+          persist-credentials: false
+          clean: true
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
+      - name: Validate admitted inputs and preserve base history
+        run: |
+          previous=()
+          if [ -d "$GITHUB_WORKSPACE/.card-data-base/card-data" ]; then
+            previous=(--previous "$GITHUB_WORKSPACE/.card-data-base/card-data")
+          fi
+          uv run --directory carddb --locked --no-default-groups sve-carddb parsed-cards validate \
+            "$GITHUB_WORKSPACE/card-data" "${previous[@]}"
 
   repo:
     runs-on: ubuntu-latest
@@ -493,7 +530,7 @@ jobs:
 
   ci-ok:
     if: always()
-    needs: [changes, repo, python, rust, web, commit]
+    needs: [changes, repo, card-data, python, rust, web, commit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -502,7 +539,7 @@ jobs:
           NEEDS: ${{ toJSON(needs) }}
         run: |
           # Unmapped jobs are mandatory; only unchanged components may skip.
-          component='{"python":"python","rust":"rust","web":"web"}'
+          component='{"card-data":"card_data","python":"python","rust":"rust","web":"web"}'
           jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "changes: $(jq -r .changes.result <<<"$NEEDS")"; exit 1; }
           status=0
           for job in $(jq -r 'keys[] | select(. != "changes")' <<<"$NEEDS"); do

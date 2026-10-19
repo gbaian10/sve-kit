@@ -102,6 +102,7 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
     revision = commit(root)
     batch = ref.batch_id
     return offline.Inputs(
+        source_mode="archive",
         repo=root,
         archive=fixture.digital.store,
         store_id="test-store",

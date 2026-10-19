@@ -11,6 +11,7 @@ from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.core.provenance import SourceUse
 from sve_carddb.core.yaml import JSON_VALUE
+from sve_carddb.domains import physical_sources
 from sve_carddb.domains.catalog.adoption_models import (
     AuthoredText,
     ImageEvidence,
@@ -20,8 +21,6 @@ from sve_carddb.domains.catalog.adoption_models import (
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
-from sve_carddb.parse.pages import extract_en as official_en
-from sve_carddb.parse.pages import extract_jp as official_jp
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -75,7 +74,8 @@ class AdoptionSources:
                 raise ValueError("Unsupported source parser recipe")
             page = (ref.batch_id, ref.source_version_id, ref.parser)
             if page not in self.pages:
-                source, raw, descriptor = self.batch(ref.batch_id).read(
+                batch = self.batch(ref.batch_id)
+                source, descriptor = batch.metadata(
                     ref.source_version_id,
                     parser_version=ref.parser,
                 )
@@ -88,10 +88,30 @@ class AdoptionSources:
                     descriptor.kind,
                 ) != (expected_provider, "card"):
                     raise ValueError("Catalog source provider/kind mismatch")
+                if expected_provider is not None:
+                    if (
+                        len(parse_qs(urlsplit(descriptor.url).query).get("cardno", []))
+                        != 1
+                    ):
+                        raise ValueError("Card source lacks exact official number")
+                    physical = physical_sources.page(
+                        batch,
+                        ref.source_version_id,
+                        region="jp" if expected_provider == "jp" else "en",
+                        parser_version=ref.parser,
+                    )
+                    projection = JSON_VALUE.validate_python(
+                        dataclasses.asdict(physical.record.get()), strict=True
+                    )
+                else:
+                    _, raw, _ = batch.read(
+                        ref.source_version_id, parser_version=ref.parser
+                    )
+                    projection = parse(raw)
                 self.pages[page] = (
                     source,
                     descriptor.provider,
-                    self._projection(ref.parser, raw, descriptor.url),
+                    projection,
                 )
             source, provider, projection = self.pages[page]
             value = pointer(projection, ref.locator)
@@ -107,10 +127,6 @@ class AdoptionSources:
             self.cache[key] = LocalizedText(lang=lang, text=value), source, projection
             self._use(source, "catalog_exact_text", ref.model_dump(mode="json"))
         return self.cache[key]
-
-    @staticmethod
-    def _projection(parser: str, raw: bytes, url: str) -> JsonValue:
-        return _projection(parser, raw, url)
 
     def value(
         self,
@@ -164,19 +180,3 @@ def pointer(value: JsonValue, locator: str) -> JsonValue:
         else:
             raise ValueError("Adoption source locator is absent")
     return value
-
-
-def _projection(parser: str, raw: bytes, url: str) -> JsonValue:
-    if parser not in SOURCE_PARSERS:
-        raise ValueError("Unsupported source parser recipe")
-    if parser == "exact-json-v1":
-        return parse(raw)
-    number = parse_qs(urlsplit(url).query).get("cardno", [])
-    if len(number) != 1:
-        raise ValueError("Card source lacks exact official number")
-    result = (
-        official_jp.extract_card(raw, number=number[0])
-        if parser == "official-jp-exact-v1"
-        else official_en.extract_card(raw, number=number[0])
-    )
-    return JSON_VALUE.validate_python(dataclasses.asdict(result), strict=True)

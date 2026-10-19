@@ -41,6 +41,7 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 | --- | --- |
 | `repo`、`archive`、`store_id` | 唯讀 repo、封存庫與 store 識別 |
 | `sources` | 依 `en`、`jp` 排序的兩筆 `{region,card_batch,image_batch,parser_version}`，pin 為完整 `sha256:` |
+| `source_mode` | 預設 `parsed`，直接讀 `<repo>/card-data/` 已驗證資料；`archive` 為明示比較模式。詳見[解析輸入](../ingest/parsed-card-inputs.md#建置入口) |
 | `revision` | 40 碼程式／authored revision |
 | `as_of`、`data_version`、`published_at` | 查核日期、preview 批次識別與 UTC 時間 |
 | `feedback_url`、`grammar_version`、`normalizer_version` | 公開 config；normalizer 應與目標前端一致 |
@@ -53,7 +54,7 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 F1 configuration 與診斷記錄已驗 pin，排除私人 root 及 inventory 的舊路徑。
 所有公開／私人／bundle／圖片輸出均須與永久輸入根分離。這不更新查核日期或授予 EN DSL 資格。
 
-建置只讀凍結批次與 authored，不開 live manifest、不抓官網。文字封存來源逐份驗 hash，圖片真實性由獨立 producer 驗證，
+建置直接讀已驗證的解析卡片、必要的其他凍結來源與 authored，不開 live manifest、不抓官網。解析資料在產生及資料變更 CI 驗證，普通建置不重驗；圖片真實性由獨立 producer 驗證，
 輸入記錄驗 source-use 閉包，建置 DB 驗 FK／JSON，公開投影驗參照閉包；匯出後由
 獨立 reader 重接所有欄分工、位置引用與分片，結果須等於公開邏輯投影。
 

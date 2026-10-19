@@ -109,7 +109,8 @@ def replay(value: ParsedObservation, source: Source) -> physical_sources.Physica
         else en_card(record)
     )
     observed = Observation.model_validate_json(canonical(observation(identity, region)))
-    text = TextCard(
+    # Admission already checked the nested presence hashes and source evidence.
+    text = TextCard.model_construct(
         source=source,
         observation=observed,
         faces=tuple(

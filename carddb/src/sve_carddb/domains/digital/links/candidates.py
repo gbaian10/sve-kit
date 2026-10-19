@@ -148,7 +148,7 @@ def sve_inventory(  # ruff: ignore[complex-structure] -- multiple printing varia
     result: dict[str, list[tuple[SveName, dict[str, JsonValue]]]] = defaultdict(list)
     for batch in review.source_batches:
         frozen = sources.batch(batch.batch_id)
-        for current in frozen.inventory.current:
+        for current in frozen.current_versions:
             descriptor = frozen.descriptor(current.source_version_id)
             if descriptor.provider != "jp" or descriptor.kind != "card":
                 continue
