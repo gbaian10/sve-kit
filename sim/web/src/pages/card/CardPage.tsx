@@ -7,7 +7,6 @@ import type { PrefetchTarget } from "../../app/card-prefetch"
 import { useDialogHistory } from "../../app/dialog-history"
 import { type CardEntryState, LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
 import { useOtherEdition } from "../../app/other-edition"
-import { printingImageClient } from "../../app/printing-snapshot"
 import {
   type SearchReadiness,
   useImageIndex,
@@ -222,34 +221,6 @@ export function CardView({
     printingCatalog.other === other.catalog
       ? printingCatalog
       : undefined
-  // Thumbnails of the other printings need their rows in a snapshot the image index can read.
-  const [printingImages, setPrintingImages] = useState<{
-    readonly printings: Catalog
-    readonly client: SnapshotClient
-  }>()
-  useEffect(() => {
-    const snapshot = other.snapshot ?? client.snapshot()
-    if (!snapshot || !cardId || !completePrintings || completePrintings.error !== undefined) return
-    let active = true
-    const printingsCatalog = completePrintings.value
-    void printingImageClient(
-      client,
-      snapshot,
-      printingsCatalog,
-      cardId,
-      other.snapshot ? ["jp", "en"] : [region],
-    ).then(
-      (value) => {
-        if (active) setPrintingImages({ printings: printingsCatalog, client: value })
-      },
-      () => undefined,
-    )
-    return () => {
-      active = false
-    }
-  }, [client, cardId, region, other.snapshot, completePrintings])
-  const imageClient =
-    printingImages?.printings === completePrintings?.value ? printingImages?.client : undefined
   const printings = cardId
     ? ((completePrintings?.value ?? catalog)?.index.printingsOf(cardId) ?? []).filter(
         (row) => row["region"] === region || (showOther && other.catalog),
@@ -934,7 +905,6 @@ export function CardView({
                 typeof revision?.["id"] === "string" ? [revision["id"]] : [],
               )}
               printings={printingThumbnails}
-              imageClient={imageClient}
               linkTo={(target) =>
                 cardLink(
                   {

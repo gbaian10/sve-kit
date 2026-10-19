@@ -382,7 +382,8 @@ export default {
     backFace: "裏面",
     related: {
       title: "関連カード",
-      evolve: "進化",
+      evolvesFrom: "進化前",
+      evolvesInto: "進化後",
       reference: "参照",
       printings: "他の収録",
       mentions: "このカードが言及するカード",

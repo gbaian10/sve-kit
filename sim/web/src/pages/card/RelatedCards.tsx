@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink, type To } from "react-router"
 
 import { loadCardRelated } from "../../app/card-related"
+import { relatedPrintings } from "../../app/printing-snapshot"
 import { useAnnotatedTexts, useImageIndex } from "../../app/snapshot"
 import { CardImage } from "../../components/card/CardImage"
 import { useTextLanguage } from "../../components/card/text-language"
@@ -10,7 +11,6 @@ import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
 import { rovingRadioKeyDown } from "../../components/ui/useRovingRadio"
 import {
-  arrayValue,
   type CardSummary,
   type Catalog,
   type Row,
@@ -21,7 +21,8 @@ import { displayName } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
-import { isEvolveKind, mentionedCards, relatedGroups } from "./related-cards"
+import { printingGroups } from "./printing-order"
+import { cardKindOf, mentionedCards, relatedGroups, representativeOf } from "./related-cards"
 
 export interface CardLink {
   readonly to: To
@@ -72,6 +73,45 @@ function useCardRelated(
   }, [client, snapshot, cardId, homeSetId, key])
   // A missing snapshot (synthetic pages) or an unknown card has no rows and nothing to wait for.
   if (!snapshot || typeof homeSetId !== "string") return { key, rows: [] }
+  return state?.key === key ? state : undefined
+}
+
+interface PinnedState {
+  readonly key: string
+  readonly value?: { readonly client: SnapshotClient; readonly catalog: Catalog }
+  readonly error?: unknown
+}
+
+/** The print bands of these cards' printings, pinned so thumbnails and summaries resolve. */
+function usePinnedPrintings(
+  client: SnapshotClient,
+  catalog: Catalog,
+  cardIds: readonly string[],
+  edition: Region,
+): PinnedState | undefined {
+  const snapshot = client.snapshot()
+  const ids = JSON.stringify(cardIds)
+  const key = JSON.stringify([client.base, snapshot?.manifestHash ?? null, ids, edition])
+  const [state, setState] = useState<PinnedState>()
+  // Keyed by the manifest hash rather than the snapshot object, so a client that builds its
+  // snapshot view per call does not restart the read on every render.
+  useEffect(() => {
+    const snapshot = client.snapshot()
+    if (!snapshot) return
+    let active = true
+    void relatedPrintings(client, snapshot, catalog, JSON.parse(ids) as string[], [edition]).then(
+      (value) => {
+        if (active) setState({ key, value })
+      },
+      (error: unknown) => {
+        if (active) setState({ key, error })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [client, catalog, ids, edition, key])
+  if (!snapshot) return { key }
   return state?.key === key ? state : undefined
 }
 
@@ -159,7 +199,6 @@ export function RelatedCards({
   printingId,
   revisionIds,
   printings,
-  imageClient,
   linkTo,
 }: {
   readonly client: SnapshotClient
@@ -170,14 +209,11 @@ export function RelatedCards({
   /** The displayed revision of each face, whose text names the mentioned cards. */
   readonly revisionIds: readonly string[]
   readonly printings: readonly PrintingEntry[]
-  /** Resolves the thumbnails of this card's other printings; the page's client until it is ready. */
-  readonly imageClient?: SnapshotClient | undefined
   readonly linkTo: (card: CardSummary) => CardLink
 }) {
   const { t } = useTranslation()
   const idPrefix = useId()
   const language = useTextLanguage()
-  const images = useImageIndex(imageClient ?? client, true)
   const [attempt, setAttempt] = useState(0)
   const related = useCardRelated(client, catalog, cardId, attempt)
   const effects = useAnnotatedTexts(
@@ -205,8 +241,6 @@ export function RelatedCards({
     edition,
   )
   const [selected, setSelected] = useState<TabId | null>(null)
-  // The section waits for the official rows so its tabs do not shuffle after the first paint.
-  if (related === undefined) return null
   // Reading order: each face's effect, then its sections, before the next face.
   const mentions = mentionedCards(
     effects.flatMap((effect, face) => [
@@ -217,34 +251,46 @@ export function RelatedCards({
   )
   const groups = relatedGroups({
     cardId,
-    related: related.rows ?? [],
+    related: related?.rows ?? [],
     mentions,
-    representative: (id) => {
-      const card = catalog.index.card(id)
-      const view = arrayValue(card?.["regions"] ?? [])
-        .map((raw) => raw as Row)
-        .find((entry) => entry["region"] === edition)
-      const defaultId = view?.["default_printing_id"]
-      return typeof defaultId === "string" ? catalog.summary(defaultId) : undefined
-    },
-    evolveKind: (id) =>
-      catalog.index
-        .facesOf(id)
-        .some((face) =>
-          isEvolveKind(
-            arrayValue(
-              catalog.index.displayRevision(stringValue(face["id"]), edition)?.["special_kinds"] ??
-                [],
-            ),
-          ),
-        ),
+    representative: (id) => representativeOf(catalog, id, edition),
+    kind: (id) => cardKindOf(catalog, id, edition),
+  })
+  // This card's other printings and every printing of its evolve pairs live in other sets' bands.
+  const pinned = usePinnedPrintings(
+    client,
+    catalog,
+    [cardId, ...groups.evolve.cards.map((card) => card.cardId)],
+    edition,
+  )
+  const images = useImageIndex(pinned?.value?.client ?? client, true)
+  // The section waits for the official rows and the pinned bands so its tabs and thumbnails do
+  // not shuffle after the first paint.
+  if (related === undefined || pinned === undefined) return null
+  // An evolve pair lists every printing of the other card in the shown edition, in chip order;
+  // without the pinned bands (a failed read) its representative printing stands in.
+  const evolvePrintings = groups.evolve.cards.flatMap((card) => {
+    const complete = pinned.value?.catalog
+    const rows = complete
+      ? (printingGroups(complete.index.printingsOf(card.cardId)).find(
+          (group) => group.region === edition,
+        )?.printings ?? [])
+      : []
+    const summaries = rows.flatMap((row) => {
+      const summary = complete?.summary(stringValue(row["id"]))
+      return summary ? [summary] : []
+    })
+    return summaries.length > 0 ? summaries : [card]
   })
   const tabs: { readonly id: TabId; readonly label: string; readonly content: ReactNode }[] = []
-  if (groups.evolve.length > 0)
+  if (evolvePrintings.length > 0)
     tabs.push({
       id: "evolve",
-      label: t("cardPage.related.evolve"),
-      content: <Group label={undefined} cards={groups.evolve} images={images} linkTo={linkTo} />,
+      label:
+        groups.evolve.direction === "from"
+          ? t("cardPage.related.evolvesFrom")
+          : t("cardPage.related.evolvesInto"),
+      content: <Group label={undefined} cards={evolvePrintings} images={images} linkTo={linkTo} />,
     })
   if (groups.mentions.length > 0 || groups.otherOfficial.length > 0)
     tabs.push({

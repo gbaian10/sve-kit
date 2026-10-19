@@ -364,7 +364,8 @@ const zhTW = {
     backFace: "背面",
     related: {
       title: "關聯卡牌",
-      evolve: "進化",
+      evolvesFrom: "進化前",
+      evolvesInto: "進化後",
       reference: "參考",
       printings: "其他版本",
       mentions: "這張卡提到",

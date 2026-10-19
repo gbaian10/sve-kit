@@ -383,7 +383,8 @@ export default {
     backFace: "Back face",
     related: {
       title: "Related Cards",
-      evolve: "Evolves",
+      evolvesFrom: "Evolves from",
+      evolvesInto: "Evolves into",
       reference: "Referenced",
       printings: "Other Printings",
       mentions: "Mentioned by this card",

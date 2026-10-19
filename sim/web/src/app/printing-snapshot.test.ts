@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import type { Catalog, LoadedSnapshot, SnapshotClient } from "../data"
-import { printingImageClient } from "./printing-snapshot"
+import { pinPrintings } from "./printing-snapshot"
 
 const file = (key: string, purpose: string, region: string, counts: readonly unknown[][]) =>
   [key, { key, purpose, role: "text", region, row_counts: counts }] as const
@@ -15,8 +15,8 @@ const part = (fileKey: string, identity: string) => ({
   identity,
 })
 
-describe("printingImageClient", () => {
-  it("merges the print bands of every owner of the card's printings into a pinned snapshot", async () => {
+describe("pinPrintings", () => {
+  it("merges the print bands of every owner of the cards' printings into a pinned snapshot", async () => {
     const snapshot = {
       manifestHash: "sha256:one",
       bootstrap: [part("catalog/jp/family-BP05/0", "printing:BP05:bootstrap")],
@@ -51,18 +51,26 @@ describe("printingImageClient", () => {
     } as unknown as SnapshotClient
     const printings = {
       index: {
-        printingsOf: () => [
-          { id: "p:1", region: "jp", home_set_id: "BP05" },
-          { id: "p:2", region: "jp", home_set_id: "SP01" },
-          { id: "p:3", region: "en", home_set_id: "SP01" },
-        ],
+        printingsOf: (cardId: string) =>
+          cardId === "c:base"
+            ? [
+                { id: "p:1", region: "jp", home_set_id: "BP05" },
+                { id: "p:2", region: "jp", home_set_id: "SP01" },
+                { id: "p:3", region: "en", home_set_id: "SP01" },
+              ]
+            : [{ id: "p:4", region: "jp", home_set_id: "BP20" }],
       },
     } as unknown as Catalog
-    const pinned = await printingImageClient(client, snapshot, printings, "c:base", ["jp"])
-    expect(reads.sort()).toEqual(["print/jp/family-BP05/0", "print/jp/family-SP01/0"])
+    const pinned = await pinPrintings(client, snapshot, printings, ["c:base", "c:evolve"], ["jp"])
+    expect(reads.sort()).toEqual([
+      "print/jp/family-BP05/0",
+      "print/jp/family-BP20/0",
+      "print/jp/family-SP01/0",
+    ])
     expect(pinned.snapshot()?.bootstrap.map((entry) => entry.identity)).toEqual([
       "printing:BP05:bootstrap",
       "printing:print/jp/family-SP01/0",
+      "printing:print/jp/family-BP20/0",
     ])
     // The original client keeps its own snapshot; only the pinned view sees the merged rows.
     expect(client.snapshot()).toBe(snapshot)

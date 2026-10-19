@@ -13,10 +13,12 @@ const state = vi.hoisted(() => {
   return {
     rows: [] as { from_card_id: string; to_card_id: string }[],
     failRows: false,
+    failPin: false,
     /** Card ids named by the front face's effect text. */
     mentions: [] as string[],
     texts,
     loads: [] as string[],
+    pins: [] as (readonly string[])[],
   }
 })
 
@@ -26,6 +28,15 @@ vi.mock("../../app/card-related", () => ({
     return state.failRows
       ? Promise.reject(new Error("synthetic engine failure"))
       : Promise.resolve(state.rows.map((row, index) => ({ id: `r${String(index)}`, ...row })))
+  },
+}))
+
+vi.mock("../../app/printing-snapshot", () => ({
+  relatedPrintings: (client: unknown, _snapshot: unknown, catalog: unknown, cardIds: string[]) => {
+    state.pins.push(cardIds)
+    return state.failPin
+      ? Promise.reject(new Error("synthetic print failure"))
+      : Promise.resolve({ client, catalog })
   },
 }))
 
@@ -76,7 +87,8 @@ vi.mock("../../app/snapshot", () => ({
 
 const NAMES: Record<string, string> = {
   base: "Synthetic base",
-  evolve: "Synthetic evolve",
+  evolve: "Synthetic base",
+  evolve2: "Synthetic other evolve",
   token: "Synthetic token",
   other: "Synthetic other",
   reprint: "Synthetic base",
@@ -84,20 +96,33 @@ const NAMES: Record<string, string> = {
 const NUMBERS: Record<string, string> = {
   base: "BP05-052",
   evolve: "BP05-053",
+  "evolve-r": "BP20-R08",
+  "evolve-sl": "BP05-SL11",
+  evolve2: "BP05-055",
   token: "PR-108",
   other: "BP05-070",
   reprint: "EBD02-005",
 }
+/** Printing ids per card, in chip order once sorted: plain numbers first, premium last. */
+const PRINTINGS: Record<string, string[]> = {
+  "c:base": ["base", "reprint"],
+  "c:evolve": ["evolve-sl", "evolve-r", "evolve"],
+}
+const cardOf = (id: string) =>
+  id === "reprint" ? "c:base" : id.startsWith("evolve-") ? "c:evolve" : `c:${id}`
 
 function summary(id: string): CardSummary {
   return {
-    cardId: id === "reprint" ? "c:base" : `c:${id}`,
+    cardId: cardOf(id),
     printingId: `p:${id}`,
     faceId: `f:${id}`,
     cardNo: NUMBERS[id] ?? id,
     region: "jp",
     classCode: null,
-    name: { original: { lang: "ja", text: NAMES[id] ?? id }, translations: {} },
+    name: {
+      original: { lang: "ja", text: NAMES[id] ?? NAMES[cardOf(id).slice(2)] ?? id },
+      translations: {},
+    },
     cost: null,
     attack: null,
     defense: null,
@@ -111,10 +136,25 @@ const catalog = {
       home_set_id: "BP05",
       regions: [{ region: "jp", default_printing_id: `p:${id.slice(2)}` }],
     }),
-    facesOf: (id: string) => [{ id: `f:${id.slice(2)}` }],
+    facesOf: (id: string) => [{ id: `f:${id.slice(2)}`, ordinal: 0 }],
     displayRevision: (faceId: string) => ({
-      special_kinds: faceId === "f:evolve" ? ["evolve"] : [],
+      type_code: "follower",
+      special_kinds:
+        faceId === "f:evolve" || faceId === "f:evolve2"
+          ? ["evolve"]
+          : faceId === "f:token"
+            ? ["token"]
+            : [],
     }),
+    printingsOf: (id: string) =>
+      (PRINTINGS[id] ?? [id.slice(2)]).map((printing) => ({
+        id: `p:${printing}`,
+        card_id: id,
+        region: "jp",
+        card_no: NUMBERS[printing] ?? printing,
+        rarity_code: "LG",
+        premium: printing.endsWith("-sl"),
+      })),
   },
   summary: (printingId: string) => summary(printingId.slice(2)),
 } as unknown as Catalog
@@ -153,9 +193,11 @@ async function open(
 beforeEach(() => {
   state.rows = []
   state.failRows = false
+  state.failPin = false
   state.mentions = []
   state.texts = {}
   state.loads = []
+  state.pins = []
 })
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
@@ -182,15 +224,66 @@ describe("RelatedCards", () => {
       within(tablist)
         .getAllByRole("tab")
         .map((tab) => tab.textContent),
-    ).toEqual(["進化", "參考", "其他版本"])
-    expect(screen.getByRole("tab", { name: "進化" })).toHaveAttribute("aria-selected", "true")
+    ).toEqual(["進化後", "參考", "其他版本"])
+    expect(screen.getByRole("tab", { name: "進化後" })).toHaveAttribute("aria-selected", "true")
     const panel = screen.getByRole("tabpanel")
     // The number is the visible label; the name lives in the accessible name and the tooltip.
-    const evolve = within(panel).getByRole("link", { name: "Synthetic evolve（BP05-053）" })
+    const evolve = within(panel).getByRole("link", { name: "Synthetic base（BP05-053）" })
     expect(evolve).toHaveTextContent("BP05-053")
-    expect(evolve).not.toHaveTextContent("Synthetic evolve")
-    expect(evolve).toHaveAttribute("title", "Synthetic evolve")
+    expect(evolve).not.toHaveTextContent("Synthetic base")
+    expect(evolve).toHaveAttribute("title", "Synthetic base")
     expect(evolve).toHaveAttribute("href", "/cards/BP05-053")
+    // Every printing of the evolve card in the shown edition, in the order of the printing chips.
+    expect(
+      within(panel)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual(["/cards/BP05-053", "/cards/BP20-R08", "/cards/BP05-SL11"])
+    // The bands are pinned for this card first, then for its evolve pairs as well.
+    expect(state.pins).toEqual([["c:base"], ["c:base", "c:evolve"]])
+  })
+
+  it("lists what an evolve card evolves from and sends its other relations to the references", async () => {
+    state.rows = [
+      { from_card_id: "c:evolve", to_card_id: "c:base" },
+      { from_card_id: "c:evolve", to_card_id: "c:token" },
+    ]
+    await open([], "c:evolve", ["rev:evolve"])
+    const tablist = await screen.findByRole("tablist", { name: "關聯卡牌" })
+    expect(
+      within(tablist)
+        .getAllByRole("tab")
+        .map((tab) => tab.textContent),
+    ).toEqual(["進化前", "參考"])
+    expect(
+      within(screen.getByRole("tabpanel"))
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual(["/cards/BP05-052", "/cards/EBD02-005"])
+  })
+
+  it("treats a differently named evolve card as a reference, not an evolve pair", async () => {
+    state.rows = [{ from_card_id: "c:base", to_card_id: "c:evolve2" }]
+    await open()
+    await screen.findByRole("tablist")
+    expect(screen.queryByRole("tab", { name: "進化後" })).not.toBeInTheDocument()
+    const official = screen.getByRole("list", { name: "其他官方關聯" })
+    expect(within(official).getByRole("link")).toHaveTextContent("BP05-055")
+  })
+
+  it("falls back to the evolve card's representative printing when the bands cannot be pinned", async () => {
+    state.rows = [{ from_card_id: "c:base", to_card_id: "c:evolve" }]
+    state.failPin = true
+    await open(printings("base", "reprint"))
+    await screen.findByRole("tablist")
+    expect(screen.getByRole("tab", { name: "進化後" })).toHaveAttribute("aria-selected", "true")
+    expect(
+      within(screen.getByRole("tabpanel"))
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual(["/cards/BP05-053"])
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(screen.getByRole("tab", { name: "其他版本" })).toBeInTheDocument()
   })
 
   it("splits the reference tab into this card's mentions and the other official relations", async () => {
@@ -202,7 +295,7 @@ describe("RelatedCards", () => {
     await open()
     const user = userEvent.setup()
     await screen.findByRole("tablist")
-    expect(screen.queryByRole("tab", { name: "進化" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("tab", { name: "進化後" })).not.toBeInTheDocument()
     expect(screen.getByRole("tab", { name: "參考" })).toHaveAttribute("aria-selected", "true")
     const mentions = screen.getByRole("list", { name: "這張卡提到" })
     expect(within(mentions).getByRole("link")).toHaveTextContent("PR-108")
@@ -238,10 +331,10 @@ describe("RelatedCards", () => {
     expect(screen.queryByRole("tab", { name: "其他版本" })).not.toBeInTheDocument()
     await user.click(screen.getByRole("tab", { name: "參考" }))
     expect(screen.getByRole("tab", { name: "參考" })).toHaveAttribute("aria-selected", "true")
-    expect(screen.getByRole("tab", { name: "進化" })).toHaveAttribute("tabindex", "-1")
+    expect(screen.getByRole("tab", { name: "進化後" })).toHaveAttribute("tabindex", "-1")
     await user.keyboard("{ArrowLeft}")
-    expect(screen.getByRole("tab", { name: "進化" })).toHaveAttribute("aria-selected", "true")
-    expect(screen.getByRole("tab", { name: "進化" })).toHaveFocus()
+    expect(screen.getByRole("tab", { name: "進化後" })).toHaveAttribute("aria-selected", "true")
+    expect(screen.getByRole("tab", { name: "進化後" })).toHaveFocus()
   })
 
   it("reports a failed relation read with a retry and still shows the other printings", async () => {
@@ -253,7 +346,7 @@ describe("RelatedCards", () => {
     state.failRows = false
     state.rows = [{ from_card_id: "c:base", to_card_id: "c:evolve" }]
     await user.click(screen.getByRole("button", { name: "重試" }))
-    expect(await screen.findByRole("tab", { name: "進化" })).toBeInTheDocument()
+    expect(await screen.findByRole("tab", { name: "進化後" })).toBeInTheDocument()
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
   })
 
