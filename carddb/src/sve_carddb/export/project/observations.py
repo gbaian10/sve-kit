@@ -239,7 +239,7 @@ def corrections(source: Source, view: dict[str, list[Record]]) -> None:
     """A correction marker belongs only to successfully changed reference uses."""
     records = source.index(
         "source_correction",
-        "id,printing_id,face_id,field,expected_raw_value,reason,state",
+        "id,printing_id,face_id,field,expected_raw_value,corrected_value,expected_raw_sections,corrected_sections,reason,state",
     )
     printings = {string(row["id"]): row for row in view["printing"]}
     revisions = {string(row["id"]): row for row in view["face_revision"]}
@@ -261,6 +261,25 @@ def corrections(source: Source, view: dict[str, list[Record]]) -> None:
             "reason": correction["reason"],
             "source_url": source.url(application["source_id"]),
         }
+        markers = (
+            [marker]
+            if correction["expected_raw_value"] != correction["corrected_value"]
+            else []
+        )
+        if (
+            correction["expected_raw_sections"] is not None
+            and correction["expected_raw_sections"] != correction["corrected_sections"]
+        ):
+            markers.append(
+                {
+                    **marker,
+                    "field": "other",
+                    "corrected_from": "\n\n".join(
+                        string(value)
+                        for value in array(correction["expected_raw_sections"])
+                    ),
+                }
+            )
         revision_id = application["face_revision_id"]
         if revision_id is not None:
             revision = revisions[string(revision_id)]
@@ -269,11 +288,11 @@ def corrections(source: Source, view: dict[str, list[Record]]) -> None:
                 or revision["region"] != printing["region"]
             ):
                 raise ValueError("Correction revision crosses source owner")
-            array(revision["corrections"]).append(dict(marker))
+            array(revision["corrections"]).extend(dict(value) for value in markers)
         for raw in array(printing["faces"]):
             face = object_value(raw)
             if face["face_id"] == correction["face_id"]:
-                array(face["corrections"]).append(dict(marker))
+                array(face["corrections"]).extend(dict(value) for value in markers)
 
 
 def _wording_completeness(view: dict[str, list[Record]]) -> None:

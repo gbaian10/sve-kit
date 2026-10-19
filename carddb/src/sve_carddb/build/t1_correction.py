@@ -15,6 +15,18 @@ TABLES = (
             Column("expected_source_unit_id", Kind.ID, nullable=True),
             Column("expected_raw_value", Kind.JSON, json_schema="correction_value"),
             Column("corrected_value", Kind.JSON, json_schema="correction_value"),
+            Column(
+                "expected_raw_sections",
+                Kind.JSON,
+                nullable=True,
+                json_schema="text_sections",
+            ),
+            Column(
+                "corrected_sections",
+                Kind.JSON,
+                nullable=True,
+                json_schema="text_sections",
+            ),
             Column("expected_source_hash", Kind.TEXT, pattern=HASH),
             Column("reason", Kind.TEXT),
             Column("reported_to_official", Kind.BOOL),
@@ -36,6 +48,7 @@ TABLES = (
             ForeignKey(("expected_source_unit_id",), "text_unit", ("id",)),
         ),
         checks=(
+            Check("(expected_raw_sections IS NULL) = (corrected_sections IS NULL)"),
             Check(
                 "sve_json_valid('change_values', json_array(face_id, field, json(expected_raw_value), json(corrected_value))) = 1"
             ),

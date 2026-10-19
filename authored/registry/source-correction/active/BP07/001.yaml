@@ -10,9 +10,14 @@ records:
       field: effect
       expected_raw_value: "これをプレイする際、場の『ナテラの大樹』2つを{アクト}：コストを-2する。\nこれをプレイする際、自分の場に『王たる光・ベイリオン』がいるなら、コストを-1する。"
       corrected_value: "これをプレイする際、場の『ナテラの大樹』2つを{アクト}：コストを-2する。\nこれをプレイする際、自分の場に『王たる光・ベイリオン』がいるなら、コストを-1する。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。"
+      sections:
+        expected_raw_value:
+          - "『ナテラの大樹』{ニュートラル}自然・アミュレット{コスト1}これが場を離れたとき、1枚引く。自分の手札1枚を捨てる。{起動}{コスト1}：これを墓場に置く。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。"
+        corrected_value: []
       expected_source_hash: sha256:522994eea10017f56a87f7711060186de17bdf81e14a80c72c75b3a3f9d46a80
       source_hash_recipe: registry-observation-v2
-      reason: Official page transcription differs from the printed card image.
+      reason: >-
+        Maintainer confirmed against the printed card image and the BP07-024 official page: BP07-P06 adds an unprinted 『ナテラの大樹』 token definition and misplaces the damage instruction in its supplementary section. Keep the corrected three-line main text and remove the entire supplementary section.
       state: active
       reported_to_official: false
       reported_on:

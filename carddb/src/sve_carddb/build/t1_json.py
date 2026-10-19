@@ -11,6 +11,7 @@ def schemas() -> dict[str, JsonValue]:
         name: definition(name) for name in ("Text", "Int", "ID", "CorrectionValue")
     }
     return {
+        "text_sections": {"type": "array", "items": {"type": "string"}},
         "correction_value": {"$defs": definitions, **definition("CorrectionValue")},
         "change_values": {"$defs": definitions, **definition("ErrataChange")},
     }

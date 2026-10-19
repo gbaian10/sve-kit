@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from sve_carddb.core.models import Date, Hash, RecordData, Text, UInt
 from sve_carddb.core.regions import Region
@@ -114,6 +114,11 @@ class CorrectionEvidence(RecordData):
     locator: Text
 
 
+class SectionCorrection(RecordData):
+    expected_raw_value: tuple[str, ...]
+    corrected_value: tuple[str, ...]
+
+
 class CorrectionData(RecordData):
     id: Annotated[str, Field(pattern=r"^x:[0-9a-f]{32}\Z")]
     printing_id: PrintingId
@@ -121,6 +126,9 @@ class CorrectionData(RecordData):
     field: Literal["effect", "card_type"]
     expected_raw_value: str
     corrected_value: str
+    sections: SectionCorrection | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
     expected_source_hash: Hash
     source_hash_recipe: Recipe
     reason: Text
@@ -129,6 +137,13 @@ class CorrectionData(RecordData):
     reported_on: Date | None
     report_url: str | None
     evidence: Annotated[tuple[CorrectionEvidence, ...], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def section_scope(self) -> CorrectionData:
+        """Keep supplementary edits in the text correction and translation boundary."""
+        if self.sections is not None and self.field != "effect":
+            raise ValueError("Supplementary sections require an effect correction")
+        return self
 
 
 DATA_MODELS: dict[str, type[RecordData]] = {

@@ -319,8 +319,20 @@ def test_translation_context_mismatch_rejected(db: Database) -> None:
         projected(db)
 
 
-def test_corrections_do_not_mark_shared_text_or_other_printing(db: Database) -> None:
+@pytest.mark.parametrize("sections", [None, ["Synthetic section.", "Second section."]])
+def test_corrections_do_not_mark_shared_text_or_other_printing(
+    db: Database, sections: list[str] | None
+) -> None:
     with db.transaction():
+        if sections is not None:
+            db.update(
+                "source_correction",
+                {"id": "correction"},
+                {
+                    "expected_raw_sections": Json(list[JsonValue](sections)),
+                    "corrected_sections": Json([]),
+                },
+            )
         raw = dict(db.rows("printing")[0].values)
         db.insert("printing", raw | {"id": "other", "card_no": "TEST-002"})
         db.insert(
@@ -342,7 +354,19 @@ def test_corrections_do_not_mark_shared_text_or_other_printing(db: Database) -> 
             "reason": "Synthetic correction",
             "source_url": "https://example.invalid/card",
         }
-    ]
+    ] + (
+        [
+            {
+                "field": "other",
+                "corrected_from": "\n\n".join(sections),
+                "is_corrected": True,
+                "reason": "Synthetic correction",
+                "source_url": "https://example.invalid/card",
+            }
+        ]
+        if sections is not None
+        else []
+    )
     assert (
         object_value(array(one(result, "printing", "other")["faces"])[0])["corrections"]
         == []
@@ -2029,3 +2053,22 @@ def test_names_only_projection_keeps_digital_evidence_private(db: Database) -> N
         )
     )
     assert not result.config["digital_endpoints"]
+
+
+def test_section_only_correction_does_not_mark_unchanged_effect(db: Database) -> None:
+    with db.transaction():
+        db.update(
+            "source_correction",
+            {"id": "correction"},
+            {
+                "corrected_value": Json("Before"),
+                "expected_raw_sections": Json(["Synthetic extra section."]),
+                "corrected_sections": Json([]),
+            },
+        )
+    result = projected(db)
+    markers = array(
+        object_value(array(one(result, "printing")["faces"])[0])["corrections"]
+    )
+    assert [object_value(marker)["field"] for marker in markers] == ["other"]
+    assert object_value(markers[0])["corrected_from"] == "Synthetic extra section."

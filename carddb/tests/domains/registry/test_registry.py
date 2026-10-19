@@ -538,11 +538,24 @@ def test_pending_type_exception_requires_explicit_scope(inputs: Inputs) -> None:
 
 
 @pytest.mark.parametrize(
-    "scenario", ["applied", "already_fixed", "conflict", "needs_review"]
+    ("scenario", "with_sections"),
+    [
+        ("applied", False),
+        ("already_fixed", False),
+        ("conflict", False),
+        ("needs_review", False),
+        ("applied", True),
+        ("already_fixed", True),
+        ("conflict", True),
+        ("needs_review", True),
+        ("effect_only_fixed", True),
+    ],
 )
 def test_correction_projection_preserves_observations(
-    inputs: Inputs, scenario: str
+    inputs: Inputs, scenario: str, with_sections: bool
 ) -> None:
+    if with_sections:
+        inputs.jp["BP02-071"].faces[0].sections = ["Synthetic token.\nMisplaced rule."]
     inputs.decisions.corrections = [
         Correction(
             region="jp",
@@ -557,8 +570,19 @@ def test_correction_projection_preserves_observations(
         )
     ]
     entries = build(inputs, {})
-    if scenario == "already_fixed":
+    if with_sections:
+        correction = next(
+            entry for entry in entries if entry.kind == "source_correction"
+        )
+        correction.data["sections"] = {
+            "expected_raw_value": ["Synthetic token.\nMisplaced rule."],
+            "corrected_value": [],
+        }
+        validate(entries)
+    if scenario in {"already_fixed", "effect_only_fixed"}:
         inputs.jp["BP02-071"].faces[0].text = "Corrected rule."
+        if with_sections and scenario == "already_fixed":
+            inputs.jp["BP02-071"].faces[0].sections = []
     elif scenario == "conflict":
         inputs.jp["BP02-071"].faces[0].name = "Changed source with unchanged raw effect"
     before = inputs.model_dump_json(round_trip=True)
@@ -570,7 +594,15 @@ def test_correction_projection_preserves_observations(
     assert len(projected) == 1
     row = projected[0]
     assert row["card_no"] == "BP02-071"
-    assert row["status"] == scenario
+    assert row["status"] == (
+        "conflict" if scenario == "effect_only_fixed" else scenario
+    )
+    if with_sections:
+        assert row["sections"] == (
+            []
+            if scenario in {"applied", "already_fixed"}
+            else ["Synthetic token.\nMisplaced rule."]
+        )
     if scenario == "applied":
         assert row["value"] == "Corrected rule."
         assert row["corrections"] == [
@@ -580,7 +612,18 @@ def test_correction_projection_preserves_observations(
                 "is_corrected": True,
                 "reason": "User confirmed printed text.",
             }
-        ]
+        ] + (
+            [
+                {
+                    "field": "other",
+                    "corrected_from": "Synthetic token.\nMisplaced rule.",
+                    "is_corrected": True,
+                    "reason": "User confirmed printed text.",
+                }
+            ]
+            if with_sections
+            else []
+        )
     else:
         assert row["corrections"] == []
     assert inputs.jp["PR-001"].faces[0].text == "Rule. (Reminder.)"
