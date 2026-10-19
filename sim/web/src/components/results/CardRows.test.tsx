@@ -297,7 +297,7 @@ it("keeps a large loaded list bounded and replaces its visible rows when the pag
   )
 })
 
-it("preserves a text selection instead of opening a row and exposes translation notices", async () => {
+it("preserves a text selection instead of opening a row without translation notices", async () => {
   const onOpen = vi.fn()
   await renderInRouter(
     <CardList
@@ -306,7 +306,7 @@ it("preserves a text selection instead of opening a row and exposes translation 
       onOpen={onOpen}
     />,
   )
-  expect(screen.getByRole("img", { name: "尚無譯名" })).toHaveAttribute("title", "尚無譯名")
+  expect(screen.queryByRole("img", { name: "尚無譯名" })).not.toBeInTheDocument()
   const selection = window.getSelection()
   const name = screen.getByRole("link")
   const range = document.createRange()

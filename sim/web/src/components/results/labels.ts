@@ -10,9 +10,6 @@ export function useResultLabels() {
     () => ({
       t,
       language,
-      noTranslation: t("card.noTranslation"),
-      translationProofreading: t("card.translationProofreading"),
-      jpSource: t("card.jpSource"),
       wordingPending: t("card.wordingPending"),
       effectUnavailable: t("results.effectUnavailable"),
       effectPending: t("results.effectPending"),

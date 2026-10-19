@@ -30,40 +30,6 @@ export interface CardGridProps {
   readonly selected?: string
 }
 
-/** Translation notices shared by the grid cell and the row shells; empty when there is none. */
-export function NameNotices({
-  name,
-  labels,
-  compact = false,
-}: {
-  readonly name: DisplayedName
-  readonly labels: ResultLabels
-  readonly compact?: boolean
-}) {
-  const notices = [
-    name.missingTranslation ? labels.noTranslation : undefined,
-    name.lowConfidence ? labels.translationProofreading : undefined,
-    name.jpSource ? labels.jpSource : undefined,
-  ].filter((notice) => notice !== undefined)
-  if (notices.length === 0) return null
-  if (compact)
-    return (
-      <span
-        role="img"
-        aria-label={notices.join(" · ")}
-        title={notices.join(" · ")}
-        className="mr-1 inline-block size-2 rounded-full border border-border-strong align-middle"
-      />
-    )
-  return (
-    <span className="flex flex-wrap gap-x-2 text-11 text-text-3">
-      {notices.map((notice) => (
-        <span key={notice}>{notice}</span>
-      ))}
-    </span>
-  )
-}
-
 // Design: 2 columns under 600 (gap 14×12), 4 up to 999, 5–6 on desktop; each cell is the image
 // plus one truncated 13px name line ("both" adds the translation in small type).
 // Grid results prefer the largest available file so desktop card pages can reuse it.
@@ -134,7 +100,6 @@ const CardCell = memo(function CardCell({
             {cell.name.secondary.text}
           </span>
         )}
-        <NameNotices name={cell.name} labels={labels} />
         {cell.summary.wordingPending && (
           <Badge className="mt-1 self-start">{labels.wordingPending}</Badge>
         )}

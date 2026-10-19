@@ -89,7 +89,7 @@ describe("visible current translation quality", () => {
     ["ja", "翻訳要校正", "日本語原文からの訳"],
     ["en", "Translation awaiting proofreading", "Translated from Japanese source"],
   ] as const)(
-    "shows independent notices and the original in %s",
+    "keeps the original without translation notices in %s",
     async (language, quality, source) => {
       const value = cell(false)
       const translated = {
@@ -105,8 +105,8 @@ describe("visible current translation quality", () => {
       await renderInRouter(<CardGrid cells={[translated]} images={undefined} onOpen={vi.fn()} />, {
         language,
       })
-      expect(screen.getByText(quality)).toBeVisible()
-      expect(screen.getByText(source)).toBeVisible()
+      expect(screen.queryByText(quality)).not.toBeInTheDocument()
+      expect(screen.queryByText(source)).not.toBeInTheDocument()
       expect(screen.getByText("Synthetic original")).toBeVisible()
       expect(
         screen.getByText("Synthetic translation", { selector: "span.font-medium" }),
@@ -170,7 +170,7 @@ it("updates shared labels and image states when the UI language changes without 
     { path: "*", element: <CardGrid cells={[value]} images={undefined} onOpen={vi.fn()} /> },
   ])
   const link = screen.getByRole("link")
-  expect(screen.getByText("尚無譯名")).toBeVisible()
+  expect(screen.queryByText("尚無譯名")).not.toBeInTheDocument()
   await act(async () => {
     await i18n.changeLanguage("en")
   })

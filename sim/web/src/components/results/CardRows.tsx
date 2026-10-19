@@ -33,7 +33,7 @@ import { ATTACK_ICON, DEFENSE_ICON } from "../card/symbolIcons"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { ArtThumb } from "./ArtThumb"
-import { type CardGridProps, type GridCell, NameNotices } from "./CardGrid"
+import { type CardGridProps, type GridCell } from "./CardGrid"
 import { type ResultLabels, useResultLabels } from "./labels"
 import { activateCell } from "./plain-click"
 import { useColumnReorder } from "./useColumnReorder"
@@ -259,7 +259,6 @@ const TableRow = memo(function TableRow({
               {cell.summary.evolve && <EvolveBadge />}
             </span>
           </span>
-          <NameNotices name={cell.name} labels={labels} />
           <StatLine
             labels={labels.stats}
             size="sm"
@@ -375,7 +374,6 @@ const ListRow = memo(function ListRow({
         }
       }}
     >
-      {visibility.name && <NameNotices name={cell.name} labels={labels} compact />}
       {visibility.name ? cell.name.primary.text : cell.summary.cardNo}
       {visibility.name && cell.name.secondary && (
         <>
