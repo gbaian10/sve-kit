@@ -42,6 +42,8 @@ class HistoricalUse(RecordData):
     def _unique_cards(self) -> Self:
         if len(set(self.cards)) != len(self.cards):
             raise ValueError("Historical use has duplicate printings")
+        if self.cards != tuple(sorted(self.cards)):
+            raise ValueError("Historical printings must be sorted")
         if self.occurrence.owner.kind != "face_revision":
             raise ValueError("Historical use requires a face revision")
         if self.occurrence.field not in {"effect", "section"}:
@@ -68,6 +70,10 @@ class LegacyReference(RecordData):
         keys = [canonical(u.occurrence.model_dump(mode="json")) for u in self.uses]
         if len(keys) != len(set(keys)):
             raise ValueError("Historical reference has duplicate source uses")
+        if keys != sorted(keys):
+            raise ValueError(
+                "Historical source uses must be sorted by canonical occurrence"
+            )
         return self
 
 

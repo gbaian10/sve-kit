@@ -1,5 +1,6 @@
 """The producer projects only complete fields proved against a real sealed batch."""
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -9,6 +10,8 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField, Target
 from sve_carddb.contracts.rulings import LegacyReference
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.effects.classifications import Basis
+from sve_carddb.domains.effects.reader import Catalog
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
 from sve_carddb.domains.rulings.storage import write as write_rulings
@@ -31,6 +34,7 @@ from ...support import digital_link_import_fixtures
 from ...support.build_db_fixtures import rows
 from ...support.digital_link_import_fixtures import make_fixture
 from ...support.translation_fixtures import template
+from ..effects.test_classifications import classification, member
 from ..rulings.test_rulings import ruling
 from .test_four_layer_classification import classifier
 from .test_four_layer_storage import compiled as compiled  # ruff: ignore[useless-import-alias] -- shared actual SQLite schema
@@ -232,13 +236,51 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
             )
         )
         documents = (ruling(applies_to=[historical.model_dump(mode="json")]),)
+        old_member = member().model_copy(
+            update={
+                "body_hash": digest(b"Synthetic rule."),
+                "body_length": len("Synthetic rule."),
+                "position": member().position.model_copy(
+                    update={"card_no": fixture.printing.card_no}
+                ),
+            }
+        )
+        catalog = Catalog(
+            "classification-v0",
+            Basis(recipe="fixture-v1", inputs_hash=digest(b"inputs")),
+            (
+                classification().model_copy(
+                    update={"id": historical.legacy, "members": (old_member.id,)}
+                ),
+            ),
+            (old_member,),
+        )
+        with pytest.raises(ValueError, match="require their catalog"):
+            rebuild_rulings(
+                db, documents, sources, fixture.jp.batch_id, report.compiled
+            )
+        with pytest.raises(ValueError, match="absent from the catalog"):
+            rebuild_rulings(
+                db,
+                documents,
+                sources,
+                fixture.jp.batch_id,
+                report.compiled,
+                replace(catalog, classifications=()),
+            )
+
         with db.transaction():
             ruling_report = write_rulings(
                 db,
                 documents,
                 fixture.authored,
                 rebuild=rebuild_rulings(
-                    db, documents, sources, fixture.jp.batch_id, report.compiled
+                    db,
+                    documents,
+                    sources,
+                    fixture.jp.batch_id,
+                    report.compiled,
+                    catalog,
                 ),
             )
         assert ruling_report.resolutions[0].reason == (

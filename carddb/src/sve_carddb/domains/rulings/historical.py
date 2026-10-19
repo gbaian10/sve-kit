@@ -45,12 +45,17 @@ class Observation:
 def references(documents: tuple[Document, ...]) -> tuple[LegacyReference, ...]:
     """The same old definition cannot acquire different domains in different rulings."""
     result: dict[str, LegacyReference] = {}
+    bare: set[str] = set()
     for document in documents:
         for reference in document.ruling.applies_to:
             if isinstance(reference, LegacyReference):
                 previous = result.setdefault(reference.legacy, reference)
                 if previous != reference:
                     raise ValueError("Conflicting authored historical domains")
+            else:
+                bare.add(reference)
+    if bare & result.keys():
+        raise ValueError("Mixed bare and explicit historical references")
     return tuple(result[k] for k in sorted(result))
 
 
@@ -62,11 +67,11 @@ def verify_use(use: HistoricalUse, observed: Observation) -> str:
         raise ValueError("Historical source field hash differs")
     if not set(use.cards) <= observed.cards:
         raise ValueError("Historical printing does not belong to the source face")
-    lines = raw.splitlines(keepends=True)
+    lines = raw.split("\n")
     if occurrence.line_ordinal >= len(lines):
         raise ValueError("Historical source line is absent")
-    start = sum(map(len, lines[: occurrence.line_ordinal]))
-    end = start + len(lines[occurrence.line_ordinal].rstrip("\r\n"))
+    start = sum(map(len, lines[: occurrence.line_ordinal])) + occurrence.line_ordinal
+    end = start + len(lines[occurrence.line_ordinal])
     if any(s.start < start or s.end > end for s in occurrence.segments):
         raise ValueError("Historical source segments cross their exact line")
     return "".join(raw[s.start : s.end] for s in occurrence.segments)
@@ -76,7 +81,7 @@ def inputs(
     documents: tuple[Document, ...],
     observe: Callable[[HistoricalUse], Observation],
 ) -> LegacyInputs:
-    """Admission proves completeness; ordinary builds recheck source facts only."""
+    """Retain source-checked definitions for the resolver after catalog validation."""
     definitions = []
     for reference in references(documents):
         uses = []
@@ -205,9 +210,15 @@ def rebuild(
     sources: Sources,
     batch_id: str,
     compiled: tuple[CompiledField, ...],
+    catalog: Catalog | None = None,
 ) -> Rebuild:
     """Only the translation build's already verified and persisted bindings are candidates."""
-    old = inputs(documents, Observations(db, sources, batch_id))
+    observe = Observations(db, sources, batch_id)
+    if references(documents):
+        if catalog is None:
+            raise ValueError("Explicit historical references require their catalog")
+        validate(documents, catalog, observe)
+    old = inputs(documents, observe)
     current = {
         match.binding.id: FrameUse(
             match.frame,

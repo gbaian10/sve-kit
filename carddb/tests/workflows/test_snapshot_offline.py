@@ -41,6 +41,8 @@ from sve_carddb.workflows.offline import (
     require_offline_coverage,
 )
 
+from ..domains.rulings.test_historical import reference
+from ..domains.rulings.test_rulings import ruling
 from ..export.test_snapshot_export import BATCH
 from ..export.test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared export fixture
 from ..export.test_snapshot_preview import EmptySources
@@ -907,3 +909,16 @@ def test_adoption_adapter_rejects_an_unpinned_configuration(
             build,
             {"test-store": case.archive},
         )
+
+
+def test_explicit_ruling_requires_a_translation_build(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    tmp_path: Path,
+) -> None:
+    _, recipe, _ = prepared
+    document = ruling(applies_to=[reference().model_dump(mode="json")])
+    (recipe.repo / "authored/rules/rulings/R-0001.yaml").write_bytes(
+        canonical(document.ruling.model_dump(mode="json"))
+    )
+    with pytest.raises(ValueError, match="verified build sources"):
+        build(recipe, bundle_dir=tmp_path / "bundle")

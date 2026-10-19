@@ -7,6 +7,8 @@ import pytest
 
 from sve_carddb.contracts.rulings import HistoricalUse, LegacyReference, Scope
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.effects.classifications import Basis
+from sve_carddb.domains.effects.reader import Catalog
 from sve_carddb.domains.rulings.historical import (
     Observation,
     inputs,
@@ -17,12 +19,28 @@ from sve_carddb.domains.rulings.historical import (
 from sve_carddb.domains.rulings.mapping import Rebuild
 from sve_carddb.domains.rulings.resolution import build
 
-from .test_evidence import frozen
+from ..effects.test_classifications import classification, member
 from .test_mapping import SyntheticSources
 from .test_rulings import ruling
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
+
+
+def frozen() -> Catalog:
+    first = member()
+    second = first.model_copy(
+        update={
+            "id": digest(b"second"),
+            "position": first.position.model_copy(update={"card_no": "TEST-002"}),
+        }
+    )
+    return Catalog(
+        "fixture",
+        Basis(recipe="fixture-v1", inputs_hash=digest(b"inputs")),
+        (classification().model_copy(update={"members": (first.id, second.id)}),),
+        (first, second),
+    )
 
 
 def reference() -> LegacyReference:
@@ -174,3 +192,74 @@ def test_reference_shape_rejects_unknown_or_empty_domains(
 ) -> None:
     with pytest.raises(ValueError, match="Invalid versioned ruling"):
         ruling(applies_to=[reference().model_dump(mode="json") | change])
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_bare_reference_cannot_borrow_another_rulings_explicit_domain(
+    reverse: bool,
+) -> None:
+    ref = reference()
+    docs = (
+        ruling(applies_to=[ref.model_dump(mode="json")]),
+        ruling(id="R-0002", applies_to=[ref.legacy]),
+    )
+    with pytest.raises(ValueError, match="Mixed bare and explicit"):
+        inputs(tuple(reversed(docs)) if reverse else docs, observation)
+    report = build((docs[1],))
+    assert report.resolutions[0].level == "reference"
+    assert report.resolutions[0].legacy.namespace is None
+
+
+@pytest.mark.parametrize(
+    "separator",
+    ["\r", "\x0b", "\x0c", "\x1c", "\x1d", "\x1e", "\x85", "\u2028", "\u2029"],
+)
+def test_only_lf_advances_historical_line_numbers(separator: str) -> None:
+    raw = "prefix" + separator + "body\nlast"
+    use = reference().uses[0]
+    occurrence = use.occurrence.model_copy(
+        update={
+            "source_hash": digest(raw.encode())[7:],
+            "segments": (
+                use.occurrence.segments[0].model_copy(update={"start": 7, "end": 11}),
+            ),
+        }
+    )
+    use = use.model_copy(update={"occurrence": occurrence})
+    assert verify_use(use, Observation(raw, 0, frozenset(use.cards))) == "body"
+    last = use.model_copy(
+        update={
+            "occurrence": occurrence.model_copy(
+                update={
+                    "line_ordinal": 1,
+                    "segments": (
+                        occurrence.segments[0].model_copy(
+                            update={"start": 12, "end": 16}
+                        ),
+                    ),
+                }
+            )
+        }
+    )
+    assert verify_use(last, Observation(raw, 0, frozenset(use.cards))) == "last"
+
+
+def test_historical_arrays_require_canonical_order() -> None:
+    ref = reference()
+    use = ref.uses[0]
+    with pytest.raises(ValueError, match="printings must be sorted"):
+        HistoricalUse(cards=tuple(reversed(use.cards)), occurrence=use.occurrence)
+    other = HistoricalUse(
+        cards=use.cards,
+        occurrence=SyntheticSources().use("z", raw="synthetic").target().occurrence,
+    )
+    ordered = tuple(
+        sorted(
+            (use, other), key=lambda u: canonical(u.occurrence.model_dump(mode="json"))
+        )
+    )
+    LegacyReference(legacy=ref.legacy, namespace=ref.namespace, uses=ordered)
+    with pytest.raises(ValueError, match="sorted by canonical occurrence"):
+        LegacyReference(
+            legacy=ref.legacy, namespace=ref.namespace, uses=tuple(reversed(ordered))
+        )
