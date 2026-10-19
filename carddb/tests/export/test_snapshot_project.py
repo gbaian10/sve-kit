@@ -403,6 +403,40 @@ def test_unknown_override_beats_known_product_date(db: Database) -> None:
     assert one(result, "printing_product")["date_precision"] == "unknown"
 
 
+def test_release_date_keeps_product_inheritance_and_explicit_inclusion_dates(
+    db: Database,
+) -> None:
+    with db.transaction():
+        db.update(
+            "product",
+            {"id": "product"},
+            {
+                "date_precision": "day",
+                "released_on": "2026-09-01",
+                "date_raw": "2026-09-01",
+            },
+        )
+    inherited = projected(db)
+    assert one(inherited, "product")["released_on"] == "2026-09-01"
+    assert one(inherited, "printing_product")["available_on"] is None
+    assert one(inherited, "printing_product")["date_precision"] is None
+    assert one(inherited, "printing_product")["first_inclusion_state"] == "first"
+    with db.transaction():
+        db.update(
+            "printing_product",
+            {"printing_id": "printing", "product_id": "product"},
+            {
+                "first_available_on": "2026-08-31",
+                "first_available_precision": "day",
+                "first_available_raw": "2026-08-31",
+            },
+        )
+    explicit = one(projected(db), "printing_product")
+    assert explicit["available_on"] == "2026-08-31"
+    assert explicit["date_precision"] == "day"
+    assert explicit["date_raw"] == "2026-08-31"
+
+
 def test_historical_art_and_artist_are_pruned_with_tombstone(db: Database) -> None:
     with db.transaction():
         db.insert("art", dict(db.rows("art")[0].values) | {"id": "old-art"})
