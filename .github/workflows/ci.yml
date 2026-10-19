@@ -53,6 +53,11 @@ jobs:
               - 'tests/fixtures/snapshot-contract/**' # shared snapshot contract, read by all three components
             card_data:
               - 'card-data/**'
+              - 'carddb/src/**' # includes transitive schema and admission dependencies
+              - 'carddb/pyproject.toml'
+              - 'carddb/uv.lock'
+              - '.github/workflows/ci.yml'
+              - '.github/ci/**'
             python:
               - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
               - 'publish/**'
@@ -104,12 +109,8 @@ jobs:
             publish/uv.lock
       - name: Validate admitted inputs and preserve base history
         run: |
-          previous=()
-          if [ -d "$GITHUB_WORKSPACE/.card-data-base/card-data" ]; then
-            previous=(--previous "$GITHUB_WORKSPACE/.card-data-base/card-data")
-          fi
           uv run --directory carddb --locked --no-default-groups sve-carddb parsed-cards validate \
-            "$GITHUB_WORKSPACE/card-data" "${previous[@]}"
+            "$GITHUB_WORKSPACE/card-data" --previous "$GITHUB_WORKSPACE/.card-data-base/card-data"
 
   repo:
     runs-on: ubuntu-latest

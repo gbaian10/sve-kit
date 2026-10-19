@@ -44,7 +44,8 @@ Card JSON contains readable records and minimal source references. Adjacent
 the complete reader requires both files and separate immutable batch selections,
 while reading card wording needs only the card file.
 Generation and the `card-data` CI job validate schema, hashes, closure and history;
-the CI job runs when `card-data/**` changes and compares with the PR base tree.
+the CI job runs when card-data, carddb source/dependencies or its workflow/helpers
+change and compares with the PR base tree. A missing base tree fails validation.
 Ordinary builds use the trusted reader without repeating those checks. Local data
 edits must pass `sve-carddb parsed-cards validate` before building. Offline text and
 image-index builds default to parsed inputs; comparison runs explicitly set
@@ -397,7 +398,7 @@ checks and build use the existing package scripts in separate steps. Local manua
 remain available. The hook ownership table marks direct steps so pre-commit skips them.
 
 Draft pull requests run only the quick checks (repository hooks, commit messages and the
-title). The Python, Rust and Web test jobs are skipped and `ci-ok` fails with a note that tests
+title). The Python, Rust, Web and card-data jobs are skipped and `ci-ok` fails with a note that tests
 were not run. Marking the PR ready for review starts the full run, which decides `ci-ok`.
 
 In pull requests the repository-wide hooks check only the files the PR changes, as the local

@@ -39,7 +39,8 @@ F1 configuration 納入 registry hash 與 adapter 版本。
 只檢查已確認 card 的 JP face_current 主效果，逐面保留 exact owner。
 雙面卡採「任一面有即標 has」：任一面證明自身宣告，就在 card 層級標記，
 不表示正面一定具有該能力；公開投影沒有面向維度。
-SourceDescriptor／frozen source 驗回 bytes、來源版本及 locator；更正沿用既有 corrected-source recipe。
+預設建置由已審查解析輸入取得來源版本及 locator；sealed/raw bytes 在產生解析資料及明示 `archive` 模式驗證，
+不在普通建置重跑，見[解析卡片輸入〈建置入口〉](../ingest/parsed-card-inputs.md#建置入口)。更正沿用既有 corrected-source recipe。
 空主文只記未抽取，不授予完整 coverage；不合併所有 printing、歷史 revision 或他 owner binding。
 
 H1 只接受 `card_keywords.v2` 的完整 body part：整個片段由唯一解析的 keyword

@@ -466,7 +466,7 @@ family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的�
 
 `date_precision` 限 `day/month/year/unknown`。day 的 released_on 必須是有效完整 ISO 日期；month/year 必須有非空 date_raw 且 released_on=null；unknown 的 released_on=null，date_raw 可以保留來源的未知描述或為 null。日精度若來源有原字串仍保留 date_raw，不把轉換後 ISO 日期冒充原字串。inclusion 的日期三欄同理；precision=null 時另兩欄皆 null，以免把無覆寫與部分覆寫混在一起。不得從抓取／封存時間補發售日期。
 
-`evidence` 是去重陣列，每項恰有 `{batch_id, source_version_id, locator, role}`。前兩個識別欄釘住 [source-archive](../ingest/source-archive.md) 的已封存批次與其中來源版本；store 名稱及根目錄由執行端設定；locator 是非空人工定位字串（例如商品區塊序號），role 是非空證據用途。匯入須驗 batch／descriptor／receipt／raw 閉包並由 descriptor 取得原 URL／raw hash，不接受以 URL 或 hash 字串代替實際可驗來源，也不在 authored 存本機絕對路徑。locator 不是可執行查詢語言。
+`evidence` 是去重陣列，每項恰有 `{batch_id, source_version_id, locator, role}`。前兩個識別欄釘住 [source-archive](../ingest/source-archive.md) 的已封存批次與其中來源版本；store 名稱及根目錄由執行端設定；locator 是非空人工定位字串（例如商品區塊序號），role 是非空證據用途。產生解析輸入及明示 `archive` 匯入時須驗 batch／descriptor／receipt／raw 閉包並由 descriptor 取得原 URL／raw hash；預設 `parsed` 建置對已收錄的 SVE 卡片來源從已審查解析輸入還原參照，不開啟或重驗其 raw，其他來源仍走歸檔驗證；不接受以 URL 或 hash 字串代替實際可驗來源，也不在 authored 存本機絕對路徑。locator 不是可執行查詢語言。
 
 商品與收錄的 evidence 不可空，且須支持該地區、商品及具體版次收錄的主張；卡片頁 products 區的共現只產候選，不能自動宣稱某家族、配布方式或完整收錄全集。純人工的歸檔家族可 evidence=[]，由記錄的 confirmed 狀態表示已經人工確認；若主張與真實商品對應，仍須該商品的來源證據及人工核對。商品頁 URL 可以是卡片頁記載的線索，但未封存該商品頁就不能宣稱已驗其內容。
 
@@ -522,20 +522,20 @@ JP、EN 均讀搜尋 URL query 中名稱精確為 `expansion` 的參數，參數
 
 同一區塊若有多個不同商品 URL／expansion 值，parser 不任選或作笛卡兒積：列出歧義，僅容許經使用者核對的 exact `source_block` 對照辨識該區塊代表的商品；若該區塊其實含數個商品，須先有能分出個別商品的來源及 parser。`source_block` 不用名稱／日期作匹配鍵；raw 改版後即使只是更正名稱，也須為新來源補對照，沿用原 product_id，不能套用舊 ordinal 猜。
 
-evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、無重複；每項都須驗 sealed batch／descriptor／first receipt／raw 閉包。至少一項證據的 role 為 `product_identity_match`，locator 為 §2 canonical JSON 字串 `{"product_block_ordinal":0}`（數字依實際區塊），正式 parser 須從該來源重現完整 match 與 region；source_block 還須與 evidence 的版本／ordinal 相同。其他 role 可保留人工判斷所需的來源及非空定位。卡片頁的商品區塊可以證明該頁記載的識別線索；只有商品連結不表示已讀／驗該商品頁內容。
+evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、無重複；每項在產生解析輸入及明示 `archive` 模式須驗 sealed batch／descriptor／first receipt／raw 閉包；預設 `parsed` 建置對已收錄的 SVE 卡片來源讀已審查的 evidence，其他來源仍走歸檔驗證。至少一項證據的 role 為 `product_identity_match`，locator 為 §2 canonical JSON 字串 `{"product_block_ordinal":0}`（數字依實際區塊），產生解析輸入時正式 parser 須從該來源產生完整 match 與 region，建置以解析結果核對 evidence 的 match 與 region；source_block 還須與 evidence 的版本／ordinal 相同。其他 role 可保留人工判斷所需的來源及非空定位。卡片頁的商品區塊可以證明該頁記載的識別線索；只有商品連結不表示已讀／驗該商品頁內容。
 
 ### 11.3 首次採納、重建匹配與改址
 
 首次建立時，工具只產候選 ID、match、完整來源與疑難清單；使用者逐筆確認商品邊界與對應後，才另建正式分片。草稿不直接變成正式輸入，通過格式檢查或來源閉包驗證也不是人工採納。
 
-對每個已驗凍結來源中的商品區塊，正式 extractor 產生可用的 product_link；沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有已驗證的對照，不作 fuzzy 比較：
+對每個已驗凍結來源中的商品區塊，正式 extractor 在產生解析輸入或明示 `archive` 模式產生可用的 product_link；預設 `parsed` 建置直接讀取這些解析結果。沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有已驗證的對照，不作 fuzzy 比較：
 
 | 結果 | 建置行為 |
 | --- | --- |
-| 命中一個 product_id（多種 match 同指此 ID 亦可） | 沿用永久 ID；官方內容及收錄仍由 raw 萃取、另驗來源與地區／printing 身分閘門 |
+| 命中一個 product_id（多種 match 同指此 ID 亦可） | 沿用永久 ID；官方內容及收錄由已審查解析輸入取得（`archive` 模式從 raw 萃取），另驗地區／printing 身分閘門 |
 | 零命中 | 診斷列精確來源、區塊、線索及缺映射原因；不臨時配號，不產該商品與依賴它的收錄列，不影響有獨立有效證據的卡文；報告明列排除，不宣稱商品完整 |
 | 命中多個不同 product_id | 商品身分衝突，整筆匯入交易失敗；不得任選第一筆、較新一筆或較短 ID |
-| 同 match 多記錄、同 ID 跨 region、證據無法重現 match、缺 raw／hash 錯 | 輸入驗證失敗，整筆交易回滾；不能降成「缺映射」後忽略 |
+| 同 match 多記錄、同 ID 跨 region、證據無法重現 match、缺所需解析輸入（產生器／`archive` 模式另拒絕缺 raw／hash 錯） | 輸入驗證失敗，整筆交易回滾；不能降成「缺映射」後忽略 |
 
 相同 ID 的多次官方觀測可以去重，但名稱、日期、商品型別等內容不一致時依既有商品衝突規則處理，不以身分 confirmed 當作選內容的授權。同名不等於同商品，同代號跨 region 亦不合併；owner 只作歸檔，不能參與商品識別或補收錄。
 
@@ -550,7 +550,9 @@ URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補
 建置明示讀取兩個獨立商品入口；啟用官方商品匯入時不得把缺少 `products/identities/` 當空對照。
 configuration 的 `product_identity` 保存 `{authored_revision}` 作為追蹤資訊；分片讀當前工作樹，
 不釘 Git exact bytes 或 dependency hash。所有歷史別名分片仍保留，重複 match 拒絕。
-來源 evidence 仍驗 sealed batch、descriptor、first receipt、raw hash、區塊及地區／owner 適用性。
+來源 evidence 的 sealed batch、descriptor、first receipt 與 raw hash 在產生解析輸入及明示 `archive` 模式驗證；
+預設 `parsed` 建置對已收錄的 SVE 卡片來源讀已審查的 evidence，僅核對本次用途的區塊及地區／owner 適用性；其他來源仍走歸檔驗證。
+資料 CI 的 schema、hash、參照閉包及歷史驗證與建置讀取分開，見[解析卡片輸入〈建置入口〉](../ingest/parsed-card-inputs.md#建置入口)。
 各 parser／用途保留實際 uses，完成交易的 DB 與 inputs／report 直接保存，不再驗 expected 使用閉包或 build seal。
 
 ## 12. 身分修復與決定續版

@@ -129,7 +129,7 @@ CLI 錯誤只印失敗摘要，不將可能含完整卡文的驗證物件印入 
 程式／authored revision 同時指向該 commit 的解析輸入；建置從已審查批次選取重建來源身分及 record／registry／text／products／extras 投影，不需要 SVE HTML、descriptor 檔或凍結 manifest 副本。
 
 完整 schema、hash、閉包與歷史驗證只在資料寫入時執行：產生器驗證候選；獨立 `parsed-cards validate` 供本機與 CI 呼叫。
-CI 的 `card-data` 工作只在 `card-data/**` 變動時執行，驗證整棵候選樹及 PR base 的歷史保留，結果納入必要的 `ci-ok`。
+CI 的 `card-data` 工作在 `card-data/**`、carddb 程式／依賴或驗證工作流程／CI helpers 變動時執行，驗證整棵候選樹及 PR base 的歷史保留，結果納入必要的 `ci-ok`；缺少 base 的 `card-data/` 時失敗，不略過歷史驗證。
 普通建置走可信資料 reader，僅解析 JSON、還原型別及參照，不掃描額外檔案、不重算驗證 hash、不重做 schema 或歷史驗證；本機手改資料須先跑 validate。
 來源身分所需的衍生欄位仍在轉接時組成，這不重新驗證原始資料。
 

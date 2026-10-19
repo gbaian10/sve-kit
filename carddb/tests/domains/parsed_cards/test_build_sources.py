@@ -82,20 +82,18 @@ def test_default_build_resolves_original_batches_without_archive(
         )
 
 
-@pytest.mark.parametrize("change", ["batch", "missing"])
-def test_build_rejects_wrong_or_missing_reviewed_inputs(
-    recipe: Inputs, change: str
-) -> None:
-    if change == "batch":
-        en, jp = recipe.sources
-        recipe = recipe.model_copy(
-            update={
-                "sources": (en.model_copy(update={"card_batch": jp.card_batch}), jp)
-            }
-        )
-    else:
-        (recipe.repo / "card-data/index.json").unlink()
-    with pytest.raises((ValueError, FileNotFoundError)):
+def test_build_rejects_wrong_regional_batch(recipe: Inputs) -> None:
+    en, jp = recipe.sources
+    recipe = recipe.model_copy(
+        update={"sources": (en.model_copy(update={"card_batch": jp.card_batch}), jp)}
+    )
+    with pytest.raises(ValueError, match="lack the requested regional card batch"):
+        source_batches(recipe)
+
+
+def test_build_rejects_missing_reviewed_inputs(recipe: Inputs) -> None:
+    (recipe.repo / "card-data/index.json").unlink()
+    with pytest.raises(FileNotFoundError, match=r"index\.json"):
         source_batches(recipe)
 
 
@@ -122,6 +120,9 @@ def test_independent_image_batch_still_checks_archive(
     version = next(iter(frozen.version_ids))
     assert frozen.read(version, parser_version="synthetic")[1] == raw
     assert readers.batch(store.root, store.store_id, sealed.batch_id) is frozen
+    (store.root / frozen.entries[version].blob.path).write_bytes(b"tampered")
+    with pytest.raises(ArchiveError, match="archive file hash or size mismatch"):
+        source_batches(recipe).configured({store.store_id: store.root}, sealed.batch_id)
 
 
 @pytest.mark.parametrize("error", ["id", "hash"])

@@ -3,10 +3,22 @@
 import dataclasses
 from functools import cache
 from types import UnionType
-from typing import Annotated, Literal, Union, cast, get_args, get_origin, get_type_hints
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Literal,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 import orjson
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from collections.abc import Hashable
 
 
 @cache
@@ -14,6 +26,39 @@ def _fields(model: type) -> dict[str, object]:
     if issubclass(model, BaseModel):
         return {name: field.annotation for name, field in model.model_fields.items()}
     return get_type_hints(model, include_extras=True)
+
+
+def _base(annotation: object) -> object:
+    return (
+        get_args(annotation)[0] if get_origin(annotation) is Annotated else annotation
+    )
+
+
+@cache
+def _supported(annotation: object) -> None:
+    """Reject unknown constructors even in absent optional or empty collection fields."""
+    annotation = _base(annotation)
+    origin, args = get_origin(annotation), get_args(annotation)
+    if annotation in {str, int, float, bool, type(None)} or origin is Literal:
+        return
+    if origin in {UnionType, Union, list} or (
+        origin is tuple and args[-1:] == (Ellipsis,)
+    ):
+        for child in args:
+            if child is not Ellipsis:
+                _supported(child)
+        return
+    if origin is dict and _base(args[0]) is str:
+        _supported(args[1])
+        return
+    if isinstance(annotation, type) and (
+        issubclass(annotation, BaseModel) or dataclasses.is_dataclass(annotation)
+    ):
+        for child in _fields(annotation).values():
+            _supported(child)
+        return
+    message = f"Unsupported trusted input annotation: {annotation!r}"
+    raise TypeError(message)
 
 
 def _union(annotation: object, value: object) -> object:
@@ -64,11 +109,15 @@ def _value(annotation: object, value: object) -> object:  # ruff: ignore[too-man
         if issubclass(annotation, BaseModel):
             return annotation.model_construct(_fields_set=None, **kwargs)
         return annotation(**kwargs)
-    return value
+    if annotation in {str, int, float, bool, type(None)} or origin is Literal:
+        return value
+    message = f"Unsupported trusted input annotation: {annotation!r}"
+    raise TypeError(message)
 
 
 def construct[T](model: type[T], data: object) -> T:
     """Restore nested Python types; schema and semantic checks belong to admission."""
+    _supported(cast("Hashable", model))
     return cast("T", _value(model, data))
 
 

@@ -6,7 +6,8 @@ crawler settings, latest cache or live manifest are opened. Card IDs remain
 manually adopted. Raw card numbers are matched only within their own region.
 
 The recipe is JSON matching `sve_carddb.workflows.offline.Inputs`: `repo`, `archive`,
-`store_id`, sorted `sources` for `en` then `jp` (each has `region`, `card_batch`,
+`store_id`, `source_mode` (defaults to `parsed`), sorted `sources` for `en` then `jp`
+(each has `region`, `card_batch`,
 `image_batch`, `parser_version`), `revision`, `as_of`,
 `data_version`, `published_at`, `feedback_url`, `grammar_version` and
 `normalizer_version`. Vocabulary and UI languages come from the current working
@@ -36,9 +37,15 @@ source records; review sources still point to authored records. Output roots mus
 also be disjoint from the permanent review input root.
 
 The revision identifies the checkout for provenance; uncommitted authored edits
-apply. Builds use the running parser and current configuration directly. Frozen
-raw hashes, archive metadata, exact text, source language and owner applicability
-remain checked before projection. The input record summarizes actual source uses.
+apply. Default builds read admitted `card-data/` and apply current configuration,
+exact text, source language and owner applicability before projection. They do not
+revalidate input schema, hashes, closure or history. Local card-data edits must pass
+`parsed-cards validate` before building. Generation checks sealed/raw closure;
+the data CI checks parsed schema, hashes, references and history without raw files.
+Explicit `source_mode: archive` retains sealed/raw verification and parsing, never
+as a fallback. Other-game APIs and image archives retain their raw verification.
+See [the build input contract](../../../../docs/schema/ingest/parsed-card-inputs.md#建置入口).
+The input record summarizes actual source uses.
 
 Japanese effect text and flavor are translated in the same transaction. The
 current templates, parameter rules and glossary are read from the working tree

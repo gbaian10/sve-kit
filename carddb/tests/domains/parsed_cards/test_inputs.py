@@ -302,6 +302,10 @@ def test_cli_generate_validate_schema_and_fail_closed(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     result = runner.invoke(app, ["validate", str(root), "--previous", str(root)])
     assert result.exit_code == 0, result.output
+    result = runner.invoke(
+        app, ["validate", str(root), "--previous", str(tmp_path / "missing-base")]
+    )
+    assert result.exit_code == 1
     result = runner.invoke(app, ["generate", str(request), str(root)])
     assert result.exit_code == 1
     assert "Synthetic front" not in result.output
