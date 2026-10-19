@@ -45,7 +45,7 @@ def _row(db: Database, table: str, key: Mapping[str, Value]) -> Mapping[str, Val
 
 
 @dataclass(frozen=True)
-class _Field:
+class CardField:
     unit_id: str
     text: str
     source_id: str
@@ -55,9 +55,10 @@ class _Field:
     face_ordinal: int
 
 
-def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner and field once for both descriptor registration and verification
+def card_field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner and field once for both descriptor registration and verification
     db: Database, field: OwnerField, lang: Literal["ja", "en"] = "ja"
-) -> _Field:
+) -> CardField:
+    """Resolve a typed source field by exact owner, never by equal text on another card."""
     owner = field.owner
     if isinstance(owner, FaceRevisionOwner):
         row = _row(db, "face_revision", {"id": owner.revision_id})
@@ -120,7 +121,7 @@ def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner a
         or unit["content_hash"] != digest(raw.encode())
     ):
         raise ValueError("Card source original text identity is invalid")
-    return _Field(unit_id, raw, source_id, locator, card_id, face_id, face_ordinal)
+    return CardField(unit_id, raw, source_id, locator, card_id, face_id, face_ordinal)
 
 
 def descriptor(
@@ -132,7 +133,7 @@ def descriptor(
     lang: Literal["ja", "en"] = "ja",
 ) -> SourceDescriptor:
     """Register the actual owner field rather than searching other cards by equal text."""
-    selected = _field(db, field, lang)
+    selected = card_field(db, field, lang)
     parser = "translation-jp-v1" if lang == "ja" else "translation-en-v1"
     if (
         lang == "ja"
@@ -174,7 +175,7 @@ def descriptor(
 
 def empty_field(db: Database, field: OwnerField) -> bool:
     """An absent effect is interned as empty text and has no source span to authorize."""
-    return not _field(db, field).text
+    return not card_field(db, field).text
 
 
 def card_source(
@@ -185,7 +186,7 @@ def card_source(
     lang: Literal["ja", "en"] = "ja",
 ) -> CardSource:
     """Equal bytes on another card or face cannot authorize a source descriptor."""
-    selected = _field(db, descriptor, lang)
+    selected = card_field(db, descriptor, lang)
     unit_id, raw, source_id, locator = (
         selected.unit_id,
         selected.text,

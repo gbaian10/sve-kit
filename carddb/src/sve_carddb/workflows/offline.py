@@ -24,7 +24,6 @@ from sve_carddb.domains.card_extras import (
     populate_planned_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.domains.effects.reader import load as load_classifications
 from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
 from sve_carddb.domains.mechanics import load as load_mechanics
@@ -55,7 +54,6 @@ from sve_carddb.domains.registry.preview.review_inputs import (
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
-from sve_carddb.domains.rulings.historical import references as historical_references
 from sve_carddb.domains.rulings.reader import load as load_rulings
 from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
 from sve_carddb.domains.rulings.storage import write as write_rulings
@@ -636,16 +634,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 inputs.revision,
                 rebuild=None
                 if template_report is None
-                else rebuild_rulings(
-                    db,
-                    rulings,
-                    name_sources,
-                    jp.card_batch,
-                    template_report.compiled,
-                    load_classifications(inputs.repo / "authored")
-                    if historical_references(rulings)
-                    else None,
-                ),
+                else rebuild_rulings(rulings, template_report.compiled),
             )
             name_uses = () if name_result is None else name_result.record.uses
             mark("db: rulings")

@@ -13,6 +13,7 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.effects.classifications import Basis
 from sve_carddb.domains.effects.reader import Catalog
 from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.rulings.historical import Observations, validate
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
 from sve_carddb.domains.rulings.storage import write as write_rulings
 from sve_carddb.domains.text_observations.intern import TextInterner
@@ -255,33 +256,16 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
             ),
             (old_member,),
         )
-        with pytest.raises(ValueError, match="require their catalog"):
-            rebuild_rulings(
-                db, documents, sources, fixture.jp.batch_id, report.compiled
-            )
+        validate(documents, catalog, Observations(db))
         with pytest.raises(ValueError, match="absent from the catalog"):
-            rebuild_rulings(
-                db,
-                documents,
-                sources,
-                fixture.jp.batch_id,
-                report.compiled,
-                replace(catalog, classifications=()),
-            )
+            validate(documents, replace(catalog, classifications=()), Observations(db))
 
         with db.transaction():
             ruling_report = write_rulings(
                 db,
                 documents,
                 fixture.authored,
-                rebuild=rebuild_rulings(
-                    db,
-                    documents,
-                    sources,
-                    fixture.jp.batch_id,
-                    report.compiled,
-                    catalog,
-                ),
+                rebuild=rebuild_rulings(documents, report.compiled),
             )
         assert ruling_report.resolutions[0].reason == (
             "no_candidate" if unused else "unsupported_relation"

@@ -1,4 +1,4 @@
-"""Validate authored old domains against this build's exact adopted source fields."""
+"""Validate historical data at admission; rebuild from the reviewed use list."""
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -16,7 +16,7 @@ from sve_carddb.domains.rulings.mapping import (
     key,
     source_scope,
 )
-from sve_carddb.domains.translations.four_layer_sources import card_source, descriptor
+from sve_carddb.domains.translations.four_layer_sources import card_field
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from sve_carddb.domains.effects.reader import Catalog
     from sve_carddb.domains.rulings.reader import Document
     from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
-    from sve_carddb.domains.translations.sources import Sources
 
 V0 = Namespace(
     code="classification-v0",
@@ -79,25 +78,22 @@ def verify_use(use: HistoricalUse, observed: Observation) -> str:
 
 def inputs(
     documents: tuple[Document, ...],
-    observe: Callable[[HistoricalUse], Observation],
 ) -> LegacyInputs:
-    """Retain source-checked definitions for the resolver after catalog validation."""
+    """Read admitted definitions without replaying source or catalog validation."""
     definitions = []
     for reference in references(documents):
-        uses = []
-        for use in reference.uses:
-            verify_use(use, observe(use))
-            uses.append(
-                LegacyUse(
-                    occurrence=use.occurrence,
-                    scope=source_scope(use.occurrence),
-                    parameters={},
-                )
+        uses = tuple(
+            LegacyUse(
+                occurrence=use.occurrence,
+                scope=source_scope(use.occurrence),
+                parameters={},
             )
+            for use in reference.uses
+        )
         definitions.append(
             Definition(
                 template_id=reference.legacy,
-                uses=tuple(uses),
+                uses=uses,
                 semantic_variant="classification_v0." + reference.legacy.lower(),
             )
         )
@@ -161,12 +157,12 @@ def validate(
 
 
 class Observations:
-    def __init__(self, db: Database, sources: Sources, batch_id: str) -> None:
-        self.db, self.sources, self.batch_id = db, sources, batch_id
+    def __init__(self, db: Database) -> None:
+        self.db = db
         self.cache: dict[bytes, Observation] = {}
 
     def __call__(self, use: HistoricalUse) -> Observation:
-        """Resolve the exact owner through the existing frozen-source boundary."""
+        """Read exact owner fields from the selected, previously validated offline build."""
         occurrence = use.occurrence
         if not isinstance(occurrence.owner, FaceRevisionOwner):
             raise TypeError("Classification-v0 requires a revision owner")
@@ -175,11 +171,7 @@ class Observations:
         )
         encoded = key(field)
         if encoded not in self.cache:
-            source = card_source(
-                self.db,
-                self.sources,
-                descriptor(self.db, self.sources, field, self.batch_id),
-            )
+            source = card_field(self.db, field)
             face = self.db.select("face", ("ordinal",), where={"id": source.face_id})[
                 0
             ].values["ordinal"]
@@ -205,20 +197,11 @@ class Observations:
 
 
 def rebuild(
-    db: Database,
     documents: tuple[Document, ...],
-    sources: Sources,
-    batch_id: str,
     compiled: tuple[CompiledField, ...],
-    catalog: Catalog | None = None,
 ) -> Rebuild:
     """Only the translation build's already verified and persisted bindings are candidates."""
-    observe = Observations(db, sources, batch_id)
-    if references(documents):
-        if catalog is None:
-            raise ValueError("Explicit historical references require their catalog")
-        validate(documents, catalog, observe)
-    old = inputs(documents, observe)
+    old = inputs(documents)
     current = {
         match.binding.id: FrameUse(
             match.frame,

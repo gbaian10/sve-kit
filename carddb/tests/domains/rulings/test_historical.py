@@ -123,7 +123,7 @@ def test_authored_scope_is_verified_before_resolution_and_reruns_after_rekey() -
     )
     with pytest.raises(ValueError, match="verified build sources"):
         build((doc,))
-    old = inputs((doc,), observation)
+    old = inputs((doc,))
     missing = build((doc,), Rebuild((old,), (), lambda _: None))
     assert [r.ruling_ref.reference_ordinal for r in missing.resolutions] == [0, 2]
     assert all(r.reason == "no_candidate" for r in missing.resolutions)
@@ -204,7 +204,7 @@ def test_bare_reference_cannot_borrow_another_rulings_explicit_domain(
         ruling(id="R-0002", applies_to=[ref.legacy]),
     )
     with pytest.raises(ValueError, match="Mixed bare and explicit"):
-        inputs(tuple(reversed(docs)) if reverse else docs, observation)
+        inputs(tuple(reversed(docs)) if reverse else docs)
     report = build((docs[1],))
     assert report.resolutions[0].level == "reference"
     assert report.resolutions[0].legacy.namespace is None
