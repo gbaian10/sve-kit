@@ -31,6 +31,18 @@ For data contribution formats, see [authored layout](docs/schema/domains/authore
   contents; neither a source link nor this repository policy grants permission
   to relicense official or third-party material.
 
+## Parsed card inputs
+
+Reviewed Japanese and English SVE inputs live in `card-data/`. Follow the
+[parsed-input contract](docs/schema/ingest/parsed-card-inputs.md) for generation,
+fixed card-number ranges and validation against the previous data tree. Keep raw
+archives and old observations: parsing is reproducible only from preserved sources,
+and updating a hash does not authorize replacing reviewed history.
+Publishable files contain source URLs and hashes, never archive store names, local
+paths, credentials, card images or audio. A data PR must show its file count, byte
+sizes, included fields and representative records for maintainer review. Runtime
+consumers continue to use versioned snapshots.
+
 ## Languages
 
 | What                               | Language                                    |

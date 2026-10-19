@@ -1,0 +1,156 @@
+{
+  "$defs": {
+    "BatchPin": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Id",
+          "type": "string"
+        },
+        "region": {
+          "enum": [
+            "jp",
+            "en"
+          ],
+          "title": "Region",
+          "type": "string"
+        },
+        "versions": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Versions",
+          "type": "integer"
+        },
+        "current": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Current",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "region",
+        "versions",
+        "current"
+      ],
+      "title": "BatchPin",
+      "type": "object"
+    },
+    "ShardPin": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1048576,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "cards": {
+          "exclusiveMinimum": 0,
+          "title": "Cards",
+          "type": "integer"
+        },
+        "observations": {
+          "exclusiveMinimum": 0,
+          "title": "Observations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "bytes",
+        "cards",
+        "observations"
+      ],
+      "title": "ShardPin",
+      "type": "object"
+    },
+    "SplitFamily": {
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "enum": [
+            "jp",
+            "en"
+          ],
+          "title": "Region",
+          "type": "string"
+        },
+        "family": {
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Family",
+          "type": "string"
+        }
+      },
+      "required": [
+        "region",
+        "family"
+      ],
+      "title": "SplitFamily",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": 1,
+      "default": 1,
+      "title": "Format",
+      "type": "integer"
+    },
+    "recipe": {
+      "const": "sve-parsed-card-v1",
+      "default": "sve-parsed-card-v1",
+      "title": "Recipe",
+      "type": "string"
+    },
+    "range_width": {
+      "const": 200,
+      "default": 200,
+      "title": "Range Width",
+      "type": "integer"
+    },
+    "split_families": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/SplitFamily"
+      },
+      "title": "Split Families",
+      "type": "array"
+    },
+    "shards": {
+      "items": {
+        "$ref": "#/$defs/ShardPin"
+      },
+      "title": "Shards",
+      "type": "array"
+    },
+    "batches": {
+      "items": {
+        "$ref": "#/$defs/BatchPin"
+      },
+      "title": "Batches",
+      "type": "array"
+    }
+  },
+  "required": [
+    "shards",
+    "batches"
+  ],
+  "title": "Index",
+  "type": "object"
+}

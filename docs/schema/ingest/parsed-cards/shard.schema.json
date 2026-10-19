@@ -1,0 +1,1204 @@
+{
+  "$defs": {
+    "Card": {
+      "additionalProperties": false,
+      "properties": {
+        "card_no": {
+          "minLength": 1,
+          "title": "Card No",
+          "type": "string"
+        },
+        "observations": {
+          "items": {
+            "$ref": "#/$defs/ParsedObservation"
+          },
+          "title": "Observations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "card_no",
+        "observations"
+      ],
+      "title": "Card",
+      "type": "object"
+    },
+    "Descriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "archive_format": {
+          "const": 1,
+          "default": 1,
+          "title": "Archive Format",
+          "type": "integer"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source_key": {
+          "title": "Source Key",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "raw_sha256": {
+          "title": "Raw Sha256",
+          "type": "string"
+        },
+        "raw_bytes": {
+          "title": "Raw Bytes",
+          "type": "integer"
+        },
+        "first_receipt_id": {
+          "title": "First Receipt Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "source_key",
+        "provider",
+        "kind",
+        "url",
+        "raw_sha256",
+        "raw_bytes",
+        "first_receipt_id"
+      ],
+      "title": "Descriptor",
+      "type": "object"
+    },
+    "ENDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "const": "en",
+          "title": "Region",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/sve_carddb__parse__pages__extract_en__CardRecord"
+        }
+      },
+      "required": [
+        "region",
+        "record"
+      ],
+      "title": "ENDocument",
+      "type": "object"
+    },
+    "EffectPresence": {
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "$ref": "#/$defs/PresenceResult"
+        },
+        "result_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Result Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result",
+        "result_hash"
+      ],
+      "title": "EffectPresence",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "descriptor": {
+          "$ref": "#/$defs/Descriptor"
+        },
+        "descriptor_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Descriptor Sha256",
+          "type": "string"
+        },
+        "fetched_at": {
+          "pattern": "^^(?:(?!0000)[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$(?![\\s\\S])$",
+          "title": "Fetched At",
+          "type": "string"
+        },
+        "etag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Etag"
+        },
+        "last_modified": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Modified"
+        }
+      },
+      "required": [
+        "descriptor",
+        "descriptor_sha256",
+        "fetched_at",
+        "etag",
+        "last_modified"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "ExpansionLink": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "expansion_link",
+          "title": "Kind",
+          "type": "string"
+        },
+        "search_url": {
+          "minLength": 1,
+          "title": "Search Url",
+          "type": "string"
+        },
+        "expansion_code": {
+          "minLength": 1,
+          "title": "Expansion Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "search_url",
+        "expansion_code"
+      ],
+      "title": "ExpansionLink",
+      "type": "object"
+    },
+    "JPDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "const": "jp",
+          "title": "Region",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/sve_carddb__parse__pages__extract_jp__CardRecord"
+        }
+      },
+      "required": [
+        "region",
+        "record"
+      ],
+      "title": "JPDocument",
+      "type": "object"
+    },
+    "LayoutEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "presence": {
+          "items": {
+            "$ref": "#/$defs/EffectPresence"
+          },
+          "title": "Presence",
+          "type": "array"
+        },
+        "whitespace": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Whitespace",
+          "type": "array"
+        },
+        "products": {
+          "items": {
+            "$ref": "#/$defs/ProductEvidence"
+          },
+          "title": "Products",
+          "type": "array"
+        },
+        "qa": {
+          "items": {
+            "$ref": "#/$defs/QAIdentity"
+          },
+          "title": "Qa",
+          "type": "array"
+        },
+        "related": {
+          "items": {
+            "$ref": "#/$defs/RelatedLink"
+          },
+          "title": "Related",
+          "type": "array"
+        },
+        "errata_urls": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errata Urls",
+          "type": "array"
+        }
+      },
+      "required": [
+        "presence",
+        "whitespace",
+        "products",
+        "qa",
+        "related",
+        "errata_urls"
+      ],
+      "title": "LayoutEvidence",
+      "type": "object"
+    },
+    "Membership": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Batch Id",
+          "type": "string"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "batch_id",
+        "current"
+      ],
+      "title": "Membership",
+      "type": "object"
+    },
+    "ParsedObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "recipe": {
+          "const": "sve-parsed-card-v1",
+          "default": "sve-parsed-card-v1",
+          "title": "Recipe",
+          "type": "string"
+        },
+        "producer_revision": {
+          "pattern": "^[0-9a-f]{40}(?![\\s\\S])",
+          "title": "Producer Revision",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "document": {
+          "discriminator": {
+            "mapping": {
+              "en": "#/$defs/ENDocument",
+              "jp": "#/$defs/JPDocument"
+            },
+            "propertyName": "region"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/JPDocument"
+            },
+            {
+              "$ref": "#/$defs/ENDocument"
+            }
+          ],
+          "title": "Document"
+        },
+        "layout": {
+          "$ref": "#/$defs/LayoutEvidence"
+        },
+        "content_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "memberships": {
+          "items": {
+            "$ref": "#/$defs/Membership"
+          },
+          "title": "Memberships",
+          "type": "array"
+        }
+      },
+      "required": [
+        "producer_revision",
+        "evidence",
+        "document",
+        "layout",
+        "content_hash",
+        "memberships"
+      ],
+      "title": "ParsedObservation",
+      "type": "object"
+    },
+    "PresenceResult": {
+      "additionalProperties": false,
+      "properties": {
+        "recipe": {
+          "const": "effect-presence-v1",
+          "default": "effect-presence-v1",
+          "title": "Recipe",
+          "type": "string"
+        },
+        "source_version_id": {
+          "pattern": "^src:v1:[0-9a-f]{64}(?![\\s\\S])",
+          "title": "Source Version Id",
+          "type": "string"
+        },
+        "source_index": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Source Index",
+          "type": "integer"
+        },
+        "parser_version": {
+          "const": "effect-presence-v1/detail-v1",
+          "default": "effect-presence-v1/detail-v1",
+          "title": "Parser Version",
+          "type": "string"
+        },
+        "template_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Template Id"
+        },
+        "container_locator": {
+          "minLength": 1,
+          "title": "Container Locator",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "present",
+            "absent",
+            "unknown"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "reason_code": {
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_version_id",
+        "source_index",
+        "template_id",
+        "container_locator",
+        "state",
+        "reason_code"
+      ],
+      "title": "PresenceResult",
+      "type": "object"
+    },
+    "ProductEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "ordinal": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "date_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date Raw"
+        },
+        "href_raw": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Href Raw",
+          "type": "array"
+        },
+        "resolved_urls": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resolved Urls",
+          "type": "array"
+        },
+        "matches": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "expansion_link": "#/$defs/ExpansionLink",
+                "product_link": "#/$defs/ProductLink",
+                "source_block": "#/$defs/SourceBlock"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ProductLink"
+              },
+              {
+                "$ref": "#/$defs/ExpansionLink"
+              },
+              {
+                "$ref": "#/$defs/SourceBlock"
+              }
+            ]
+          },
+          "title": "Matches",
+          "type": "array"
+        },
+        "diagnostics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ordinal",
+        "name",
+        "date_raw",
+        "href_raw",
+        "resolved_urls",
+        "matches",
+        "diagnostics"
+      ],
+      "title": "ProductEvidence",
+      "type": "object"
+    },
+    "ProductHint": {
+      "description": "Product evidence printed below the card, before product identity is resolved.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date"
+        },
+        "links": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "date",
+        "links"
+      ],
+      "title": "ProductHint",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ProductLink": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "product_link",
+          "title": "Kind",
+          "type": "string"
+        },
+        "product_url": {
+          "minLength": 1,
+          "title": "Product Url",
+          "type": "string"
+        },
+        "expansion_code": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expansion Code"
+        }
+      },
+      "required": [
+        "kind",
+        "product_url",
+        "expansion_code"
+      ],
+      "title": "ProductLink",
+      "type": "object"
+    },
+    "QAIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "stable_source_key": {
+          "minLength": 1,
+          "title": "Stable Source Key",
+          "type": "string"
+        },
+        "official_number": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Official Number"
+        },
+        "locator": {
+          "minLength": 1,
+          "title": "Locator",
+          "type": "string"
+        },
+        "published_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Published On"
+        },
+        "date_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date Raw"
+        }
+      },
+      "required": [
+        "stable_source_key",
+        "official_number",
+        "locator",
+        "published_on",
+        "date_raw"
+      ],
+      "title": "QAIdentity",
+      "type": "object"
+    },
+    "RelatedHint": {
+      "description": "An official link, without inferring the relationship or card identity.",
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "href": {
+          "title": "Href",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "href"
+      ],
+      "title": "RelatedHint",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "RelatedLink": {
+      "additionalProperties": false,
+      "properties": {
+        "locator": {
+          "minLength": 1,
+          "title": "Locator",
+          "type": "string"
+        },
+        "href_raw": {
+          "minLength": 1,
+          "title": "Href Raw",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "href_raw"
+      ],
+      "title": "RelatedLink",
+      "type": "object"
+    },
+    "SourceBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "source_block",
+          "title": "Kind",
+          "type": "string"
+        },
+        "source_version_id": {
+          "pattern": "^src:v1:[0-9a-f]{64}(?![\\s\\S])",
+          "title": "Source Version Id",
+          "type": "string"
+        },
+        "product_block_ordinal": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Product Block Ordinal",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "source_version_id",
+        "product_block_ordinal"
+      ],
+      "title": "SourceBlock",
+      "type": "object"
+    },
+    "sve_carddb__parse__pages__extract_en__CardRecord": {
+      "properties": {
+        "number": {
+          "title": "Number",
+          "type": "string"
+        },
+        "faces": {
+          "items": {
+            "$ref": "#/$defs/sve_carddb__parse__pages__extract_en__Face"
+          },
+          "title": "Faces",
+          "type": "array"
+        },
+        "release_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Release Date"
+        },
+        "errata_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Errata Url"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "qa": {
+          "items": {
+            "$ref": "#/$defs/sve_carddb__parse__pages__extract_en__QA"
+          },
+          "title": "Qa",
+          "type": "array"
+        },
+        "products": {
+          "items": {
+            "$ref": "#/$defs/ProductHint"
+          },
+          "title": "Products",
+          "type": "array"
+        },
+        "related_cards": {
+          "items": {
+            "$ref": "#/$defs/RelatedHint"
+          },
+          "title": "Related Cards",
+          "type": "array"
+        }
+      },
+      "required": [
+        "number",
+        "faces",
+        "release_date",
+        "errata_url",
+        "notes",
+        "qa",
+        "products",
+        "related_cards"
+      ],
+      "title": "CardRecord",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "sve_carddb__parse__pages__extract_en__Face": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "info": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Info",
+          "type": "object"
+        },
+        "stats": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Stats",
+          "type": "object"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text"
+        },
+        "sections": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sections",
+          "type": "array"
+        },
+        "raw_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Raw Text"
+        },
+        "speech": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Speech"
+        },
+        "illustrator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Illustrator"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "trait_raw": {
+          "title": "Trait Raw",
+          "type": "string"
+        },
+        "traits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Traits",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "info",
+        "stats",
+        "text",
+        "sections",
+        "raw_text",
+        "speech",
+        "illustrator",
+        "image",
+        "trait_raw",
+        "traits"
+      ],
+      "title": "Face",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "sve_carddb__parse__pages__extract_en__QA": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "answer": {
+          "title": "Answer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "question",
+        "answer"
+      ],
+      "title": "QA",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "sve_carddb__parse__pages__extract_jp__CardRecord": {
+      "description": "Everything the card page says about one card number.",
+      "properties": {
+        "number": {
+          "title": "Number",
+          "type": "string"
+        },
+        "faces": {
+          "items": {
+            "$ref": "#/$defs/sve_carddb__parse__pages__extract_jp__Face"
+          },
+          "title": "Faces",
+          "type": "array"
+        },
+        "release_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Release Date"
+        },
+        "errata_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Errata Url"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "qa": {
+          "items": {
+            "$ref": "#/$defs/sve_carddb__parse__pages__extract_jp__QA"
+          },
+          "title": "Qa",
+          "type": "array"
+        },
+        "products": {
+          "items": {
+            "$ref": "#/$defs/ProductHint"
+          },
+          "title": "Products",
+          "type": "array"
+        },
+        "related_cards": {
+          "items": {
+            "$ref": "#/$defs/RelatedHint"
+          },
+          "title": "Related Cards",
+          "type": "array"
+        }
+      },
+      "required": [
+        "number",
+        "faces",
+        "release_date",
+        "errata_url",
+        "notes",
+        "qa",
+        "products",
+        "related_cards"
+      ],
+      "title": "CardRecord",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "sve_carddb__parse__pages__extract_jp__Face": {
+      "description": "One side of a card; double-faced cards have two.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "card_class": {
+          "title": "Card Class",
+          "type": "string"
+        },
+        "card_type": {
+          "title": "Card Type",
+          "type": "string"
+        },
+        "traits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Traits",
+          "type": "array"
+        },
+        "rarity": {
+          "title": "Rarity",
+          "type": "string"
+        },
+        "product": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Product"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "cost": {
+          "title": "Cost",
+          "type": "string"
+        },
+        "power": {
+          "title": "Power",
+          "type": "string"
+        },
+        "hp": {
+          "title": "Hp",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text"
+        },
+        "sections": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sections",
+          "type": "array"
+        },
+        "flavor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Flavor"
+        },
+        "illustrator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Illustrator"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "trait_raw": {
+          "title": "Trait Raw",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "card_class",
+        "card_type",
+        "traits",
+        "rarity",
+        "product",
+        "title",
+        "cost",
+        "power",
+        "hp",
+        "text",
+        "sections",
+        "flavor",
+        "illustrator",
+        "image",
+        "trait_raw"
+      ],
+      "title": "Face",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "sve_carddb__parse__pages__extract_jp__QA": {
+      "description": "A ruling printed on the card page.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "answer": {
+          "title": "Answer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "question",
+        "answer"
+      ],
+      "title": "QA",
+      "type": "object",
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": 1,
+      "default": 1,
+      "title": "Format",
+      "type": "integer"
+    },
+    "region": {
+      "enum": [
+        "jp",
+        "en"
+      ],
+      "title": "Region",
+      "type": "string"
+    },
+    "family": {
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "title": "Family",
+      "type": "string"
+    },
+    "band": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Band"
+    },
+    "cards": {
+      "items": {
+        "$ref": "#/$defs/Card"
+      },
+      "title": "Cards",
+      "type": "array"
+    }
+  },
+  "required": [
+    "region",
+    "family",
+    "band",
+    "cards"
+  ],
+  "title": "Shard",
+  "type": "object"
+}
