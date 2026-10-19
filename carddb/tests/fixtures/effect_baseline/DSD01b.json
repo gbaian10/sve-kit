@@ -1,0 +1,96 @@
+{
+  "DSD01b-004": {
+    "ast_sha256": "41852f8c601b1be0f524588bfe0bb3e43e13a5c85a099d33a69ccba096194003",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:f4648f7e40e539abe59b008e4baeb28433bf3b9571baae5b5535fc5b7e1884b9",
+            "use_id": "use:66c632598cdab0c0f4ca82e65610ec06b845fdd91e4afb4463f392bd3cafbf35",
+            "frame_id": "frame:8ebd201e08a1e14f57b700f2fb76dc11afbf7f16261350a117e2ca75f1aac18c",
+            "source_sha256": "1e8b8069d35929fbb685e8f12c4d143fc91724ca7d515d5049bfaf0688e127d0",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 19,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:c39022cd132413572fd07ff220d6720984f2c03c462ea02ad2d45c5512aceb6c",
+            "use_id": "use:66c632598cdab0c0f4ca82e65610ec06b845fdd91e4afb4463f392bd3cafbf35",
+            "frame_id": "frame:c67116e39f6b86a1bff378ea67d41e1cb14bedc56282f06aa93820b235e5a80f",
+            "source_sha256": "1e8b8069d35929fbb685e8f12c4d143fc91724ca7d515d5049bfaf0688e127d0",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 24,
+                  "start": 20
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": []
+  },
+  "DSD01b-005": {
+    "ast_sha256": "0ccd8e593d06528553b95ca12c69f3299e744dd7d1f33682576159c96452d215",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0,
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:578d961deaa66a342bc727bb85fe563f32edd7154defe75959562030ab064855",
+            "use_id": "use:a4b39920f55a00969f0c0b4234c77ff023b671967101b809b00898b75a837da4",
+            "frame_id": "frame:dcbcb53fba26bf1cbaecaf0a4fed5cef8658deedc5a3b8d210c1c1e4a004a209",
+            "source_sha256": "94aba357f0f230a74486fc60cb2eafabca9c15e8a0c1286f16e6cef4e780759c",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 9,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": []
+  }
+}
