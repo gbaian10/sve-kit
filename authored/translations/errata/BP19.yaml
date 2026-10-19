@@ -1,0 +1,11 @@
+format: 1
+kind: errata_translations
+entries:
+  - source_hash: sha256:b8d80e3680d367158a33eaaccde2e35e449223ff5ace8e2fa335ca8898ec1a39
+    source_url: https://shadowverse-evolve.com/errata/bp19-075/
+    source_date: '2026-03-23'
+    lang: zh-Hant
+    before: 自己的主戰者生命值減少時，若「本回合中自己的主戰者生命值減少的次數」為4次以上，這張卡片進化。
+    after: 自己的回合中，自己的主戰者生命值減少時，若「本回合中自己的主戰者生命值減少的次數」為4次以上，這張卡片進化。
+    origin: machine
+    low_confidence: false
