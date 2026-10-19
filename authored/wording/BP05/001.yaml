@@ -118,9 +118,9 @@ records:
   - face_id: f:72dde15acc8f5642aa4e189d506d76d5
     region: jp
     comparison_hash: sha256:afd5340f97863f6a55391642157711a41cc40953ed345a08b6b60b82f6d93c80
-    classification: errata
-    method: ai
-    reason: 條件檢查與選擇對象的先後位置改變；條件未滿足時是否仍選擇對象可能不同。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：「場に」只是明寫原本就只在場上有效；入場曲改成先選再看死靈術條件，條件不成立時不做任何處理，結果相同。
   - face_id: f:7b24baa2c8075c7995dc919250afd982
     region: en
     comparison_hash: sha256:17aaac8f5748d2cab7c63d04761246fed5ebd691002b5dd327f4fda0425bc07f

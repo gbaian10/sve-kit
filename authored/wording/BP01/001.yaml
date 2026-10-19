@@ -70,9 +70,9 @@ records:
   - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
     region: jp
     comparison_hash: sha256:abf721038818e03ee6e6217f87c4be1dfc66fcce9af92fe167ebd173c22a8122
-    classification: errata
-    method: ai
-    reason: 零計數器的處理由放入墓場改為破壞，且判斷時機從狀態改為到達零時；可能影響觸發與替代效果，留待勘誤版本呈現。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：以 EBD02-T01 的寫法為準。
   - face_id: f:272b9d335e4856e6bf329a48fdd4df1a
     region: en
     comparison_hash: sha256:e29299473dd486a35066154929e88cdef3dc15262cda5d39dec0ed71b27375bc
