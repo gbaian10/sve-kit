@@ -109,6 +109,8 @@ def coverage_scope(kind: str = "python") -> tuple[str, float]:
     """Scope comes from the event classifier, never from missing private files."""
     if kind == "publish":
         return "synthetic", 92
+    if kind == "rust":
+        return "full", FULL_THRESHOLD
     selected = os.environ.get("SVE_CI_TEST_MODE", "full")
     raw = os.environ.get(
         "SVE_CI_COVERAGE_THRESHOLD", "90" if selected == "full" else ""
@@ -126,12 +128,14 @@ def coverage_scope(kind: str = "python") -> tuple[str, float]:
 def scope_description(kind: str = "python") -> str:
     """Distinguish remaining-test coverage from complete acceptance."""
     selected, _ = coverage_scope(kind)
+    if kind == "rust":
+        return "Test scope: **full**; generated public card input, identical for project and fork PRs."
     if selected == "synthetic":
         return "Test scope: **synthetic publish tests**; no private test data required, including fork PRs."
     if selected == "full":
         return "Test scope: **full**; private test data required."
     return (
-        "Test scope: **fork / remaining tests**. Private real-page / engine snapshot tests were not run. "
+        "Test scope: **fork / remaining tests**. The three other-game private real-page tests were not run; public SVE cases ran. "
         "私有真實頁測試未執行。 This is not full coverage acceptance."
     )
 
@@ -239,7 +243,11 @@ def rust_summary(folder: Path) -> str:
     skipped = sum(int(row[2]) for row in results)
     elapsed = number((folder / "elapsed.txt").read_text(encoding="utf-8").strip())
     seconds = sum(number(row[3]) for row in results)
-    coverage_line = scope_description() + "\n" + coverage_description(folder, rust=True)
+    coverage_line = (
+        scope_description("rust")
+        + "\n"
+        + coverage_description(folder, rust=True, kind="rust")
+    )
     locations = re.findall(
         r"^test ((?:r#)?[A-Za-z_][A-Za-z0-9_]*(?:::(?:r#)?[A-Za-z_][A-Za-z0-9_]*)*) \.\.\. FAILED$",
         source,

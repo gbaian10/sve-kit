@@ -58,7 +58,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | 人寫資料                                   | `authored/`                             | ✅            |
 | 日英解析卡片輸入與來源證據                 | `card-data/`                            | ✅ 審查後保存 |
 | 官方 SVE 日英卡文                          | `authored/` 證據資料、測試 fixture 等   | ✅            |
-| 私有測試原件與完整測試卡表                 | 專用私有 GitHub testdata repo           | 見下述流程    |
+| 私有其他遊戲案例與歷史測試卡表             | 專用私有 GitHub testdata repo           | 見下述流程    |
 
 `SVE_DATA_DIR` 的 latest cache 只保存可替換的工作副本；清理或替換前，所需來源版本須已歸檔並可從獨立備份驗回。
 **抓取 manifest 與歷史 raw／來源版本 inventory 都不可刪**；官網回寫後無法靠重抓還原，建置 DB 可重建不代表來源歷史可丟棄。
@@ -75,15 +75,14 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
 `authored/` 依卡包切檔（例如 `authored/rules/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
 
-既有完整日文測試卡表 JSONL、19 個官方頁面測試原檔與來源說明保存在永久私有的 GitHub testdata repo，不放卡圖或憑證，不用 R2。
-公開 carddb 測試使用合成頁面與文字，並保存私有案例索引及逐欄位 SHA-256；SVE 日英真實卡文 fixture 也可進 repo。
-合成案例繼續驗證結構與邊界；依賴私有原件的測試沿下述取得與驗證流程，不因允許公開卡文而跳過。
-歷史官方內容與其他保留內容的授權範圍見 [LICENSING.md](LICENSING.md)。
-對私有測試輸入，`sve-kit` 保存資料來源鎖定檔（完整 commit SHA＋各檔案 SHA-256）；CI 以唯讀 deploy key 取得指定 commit 並驗 hash，key 由管理者設定為 secret。可信任 job 缺資料、缺憑證或 hash 不符即失敗，不靜默跳過。
-更新時先重產並推送資料 repo、保留舊 commit，再以 `sve-kit` PR 更新鎖定檔，通過 CI 後合併。
-公開後主分支與專案自己的 PR 跑完整測試：Rust 行覆蓋率門檻為 90%，Python 行與分支覆蓋率合計門檻為 90%（本機 pytest hook 與 CI 相同）；公開後 fork PR 沒有 secret，明確排除依賴私有測試資料的測試並在 job summary 標示。
-fork PR 依來源 repo 判定，明確以 `excluded` 模式排除私有頁面，Rust 只排除依賴私有快照的 `cards`／`shared` 測試目標，保留 production 覆蓋範圍。
-fork PR 使用 `.github/ci/fork-coverage.json` 針對剩餘測試配置的獨立覆蓋率門檻與結果標示，不套用完整測試的 90% 門檻，也不宣稱完整覆蓋率驗收通過。
+16 個 SVE 日英官方頁面 fixture 存在 `carddb/tests/fixtures/official_jp/`、`official_en/`，來源說明及原有逐欄 hash 保存在旁邊；公開與 fork 測試都執行。合成案例繼續驗證結構與邊界。
+引擎測試由 carddb 讀取 `card-data/` 及 `tests/engine/card-input.json` 明示的 JP 批次，產生暫存 JSONL；不提交衍生卡表。引擎仍自行載入 authored 效果、規則名稱與 token 選用，不另造一套卡表規則。
+本機 `cargo-test` hook 與 Rust CI 共用 `.github/ci/rust_tests.py`，每次重產輸入且清除暫存；缺資料必須失敗。Rust 不需要私有 checkout 或 deploy key，主 repo 與 fork 均跑完整 workspace，行覆蓋率門檻 90%。
+永久私有 testdata 保留舊 JSONL、19 個原檔及全部歷史，不能刪除或改公開；Python 現在只讀其中 F17–F19 三個其他遊戲案例。
+私有測試輸入以 `.github/ci/testdata.lock` 釘 repo／完整 commit，`private-pages.json` 釘各檔 SHA-256 與逐欄期望；CI 以唯讀 deploy key 取得指定 commit 並驗 hash。可信任 Python job 缺資料、憑證或 hash 不符即失敗。
+更新私有案例時先新增私有 repo commit、保留舊歷史，再以 sve-kit PR 更新 pin。
+主分支與專案自己的 Python PR 跑完整測試，行與分支覆蓋率合計門檻 90%（本機 hook 與 CI 相同）；fork 依來源 repo 判定，以 `excluded` 排除三個私有案例，仍執行公開 SVE 與合成案例。
+Python fork 使用 `.github/ci/fork-coverage.json` 的獨立門檻，summary 標明排除範圍，不宣稱完整覆蓋率驗收通過；Rust 不使用 fork 降低門檻。
 測試卡文與含卡文的衍生產物不放 Actions cache／artifact；失敗 log 不印整行卡文。私有存放只是存取控制，不等於授權；公開保存也是專案的風險決定，不是官方許可。授權相關 PR 仍須審查並在合併前交維護者確認。
 
 ## 已定案的設計原則
@@ -126,7 +125,7 @@ uv --directory carddb run pytest           # 測試
 uv --directory carddb run ruff check       # lint
 uv --directory carddb run mypy             # 型別檢查
 cargo clippy --locked --workspace --all-targets -- -D warnings   # Rust lint
-cargo llvm-cov --locked --workspace --fail-under-lines 90   # Rust 測試＋行覆蓋率門檻（手動 hook `cargo-test`；CI 每次跑）
+python3 .github/ci/rust_tests.py           # 產生公開測試輸入＋Rust 完整覆蓋率（90%）
 cargo deny check && cargo machete          # 依賴的安全公告與未用依賴（pre-push 也會跑）
 ```
 

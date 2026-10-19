@@ -8,14 +8,14 @@ from pathlib import Path
 
 import pytest
 
-from ..support.private_pages_support import (
+from ..support.page_fixtures_support import (
     DIRECTORY_ENV,
     MODE_ENV,
     Case,
     Check,
+    FixtureInputs,
     Index,
-    PrivateInputs,
-    PrivatePageError,
+    PageFixtureError,
     check_projection,
     load_index,
     mode,
@@ -41,13 +41,13 @@ CASE = Case(
 def test_public_index_needs_no_private_checkout() -> None:
     index = load_index()
     assert index.commit == "309b766885d49faff9db80f5b97cd56d8601c55b"
-    assert len(index.cases) == 19
-    assert len({case.sha256 for case in index.cases}) == 19
+    assert {case.id for case in index.cases} == {"F17", "F18", "F19"}
+    assert len({case.sha256 for case in index.cases}) == 3
 
 
 def test_private_fixture_representation_is_safe() -> None:
-    inputs = PrivateInputs({"F01": b"SVE-KIT synthetic private sentinel"})
-    assert repr(inputs) == "<private inputs>"
+    inputs = FixtureInputs({"F01": b"SVE-KIT synthetic private sentinel"})
+    assert repr(inputs) == "<fixture inputs>"
     assert inputs["F01"] == b"SVE-KIT synthetic private sentinel"
 
 
@@ -90,7 +90,7 @@ def test_mode_is_explicit_with_excluded_default(value: str | None) -> None:
 @pytest.mark.parametrize("value", ["", "auto", "Required"])
 def test_unknown_mode_fails(value: str) -> None:
     with pytest.raises(
-        PrivatePageError, match=r"^private-page mode must be required or excluded$"
+        PageFixtureError, match=r"^private-page mode must be required or excluded$"
     ):
         mode({MODE_ENV: value})
 
@@ -107,19 +107,19 @@ def test_local_hash_verification_does_not_require_git(tmp_path: Path) -> None:
 
 def test_hash_mismatch_is_safe(tmp_path: Path) -> None:
     write_fixture(tmp_path, b"SVE-KIT synthetic private sentinel")
-    with pytest.raises(PrivatePageError) as failure:
+    with pytest.raises(PageFixtureError) as failure:
         read_inputs(Index("f" * 40, (CASE,)), tmp_path)
     assert str(failure.value) == "F01: fixture hash mismatch"
 
 
 def test_missing_fixture_fails(tmp_path: Path) -> None:
-    with pytest.raises(PrivatePageError, match=r"^F01: fixture unavailable$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: fixture unavailable$"):
         read_inputs(Index("f" * 40, (CASE,)), tmp_path)
 
 
 def test_missing_directory_fails(tmp_path: Path) -> None:
     with pytest.raises(
-        PrivatePageError, match=r"^private-page data directory is unavailable$"
+        PageFixtureError, match=r"^page-fixture data directory is unavailable$"
     ):
         read_inputs(Index("f" * 40, (CASE,)), tmp_path / "missing")
 
@@ -131,7 +131,7 @@ def test_symlink_escape_fails(tmp_path: Path) -> None:
     outside = tmp_path / "outside.html"
     outside.write_bytes(b"test")
     path.symlink_to(outside)
-    with pytest.raises(PrivatePageError, match=r"^F01: unsafe fixture$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: unsafe fixture$"):
         read_inputs(Index("f" * 40, (CASE,)), root)
 
 
@@ -150,18 +150,18 @@ def test_unsafe_index_paths_are_rejected(tmp_path: Path, path: str) -> None:
     cases = document["cases"]
     assert isinstance(cases, list)
     cases[0]["path"] = path
-    with pytest.raises(PrivatePageError, match=r"^unsafe private-page fixture path$"):
+    with pytest.raises(PageFixtureError, match=r"^unsafe page-fixture fixture path$"):
         load_index(write_index(tmp_path, document))
 
 
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [
-        ("sha256", "x" * 64, "invalid private-page fixture hash"),
-        ("parser", "eval", "unknown private-page parser"),
-        ("id", "name from source", "invalid private-page case ID"),
-        ("arguments", {"extra": 1}, "invalid private-page index object"),
-        ("checks", [], "private-page case has no checks"),
+        ("sha256", "x" * 64, "invalid page-fixture fixture hash"),
+        ("parser", "eval", "unknown page-fixture parser"),
+        ("id", "name from source", "invalid page-fixture case ID"),
+        ("arguments", {"extra": 1}, "invalid page-fixture index object"),
+        ("checks", [], "page-fixture case has no checks"),
     ],
 )
 def test_invalid_case_contract_fails(
@@ -171,7 +171,7 @@ def test_invalid_case_contract_fails(
     cases = document["cases"]
     assert isinstance(cases, list)
     cases[0][field] = value
-    with pytest.raises(PrivatePageError) as failure:
+    with pytest.raises(PageFixtureError) as failure:
         load_index(write_index(tmp_path, document))
     assert str(failure.value) == message
 
@@ -179,10 +179,10 @@ def test_invalid_case_contract_fails(
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [
-        ("commit", "f" * 39, "invalid private-page commit pin"),
-        ("version", True, "unsupported private-page index version"),
-        ("version", 2, "unsupported private-page index version"),
-        ("cases", [], "private-page index has no cases"),
+        ("commit", "f" * 39, "invalid page-fixture commit pin"),
+        ("version", True, "unsupported page-fixture index version"),
+        ("version", 2, "unsupported page-fixture index version"),
+        ("cases", [], "page-fixture index has no cases"),
     ],
 )
 def test_invalid_index_contract_fails(
@@ -190,7 +190,7 @@ def test_invalid_index_contract_fails(
 ) -> None:
     document = index_document()
     document[field] = value
-    with pytest.raises(PrivatePageError) as failure:
+    with pytest.raises(PageFixtureError) as failure:
         load_index(write_index(tmp_path, document))
     assert str(failure.value) == message
 
@@ -198,7 +198,7 @@ def test_invalid_index_contract_fails(
 def test_duplicate_json_keys_fail(tmp_path: Path) -> None:
     path = tmp_path / "index.json"
     path.write_text('{"version":1,"version":1}')
-    with pytest.raises(PrivatePageError, match=r"^duplicate private-page index key$"):
+    with pytest.raises(PageFixtureError, match=r"^duplicate page-fixture index key$"):
         load_index(path)
 
 
@@ -208,7 +208,7 @@ def test_duplicate_case_fails(tmp_path: Path) -> None:
     assert isinstance(cases, list)
     cases.append(cases[0])
     with pytest.raises(
-        PrivatePageError, match=r"^duplicate private-page case or fixture$"
+        PageFixtureError, match=r"^duplicate page-fixture case or fixture$"
     ):
         load_index(write_index(tmp_path, document))
 
@@ -218,7 +218,7 @@ def test_duplicate_check_fails(tmp_path: Path) -> None:
     cases = document["cases"]
     assert isinstance(cases, list)
     cases[0]["checks"] *= 2
-    with pytest.raises(PrivatePageError, match=r"^duplicate private-page check path$"):
+    with pytest.raises(PageFixtureError, match=r"^duplicate page-fixture check path$"):
         load_index(write_index(tmp_path, document))
 
 
@@ -239,16 +239,16 @@ def test_subset_allows_new_fields_and_distinguishes_null_from_empty() -> None:
             }
         },
     )
-    with pytest.raises(PrivatePageError, match=r"^F01: record\.name: text mismatch$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: record\.name: text mismatch$"):
         check_projection(case, {"record": {"name": None, "note": None}})
-    with pytest.raises(PrivatePageError, match=r"^F01: record\.note: null mismatch$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: record\.note: null mismatch$"):
         check_projection(case, {"record": {"name": "", "note": ""}})
 
 
 def test_exact_utf8_and_safe_field_failure() -> None:
     check_projection(CASE, {"name": ""})
     for actual in (" ", "\n", "SVE-KIT synthetic private sentinel"):
-        with pytest.raises(PrivatePageError) as failure:
+        with pytest.raises(PageFixtureError) as failure:
             check_projection(CASE, {"name": actual})
         assert str(failure.value) == "F01: name: text mismatch"
 
@@ -262,13 +262,13 @@ def test_ordered_list_and_missing_field() -> None:
         ),
     )
     check_projection(case, {"items": ["", "SVE-KIT synthetic second"]})
-    with pytest.raises(PrivatePageError, match=r"^F01: items\.0: text mismatch$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: items\.0: text mismatch$"):
         check_projection(case, {"items": ["SVE-KIT synthetic second", ""]})
-    with pytest.raises(PrivatePageError, match=r"^F01: items: length mismatch$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: items: length mismatch$"):
         check_projection(case, {"items": [""]})
-    with pytest.raises(PrivatePageError, match=r"^F01: items: missing field$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: items: missing field$"):
         check_projection(case, {})
-    with pytest.raises(PrivatePageError, match=r"^F01: items\.0: missing field$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: items\.0: missing field$"):
         check_projection(replace(case, checks=(case.checks[1],)), {"items": []})
 
 
@@ -277,14 +277,14 @@ def test_boolean_is_not_integer() -> None:
     boolean = replace(CASE, checks=(Check(("flag",), "boolean", True),))
     check_projection(integer, {"count": 1})
     check_projection(boolean, {"flag": True})
-    with pytest.raises(PrivatePageError, match=r"^F01: count: integer mismatch$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: count: integer mismatch$"):
         check_projection(integer, {"count": True})
-    with pytest.raises(PrivatePageError, match=r"^F01: flag: boolean mismatch$"):
+    with pytest.raises(PageFixtureError, match=r"^F01: flag: boolean mismatch$"):
         check_projection(boolean, {"flag": 1})
 
 
 def test_parser_error_does_not_quote_private_input() -> None:
-    with pytest.raises(PrivatePageError) as failure:
+    with pytest.raises(PageFixtureError) as failure:
         project(CASE, b"SVE-KIT synthetic private sentinel")
     assert str(failure.value) == "F01: parser rejected fixture"
 
@@ -335,7 +335,7 @@ def private_failure_project(tmp_path_factory: pytest.TempPathFactory) -> Path:
     )
     (root / "test_mismatch.py").write_text(
         "import os\nfrom dataclasses import replace\nfrom pathlib import Path\n"
-        "from tests.support.private_pages_support import load_index\n"
+        "from tests.support.page_fixtures_support import load_index\n"
         "from tests.parse import test_private_official_pages as private\n"
         "private.INDEX = load_index(Path('index.json'))\n"
         "if os.environ['SVE_KIT_TEST_FAILURE'] == 'parser':\n"
@@ -378,7 +378,7 @@ def test_pytest_failure_traceback_hides_private_page(
     assert result.returncode == 1
     assert "1 failed" in output
     assert message in output
-    assert "<private inputs>" in output
+    assert "<fixture inputs>" in output
     assert "b'<" not in output
     assert "SVE-KIT PRIVATE HEAD" not in output
     assert "SVE-KIT PRIVATE TAIL" not in output
@@ -396,7 +396,7 @@ def pytest_project(tmp_path_factory: pytest.TempPathFactory) -> Path:
     )
     (root / "test_public.py").write_text("def test_public():\n    pass\n")
     (root / "test_private_official_pages.py").write_text(
-        "import os\nfrom pathlib import Path\nimport pytest\nfrom tests.support.private_pages_support import load_index, read_inputs, DIRECTORY_ENV\npytestmark = pytest.mark.private_pages\ndef test_private():\n    assert read_inputs(load_index(Path('index.json')), Path(os.environ[DIRECTORY_ENV]))['F01'] == b'test'\n"
+        "import os\nfrom pathlib import Path\nimport pytest\nfrom tests.support.page_fixtures_support import load_index, read_inputs, DIRECTORY_ENV\npytestmark = pytest.mark.private_pages\ndef test_private():\n    assert read_inputs(load_index(Path('index.json')), Path(os.environ[DIRECTORY_ENV]))['F01'] == b'test'\n"
     )
     write_index(root, index_document())
     write_fixture(root)
@@ -447,22 +447,22 @@ def test_real_collection_rejects_unknown_mode(pytest_project: Path, value: str) 
 @pytest.mark.parametrize(
     ("check", "message"),
     [
-        ({"path": [], "kind": "null"}, "invalid private-page check path"),
-        ({"path": [True], "kind": "null"}, "invalid private-page index string"),
-        ({"path": [-1], "kind": "null"}, "invalid private-page index integer"),
+        ({"path": [], "kind": "null"}, "invalid page-fixture check path"),
+        ({"path": [True], "kind": "null"}, "invalid page-fixture index string"),
+        ({"path": [-1], "kind": "null"}, "invalid page-fixture index integer"),
         (
             {"path": ["name"], "kind": "text", "expected": "x" * 64},
-            "invalid private-page text hash",
+            "invalid page-fixture text hash",
         ),
         (
             {"path": ["count"], "kind": "integer", "expected": True},
-            "invalid private-page index integer",
+            "invalid page-fixture index integer",
         ),
         (
             {"path": ["flag"], "kind": "boolean", "expected": 1},
-            "invalid private-page boolean",
+            "invalid page-fixture boolean",
         ),
-        ({"path": ["name"], "kind": "unknown"}, "unknown private-page check kind"),
+        ({"path": ["name"], "kind": "unknown"}, "unknown page-fixture check kind"),
     ],
 )
 def test_invalid_check_contract_fails(
@@ -472,7 +472,7 @@ def test_invalid_check_contract_fails(
     cases = document["cases"]
     assert isinstance(cases, list)
     cases[0]["checks"] = [check]
-    with pytest.raises(PrivatePageError) as failure:
+    with pytest.raises(PageFixtureError) as failure:
         load_index(write_index(tmp_path, document))
     assert str(failure.value) == message
 
@@ -521,6 +521,30 @@ def test_required_collection_does_not_skip_unavailable_data(
     )
     assert result.returncode == 1
     assert "1 failed" in result.stdout
-    assert "private-page data directory is unavailable" in result.stdout
+    assert "page-fixture data directory is unavailable" in result.stdout
     assert "skipped" not in result.stdout
     assert "私有真實頁測試未執行" not in result.stdout
+
+
+@pytest.mark.parametrize("public", [False, True])
+@pytest.mark.parametrize(
+    "path",
+    [
+        "fixtures/carddb/synthetic/basic.html",
+        "fixtures/official_jp/card.html",
+        "fixtures/official_en/card.html",
+    ],
+)
+def test_index_roots_do_not_cross_storage_boundaries(
+    tmp_path: Path, public: bool, path: str
+) -> None:
+    document = index_document()
+    cases = document["cases"]
+    assert isinstance(cases, list)
+    cases[0]["path"] = path
+    index = write_index(tmp_path, document)
+    if public == path.startswith("fixtures/official_"):
+        assert load_index(index, public=public).cases[0].path == path
+    else:
+        with pytest.raises(PageFixtureError, match="unsafe page-fixture fixture path"):
+            load_index(index, public=public)

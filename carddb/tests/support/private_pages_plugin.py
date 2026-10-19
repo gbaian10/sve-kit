@@ -4,7 +4,7 @@ from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] --
 import pytest
 from _pytest.terminal import TerminalReporter  # ruff: ignore[typing-only-third-party-import] -- pluggy evaluates hook annotations at registration
 
-from .private_pages_support import PrivatePageError, mode
+from .page_fixtures_support import PageFixtureError, mode
 
 MODE = pytest.StashKey[str]()
 
@@ -12,7 +12,7 @@ MODE = pytest.StashKey[str]()
 def pytest_configure(config: pytest.Config) -> None:
     try:
         config.stash[MODE] = mode(os.environ)
-    except PrivatePageError as exc:
+    except PageFixtureError as exc:
         raise pytest.UsageError(str(exc)) from None
     config.addinivalue_line(
         "markers", "private_pages: needs pinned private official pages"

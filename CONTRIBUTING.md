@@ -267,7 +267,6 @@ OS environment and preserves overrides supplied by a shell or CI:
 SVE_DATA_DIR = "{{ get_env(name='SVE_DATA_DIR', default='/absolute/local/data') }}"
 SVE_EXPORT_DIR = "{{ get_env(name='SVE_EXPORT_DIR', default='/absolute/local/export') }}"
 SVE_CARDDB_PRIVATE_DIR = "{{ get_env(name='SVE_CARDDB_PRIVATE_DIR', default='/absolute/local/carddb-private') }}"
-SVE_TEST_SNAPSHOT = "{{ get_env(name='SVE_TEST_SNAPSHOT', default='/absolute/local/cards.jsonl') }}"
 ```
 
 These paths are examples; replace them in private configuration. An activated
@@ -300,10 +299,10 @@ workflow steps and does not depend on local mise configuration.
 | `SVE_TIMEOUT` | HTTP timeout | carddb `ingest.config.Settings` | Optional; 30 seconds, positive |
 | `SVE_USER_AGENT` | Browser User-Agent | carddb `ingest.config.Settings` | Optional; existing browser UA |
 | `SVE_BREAKER_THRESHOLD` | HTTP circuit breaker threshold | carddb `ingest.config.Settings` | Optional; 5, positive integer |
-| `SVE_TEST_SNAPSHOT` | Private card list JSONL | Rust card tests | Required for full/required CI; optional local tests skip when unset; no default |
-| `SVE_PRIVATE_TESTDATA_MODE` | Private fixture policy | Python/Rust tests | CI explicitly sets `required` or `excluded`; local Python unset runs synthetic tests and reports exclusion |
+| `SVE_TEST_SNAPSHOT` | Generated temporary JP test JSONL | Rust card tests | Set by `.github/ci/rust_tests.py`; direct Cargo tests fail if it is missing |
+| `SVE_PRIVATE_TESTDATA_MODE` | Private fixture policy | Python tests | CI sets `required` or `excluded`; local unset runs public SVE and synthetic tests and reports three private cases excluded |
 | `SVE_PRIVATE_TESTDATA_DIR` | Private page fixtures | Python tests | Required in `required` mode; no default |
-| `SVE_CI_TEST_MODE` | Full or fork test scope | CI helpers and Rust tests | Set by CI; no mise default |
+| `SVE_CI_TEST_MODE` | Full or fork Python test scope | CI helpers | Set by CI; Rust always runs the full public scope; no mise default |
 | `SVE_CI_COVERAGE_THRESHOLD` | Coverage acceptance threshold | CI helpers | Set from CI policy; no mise default |
 | `SVE_R2_ACCESS_KEY_ID`, `SVE_R2_SECRET_ACCESS_KEY` | R2 credentials | publish upload/remote GC SDK | Required for remote execution only; no default; keep secrets outside the repo |
 | `R2_ACCOUNT_ID`, `R2_DEV_BUCKET` | R2 account and target bucket | publish upload/remote GC | Execution requires CLI or env; no default |
@@ -327,8 +326,8 @@ pre-commit install
 The git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
 are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
 that component or a shared input. The Python manual hook enforces 90% combined line and branch
-coverage; Rust tests enforce 90% line coverage. The same thresholds apply locally and to full CI runs; fork PRs use separate
-remaining-test thresholds described below.
+coverage; Rust tests enforce 90% line coverage for both project and fork PRs.
+Python fork PRs use the separate remaining-test threshold described below.
 publish has its own 92% combined line and branch coverage gate, including fork PRs,
 and requires no private test data.
 Direct `pytest` runs do not enable coverage, so you can run selected files or tests without the
@@ -441,30 +440,40 @@ the workspace so test execution does not depend on a previous job's outputs.
 
 ### Private test data and fork PRs
 
-The permanently private testdata repository holds the engine JSONL and 19 original
-carddb pages. CI checks out the full commit in `.github/ci/testdata.lock`, verifies
-that commit and the engine file SHA-256, and checks every original page and expected
-field against `carddb/tests/fixtures/private-pages.json`. Both pins must agree.
-Update the private repository first, retaining its existing history, then update
-the public pins in a separate PR. Do not rewrite private testdata history.
+The 16 SVE JP/EN parser fixtures are public under `carddb/tests/fixtures/official_jp/`
+and `official_en/`. `official-pages.json` retains their original file and field hashes;
+`OFFICIAL-SOURCES.md` records provenance and the limits of the curated source pages.
+All project and fork runs execute these cases alongside the synthetic boundary tests.
 
-Project PRs and public `main` use `SVE_PRIVATE_TESTDATA_MODE=required`; a missing
-key, checkout, file or hash match fails the job. Fork PRs are identified by the
-head repository, not by actor or credential availability. They do not check out
-private testdata: Python uses `excluded`, and Rust omits only the snapshot-dependent
-`cards` and `shared` integration targets. Production coverage scope is unchanged.
-The independent thresholds live in `.github/ci/fork-coverage.json`. Each component
-summary marks remaining-test coverage and says private tests were not run; this
-is not full coverage acceptance. Unknown modes or missing fork thresholds fail.
+Rust uses a temporary JSONL generated by carddb from the admitted `card-data/` and
+the explicit JP batch in `tests/engine/card-input.json`. It contains every current
+printing and face; the engine continues to apply its existing authored effects,
+rule names and token selection. This is a test adapter, not a production snapshot
+or a separate maintained card list. Update the batch pin explicitly when changing
+the test baseline. `.github/ci/rust_tests.py` generates a fresh file, replaces any
+inherited `SVE_TEST_SNAPSHOT`, runs Cargo, and removes the temporary data. Both the
+manual `cargo-test` hook and CI use it. Project and fork PRs run the same complete
+workspace with the 90% line coverage gate, without private credentials. Direct
+Cargo snapshot tests fail if the generated input is missing; they never skip.
 
-With `SVE_PRIVATE_TESTDATA_MODE` unset, local Python runs only synthetic tests and
-prints `私有真實頁測試未執行` at the end. Maintainers running the full Python hook
-must explicitly set `SVE_PRIVATE_TESTDATA_MODE=required` and
-`SVE_PRIVATE_TESTDATA_DIR=/path/to/private-testdata` in ignored local configuration.
-Local Python checks per-file hashes; CI additionally verifies the checkout commit.
-`cargo-test` needs `SVE_TEST_SNAPSHOT` (see Setup). Never add `--showlocals`/`-l` to
-private-page tests: intermediate values can contain official wording. Their fixture
-wrapper has a safe representation, but local-variable dumps are not safe.
+The permanently private repository keeps all old files and history. Python only
+reads F17–F19 (three other-game fixtures). `.github/ci/testdata.lock` pins its repo
+and full commit, while `private-pages.json` records the paths, file hashes and
+field oracles. The pins must agree. Update private data by adding commits, never
+rewriting or deleting history, then update the public pin in a separate PR.
+
+Project Python PRs and `main` use `SVE_PRIVATE_TESTDATA_MODE=required`; missing keys,
+checkouts, files or matching hashes fail. Forks are classified by head repository,
+not actor or credential availability. They use `excluded` only for the three
+remaining private cases, with the existing independent threshold in
+`.github/ci/fork-coverage.json` and an explicit remaining-test summary.
+
+Local Python defaults to `excluded` and runs public SVE plus synthetic cases.
+Maintainers running the full Python hook set `SVE_PRIVATE_TESTDATA_MODE=required`
+and `SVE_PRIVATE_TESTDATA_DIR=/path/to/private-testdata` in ignored configuration.
+Never add `--showlocals`/`-l` to private-page tests: local-variable dumps can expose
+private wording despite the fixture wrapper's safe representation. Generated
+JSONL, official test content and raw test logs are not cached or uploaded as artifacts.
 
 Now and then, and before a release, run the mutation test. Every surviving mutant
 is a bug the tests would not notice; add a test, or explain why it cannot change behaviour:

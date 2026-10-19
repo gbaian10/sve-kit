@@ -23,16 +23,14 @@ fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
-#[path = "support/private_catalog.rs"]
-mod private_catalog;
+#[path = "support/generated_catalog.rs"]
+mod generated_catalog;
 
-use private_catalog::catalog;
+use generated_catalog::catalog;
 
 #[test]
 fn representative_rules_pass_every_checkpoint() {
-    let Some(catalog) = catalog() else {
-        return;
-    };
+    let catalog = catalog();
     let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
     let selection =
         load_selection(&root().join("tests/rules-scenarios/g1-selection.yaml")).unwrap();
@@ -45,9 +43,7 @@ fn representative_rules_pass_every_checkpoint() {
 
 #[test]
 fn every_shared_scenario_passes_or_is_a_listed_known_failure() {
-    let Some(catalog) = catalog() else {
-        return;
-    };
+    let catalog = catalog();
     let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
     let known = load_known_failures(&root().join("tests/engine/known-failures.yaml")).unwrap();
     let reports = run(
@@ -66,9 +62,7 @@ fn every_shared_scenario_passes_or_is_a_listed_known_failure() {
 /// Load-time rejection (M1): every authored card either loads or is a reviewed rejection.
 #[test]
 fn authored_yaml_loads_or_is_a_listed_rejection() {
-    let Some(catalog) = catalog() else {
-        return;
-    };
+    let catalog = catalog();
     let listed: serde_json::Value = serde_saphyr::from_str(
         &read_to_string(root().join("tests/engine/rejected-yaml.yaml")).unwrap(),
     )
@@ -108,9 +102,7 @@ fn authored_yaml_loads_or_is_a_listed_rejection() {
 
 #[test]
 fn replay_and_assist_match_every_shared_assertion() {
-    let Some(catalog) = catalog() else {
-        return;
-    };
+    let catalog = catalog();
     let fixtures = load_fixtures(&root().join("tests/architecture-fixtures")).unwrap();
     let mut replay =
         || -> Box<dyn ReplayEngine> { Box::new(ReplayAdapter::new(Arc::clone(&catalog))) };
@@ -127,9 +119,7 @@ fn replay_and_assist_match_every_shared_assertion() {
 
 #[test]
 fn information_pairs_legality_and_profiles_match_shared_ai_contract() {
-    let Some(catalog) = catalog() else {
-        return;
-    };
+    let catalog = catalog();
     let mut profiles = BTreeMap::new();
     for id in ["general", "aggro", "control"] {
         profiles.insert(

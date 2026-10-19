@@ -65,6 +65,10 @@ jobs:
               - 'tools/schema-er/**'
               - 'authored/**' # the registry tests load and validate the real authored data
             rust:
+              - 'card-data/**'
+              - 'carddb/src/**' # engine projection and its transitive schema/CLI dependencies
+              - 'carddb/pyproject.toml'
+              - 'carddb/uv.lock'
               - 'sim/engine/**'
               - 'sim/scenario-runner/**'
               - 'Cargo.toml'
@@ -350,28 +354,6 @@ jobs:
         with:
           persist-credentials: false
           clean: true
-      - name: Clear prior private checkout
-        run: rm -rf .testdata
-      - name: Select explicit test scope and read the pin
-        id: pin
-        run: python3 .github/ci/testdata.py configure rust
-      - name: Require the private-data deploy key
-        if: steps.pin.outputs.mode == 'required'
-        env:
-          DEPLOY_KEY: ${{ secrets.TESTDATA_DEPLOY_KEY }}
-        run: test -n "$DEPLOY_KEY" || { echo 'Required private test data key is missing'; exit 1; }
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: steps.pin.outputs.mode == 'required'
-        with:
-          repository: ${{ steps.pin.outputs.repo }}
-          ref: ${{ steps.pin.outputs.commit }}
-          ssh-key: ${{ secrets.TESTDATA_DEPLOY_KEY }}
-          path: .testdata
-          persist-credentials: false
-          clean: true
-      - name: Verify required private test data
-        if: steps.pin.outputs.mode == 'required'
-        run: python3 .github/ci/testdata.py verify rust
       - name: Install the pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -411,7 +393,7 @@ jobs:
             uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
-      - name: Rust tests (coverage gate for the explicit test scope)
+      - name: Rust tests (public inputs, full 90% coverage gate)
         id: tests
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
@@ -421,7 +403,8 @@ jobs:
           mkdir -p "$REPORT_DIR"
           start=$SECONDS
           status=0
-          python3 .github/ci/testdata.py rust-tests "$REPORT_DIR/coverage.json" \
+          python3 .github/ci/rust_tests.py llvm-cov --locked --workspace --summary-only \
+            --fail-under-lines 90 --json --output-path "$REPORT_DIR/coverage.json" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "cargo llvm-cov exit status: $status (statistics in the next step; raw output stays private)"
@@ -431,11 +414,11 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
         run: python3 .github/ci/test_summary.py rust "$REPORT_DIR"
-      - name: Remove private Rust reports and test data
+      - name: Remove Rust reports
         if: always()
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
-        run: rm -rf "$REPORT_DIR" .testdata
+        run: rm -rf "$REPORT_DIR"
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:

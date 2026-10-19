@@ -262,7 +262,19 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
             json.dumps({"data": [{"totals": {"lines": {"percent": 95.5}}}]}),
             encoding="utf-8",
         )
-        summary = rust_summary(self.folder)
+        summary = ""
+        for environment in (
+            {},
+            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "94"},
+        ):
+            with patch.dict(os.environ, environment, clear=True):
+                summary = rust_summary(self.folder)
+                assert (
+                    "generated public card input, identical for project and fork PRs"
+                    in summary
+                )
+                assert "private test data required" not in summary
+                assert "required **90%**" in summary
         assert (
             "Total: **7** · Passed: **4** · Skipped/ignored: **1** · Failed: **2**"
             in summary

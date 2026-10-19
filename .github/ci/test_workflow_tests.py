@@ -9,6 +9,7 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import] -- executes the 
 import tempfile
 import tomllib
 import unittest
+from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import cast
 
@@ -74,7 +75,7 @@ class DirectTestTests(unittest.TestCase):
             ("python", 'pytest -n "$PYTEST_WORKERS" --cov --durations=30'),
             (
                 "rust",
-                'python3 .github/ci/testdata.py rust-tests "$REPORT_DIR/coverage.json"',
+                "python3 .github/ci/rust_tests.py llvm-cov --locked --workspace --summary-only",
             ),
             ("web", "bun run test --maxWorkers=4 --reporter=junit"),
         ):
@@ -92,9 +93,7 @@ class DirectTestTests(unittest.TestCase):
             )
             assert "!cancelled()" in str(summary["if"])
             cleanup = next(
-                step
-                for step in steps
-                if str(step.get("name", "")).startswith("Remove private")
+                step for step in steps if str(step.get("name", "")).startswith("Remove")
             )
             assert cleanup["if"] == "always()"
         assert not any(
@@ -124,7 +123,7 @@ class DirectTestTests(unittest.TestCase):
     def test_private_checkout_and_key_are_only_required_for_full_scope(self) -> None:
         """Forks omit checkout rather than attempting it without credentials."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        for component in ("python", "rust"):
+        for component in ("python",):
             steps = workflow["jobs"][component]["steps"]
             select = next(step for step in steps if step.get("id") == "pin")
             assert (
@@ -280,7 +279,7 @@ class DirectTestTests(unittest.TestCase):
         assert "if" not in install
 
     def test_rust_cleanup_retains_target_before_cache_post_save(self) -> None:
-        """Execute cleanup in a sandbox: discard private inputs, keep compiled dependencies."""
+        """Execute cleanup in a sandbox: discard raw reports, keep compiled dependencies."""
         workflow = cast(
             "dict[str, object]",
             yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
@@ -289,14 +288,12 @@ class DirectTestTests(unittest.TestCase):
         steps = cast("list[dict[str, object]]", jobs["rust"]["steps"])
         script = str(
             next(
-                step
-                for step in steps
-                if str(step.get("name", "")).startswith("Remove private")
+                step for step in steps if str(step.get("name", "")).startswith("Remove")
             )["run"]
         )
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            for name in ("target", ".testdata", "reports"):
+            for name in ("target", "reports"):
                 (root / name).mkdir()
                 (root / name / "marker").touch()
             result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- sandboxed real cleanup, fixed argv
@@ -308,8 +305,56 @@ class DirectTestTests(unittest.TestCase):
             )
             assert result.returncode == 0
             assert (root / "target/marker").exists()
-            assert not (root / ".testdata").exists()
             assert not (root / "reports").exists()
+
+    def test_rust_uses_public_inputs_in_every_scope(self) -> None:
+        """Data edits exercise consumers without private credentials or exclusions."""
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = workflow["jobs"]["rust"]["steps"]
+        assert all("TESTDATA_DEPLOY_KEY" not in str(step) for step in steps)
+        assert all(step.get("with", {}).get("path") != ".testdata" for step in steps)
+        tests = next(step for step in steps if step.get("id") == "tests")
+        assert "rust_tests.py" in tests["run"]
+        assert "--fail-under-lines 90" in tests["run"]
+        filters = next(
+            step
+            for step in workflow["jobs"]["changes"]["steps"]
+            if step.get("id") == "filter"
+        )["with"]["filters"]
+        rules = yaml.safe_load(filters)
+        for component in ("shared", "python", "web"):
+            assert not any(
+                fnmatchcase("card-data/jp/SYN/000-099.json", pattern)
+                for pattern in rules[component]
+            )
+        assert "card-data/**" in rules["card_data"]
+        for path in (
+            "card-data/jp/SYN/000-099.json",
+            "carddb/src/sve_carddb/core/json.py",
+            "carddb/src/sve_carddb/domains/parsed_cards/engine_fixture.py",
+            "carddb/src/sve_carddb/parse/pages/extract_jp.py",
+            "carddb/pyproject.toml",
+            "carddb/uv.lock",
+            "tests/engine/card-input.json",
+        ):
+            assert any(
+                fnmatchcase(path, pattern)
+                for pattern in (*rules["shared"], *rules["rust"])
+            )
+
+    def test_mutation_hook_generates_the_same_public_input(self) -> None:
+        """Mutation baseline tests need the same generated catalogue as coverage."""
+        repos = cast("list[dict[str, object]]", load_config()["repos"])
+        hook = next(
+            hook
+            for repo in repos
+            for hook in cast("list[dict[str, object]]", repo["hooks"])
+            if hook["id"] == "cargo-mutants"
+        )
+        assert (
+            hook["entry"]
+            == "python3 .github/ci/rust_tests.py mutants --workspace -j 4 --timeout 120"
+        )
 
     def test_python_coverage_contract_remains_combined_ninety(self) -> None:
         """Read the actual config so changing line-only or lowering the bar fails."""
