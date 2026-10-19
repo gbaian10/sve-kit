@@ -6,6 +6,7 @@ import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- runs the checked-in gate only
 import unittest
 from copy import deepcopy
+from fnmatch import fnmatchcase
 from typing import cast, override
 
 import yaml
@@ -26,7 +27,7 @@ class WorkflowGateTests(unittest.TestCase):
         self.jobs = cast("dict[str, dict[str, object]]", self.workflow["jobs"])
         steps = cast("list[dict[str, object]]", self.jobs["ci-ok"]["steps"])
         self.gate = str(steps[0]["run"])
-        self.outputs = dict.fromkeys(("python", "rust", "web"), "false")
+        self.outputs = dict.fromkeys(("python", "rust", "web", "card_data"), "false")
         self.needs: dict[str, object] = {
             job: {
                 "result": "success"
@@ -55,6 +56,7 @@ class WorkflowGateTests(unittest.TestCase):
     def test_component_results(self) -> None:
         """Failure, cancellation and unexpected skipping must block every component."""
         for component, jobs in {
+            "card_data": ("card-data",),
             "python": ("python",),
             "rust": ("rust",),
             "web": ("web",),
@@ -111,3 +113,44 @@ class WorkflowGateTests(unittest.TestCase):
                 needs.append(job)
         needs.append("repo")
         assert workflow_problems(self.workflow)
+
+    def test_card_data_changes_include_admission_code_and_job(self) -> None:
+        """Run real-data validation when its implementation or execution changes."""
+        steps = cast("list[dict[str, object]]", self.jobs["changes"]["steps"])
+        step = next(step for step in steps if step.get("id") == "filter")
+        filters = yaml.safe_load(cast("dict[str, str]", step["with"])["filters"])
+        patterns = cast("list[str]", filters["card_data"])
+        for path in (
+            "card-data/jp/SYN/000-099.json",
+            "carddb/src/sve_carddb/domains/parsed_cards/storage.py",
+            "carddb/src/sve_carddb/core/models.py",
+            "carddb/pyproject.toml",
+            "carddb/uv.lock",
+            ".github/workflows/ci.yml",
+            ".github/ci/hooks.py",
+        ):
+            with self.subTest(path=path):
+                assert any(fnmatchcase(path, pattern) for pattern in patterns)
+
+    def test_card_data_job_keeps_previous_when_checkout_is_missing(self) -> None:
+        """A missing base must reach the validator, never disable history checks."""
+        steps = cast("list[dict[str, object]]", self.jobs["card-data"]["steps"])
+        command = str(next(step["run"] for step in steps if "run" in step))
+        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed bash argv executing the checked-in job with an argv-recording uv stand-in
+            [
+                shutil.which("bash") or "bash",
+                "-eu",
+                "-c",
+                'uv() { printf "%s\\n" "$@"; }\n' + command,
+            ],
+            env={**os.environ, "GITHUB_WORKSPACE": "/nonexistent synthetic checkout"},
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        argv = result.stdout.splitlines()
+        assert argv[-3:] == [
+            "/nonexistent synthetic checkout/card-data",
+            "--previous",
+            "/nonexistent synthetic checkout/.card-data-base/card-data",
+        ]

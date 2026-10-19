@@ -32,8 +32,8 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 新增或修改 ADR、名詞表時參考 `mattpocock-skills` 的 `domain-modeling` skill（Claude Code 由 `.claude/settings.json` 啟用）；名詞表用繁體中文，與 skill 預設不同處以本 repo 規則為準。
 `docs/` 只放完成後仍成立的規格與決定；進度、排程、交付點與待決事項放 GitHub issue／milestone。
 
-依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`；規劃新增 `card-data/` → `carddb/`。
-`card-data/` 已匯入日英基線，格式與驗證器已實作，建置接線另行實作；`carddb` 匯出的有版號快照仍是使用者與模擬器的**唯一卡片資料權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
+依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`；`card-data/` → `carddb/`。
+`card-data/` 保存日英解析輸入；產生器與資料變更 CI 驗證 schema、hash、閉包及歷史，普通建置只讀取已驗證資料；`carddb` 匯出的有版號快照仍是使用者與模擬器的**唯一卡片資料權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
 但**不要維護另一份獨立的卡表**。
 
 `carddb/src/sve_carddb/` 依階段分層：基礎 `core/`、`contracts/`；來源 `ingest/`（`crawl/`、`http/`、`archive/`）、`parse/`；

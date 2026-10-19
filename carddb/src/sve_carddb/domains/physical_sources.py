@@ -65,6 +65,12 @@ def page(
     sources: FrozenSources, version: str, *, region: Region, parser_version: str
 ) -> PhysicalPage:
     """Reuse the full physical extraction recipe within the reader's exact input pin."""
+    from sve_carddb.domains.parsed_cards.sources import ParsedSources  # ruff: ignore[import-outside-top-level] -- portable projections reuse the physical domain models
+
+    if isinstance(sources, ParsedSources):
+        if sources.selection.region != region:
+            raise ValueError("Parsed physical source region mismatch")
+        return sources.physical(version, parser_version=parser_version)
     source, _ = sources.metadata(version, parser_version=parser_version)
     return sources.projection(
         version,

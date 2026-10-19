@@ -1,6 +1,6 @@
 # 建置中的四層來源位置
 
-正常建置從指定的 JP 封存批次解析精確 owner 欄位，由四層來源核心產生 body、reminder、token_header 與 layout 分段、Unicode trace 及葉位置。
+正常建置從指定 JP 批次的已審查解析輸入取得精確 owner 欄位，由四層來源核心產生 body、reminder、token_header 與 layout 分段、Unicode trace 及葉位置。
 來源原文與 canonical source 只在建置 DB 中重建，不複製到 authored。現行流程不產生或讀取舊 `inv:` 清冊。
 Frame、SourceBinding 與 pending 的完整形狀依[四層共用契約](four-layer-translation.md)。
 

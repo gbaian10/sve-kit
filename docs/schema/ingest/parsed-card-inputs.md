@@ -1,7 +1,7 @@
 # 解析卡片輸入契約
 
 `card-data/` 的格式用來保存已審查的 SVE 日英官方頁面解析結果。
-目前已匯入日英基線並實作產生器、reader 與 validator；建置入口與 CI 接線另行實作。
+已匯入日英基線；產生器與資料變更 CI 完整驗證，普通建置直接讀取已驗證的 JSON。
 使用者與 sim 仍讀有版號的卡表快照；解析輸入不包含翻譯採納、跨地區配對、效果 DSL 或人工勘誤追蹤。
 來源歸檔與備份依[原始來源契約](source-archive.md)保存，不能因 JSON 已入版控而刪除。
 
@@ -36,7 +36,7 @@
 
 可還原的身分不重存：presence 與 `source_block` 商品 match 的來源 ID 取所屬觀測；descriptor 的地區、種類、URL、來源鍵由卡片來源參照依原歸檔演算法還原。
 其餘 raw hash／bytes、最初 receipt hash、descriptor hash、ETag、Last-Modified、whitespace、presence result hash 與 `content_hash` 都保存在證據檔。
-合併後重驗所有語義 hash，再重新拆分比較**兩檔完整 canonical bytes**；懸空參照、未使用項目、不正確去重、多餘證據及 map 排序不同均拒絕。
+寫入端驗證器合併後重驗所有語義 hash，再重新拆分比較**兩檔完整 canonical bytes**；懸空參照、未使用項目、不正確去重、多餘證據及 map 排序不同均拒絕。
 重排儲存格式不改變語義觀測 `content_hash`，也不改寫既有 `producer_revision`。
 
 ## 批次選取與歷史保護
@@ -46,9 +46,9 @@
 按來源 ID 排序後**固定每 1,000 筆**切一個成員檔；除最後一檔外必須滿 1,000 筆，檔名為至少四位的 part 編號。
 這是新批次的來源選取成員，不是卡片的百號區段；新批次有自己的目錄，永不重新分配舊批次。
 `index.batches` 記錄原批次 `id` 與按 part 排序的 `parts`，逐檔釘選獨立 `sha256` 與 `bytes`。
-reader 重組後重切，檢查連續 part、排序、容量、地區及來源 ID 不重複。
+驗證器重組後重切，檢查連續 part、排序、容量、地區及來源 ID 不重複。
 批次選取檔的 hash **不是**原始 inventory hash；原批次 ID 只標明產生時已驗證的來源批次。
-產生器從完整、已驗證的凍結來源批次建立選取表；reader 驗證每筆來源存在、地區一致、同批每 URL 至多一個 current，且全部觀測至少被一批選取。
+產生器從完整、已驗證的凍結來源批次建立選取表；驗證器檢查每筆來源存在、地區一致、同批每 URL 至多一個 current，且全部觀測至少被一批選取。
 
 新增批次只新增獨立選取成員檔並更新索引。未變的卡片檔與證據檔 bytes 保持不變。
 選取表保留重建指定批次需要的全部來源版本與 current 狀態，供沒有 HTML 的建置使用。
@@ -59,7 +59,7 @@ reader 重組後重切，檢查連續 part、排序、容量、地區及來源 I
 `load` 只保證目前資料自洽，無法偵測連同 hash、索引一起改寫的歷史。
 每個修改 `card-data/**` 的 PR，CI **必須**以 PR base commit 的完整 `card-data/` 執行
 `parsed-cards validate <候選根> --previous <PR base 資料根>`；不以同一棵候選樹充當前版。
-CI 接線尚待建置整合實作，完成前由本機執行相同前版驗證並在交付紀錄列明基底。
+CI 的 `card-data` 工作已接上此驗證，失敗會阻擋 `ci-ok`。
 首次匯入沒有前版，只能由原始來源本機產生、核對來源與人工審查，不能宣稱有歷史保護或補造缺失的舊文。
 
 ## 固定分檔規則
@@ -96,13 +96,13 @@ UTF-8、無 BOM、LF、檔尾一個 LF、兩空格縮排、不轉義非 ASCII；
 卡片依原樣卡號排序，觀測依來源 ID（hash）排序，**不是時間順序**；觀測時間須看 `fetched_at`。
 面、段落、商品、Q&A 與相關連結保留來源順序。
 不可重複 JSON key、不可未知欄位、不可符號連結或穿越根目錄，不接受缺檔、多出的 JSON 或錯誤 hash／bytes／數量。
-嚴格 reader 完成整個閉包驗證後才交付資料，無網路、HTML、manifest 或 latest cache fallback。
+寫入端使用的 `storage.load` 完成整個閉包驗證後才交付資料；建置使用的 `reader.read` 直接還原已驗證 JSON，兩者均無網路、HTML、manifest 或 latest cache fallback。
 hash 是變更偵測與鎖定工具，不能代替來源核對、權利確認或 PR 審查。
 
 機器 Schema：[索引](parsed-cards/index.schema.json)、[卡片](parsed-cards/cards.schema.json)、[證據](parsed-cards/evidence.schema.json)、[批次選取](parsed-cards/batch.schema.json)。
 `codec.schema` 產生封閉的 Draft 2020-12 JSON Schema；測試逐 byte 比對提交的四份 Schema，避免漂移。
-`sve-carddb parsed-cards schema <全新絕對目錄>` 輸出上述四份檔案；runtime 同時驗 schema、身分關係與 canonical bytes。
-卡片檔可單獨閱讀，完整輸入 reader 仍須驗證配對證據、批次選取與索引。
+`sve-carddb parsed-cards schema <全新絕對目錄>` 輸出上述四份檔案；驗證器同時驗 schema、身分關係與 canonical bytes。
+卡片檔可單獨閱讀，寫入端須驗證配對證據、批次選取與索引，建置端只讀取。
 
 ## 產生與驗收
 
@@ -122,6 +122,20 @@ hash 是變更偵測與鎖定工具，不能代替來源核對、權利確認或
 來源批次須完整且限定單地區 SVE card pages；產生器讀取並驗原始 hash，套用與既有建置共用的 DOM recipe。
 `sve-carddb parsed-cards validate <資料絕對目錄> [--previous <前版絕對目錄>]` 驗證全部檔案與更新歷史。
 CLI 錯誤只印失敗摘要，不將可能含完整卡文的驗證物件印入 log。
+
+## 建置入口
+
+`snapshot export-offline` 與 `images build-index` 共用配方的 `source_mode`，預設 `parsed`，直接讀 `<repo>/card-data/`。
+程式／authored revision 同時指向該 commit 的解析輸入；建置從已審查批次選取重建來源身分及 record／registry／text／products／extras 投影，不需要 SVE HTML、descriptor 檔或凍結 manifest 副本。
+
+完整 schema、hash、閉包與歷史驗證只在資料寫入時執行：產生器驗證候選；獨立 `parsed-cards validate` 供本機與 CI 呼叫。
+CI 的 `card-data` 工作在 `card-data/**`、carddb 程式／依賴或驗證工作流程／CI helpers 變動時執行，驗證整棵候選樹及 PR base 的歷史保留，結果納入必要的 `ci-ok`；缺少 base 的 `card-data/` 時失敗，不略過歷史驗證。
+普通建置走可信資料 reader，僅解析 JSON、還原型別及參照，不掃描額外檔案、不重算驗證 hash、不重做 schema 或歷史驗證；本機手改資料須先跑 validate。
+來源身分所需的衍生欄位仍在轉接時組成，這不重新驗證原始資料。
+
+`archive` 是明示使用原始來源的比較／驗收模式，不是讀不到解析資料時的 fallback。
+解析模式遇到未收錄的 SVE 卡片批次，在讀 raw 前拒絕；其他遊戲 API 與圖片仍讀各自的獨立歸檔。
+執行時的邏輯 store 名稱由本機配方明示提供，只用於私人 provenance；公開資料不驗證或推測原 inventory 的 store 身分，也不保存 store 名稱。
 
 推送前人工清單包含各類檔案數、總 bytes、最大檔、欄位、實際日英範例及排除秘密／本機路徑／媒體 bytes 的檢查。
 切換建置須證明相同來源集合在沒有 SVE HTML 的隔離環境逐欄一致，匯出通過公開 reader 與完整 Python／Rust 覆蓋率門檻。

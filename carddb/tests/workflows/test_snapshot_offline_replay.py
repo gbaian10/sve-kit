@@ -267,6 +267,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
             product_envelope([family(home, code="synthetic")]),
         )
     recipe = offline.Inputs(
+        source_mode="archive",
         repo=root,
         archive=archive,
         store_id="test-store",

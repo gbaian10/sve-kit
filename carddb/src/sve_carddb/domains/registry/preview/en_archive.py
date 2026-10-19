@@ -33,7 +33,7 @@ class FrozenEN:
         self._sources = sources or FrozenSources(root, store_id, batch_id)
         self._sources.require_scope(root, store_id, batch_id)
         self._current = {
-            item.url: item.source_version_id for item in self._sources.inventory.current
+            item.url: item.source_version_id for item in self._sources.current_versions
         }
         self._parser_version = parser_version
         self.batch_id = batch_id

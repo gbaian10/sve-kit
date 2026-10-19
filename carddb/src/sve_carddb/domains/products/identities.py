@@ -12,6 +12,7 @@ from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Source, SourceUse
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
+from sve_carddb.domains import physical_sources
 from sve_carddb.domains.products.identity_models import (
     ExpansionLink,
     IdentityRecord,
@@ -21,7 +22,7 @@ from sve_carddb.domains.products.identity_models import (
 )
 from sve_carddb.domains.products.loader import _safe_file
 from sve_carddb.domains.products.models import Evidence, ProductRecord
-from sve_carddb.domains.products.official import PARSER, ProductPage, parse_products
+from sve_carddb.domains.products.official import PARSER, ProductPage
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
 if TYPE_CHECKING:
@@ -238,7 +239,7 @@ def _evidence(
             key = ref.batch_id
             frozen = batches.configured(stores, key)
             parse_key = (key, ref.source_version_id)
-            source, raw, descriptor = frozen.read(
+            source, descriptor = frozen.metadata(
                 ref.source_version_id, parser_version="archive-closure-v1"
             )
             page: ProductPage | None = None
@@ -250,7 +251,14 @@ def _evidence(
                     raise ValueError("Product identity source region/kind mismatch")
                 source = source.model_copy(update={"parser_version": PARSER})
                 if parse_key not in parsed:
-                    parsed[parse_key] = parse_products(raw, source, record.data.region)
+                    physical = physical_sources.page(
+                        frozen,
+                        ref.source_version_id,
+                        region=record.data.region,
+                        parser_version=PARSER,
+                    )
+                    physical.require_identity()
+                    parsed[parse_key] = physical.products.get()
                 page = parsed[parse_key]
                 ordinal = _ordinal(ref.locator)
                 if isinstance(record.data.match, SourceBlock) and (

@@ -159,7 +159,7 @@ def _named_kinds(
         location = re.fullmatch(r"/faces/(?P<ordinal>0|[1-9][0-9]*)/name", ref.locator)
         if location is None:
             continue
-        if ref.source_version_id not in sources.batch(ref.batch_id).entries:
+        if ref.source_version_id not in sources.batch(ref.batch_id).version_ids:
             continue
         lang, spelling, source = sources.text(ref)
         if lang != "ja" or source.id != ref.source_version_id:

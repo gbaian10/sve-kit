@@ -27,6 +27,8 @@ from sve_carddb.domains.card_extras import (
 from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
 from sve_carddb.domains.mechanics import load as load_mechanics
+from sve_carddb.domains.parsed_cards.reader import read as read_parsed
+from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.products import (
     FrozenProducts,
     load_product_identities,
@@ -122,6 +124,7 @@ class Inputs(RecordData):
     normalizer_version: Text
     name_policy: Literal["approved-frozen-v1"] | None = None
     registry_review_inputs: ReviewInputPin | None = None
+    source_mode: Literal["parsed", "archive"] = "parsed"
 
     @model_validator(mode="after")
     def regional_scope(self) -> Inputs:
@@ -142,6 +145,17 @@ class Inputs(RecordData):
     def batch(self) -> Batch:
         """Keep the launch scope explicit rather than deriving it from loaded rows."""
         return Batch(self.data_version, self.published_at, self.as_of, ("en", "jp"))
+
+
+def source_batches(inputs: Inputs) -> FrozenBatches:
+    """Read admitted repository inputs; validation runs only during data admission."""
+    if inputs.source_mode == "archive":
+        return FrozenBatches()
+    catalog = read_parsed(inputs.repo / "card-data")
+    regions = {batch.id: batch.region for batch in catalog.batches}
+    if any(regions.get(pin.card_batch) != pin.region for pin in inputs.sources):
+        raise ValueError("Parsed inputs lack the requested regional card batch")
+    return ParsedBatches(catalog)
 
 
 def registry_provider(inputs: Inputs, batches: FrozenBatches) -> FrozenRegions:
@@ -354,7 +368,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
     names = composer(inputs)
     mark("load names (composer)")
-    batches = FrozenBatches()
+    batches = source_batches(inputs)
     if image_index is not None:
         image_index.validate_tables()
         if image_index.store_id != inputs.store_id or tuple(

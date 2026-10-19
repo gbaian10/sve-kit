@@ -146,7 +146,7 @@ normalized_hash 是舊 normalizer 的歷史 pattern hash，只供人工與 #499 
 ## 3. 四層來源核心與定義
 
 四層來源核心定位來源欄位及句型位置，保留 body、reminder、token_header、layout、name 與 label 角色；風味不在其中。
-每次建置從封存來源產生 binding／未匹配清單，不存 Git，見[來源位置契約](four-layer-source-positions.md)。
+每次建置從指定批次的已審查解析輸入產生 binding／未匹配清單，不存 Git，見[來源位置契約](four-layer-source-positions.md)。
 缺來源、unknown、空字串與空白不能混為不存在；每個來源片段都要有去向。
 
 四層 Frame 的 source descriptor、canonical source、語義 payload 與完整 hash ID 依

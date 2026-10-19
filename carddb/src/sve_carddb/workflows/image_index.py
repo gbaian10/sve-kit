@@ -41,10 +41,10 @@ from sve_carddb.images.checks import ImageChecks
 from sve_carddb.images.crop_report import CropBinding, crop_report
 from sve_carddb.images.crops import load_image_crops
 from sve_carddb.images.variants import DEFAULT_RECIPE
-from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.parse.pages.official_jp import image_url
 from sve_carddb.workflows.art_matching import art_candidates
-from sve_carddb.workflows.offline import Inputs, registry_provider
+from sve_carddb.workflows.offline import Inputs, registry_provider, source_batches
 
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
@@ -281,6 +281,7 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
             if state_exists
             else "Missing media-state.json: restore image state or use --initial for a first build"
         )
+    text_batches = source_batches(recipe)
     checks = ImageChecks(reuse=not verify_all)
     batches = {
         pin.region: FrozenSources(
@@ -304,7 +305,6 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         tuple(item for part in parts for item in part.images),
         sum(part.elapsed_seconds for part in parts),
     )
-    text_batches = FrozenBatches()
     identity = plan_preview(
         authored_root(recipe.repo),
         registry_provider(recipe, text_batches),

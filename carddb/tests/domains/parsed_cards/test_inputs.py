@@ -16,8 +16,9 @@ from sve_carddb.domains.parsed_cards.commands import app
 from sve_carddb.domains.parsed_cards.filing import number_range
 from sve_carddb.domains.parsed_cards.generate import generate
 from sve_carddb.domains.parsed_cards.models import Index
-from sve_carddb.domains.parsed_cards.projection import replay
+from sve_carddb.domains.parsed_cards.reader import read
 from sve_carddb.domains.parsed_cards.serialization import combine, separate
+from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.parsed_cards.storage import load, write
 from sve_carddb.domains.parsed_cards.wire import CardFile
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
@@ -80,6 +81,7 @@ def test_roundtrip_all_projections_without_archive(
     )
     sources.root.rename(tmp_path / "unmounted")
     restored = load(root)
+    assert read(root) == restored
     assert batches.selection(restored, sources.batch_id).versions == {
         entry.source_version_id: True for entry in sources.inventory.entries
     }
@@ -93,7 +95,17 @@ def test_roundtrip_all_projections_without_archive(
         )
         == source
     )
-    actual = replay(restored.observations()[version], source)
+    readers = ParsedBatches(restored)
+    adapted = readers.configured({sources.store_id: sources.root}, sources.batch_id)
+    assert adapted.version_ids == sources.version_ids
+    assert adapted.current_versions == sources.current_versions
+    assert adapted.metadata(version, parser_version="synthetic-consumer") == (
+        source,
+        sources.descriptor(version),
+    )
+    actual = physical_sources.page(
+        adapted, version, region=region, parser_version="synthetic-consumer"
+    )
     assert actual.record.get() == expected.record.get()
     assert actual.observation.get() == expected.observation.get()
     assert actual.products.get() == expected.products.get()
@@ -102,6 +114,21 @@ def test_roundtrip_all_projections_without_archive(
     for index in range(len(actual.text.get().faces)):
         assert actual.text.get().projected(index) == expected.text.get().projected(
             index
+        )
+    with pytest.raises(ValueError, match="do not expose raw HTML"):
+        adapted.read(version, parser_version="synthetic-consumer")
+    with pytest.raises(ValueError, match="require a physical-page projection"):
+        adapted.projection(version, parser_version="synthetic", extract=lambda *_: None)
+    with pytest.raises(ValueError, match="region mismatch"):
+        physical_sources.page(
+            adapted,
+            version,
+            region="en" if region == "jp" else "jp",
+            parser_version="synthetic",
+        )
+    with pytest.raises(ValueError, match="exactly one explicit store binding"):
+        readers.configured(
+            {"first": sources.root, "second": sources.root}, sources.batch_id
         )
     assert encode(restored.index) == encode(catalog.index)
 
@@ -275,6 +302,10 @@ def test_cli_generate_validate_schema_and_fail_closed(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     result = runner.invoke(app, ["validate", str(root), "--previous", str(root)])
     assert result.exit_code == 0, result.output
+    result = runner.invoke(
+        app, ["validate", str(root), "--previous", str(tmp_path / "missing-base")]
+    )
+    assert result.exit_code == 1
     result = runner.invoke(app, ["generate", str(request), str(root)])
     assert result.exit_code == 1
     assert "Synthetic front" not in result.output

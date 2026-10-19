@@ -104,6 +104,7 @@ def prepared(
         for region in ("en", "jp")
     )
     recipe = Inputs(
+        source_mode="archive",
         repo=repo,
         archive=case.store,
         store_id="test-store",

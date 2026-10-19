@@ -97,7 +97,7 @@ class FrozenTexts:
         self.region = region
         self.parser_version = parser_version
         self.current = {
-            item.url: item.source_version_id for item in self.sources.inventory.current
+            item.url: item.source_version_id for item in self.sources.current_versions
         }
         self._versions: dict[str, tuple[str, ...]] | None = None
 
@@ -108,8 +108,8 @@ class FrozenTexts:
         url = (jp if region == "jp" else en).card_url(card_no)
         if self._versions is None:
             by_url: dict[str, list[str]] = {}
-            for entry in self.sources.inventory.entries:
-                descriptor = self.sources.descriptor(entry.source_version_id)
+            for version in sorted(self.sources.version_ids):
+                descriptor = self.sources.descriptor(version)
                 if (descriptor.provider, descriptor.kind) == (self.region, "card"):
                     by_url.setdefault(descriptor.url, []).append(descriptor.id)
             self._versions = {

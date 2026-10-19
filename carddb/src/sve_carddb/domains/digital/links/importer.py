@@ -188,7 +188,7 @@ class Result:
                         batch_key = batch.batch_id
                         frozen = sources.batch(batch_key)
                         if (
-                            ref.source_version_id not in frozen.entries
+                            ref.source_version_id not in frozen.version_ids
                             or frozen.descriptor(ref.source_version_id).url
                             != card_url(printing.card_no)
                         ):

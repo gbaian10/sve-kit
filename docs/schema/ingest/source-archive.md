@@ -138,15 +138,17 @@ Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有�
 ## 5. 只讀重建與缺失歷史
 
 四層來源核心依[來源位置契約](../domains/four-layer-source-positions.md)每次建置重新產生 binding／未匹配清單，不保存也不比對舊清冊；
-每次仍驗本節 sealed/raw 閉包，不借私人審核頁面的免重讀例外略過來源。
+預設 `parsed` 建置讀取已審查的解析輸入，不重驗本節 sealed/raw 閉包；產生解析資料時及明示 `archive` 模式仍驗此閉包。
+此免重驗路徑只適用於已收錄的 SVE 卡片來源；其他遊戲 API、圖片及其餘歸檔來源仍驗各自的 sealed/raw 閉包。
+資料 CI 驗解析輸入的 schema、hash、參照閉包及歷史保留，不需要原始歸檔；入口與本機驗證責任見[解析卡片輸入〈建置入口〉](parsed-card-inputs.md#建置入口)。
 只用一個 BuildContext／F1，實際 program_revision、完整程式／lock 如實記當次執行 H；
 逐群組保留歷史 producer R、凍結版本／manifest pins、context、預期／實際結果與實際環境差異。
-環境值不同不先拒絕也不進語義 root；缺閉包／凍結 bytes 或輸出漂移仍拒絕。
+環境值不同不先拒絕也不進語義 root。產生器與 `archive` 模式缺閉包／凍結 bytes 時拒絕；`parsed` 模式缺所需解析輸入時拒絕，不能回讀 raw 補資料。
 同 raw 一列 source_record，不以 parser／producer 重配 raw ID；同 parser 跨 producer 的用途及 pin 歸屬
 保留群組映射，不以最後一筆覆蓋。建置交易完成後直接保存 DB、inputs 與 report；
 不另計 expected uses 閉包，也不重播 bundle。
 
-建置／離線 extract 接受 sealed inventory 的 hash，先驗 seal、DB、副本 schema、所有 metadata 與 raw 閉包。只用 `Manifest.open_snapshot()`（`mode=ro&immutable=1`）讀關閉的副本，不跑 DDL／journal pragma；parser／extractor 只能透過 archive locator 讀來源，不能回查 live/latest 補資料。既有 extract 持鎖讀 live 是另一種受控入口；不能把該輸出自動稱為 sealed 重建。
+解析資料產生器、明示 `archive` 模式的建置與離線 extract 接受 sealed inventory 的 hash，先驗 seal、DB、副本 schema、所有 metadata 與 raw 閉包。只用 `Manifest.open_snapshot()`（`mode=ro&immutable=1`）讀關閉的副本，不跑 DDL／journal pragma；parser／extractor 只能透過 archive locator 讀來源，不能回查 live/latest 補資料。既有 extract 持鎖讀 live 是另一種受控入口；不能把該輸出自動稱為 sealed 重建。
 
 重建固定輸入批次、authored commit／檔案 hash、parser／程式版本與配置。extract 只寫 derived 輸出及報告，不寫 manifest 或 authored；前後 DB／inventory／raw hash 不變。建置 source_record、QA／CR 歷史等每個引用的來源版本須能追回歸檔，不能只留一串 hash。
 

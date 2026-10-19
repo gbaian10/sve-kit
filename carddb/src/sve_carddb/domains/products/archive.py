@@ -29,7 +29,7 @@ class FrozenProducts:
     def pages(self) -> tuple[ProductPage, ...]:
         """Read current product projections from the shared verified physical pages."""
         pages: list[ProductPage] = []
-        for entry in self.sources.inventory.current:
+        for entry in self.sources.current_versions:
             _, descriptor = self.sources.metadata(
                 entry.source_version_id, parser_version=PARSER
             )

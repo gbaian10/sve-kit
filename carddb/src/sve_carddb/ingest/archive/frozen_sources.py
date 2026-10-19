@@ -11,6 +11,7 @@ from sve_carddb.core.json import digest
 from sve_carddb.core.provenance import ArchivePin, RawKind, Source
 from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
+    Current,
     Descriptor,
     Receipt,
     verify_batch,
@@ -42,6 +43,16 @@ class FrozenSources:
         self._descriptors: dict[str, Descriptor] = {}
         self._verified: set[str] = set()
         self._projections: dict[tuple[str, str], object] = {}
+
+    @property
+    def version_ids(self) -> frozenset[str]:
+        """Expose batch membership independently of private inventory details."""
+        return frozenset(self.entries)
+
+    @property
+    def current_versions(self) -> tuple[Current, ...]:
+        """Expose the batch's URL selections in their canonical order."""
+        return tuple(self.inventory.current)
 
     def require_scope(self, root: Path, store_id: str, batch_id: str) -> None:
         """A shared reader must still belong to the caller's exact input pin."""

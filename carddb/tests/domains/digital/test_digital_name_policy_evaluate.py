@@ -10,6 +10,7 @@ from pydantic import JsonValue
 
 import sve_carddb.domains.digital.name_policies.evaluate as module
 from sve_carddb.core.json import array, canonical, digest, object_value
+from sve_carddb.domains.catalog.adoption_models import Batch
 from sve_carddb.domains.digital.links.catalogue import complete_inventory
 from sve_carddb.domains.digital.links.evidence import Evidence
 from sve_carddb.domains.digital.links.importer import review_context
@@ -26,9 +27,18 @@ from sve_carddb.domains.digital.name_policies.evaluate import (
 )
 from sve_carddb.domains.digital.name_policies.records import LinkPolicy
 from sve_carddb.domains.digital.name_policies.references import reference_names
+from sve_carddb.domains.parsed_cards.generate import generate
+from sve_carddb.domains.parsed_cards.reader import read
+from sve_carddb.domains.parsed_cards.sources import ParsedBatches
+from sve_carddb.domains.parsed_cards.storage import write
 from sve_carddb.domains.translations.inputs import Snapshot
 from sve_carddb.domains.translations.names.resolve import Names
+from sve_carddb.domains.translations.sources import Sources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import seal_batch
 
+from ...ingest.test_source_archive import _put, _resource, _store
 from ...support.digital_link_import_fixtures import catalogue_fixture
 from ...support.digital_name_policy_fixtures import (
     PolicyFixture,
@@ -538,3 +548,68 @@ def test_reference_qualification_uses_term_source_shape_not_slug(
     else:
         assert names["term:name.synthetic_fragment"].text == "合成測試名"
         assert names["term:name.synthetic_fragment"].low_confidence
+
+
+def test_owner_uses_shared_projection_after_html_is_removed(
+    baseline: PolicyFixture, tmp_path: Path
+) -> None:
+    fixture = copied_policy(baseline, tmp_path / "owner")
+    sources = fixture.digital.sources()
+    owner = fixture.owner()
+    review = review_context(sources)
+    expected = owner_text(owner, sources, review)
+    assert owner.name_ref is not None
+    frozen = sources.batch(owner.name_ref.batch_id)
+    entry = frozen.entries[owner.name_ref.source_version_id]
+    (frozen.root / entry.blob.path).unlink()
+    assert owner_text(owner, sources, review) == expected
+
+
+def test_owner_reads_admitted_json_without_html(
+    baseline: PolicyFixture, tmp_path: Path
+) -> None:
+    fixture = copied_policy(baseline, tmp_path / "owner")
+    owner = fixture.owner()
+    assert owner.name_ref is not None
+    old = fixture.digital.sources()
+    _, raw, descriptor = old.batch(owner.name_ref.batch_id).read(
+        owner.name_ref.source_version_id, parser_version="translation-jp-v1"
+    )
+    raw = raw.replace(
+        b'<div class="detail">',
+        b'<div class="illustrator"><span class="heading">SYN-001</span></div><div class="detail">',
+    )
+    store = _store(tmp_path / "jp-only")
+    _put(store, _resource(descriptor.url, "raw/card.html", raw, Kind.CARD), raw)
+    batch = seal_batch(store)
+    frozen = FrozenSources(store.root, store.store_id, batch.batch_id)
+    catalog = generate(
+        [("jp", frozen)],
+        {("jp", fixture.digital.printing.card_no): "SYN"},
+        producer_revision=fixture.authored,
+    )
+    write(tmp_path / "card-data", catalog)
+    owner = owner.model_copy(
+        update={
+            "name_ref": owner.name_ref.model_copy(
+                update={
+                    "batch_id": batch.batch_id,
+                    "source_version_id": next(iter(frozen.version_ids)),
+                }
+            )
+        }
+    )
+    review = review_context(old).model_copy(
+        update={"source_batches": (Batch(batch_id=batch.batch_id),)}
+    )
+    stores = {store.store_id: store.root}
+    expected = owner_text(owner, Sources(stores, fixture.root, old.build), review)
+    store.root.rename(tmp_path / "unmounted-jp")
+    fixture.digital.store.rename(tmp_path / "unmounted-original")
+    sources = Sources(
+        stores,
+        fixture.root,
+        old.build,
+        batches=ParsedBatches(read(tmp_path / "card-data")),
+    )
+    assert owner_text(owner, sources, review) == expected
