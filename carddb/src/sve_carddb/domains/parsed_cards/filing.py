@@ -19,11 +19,12 @@ def band(number: str, region: Region) -> str:
         raise ValueError("Parsed card number has no range suffix")
     if suffix in {"EP", "SEP"}:
         return "unnumbered"
-    match = re.fullmatch(r"[A-ZⓈ]*([0-9]+)[a-z]*", suffix)
+    match = re.fullmatch(r"([A-ZⓈ]*)([0-9]+)[a-z]*", suffix)
     if match is None:
         raise ValueError("Parsed card number requires an explicit range exception")
-    start = int(match[1]) // RANGE_WIDTH * RANGE_WIDTH
-    return f"{start:03d}-{start + RANGE_WIDTH - 1:03d}"
+    start = int(match[2]) // RANGE_WIDTH * RANGE_WIDTH
+    prefix = match[1] + "/" if match[1] else ""
+    return f"{prefix}{start:03d}-{start + RANGE_WIDTH - 1:03d}"
 
 
 def shard_path(

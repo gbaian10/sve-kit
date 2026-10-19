@@ -68,7 +68,7 @@ def assemble(
         raw = encode(shard)
         if len(raw) > MAX_BYTES:
             raise ValueError(
-                f"Parsed family exceeds 1 MiB; explicitly split {region}/{family}"
+                f"Parsed member exceeds 1 MiB; review fixed filing for {region}/{family}"
             )
         path = shard_path(region, family, shard.cards[0].card_no, splits)
         members[path] = (

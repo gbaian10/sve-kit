@@ -107,14 +107,16 @@ def test_roundtrip_all_projections_without_archive(
 @pytest.mark.parametrize(
     ("region", "number", "expected"),
     [
-        ("jp", "PR-000", "000-199"),
-        ("jp", "PR-199", "000-199"),
-        ("jp", "PR-200", "200-399"),
-        ("en", "PR-399EN", "200-399"),
-        ("en", "PR-400EN", "400-599"),
-        ("jp", "CP04-SP01", "000-199"),
-        ("en", "BP03-LDⓈ01EN", "000-199"),
-        ("jp", "SYN-1234a", "1200-1399"),
+        ("jp", "PR-000", "000-099"),
+        ("jp", "PR-099", "000-099"),
+        ("jp", "PR-100", "100-199"),
+        ("jp", "PR-199", "100-199"),
+        ("jp", "PR-200", "200-299"),
+        ("en", "PR-399EN", "300-399"),
+        ("en", "PR-400EN", "400-499"),
+        ("jp", "CP04-SP01", "SP/000-099"),
+        ("en", "BP03-LDⓈ01EN", "LDⓈ/000-099"),
+        ("jp", "SYN-1234a", "1200-1299"),
         ("jp", "SYN-EP", "unnumbered"),
         ("jp", "SYN-SEP", "unnumbered"),
     ],
@@ -137,7 +139,7 @@ def test_split_and_history_cannot_be_reassigned(tmp_path: Path) -> None:
         producer_revision=REVISION,
         split_families=(SplitFamily(region="en", family="SYN"),),
     )
-    assert catalog.index.shards[0].path == "en/SYN/000-199.json"
+    assert catalog.index.shards[0].path == "en/SYN/100-199.json"
     assert write(tmp_path / "split", catalog) == catalog
     changed = generate(
         [("en", sources)], {("en", number): "OTHER"}, producer_revision=REVISION
@@ -266,7 +268,7 @@ def test_cli_generate_validate_schema_and_fail_closed(tmp_path: Path) -> None:
         json.loads((schemas / "index.schema.json").read_bytes())["properties"][
             "range_width"
         ]["const"]
-        == 200
+        == 100
     )
     (root / "index.json").write_bytes(b"{}")
     assert runner.invoke(app, ["validate", str(root)]).exit_code == 1

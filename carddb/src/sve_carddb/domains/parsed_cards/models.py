@@ -17,7 +17,7 @@ from sve_carddb.parse.pages import extract_en, extract_jp, official_en, official
 RECIPE: Final = "sve-parsed-card-v1"
 MAX_BYTES = 1024 * 1024
 MAX_FACES = 2
-RANGE_WIDTH: Final = 200
+RANGE_WIDTH: Final = 100
 Family = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+$", max_length=64)]
 
 
@@ -210,7 +210,7 @@ class SplitFamily(RecordData):
 class Index(RecordData):
     format: Literal[1] = 1
     recipe: Literal["sve-parsed-card-v1"] = RECIPE
-    range_width: Literal[200] = RANGE_WIDTH
+    range_width: Literal[100] = RANGE_WIDTH
     split_families: tuple[SplitFamily, ...] = ()
     shards: tuple[ShardPin, ...]
     batches: tuple[BatchPin, ...]
