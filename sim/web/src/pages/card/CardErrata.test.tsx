@@ -3,8 +3,9 @@ import { expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { InlineText } from "../../components/card/InlineText"
-import { createSnapshotClient } from "../../data"
+import { createSnapshotClient, loadCardErrata } from "../../data"
 import { renderInRouter } from "../../test-utils"
+import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
 import { memoryCache } from "../../test-utils/cache"
 import { CardErrata } from "./CardErrata"
 
@@ -54,4 +55,14 @@ it("shows both announcement passages, their translations, date and source withou
 it("emphasizes explicit keyword headings without inventing historical annotation references", () => {
   const { container } = render(<InlineText text="【連擊 5】改為選擇。" emphasis />)
   expect(container.querySelector("strong")).toHaveTextContent("【連擊 5】")
+})
+
+it("returns no notices for an edition absent from the snapshot", async () => {
+  const { client } = await annotatedOrigin()
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  await expect(loadCardErrata(client, snapshot, "card", "printing", "face", "en")).resolves.toEqual(
+    [],
+  )
 })

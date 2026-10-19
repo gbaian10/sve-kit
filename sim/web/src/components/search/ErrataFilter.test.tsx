@@ -26,14 +26,14 @@ function Harness() {
   )
 }
 
-it("toggles errata independently beside the display selector and round trips through the URL", async () => {
+it("toggles errata independently before the display controls and round trips through the URL", async () => {
   await renderInRouter(<Harness />)
   const user = userEvent.setup()
   const errata = screen.getByRole("switch", { name: "只顯示勘誤卡" })
   const grouping = screen.getByRole("combobox", { name: "顯示方式" })
   expect(screen.getAllByRole("switch")).toHaveLength(1)
   expect(errata).toHaveAccessibleDescription("官方發過勘誤公告的卡")
-  expect(grouping.compareDocumentPosition(errata) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(errata.compareDocumentPosition(grouping) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   await user.click(errata)
   expect(errata).toBeChecked()
   expect(grouping).toHaveValue("printing")

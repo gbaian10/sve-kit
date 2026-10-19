@@ -447,7 +447,7 @@ export class SearchEngine {
       dataVersion: stringValue(manifest["data_version"]),
       manifestFields: entryFields(manifest),
       errataCards: new Set(
-        arrayValue(objectValue(manifest["errata_card_ids"])[request.edition]).map((id) =>
+        arrayValue(objectValue(manifest["errata_card_ids"])[request.edition] ?? []).map((id) =>
           stringValue(id),
         ),
       ),

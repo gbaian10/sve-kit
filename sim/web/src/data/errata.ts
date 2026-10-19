@@ -15,7 +15,7 @@ export async function loadCardErrata(
   faceId: string,
   region: string,
 ): Promise<CardErratum[]> {
-  if (!arrayValue(objectValue(snapshot.manifest["errata_card_ids"])[region]).includes(cardId))
+  if (!arrayValue(objectValue(snapshot.manifest["errata_card_ids"])[region] ?? []).includes(cardId))
     return []
   const keys = [...snapshot.files]
     .filter(([, file]) =>
