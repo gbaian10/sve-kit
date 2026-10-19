@@ -127,7 +127,7 @@ it("updates table labels and fallback thumbnails on language changes while retai
 })
 
 describe("spreadsheet list", () => {
-  it("renders eight columns, explicit states, full one-line text and absent stats without card images", async () => {
+  it("renders nine columns, explicit states, full one-line text and absent stats without card images", async () => {
     vi.stubGlobal("IntersectionObserver", undefined)
     const states = ["ready", "pending", "error", "unknown", "blank"]
     const cells = states.map((state) => ({
@@ -165,7 +165,7 @@ describe("spreadsheet list", () => {
     await renderInRouter(<CardList classLabel={classLabel} cells={cells} onOpen={vi.fn()} />)
     expect(
       screen.getAllByRole("columnheader").map((column) => column.getAttribute("aria-label")),
-    ).toEqual(["卡號", "名稱", "稀有度", "職業", "消費", "攻擊力", "生命值", "卡文"])
+    ).toEqual(["卡號", "名稱", "稀有度", "進化", "職業", "消費", "攻擊力", "生命值", "卡文"])
     const rows = screen.getAllByRole("row").slice(1)
     expect(rows[0]).toHaveTextContent("First synthetic ability. Second synthetic ability.")
     expect(within(rows[0] ?? document.body).getAllByText("—")).toHaveLength(2)
@@ -350,7 +350,7 @@ it("hides matching headers and cells, keeps an identity column, and preserves ro
   )
   const user = userEvent.setup()
   await user.click(screen.getByText("顯示欄位", { selector: "summary" }))
-  for (const name of ["稀有度", "職業", "消費", "攻擊力", "生命值"]) {
+  for (const name of ["稀有度", "進化", "職業", "消費", "攻擊力", "生命值"]) {
     await user.click(screen.getByRole("checkbox", { name }))
   }
   expect(screen.getAllByRole("columnheader")).toHaveLength(3)
@@ -509,13 +509,13 @@ it("reorders from the picker keyboard and keeps focus and cells in the same orde
   expect(handle).toHaveFocus()
   expect(
     screen.getAllByRole("columnheader").map((header) => header.getAttribute("aria-label")),
-  ).toEqual(["卡號", "名稱", "職業", "稀有度", "消費", "攻擊力", "生命值", "卡文"])
+  ).toEqual(["卡號", "名稱", "稀有度", "職業", "進化", "消費", "攻擊力", "生命值", "卡文"])
   expect(
-    within(screen.getAllByRole("cell")[2] ?? document.body).getByRole("img", { name: "中立" }),
+    within(screen.getAllByRole("cell")[3] ?? document.body).getByRole("img", { name: "中立" }),
   ).toBeVisible()
   expect(
     screen.getAllByRole("checkbox").map((checkbox) => checkbox.closest("label")?.textContent),
-  ).toEqual(["卡號", "名稱", "職業", "稀有度", "消費", "攻擊力", "生命值", "卡文"])
+  ).toEqual(["卡號", "名稱", "稀有度", "職業", "進化", "消費", "攻擊力", "生命值", "卡文"])
   await userEvent.keyboard("{ArrowDown}")
   expect(prefsStore.get().listOrder).toEqual(DEFAULT_PREFS.listOrder)
 })
@@ -545,7 +545,7 @@ it("keeps short header clicks sortable and commits a header drag only on release
     expect(onSort).toHaveBeenCalledWith("name")
     onSort.mockClear()
     fireEvent.pointerDown(button, { pointerId: 2, isPrimary: true, button: 0, clientX: 120 })
-    for (let x = 130; x < 500; x += 10) fireEvent.pointerMove(button, { pointerId: 2, clientX: x })
+    for (let x = 130; x < 600; x += 10) fireEvent.pointerMove(button, { pointerId: 2, clientX: x })
     expect(writes).not.toHaveBeenCalled()
     expect(document.querySelector('[data-list-heading="cost"]')).toHaveAttribute(
       "data-drop",
@@ -558,6 +558,7 @@ it("keeps short header clicks sortable and commits a header drag only on release
     expect(prefsStore.get().listOrder).toEqual([
       "number",
       "rarity",
+      "evolve",
       "class",
       "cost",
       "name",
@@ -565,9 +566,89 @@ it("keeps short header clicks sortable and commits a header drag only on release
       "defense",
       "effect",
     ])
-    expect(screen.getAllByRole("cell")[4]).toHaveTextContent("Synthetic name")
+    expect(screen.getAllByRole("cell")[5]).toHaveTextContent("Synthetic name")
   } finally {
     writes.mockRestore()
     vi.unstubAllGlobals()
   }
 })
+
+it.each(["list", "table"] as const)("shows EVOLVE only for evolve cards in %s", async (view) => {
+  const evolved = {
+    ...cell,
+    key: "evolved",
+    summary: { ...cell.summary, evolve: true, rarityCode: "lg" },
+  }
+  const props = { cells: [cell, evolved], onOpen: vi.fn() }
+  await renderInRouter(
+    view === "list" ? (
+      <CardList classLabel={classLabel} {...props} />
+    ) : (
+      <CardTable {...props} images={undefined} artOf={() => undefined} />
+    ),
+  )
+  expect(screen.getAllByRole("img", { name: "EVOLVE" })).toHaveLength(1)
+  if (view === "list") {
+    const cells = document.querySelectorAll("[data-list-evolve]")
+    expect(cells[0]).toBeEmptyDOMElement()
+    expect(within(cells[1] as HTMLElement).getByRole("img", { name: "EVOLVE" })).toBeVisible()
+    expect(screen.getAllByRole("columnheader")[3]).toHaveAttribute("aria-label", "進化")
+  } else {
+    expect(screen.getByRole("img", { name: "EVOLVE" }).previousElementSibling).toHaveAttribute(
+      "data-rarity-badges",
+    )
+  }
+})
+
+it("toggles the evolve column independently of rarity", async () => {
+  await renderInRouter(
+    <>
+      <ListColumnPicker />
+      <CardList
+        classLabel={classLabel}
+        cells={[{ ...cell, summary: { ...cell.summary, evolve: true } }]}
+        onOpen={vi.fn()}
+      />
+    </>,
+  )
+  await userEvent.click(screen.getByText("顯示欄位", { selector: "summary" }))
+  await userEvent.click(screen.getByRole("checkbox", { name: "進化" }))
+  expect(screen.queryByRole("columnheader", { name: "進化" })).not.toBeInTheDocument()
+  expect(screen.queryByRole("img", { name: "EVOLVE" })).not.toBeInTheDocument()
+  expect(screen.getByRole("columnheader", { name: "稀有度" })).toBeVisible()
+  await userEvent.click(screen.getByRole("checkbox", { name: "進化" }))
+  expect(screen.getByRole("img", { name: "EVOLVE" })).toBeVisible()
+})
+
+it.each(["zh-TW", "ja", "en"] as const)(
+  "shows only effect text without an incomplete-preview notice in %s",
+  async (language) => {
+    act(() => {
+      prefsStore.set({ effectLanguage: "original" })
+    })
+    vi.stubGlobal("IntersectionObserver", undefined)
+    vi.mocked(useAbilityPreview).mockReturnValue({
+      phase: "complete",
+      queryId: 1,
+      generation: 1,
+      root: "/cdn",
+      manifestHash: "synthetic",
+      page: { total: 0, offset: 0, items: [] },
+      preview: { text: "Synthetic ability", language: "en" },
+    })
+    await renderRoutes(
+      [
+        {
+          path: "*",
+          element: (
+            <CardTable cells={[cell]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />
+          ),
+        },
+      ],
+      { language },
+    )
+    expect(screen.getByText("Synthetic ability").closest("[data-preview]")).toHaveTextContent(
+      /^Synthetic ability$/u,
+    )
+  },
+)

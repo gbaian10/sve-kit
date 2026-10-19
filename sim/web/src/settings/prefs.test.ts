@@ -226,6 +226,7 @@ it("cleans a saved column order and appends missing columns in default order", (
     "name",
     "number",
     "rarity",
+    "evolve",
     "class",
     "cost",
     "attack",

@@ -24,6 +24,7 @@ import {
   usePrefs,
 } from "../../settings"
 import { CLASS_ICON } from "../card/classIcons"
+import { EvolveBadge } from "../card/EvolveBadge"
 import { InlineText } from "../card/InlineText"
 import { RarityBadges } from "../card/RarityBadges"
 import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
@@ -192,7 +193,6 @@ const EffectPreview = memo(function EffectPreview({
       ) : (
         <PreviewStatus phase={result.phase} labels={labels} />
       )}
-      {!singleLine && <span className="text-11 text-text-3">{labels.abilityPreview}</span>}
     </span>
   )
 })
@@ -256,6 +256,7 @@ const TableRow = memo(function TableRow({
             <span className="inline-flex shrink-0 items-center gap-2 text-11 text-text-3 tabular-nums">
               {cell.summary.cardNo}
               <RarityBadges {...cell.summary} />
+              {cell.summary.evolve && <EvolveBadge />}
             </span>
           </span>
           <NameNotices name={cell.name} labels={labels} />
@@ -281,7 +282,6 @@ const TableRow = memo(function TableRow({
           ) : (
             <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
               <span className="text-13 text-text-3 italic">{labels.effectPending}</span>
-              <span className="text-11 text-text-3">{labels.abilityPreview}</span>
             </span>
           )}
         </span>
@@ -417,6 +417,12 @@ const ListRow = memo(function ListRow({
                 <RarityBadges {...cell.summary} />
               </td>
             )
+          case "evolve":
+            return (
+              <td key={column} data-list-evolve="">
+                {cell.summary.evolve && <EvolveBadge />}
+              </td>
+            )
           case "name":
             return (
               <td key={column} data-list-name="">
@@ -528,6 +534,7 @@ export function CardList({
   const names = {
     number: labels.t("results.columns.number"),
     rarity: labels.t("results.columns.rarity"),
+    evolve: labels.t("results.columns.evolve"),
     name: labels.t("results.columns.name"),
     class: labels.t("results.columns.class"),
     cost: labels.stats.cost,
@@ -590,7 +597,10 @@ export function CardList({
           <tr aria-rowindex={1} data-column-order="">
             {columns.map((column) => {
               const key =
-                column === "rarity" || column === "effect" || column === "class"
+                column === "rarity" ||
+                column === "evolve" ||
+                column === "effect" ||
+                column === "class"
                   ? null
                   : sorts[column]
               const label = names[column]

@@ -45,6 +45,7 @@ export interface CardSummary {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
+  readonly evolve?: boolean
   readonly rarityCode?: string | null
   readonly premium?: boolean | null
   readonly rarity?: NameSource
@@ -254,6 +255,7 @@ function* catalogCardCursor(
           cost: nullableInteger(own?.["cost"]),
           attack: nullableInteger(own?.["attack"]),
           defense: nullableInteger(own?.["defense"]),
+          evolve: arrayValue(own?.["special_kinds"] ?? []).includes("evolve"),
           wordingPending:
             pending !== undefined && (pending["display"] as Row)["basis"] !== "current",
         })

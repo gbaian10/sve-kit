@@ -220,6 +220,7 @@ export default {
     reorderColumn: "Reorder {{column}} (↑/↓ to move)",
     columns: {
       class: "Class",
+      evolve: "Evolve",
       rarity: "Rarity",
       number: "Number",
       name: "Name",
@@ -235,7 +236,6 @@ export default {
     },
     descending: "Descending",
     view: "View",
-    abilityPreview: "Ability preview, incomplete",
     effectPending: "Loading effect",
     effectUnavailable: "Effect unavailable",
     conditions: "Current conditions",

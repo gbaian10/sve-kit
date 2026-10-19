@@ -54,6 +54,7 @@ html:has([data-card-list]) {
 
   --list-size-number: var(--list-user-number, 132px);
   --list-size-rarity: max(var(--list-user-rarity, 0px), var(--rarity-column-min-width));
+  --list-size-evolve: max(var(--list-user-evolve, 0px), 64px);
   --list-size-name: var(--list-user-name, 192px);
   --list-size-class: max(var(--list-user-class, 0px), var(--class-column-min-width));
   --list-size-cost: var(--list-user-cost, 44px);
@@ -68,6 +69,10 @@ html:has([data-card-list]) {
 
 :where([data-list-col="rarity"]) {
   width: var(--list-size-rarity);
+}
+
+:where([data-list-col="evolve"]) {
+  width: var(--list-size-evolve);
 }
 
 :where([data-list-col="name"]) {
@@ -326,6 +331,7 @@ html:has([data-card-list]) {
   :where([data-card-list]) {
     --list-size-number: var(--list-mobile-user-number, 84px);
     --list-size-rarity: max(var(--list-mobile-user-rarity, 0px), var(--rarity-column-min-width));
+    --list-size-evolve: max(var(--list-mobile-user-evolve, 0px), 64px);
     --list-size-name: var(--list-mobile-user-name, 124px);
     --list-size-class: max(var(--list-mobile-user-class, 0px), var(--class-column-min-width));
     --list-size-cost: var(--list-mobile-user-cost, 44px);

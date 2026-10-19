@@ -224,6 +224,7 @@ export default {
     reorderColumn: "「{{column}}」の順序を変更（↑／↓ で移動）",
     columns: {
       class: "クラス",
+      evolve: "進化",
       rarity: "レアリティ",
       number: "番号",
       name: "名前",
@@ -239,7 +240,6 @@ export default {
     },
     descending: "降順",
     view: "表示",
-    abilityPreview: "能力プレビュー・未完",
     effectPending: "効果を読み込み中",
     effectUnavailable: "効果を読み込めません",
     conditions: "現在の条件",

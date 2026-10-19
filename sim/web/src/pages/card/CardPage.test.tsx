@@ -55,6 +55,7 @@ const paragraphs = (root: Element, lang: string) =>
   [...root.querySelectorAll(`p[lang="${lang}"]`)].map((p) => p.textContent)
 
 const state = vi.hoisted(() => ({
+  evolve: false,
   available: false,
   current: false,
   crossRegion: false,
@@ -353,6 +354,7 @@ vi.mock("../../app/snapshot", () => {
             class_code: "royal",
             type_code: "follower",
             traits: ["synthetic"],
+            special_kinds: state.evolve ? ["evolve"] : [],
             cost: 3,
             attack: 4,
             defense: 5,
@@ -389,6 +391,7 @@ vi.mock("../../app/snapshot", () => {
 })
 
 beforeEach(() => {
+  state.evolve = false
   state.originalName = false
   state.available = false
   state.multiplePrintings = false
@@ -1146,4 +1149,16 @@ describe("page layout", () => {
       translated.compareDocumentPosition(original) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
   })
+})
+
+it("shows EVOLVE after the type tag using agreed face values", async () => {
+  state.evolve = true
+  state.originalName = true
+  state.doubleFace = true
+  await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+    initialEntries: ["/cards/BP-SYNTHETIC"],
+  })
+  const badges = screen.getAllByRole("img", { name: "EVOLVE" })
+  expect(badges).toHaveLength(2)
+  expect(badges[0]?.previousElementSibling).toHaveTextContent("follower")
 })

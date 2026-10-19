@@ -22,6 +22,7 @@ project documentation uses Apache-2.0 as shown below.
 | Other repository-root configuration files, including dotfiles and lockfiles | Apache-2.0 | Third-party notices and material retain their own terms |
 | `tests/rules-scenarios/questions/` | Apache-2.0 | `evidence[].quote` and any other official or third-party source wording are quotations, not licensed by the project |
 | `sim/web/src/assets/rarity/`, except README files | Apache-2.0 for our drawings | The imitated official rarity-label designs; glyph outlines retain OFL-1.1 terms, see `OFL.txt` in that directory |
+| `sim/web/src/assets/evolve/`, except README files | Apache-2.0 for our drawing | The imitated official EVOLVE-label design; glyph outlines retain OFL-1.1 terms, see `sim/web/src/assets/rarity/OFL.txt` |
 | `sim/web/src/assets/official/` image files, including `logo/head-left.png` | No project license | All official images, including cropped derivatives; the directory README follows the documentation row |
 | `LICENSE`, `LICENSES/` | The supplied standard texts and exclusion notice identify their own terms and scope | These texts do not override the exclusions above |
 

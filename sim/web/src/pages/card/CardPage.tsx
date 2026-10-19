@@ -18,6 +18,7 @@ import { StatusStrip } from "../../app/StatusStrip"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
 import { CLASS_ICON } from "../../components/card/classIcons"
+import { EvolveBadge } from "../../components/card/EvolveBadge"
 import { RarityBadges } from "../../components/card/RarityBadges"
 import { StatCells } from "../../components/card/StatCells"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
@@ -28,6 +29,7 @@ import { Dialog } from "../../components/ui/Dialog"
 import { Link } from "../../components/ui/Link"
 import { useToast } from "../../components/ui/toast-context"
 import {
+  arrayValue,
   cardPrintings,
   type CardRouteInput,
   type CardSummary,
@@ -751,6 +753,7 @@ export function CardView({
                   ? null
                   : undefined
             const typeCode = typeof values?.["type_code"] === "string" ? values["type_code"] : null
+            const evolve = arrayValue(values?.["special_kinds"] ?? []).includes("evolve")
             const traits = (values?.["traits"] ?? []) as string[]
             const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
             const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
@@ -796,7 +799,7 @@ export function CardView({
                         </span>
                       )}
                     </p>
-                    {(typeCode !== null || traits.length > 0) && (
+                    {(typeCode !== null || traits.length > 0 || evolve) && (
                       <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13">
                         {typeCode !== null && (
                           <>
@@ -804,6 +807,7 @@ export function CardView({
                             <Badge>{label("type", typeCode)}</Badge>
                           </>
                         )}
+                        {evolve && <EvolveBadge />}
                         {traits.length > 0 && (
                           <>
                             <span className={cn("text-text-3", typeCode !== null && "ml-1.5")}>

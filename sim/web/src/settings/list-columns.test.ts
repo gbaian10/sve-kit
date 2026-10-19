@@ -8,11 +8,12 @@ it("moves columns in either direction while retaining hidden columns", () => {
     "number",
     "name",
     "rarity",
+    "evolve",
     "cost",
     "attack",
     "defense",
     "class",
     "effect",
   ])
-  expect(moveListColumn(moved, "class", "rarity", true)).toEqual(LIST_COLUMNS)
+  expect(moveListColumn(moved, "class", "evolve", true)).toEqual(LIST_COLUMNS)
 })

@@ -85,6 +85,29 @@ describe("catalog", () => {
     expect(catalog.summary("p:nope")).toBeUndefined()
   })
 
+  it("derives evolve status from the shown face revision in each region", () => {
+    const modified = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["face_id"] === "f:bp01-001" &&
+          row["region"] === "jp" &&
+          Object.hasOwn(row, "special_kinds")
+            ? { ...row, special_kinds: ["evolve"] }
+            : row,
+        ),
+      })),
+    }
+    const changed = createCatalog(modified)
+    expect(changed.summary("p:bp01-001")?.evolve).toBe(true)
+    expect(changed.summary("p:bp01-001-en")?.evolve).toBe(false)
+    const columns = new BootstrapColumns()
+    columns.ingest(modified.bootstrap)
+    columns.seal()
+    expect(new SearchIndex(columns, "jp").recent(["p:bp01-001"])[0]?.summary?.evolve).toBe(true)
+  })
+
   it("passes through official rarity, Premium and optional face appearance to result summaries", () => {
     const modified = {
       ...snapshot,

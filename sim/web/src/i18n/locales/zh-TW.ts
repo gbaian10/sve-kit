@@ -210,7 +210,14 @@ const zhTW = {
     visibleColumns: "顯示欄位",
     resizeColumn: "調整「{{column}}」欄寬",
     reorderColumn: "調整「{{column}}」順序（↑／↓ 移動）",
-    columns: { class: "職業", rarity: "稀有度", number: "卡號", name: "名稱", effect: "卡文" },
+    columns: {
+      class: "職業",
+      rarity: "稀有度",
+      evolve: "進化",
+      number: "卡號",
+      name: "名稱",
+      effect: "卡文",
+    },
     sortBy: {
       date: "發售日",
       no: "卡號",
@@ -221,7 +228,6 @@ const zhTW = {
     },
     descending: "降冪",
     view: "檢視",
-    abilityPreview: "能力預覽・未完整",
     effectPending: "效果載入中",
     effectUnavailable: "效果無法載入",
     conditions: "目前條件",

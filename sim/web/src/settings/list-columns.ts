@@ -4,6 +4,7 @@ export const LIST_COLUMNS = [
   "number",
   "name",
   "rarity",
+  "evolve",
   "class",
   "cost",
   "attack",
@@ -17,6 +18,7 @@ export type ListVisibility = Readonly<Record<ListColumn, boolean>>
 export const LIST_MIN_WIDTHS: Readonly<Record<ListColumn, number>> = {
   number: 84,
   rarity: RARITY_COLUMN_MIN_WIDTH,
+  evolve: 64,
   name: 100,
   class: 48,
   cost: 40,
@@ -28,6 +30,7 @@ export const LIST_MIN_WIDTHS: Readonly<Record<ListColumn, number>> = {
 export const DEFAULT_LIST_VISIBILITY: ListVisibility = {
   number: true,
   rarity: true,
+  evolve: true,
   name: true,
   class: true,
   cost: true,
