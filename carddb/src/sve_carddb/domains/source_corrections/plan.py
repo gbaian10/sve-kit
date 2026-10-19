@@ -9,7 +9,11 @@ from pydantic import JsonValue
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import SourceUse
 from sve_carddb.core.regions import Region
-from sve_carddb.domains.registry.corrections import Status, correction_status
+from sve_carddb.domains.registry.corrections import (
+    SectionComparison,
+    Status,
+    correction_status,
+)
 from sve_carddb.domains.registry.records import CorrectionData, PrintingData
 from sve_carddb.domains.source_corrections.images import evidence_url
 
@@ -70,7 +74,10 @@ class Application:
 
     def marker(self, source_url: str | None) -> dict[str, JsonValue] | None:
         """Keep provenance on this successfully changed reference, never on text."""
-        if self.status != "applied":
+        if (
+            self.status != "applied"
+            or self.data.expected_raw_value == self.data.corrected_value
+        ):
             return None
         return {
             "field": self.data.field,
@@ -100,6 +107,23 @@ class Application:
             else None,
         }
 
+    def section_marker(self, source_url: str | None) -> dict[str, JsonValue] | None:
+        """Describe supplementary source text through the existing public other field."""
+        sections = self.data.sections
+        if (
+            self.status != "applied"
+            or sections is None
+            or sections.expected_raw_value == sections.corrected_value
+        ):
+            return None
+        return {
+            "field": "other",
+            "corrected_from": "\n\n".join(sections.expected_raw_value),
+            "is_corrected": True,
+            "reason": self.data.reason,
+            "source_url": source_url,
+        }
+
 
 def _status(data: CorrectionData, item: FaceObservation) -> Status | None:
     if data.state != "active":
@@ -110,6 +134,13 @@ def _status(data: CorrectionData, item: FaceObservation) -> Status | None:
         expected=data.expected_raw_value,
         corrected=data.corrected_value,
         expected_hash=data.expected_source_hash,
+        sections=SectionComparison(
+            item.content.sections,
+            data.sections.expected_raw_value,
+            data.sections.corrected_value,
+        )
+        if data.sections is not None
+        else SectionComparison(),
     )
 
 
@@ -212,12 +243,17 @@ def verify_applications(
         raise ValueError("Correction application inventory mismatch")
     by_use = {(item.printing_id, item.face_id): item for item in observations}
     fields: set[tuple[str, str, str]] = set()
+    sections: set[tuple[str, str]] = set()
     for application in applications:
         data = application.data
         key = data.printing_id, data.face_id, data.field
         if key in fields or application.observation != by_use.get(key[:2]):
             raise ValueError("Correction field/source inventory mismatch")
         fields.add(key)
+        if data.sections is not None:
+            if key[:2] in sections:
+                raise ValueError("Correction sections overlap")
+            sections.add(key[:2])
         _verify_application(preview, application)
 
 
@@ -240,10 +276,13 @@ def corrected_observations(
             )
             if a.observation == item and a.status == "applied"
         )
-        fields = {
+        fields: dict[str, object] = {
             "effect" if a.data.field == "effect" else "type_raw": a.data.corrected_value
             for a in applied
         }
+        for application in applied:
+            if application.data.sections is not None:
+                fields["sections"] = application.data.sections.corrected_value
         result.append(
             item.model_copy(
                 update={

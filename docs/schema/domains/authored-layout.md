@@ -216,7 +216,7 @@ confirmed_none 與 same_rules_reskin 記錄不可因追加版次自動擴張。�
 
 ### 3.4 來源更正
 
-`source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類；公開 field／值型別依 [傳輸契約 §3.3](../export/snapshot-transport.md#33-公開更正值)，不擴張此 authored 格式的兩欄白名單。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
+`source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類。effect 更正可在同筆記錄加入選用的 `sections: {expected_raw_value: [Text], corrected_value: [Text]}`，核對並替換整份補充段落清單；保留段落順序與原始換行，空清單代表沒有段落。本文與段落必須全部符合原值且來源 hash 相符才原子套用；全部已符合改值時才視為 upstream fixed，部分修正或任一原值不符均為 conflict，不套用其餘部分。段落更正沿用同筆記錄的卡圖證據、hash、reason 與採納狀態，不另建衝突記錄；同一 printing／face 不得有重疊的段落更正。公開 field／值型別依 [傳輸契約 §3.3](../export/snapshot-transport.md#33-公開更正值)：本文或種類保留原 field，補充段落以 `other` 的文字原值呈現，多段以空行分隔；不將清單或建置欄位送入公開 CorrectionValue。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
 
 evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。匯入以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，不保存確認者與流程日期。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
 

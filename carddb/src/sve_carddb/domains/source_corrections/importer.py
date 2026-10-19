@@ -41,6 +41,12 @@ def correction_values(application: Application) -> dict[str, Value]:
         else None,
         "expected_raw_value": Json(data.expected_raw_value),
         "corrected_value": Json(data.corrected_value),
+        "expected_raw_sections": Json(list(data.sections.expected_raw_value))
+        if data.sections is not None
+        else None,
+        "corrected_sections": Json(list(data.sections.corrected_value))
+        if data.sections is not None
+        else None,
         "expected_source_hash": data.expected_source_hash,
         "reason": data.reason,
         "reported_to_official": data.reported_to_official,
@@ -145,6 +151,7 @@ def verify_corrections(db: Database, plan: TextPlan, vocabulary: Vocabulary) -> 
         for row in db.rows("printing_face_observation")
     }
     units = {row.values["id"]: row.values for row in db.rows("text_unit")}
+    sections = db.rows("face_text_section")
     for application in plan.corrections:
         if application.status not in {"applied", "already_fixed"}:
             continue
@@ -179,3 +186,13 @@ def verify_corrections(db: Database, plan: TextPlan, vocabulary: Vocabulary) -> 
             raise ValueError(
                 "Correction result revision does not contain the corrected content"
             )
+        for observation in (item, candidate):
+            actual = {
+                row.values["ordinal"]: units[row.values["text_unit_id"]]["text"]
+                for row in sections
+                if row.values["revision_id"] == revision_id(observation)
+            }
+            if actual != dict(enumerate(observation.content.sections)):
+                raise ValueError(
+                    "Correction revision sections differ from the verified content"
+                )

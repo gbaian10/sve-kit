@@ -67,12 +67,6 @@ records:
     classification: same_effect
     method: ai
     reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
-  - face_id: f:8b7ea5fbe29053308a8659e466983301
-    region: jp
-    comparison_hash: sha256:1ec1c5e18cda78c6d239b16e5768ee45baf0bf5922e8737f5d8e793392939bec
-    classification: pending_review
-    method: ai
-    reason: 補充段落除生成物定義外重複主文的傷害步驟；需要來源修正確認，避免誤認多一次傷害。
   - face_id: f:b3e4edb876555a0f9afa397e43eec6ac
     region: en
     comparison_hash: sha256:d7028fc8d58dc63b75f28f8b3a2193a07cd61d0678f3e40efd80fa7e25212a7b

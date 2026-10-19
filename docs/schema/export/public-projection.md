@@ -128,3 +128,7 @@ uv --directory carddb run pytest tests/export/test_snapshot_project.py
 只有 day 精度可用於發售日排序；月、年、明示未知或沒有商品收錄時，不補成完整日期。
 同一版次有多筆收錄時，所有收錄都能判定完整日期才取最早日；任何一筆日期未定均保留未知。
 查卡合併檢視採用篩選後代表版次的日期，不改用整張卡最早的日期。日期相同依卡號，未知日期在升冪與降冪都排最後。
+
+### 來源更正的補充段落
+
+同筆來源更正可原子修正本文／種類及整份補充段落；建置端保存原始與更正後 revision 的各自段落，不覆寫原始觀測。公開 `Correction` 沿用既有型別：主要欄位照原 field，補充段落以 `field=other`、`corrected_from` 為原段落文字（多段以空行連接）呈現，共用 reason 與 source_url。只有成功套用的 printing／face 與結果 revision 帶標記；conflict 不產生修正內容或標記，上游已全部修正時也不重貼標記。

@@ -34,6 +34,11 @@ def correction_references(
             grouped.setdefault(
                 (item.printing_id, item.face_id, item.card.source.id), []
             ).append(marker)
+        section_marker = application.section_marker(url)
+        if section_marker is not None:
+            grouped.setdefault(
+                (item.printing_id, item.face_id, item.card.source.id), []
+            ).append(section_marker)
     return tuple(
         {
             "printing_id": printing,

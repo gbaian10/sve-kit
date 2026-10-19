@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.core.provenance import BuildContext
+    from sve_carddb.domains.registry.records import SectionCorrection
     from sve_carddb.domains.text_observations.plan import TextPlan
 
 PARSER = "translation-jp-corrected-v1"
@@ -24,6 +25,7 @@ class CorrectedField:
     face_id: str
     original: str
     corrected: str
+    sections: SectionCorrection | None = None
 
 
 @dataclass(frozen=True, init=False)
@@ -53,6 +55,7 @@ class Corrections:
                 item.face_id,
                 application.data.expected_raw_value,
                 application.data.corrected_value,
+                application.data.sections,
             )
             if key in fields and fields[key] != field:
                 raise ValueError("Ambiguous corrected translation source field")
@@ -90,6 +93,12 @@ class Corrections:
             face = object_value(faces[index])
             if face.get("text") != field.original:
                 raise ValueError("Corrected source differs from exact original effect")
+            if field.sections is not None:
+                if face.get("sections") != list(field.sections.expected_raw_value):
+                    raise ValueError(
+                        "Corrected source differs from exact original sections"
+                    )
+                face["sections"] = list(field.sections.corrected_value)
             face["text"] = field.corrected
         return result
 
