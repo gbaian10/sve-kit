@@ -11,17 +11,59 @@
 首次匯入依卡號、face、v0 source 的 `/` 前綴、line、kind、ID 排序，section 在 effect 前；
 分類取代表 member 的位置，member 取自身位置。這不是商品收錄證據。
 
-封套恰有 `format: 1`、`kind: effect_classification_shard`、`namespace`、`basis`、`records`。
+分類封套恰有 `format: 2`、`kind: effect_classification_shard`、`namespace`、`basis`、`records`。
 `basis` 包含轉換規則版本 `recipe` 與來源集合 `inputs_hash`。一份 catalog 的 namespace 與 basis
 必須相同；混入不同輸入版本會失敗。來源、轉換程式與完整重現清單保存在匯入時的私有證據，
 候選 authored 自身的逐筆內容雜湊則隨資料保留。
+basis 描述原分類來源與轉換語義，不因儲存表示改變而重鍵；儲存編碼由 format 選定。
 
-`records` 非空，只有以下兩種記錄，所有欄位必填，沒有預設品質升級：
+`records` 非空，只有以下兩種記錄；未列在下方預設表的欄位必填，沒有預設品質升級：
 
 | kind | 欄位與用途 |
 | --- | --- |
-| `classification` | `id` 是 namespace 內分類 ID；`status` 恰為 `candidate`；`family` 是原分類代號；`normalized_hash`、`definition_hash`、`label_hash` 固定來源證據；`members` 是完整成員 ID 集合；`abilities`、`clauses`、`relations` 保存分類結構 |
-| `member` | `id`、`template`、`position`；`body_hash`、`raw_hash`、`body_length`、`raw_length`；`token_header_hash`（無則 null）、`block`、`evidence_hash`；`clauses` 保存全部 clause 的 ID、舊 template ID、body/raw 範圍 |
+| `classification` | `id` 是 namespace 內分類 ID；`status` 恰為 `candidate`；`family` 是原分類代號；`normalized_hash`、`definition_hash`、`label_hash` 固定來源證據；`members` 是完整舊 UID 集合；`abilities`、`clauses`、`relations` 保存分類結構 |
+| `member` | `id` 是舊 UID；`template`、`position`、`source`、`body_length`、`raw_length`；`token_header_hash`、`block`（舊 UID）、`evidence_hash`；`clauses` 保存全部 clause 的舊 template ID、body/raw 範圍 |
+
+### 分類文字版本
+
+文字分片位於 `authored/rules/classification-sources/<owner>/<sequence>.yaml`，封套恰有
+`format: 1`、`kind: classification_source_shard`、`namespace`、`basis`、`owner`、`records`。
+namespace／basis 必須與分類分片完全相同；owner 必須等於路徑中的 owner。
+每筆文字版本恰有 `id`、`raw` 與可省略的 `body`；`records` 非空。
+`raw` 是 v0 索引引用的原始文字，`body` 是當時分類的正文，不從目前卡表反推。
+body 省略或 null 時等於 raw；兩者不同時完整保存 body，不假定它是 raw 的連續子字串。
+
+文字版本 ID 為 `sha256:` 加上 core canonical JSON `{"raw": raw, "body": body}` 的完整 SHA-256，
+其中 body 先套用預設值。相同 owner 內同一文字版本只存一次，跨 owner 可以各自保存。
+首次寫入按 ID 字典序分片；後續新增依共通規則追加序號。每檔小於 1 MiB。
+member 的 `source` 引用自身卡號第一個 `-` 前的 owner 內文字版本；member 分片 owner 也必須相同。
+文字分片與分類分片皆為必要入口，不接受找不到文字時退回舊 hash 的讀法。
+
+reader 重算文字版本 ID，驗證獨立保存的 body／raw 長度，再核對子句區段。
+不存在的引用、hash 不符、長度不符、區段越界、同 owner 重複版本、跨 namespace／basis 都失敗；
+診斷不附卡文。raw／body 不進回傳 Catalog；Catalog 保留由精確文字算出的原有 hash。
+
+### 可讀識別碼與省略值
+
+member 的 id、block、分類的 members 使用原始 UID；分類 clause 的 id 與 relation 端點的 clause
+使用原始 CID。member 子句不重複保存 ID：依陣列順序以零起算序號組成 `UID + "~" + 序號`。
+reader 對這些 UID／CID 的精確 UTF-8 bytes 作 SHA-256，還原原本 Catalog 的所有識別碼；
+不解析名稱、不正規化 Unicode、不換成局部序號。文字版本 ID 不取代 member 身分。
+
+| 位置／欄位 | 省略或 null 時的值 |
+| --- | --- |
+| 文字版本 `body` | 同筆 `raw` |
+| member `raw_length` | 同筆 `body_length` |
+| member `block` | 同筆原始 `id`（UID） |
+| member clause `raw` | 同筆 `body` 區段 |
+| member `token_header_hash`、position `ordinal` | null |
+| ability `cost_timing`、`note_hash` | null |
+| classified clause `decision`、`capture` | null |
+| relation endpoint `ability` | null |
+
+其餘資料不作省略推算；完整 members 集合、各類證據 hash、子句與 relation 順序皆保留。
+wire format 1 的 hash-only 分類分片不再接受；reader 的內部 resolved Shard 保留原格式，
+供 Catalog 與 matcher 使用，不是另一個 authored 入口。
 
 分類的 clauses／relations 描述一個代表 member，分類 clause ID 集合必須恰好涵蓋該 member
 的全部子句，且唯一屬於它；其他 member 的舊 C 樣板序列必須相同，依序對應。
@@ -52,9 +94,11 @@ namespace 為 `classification-v0`，recipe 為 `v0-classification-candidates-1`�
 `inputs_hash` 是以 classification 目錄為基準的 POSIX 相對路徑（例如 `v0/templates.jsonl`）到
 `sha256:<hex>` 字串值的對照表的 core canonical JSON 雜湊。
 完整檔案 hash 清單保存在私有匯入證據；不將本機路徑寫入 authored。
+文字分片只保存此 v0 分類引用的日文 raw／body；這是本批匯入範圍，不定義其他卡片資料的存放政策。
+官方文字與識別碼內的官方名稱不在專案授權範圍，依 [LICENSING](../../../LICENSING.md)。
 
-- T、C 與 family 代號原樣保留。member ID、clause ID、block ID 為舊 UID／CID 的精確 UTF-8 SHA-256，
-  因為原 ID 可能含官方 token 名稱，不能直接公開。
+- T、C 與 family 代號原樣保留。authored 保存原始 UID／CID（可能含官方 token 名稱）；
+  resolved member、clause、block ID 仍為其精確 UTF-8 SHA-256。
 - definition、label、member evidence 與 token header 的 hash 來自完整原始物件的 core canonical JSON；
   normalized、raw、body、note hash 來自各原始字串的 UTF-8 bytes。所有 hash 使用 `sha256:` 前綴。
 - 原始 variants 由完整原始 definition hash 固定。原始 label 的自由文字、scope、gaps、
