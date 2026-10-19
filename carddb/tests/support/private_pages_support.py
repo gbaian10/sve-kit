@@ -1,4 +1,4 @@
-"""Pinned, field-specific oracles for private parser fixtures.
+"""Pinned, field-specific oracles shared by public and private parser fixtures.
 
 Text checks hash UTF-8 exactly; nulls and list lengths are separate checks.
 Mapping checks allow new output fields. Local verification never consults Git.
@@ -161,7 +161,12 @@ def _case(value: object) -> Case:
         relative.is_absolute()
         or ".." in relative.parts
         or relative.as_posix() != path
-        or relative.parts[:2] != ("fixtures", "carddb")
+        or relative.parts[:2]
+        not in {
+            ("fixtures", "carddb"),
+            ("fixtures", "official_jp"),
+            ("fixtures", "official_en"),
+        }
         or relative.suffix not in {".html", ".json"}
     ):
         raise PrivatePageError("unsafe private-page fixture path")

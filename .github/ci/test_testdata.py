@@ -10,14 +10,14 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import] -- synthetic Com
 import tempfile
 import unittest
 from pathlib import Path
-from typing import cast, override
+from typing import override
 from unittest.mock import patch
 
 import testdata
 
 REPOSITORY = "owner/project"
 COMMIT = "a" * 40
-BODY = b"synthetic engine input"
+BODY = b"synthetic private page"
 
 
 def event(head: str = REPOSITORY) -> dict[str, object]:
@@ -29,28 +29,6 @@ def event(head: str = REPOSITORY) -> dict[str, object]:
             "base": {"repo": {"full_name": REPOSITORY}},
             "head": {"repo": {"full_name": head}},
         },
-    }
-
-
-def metadata() -> dict[str, object]:
-    """Include public tests in both packages and two private integration targets."""
-    return {
-        "workspace_members": ["engine", "runner"],
-        "packages": [
-            {
-                "id": "engine",
-                "name": "sve-engine",
-                "targets": [
-                    {"name": name, "kind": ["test"]}
-                    for name in ("cards", "shared", "m0")
-                ],
-            },
-            {
-                "id": "runner",
-                "name": "sve-scenario-runner",
-                "targets": [{"name": "runner", "kind": ["test"]}],
-            },
-        ],
     }
 
 
@@ -67,17 +45,25 @@ class TestdataTests(unittest.TestCase):
         (self.root / "carddb/tests/fixtures").mkdir(parents=True)
         self.pin = self.root / ".github/ci/testdata.lock"
         self.pin.write_text(
-            f'repo = "owner/private"\ncommit = "{COMMIT}"\n'
-            'snapshot_path = "fixtures/engine/cards.jsonl"\n'
-            f'snapshot_sha256 = "{hashlib.sha256(BODY).hexdigest()}"\n',
+            f'repo = "owner/private"\ncommit = "{COMMIT}"\n',
             encoding="utf-8",
         )
         (self.root / ".github/ci/fork-coverage.json").write_text(
-            '{"python": 73, "rust": 64}',
+            '{"python": 73}',
             encoding="utf-8",
         )
         (self.root / "carddb/tests/fixtures/private-pages.json").write_text(
-            json.dumps({"commit": COMMIT}),
+            json.dumps(
+                {
+                    "commit": COMMIT,
+                    "cases": [
+                        {
+                            "path": "fixtures/carddb/synthetic.html",
+                            "sha256": hashlib.sha256(BODY).hexdigest(),
+                        }
+                    ],
+                }
+            ),
             encoding="utf-8",
         )
         self.event_file = self.root / "event.json"
@@ -144,17 +130,17 @@ class TestdataTests(unittest.TestCase):
     def test_full_configuration_requires_private_testdata(self) -> None:
         """Full scope keeps the existing 90% gate and an explicit required mode."""
         with patch.dict(os.environ, self.environment, clear=True):
-            testdata.configure("rust")
+            testdata.configure("python")
         assert (self.root / "env").read_text(encoding="utf-8") == (
             "SVE_PRIVATE_TESTDATA_MODE=required\nSVE_CI_TEST_MODE=full\nSVE_CI_COVERAGE_THRESHOLD=90\n"
         )
 
     def test_pin_disagreement_and_unsafe_paths_fail(self) -> None:
-        """A path escape or a Python/Rust pin mismatch cannot reach checkout."""
+        """A malformed repository or checkout pin mismatch cannot reach checkout."""
         original = self.pin.read_text(encoding="utf-8")
         for changed in (
             original.replace(COMMIT, "b" * 40),
-            original.replace("fixtures/engine", "../engine"),
+            original.replace("owner/private", "../private"),
         ):
             self.pin.write_text(changed, encoding="utf-8")
             with self.assertRaises(ValueError):
@@ -163,7 +149,6 @@ class TestdataTests(unittest.TestCase):
     def test_fork_thresholds_are_independent_and_invalid_values_fail(self) -> None:
         """Never silently use full coverage or disable a fork gate."""
         assert testdata.threshold("python", "fork") == 73
-        assert testdata.threshold("rust", "fork") == 64
         assert testdata.threshold("python", "full") == 90
         for value in (0, True, "73", 101):
             (self.root / ".github/ci/fork-coverage.json").write_text(
@@ -175,8 +160,8 @@ class TestdataTests(unittest.TestCase):
             testdata.threshold("python", "unknown")
 
     def test_private_verification_is_trusted_and_exact(self) -> None:
-        """The checked-out commit and engine bytes are separate fail-closed checks."""
-        snapshot = self.root / ".testdata/fixtures/engine/cards.jsonl"
+        """The checked-out commit and private bytes are separate fail-closed checks."""
+        snapshot = self.root / ".testdata/fixtures/carddb/synthetic.html"
         snapshot.parent.mkdir(parents=True)
         snapshot.write_bytes(BODY)
         success = subprocess.CompletedProcess([], 0, stdout=COMMIT + "\n")
@@ -189,10 +174,9 @@ class TestdataTests(unittest.TestCase):
             patch.object(subprocess, "run", return_value=success),
         ):
             testdata.verify("python")
-            testdata.verify("rust")
             snapshot.write_bytes(b"changed synthetic input")
             with self.assertRaises(ValueError):
-                testdata.verify("rust")
+                testdata.verify("python")
         with patch.dict(
             os.environ, {"SVE_PRIVATE_TESTDATA_MODE": "excluded"}, clear=True
         ):
@@ -216,68 +200,16 @@ class TestdataTests(unittest.TestCase):
             == "Test scope or private test-data verification failed.\n"
         )
 
-    def test_rust_keeps_both_public_packages_and_only_excludes_private_targets(
-        self,
-    ) -> None:
-        """Both snapshot-dependent engine test binaries must be omitted."""
-        assert testdata.public_rust_targets(metadata()) == ["m0", "runner"]
-        result = subprocess.CompletedProcess([], 0, stdout=json.dumps(metadata()))
-        with patch.object(subprocess, "run", return_value=result):
-            command = testdata.rust_command("fork", 64, Path("coverage.json"))
-        assert command[1:] == [
-            "llvm-cov",
-            "--locked",
-            "--workspace",
-            "-j",
-            "4",
-            "--summary-only",
-            "--fail-under-lines",
-            "64",
-            "--json",
-            "--output-path",
-            "coverage.json",
-            "--lib",
-            "--bins",
-            "--test",
-            "m0",
-            "--test",
-            "runner",
-        ]
-        assert "--exclude" not in command
-        assert "--ignore-filename-regex" not in command
-        assert "--test" not in testdata.rust_command("full", 90, Path("coverage.json"))
-
-    def test_rust_missing_inventory_and_ambiguous_names_fail(self) -> None:
-        """Target additions cannot accidentally select a private binary by name."""
-        invalid_documents: tuple[object, ...] = (
-            {},
-            {"workspace_members": [], "packages": []},
-        )
-        for invalid in invalid_documents:
-            with self.assertRaises((ValueError, TypeError)):
-                testdata.public_rust_targets(invalid)
-        document = metadata()
-        packages = document["packages"]
-        assert isinstance(packages, list)
-        package = cast("dict[str, object]", packages[1])
-        targets = cast("list[dict[str, object]]", package["targets"])
-        targets.append({"name": "cards", "kind": ["test"]})
-        with self.assertRaisesRegex(
-            ValueError, "^Ambiguous Cargo private test targets$"
-        ):
-            testdata.public_rust_targets(document)
-
-    def test_fork_rust_execution_clears_snapshot_and_preserves_failure(self) -> None:
-        """A inherited local private-data path must not widen the fork test scope."""
-        result: subprocess.CompletedProcess[str] = subprocess.CompletedProcess([], 7)
-        with (
-            patch.dict(
-                os.environ,
-                {"SVE_CI_TEST_MODE": "fork", "SVE_TEST_SNAPSHOT": "/synthetic/private"},
-                clear=True,
-            ),
-            patch.object(testdata, "rust_command", return_value=["/tools/cargo"]),
-            patch.object(subprocess, "run", return_value=result) as execute,
-        ):
-            assert testdata.main(["rust-tests", "coverage.json"]) == 7
-        assert "SVE_TEST_SNAPSHOT" not in execute.call_args.kwargs["env"]
+    def test_private_inventory_rejects_escape_and_duplicates(self) -> None:
+        """A valid checkout cannot authorize paths outside its fixture root."""
+        index = self.root / "carddb/tests/fixtures/private-pages.json"
+        for path in ("../private", "/absolute", "fixtures/carddb/../outside"):
+            index.write_text(
+                json.dumps({"cases": [{"path": path, "sha256": "a" * 64}]})
+            )
+            with self.assertRaises(ValueError):
+                testdata.private_files()
+        case = {"path": "fixtures/carddb/synthetic.html", "sha256": "a" * 64}
+        index.write_text(json.dumps({"cases": [case, case]}))
+        with self.assertRaises(ValueError):
+            testdata.private_files()

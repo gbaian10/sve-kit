@@ -10,12 +10,12 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-      # Synthetic HTML deliberately preserves parser-significant whitespace; web snapshots
+      # Synthetic HTML preserves parser whitespace; official fixtures retain pinned bytes. Web snapshots
       # are canonical JSON whose sha256 is pinned (no trailing newline).
       - id: trailing-whitespace
-        exclude: ^(carddb/tests/fixtures/synthetic_(jp|en)/.*\.html$|sim/web/fixtures/)
+        exclude: ^(carddb/tests/fixtures/(synthetic|official)_(jp|en)/.*\.html$|sim/web/fixtures/)
       - id: end-of-file-fixer
-        exclude: ^(carddb/tests/fixtures/synthetic_(jp|en)/.*\.html$|sim/web/fixtures/)
+        exclude: ^(carddb/tests/fixtures/(synthetic|official)_(jp|en)/.*\.html$|sim/web/fixtures/)
       - id: check-added-large-files
         args: [--maxkb=1024, --enforce-all]
       - id: check-ast
@@ -164,9 +164,9 @@ repos:
         name: cargo test (with line coverage >= 90%)
         language: system
         # Runs the whole test suite once, instrumented; raise the bar as the engine grows.
-        entry: mise exec -- cargo llvm-cov --locked --workspace --summary-only --fail-under-lines 90
+        entry: python3 .github/ci/rust_tests.py
         pass_filenames: false
-        # Manual locally (it needs SVE_TEST_SNAPSHOT and takes minutes); CI runs it on every Rust change:
+        # Manual locally; the wrapper generates public test input, as CI does:
         # `pre-commit run --hook-stage manual cargo-test`.
         always_run: true
         stages: [manual]

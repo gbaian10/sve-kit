@@ -12,13 +12,30 @@ from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.core.provenance import Revision
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.parsed_cards import codec
+from sve_carddb.domains.parsed_cards.engine_fixture import project as engine_fixture
 from sve_carddb.domains.parsed_cards.generate import generate
 from sve_carddb.domains.parsed_cards.models import BatchFile, Family, Index
+from sve_carddb.domains.parsed_cards.reader import read
 from sve_carddb.domains.parsed_cards.storage import load, write
 from sve_carddb.domains.parsed_cards.wire import CardFile, EvidenceFile
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 app = typer.Typer(no_args_is_help=True)
+
+
+@app.command("engine-fixture")
+def engine_fixture_command(root: Path, batch_id: str, output: Path) -> None:
+    """Write a new temporary JP engine input from admitted repository JSON."""
+    try:
+        root = _absolute(root)
+        output = _engine_destination(root, output)
+        content = engine_fixture(read(root), batch_id)
+        with output.open("xb") as destination:
+            destination.write(content)
+    except OSError, ValueError:
+        typer.echo("Engine test input generation failed.", err=True)
+        raise typer.Exit(1) from None
+    typer.echo("Engine test input generated; no publication performed.")
 
 
 class SourceBatch(RecordData):
@@ -51,6 +68,13 @@ def _absolute(path: Path) -> Path:
     if not path.is_absolute():
         raise ValueError("An explicit absolute path is required")
     return path
+
+
+def _engine_destination(root: Path, output: Path) -> Path:
+    output = _absolute(output)
+    if output.resolve().is_relative_to(root.resolve()):
+        raise ValueError("Engine output must not replace source inputs")
+    return output
 
 
 @app.command("generate")

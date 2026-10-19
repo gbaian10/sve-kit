@@ -41,8 +41,8 @@ CASE = Case(
 def test_public_index_needs_no_private_checkout() -> None:
     index = load_index()
     assert index.commit == "309b766885d49faff9db80f5b97cd56d8601c55b"
-    assert len(index.cases) == 19
-    assert len({case.sha256 for case in index.cases}) == 19
+    assert {case.id for case in index.cases} == {"F17", "F18", "F19"}
+    assert len({case.sha256 for case in index.cases}) == 3
 
 
 def test_private_fixture_representation_is_safe() -> None:

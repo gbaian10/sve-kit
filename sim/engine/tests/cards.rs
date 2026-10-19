@@ -9,10 +9,10 @@ use alloc::sync::Arc;
 use serde_json::{Value, json};
 use sve_engine::game::Game;
 
-#[path = "support/private_catalog.rs"]
-mod private_catalog;
+#[path = "support/generated_catalog.rs"]
+mod generated_catalog;
 
-use private_catalog::catalog;
+use generated_catalog::catalog;
 
 fn position(class: &str, hand: &Value, deck: &Value, counters: &Value) -> Value {
     json!({
@@ -33,9 +33,7 @@ fn position(class: &str, hand: &Value, deck: &Value, counters: &Value) -> Value 
 /// evolve actions (`evolve_played`).
 #[test]
 fn bp16_036_widens_the_choice_after_any_evolution() {
-    let Some(catalog) = catalog() else {
-        return;
-    };
+    let catalog = catalog();
     let max_options = |counters: &Value| {
         let game = Game::new(
             Arc::clone(&catalog),
@@ -69,9 +67,7 @@ fn bp16_036_widens_the_choice_after_any_evolution() {
 /// KE-14, BP20-P28: only onmyoji followers and spells are offered.
 #[test]
 fn bp20_p28_offers_onmyoji_followers_or_spells_only() {
-    let Some(catalog) = catalog() else {
-        return;
-    };
+    let catalog = catalog();
     let mut game = Game::new(
         catalog,
         &position(
