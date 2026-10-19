@@ -15,7 +15,7 @@ project documentation uses Apache-2.0 as shown below.
 | --- | --- | --- |
 | `carddb/`, `sim/`, `dsl/`, `.github/`, and `tests/`, except the more specific rows below | Apache-2.0 | Official names, card wording, rules, Q&A, source-derived text and other third-party material in literals, examples or fixtures |
 | `authored/rules/effects/`, `authored/rules/keywords.yaml`, `authored/rules/engine/` | Apache-2.0 | Official names in `name` and `ja`, copied wording, and other official or third-party material |
-| All other paths under `authored/`, including translations, rulings, registry, IDs, products, catalog adoptions, and their indexes | CC0-1.0 | `evidence[].quote`; official or third-party translations, including values with `origin: official_*`; `expected_raw_value` and `corrected_value` containing source expression; official product names in `authored/products/` `text` values; official vocabulary in `authored/catalog/adoptions/` `raw` values; other identified third-party material |
+| All other paths under `authored/`, including DSL classification evidence, translations, rulings, registry, IDs, products, catalog adoptions, and their indexes | CC0-1.0 | Official card wording and names in source evidence or identifiers; `evidence[].quote`; official or third-party translations, including values with `origin: official_*`; `expected_raw_value` and `corrected_value` containing source expression; official product names in `authored/products/` `text` values; official vocabulary in `authored/catalog/adoptions/` `raw` values; other identified third-party material |
 | `docs/`, README files at any level, `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, and project-owned legal documentation | Apache-2.0 | Real-card examples, official excerpts and source quotations, including those in `docs/dsl/` and `docs/sim/` |
 | Other repository-root configuration files, including dotfiles and lockfiles | Apache-2.0 | Third-party notices and material retain their own terms |
 | `tests/rules-scenarios/questions/` | Apache-2.0 | `evidence[].quote` and any other official or third-party source wording are quotations, not licensed by the project |
@@ -63,9 +63,16 @@ covered by the project's Apache grant. Synthetic test
 content follows its path's project license. Any official or other third-party
 source expression embedded in test programs remains excluded from that grant.
 
-Public carddb tests use synthetic pages and wording. Original test pages and the
-engine card list are kept in a permanently private testdata repository; the public
-repository stores source pins and field-value SHA-256 hashes, not those inputs.
+Official SVE Japanese and English card wording may be retained in Git; card
+images and audio remain excluded. This repository policy does not grant rights
+in that wording and does not extend to original inputs from other games such as
+SV1 or Worlds Beyond. The exclusions in the path table apply to official content
+in both data and test programs.
+
+Public carddb tests use synthetic pages and wording and may include
+real SVE wording. The existing original test pages and engine card list are kept
+in a permanently private testdata repository; their public source pins and
+field-value SHA-256 hashes support the private-input verification workflow.
 Private storage controls access and does not grant rights in official material.
 Earlier source-derived fixtures and assertions remain excluded in Git history.
 

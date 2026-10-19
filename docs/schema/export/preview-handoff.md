@@ -35,7 +35,7 @@ uv --directory carddb run sve-carddb snapshot export-offline --inputs /private/i
 bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不得逸出 preview root。
 
 `--inputs` 是呼叫端明確提供的 JSON 配方，欄位如下；路徑與實際來源 pin 留在私人建置環境，
-不進 repo。配方、詞彙綁定與衍生產物可能含官方文字，適用相同的私人資料邊界。
+不進 repo。配方、詞彙綁定與衍生產物依此建置流程留在 repo 外；這不限制依 [AGENTS.md](../../../AGENTS.md#資料放在哪裡) 保存 SVE 日英卡文。
 
 | 欄位 | 意義 |
 | --- | --- |

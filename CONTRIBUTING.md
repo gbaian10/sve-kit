@@ -24,9 +24,12 @@ For data contribution formats, see [authored layout](docs/schema/domains/authore
   You offer only rights you hold and can grant. No separate copyright assignment,
   CLA or DCO sign-off is required.
 - Distinguish your own suggestions from official or community wording. Cite the
-  source and its date or version where known. Link to sources instead of copying
-  full pages, card lists, images or other people's translations; a source link
-  is not permission to relicense them.
+  source and its date or version where known. Official SVE Japanese and English
+  card wording may be included in Git; card images and audio remain excluded.
+  This decision does not extend to original inputs from other games such as SV1
+  or Worlds Beyond. Link to other third-party sources instead of copying their
+  contents; neither a source link nor this repository policy grants permission
+  to relicense official or third-party material.
 
 ## Languages
 
