@@ -56,7 +56,7 @@ records:
       corrected_value: "【疾走】\n自分のエンドフェイズが来たとき、これは消滅する。"
       expected_source_hash: sha256:daae2afa3464a8882766c4da357ffdd91c143b96fba626a59490210ea354313c
       source_hash_recipe: registry-observation-v2
-      reason: Official page transcription differs from the printed card image.
+      reason: Official page omits the end-phase banish ability printed below Storm on the card image.
       state: active
       reported_to_official: false
       reported_on:
@@ -66,4 +66,4 @@ records:
           sha256: sha256:32a12bf6b0cccd667b8d38e162ba90261a08cd32f4efe769881c919199e69793
           image_src: /wordpress/wp-content/images/cardlist/PR/pr-114.png
           region: jp
-          locator: Card rules text box
+          locator: Rules text box, Storm keyword and the end-phase banish line directly below it
