@@ -1,0 +1,3529 @@
+format: 2
+kind: effect_classification_shard
+namespace: classification-v0
+basis:
+  recipe: v0-classification-candidates-1
+  inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+records:
+  - kind: classification
+    id: Ta837cc112b
+    status: candidate
+    family: fanfare-two-tokens-necro-storm
+    normalized_hash: sha256:a837cc112b259006921365b0bc7dc48d0d98fec6d47bed49071ad95f5fe53e78
+    definition_hash: sha256:770ac15b05393da1bdfc9418496cf14ae47ac5fa68e413816298f66d03a2d122
+    label_hash: sha256:37516a54db51d5c7666bf4189934d3365f29d1e94e2f0b834e124f1b4158c3da
+    members:
+      - BP16-075#0/text/0
+      - BP16-SL19#0/text/0
+      - BP16-U05#0/text/0
+      - EBD03-001#0/text/0
+      - PR-512#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-001#0/text/0~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - I.token
+          - D.rule-choice
+          - V.zone-capacity
+        author:
+          - A.head.fanfare
+          - A.act.create
+        note_hash: sha256:b25de901bed46255c66928cf885d7bf82241d650823640d2dcbc719d83e17606
+      - id: EBD03-001#0/text/0~1
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.necro-charge
+          - I.grant
+          - L.continuous
+          - L.duration
+          - B.keyword
+          - R.follow-move
+        author:
+          - A.if
+          - A.cond
+          - A.act.grant
+          - A.ref
+        note_hash: sha256:821dd555f0c0b7293dd34da8b92b1874115f948a30649d5d735e1e454793b88b
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-001#0/text/0~0
+        targets:
+          - clause: EBD03-001#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: branch
+        sources:
+          - clause: EBD03-001#0/text/0~1
+        targets:
+          - clause: EBD03-001#0/text/0~1
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: result-of
+        sources:
+          - clause: EBD03-001#0/text/0~0
+        targets:
+          - clause: EBD03-001#0/text/0~1
+        note_hash: sha256:80513bd4686abef43c5b641351bc8f0a1075a55680949f95df620f1d259ae1bd
+  - kind: member
+    id: EBD03-001#0/text/0
+    template: Ta837cc112b
+    position:
+      card_no: EBD03-001
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 63
+    evidence_hash: sha256:7279ebb78ef0bc645d313e85344e71c201f8f701b37b0cf62fd41afa7e0778fe
+    clauses:
+      - template: C965c0ec7ef
+        body:
+          start: 0
+          end: 40
+      - template: Cfccad24e88
+        body:
+          start: 40
+          end: 63
+    source: sha256:cc92a6070c36dcb13e77f7d0b144242ca60b87c74e3f47bc31fe890acb60fe59
+  - kind: classification
+    id: Tef48b04a06
+    status: candidate
+    family: activate-sacrifice-other-damage
+    normalized_hash: sha256:ef48b04a0687eddef2e30cf6dfa86abb84d6e4042e6528205fa0753844ce6785
+    definition_hash: sha256:9b3fd997362f33a527d6550ba39b4a9095ddc18ef1363f061a42bf36be9b4dba
+    label_hash: sha256:cfda500e2db07e675a9f98699c13a47867fd82c4f2762fbaa9d69502a464e285
+    members:
+      - BP16-075#0/text/1
+      - BP16-SL19#0/text/1
+      - BP16-U05#0/text/1
+      - EBD03-001#0/text/1
+      - PR-512#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-001#0/text/1~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - T.receipt
+          - I.posture
+          - I.move
+          - S.zone
+          - S.filter
+          - X.predicate
+          - D.play-param
+          - R.target
+        author:
+          - A.head.activate
+          - A.cost
+          - A.sel
+          - A.target
+        note_hash: sha256:05af7c25d4d734db3d96fc5f277bea05d0a38f0247b621625033e8294b8841b5
+      - id: EBD03-001#0/text/1~1
+        ability: a1
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:46c582b4ccce84a2fc4078abbfd91db769b101e78ef4198c9c7aeef127f2be2f
+    relations:
+      - type: cost-of
+        sources:
+          - clause: EBD03-001#0/text/1~0
+        targets:
+          - clause: EBD03-001#0/text/1~1
+        note_hash: sha256:52f9872d358c808a687029cf1d49b43a21d194342501a241b19d179087909a15
+      - type: sequence
+        sources:
+          - clause: EBD03-001#0/text/1~0
+        targets:
+          - clause: EBD03-001#0/text/1~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-001#0/text/1
+    template: Tef48b04a06
+    position:
+      card_no: EBD03-001
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 55
+    evidence_hash: sha256:1df5790bdc861072e7bf8b19e147a954d1040da3c4c290de7a5f42be73a3a90f
+    clauses:
+      - template: C421d974107
+        body:
+          start: 0
+          end: 46
+      - template: Cdf35a4dada
+        body:
+          start: 46
+          end: 55
+    source: sha256:592de8896b9bfbc94d8d27d0f4796e30a6e3ada3eae2625545526bd328856c48
+  - kind: member
+    id: EBD03-002#0/text/0
+    template: T3f4ec6dc23
+    position:
+      card_no: EBD03-002
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 4
+    evidence_hash: sha256:644595eda0553c5812b322e7545b5a15e908cc95fc5d4bbe528ddfac9ff689e9
+    clauses:
+      - template: C3f4ec6dc23
+        body:
+          start: 0
+          end: 4
+    source: sha256:87b795e30f197f44f7977a475f0e612b291f04373d9dab747095907186742825
+  - kind: classification
+    id: T6451f20dab
+    status: candidate
+    family: opponent-end-self-grave
+    normalized_hash: sha256:6451f20dab073cf72c55f43e55bcc52479ddf88ee10d0499e573dd23585a5e88
+    definition_hash: sha256:4c24c70a7f44c825e0abeda4cffac45fd0771691d06e012da6c8d93ed5e70218
+    label_hash: sha256:671c9ad8e09d5a58f85d2e9369b3260019460879f007b828722ea47c9232777d
+    members:
+      - BP16-078#0/text/1
+      - BP16-SL22#0/text/1
+      - EBD03-002#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-002#0/text/1~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.phase
+          - I.move
+          - T.receipt
+        author:
+          - A.head.auto
+          - A.act.move
+        note_hash: sha256:6d48e2e7d8e72e554c77553a2d58f52fa878c3b39a5c6d4eb02f2b7d9e27e8ed
+    relations: []
+  - kind: member
+    id: EBD03-002#0/text/1
+    template: T6451f20dab
+    position:
+      card_no: EBD03-002
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 25
+    evidence_hash: sha256:eabdc3bc0c2ced4d1b363534c3bf60c5db6888defe7db2b3b7f85ecca9887543
+    clauses:
+      - template: C6451f20dab
+        body:
+          start: 0
+          end: 25
+    source: sha256:0f0f0dfebf2f89d677d602fd8d4698f3e77e559f188e78c24958071dd8da9579
+  - kind: classification
+    id: T2282adec2b
+    status: candidate
+    family: fanfare-provenance-mode-count
+    normalized_hash: sha256:2282adec2b8bc4ebc4b6338166864add5866f8baa97c466c93d53a52ce7f401d
+    definition_hash: sha256:e05c8ee3a8e1e26d6d54c1179230d1f6e0384d068d6096cf6f761d3142cfc151
+    label_hash: sha256:920373b4980e10ac93f361899f1de1e7b5b7759ea7af36e928985d16a8ab563c
+    members:
+      - BP16-078#0/text/2
+      - BP16-SL22#0/text/2
+      - EBD03-002#0/text/2
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-002#0/text/2~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - K.mode
+          - D.play-param
+        author:
+          - A.head.fanfare
+          - A.choice
+          - A.choice-at-play
+        note_hash: sha256:2681acce72dfc8303fdb8731d532ea7d2285748b94a4759cd6403495ac0708c2
+      - id: EBD03-002#0/text/2~1
+        ability: a1
+        capture: C.at-play
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - L.replacement
+        author:
+          - A.if
+          - A.cond
+          - A.comb.instead
+        note_hash: sha256:dfdbad46182803590bbff718e059b155c0ec008fa86176f1bbfee47bcc362bf9
+    relations:
+      - type: branch
+        sources:
+          - clause: EBD03-002#0/text/2~1
+        targets:
+          - clause: EBD03-002#0/text/2~1
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: capture-of
+        sources:
+          - clause: EBD03-002#0/text/2~1
+        targets:
+          - clause: EBD03-002#0/text/2~0
+        note_hash: sha256:97402a19ac03d0bf7ac2b4751cba1e751d5606923bf44da7fd72894c4a4ddcbc
+  - kind: member
+    id: EBD03-002#0/text/2
+    template: T2282adec2b
+    position:
+      card_no: EBD03-002
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 47
+    evidence_hash: sha256:827d84a0b25ed0b091d4091b0ce77745f9ecc0c235125826cf1e22d40cf8c778
+    clauses:
+      - template: Ce5f83894e0
+        body:
+          start: 0
+          end: 22
+      - template: C8eb4dae831
+        body:
+          start: 22
+          end: 47
+    source: sha256:afd84fb83ec87e86040f8e0538288ac84905bbf3f51c915dfbd5b8397bf0c8e9
+  - kind: classification
+    id: Te879f74011
+    status: candidate
+    family: fanfare-two-mode-bodies
+    normalized_hash: sha256:e879f7401173016074d6da8798677a82a27fb4f4e9512d088a61f3961eb272ab
+    definition_hash: sha256:d82a0aec47582611c8d204dbd69af2c6986d87f908278a670dc30a196dbce925
+    label_hash: sha256:2c51d4cd8f297ee396684b61989880c8ef32de2421cf1ce11302d59ad8f0652e
+    members:
+      - BP16-078#0/text/3
+      - BP16-SL22#0/text/3
+      - EBD03-002#0/text/3
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-002#0/text/3~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - I.token
+          - D.rule-choice
+          - V.zone-capacity
+        author:
+          - A.head.fanfare
+          - A.act.create
+        note_hash: sha256:b25de901bed46255c66928cf885d7bf82241d650823640d2dcbc719d83e17606
+      - id: EBD03-002#0/text/3~1
+        ability: a1
+        stage: known
+        ir:
+          - I.life
+          - T.player-ref
+        author:
+          - A.act.life
+        note_hash: sha256:6d6b09a2193e6b956192e22a9ea476cd7804f27e2297674a5db34eeca52f1e2a
+      - id: EBD03-002#0/text/3~2
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+          - S.ordered
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: scope-of
+        sources:
+          - clause: EBD03-002#0/text/3~0
+        targets:
+          - clause: EBD03-002#0/text/3~0
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-002#0/text/3~0
+        targets:
+          - clause: EBD03-002#0/text/3~1
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: sequence
+        sources:
+          - clause: EBD03-002#0/text/3~0
+        targets:
+          - clause: EBD03-002#0/text/3~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: scope-of
+        sources:
+          - clause: EBD03-002#0/text/3~2
+        targets:
+          - clause: EBD03-002#0/text/3~2
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+  - kind: member
+    id: EBD03-002#0/text/3
+    template: Te879f74011
+    position:
+      card_no: EBD03-002
+      region: jp
+      face: 0
+      field: effect
+      line: 3
+    body_length: 55
+    evidence_hash: sha256:375139535b05b2d02719a2c5d88173dc8d9d4f828ae16a9c63397168d0431034
+    clauses:
+      - template: Ce2bea09240
+        body:
+          start: 0
+          end: 18
+      - template: Ca1099c5fef
+        body:
+          start: 18
+          end: 35
+      - template: C46d0e5a780
+        body:
+          start: 35
+          end: 55
+    source: sha256:f447b8ac90f5a219a4781847c334b4cb9e7f204b8559123c2a563d283629d506
+  - kind: member
+    id: EBD03-003#0/text/0
+    template: Ted815258fe
+    position:
+      card_no: EBD03-003
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 10
+    evidence_hash: sha256:0ce9a80a19cabb5aeb95b104aa1f4b1751fda75dec9abec4111f37ad21168127
+    clauses:
+      - template: Ced815258fe
+        body:
+          start: 0
+          end: 10
+    source: sha256:3a65b656fb390315c3af8a4421ea767b7d57b6a2df32d176bdd68a971ef38dfb
+  - kind: classification
+    id: T2576e61921
+    status: candidate
+    family: fanfare.target.if-count-destroy.leader-damage
+    normalized_hash: sha256:2576e6192195e0034466e6cb607bcec6c6b263bfacd518c365a7c092d1b723d3
+    definition_hash: sha256:aa762c5283b5957c90d775dedb0b9562d64ecd0d74adbec0c5d6563126a4dcad
+    label_hash: sha256:08f8116e6b6879bbf7be06c36dcc6efb2f6848404e13a205f804c1f445c635f0
+    members:
+      - BP15-078#0/text/1
+      - BP15-SL22#0/text/1
+      - EBD03-003#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-003#0/text/1~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+          - V.kind
+        author:
+          - A.head.fanfare
+          - A.target
+          - A.sel
+        note_hash: sha256:7744b15f088f8a3a2d4180b4cf685a032e0380b4e988a471dea9107c78334943
+      - id: EBD03-003#0/text/1~1
+        ability: a1
+        capture: C.live
+        stage: known
+        ir:
+          - K.if
+          - X.aggregate
+          - X.predicate
+          - S.zone
+          - S.filter
+          - V.name
+          - V.zone-count
+          - I.destroy
+          - R.target
+        author:
+          - A.if
+          - A.cond
+          - A.sel
+          - A.act.destroy
+          - A.ref
+        note_hash: sha256:4392d7545b02a226b522c4d4b3e5e494d5ece4b0fa646df51e27c59bec677eaf
+      - id: EBD03-003#0/text/1~2
+        ability: a1
+        stage: known
+        ir:
+          - I.damage
+          - S.relation
+          - T.player-ref
+          - R.target
+          - R.lki
+        author:
+          - A.act.damage
+          - A.ref
+        note_hash: sha256:dfc2b582fa852e5ce951252aaefa3bf2ff638f830f7405fe62716528082d0900
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-003#0/text/1~0
+        targets:
+          - clause: EBD03-003#0/text/1~1
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: EBD03-003#0/text/1~1
+        targets:
+          - clause: EBD03-003#0/text/1~2
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: branch
+        sources:
+          - clause: EBD03-003#0/text/1~1
+        targets:
+          - clause: EBD03-003#0/text/1~1
+          - clause: EBD03-003#0/text/1~2
+        note_hash: sha256:624d3cb24958a1d9fecea9acaad0fec6d8e2e7c1afea2604b143b135a99f475a
+      - type: capture-of
+        sources:
+          - clause: EBD03-003#0/text/1~0
+        targets:
+          - clause: EBD03-003#0/text/1~1
+        note_hash: sha256:08cd0e8b39ab1a944fcb1ca856203dffba4c4f54185054d0af226b70b76a8af3
+      - type: capture-of
+        sources:
+          - clause: EBD03-003#0/text/1~0
+        targets:
+          - clause: EBD03-003#0/text/1~2
+        note_hash: sha256:73e29a78fac7e4aff968c6125892d862d597e2a0a2007538ec53167ce7ed0c19
+  - kind: member
+    id: EBD03-003#0/text/1
+    template: T2576e61921
+    position:
+      card_no: EBD03-003
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 72
+    evidence_hash: sha256:2997afcc83bdc304473b23df718f36dc606e307063b74f45d50b123588e7f332
+    clauses:
+      - template: Ce3cf6db917
+        body:
+          start: 0
+          end: 25
+      - template: C5650705506
+        body:
+          start: 25
+          end: 58
+      - template: Caa8bc3424e
+        body:
+          start: 58
+          end: 72
+    source: sha256:b785141ebeee8ed944d410d78c29473da5e4113b95231f11e08dc1bfacb925cb
+  - kind: classification
+    id: T9ab41d9465
+    status: candidate
+    family: lastword-token-ex-mill
+    normalized_hash: sha256:9ab41d9465e1555f9c75f2f3b50537753e278871c60840fdd6e89c316ff092d7
+    definition_hash: sha256:e89f2462b64e281b244ae391bb1f277fff025d9deca26b12664c6b4afb16527a
+    label_hash: sha256:0ab9ff732fcef01e28c9dcb25821548e41922a41f5ef129e96f1f5e9c760b1e6
+    members:
+      - BP15-078#0/text/2
+      - BP15-SL22#0/text/2
+      - EBD03-003#0/text/2
+    abilities:
+      - id: a1
+        head: A.head.lastword
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-003#0/text/2~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.leave-field
+          - I.token
+          - D.rule-choice
+          - V.zone-capacity
+        author:
+          - A.head.lastword
+          - A.act.create
+        note_hash: sha256:b25de901bed46255c66928cf885d7bf82241d650823640d2dcbc719d83e17606
+      - id: EBD03-003#0/text/2~1
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+          - S.ordered
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-003#0/text/2~0
+        targets:
+          - clause: EBD03-003#0/text/2~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-003#0/text/2
+    template: T9ab41d9465
+    position:
+      card_no: EBD03-003
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 44
+    evidence_hash: sha256:59fba73b126c925b0b7d32da4b74fcff300e45fc1c371e531bef891122af5164
+    clauses:
+      - template: Ca8354b1d56
+        body:
+          start: 0
+          end: 27
+      - template: Cfb5fee5a0e
+        body:
+          start: 27
+          end: 44
+    source: sha256:628ce81dc1c53c292ca940bfc5b9ea71634fdc7748c4d6fb15fe0865b21b846a
+  - kind: member
+    id: EBD03-004#0/text/0
+    template: T921ff9f9b9
+    position:
+      card_no: EBD03-004
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 4
+    evidence_hash: sha256:438a6f4c568e0a8a53d8dd03ce40fb8fc96af4547a6a550e5203e2e3125b22b8
+    clauses:
+      - template: C921ff9f9b9
+        body:
+          start: 0
+          end: 4
+    source: sha256:75d9d7e6386316a25731923cd79f27e6ea3c7f0fab855853315baa31db97b2e1
+  - kind: member
+    id: EBD03-004#0/text/1
+    template: T7346dc50a8
+    position:
+      card_no: EBD03-004
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 26
+    evidence_hash: sha256:42bdb31fcdc389ef79476abc126a590256acd63853a9b864524710aa14913341
+    clauses:
+      - template: C7346dc50a8
+        body:
+          start: 0
+          end: 26
+    source: sha256:2fbf37a9bd5889d6b9a885a915dbef77856b36360b91213a993f9bb37e644001
+  - kind: classification
+    id: Tc167174c1d
+    status: candidate
+    family: grave-activate-self-reanimate-grant-lastword
+    normalized_hash: sha256:c167174c1dc185ba96247c073843ea3a7f83379705d023f1014bcf56334aea62
+    definition_hash: sha256:77cda0a30019ef38f3d20386860030063e50f961a8f526c1d17dee769f45f261
+    label_hash: sha256:e655e28eb6b5b4126320bc3ee63f283579e043856a077221584df152120378de
+    members:
+      - BP12-071#0/text/2
+      - BP12-SL20#0/text/2
+      - BP12-U05#0/text/2
+      - EBD03-004#0/text/2
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-004#0/text/2~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - T.receipt
+          - I.resource
+          - I.move
+        author:
+          - A.head.activate
+          - A.cost
+          - A.act.move
+        note_hash: sha256:bfddc4ccf592069dcb22ef908f293f3a2176e46366009d4878874a85fad88032
+      - id: EBD03-004#0/text/2~1
+        ability: a1
+        stage: known
+        ir:
+          - I.grant
+          - L.continuous
+          - L.duration
+          - B.keyword
+          - R.follow-move
+          - B.ability
+          - B.trigger
+          - E.leave-field
+          - I.banish
+        author:
+          - A.act.grant
+          - A.ref
+          - A.head.lastword
+          - A.act.banish
+        note_hash: sha256:3ba99e225a98c6d0df10fea60781640a811bae752da3d2acf70375ec7c284040
+      - id: EBD03-004#0/text/2~2
+        ability: a1
+        capture: C.at-play
+        stage: known
+        ir:
+          - X.predicate
+          - V.zone-count
+          - X.aggregate
+        author:
+          - A.cond
+          - A.expr
+          - A.sel
+        note_hash: sha256:2c16890f4a519e38208aaa0d156903e97d842b440770fa8cb83d1a0966a41b34
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-004#0/text/2~0
+        targets:
+          - clause: EBD03-004#0/text/2~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: cost-of
+        sources:
+          - clause: EBD03-004#0/text/2~0
+        targets:
+          - clause: EBD03-004#0/text/2~0
+        note_hash: sha256:52f9872d358c808a687029cf1d49b43a21d194342501a241b19d179087909a15
+      - type: cost-of
+        sources:
+          - clause: EBD03-004#0/text/2~0
+        targets:
+          - clause: EBD03-004#0/text/2~1
+        note_hash: sha256:52f9872d358c808a687029cf1d49b43a21d194342501a241b19d179087909a15
+      - type: result-of
+        sources:
+          - clause: EBD03-004#0/text/2~0
+        targets:
+          - clause: EBD03-004#0/text/2~1
+        note_hash: sha256:80513bd4686abef43c5b641351bc8f0a1075a55680949f95df620f1d259ae1bd
+      - type: scope-of
+        sources:
+          - clause: EBD03-004#0/text/2~2
+        targets:
+          - clause: EBD03-004#0/text/2~0
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-004#0/text/2~2
+        targets:
+          - clause: EBD03-004#0/text/2~1
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+  - kind: member
+    id: EBD03-004#0/text/2
+    template: Tc167174c1d
+    position:
+      card_no: EBD03-004
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 98
+    evidence_hash: sha256:496f4644d643d0006dbf299638ef5b2f94e57c37cca6d4fff7806f126c8a5584
+    clauses:
+      - template: C6b871c8212
+        body:
+          start: 0
+          end: 25
+      - template: C5680b838c9
+        body:
+          start: 25
+          end: 49
+      - template: C6ce9067ea5
+        body:
+          start: 49
+          end: 98
+    source: sha256:b2e095230445ffbeeef8b843e2a25817e3f372ae587e3cbf6bca66eed48197d5
+  - kind: member
+    id: EBD03-005#0/text/0
+    template: T23f16a2851
+    position:
+      card_no: EBD03-005
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 19
+    evidence_hash: sha256:336260762ad059f86c3ff2962e6251da26baeb41d6b30f7250773e7966ced5cb
+    clauses:
+      - template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+    source: sha256:fcce69518173fecb65f10b6eb03da63b413e19df0b0e9e46fc9b469a88364f28
+  - kind: classification
+    id: T795d232ec7
+    status: candidate
+    family: auto.self-acted-opponents-each-discard
+    normalized_hash: sha256:795d232ec7235d82bebb71cb85b7131c9c73b8eb44b0f8191e639bce8c564241
+    definition_hash: sha256:654768c7e34451598b8ed187943e5ce2d486ca20c3b269000e2c175ed77d602c
+    label_hash: sha256:7e42f28e4bdf352ea33fe6ef24b54c8d022ac9df6b3d7b2b104d1498592c4681
+    members:
+      - BP11-069#0/text/1
+      - BP11-070#0/text/0
+      - BP11-SL13#0/text/1
+      - BP11-SL14#0/text/0
+      - BP11-U05#0/text/0
+      - EBD03-005#0/text/1
+      - EBD03-006#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-005#0/text/1~0
+        ability: a1
+        decision: D.resolve-choice
+        stage: known
+        ir:
+          - K.each-player
+          - I.discard
+        author:
+          - A.head.auto
+          - A.comb.each_player
+          - A.act.discard
+        note_hash: sha256:90153ee872a3fed6d09fcc48b5caac23623b8b2fbc0f3a233d3287fbaaff0b4d
+    relations: []
+  - kind: member
+    id: EBD03-005#0/text/1
+    template: T795d232ec7
+    position:
+      card_no: EBD03-005
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 35
+    evidence_hash: sha256:18ce5e3bf18bac3b686cd707408126048b41ded773bf2747192024d791f3dfcd
+    clauses:
+      - template: C795d232ec7
+        body:
+          start: 0
+          end: 35
+    source: sha256:4b6cdaaa65c705ede91e084871825239c65123b15afba98d0782e2b08dfa37a8
+  - kind: classification
+    id: Te01e30b12f
+    status: candidate
+    family: fanfare-absent-named-create
+    normalized_hash: sha256:e01e30b12fd33193e1ad66348c8c27719fa93c6f48f569f642e3b8a945e2cfd7
+    definition_hash: sha256:86720128627c3f497aaf54de3b5d9f46d32b40b5411766636267adc81d3d3d02
+    label_hash: sha256:d9fba3050b919fe3b81577f8a8e3e71bbdc1b3f732333a7d1681191cf3bcd8ae
+    members:
+      - BP11-069#0/text/2
+      - BP11-SL13#0/text/2
+      - EBD03-005#0/text/2
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-005#0/text/2~0
+        ability: a1
+        capture: C.live
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - K.if
+          - X.predicate
+          - V.zone-count
+          - X.aggregate
+          - I.token
+          - D.rule-choice
+          - V.zone-capacity
+        author:
+          - A.head.fanfare
+          - A.if
+          - A.cond
+          - A.expr
+          - A.sel
+          - A.act.create
+        note_hash: sha256:1ff610f11139c2dcb6eaefba6d5c7a4a5292677d2a04125e75993cf4809fa70e
+    relations:
+      - type: branch
+        sources:
+          - clause: EBD03-005#0/text/2~0
+        targets:
+          - clause: EBD03-005#0/text/2~0
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+  - kind: member
+    id: EBD03-005#0/text/2
+    template: Te01e30b12f
+    position:
+      card_no: EBD03-005
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 40
+    evidence_hash: sha256:c2260734d13643a8f429a18ac20757669bc781d1ff326ae4a759b36085eaa98c
+    clauses:
+      - template: Ce01e30b12f
+        body:
+          start: 0
+          end: 40
+    source: sha256:ed08142d638f76171a5180f860c8ba27a73ef51be0fc564409b3b208610e210d
+  - kind: member
+    id: EBD03-006#0/text/0
+    template: T795d232ec7
+    position:
+      card_no: EBD03-006
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 35
+    evidence_hash: sha256:be1ef3ed152e5132eb8ada269fd77656d617da084c9f067161e9437dd38cdd53
+    clauses:
+      - template: C795d232ec7
+        body:
+          start: 0
+          end: 35
+    source: sha256:4b6cdaaa65c705ede91e084871825239c65123b15afba98d0782e2b08dfa37a8
+  - kind: classification
+    id: T80c1d4175a
+    status: candidate
+    family: own-turn-any-discard-target-act
+    normalized_hash: sha256:80c1d4175ac81423e5a1c056b81ed7ca1725e1ef6efbb94568c92dcdcebdd09e
+    definition_hash: sha256:ff47ea9f6fe3e3546d634436ce1af58e14c2d3385e7b02b6189bd10280eb925d
+    label_hash: sha256:e273762a991dc87f5438f0c04da7e1c131e98ebbfcb62dd9d1d3f0eb71291802
+    members:
+      - BP11-070#0/text/1
+      - BP11-SL14#0/text/1
+      - BP11-U05#0/text/1
+      - EBD03-006#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.auto
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-006#0/text/1~0
+        ability: a1
+        decision: D.play-param
+        capture: C.at-event
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.discard
+          - S.zone
+          - S.filter
+          - X.predicate
+          - V.turn
+          - D.play-param
+          - R.target
+        author:
+          - A.head.auto
+          - A.sel
+          - A.cond
+          - A.target
+        note_hash: sha256:7e20af77f3b58bf3bce6dfd4330e258d9cb2cf6c061e5b0381199d0794de22a1
+      - id: EBD03-006#0/text/1~1
+        ability: a1
+        stage: known
+        ir:
+          - I.posture
+        author:
+          - A.act.act
+        note_hash: sha256:e568a4506b19ee60c5c7fef22be58535b4665d46269bfce8b2254c81444ab417
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-006#0/text/1~0
+        targets:
+          - clause: EBD03-006#0/text/1~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-006#0/text/1
+    template: T80c1d4175a
+    position:
+      card_no: EBD03-006
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 58
+    evidence_hash: sha256:86780622d65c2f34cec9c75a3b7d15c28b9c47c7ed15ec16c12aca816321952f
+    clauses:
+      - template: C70ee6b9b19
+        body:
+          start: 0
+          end: 49
+      - template: Cfeccef9f05
+        body:
+          start: 49
+          end: 58
+    source: sha256:ee5daa7e8b8f2f694fc2647031df42caa104a1347c45a06c8fa4251827b4de54
+  - kind: classification
+    id: Tf8ac37f422
+    status: candidate
+    family: evolve-discard-return-two
+    normalized_hash: sha256:f8ac37f422fd8674cedb132432b8899fe2baf7bfc1f96a0f7023751dc8b5c6d8
+    definition_hash: sha256:d18d144868a16b93ebd3c5e866606ec65cd4d72773061d265533b7dda56e5ab1
+    label_hash: sha256:c5c5bcd957e37a5362fa37f3f1ec9dd25cfed370eadc3675fc48d1b32d1d1fe5
+    members:
+      - BP11-070#0/text/2
+      - BP11-SL14#0/text/2
+      - BP11-U05#0/text/2
+      - EBD03-006#0/text/2
+    abilities:
+      - id: a1
+        head: A.head.evolve_time
+        ir: B.trigger
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-006#0/text/2~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.evolve
+          - K.pay
+          - T.receipt
+          - I.discard
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.evolve_time
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:b26cc09798aa273ebb2c887f136dd007f3ed97da0fafc22baf6797dbd6973cc4
+      - id: EBD03-006#0/text/2~1
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-006#0/text/2~0
+        targets:
+          - clause: EBD03-006#0/text/2~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: cost-of
+        sources:
+          - clause: EBD03-006#0/text/2~0
+        targets:
+          - clause: EBD03-006#0/text/2~1
+        note_hash: sha256:52f9872d358c808a687029cf1d49b43a21d194342501a241b19d179087909a15
+  - kind: member
+    id: EBD03-006#0/text/2
+    template: Tf8ac37f422
+    position:
+      card_no: EBD03-006
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 41
+    evidence_hash: sha256:ee5def2b743e28e71bfd96ccf6e2565a5eb538a004f73a24de359fcbf04514f7
+    clauses:
+      - template: C68c2e0b31a
+        body:
+          start: 0
+          end: 31
+      - template: Cb58ac3aa06
+        body:
+          start: 31
+          end: 41
+    source: sha256:ffeac0d395f0ad1f627f451ca7790b9c49868d2beb8ffa762b57ff430e2781d9
+  - kind: classification
+    id: Tea9d4d311f
+    status: candidate
+    family: fanfare-necro-optional-reanimate-self-banish
+    normalized_hash: sha256:ea9d4d311fcc8ca24cfb4bbafb64fa0399e15965712eefa6cda89af2cd1b39bf
+    definition_hash: sha256:ec48aac6f4da7031286b3e76685eb631b961c83aae7ba58a2c633f1a10878ab4
+    label_hash: sha256:5eba545e0af1d7fe817545a8a379f7f0188d80cbd5ac61c23f16a0b07cc14780
+    members:
+      - BP11-071#0/text/0
+      - BP11-SL15#0/text/0
+      - EBD03-007#0/text/0
+      - PR-399#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-007#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.fanfare
+          - A.target
+          - A.sel
+        note_hash: sha256:347f095dfcf5cb05900b9c6f0ef0667370e655753ef8ddc73e5b3a898078e771
+      - id: EBD03-007#0/text/0~1
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.necro-charge
+          - K.may
+          - I.move
+          - T.receipt
+        author:
+          - A.if
+          - A.cond
+          - A.may
+          - A.act.move
+        note_hash: sha256:6434c77c35d97cb83640186e949e6608cbd74d109a7f5a1b9a205730b45bd6ef
+      - id: EBD03-007#0/text/0~2
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - T.receipt
+          - V.receipt-field
+          - I.banish
+        author:
+          - A.if
+          - A.cond
+          - A.expr
+          - A.act.banish
+        note_hash: sha256:9788c6f3975310073d645b2e5ba38b11ba6f8ef5bfa7b7aca8b951f88ecd1d71
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-007#0/text/0~0
+        targets:
+          - clause: EBD03-007#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-007#0/text/0~1
+        targets:
+          - clause: EBD03-007#0/text/0~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: branch
+        sources:
+          - clause: EBD03-007#0/text/0~1
+        targets:
+          - clause: EBD03-007#0/text/0~1
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: branch
+        sources:
+          - clause: EBD03-007#0/text/0~1
+        targets:
+          - clause: EBD03-007#0/text/0~2
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: branch
+        sources:
+          - clause: EBD03-007#0/text/0~2
+        targets:
+          - clause: EBD03-007#0/text/0~2
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: result-of
+        sources:
+          - clause: EBD03-007#0/text/0~1
+        targets:
+          - clause: EBD03-007#0/text/0~2
+        note_hash: sha256:80513bd4686abef43c5b641351bc8f0a1075a55680949f95df620f1d259ae1bd
+  - kind: member
+    id: EBD03-007#0/text/0
+    template: Tea9d4d311f
+    position:
+      card_no: EBD03-007
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 76
+    evidence_hash: sha256:3f1b8ffe2bb168741e71a97fa6f41690fe78419f600be9dcb8bdd9ca28476536
+    clauses:
+      - template: C4b6a8bb734
+        body:
+          start: 0
+          end: 38
+      - template: C08ff0d3aae
+        body:
+          start: 38
+          end: 61
+      - template: C248101085c
+        body:
+          start: 61
+          end: 76
+    source: sha256:71e37bc6232c2249cb2d9e8930a55f47d0412edb0388607fa9da205100635caa
+  - kind: classification
+    id: T055484e773
+    status: candidate
+    family: lastword-self-ex-mill
+    normalized_hash: sha256:055484e773c9f9adc40175a31d972f50d135f795dda020c4f1b3581cf01e5b15
+    definition_hash: sha256:08a6342523a5267913442b092934187d9747de259707c4b7799f3ce7be2606e6
+    label_hash: sha256:57b0b7fac74216a2da75dbe4cab56ff8aebc1ddd0111b47993e278ed48c955a3
+    members:
+      - BP11-071#0/text/1
+      - BP11-SL15#0/text/1
+      - EBD03-007#0/text/1
+      - PR-399#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.lastword
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-007#0/text/1~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.leave-field
+          - I.move
+          - T.receipt
+          - R.follow-move
+        author:
+          - A.head.lastword
+          - A.act.move
+          - A.ref
+        note_hash: sha256:dfe3ba5dfdb65a1343e3f306682eb6dd40075724f04f9c7f8b98ec94c291d621
+      - id: EBD03-007#0/text/1~1
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+          - S.ordered
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-007#0/text/1~0
+        targets:
+          - clause: EBD03-007#0/text/1~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-007#0/text/1
+    template: T055484e773
+    position:
+      card_no: EBD03-007
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 37
+    evidence_hash: sha256:5330d99eedc836f3dc2287d7090579fb43efd9c6274b26ecf056a07a37beb3c0
+    clauses:
+      - template: C743c2188a6
+        body:
+          start: 0
+          end: 20
+      - template: Cfb5fee5a0e
+        body:
+          start: 20
+          end: 37
+    source: sha256:673adeb0d12afafc4cedf1d58a8484422fc50404d3a6c208403100dd1b9f6b29
+  - kind: classification
+    id: Tbf84f495e4
+    status: candidate
+    family: static-necro-rush-bane
+    normalized_hash: sha256:bf84f495e4efc3e4010fd8dc1082d3ebf099c417faa10f7f424894afb56b24af
+    definition_hash: sha256:ce6552e0e7ec13819877baa3ce2c38adc9f5a2b9c5f54563ffb8605de04dcb2b
+    label_hash: sha256:8e5453c9f775abefbe19e79f9be337d565258e921e5de2f1aa7362a325fc948b
+    members:
+      - BP02-087#0/text/0
+      - BP13-076#0/text/0
+      - EBD03-008#0/text/0
+      - ETD02-013#0/text/0
+      - PR-351#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.static
+        ir: B.ability
+        cost_timing: None
+    clauses:
+      - id: EBD03-008#0/text/0~0
+        ability: a1
+        capture: C.live
+        stage: known
+        ir:
+          - B.ability
+          - L.continuous
+          - X.predicate
+          - V.necro-charge
+          - B.keyword
+        author:
+          - A.head.static
+          - A.effect
+          - A.cond
+        note_hash: sha256:dd8ac0750daf1f96ec2e0e3a14241af4d8d5788b7d6be23f9a2d8d66cbdca11b
+    relations:
+      - type: branch
+        sources:
+          - clause: EBD03-008#0/text/0~0
+        targets:
+          - clause: EBD03-008#0/text/0~0
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+  - kind: member
+    id: EBD03-008#0/text/0
+    template: Tbf84f495e4
+    position:
+      card_no: EBD03-008
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 27
+    raw_length: 73
+    evidence_hash: sha256:408539b9545f6def47ac92631fece4a84d2c2a255f5aec109ba75621053e39e4
+    clauses:
+      - template: Cbf84f495e4
+        body:
+          start: 0
+          end: 27
+    source: sha256:3d9548644c233f303259d5a08fc10c8edc81c878fd4ab5a94ae0b256f63c763c
+  - kind: classification
+    id: T91bd7a5749
+    status: candidate
+    family: fanfare-mode-grave-ex-necro-discount
+    normalized_hash: sha256:91bd7a5749dbd328405f641636d251431a14f6fd60e5f1f48f180daf2b89296f
+    definition_hash: sha256:43e7218fbad1831affa2cf7f181e7f01af007104f131237bca0ff611ac9b6aed
+    label_hash: sha256:91dc6951b1691b47049aed21cd4549829b44d83eb287a4e946efd0fb206b89c4
+    members:
+      - BP13-076#0/text/1
+      - EBD03-008#0/text/1
+      - PR-351#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-008#0/text/1~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - K.mode
+          - D.play-param
+        author:
+          - A.head.fanfare
+          - A.choice
+          - A.choice-at-play
+        note_hash: sha256:2681acce72dfc8303fdb8731d532ea7d2285748b94a4759cd6403495ac0708c2
+      - id: EBD03-008#0/text/1~1
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.target
+          - A.sel
+        note_hash: sha256:db2ded43a3e1f8d316dde1aec936a4b9eae416c5882332ce9f71d33fe3f7493b
+      - id: EBD03-008#0/text/1~2
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+      - id: EBD03-008#0/text/1~3
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.necro-charge
+          - L.replacement
+          - L.duration
+          - R.follow-move
+        author:
+          - A.if
+          - A.cond
+          - A.macro.discount
+          - A.ref
+        note_hash: sha256:14c6e6ea548c57657bba28afa53359e043c56f5952549c9fb6296a3d5ea0c6cb
+      - id: EBD03-008#0/text/1~4
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+          - S.ordered
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: scope-of
+        sources:
+          - clause: EBD03-008#0/text/1~0
+        targets:
+          - clause: EBD03-008#0/text/1~1
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-008#0/text/1~0
+        targets:
+          - clause: EBD03-008#0/text/1~2
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-008#0/text/1~0
+        targets:
+          - clause: EBD03-008#0/text/1~3
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-008#0/text/1~0
+        targets:
+          - clause: EBD03-008#0/text/1~4
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: sequence
+        sources:
+          - clause: EBD03-008#0/text/1~1
+        targets:
+          - clause: EBD03-008#0/text/1~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-008#0/text/1~2
+        targets:
+          - clause: EBD03-008#0/text/1~3
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: branch
+        sources:
+          - clause: EBD03-008#0/text/1~3
+        targets:
+          - clause: EBD03-008#0/text/1~3
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: result-of
+        sources:
+          - clause: EBD03-008#0/text/1~2
+        targets:
+          - clause: EBD03-008#0/text/1~3
+        note_hash: sha256:80513bd4686abef43c5b641351bc8f0a1075a55680949f95df620f1d259ae1bd
+  - kind: member
+    id: EBD03-008#0/text/1
+    template: T91bd7a5749
+    position:
+      card_no: EBD03-008
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 107
+    evidence_hash: sha256:837bb270c6592a86afd99b6a7744c13342a5acc795423024c171b11dd86ae59d
+    clauses:
+      - template: Ce5f83894e0
+        body:
+          start: 0
+          end: 22
+      - template: Cfafb3f584f
+        body:
+          start: 22
+          end: 43
+      - template: C0525d26a44
+        body:
+          start: 43
+          end: 55
+      - template: C5eacda8fc5
+        body:
+          start: 55
+          end: 87
+      - template: C46d0e5a780
+        body:
+          start: 87
+          end: 107
+    source: sha256:bcc4a1ec16afc57985209129335975b5b55a7c45c3c2eef55f07a114a7d2dec3
+  - kind: classification
+    id: T0ad3701948
+    status: candidate
+    family: fanfare-necro-reanimate-ward
+    normalized_hash: sha256:0ad3701948325036cd95b5dba40efeab3774cdfe206b5e8308a3d3baa9168473
+    definition_hash: sha256:6624e02c217b89307591331b5def235ad2952fd5085f84a978635d4477460f4c
+    label_hash: sha256:812347e34d9cdadc4b33e7a410222b6e194c38ed1aeaad93a47e9608724e760f
+    members:
+      - BP13-077#0/text/0
+      - EBD03-009#0/text/0
+      - PR-485#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-009#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.fanfare
+          - A.target
+          - A.sel
+        note_hash: sha256:347f095dfcf5cb05900b9c6f0ef0667370e655753ef8ddc73e5b3a898078e771
+      - id: EBD03-009#0/text/0~1
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.necro-charge
+          - I.move
+          - T.receipt
+        author:
+          - A.if
+          - A.cond
+          - A.act.move
+        note_hash: sha256:6ff0c16165c52e59bf53a0ceb732b7dcc98e717459ef29ce0eb45ad827062781
+      - id: EBD03-009#0/text/0~2
+        ability: a1
+        stage: known
+        ir:
+          - I.grant
+          - L.continuous
+          - L.duration
+          - B.keyword
+          - R.follow-move
+        author:
+          - A.act.grant
+          - A.ref
+        note_hash: sha256:34f0cc025819b977d4a282f60194b5a589e2a5f96a5a0ed023e70df5d835f41d
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-009#0/text/0~0
+        targets:
+          - clause: EBD03-009#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-009#0/text/0~1
+        targets:
+          - clause: EBD03-009#0/text/0~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: branch
+        sources:
+          - clause: EBD03-009#0/text/0~1
+        targets:
+          - clause: EBD03-009#0/text/0~1
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: branch
+        sources:
+          - clause: EBD03-009#0/text/0~1
+        targets:
+          - clause: EBD03-009#0/text/0~2
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: result-of
+        sources:
+          - clause: EBD03-009#0/text/0~1
+        targets:
+          - clause: EBD03-009#0/text/0~2
+        note_hash: sha256:80513bd4686abef43c5b641351bc8f0a1075a55680949f95df620f1d259ae1bd
+  - kind: member
+    id: EBD03-009#0/text/0
+    template: T0ad3701948
+    position:
+      card_no: EBD03-009
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 83
+    raw_length: 119
+    evidence_hash: sha256:588c4c71b889d2c0dbb7a2bc710d9bc85ee4f4303e3de8941f669efe62d50639
+    clauses:
+      - template: Cc13d01ffd7
+        body:
+          start: 0
+          end: 52
+      - template: C2ce88e339a
+        body:
+          start: 52
+          end: 72
+      - template: Cb83df673b7
+        body:
+          start: 72
+          end: 83
+    source: sha256:3334b9c4724a06d26c7fb372de08e13dc89db24427dccba6c1fe931b49b30a63
+  - kind: classification
+    id: T926c21efdd
+    status: candidate
+    family: attack-opponent-leader-and-field-damage
+    normalized_hash: sha256:926c21efdda4bfcca33358e5d29a1edb3c5adc31db53ca532943bd8c7134000e
+    definition_hash: sha256:45558dce231192f94372dde60a55b9a42ebe5c6d727350ba34bb4dd145fa9c19
+    label_hash: sha256:7303779e284b67d61ab712957da0889334b5f769060af052e88fddec18984a32
+    members:
+      - EBD03-010#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.attack_time
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-010#0/text/0~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.attack
+          - I.damage
+          - T.player-set
+          - S.zone
+          - S.filter
+          - X.predicate
+          - S.combine
+        author:
+          - A.head.attack_time
+          - A.act.damage
+          - A.who
+          - A.sel
+        note_hash: sha256:f4719c276686ed78bdda400f0194c9dde771c63cffb0b23af1ea0897d7eeb374
+    relations: []
+  - kind: member
+    id: EBD03-010#0/text/0
+    template: T926c21efdd
+    position:
+      card_no: EBD03-010
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 36
+    evidence_hash: sha256:dffacb4b3f9656cf112129f2d221d8f2ae4fadc1c9718f1cbfb89a2cfa54a133
+    clauses:
+      - template: C926c21efdd
+        body:
+          start: 0
+          end: 36
+    source: sha256:f4a46d8fc90023e733bfe36f1585bc436c46bf7a34d3b9cd1fa5714ddeccaeac
+  - kind: classification
+    id: Te09889f08b
+    status: candidate
+    family: fanfare-opponent-damage-necro-storm
+    normalized_hash: sha256:e09889f08b8b3b053e9e410bc235f1b6882a3d10683eaad7c2d36b836e67e901
+    definition_hash: sha256:2cb0fd5a2f06639aa42cb9bfd476169fb43fc568c9497d073985a4068c08d620
+    label_hash: sha256:406eec1cd926ab987c58c3be73a0de0a557ec6db4dfe04bb61166bdf2e2624bf
+    members:
+      - EBD03-010#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-010#0/text/1~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - I.damage
+          - T.player-set
+          - S.zone
+          - S.filter
+          - X.predicate
+          - S.combine
+        author:
+          - A.head.fanfare
+          - A.act.damage
+          - A.who
+          - A.sel
+        note_hash: sha256:f4719c276686ed78bdda400f0194c9dde771c63cffb0b23af1ea0897d7eeb374
+      - id: EBD03-010#0/text/1~1
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.necro-charge
+          - I.grant
+          - L.continuous
+          - L.duration
+          - B.keyword
+        author:
+          - A.if
+          - A.cond
+          - A.act.grant
+        note_hash: sha256:3658659f4679370e3cca96395dedaec4601dfefd66f3cc55fabd0a64c774ac62
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-010#0/text/1~0
+        targets:
+          - clause: EBD03-010#0/text/1~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: branch
+        sources:
+          - clause: EBD03-010#0/text/1~1
+        targets:
+          - clause: EBD03-010#0/text/1~1
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+  - kind: member
+    id: EBD03-010#0/text/1
+    template: Te09889f08b
+    position:
+      card_no: EBD03-010
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 63
+    raw_length: 93
+    evidence_hash: sha256:30722a6f3545d666134399bde2755fb8815d949713c088d32d61a31826c7ca2c
+    clauses:
+      - template: Cab8a920a66
+        body:
+          start: 0
+          end: 40
+      - template: Cf511a0547e
+        body:
+          start: 40
+          end: 63
+    source: sha256:398499fc1027ea8a0237a90f54c210fc7a57c37d25c94d2a6aab9576df98833a
+  - kind: member
+    id: EBD03-011#0/section:0/0
+    template: T25ba50b47a
+    position:
+      card_no: EBD03-011
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_length: 6
+    evidence_hash: sha256:11de35ce4a325d79a87c04b0deca59ddaa70f16555549afe77f5b693c05b975f
+    clauses:
+      - template: C25ba50b47a
+        body:
+          start: 0
+          end: 6
+    source: sha256:4dd561decc381cff74345e78982c41fd64bbb962840ab727fb6bab6375178878
+  - kind: classification
+    id: T6c18191c89
+    status: candidate
+    family: spell-target-negative-buff
+    normalized_hash: sha256:6c18191c89b34ec95d9e38bd6f021344a734b3db93cf614c5c70553a5d6c471a
+    definition_hash: sha256:dc86b4d978529ea281097108bdb24e5367ca13654737b1c59ae7654dca0521b0
+    label_hash: sha256:b5bb7da7472a3d3bc7e393a316f15b71448fed7cfbafa8e24edb469ac4e0f406
+    members:
+      - BP11-075#0/section:0/1
+      - BP11-P17#0/section:0/1
+      - EBD03-011#0/section:0/1
+      - PR-541#0/section:0/1
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+    clauses:
+      - id: EBD03-011#0/section:0/1~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.spell
+          - A.target
+          - A.sel
+        note_hash: sha256:e06ac0332f47d636987bdb6429fbcd011f3d0cfd251a1537fef1fa3cba4d06c2
+      - id: EBD03-011#0/section:0/1~1
+        ability: a1
+        stage: known
+        ir:
+          - I.modify
+          - L.continuous
+          - L.duration
+        author:
+          - A.act.buff
+        note_hash: sha256:305796fc91a5e901dfe9d481e6be36d86f2e477adde586788cddf396187e3891
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-011#0/section:0/1~0
+        targets:
+          - clause: EBD03-011#0/section:0/1~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-011#0/section:0/1
+    template: T6c18191c89
+    position:
+      card_no: EBD03-011
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 1
+    body_length: 36
+    block: EBD03-011#0/section:0/0
+    evidence_hash: sha256:808f8ff42536913e32b4b370f47a77ad4f7590a3e65b486e132f1d4ab144a722
+    clauses:
+      - template: C3f5066b9e7
+        body:
+          start: 0
+          end: 16
+      - template: C5c8884bc09
+        body:
+          start: 16
+          end: 36
+    source: sha256:f0952507e0108318e9801a8f64045bc903f7872372438724ddcc77485670fc0f
+  - kind: classification
+    id: Tad6b70de3d
+    status: candidate
+    family: grave-activate-group-banish-act
+    normalized_hash: sha256:ad6b70de3df673ef1b9483629077f7afbc7b58e3a8ef768efb40c9d78f079f94
+    definition_hash: sha256:c0699e627ca13aed8b7e81c06ea31df02c6ed6445daf5fe0cf61f318c0cf0718
+    label_hash: sha256:c4b3ec9e0c661ec2b6c477df1b0d5b04766d48b011efe8765092dfd8624a415c
+    members:
+      - BP11-075#0/text/0
+      - BP11-P17#0/text/0
+      - EBD03-011#0/text/0
+      - PR-541#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-011#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - T.receipt
+          - I.banish
+          - S.zone
+          - S.filter
+          - X.predicate
+          - D.play-param
+          - R.target
+        author:
+          - A.head.activate
+          - A.cost
+          - A.sel
+          - A.target
+        note_hash: sha256:d96f1cb5dfcb428adb97697aef4bfc23ea6d62a1c67f12e17b63aa2394df57e3
+      - id: EBD03-011#0/text/0~1
+        ability: a1
+        stage: known
+        ir:
+          - I.posture
+        author:
+          - A.act.act
+        note_hash: sha256:e568a4506b19ee60c5c7fef22be58535b4665d46269bfce8b2254c81444ab417
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-011#0/text/0~0
+        targets:
+          - clause: EBD03-011#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: cost-of
+        sources:
+          - clause: EBD03-011#0/text/0~0
+        targets:
+          - clause: EBD03-011#0/text/0~1
+        note_hash: sha256:52f9872d358c808a687029cf1d49b43a21d194342501a241b19d179087909a15
+  - kind: member
+    id: EBD03-011#0/text/0
+    template: Tad6b70de3d
+    position:
+      card_no: EBD03-011
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 61
+    evidence_hash: sha256:948c5922a6ab6a6b43b30a648f40e71ca7f48a78cc804b1f3bb00212c03eb60f
+    clauses:
+      - template: C02e4d1caa0
+        body:
+          start: 0
+          end: 52
+      - template: Cfeccef9f05
+        body:
+          start: 52
+          end: 61
+    source: sha256:ea844e282a4b21f2da2b544f74dc242aa8715db64853e72871ebf1510a064b22
+  - kind: member
+    id: EBD03-012#0/text/0
+    template: T884189d82c
+    position:
+      card_no: EBD03-012
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 43
+    evidence_hash: sha256:693db4ca050b15b9ddab07ac11d369f4cc6b53bd3a54ebdffa9201a7116754db
+    clauses:
+      - template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+      - template: C5f0650f997
+        body:
+          start: 19
+          end: 43
+    source: sha256:6027a4c61f764a1466677b13c4914472b12c76121d922397309626e06de6e8cf
+  - kind: member
+    id: EBD03-012#0/text/1
+    template: Tca6721d157
+    position:
+      card_no: EBD03-012
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 4
+    raw_length: 43
+    evidence_hash: sha256:956ee493eb0a433290672e85eb612b9caa53f64b519c135fd50ffc0da589fef6
+    clauses:
+      - template: Cca6721d157
+        body:
+          start: 0
+          end: 4
+    source: sha256:75cc93e7073913d636a0140c9d8f0c3ee71cac72a14e9e93815c25e26d36c4ae
+  - kind: classification
+    id: T53b75f0382
+    status: candidate
+    family: lastword.create-amulet-token-to-field.mill-top-n
+    normalized_hash: sha256:53b75f03823a4a5dadd0abe2f61d75ccd1c48d40fbf83a2503964959503b2dd6
+    definition_hash: sha256:16719943276d62d53c01498bfef5c1e2dec55d0b4d43955b1aeda0df588d38bb
+    label_hash: sha256:61afa8e6f4232f7d5106e133695345cfc1cabd5784b5924fd848b7552f6ae347
+    members:
+      - BP11-076#0/text/2
+      - BP11-077#0/text/2
+      - BP11-082#0/text/1
+      - BP11-P18#0/text/2
+      - BP11-P19#0/text/2
+      - EBD03-012#0/text/2
+      - EBD03-013#0/text/2
+    abilities:
+      - id: a1
+        head: A.head.lastword
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-012#0/text/2~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.leave-field
+          - R.lki
+          - I.token
+          - V.name
+          - D.rule-choice
+          - V.zone-capacity
+          - E.enter-field
+        author:
+          - A.head.lastword
+          - A.act.create
+        note_hash: sha256:a88ed992ade348f0b0ac88d731b75956175900312e332d5efb9c4fea8a7ea69a
+      - id: EBD03-012#0/text/2~1
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - S.ordered
+          - T.player-ref
+        author:
+          - A.act.move
+          - A.who
+        note_hash: sha256:1feabeb1f7dd412082c79e25e844124b7dc6d96ed47a32c0c8032b63cd0674af
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-012#0/text/2~0
+        targets:
+          - clause: EBD03-012#0/text/2~1
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - kind: member
+    id: EBD03-012#0/text/2
+    template: T53b75f0382
+    position:
+      card_no: EBD03-012
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 40
+    evidence_hash: sha256:3cdf50e5c8bdb3700d0cd0bbf031b4806a3f5e6049a80aa4d69796d9e2b3cf11
+    clauses:
+      - template: C4969d0808f
+        body:
+          start: 0
+          end: 23
+      - template: Cfb5fee5a0e
+        body:
+          start: 23
+          end: 40
+    source: sha256:eae00635619964f342d34821a65ff977d1eaf80d1e3049ac77701060d39eac45
+  - kind: classification
+    id: T17c62d3c96
+    status: candidate
+    family: token.activate.self-to-cemetery.target-own-follower.grant-rush.cond-target-trait-buff
+    normalized_hash: sha256:17c62d3c96dddc539a934a7a127012f18cbdd5ebb0326c947b372852529afb6d
+    definition_hash: sha256:2c6c9e92f713cdd4f6d36ee0bef4b316f17bb34f7eed3a8c62395bcfee720138
+    label_hash: sha256:d1a99800e21207f6ff44038666ee8a6052cbdd1f90d11aa05f7900434a93360b
+    members:
+      - BP11-027#0/section:0/token:機動二輪車/0
+      - BP11-065#0/section:0/token:機動二輪車/0
+      - BP11-077#0/section:0/token:機動二輪車/0
+      - BP11-082#0/section:0/token:機動二輪車/0
+      - BP11-099#0/section:0/token:機動二輪車/0
+      - BP11-115#0/section:0/token:機動二輪車/0
+      - BP11-P16#0/section:0/token:機動二輪車/0
+      - BP11-P19#0/section:0/token:機動二輪車/0
+      - BP11-P32#0/text/0
+      - BP11-T04#0/text/0
+      - BP16-T21#0/text/0
+      - EBD03-013#0/section:0/token:機動二輪車/0
+      - EBD03-T06#0/text/0
+      - PR-300#0/section:0/token:機動二輪車/0
+      - PR-303#0/section:0/token:機動二輪車/0
+      - PR-309#0/section:0/token:機動二輪車/0
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-013#0/section:0/token:機動二輪車/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.source
+          - K.pay
+          - I.move
+          - E.payment
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+          - V.kind
+          - R.lki
+        author:
+          - A.head.activate
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:261e2b2b04a26b30cc7aa855231f894a49dfdc0c861929cfd12e41e577a3aa23
+      - id: EBD03-013#0/section:0/token:機動二輪車/0~1
+        ability: a1
+        stage: known
+        ir:
+          - I.grant
+          - L.continuous
+          - L.duration
+          - R.target
+          - B.keyword
+        author:
+          - A.act.grant
+          - A.ref
+        note_hash: sha256:51eb1d7ec874842ef89fea9d29551ae39dce3d6d958b0f3d89129f2373fe0b7e
+      - id: EBD03-013#0/section:0/token:機動二輪車/0~2
+        ability: a1
+        capture: C.live
+        stage: known
+        ir:
+          - K.if
+          - X.aggregate
+          - X.predicate
+          - V.traits
+          - R.target
+          - I.modify
+          - L.continuous
+          - L.duration
+        author:
+          - A.if
+          - A.cond
+          - A.sel
+          - A.act.buff
+          - A.ref
+        note_hash: sha256:8cf4fd81a7ed9b73351dfc051303ba7a6db35550682cc0f5e4d2aeb9502485be
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~0
+        targets:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~1
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~1
+        targets:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~2
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: capture-of
+        sources:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~0
+        targets:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~1
+        note_hash: sha256:a66c7c1a21028d43cc58053972cf3407fe3fdf27dfe3c566206813d535ac5beb
+      - type: capture-of
+        sources:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~0
+        targets:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~2
+        note_hash: sha256:09cf3e510dba2778336be66c01fe95abfd5c1b5d395cf82ba5239f5517b61dab
+      - type: branch
+        sources:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~2
+        targets:
+          - clause: EBD03-013#0/section:0/token:機動二輪車/0~2
+        note_hash: sha256:f096e0c75ca5365dd6eb22c424e2be6991b687528646c6f63f7066342b9cc59a
+  - kind: member
+    id: EBD03-013#0/section:0/token:機動二輪車/0
+    template: T17c62d3c96
+    position:
+      card_no: EBD03-013
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_length: 67
+    token_header_hash: sha256:acc8a5a4bc72daffd293674ac18f97d758b7a957b005669e118dcd98777e0547
+    evidence_hash: sha256:916195fa559ab38ee8cccaf7d0d6b911f4b9bee3a6cd25ae89c52929480798b0
+    clauses:
+      - template: Ccdf3f115fd
+        body:
+          start: 0
+          end: 29
+      - template: Cc339c5192d
+        body:
+          start: 29
+          end: 40
+      - template: Ce659493f3d
+        body:
+          start: 40
+          end: 67
+    source: sha256:7baec35b0df528c8c8b9e042d1976e2e91e822626c7727c65e42c185f272c942
+  - kind: member
+    id: EBD03-013#0/text/0
+    template: T3f4ec6dc23
+    position:
+      card_no: EBD03-013
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 4
+    evidence_hash: sha256:d634069165a950320512d6967e8f16a09c3eecb9f3f8662affb1973ada737e6a
+    clauses:
+      - template: C3f4ec6dc23
+        body:
+          start: 0
+          end: 4
+    source: sha256:87b795e30f197f44f7977a475f0e612b291f04373d9dab747095907186742825
+  - kind: member
+    id: EBD03-013#0/text/1
+    template: Tb4006380ea
+    position:
+      card_no: EBD03-013
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 30
+    evidence_hash: sha256:629ef8ca0fd407a0ca9f948592dec1561c1cec2809918705323559c8b27b38c6
+    clauses:
+      - template: Cf337ee4cf4
+        body:
+          start: 0
+          end: 21
+      - template: Cdf35a4dada
+        body:
+          start: 21
+          end: 30
+    source: sha256:697a94840676ed95b976fa5d135a3a252652b44031eb0304f10c6bac5786c403
+  - kind: member
+    id: EBD03-013#0/text/2
+    template: T53b75f0382
+    position:
+      card_no: EBD03-013
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 40
+    evidence_hash: sha256:846540caea54581f755b975fd6dba7ccac7edd6e8e17ae5cde11c44cbc6f3757
+    clauses:
+      - template: C4969d0808f
+        body:
+          start: 0
+          end: 23
+      - template: Cfb5fee5a0e
+        body:
+          start: 23
+          end: 40
+    source: sha256:eae00635619964f342d34821a65ff977d1eaf80d1e3049ac77701060d39eac45
+  - kind: classification
+    id: T5ac56a2a5e
+    status: candidate
+    family: spell-damage-necro-leader-damage
+    normalized_hash: sha256:5ac56a2a5e64cc2169d0e00e0312aa2e29191ac79e9546c765473100bf04af95
+    definition_hash: sha256:f6995c266485332f9391748eb7752d963dc5f2ef3ae9bf09cf0f8313b9747aa8
+    label_hash: sha256:d5b2a87cd80eedf2f8b5937432ef78a8668cc16e662075ca42f0f88b0af31b94
+    members:
+      - BP13-081#0/text/0
+      - BP13-P19#0/text/0
+      - EBD03-014#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+    clauses:
+      - id: EBD03-014#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+          - V.roles
+          - S.relation
+          - T.player-ref
+        author:
+          - A.head.spell
+          - A.target
+          - A.sel
+          - A.who
+          - A.ref
+        note_hash: sha256:d314585c1d94f968c9bcc073f0bfee282c861165d4f399f980e1f80e85a84722
+      - id: EBD03-014#0/text/0~1
+        ability: a1
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:46c582b4ccce84a2fc4078abbfd91db769b101e78ef4198c9c7aeef127f2be2f
+      - id: EBD03-014#0/text/0~2
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.necro-charge
+          - I.damage
+          - V.roles
+          - S.relation
+          - T.player-ref
+        author:
+          - A.if
+          - A.cond
+          - A.act.damage
+          - A.who
+          - A.ref
+        note_hash: sha256:0cfc8428a963d934892ba0d76cb6a6be98f36a2de5682b2659969fae24c85e5f
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-014#0/text/0~0
+        targets:
+          - clause: EBD03-014#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-014#0/text/0~1
+        targets:
+          - clause: EBD03-014#0/text/0~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: branch
+        sources:
+          - clause: EBD03-014#0/text/0~2
+        targets:
+          - clause: EBD03-014#0/text/0~2
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+      - type: capture-of
+        sources:
+          - clause: EBD03-014#0/text/0~0
+        targets:
+          - clause: EBD03-014#0/text/0~2
+        note_hash: sha256:97402a19ac03d0bf7ac2b4751cba1e751d5606923bf44da7fd72894c4a4ddcbc
+  - kind: member
+    id: EBD03-014#0/text/0
+    template: T5ac56a2a5e
+    position:
+      card_no: EBD03-014
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 51
+    evidence_hash: sha256:5c85eb9ca476d3e61c237b6524df0172ad1b7c4be7bde2dc9183118c87a8abd1
+    clauses:
+      - template: C3f5066b9e7
+        body:
+          start: 0
+          end: 16
+      - template: Cdf35a4dada
+        body:
+          start: 16
+          end: 25
+      - template: Cf69d7c6da8
+        body:
+          start: 25
+          end: 51
+    source: sha256:f0ee48ea459e05e5f2abd300662cb0de1308bab1819459dc1c41733dbd8fd7b0
+  - kind: classification
+    id: Tb8e775ac78
+    status: candidate
+    family: spell-necro-reanimate-two
+    normalized_hash: sha256:b8e775ac78f65dfc1923cf4d7984a547c17e6c0a31ad25bb497757b6bae8f9f0
+    definition_hash: sha256:5a4bb8fc2ec987e1a922df8756a87fd77fd9351ca3f04583c2c9d1782af218b5
+    label_hash: sha256:496b8e1b614a326917e90f651176dd65af5bde7b578fe4bf3c99d7efecd1a4a3
+    members:
+      - BP11-079#0/text/0
+      - BP11-P20#0/text/0
+      - EBD03-015#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+    clauses:
+      - id: EBD03-015#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.spell
+          - A.target
+          - A.sel
+        note_hash: sha256:e06ac0332f47d636987bdb6429fbcd011f3d0cfd251a1537fef1fa3cba4d06c2
+      - id: EBD03-015#0/text/0~1
+        ability: a1
+        capture: C.at-resolution
+        stage: known
+        ir:
+          - K.if
+          - X.predicate
+          - V.necro-charge
+          - I.move
+          - T.receipt
+        author:
+          - A.if
+          - A.cond
+          - A.act.move
+        note_hash: sha256:6ff0c16165c52e59bf53a0ceb732b7dcc98e717459ef29ce0eb45ad827062781
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-015#0/text/0~0
+        targets:
+          - clause: EBD03-015#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: branch
+        sources:
+          - clause: EBD03-015#0/text/0~1
+        targets:
+          - clause: EBD03-015#0/text/0~1
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+  - kind: member
+    id: EBD03-015#0/text/0
+    template: Tb8e775ac78
+    position:
+      card_no: EBD03-015
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 49
+    evidence_hash: sha256:8857f624237940c5533cf2cb5bbf79038e60d5a9acd4b7dcdf371972c1f1883e
+    clauses:
+      - template: Ceed7f9b1f3
+        body:
+          start: 0
+          end: 29
+      - template: C2ce88e339a
+        body:
+          start: 29
+          end: 49
+    source: sha256:0183ca6d8d9c6d8f94bdfabe23eda091f3c1b75f0b81b1fc1034d4652ad4e8f3
+  - kind: member
+    id: EBD03-016#0/text/0
+    template: T7346dc50a8
+    position:
+      card_no: EBD03-016
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 26
+    evidence_hash: sha256:6e8c745cd88ee51dd6c13ba5772858de96f598a854bca53b379b85147055d705
+    clauses:
+      - template: C7346dc50a8
+        body:
+          start: 0
+          end: 26
+    source: sha256:2fbf37a9bd5889d6b9a885a915dbef77856b36360b91213a993f9bb37e644001
+  - kind: classification
+    id: T0f31e19f2c
+    status: candidate
+    family: activate-sacrifice-recover-trait
+    normalized_hash: sha256:0f31e19f2c1a2436babda28a2bd00cdfde78c50653542583ad10eef73d6cca25
+    definition_hash: sha256:a9bf2a1b65778dbc5de9957db3e189236f558bf28737e4845430eca24859be2c
+    label_hash: sha256:d8147c763c78840e951332001c7ef041b767651b41d694d90d128594b407b836
+    members:
+      - BP04-090#0/text/1
+      - BP04-091#0/text/1
+      - EBD03-016#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-016#0/text/1~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - T.receipt
+          - I.resource
+          - I.posture
+          - I.move
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.activate
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:ef4d7e8666aa2eaac7e0a4de687435cbfad86f98c5bc6517c1d0fa89d7b36b46
+      - id: EBD03-016#0/text/1~1
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: cost-of
+        sources:
+          - clause: EBD03-016#0/text/1~0
+        targets:
+          - clause: EBD03-016#0/text/1~1
+        note_hash: sha256:52f9872d358c808a687029cf1d49b43a21d194342501a241b19d179087909a15
+      - type: sequence
+        sources:
+          - clause: EBD03-016#0/text/1~0
+        targets:
+          - clause: EBD03-016#0/text/1~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-016#0/text/1
+    template: T0f31e19f2c
+    position:
+      card_no: EBD03-016
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 54
+    evidence_hash: sha256:c339b7fe942115bbbc82ab28a6703cc95a6a4d82b12c144a7a06e239c24e7f24
+    clauses:
+      - template: Ce6fa62c13e
+        body:
+          start: 0
+          end: 44
+      - template: Cb58ac3aa06
+        body:
+          start: 44
+          end: 54
+    source: sha256:fc65d61229f46496e9533a15bf7bf49ac0805bfd19d77e4da2b4c5b9472f6882
+  - kind: member
+    id: EBD03-017#0/text/0
+    template: T23f16a2851
+    position:
+      card_no: EBD03-017
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 19
+    evidence_hash: sha256:03528ea153840bdc79c44d5cdde9d0d7685f078e5536b3ac7e8c3580368327be
+    clauses:
+      - template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+    source: sha256:fcce69518173fecb65f10b6eb03da63b413e19df0b0e9e46fc9b469a88364f28
+  - kind: classification
+    id: Tcf0dc75a61
+    status: candidate
+    family: fanfare-vehicle-field-or-ex-heal
+    normalized_hash: sha256:cf0dc75a61398d88d3fff0897cb4e9815754fedfa28791bf19db526cbe8b020e
+    definition_hash: sha256:24a2271669590ddb98571a081fe0b41549d43955e0196ecc3ff53ea5f49d9c32
+    label_hash: sha256:46a883d016941b6d8f4144a67a3c41e45e4214fc9e19bc759f119d9d6bfc060b
+    members:
+      - BP11-109#0/text/1
+      - BP11-P25#0/text/1
+      - EBD03-017#0/text/1
+    abilities:
+      - id: a1
+        head: A.head.fanfare
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-017#0/text/1~0
+        ability: a1
+        capture: C.live
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.enter-field
+          - K.if
+          - X.predicate
+          - V.zone-count
+          - X.aggregate
+          - S.combine
+          - I.life
+          - T.player-ref
+        author:
+          - A.head.fanfare
+          - A.if
+          - A.cond
+          - A.expr
+          - A.sel
+          - A.act.life
+        note_hash: sha256:f51acfeb15044d35b8e23e39bf31d4a31292ba7a7ef20bba3fd1016408c8f2da
+    relations:
+      - type: branch
+        sources:
+          - clause: EBD03-017#0/text/1~0
+        targets:
+          - clause: EBD03-017#0/text/1~0
+        note_hash: sha256:10cb35b48e9b51645d746d19d30c9ea1c62b2deecefc064520f474f673c05b3a
+  - kind: member
+    id: EBD03-017#0/text/1
+    template: Tcf0dc75a61
+    position:
+      card_no: EBD03-017
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 52
+    evidence_hash: sha256:da449d698d48bb1f8467edc78cbeb6f26fd14682f288c98f346be25e7432eafa
+    clauses:
+      - template: Ccf0dc75a61
+        body:
+          start: 0
+          end: 52
+    source: sha256:fd0c13ede07f3a0b846dfe1e610646ae6d4b1c9a46c07098accad5158dd79dba
+  - kind: classification
+    id: T3ba00fc5f4
+    status: candidate
+    family: evolve-look-trait-pick-rest-bottom
+    normalized_hash: sha256:3ba00fc5f46918bf0aa04915073ca9bab30affd7cb7631a33a1356810f12aeec
+    definition_hash: sha256:e36cd17e1e48fcbcd7b2c2f9c2c0dc91775e652609fa3e262c3ab0e040a4d795
+    label_hash: sha256:30b5fafe423ca486e586e7da550ea90febc3cb9de197b00300107e7cad4d82ef
+    members:
+      - BP11-110#0/text/0
+      - BP11-P26#0/text/0
+      - EBD03-018#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.evolve_time
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-018#0/text/0~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.evolve
+          - I.look
+          - S.ordered
+          - X.binding
+        author:
+          - A.head.evolve_time
+          - A.act.look
+        note_hash: sha256:1649f21b7f98e123004fb2e9d70687c80258ecf4e4f150be8b262d6a4997296b
+      - id: EBD03-018#0/text/0~1
+        ability: a1
+        decision: D.resolve-choice
+        stage: known
+        ir:
+          - D.resolve-choice
+          - R.object
+          - S.zone
+          - S.filter
+          - K.may
+          - I.reveal
+          - X.binding
+          - I.move
+          - T.receipt
+        author:
+          - A.choose
+          - A.sel
+          - A.may
+          - A.act.reveal
+          - A.act.move
+        note_hash: sha256:54476da7a725c35b90321e9ece64d41dbcf28dee8ec9a357d19d9c63a31aafa4
+      - id: EBD03-018#0/text/0~2
+        ability: a1
+        decision: D.resolve-choice
+        stage: known
+        ir:
+          - I.order
+          - D.resolve-choice
+        author:
+          - A.order
+          - A.act.move
+        note_hash: sha256:257c1c6681a14536ce7b6c646e719de34aa9df42bcbd50042154cb067f87a6f7
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-018#0/text/0~0
+        targets:
+          - clause: EBD03-018#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-018#0/text/0~1
+        targets:
+          - clause: EBD03-018#0/text/0~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: result-of
+        sources:
+          - clause: EBD03-018#0/text/0~0
+        targets:
+          - clause: EBD03-018#0/text/0~1
+        note_hash: sha256:80513bd4686abef43c5b641351bc8f0a1075a55680949f95df620f1d259ae1bd
+      - type: result-of
+        sources:
+          - clause: EBD03-018#0/text/0~0
+        targets:
+          - clause: EBD03-018#0/text/0~2
+        note_hash: sha256:80513bd4686abef43c5b641351bc8f0a1075a55680949f95df620f1d259ae1bd
+  - kind: member
+    id: EBD03-018#0/text/0
+    template: T3ba00fc5f4
+    position:
+      card_no: EBD03-018
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 64
+    evidence_hash: sha256:3f2bd2ea38d06d74eae5411b2ccb6cecaff84427b7cf1a218f258c07382635a3
+    clauses:
+      - template: C7d260b2895
+        body:
+          start: 0
+          end: 19
+      - template: C6c308779b6
+        body:
+          start: 19
+          end: 47
+      - template: C44a63a4281
+        body:
+          start: 47
+          end: 64
+    source: sha256:f5e561da9fd60cd551dddf47a80b6f288a4b1c6f6336d14aa05f03e73ae2830d
+  - kind: member
+    id: EBD03-019#0/text/0
+    template: T23f16a2851
+    position:
+      card_no: EBD03-019
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 19
+    evidence_hash: sha256:cccf3464065459824f9b6f380537a70916a1318ee8483f7b6720be36ecdcb5cb
+    clauses:
+      - template: C23f16a2851
+        body:
+          start: 0
+          end: 19
+    source: sha256:fcce69518173fecb65f10b6eb03da63b413e19df0b0e9e46fc9b469a88364f28
+  - kind: member
+    id: EBD03-019#0/text/1
+    template: T78e8a5204c
+    position:
+      card_no: EBD03-019
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 25
+    evidence_hash: sha256:54523d2d7e2b69cebf67aa126019d92b2a36fba974c85b262e0fed4b33b85678
+    clauses:
+      - template: C78e8a5204c
+        body:
+          start: 0
+          end: 25
+    source: sha256:fed04dc8fdf177d7c5dffba61002f517da7080e02d45b925e8669123e56eb26d
+  - kind: classification
+    id: T9b762614c0
+    status: candidate
+    family: evolve-mode-reanimate-or-damage
+    normalized_hash: sha256:9b762614c0aee6b0248b1fe37b7d92e49c161b0e70250559d4d0ada7021e7a2d
+    definition_hash: sha256:6e65c795b0600d271d7b061c92020bfdd3baaf8054b3c55e6a67080b3ecdd85e
+    label_hash: sha256:785dc3f8681b658becc73a7798608fbfdfe9d7de6a1c5e10bc37655d299b3b49
+    members:
+      - BP15-089#0/text/0
+      - EBD03-020#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.evolve_time
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-020#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.evolve
+          - K.mode
+          - D.play-param
+        author:
+          - A.head.evolve_time
+          - A.choice
+          - A.choice-at-play
+        note_hash: sha256:2681acce72dfc8303fdb8731d532ea7d2285748b94a4759cd6403495ac0708c2
+      - id: EBD03-020#0/text/0~1
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.target
+          - A.sel
+        note_hash: sha256:db2ded43a3e1f8d316dde1aec936a4b9eae416c5882332ce9f71d33fe3f7493b
+      - id: EBD03-020#0/text/0~2
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+      - id: EBD03-020#0/text/0~3
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.target
+          - A.sel
+        note_hash: sha256:db2ded43a3e1f8d316dde1aec936a4b9eae416c5882332ce9f71d33fe3f7493b
+      - id: EBD03-020#0/text/0~4
+        ability: a1
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:46c582b4ccce84a2fc4078abbfd91db769b101e78ef4198c9c7aeef127f2be2f
+    relations:
+      - type: scope-of
+        sources:
+          - clause: EBD03-020#0/text/0~0
+        targets:
+          - clause: EBD03-020#0/text/0~1
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-020#0/text/0~0
+        targets:
+          - clause: EBD03-020#0/text/0~2
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-020#0/text/0~0
+        targets:
+          - clause: EBD03-020#0/text/0~3
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: scope-of
+        sources:
+          - clause: EBD03-020#0/text/0~0
+        targets:
+          - clause: EBD03-020#0/text/0~4
+        note_hash: sha256:f74e2fa8ea8105b8d334b417f1e65817b237c16105d0152f5e9b52a79175f1a5
+      - type: sequence
+        sources:
+          - clause: EBD03-020#0/text/0~1
+        targets:
+          - clause: EBD03-020#0/text/0~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-020#0/text/0~3
+        targets:
+          - clause: EBD03-020#0/text/0~4
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-020#0/text/0
+    template: T9b762614c0
+    position:
+      card_no: EBD03-020
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 90
+    evidence_hash: sha256:47e1ed34bd3e333a11b680a703d23976f95e65448ba247866975b14fcafd9748
+    clauses:
+      - template: Ceecf70782e
+        body:
+          start: 0
+          end: 18
+      - template: C150b3ea671
+        body:
+          start: 18
+          end: 54
+      - template: Ce0ba568361
+        body:
+          start: 54
+          end: 62
+      - template: C07cf405547
+        body:
+          start: 62
+          end: 81
+      - template: Cdf35a4dada
+        body:
+          start: 81
+          end: 90
+    source: sha256:59ea8a96a72cf0e07dc5db66e2d8df135720d1a35b7aac83fa635684991185e7
+  - kind: member
+    id: EBD03-020#0/text/1
+    template: T78e8a5204c
+    position:
+      card_no: EBD03-020
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 25
+    evidence_hash: sha256:d61dbf6a1ac069d90a8d6b08a0ed0a907b5f58ece8470744bc8da3749c8c3754
+    clauses:
+      - template: C78e8a5204c
+        body:
+          start: 0
+          end: 25
+    source: sha256:fed04dc8fdf177d7c5dffba61002f517da7080e02d45b925e8669123e56eb26d
+  - kind: classification
+    id: T52be86e214
+    status: candidate
+    family: lastword-damage-mill
+    normalized_hash: sha256:52be86e214f45e860e6d4a711862f532823a150241052b0527fe9af0096ea3bf
+    definition_hash: sha256:89775c4c2a01090cd1d046bbdb7bddce383b3c4679c17751036b5fadfa468597
+    label_hash: sha256:e8a471e72750421b50d94c71a86081d630b5d1ef7b445c7d610e4b105eb6298a
+    members:
+      - BP16-P30#0/text/0
+      - BP16-T04#0/text/0
+      - EBD03-T01#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.lastword
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-T01#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.leave-field
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.lastword
+          - A.target
+          - A.sel
+        note_hash: sha256:347f095dfcf5cb05900b9c6f0ef0667370e655753ef8ddc73e5b3a898078e771
+      - id: EBD03-T01#0/text/0~1
+        ability: a1
+        stage: known
+        ir:
+          - I.damage
+        author:
+          - A.act.damage
+        note_hash: sha256:46c582b4ccce84a2fc4078abbfd91db769b101e78ef4198c9c7aeef127f2be2f
+      - id: EBD03-T01#0/text/0~2
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+          - S.ordered
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-T01#0/text/0~0
+        targets:
+          - clause: EBD03-T01#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-T01#0/text/0~1
+        targets:
+          - clause: EBD03-T01#0/text/0~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-T01#0/text/0
+    template: T52be86e214
+    position:
+      card_no: EBD03-T01
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 50
+    evidence_hash: sha256:8fdc3bc16704d3f8505e615a9584abdd0a56bd4db9e7e56fa31b17b5f3eef53e
+    clauses:
+      - template: Cd7dc77dc4b
+        body:
+          start: 0
+          end: 24
+      - template: Cdf35a4dada
+        body:
+          start: 24
+          end: 33
+      - template: Cfb5fee5a0e
+        body:
+          start: 33
+          end: 50
+    source: sha256:29ae7b362d0cdaaf1d4c258c733c3d591d09862e9807c7227415585e536b17f7
+  - kind: classification
+    id: T506a15b9f0
+    status: candidate
+    family: lastword-heal-mill
+    normalized_hash: sha256:506a15b9f0bd2e16af9d791f79c4bd2ee0e7d1f9375cecae9cea1fb067f9777c
+    definition_hash: sha256:c9d3fbf60c0dc89e0c56802cb075ae976e7bb5cd1127e278ec18918d7af7ebd9
+    label_hash: sha256:f445f4b611263b744871131d6f8f7015a62c12be3dd5c309116395ae5be2e6a8
+    members:
+      - BP16-P31#0/text/0
+      - BP16-T05#0/text/0
+      - EBD03-T02#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.lastword
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-T02#0/text/0~0
+        ability: a1
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.leave-field
+          - I.life
+          - T.player-ref
+        author:
+          - A.head.lastword
+          - A.act.life
+        note_hash: sha256:a7098c9391d3ac58c8872ab2c7c3f39d3ebca541e7fb62d997f68e40b6581142
+      - id: EBD03-T02#0/text/0~1
+        ability: a1
+        stage: known
+        ir:
+          - I.move
+          - T.receipt
+          - S.ordered
+        author:
+          - A.act.move
+        note_hash: sha256:53e437cfa212351dafb0ff92f1be5a3b0950d6e369a5e8fda4c594075f51aa9f
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-T02#0/text/0~0
+        targets:
+          - clause: EBD03-T02#0/text/0~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-T02#0/text/0
+    template: T506a15b9f0
+    position:
+      card_no: EBD03-T02
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 42
+    evidence_hash: sha256:4fef60143128ec766b258d4679fdb06067191f8e244fb53f6f12884cbd699895
+    clauses:
+      - template: C4024c69965
+        body:
+          start: 0
+          end: 25
+      - template: Cfb5fee5a0e
+        body:
+          start: 25
+          end: 42
+    source: sha256:98ba48814081e99e15d8a0a57cacc9d32a3cf1cd7ba76b8e5f9647ebab101d38
+  - kind: member
+    id: EBD03-T03#0/text/0
+    template: Ted815258fe
+    position:
+      card_no: EBD03-T03
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 10
+    raw_length: 46
+    evidence_hash: sha256:0a5875b3fd1f004fdf1f224144d92f38a552679ea602d109aab841a6f0202aa6
+    clauses:
+      - template: Ced815258fe
+        body:
+          start: 0
+          end: 10
+    source: sha256:8fb59f863a6ea54e8f734bae3b3e3f25f8ea934d1f770595350c008b26ebe19f
+  - kind: member
+    id: EBD03-T04#0/section:0/token:絶叫の残響・ルルナイ/0
+    template: Ted815258fe
+    position:
+      card_no: EBD03-T04
+      region: jp
+      face: 0
+      field: section
+      ordinal: 0
+      line: 0
+    body_length: 10
+    token_header_hash: sha256:ca648724fe218dcff999d9c0ed69b8bc2b7a5c9b931e30c0a8bbdb5626e02bf5
+    evidence_hash: sha256:25eb2f9b5d4bf5af05d72638d4103c5b46d775bee64202dde1d9a01f980bee4e
+    clauses:
+      - template: Ced815258fe
+        body:
+          start: 0
+          end: 10
+    source: sha256:3a65b656fb390315c3af8a4421ea767b7d57b6a2df32d176bdd68a971ef38dfb
+  - kind: classification
+    id: Tb08dca6d68
+    status: candidate
+    family: spell-per-grave-count-token
+    normalized_hash: sha256:b08dca6d685f5b89c8925a6514e2e20d3024514e7e324f51680d92b1a4de6e3c
+    definition_hash: sha256:f4f5a4a3ed2537b3b67775f17fe0dbc8ff36935853ec92d526d806527db89a63
+    label_hash: sha256:96adda57b8427dc88e59f4d45a1c7c117521ab1f5d3f9f52eedf096604abcd93
+    members:
+      - BP15-PR15#0/text/0
+      - BP15-PR25#0/text/0
+      - EBD03-T04#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.spell
+        ir: B.ability
+        cost_timing: None
+    clauses:
+      - id: EBD03-T04#0/text/0~0
+        ability: a1
+        capture: C.live
+        stage: known
+        ir:
+          - B.ability
+          - V.zone-count
+          - X.aggregate
+          - X.math
+          - I.token
+          - D.rule-choice
+          - V.zone-capacity
+        author:
+          - A.head.spell
+          - A.expr
+          - A.sel
+          - A.act.create
+        note_hash: sha256:19231d36999a51040030f954c9962e7628c5a12fc8e12c3a1109cf80c3ca7271
+    relations: []
+  - kind: member
+    id: EBD03-T04#0/text/0
+    template: Tb08dca6d68
+    position:
+      card_no: EBD03-T04
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 35
+    evidence_hash: sha256:12ab281a4269ae6c1150c302c6c6ca8932846e214ee713bd84140351cf9d7825
+    clauses:
+      - template: Cb08dca6d68
+        body:
+          start: 0
+          end: 35
+    source: sha256:4d47de2900e743395d5d054e9232b286737f3363209c7a446beb05de380b77f6
+  - kind: classification
+    id: T008040689b
+    status: candidate
+    family: activate-cost-sum-act-pilot
+    normalized_hash: sha256:008040689bd67b3e153ebad70d2a13bac1d75854ea08ac9409c86caef8e47dfc
+    definition_hash: sha256:d367d19817850a855d0c1e961a4e07e984beba584a0779d6598f0e7dcf06d3b6
+    label_hash: sha256:4629f6a344a6f08ec07a1dae6dbf7d09cfea2135b6397098d99d03d847a86b73
+    members:
+      - BP11-P30#0/text/0
+      - BP11-T02#0/text/0
+      - EBD03-T05#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-T05#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - K.pay
+          - T.receipt
+          - I.resource
+          - I.posture
+          - S.zone
+          - S.filter
+          - X.predicate
+          - V.cost
+          - X.aggregate
+          - I.box-pilot
+          - L.duration
+        author:
+          - A.head.activate
+          - A.cost
+          - A.sel
+          - A.expr
+          - A.act.pilot
+        note_hash: sha256:dbe99cab7890ea30eddd352df2f4eda98728a7e4ea81a8ba9c807ac2077392d8
+    relations: []
+  - kind: member
+    id: EBD03-T05#0/text/0
+    template: T008040689b
+    position:
+      card_no: EBD03-T05
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 55
+    raw_length: 87
+    evidence_hash: sha256:2cc18daa67b437f02de725707345e847811b68b58a65337ebce0ef2d3ac349d9
+    clauses:
+      - template: C008040689b
+        body:
+          start: 0
+          end: 55
+    source: sha256:d9460bbd9d2dc9feb62862a8f37a4280baf650dc9b8d8d856e45b7ebc048878a
+  - kind: member
+    id: EBD03-T05#0/text/1
+    template: Tca6721d157
+    position:
+      card_no: EBD03-T05
+      region: jp
+      face: 0
+      field: effect
+      line: 1
+    body_length: 4
+    evidence_hash: sha256:b2ab59d015efc63974b84c6fd63c2c16ad8b849bc37c91eace346211a95bb868
+    clauses:
+      - template: Cca6721d157
+        body:
+          start: 0
+          end: 4
+    source: sha256:a76676048aaed537c31713e1829f9aa41d47562125d1aa74931fbee792f25046
+  - kind: classification
+    id: T4e12bf3ccc
+    status: candidate
+    family: attack-destroy-heal
+    normalized_hash: sha256:4e12bf3ccccbd1c2b9b8e5d70fc710b75594cfa5ec41f45ffa43e861a522d490
+    definition_hash: sha256:3738b5c384e29d02054e86f0515ba70e67d4619864714ba752169008b05ff133
+    label_hash: sha256:0ecd5869e1fb35cc2c30b1acc29005d38798346ec0737ce633f46df8cb86f60e
+    members:
+      - EBD03-T05#0/text/2
+    abilities:
+      - id: a1
+        head: A.head.attack_time
+        ir: B.trigger
+        cost_timing: None
+    clauses:
+      - id: EBD03-T05#0/text/2~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.trigger
+          - E.attack
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+        author:
+          - A.head.attack_time
+          - A.target
+          - A.sel
+        note_hash: sha256:347f095dfcf5cb05900b9c6f0ef0667370e655753ef8ddc73e5b3a898078e771
+      - id: EBD03-T05#0/text/2~1
+        ability: a1
+        stage: known
+        ir:
+          - I.destroy
+        author:
+          - A.act.destroy
+        note_hash: sha256:ab5fccba2217de92d9895ac3ae67982974208fba1469878c6d7a9e5adc8bbc74
+      - id: EBD03-T05#0/text/2~2
+        ability: a1
+        stage: known
+        ir:
+          - I.life
+          - T.player-ref
+        author:
+          - A.act.life
+        note_hash: sha256:6d6b09a2193e6b956192e22a9ea476cd7804f27e2297674a5db34eeca52f1e2a
+    relations:
+      - type: sequence
+        sources:
+          - clause: EBD03-T05#0/text/2~0
+        targets:
+          - clause: EBD03-T05#0/text/2~1
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+      - type: sequence
+        sources:
+          - clause: EBD03-T05#0/text/2~1
+        targets:
+          - clause: EBD03-T05#0/text/2~2
+        note_hash: sha256:3e8ef6f9809515929d8e55fc0daa5eb8cc5d927aab1f92363e1724bd328586e1
+  - kind: member
+    id: EBD03-T05#0/text/2
+    template: T4e12bf3ccc
+    position:
+      card_no: EBD03-T05
+      region: jp
+      face: 0
+      field: effect
+      line: 2
+    body_length: 52
+    evidence_hash: sha256:ad242d1424ca02847efc3b13a20813b984fbbf4e74aec60460260275e205db7f
+    clauses:
+      - template: C157929f760
+        body:
+          start: 0
+          end: 27
+      - template: Cbcbbd98893
+        body:
+          start: 27
+          end: 35
+      - template: Ca1099c5fef
+        body:
+          start: 35
+          end: 52
+    source: sha256:7734f23010db401e5f6fca4b0e3d7363c01619abf08f0e5f581ef233df05dce2
+  - kind: member
+    id: EBD03-T06#0/text/0
+    template: T17c62d3c96
+    position:
+      card_no: EBD03-T06
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 67
+    evidence_hash: sha256:84fff436f7951b1f0c986d6d6c3808908965332517a87725f02276ee3e20aec9
+    clauses:
+      - template: Ccdf3f115fd
+        body:
+          start: 0
+          end: 29
+      - template: Cc339c5192d
+        body:
+          start: 29
+          end: 40
+      - template: Ce659493f3d
+        body:
+          start: 40
+          end: 67
+    source: sha256:7baec35b0df528c8c8b9e042d1976e2e91e822626c7727c65e42c185f272c942
+  - kind: classification
+    id: T52c136c557
+    status: candidate
+    family: token.activate.self-to-cemetery.target-own-follower.grant-ward.cond-target-trait-buff
+    normalized_hash: sha256:52c136c557d0148802c9caccdf327e64cff8dab1417ec166bee11ca7c82bbd28
+    definition_hash: sha256:e16a193a63d4d4b1fe76f65c4d50aacf37f342f6cd4cd26a0b8cef0af365e990
+    label_hash: sha256:f171cec2fcd39623e2dda646f895de6b928df78e746829f0bfb85dddda4a8544
+    members:
+      - BP11-044#0/section:0/token:魔導装甲車/0
+      - BP11-P33#0/text/0
+      - BP11-T05#0/text/0
+      - BP16-T22#0/text/0
+      - EBD03-T07#0/text/0
+    abilities:
+      - id: a1
+        head: A.head.activate
+        ir: B.ability
+        cost_timing: PlayParameter
+    clauses:
+      - id: EBD03-T07#0/text/0~0
+        ability: a1
+        decision: D.play-param
+        stage: known
+        ir:
+          - B.ability
+          - B.source
+          - K.pay
+          - I.move
+          - E.payment
+          - D.play-param
+          - R.target
+          - S.zone
+          - S.filter
+          - V.kind
+          - R.lki
+        author:
+          - A.head.activate
+          - A.cost
+          - A.target
+          - A.sel
+        note_hash: sha256:c97da9bafef8116134fba427b57f627f3413ac46b946b9f0df590dad07fd8a3e
+      - id: EBD03-T07#0/text/0~1
+        ability: a1
+        stage: known
+        ir:
+          - I.grant
+          - L.continuous
+          - L.duration
+          - R.target
+          - B.keyword
+        author:
+          - A.act.grant
+          - A.ref
+        note_hash: sha256:f3c94d6287cfceaf6bccf5420ca99c076715b57c0dd55c94fdaa43099d9570cc
+      - id: EBD03-T07#0/text/0~2
+        ability: a1
+        capture: C.live
+        stage: known
+        ir:
+          - K.if
+          - X.aggregate
+          - X.predicate
+          - V.traits
+          - R.target
+          - I.modify
+          - L.continuous
+          - L.duration
+        author:
+          - A.if
+          - A.cond
+          - A.sel
+          - A.act.buff
+          - A.ref
+        note_hash: sha256:3043eaa2c60914e92c2dc2e0fd7faef67600f034bb75ce35af5045d29d5fc1df
+    relations:
+      - type: cost-of
+        sources:
+          - clause: EBD03-T07#0/text/0~0
+        targets:
+          - clause: EBD03-T07#0/text/0~0
+        note_hash: sha256:f3ca0dbb3340151b873ad1c3c0b3a5031e96101f61aa24bd7c8307f96e36e7e3
+      - type: sequence
+        sources:
+          - clause: EBD03-T07#0/text/0~0
+        targets:
+          - clause: EBD03-T07#0/text/0~1
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: sequence
+        sources:
+          - clause: EBD03-T07#0/text/0~1
+        targets:
+          - clause: EBD03-T07#0/text/0~2
+        note_hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - type: capture-of
+        sources:
+          - clause: EBD03-T07#0/text/0~0
+        targets:
+          - clause: EBD03-T07#0/text/0~1
+        note_hash: sha256:a66c7c1a21028d43cc58053972cf3407fe3fdf27dfe3c566206813d535ac5beb
+      - type: capture-of
+        sources:
+          - clause: EBD03-T07#0/text/0~0
+        targets:
+          - clause: EBD03-T07#0/text/0~2
+        note_hash: sha256:09cf3e510dba2778336be66c01fe95abfd5c1b5d395cf82ba5239f5517b61dab
+      - type: branch
+        sources:
+          - clause: EBD03-T07#0/text/0~2
+        targets:
+          - clause: EBD03-T07#0/text/0~2
+        note_hash: sha256:f096e0c75ca5365dd6eb22c424e2be6991b687528646c6f63f7066342b9cc59a
+  - kind: member
+    id: EBD03-T07#0/text/0
+    template: T52c136c557
+    position:
+      card_no: EBD03-T07
+      region: jp
+      face: 0
+      field: effect
+      line: 0
+    body_length: 66
+    raw_length: 131
+    evidence_hash: sha256:a283309f0b1c3cdd538a1242b35c9adad14ed696414263fda0736bcc074def32
+    clauses:
+      - template: Ccdf3f115fd
+        body:
+          start: 0
+          end: 29
+      - template: Cb83df673b7
+        body:
+          start: 29
+          end: 40
+      - template: Ca06ceee4b6
+        body:
+          start: 40
+          end: 66
+    source: sha256:a156d60494abb6c0d087dac666bdc350e0a1f0da2c6bfad0de8e62f178be4569

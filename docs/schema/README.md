@@ -46,6 +46,7 @@
 | [構築規則與禁限採納](domains/construction-adoption.md) | Standard 專用封套、來源登錄、有限 ref／CR 引用與 coverage／unknown 邊界 |
 | [數位對應採納契約](domains/digital-link-adoption.md) | 真人 link 入口、凍結名稱與逐 owner 使用；政策連結見獨立契約 |
 | [數位名字與同名瀏覽政策](domains/digital-name-policy.md) | 可修改的名字／同名瀏覽規則、排除與待啟用能力 |
+| [效果分類候選](domains/effect-classifications.md) | 分類來源範圍、候選結構、精確來源對照與未採納邊界 |
 | [風味文字直接對照表](domains/flavor-translation.md) | 以原文 hash 對照整段譯文；不走模板、不設採納政策 |
 | [術語採納與加粗](domains/glossary-adoption.md) | 永久概念、當前選詞、來源主張、可修訂加粗與公開標註 |
 | [身分修復與決定續版](domains/identity-repair.md) | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影 |

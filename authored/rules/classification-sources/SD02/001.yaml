@@ -1,0 +1,44 @@
+format: 1
+kind: classification_source_shard
+namespace: classification-v0
+basis:
+  recipe: v0-classification-candidates-1
+  inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+owner: SD02
+records:
+  - id: sha256:0b6f18786bc06501d2e81e006d2fddb1e1dbfb9f1882133bfb210891d2a9fcd7
+    raw: 【攻撃時】自分の他のフォロワー1体を選ぶ。それは{攻撃力}+2する。
+  - id: sha256:2896967c648db673f4b466a0dd73c8096ffb4e123a52e50e7fd452c0362e321b
+    raw: 【疾走】(【疾走】を持つフォロワーは、場に出たターンから攻撃できる)
+  - id: sha256:29277d4b199c82ded533d97be94ad855415f74327b19f09dfe754aa5fd55573b
+    raw: 【進化時】『スティールナイト』1体と『ナイト』1体を出す。
+  - id: sha256:3741f831b98e3ac337a7d6d7d885d8b75822a08c3427b19c3076ef3257da6fc5
+    raw: 自分のフォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。1枚引く。
+  - id: sha256:4dd561decc381cff74345e78982c41fd64bbb962840ab727fb6bab6375178878
+    raw: '{クイック}'
+  - id: sha256:52eb2d519ff70f735dacdcdca09c703f09dc2d66827b2ee6de80beff2639123d
+    raw: 【指定攻撃】(【指定攻撃】を持つフォロワーは、スタンド状態のフォロワーを攻撃できる)
+  - id: sha256:5ac517b330450b42093ad2168636b9a8c67bd87d8b27ac345460d1fb57827e08
+    raw: '{ファンファーレ}自分の他のフォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。'
+  - id: sha256:63d83837dcf607af6acfc1e9bf96d8ec1a14e54de93f4f055769202ff2e8a13f
+    raw: '{ファンファーレ}『ナイト』1体を出す。'
+  - id: sha256:65b437b19e9a80b53822d953fdfea2ff58e6e1adefcfdf0db2ebc2118a50e9a8
+    raw: 相手のフォロワー1体を選ぶ。それに5ダメージ。『ナイト』1枚をEXエリアに置く。
+  - id: sha256:689ab4a53d4cf82acf360570fd34ca92d1ed59c2c9216b5141928d23033fa2ed
+    raw: 相手のフォロワー1体を選ぶ。それに「自分の場のフォロワーの数」と同じダメージ。
+  - id: sha256:76952c880e25a84a451cbe95fd4919075d6fdadc627daa08319e67f55f1a897d
+    raw: '{ファンファーレ}下記から1つチョイスする。【1】相手のフォロワー1体を選ぶ。それを破壊する。【2】これは【疾走】を持つ。(【疾走】を持つフォロワーは、場に出たターンから攻撃できる)'
+  - id: sha256:87b795e30f197f44f7977a475f0e612b291f04373d9dab747095907186742825
+    raw: 【疾走】
+  - id: sha256:93eb90c8aec2f1e88e893334614b07a322c685dd33c567fc016548b2f601d129
+    raw: 【守護】(これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない)
+  - id: sha256:95cd7ed089d04613e6339d0a2ed51754d3ca28dec9e0c82d0c7ca7162a5234c5
+    raw: '{起動}{コスト1}：これは【必殺】を持つ。(【必殺】を持つフォロワーと交戦した相手のフォロワーは、ダメージを与え合ったあと破壊される)'
+  - id: sha256:99413bdb90edff7effa43b881322f9eead5c5079df74fd68067ae51ff2361cae
+    raw: 【突進】(【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる)
+  - id: sha256:ae0304126eace185a4ef28f4ee8bcdc9505fdc48d6458e0e98b383fb3018c12d
+    raw: '{進化}{コスト4}：これは進化する。'
+  - id: sha256:d19474fdccc98df363ffdce02fc0decb1739ccb04591dba5ba66c75a8814ba6a
+    raw: '{進化}{コスト3}：これは進化する。'
+  - id: sha256:fcce69518173fecb65f10b6eb03da63b413e19df0b0e9e46fc9b469a88364f28
+    raw: '{進化}{コスト1}：これは進化する。'

@@ -1,0 +1,61 @@
+format: 1
+kind: classification_source_shard
+namespace: classification-v0
+basis:
+  recipe: v0-classification-candidates-1
+  inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+owner: SD01
+records:
+  - id: sha256:061aca1eaed1171d5b49f7387e21405b7d0e5f1d1c37182fa21cbe00afebde0c
+    raw: 自分の場に妖精・トークンが出たとき、それは{攻撃力}+1/{体力}+1する。
+  - id: sha256:194a225bac62bd50a3bd533f1ce35b5c992c5304baa2a4635969be0b372e7824
+    raw: これは【守護】を無視して攻撃できる。
+  - id: sha256:2b537fb810cced636439c69c9cf58a9618c81c7907db474faf0692eacfa2e386
+    raw: これがある限り、自分の妖精・トークンすべては【指定攻撃】を持つ。
+  - id: sha256:2bc6b85c51475f3bfde27ca958a1d229d32875e66deccfbd9499b49884d7534d
+    raw: '{ファンファーレ}自分の妖精・フォロワー1体を選ぶ。それは{攻撃力}+1する。'
+  - id: sha256:2cbf116ff000d0a601dace61ca05dd5a617a70f69f5b3192b0b71e56153d42b1
+    raw: 『フェアリー』3枚をEXエリアに置く。
+  - id: sha256:35821c97bdf6b29a5a77c306fe34394bc0d1d1b85de22a08a035ee951b13114b
+    raw: '{ファンファーレ}『フェアリー』9枚の中から、好きな枚数を場に出す。好きな枚数をEXエリアに置く。'
+  - id: sha256:413a2c1c83d3ddbcafef2a9789fe9a34ebcd9354aa04e463596f47d79f4323f8
+    raw: 自分の場に他のフォロワーが出たとき、これは{攻撃力}+1/{体力}+1する。
+  - id: sha256:4dd561decc381cff74345e78982c41fd64bbb962840ab727fb6bab6375178878
+    raw: '{クイック}'
+  - id: sha256:51b543fd481b36a588afbd04f6dfa8ba3695d226412483133246d89a359cdf4d
+    raw: '{進化}{コスト2}：これは進化する。'
+  - id: sha256:52eb2d519ff70f735dacdcdca09c703f09dc2d66827b2ee6de80beff2639123d
+    raw: 【指定攻撃】(【指定攻撃】を持つフォロワーは、スタンド状態のフォロワーを攻撃できる)
+  - id: sha256:639c55b6afd2414e8eaefd9d05f44d8068ce4a0472ed687e384acfff014db823
+    raw: '{ファンファーレ}相手のフォロワー1体を選ぶ。それに1ダメージ。【コンボ_3】代わりに3ダメージ。(このターン中にこれを含めて3枚以上プレイしていたなら、【コンボ_3】の後の能力が働く)'
+  - id: sha256:75d9d7e6386316a25731923cd79f27e6ea3c7f0fab855853315baa31db97b2e1
+    raw: 【守護】
+  - id: sha256:78ef05a833c8e7863ab1037a9de8b5f0b3f8abe9aacee229388871e3a249997e
+    raw: '{起動}{コスト1}これを{アクト}：これを手札に戻す。'
+  - id: sha256:82ed8199a8b2dad3318d39fde143ae3f42a1604306d2abb089d09db47f1f5940
+    raw: 相手のフォロワーすべてに1ダメージ。
+  - id: sha256:ae0304126eace185a4ef28f4ee8bcdc9505fdc48d6458e0e98b383fb3018c12d
+    raw: '{進化}{コスト4}：これは進化する。'
+  - id: sha256:b1e9ae1183b39f9f494ba0ee87c40e81dc50165b97a7755d2405b487a86594f9
+    raw: 相手のフォロワー1体を選ぶ。それに3ダメージ。『フェアリー』1枚をEXエリアに置く。
+  - id: sha256:d017bd495f5e63c760c6f8b543a9269f4099704ca7a35c6b90b0504b8659230c
+    raw: '{ファンファーレ}{ラストワード}『フェアリー』1枚をEXエリアに置く。'
+  - id: sha256:d7a291bb798615961df500bec8fe9010bcefcadfbd675a51862d55097a195677
+    raw: '{ファンファーレ}『フェアリー』3枚を、場が上限になるまで出す。残りをEXエリアに置く。'
+  - id: sha256:d9239219c9387a7b3796b4820d77aecef7cc2312c095f712239cf7535b5a1bf7
+    raw: これがいる限り、自分の他の妖精・フォロワーすべては【突進】を持つ。
+  - id: sha256:dabb5d10a09c8fc91060820dddb3616eaa316fc92ab351d4aa6dd1d07d34a4b1
+    raw: '{ファンファーレ}【コンボ_3】これの{進化}コストを0にする。(このターン中にこれを含めて3枚以上プレイしていたなら、【コンボ_3】の後の能力が働く)'
+  - id: sha256:db2325d7684fb372b50c65b9734b97782ade3e7c54515a88ee19996175eb226a
+    raw: 【進化時】相手のフォロワー1体を選ぶ。それを手札に戻す。【コンボ_3】1枚引く。（手札に戻ったトークンはゲームから取り除く）
+    body: 【進化時】相手のフォロワー1体を選ぶ。それを手札に戻す。【コンボ_3】1枚引く。
+  - id: sha256:dd1c06138f9e21bae7a2ebc0b35c19a350c601b0687a2b308e8892c249706357
+    raw: '{ファンファーレ}自分の妖精・トークンすべては{攻撃力}+1/{体力}+1する。'
+  - id: sha256:df69bf9b4aa670733b45c99dbcb472a268e259410e9a6afc48dcc3b568fc6dc1
+    raw: 相手のフォロワー1体を選ぶ。それに2ダメージ。
+  - id: sha256:e95e2472a122daa7d2dfa3cf2f251272182640b3cc1d233b61a1b331993af95b
+    raw: '{ラストワード}『フェアリー』1枚をEXエリアに置く。'
+  - id: sha256:f5787190098ed9ee88695795f092537f726cd41b6bb9a1f76993499e19dd044d
+    raw: 【進化時】『フェアリー』1体を出す。
+  - id: sha256:fcce69518173fecb65f10b6eb03da63b413e19df0b0e9e46fc9b469a88364f28
+    raw: '{進化}{コスト1}：これは進化する。'
