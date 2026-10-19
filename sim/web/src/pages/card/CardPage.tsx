@@ -17,8 +17,9 @@ import {
 import { StatusStrip } from "../../app/StatusStrip"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
+import { CardTypeBadge } from "../../components/card/CardTypeBadge"
 import { CLASS_ICON } from "../../components/card/classIcons"
-import { EvolveBadge } from "../../components/card/EvolveBadge"
+import { DeckLocationBadges } from "../../components/card/DeckLocationBadges"
 import { RarityBadges } from "../../components/card/RarityBadges"
 import { StatCells } from "../../components/card/StatCells"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
@@ -45,6 +46,7 @@ import {
 } from "../../data"
 import { CardRouteError, printingPath } from "../../domain/cardRoute"
 import { classStyle } from "../../domain/classes"
+import { deckLocationBadges } from "../../domain/deckLocation"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { parseQuery } from "../../domain/query/codec"
 import type { Region } from "../../domain/search"
@@ -753,7 +755,10 @@ export function CardView({
                   ? null
                   : undefined
             const typeCode = typeof values?.["type_code"] === "string" ? values["type_code"] : null
-            const evolve = arrayValue(values?.["special_kinds"] ?? []).includes("evolve")
+            const locations = deckLocationBadges(
+              typeCode ?? "",
+              arrayValue(values?.["special_kinds"] ?? []),
+            )
             const traits = (values?.["traits"] ?? []) as string[]
             const cost = typeof values?.["cost"] === "number" ? values["cost"] : null
             const attack = typeof values?.["attack"] === "number" ? values["attack"] : null
@@ -768,13 +773,6 @@ export function CardView({
                   <div className="flex flex-col gap-1.5">
                     {ordinal > 0 && <Badge className="self-start">{t("cardPage.backFace")}</Badge>}
                     <div className="flex items-start gap-2">
-                      {classCode !== undefined && (
-                        <img
-                          src={CLASS_ICON[classStyle(classCode)]}
-                          alt=""
-                          className="mt-0.5 size-5 shrink-0"
-                        />
-                      )}
                       <div className="min-w-0 flex-1">
                         {typeof nameRevisionId === "string" ? (
                           <CardNameHeading
@@ -789,42 +787,36 @@ export function CardView({
                         )}
                       </div>
                     </div>
-                    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-13 text-text-2">
-                      <RarityBadges {...faceSummary} />
-                      <span className="font-mono tabular-nums">{faceSummary.cardNo}</span>
+                    <p
+                      data-card-classification=""
+                      className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13 text-text-2"
+                    >
                       {classCode !== undefined && (
-                        <span>
-                          {joiner}
-                          {classCode === null ? t("search.neutral") : label("class", classCode)}
-                        </span>
+                        <>
+                          <img
+                            src={CLASS_ICON[classStyle(classCode)]}
+                            alt=""
+                            className="size-5 shrink-0"
+                          />
+                          <span>
+                            {classCode === null ? t("search.neutral") : label("class", classCode)}
+                            {joiner}
+                          </span>
+                        </>
                       )}
+                      {typeCode !== "leader" && (
+                        <CardTypeBadge
+                          code={typeCode}
+                          label={typeCode ? label("type", typeCode) : undefined}
+                          fallback
+                        />
+                      )}
+                      <DeckLocationBadges locations={locations} />
+                      <RarityBadges {...faceSummary} />
+                      {traits.map((code) => (
+                        <span key={code}>{label("trait", code)}</span>
+                      ))}
                     </p>
-                    {(typeCode !== null || traits.length > 0 || evolve) && (
-                      <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13">
-                        {typeCode !== null && (
-                          <>
-                            <span className="text-text-3">{t("cardPage.cardType")}</span>
-                            <Badge>{label("type", typeCode)}</Badge>
-                          </>
-                        )}
-                        {evolve && <EvolveBadge />}
-                        {traits.length > 0 && (
-                          <>
-                            <span className={cn("text-text-3", typeCode !== null && "ml-1.5")}>
-                              {t("cardPage.trait")}
-                            </span>
-                            {traits.map((code) => (
-                              <span
-                                key={code}
-                                className="inline-flex h-6 items-center rounded-pill border border-border px-2 text-12 text-text-2"
-                              >
-                                {label("trait", code)}
-                              </span>
-                            ))}
-                          </>
-                        )}
-                      </p>
-                    )}
                     <StatCells className="mt-1" cost={cost} attack={attack} defense={defense} />
                     {!frame && ordinal === 0 && navigation && (
                       <div className="mt-2 flex gap-2">{navigation}</div>

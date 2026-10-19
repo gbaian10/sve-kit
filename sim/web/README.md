@@ -303,6 +303,12 @@ a two-line effect preview) or the list rows (52px, class-coloured edge);
 the result count sits beside the search bar's filter button; the control row holds the sort
 control and the view switch.
 
+Type and deck-location labels use hand-drawn SVGs; their sources and exclusions are
+in [the card-label README](src/assets/card-labels/README.md). The list places Deck
+and Type after Rarity; both columns can be hidden or reordered. Cards retain every
+matching badge in location-filter order (evolve, advance, leader, Token).
+The existing search counts and selections still use one primary location per printing.
+
 List views become usable after the selected region's whole catalog is verified and indexed in
 the Worker. `useListView` publishes names and numbers independently of image metadata;
 `useVisibleResultImages` requests metadata for slots reported visible by IntersectionObserver.

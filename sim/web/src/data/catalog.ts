@@ -1,4 +1,5 @@
 import { cardNoKey, cardNoLookupKey } from "../domain/cardNo"
+import { type BadgeLocation, deckLocationBadges } from "../domain/deckLocation"
 import type { NameSource } from "../domain/nameDisplay"
 import { NORMALIZER_VERSION, normalizeText } from "../domain/normalize"
 import type { QueryState } from "../domain/query/model"
@@ -45,7 +46,8 @@ export interface CardSummary {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
-  readonly evolve?: boolean
+  readonly typeCode?: string | null
+  readonly deckLocations?: readonly BadgeLocation[]
   readonly rarityCode?: string | null
   readonly premium?: boolean | null
   readonly rarity?: NameSource
@@ -255,7 +257,11 @@ function* catalogCardCursor(
           cost: nullableInteger(own?.["cost"]),
           attack: nullableInteger(own?.["attack"]),
           defense: nullableInteger(own?.["defense"]),
-          evolve: arrayValue(own?.["special_kinds"] ?? []).includes("evolve"),
+          typeCode: typeof own?.["type_code"] === "string" ? own["type_code"] : null,
+          deckLocations: deckLocationBadges(
+            typeof own?.["type_code"] === "string" ? own["type_code"] : "",
+            arrayValue(own?.["special_kinds"] ?? []),
+          ),
           wordingPending:
             pending !== undefined && (pending["display"] as Row)["basis"] !== "current",
         })

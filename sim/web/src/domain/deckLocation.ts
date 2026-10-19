@@ -38,3 +38,18 @@ export function orderLocationTokens(tokens: readonly string[]): string[] {
     return pa - pb || ca - cb
   })
 }
+
+export type BadgeLocation = "evolve" | "advance" | "leader" | "token"
+
+/** Badges retain every matching kind, in the filter row's display order. */
+export function deckLocationBadges(
+  type: string,
+  specialKinds: readonly unknown[],
+): BadgeLocation[] {
+  return LOCATION_ORDER.filter((location): location is BadgeLocation => {
+    if (location === "leader") return type === "leader"
+    if (location === "evolve" || location === "advance" || location === "token")
+      return specialKinds.includes(location)
+    return false
+  })
+}

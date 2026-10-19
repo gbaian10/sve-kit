@@ -50,6 +50,11 @@ it("offers only the printed types in order and leaves deck locations to their ow
       .getAllByRole("button")
       .map((button) => button.getAttribute("aria-label")),
   ).toEqual(["清除種類", "從者", "法術", "護符"])
+  for (const label of ["從者", "法術", "護符"]) {
+    const chip = within(row).getByRole("button", { name: label })
+    expect(chip.querySelector("img")).toHaveAttribute("alt", "")
+    expect(chip).toHaveAttribute("title", expect.stringContaining(label))
+  }
   // `token` in an older URL is a deck location, so it never reaches this row's selection.
   expect(within(row).getByRole("button", { name: "法術" })).toHaveAttribute("aria-pressed", "true")
   expect(screen.getByLabelText("url")).toHaveTextContent(/^type=spell$/u)

@@ -79,13 +79,15 @@ describe("catalog", () => {
       cost: 1,
       attack: 1,
       defense: 1,
+      typeCode: "follower",
+      deckLocations: [],
     })
     expect(catalog.summary("p:bp01-001")?.name.original.lang).toBe("ja")
     expect(catalog.summary("p:bp01-001-en")?.name.original.lang).toBe("en")
     expect(catalog.summary("p:nope")).toBeUndefined()
   })
 
-  it("derives evolve status from the shown face revision in each region", () => {
+  it("derives position badges from the shown face revision in each region", () => {
     const modified = {
       ...snapshot,
       bootstrap: snapshot.bootstrap.map((fragment) => ({
@@ -100,12 +102,14 @@ describe("catalog", () => {
       })),
     }
     const changed = createCatalog(modified)
-    expect(changed.summary("p:bp01-001")?.evolve).toBe(true)
-    expect(changed.summary("p:bp01-001-en")?.evolve).toBe(false)
+    expect(changed.summary("p:bp01-001")?.deckLocations).toEqual(["evolve"])
+    expect(changed.summary("p:bp01-001-en")?.deckLocations).toEqual([])
     const columns = new BootstrapColumns()
     columns.ingest(modified.bootstrap)
     columns.seal()
-    expect(new SearchIndex(columns, "jp").recent(["p:bp01-001"])[0]?.summary?.evolve).toBe(true)
+    expect(
+      new SearchIndex(columns, "jp").recent(["p:bp01-001"])[0]?.summary?.deckLocations,
+    ).toEqual(["evolve"])
   })
 
   it("passes through official rarity, Premium and optional face appearance to result summaries", () => {

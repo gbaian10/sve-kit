@@ -174,6 +174,7 @@ const zhTW = {
     subChip: "{{parent}}・{{child}}",
   },
   quickSet: { latest: "最新：{{code}}", latestAccessible: "最新卡包：{{name}}" },
+  cardType: { follower: "從者", spell: "法術", amulet: "護符" },
   typeFilter: { label: "種類" },
   locationFilter: {
     label: "牌組位置",
@@ -213,7 +214,8 @@ const zhTW = {
     columns: {
       class: "職業",
       rarity: "稀有度",
-      evolve: "進化",
+      location: "位置",
+      type: "種類",
       number: "卡號",
       name: "名稱",
       effect: "卡文",
@@ -378,8 +380,6 @@ const zhTW = {
     linkCopyFailed: "無法複製，請從網址列複製",
     set: "卡包 {{code}}",
     stats: { cost: "消費", attack: "攻擊力", defense: "生命值" },
-    cardType: "種類",
-    trait: "類型",
     separator: "・",
     backFace: "背面",
     related: {

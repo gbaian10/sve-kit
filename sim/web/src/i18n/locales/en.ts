@@ -182,6 +182,7 @@ export default {
     subChip: "{{parent}} · {{child}}",
   },
   quickSet: { latest: "Latest: {{code}}", latestAccessible: "Latest set: {{name}}" },
+  cardType: { follower: "Follower", spell: "Spell", amulet: "Amulet" },
   typeFilter: { label: "Card Type" },
   locationFilter: {
     label: "Deck location",
@@ -220,7 +221,8 @@ export default {
     reorderColumn: "Reorder {{column}} (↑/↓ to move)",
     columns: {
       class: "Class",
-      evolve: "Evolve",
+      location: "Deck",
+      type: "Type",
       rarity: "Rarity",
       number: "Number",
       name: "Name",
@@ -394,8 +396,6 @@ export default {
     linkCopyFailed: "Could not copy; use the address bar",
     set: "Set {{code}}",
     stats: { cost: "Cost", attack: "Attack", defense: "Defense" },
-    cardType: "Card Type",
-    trait: "Trait",
     separator: " · ",
     backFace: "Back face",
     related: {

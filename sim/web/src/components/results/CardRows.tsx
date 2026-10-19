@@ -23,8 +23,9 @@ import {
   prefsStore,
   usePrefs,
 } from "../../settings"
+import { CardTypeBadge } from "../card/CardTypeBadge"
 import { CLASS_ICON } from "../card/classIcons"
-import { EvolveBadge } from "../card/EvolveBadge"
+import { DeckLocationBadges } from "../card/DeckLocationBadges"
 import { InlineText } from "../card/InlineText"
 import { RarityBadges } from "../card/RarityBadges"
 import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
@@ -253,10 +254,11 @@ const TableRow = memo(function TableRow({
                 </>
               )}
             </span>
-            <span className="inline-flex shrink-0 items-center gap-2 text-11 text-text-3 tabular-nums">
+            <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-11 text-text-3 tabular-nums">
               {cell.summary.cardNo}
               <RarityBadges {...cell.summary} />
-              {cell.summary.evolve && <EvolveBadge />}
+              <DeckLocationBadges locations={cell.summary.deckLocations} />
+              <CardTypeBadge code={cell.summary.typeCode} />
             </span>
           </span>
           <StatLine
@@ -415,10 +417,16 @@ const ListRow = memo(function ListRow({
                 <RarityBadges {...cell.summary} />
               </td>
             )
-          case "evolve":
+          case "location":
             return (
-              <td key={column} data-list-evolve="">
-                {cell.summary.evolve && <EvolveBadge />}
+              <td key={column} data-list-location="">
+                <DeckLocationBadges locations={cell.summary.deckLocations} />
+              </td>
+            )
+          case "type":
+            return (
+              <td key={column} data-list-type="">
+                <CardTypeBadge code={cell.summary.typeCode} />
               </td>
             )
           case "name":
@@ -532,7 +540,8 @@ export function CardList({
   const names = {
     number: labels.t("results.columns.number"),
     rarity: labels.t("results.columns.rarity"),
-    evolve: labels.t("results.columns.evolve"),
+    location: labels.t("results.columns.location"),
+    type: labels.t("results.columns.type"),
     name: labels.t("results.columns.name"),
     class: labels.t("results.columns.class"),
     cost: labels.stats.cost,
@@ -596,7 +605,8 @@ export function CardList({
             {columns.map((column) => {
               const key =
                 column === "rarity" ||
-                column === "evolve" ||
+                column === "location" ||
+                column === "type" ||
                 column === "effect" ||
                 column === "class"
                   ? null

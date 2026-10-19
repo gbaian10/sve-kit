@@ -449,15 +449,13 @@ it("shows the shared type line and stats without a display revision", async () =
     initialEntries: ["/cards/BP-SYNTHETIC"],
     language: "zh-TW",
   })
-  // Rarity · number · class on one line; card type as a tag and traits as chips on the next.
-  const meta = screen.getAllByRole("img", { name: "官方稀有度：SR" })[0]?.closest("p")
-  expect(meta).toHaveTextContent("BP-SYNTHETIC・royal")
+  const meta = screen
+    .getAllByRole("img", { name: "官方稀有度：SR" })[0]
+    ?.closest("p") as HTMLElement
+  expect(meta).toHaveTextContent("royal・synthetic")
   expect(meta).not.toHaveTextContent("follower")
+  expect(within(meta).getByRole("img", { name: "follower" })).toBeVisible()
   expect(document.querySelectorAll("[data-rarity-badges] img")).toHaveLength(2)
-  const typeLabel = screen.getAllByText("種類")[0]
-  expect(typeLabel?.nextElementSibling).toHaveTextContent("follower")
-  const traitLabel = screen.getAllByText("類型")[0]
-  expect(traitLabel?.nextElementSibling).toHaveTextContent("synthetic")
   for (const name of ["消費 3", "攻擊力 4", "生命值 5"]) {
     expect(screen.getAllByRole("listitem", { name })[0]).toBeVisible()
   }
@@ -1158,7 +1156,7 @@ it("shows EVOLVE after the type tag using agreed face values", async () => {
   await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
     initialEntries: ["/cards/BP-SYNTHETIC"],
   })
-  const badges = screen.getAllByRole("img", { name: "EVOLVE" })
+  const badges = screen.getAllByRole("img", { name: "進化" })
   expect(badges).toHaveLength(2)
-  expect(badges[0]?.previousElementSibling).toHaveTextContent("follower")
+  expect(badges[0]?.parentElement?.previousElementSibling).toHaveAttribute("alt", "follower")
 })

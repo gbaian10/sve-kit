@@ -54,7 +54,8 @@ html:has([data-card-list]) {
 
   --list-size-number: var(--list-user-number, 132px);
   --list-size-rarity: max(var(--list-user-rarity, 0px), var(--rarity-column-min-width));
-  --list-size-evolve: max(var(--list-user-evolve, 0px), 64px);
+  --list-size-type: max(var(--list-user-type, 0px), 64px);
+  --list-size-location: max(var(--list-user-location, 0px), 72px);
   --list-size-name: var(--list-user-name, 192px);
   --list-size-class: max(var(--list-user-class, 0px), var(--class-column-min-width));
   --list-size-cost: var(--list-user-cost, 44px);
@@ -71,8 +72,12 @@ html:has([data-card-list]) {
   width: var(--list-size-rarity);
 }
 
-:where([data-list-col="evolve"]) {
-  width: var(--list-size-evolve);
+:where([data-list-col="type"]) {
+  width: var(--list-size-type);
+}
+
+:where([data-list-col="location"]) {
+  width: var(--list-size-location);
 }
 
 :where([data-list-col="name"]) {
@@ -229,13 +234,17 @@ html:has([data-card-list]) {
   white-space: nowrap;
 }
 
-:where([data-card-list] td:not([data-list-rarity])) {
+:where([data-card-list] td:not([data-list-rarity], [data-list-location], [data-list-type])) {
   /* Keep long card content from enlarging the intrinsic columns. */
   max-width: 0;
 }
 
 :where([data-card-list] [data-list-rarity]),
-:where([data-list-heading="rarity"]) {
+:where([data-list-heading="rarity"]),
+:where([data-card-list] [data-list-location]),
+:where([data-list-heading="location"]),
+:where([data-card-list] [data-list-type]),
+:where([data-list-heading="type"]) {
   padding-inline: 4px;
 }
 
@@ -331,7 +340,8 @@ html:has([data-card-list]) {
   :where([data-card-list]) {
     --list-size-number: var(--list-mobile-user-number, 84px);
     --list-size-rarity: max(var(--list-mobile-user-rarity, 0px), var(--rarity-column-min-width));
-    --list-size-evolve: max(var(--list-mobile-user-evolve, 0px), 64px);
+    --list-size-type: max(var(--list-mobile-user-type, 0px), 64px);
+    --list-size-location: max(var(--list-mobile-user-location, 0px), 72px);
     --list-size-name: var(--list-mobile-user-name, 124px);
     --list-size-class: max(var(--list-mobile-user-class, 0px), var(--class-column-min-width));
     --list-size-cost: var(--list-mobile-user-cost, 44px);

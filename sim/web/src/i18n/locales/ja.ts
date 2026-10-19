@@ -186,6 +186,7 @@ export default {
     subChip: "{{parent}}・{{child}}",
   },
   quickSet: { latest: "最新：{{code}}", latestAccessible: "最新カードセット：{{name}}" },
+  cardType: { follower: "フォロワー", spell: "スペル", amulet: "アミュレット" },
   typeFilter: { label: "カード種類" },
   locationFilter: {
     label: "デッキ区分",
@@ -224,7 +225,8 @@ export default {
     reorderColumn: "「{{column}}」の順序を変更（↑／↓ で移動）",
     columns: {
       class: "クラス",
-      evolve: "進化",
+      location: "区分",
+      type: "種類",
       rarity: "レアリティ",
       number: "番号",
       name: "名前",
@@ -391,8 +393,6 @@ export default {
     linkCopyFailed: "コピーできません。アドレスバーからコピーしてください",
     set: "パック {{code}}",
     stats: { cost: "コスト", attack: "攻撃力", defense: "体力" },
-    cardType: "カード種類",
-    trait: "タイプ",
     separator: "・",
     backFace: "裏面",
     related: {

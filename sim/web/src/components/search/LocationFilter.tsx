@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { SearchOptions } from "../../data"
 import { leaderFrameTokens, LOCATION_ORDER, tokenKindTokens } from "../../domain/deckLocation"
 import type { TextLang } from "../../domain/search"
+import { DeckLocationBadges } from "../card/DeckLocationBadges"
 import { locationLabel, vocabularyOptionLabel } from "./facet-labels"
 import { type FacetChip, FacetChips } from "./FacetChips"
 
@@ -31,11 +32,16 @@ export function LocationFilter({
     // Rows the edition has no printings for stay out, as the type row does; "main" always shows.
     if (code !== "main" && !(counts[code] ?? 0) && options) return []
     const label = locationLabel(t, code)
+    const content =
+      code === "evolve" || code === "advance" || code === "leader" || code === "token" ? (
+        <DeckLocationBadges locations={[code]} decorative />
+      ) : undefined
     if (code === "token")
       return [
         {
           code,
           label,
+          content,
           children: tokenKindTokens(counts).map((token) => ({
             code: token,
             label: typeLabel(token.slice("token:".length)),
@@ -47,13 +53,14 @@ export function LocationFilter({
         {
           code,
           label,
+          content,
           children: leaderFrameTokens(counts).map((token) => ({
             code: token,
             label: locationLabel(t, token),
           })),
         },
       ]
-    return [{ code, label }]
+    return [{ code, label, content }]
   })
   return (
     <FacetChips
