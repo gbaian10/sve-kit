@@ -124,45 +124,49 @@ def test_review_drafts_are_bound_to_the_classifications_they_explain(
             assert difference["rationale"]
 
 
-def test_known_invalid_alignment_keeps_both_source_locations_visible() -> None:
-    for path in (ROOT / "authored/rules/effect-reviews").glob("*.yaml"):
-        if path.stem != "BP07":
-            assert "positive_alignment_exceptions" not in read_yaml(path), path.stem
+def test_bp07_p06_uses_the_corrected_main_text_without_duplicate_coverage() -> None:
     draft = read_yaml(ROOT / "authored/rules/effect-reviews/BP07.yaml")
-    baseline = OBJECT.validate_json((BASELINE / "BP07.json").read_bytes())
-    exceptions = array(draft["positive_alignment_exceptions"])
-    assert exceptions
-    for value in exceptions:
-        row = object_value(value)
-        number = str(row["card_no"])
-        assert row["status"] == "known_invalid_alignment"
-        assert row["source_issue"] == "uncorrected_duplicate"
-        card = object_value(baseline[number])
-        source = object_value(row["position"])
-        target = object_value(row["proposed_position"])
-        positive = [
-            object_value(p)
-            for p in array(card["positions"])
-            if all(object_value(p)[key] == value for key, value in source.items())
+    assert "positive_alignment_exceptions" not in draft
+    assert all(
+        object_value(row)["card_no"] != "BP07-P06"
+        for row in array(draft["reverse_positions"])
+    )
+    card = object_value(
+        OBJECT.validate_json((BASELINE / "BP07.json").read_bytes())["BP07-P06"]
+    )
+    assert card["unclassified_positions"] == []
+    positions = [object_value(row) for row in array(card["positions"])]
+    damage = next(row for row in positions if row["ability_indices"] == [2])
+    assert [damage[k] for k in ("face", "field", "section", "line")] == [
+        0,
+        "effect",
+        None,
+        3,
+    ]
+    assert all(row["field"] == "effect" for row in positions)
+    records = array(
+        read_yaml(ROOT / "authored/registry/source-correction/active/BP07/001.yaml")[
+            "records"
         ]
-        assert len(positive) == 1, number
-        assert row["ability"] in array(positive[0]["ability_indices"])
-        reverse = [
-            object_value(p)
-            for p in array(draft["reverse_positions"])
-            if object_value(p)["card_no"] == number
-            and all(object_value(p)[key] == value for key, value in target.items())
-        ]
-        assert len(reverse) == 1, number
-        assert object_value(reverse[0]["covered_by"])["ability"] == row["ability"]
-        corrections = array(
-            read_yaml(
-                ROOT / "authored/registry/source-correction/active/BP07/001.yaml"
-            )["records"]
-        )
-        assert row["source_correction"] in {
-            str(object_value(object_value(c)["data"])["id"]) for c in corrections
-        }
+    )
+    correction = next(
+        object_value(object_value(row)["data"])
+        for row in records
+        if object_value(object_value(row)["data"])["id"]
+        == "x:d529a2a90bd757f2be41c721eb0eaf4b"
+    )
+    assert object_value(correction["sections"])["corrected_value"] == []
+    text = correction["corrected_value"]
+    assert isinstance(text, str)
+    lines = text.splitlines(keepends=True)
+    assert len(lines) == 3
+    start = sum(map(len, lines[:2]))
+    for value in array(damage["fragments"]):
+        fragment = object_value(value)
+        assert fragment["source_sha256"] == hashlib.sha256(text.encode()).hexdigest()
+        span = object_value(fragment["span"])
+        assert span["role"] == "body"
+        assert span["segments"] == [{"start": start, "end": len(text)}]
 
 
 def test_reverse_positions_preserve_concrete_cross_line_coverage() -> None:

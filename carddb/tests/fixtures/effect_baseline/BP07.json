@@ -262,7 +262,7 @@
     "unclassified_positions": []
   },
   "BP07-P06": {
-    "ast_sha256": "3e852981793b73afd4c69f89d15a5ca927fa727f709ca9a0482f65045aa0e960",
+    "ast_sha256": "6c2b8a33ae6c07119a8b05b3f8282608c05b255dd869cf272f69d3cab820d6dd",
     "positions": [
       {
         "face": 0,
@@ -320,25 +320,25 @@
       },
       {
         "face": 0,
-        "field": "section",
-        "section": 0,
-        "line": 2,
+        "field": "effect",
+        "section": null,
+        "line": 3,
         "ability_indices": [
           2
         ],
         "fragments": [
           {
-            "id": "bind:2805b89cd4581bc6e637d96848aa2c5b2a7f4f63d0c9b07123d5edffb39a58df",
-            "use_id": "use:73d74893e3e10a9031b8219cd434e8a8861fca4f578df6530837a326bedc8666",
-            "frame_id": "frame:e58a4f3cf6f7f2f1f5f7e561791e78712fcdd9e1a34c55b54c075c3a6e5e3a68",
-            "source_sha256": "24772ae54ea8dced8c0a6b4bdaeb4b61624c7d2c74a61839763dcfe88fbbdad0",
+            "id": "bind:3ed70d0961675a48b368adcd02c518e11bb45c1aa39ab13479c2910dd7768de4",
+            "use_id": "use:c8a93188c290bb5f1fcbd9ea23bce66029afbf26d7cd527c95d30da18644927a",
+            "frame_id": "frame:329671b7b82b6e62fb79e7237c7e9ad6ba359441c3c8b07e131ad31742b45b5a",
+            "source_sha256": "e7f747ad4e7c20fa81806b25bd62cf99ff1ba44e6c83ffd8f619d7c09e599c33",
             "span": {
               "anchor": null,
               "role": "body",
               "segments": [
                 {
-                  "end": 105,
-                  "start": 80
+                  "end": 107,
+                  "start": 82
                 }
               ]
             }
@@ -346,27 +346,7 @@
         ]
       }
     ],
-    "unclassified_positions": [
-      {
-        "face": 0,
-        "field": "section",
-        "section": 0,
-        "line": 1,
-        "frame_ids": [
-          "frame:0786e3f6dd5d4055a09a7f2077558c29492841266530f460b6b203f41942266c",
-          "frame:2aca42653f49e9eb39e6681453cb66d5fd7f522f944080dbfd32c9708b61993f"
-        ]
-      },
-      {
-        "face": 0,
-        "field": "effect",
-        "section": null,
-        "line": 3,
-        "frame_ids": [
-          "frame:329671b7b82b6e62fb79e7237c7e9ad6ba359441c3c8b07e131ad31742b45b5a"
-        ]
-      }
-    ]
+    "unclassified_positions": []
   },
   "BP07-P16": {
     "ast_sha256": "410dc93c6819399a3a214ca6517caa19d6d563916d30096964c30ef022a62b0e",
