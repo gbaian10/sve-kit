@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.profiles import MEDIA, READER_VERSION, profile
 from sve_carddb.contracts.snapshot import (
     decode,
     definition,
@@ -574,7 +574,7 @@ def validate_manifest(manifest_value: JsonValue) -> None:
     validate("Manifest", manifest, string(manifest["format_version"]))
     selected = profile(string(manifest["format_version"]))
     if tuple(map(int, string(manifest["min_reader_version"]).split("."))) > tuple(
-        map(int, selected.version.split("."))
+        map(int, READER_VERSION.split("."))
     ) or set(map(string, array(manifest["required_capabilities"]))) != set(
         selected.capabilities
     ):
@@ -631,7 +631,7 @@ def compatible(entry: Row) -> bool:
     except ValueError:
         return False
     minimum = tuple(map(int, string(entry["min_reader_version"]).split(".")))
-    return minimum <= tuple(map(int, selected.version.split("."))) and set(
+    return minimum <= tuple(map(int, READER_VERSION.split("."))) and set(
         map(string, array(entry["required_capabilities"]))
     ) <= set(selected.capabilities)
 

@@ -5756,6 +5756,44 @@
         }
       ]
     },
+    "card_mentioned_by": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "$ref": "#/$defs/Region"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3,
+      "x-columns": [
+        "card_id",
+        "region",
+        "from_card_id"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "Region"
+        },
+        {
+          "scalar": "ID"
+        }
+      ],
+      "x-primary-key": [
+        "card_id",
+        "region",
+        "from_card_id"
+      ]
+    },
     "digital_card": {
       "type": "array",
       "prefixItems": [
@@ -11977,6 +12015,39 @@
         }
       ]
     },
+    "card_mentioned_by_detail": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "$ref": "#/$defs/Region"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3,
+      "x-columns": [
+        "card_id",
+        "region",
+        "from_card_id"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "Region"
+        },
+        {
+          "scalar": "ID"
+        }
+      ]
+    },
     "card_related_detail_fragment": {
       "type": "array",
       "prefixItems": [
@@ -11996,6 +12067,32 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/card_related_detail"
+          }
+        }
+      ],
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
+    },
+    "card_mentioned_by_detail_fragment": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
+        },
+        {
+          "const": "detail"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/card_mentioned_by_detail"
           }
         }
       ],
@@ -16266,6 +16363,16 @@
                   }
                 ]
               }
+            },
+            "card_mentioned_by": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/card_mentioned_by_detail_fragment"
+                  }
+                ]
+              }
             }
           },
           "additionalProperties": false
@@ -16474,6 +16581,9 @@
           "bootstrap": "field_annotation_bootstrap",
           "detail": "field_annotation_detail",
           "history": "field_annotation_history"
+        },
+        "card_mentioned_by": {
+          "detail": "card_mentioned_by_detail"
         }
       },
       "x-tables": [
@@ -16501,6 +16611,7 @@
         "rules_profile",
         "restriction",
         "card_related",
+        "card_mentioned_by",
         "digital_card",
         "digital_art",
         "digital_link",
@@ -16630,6 +16741,7 @@
                   "rules_profile",
                   "restriction",
                   "card_related",
+                  "card_mentioned_by",
                   "digital_card",
                   "digital_art",
                   "digital_link",
@@ -17075,7 +17187,7 @@
           "uniqueItems": true
         },
         "min_reader_version": {
-          "const": "4.0.0"
+          "const": "4.0.1"
         },
         "required_capabilities": {
           "const": [
@@ -19584,6 +19696,55 @@
                   "reason"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "const": "card_mentioned_by"
+                  },
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "region": {
+                        "$ref": "#/$defs/Region"
+                      },
+                      "from_card_id": {
+                        "$ref": "#/$defs/ID"
+                      }
+                    },
+                    "required": [
+                      "card_id",
+                      "region",
+                      "from_card_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "changed_fields": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "card_id",
+                        "region",
+                        "from_card_id"
+                      ]
+                    },
+                    "maxItems": 0
+                  },
+                  "reason": {
+                    "$ref": "#/$defs/Text"
+                  }
+                },
+                "required": [
+                  "entity",
+                  "key",
+                  "changed_fields",
+                  "reason"
+                ],
+                "additionalProperties": false
               }
             ]
           }
@@ -21806,6 +21967,56 @@
                   "reason"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "const": "card_mentioned_by"
+                  },
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "region": {
+                        "$ref": "#/$defs/Region"
+                      },
+                      "from_card_id": {
+                        "$ref": "#/$defs/ID"
+                      }
+                    },
+                    "required": [
+                      "card_id",
+                      "region",
+                      "from_card_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "changed_fields": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "card_id",
+                        "region",
+                        "from_card_id"
+                      ]
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                  },
+                  "reason": {
+                    "$ref": "#/$defs/Text"
+                  }
+                },
+                "required": [
+                  "entity",
+                  "key",
+                  "changed_fields",
+                  "reason"
+                ],
+                "additionalProperties": false
               }
             ]
           }
@@ -23967,6 +24178,55 @@
                         "field",
                         "ordinal",
                         "annotation_set_id"
+                      ]
+                    },
+                    "maxItems": 0
+                  },
+                  "reason": {
+                    "$ref": "#/$defs/Text"
+                  }
+                },
+                "required": [
+                  "entity",
+                  "key",
+                  "changed_fields",
+                  "reason"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "const": "card_mentioned_by"
+                  },
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "card_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "region": {
+                        "$ref": "#/$defs/Region"
+                      },
+                      "from_card_id": {
+                        "$ref": "#/$defs/ID"
+                      }
+                    },
+                    "required": [
+                      "card_id",
+                      "region",
+                      "from_card_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "changed_fields": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "card_id",
+                        "region",
+                        "from_card_id"
                       ]
                     },
                     "maxItems": 0

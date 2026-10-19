@@ -8,7 +8,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -24,13 +24,13 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -736,7 +736,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -794,7 +794,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -810,12 +810,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       }
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -1521,7 +1521,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -1589,7 +1589,7 @@
         "data_version": "20261005T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -1611,7 +1611,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -1627,12 +1627,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       }
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -2338,7 +2338,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -2373,7 +2373,7 @@
         "data_version": "20261005T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -2428,7 +2428,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -2444,12 +2444,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       }
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -3155,7 +3155,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -3223,7 +3223,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -3240,12 +3240,12 @@
           "validation_policy_id": null
         },
         "manifest_path": "snapshots/manifests/0000000000000000000000000000000000000000000000000000000000000000.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -3951,7 +3951,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64

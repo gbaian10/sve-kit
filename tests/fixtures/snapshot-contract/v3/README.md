@@ -5,7 +5,7 @@ text or image binaries. Expected objects are independent of the exporter and
 reader. `index.json` lists the shared Python and TypeScript inputs. Core schema,
 reader, canonical and bucket vectors use the current 4.0 shape.
 
-The profile is format `4.0.0`, 64 buckets, with all eight required capabilities.
+The profile is format `4.0.0`, minimum reader `4.0.1`, 64 buckets, with all eight required capabilities.
 JSON files are indented for review; manifest hashes and sizes describe
 canonical-json-v1 bytes. Load each payload through its manifest key and path.
 The golden must rejoin from individual files to `expected-logical.json`.
@@ -122,3 +122,10 @@ the selected translation's origin or authority while retaining its low-confidenc
 flag and valid owner pointers. Reseal the changed translation file and all exact
 references before invoking the readers, so failures test eligibility rather than
 stale bytes or hashes.
+
+`mentioned-by-native.json` is a synthetic producer snapshot whose current effect
+names another card. Web tests locate the target card's existing engine band and
+read its `card_mentioned_by` row from the shared file already used by
+`card_related`, without another request or annotation details. Independent
+Python projection assertions cover self references, duplicates, withheld targets,
+sections, historical versions and selected Japanese source annotations for English.

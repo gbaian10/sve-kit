@@ -64,6 +64,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `rules_profile` | `id, region, format_code, name_unit_id, revisions:[{id,effective_from,effective_until?,cr_version_id?,default_copy_limit?,construction_rules_ref?}]` | 各區各賽制/日期規則 |
 | `restriction` | `id, profile_id, announced_on?, effective_from, effective_until?, kind, state, max_copies?, max_selected_groups?, members:[{rules_name_id,choice_option,deck_scope}]` | 禁止、限張、二擇一/多選項；不以 `card_id` 漏限 |
 | `card_related` | `id, from_card_id, to_card_id, relation, suggested_count?, applicable_regions?:[Region]` | 進化/相關卡與牌組追加區建議；`same_rules_reskin` 為換皮卡指向原卡的「規則相同」提示：`applicable_regions` 必填（非空、去重、排序），由建置逐地區驗證結果填入，reader 只在目前卡面地區包含於其中時顯示，結果為空則不投影；其他 relation 為 null。不合併構築張數，reader 不得據此推導 DSL 共用或跨區等義 |
+| `card_mentioned_by` | `card_id, region, from_card_id` | 卡文提到此卡的反查；`card_id` 是被提到者，`from_card_id` 是提到者。複合 `PK(card_id,region,from_card_id)`，依序排序；同地區同一對卡只出一列，不含自我提及。只採現行版本效果與段落的卡名標註，不反轉官方相關卡 |
 | `digital_card` | `id, game, official_id` | 官方數位頁連結，僅 SVE 所需閉包 |
 | `digital_art` | `id, digital_card_id, phase, style_key` | 數位進化面/styles/異畫對照 |
 | `digital_link` | `id, card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level` | 區分 `same_card/character/name_only` |

@@ -317,7 +317,7 @@ Brotli 2 MiB 分界及按需容量依 [size-budget.md](size-budget.md)。
 
 card.regions、face.current／wording 按區拆列，合回時依 region 鍵排序。其餘固定欄位須完整相等；同區衝突或固定欄不相等拒收，不作任意 JSON merge 或最後載入者覆蓋。沒有該區公開 printing 的卡，其區域列放背景 region-state，完整 reader 還原 unknown／pending；所選區基本目錄不為此載另一區正文。printing_product 的適用區域取 parent printing.region。
 
-基本目錄包含 card、face、current／暫顯 revision 基本欄、default printing 基本列、非 default 卡號定位、product_family、vocabulary、keyword 與名稱／翻譯／annotation 必要字典閉包。card_related、face_rules_name、card_engine_support、rules_name 屬 engine，商品與其他印刷屬背景用途。
+基本目錄包含 card、face、current／暫顯 revision 基本欄、default printing 基本列、非 default 卡號定位、product_family、vocabulary、keyword 與名稱／翻譯／annotation 必要字典閉包。card_related、card_mentioned_by、face_rules_name、card_engine_support、rules_name 屬 engine，商品與其他印刷屬背景用途。
 
 **基本目錄完成**：manifest、config、所選區所有 purpose=catalog 且 region∈{所選區,null} 的檔及其強依賴全部取得、驗證與 join 完成，才開放搜尋。印刷背景尚未完成時卡號定位、卡包篩選已可用；印刷 facet 依用途完成狀態處理。切版本不用舊版列補新版本；切區合回沿上述有限規則。
 
@@ -342,7 +342,7 @@ card、face、face_revision、support、卡片關係跟 card.home_set_id；print
 
 ### 5.1 固定配置
 
-4.0 固定內部 N=64、min_reader_version=4.0.0，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶，BP01／CP04 固定兩帶，global 八帶。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
+4.0 固定內部 N=64、min_reader_version=4.0.1，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶，BP01／CP04 固定兩帶，global 八帶。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
 
 catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 `:band-<n>`。File key 為 `<purpose>/<region-or-shared>/<family-or-shared>/<band>`，家族 ID 按 UTF-8 percent encode（只保留 unreserved），catalog band 固定 0。config、programs 各一檔，key 同用途，region=null、segment=shared。
 
@@ -364,7 +364,7 @@ catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 
 
 ### 5.4 卡包 media 與 ID 圖片
 
-format_version 與 min_reader_version 均為 `4.0.0`，完整八個 required_capabilities 依
+format_version 為 `4.0.0`，min_reader_version 為 `4.0.1`，完整八個 required_capabilities 依
 [公開 annotation §1](public-annotation.md#1-版本與驗證邊界)，空圖片、same_name 或 annotation 也不能省略。
 translation 在 bootstrap／detail 均為完整八欄；FieldTranslation 的七格欄序與 basis 依 §8。
 canonical、owner、分片鍵及裝檔規則沿前述配置，producer、Python reader、共用 golden 與 Web 解碼欄序須同步。
@@ -444,7 +444,7 @@ support_changes 比較套用 override/block 後的有效狀態；同狀態但 re
 ## 8. annotation 與來源閉包
 
 [公開 annotation 契約](public-annotation.md)及其[元件 Schema](public-annotation.schema.json)定義現行欄位：
-format_version／min_reader_version=4.0.0，必要能力包含 jp-source-translation-v1 與 public-annotation-v1，
+format_version=4.0.0、min_reader_version=4.0.1，必要能力包含 jp-source-translation-v1 與 public-annotation-v1，
 完整集合依該契約 §1，所有封套及 index entry 一致；index_format=2 不變。
 canonical、N=64、band widths、media、base／row_index 與同名規則依前述配置；整體容量仍須重新量測。
 
@@ -473,3 +473,18 @@ translation.annotation_kind=none 且 annotation_set_id=null 才表示空集合�
 `WordingView` 的欄序為 `region,state,display,candidates,undated_printing_ids,common_name,classification,method,reason,basis_printing_id,basis_released_on`。
 `common_name` 為 nullable `CommonName`：`name_unit_id,translations`；其 `CommonNameTranslation` 欄序是 `field,ordinal,target_lang,translation_id,basis`，field 固定 name、ordinal 固定 null。
 推導及退回依 [快照格式 §2.3](snapshot-format.md#23-卡文版本與依據版本)，名稱與可用名稱翻譯的必要字典隨 face 進 catalog。非 null 候選的輕量名稱與數值納入 display_ref，正文走 detail；display_ref 外的 revision 走 history，catalog 不依賴 history。
+
+### 卡名反查的 engine 配置與准入
+
+`card_mentioned_by` 的 detail tuple 為 `[card_id,region,from_card_id]`，base=null，無巢狀 descriptor。
+永久 owner 為被提到者 `card_id` 的 `home_set`；沿用 engine 的既有文字 band 寬度，以 `[card_id]` 分配，
+File.region 固定為 null，與 `card_related`、`card_engine_support` 共用既有 engine band 檔；列的 region 仍是卡面地區，
+不由 File.region 推得。reader 在這張表允許同一共享 fragment 同時含 JP／EN 列，並依列 region 選用；
+其他區域表仍須與 File.region 相符。每張 card 已有一列 card_engine_support，故被提到者的共享 engine band 已存在。
+引用的提到者可以屬於其他卡包；無須下載提到者的 detail 或 annotation 字典。
+兩端仍使用既有永久 card ID，不分配短號或引用會隨其他檔案重排的列索引。
+空反查不產生 fragment。此變更不新增 purpose、partition、bucket 數或 band 切法。
+
+4.0.0 尚未凍結，本次同步替換固定 Schema、producer、reader 與合成樣本，不新增 capability 或雙格式 parser。
+最低 reader 契約版本提升為 4.0.1；4.0.0 reader 在版本索引階段即略過新快照，可選相容的 previous，
+沒有相容版時回報不支援，不進入新表的解碼。Web 與 Python reader 均明示支援至 4.0.1。

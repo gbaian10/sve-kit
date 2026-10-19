@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.domains.translations.four_layer_storage import read_annotation
 from sve_carddb.export.name_annotations import assign_name_concepts
+from sve_carddb.export.project.mentioned_by import mentioned_by
 from sve_carddb.export.project.source import Record, Source, json_list
 from sve_carddb.export.project.translations import pointer
 from sve_carddb.export.text_owners import TextOwners
@@ -32,11 +33,13 @@ def annotations(
         for row in source.rows("translation_use_annotation", "use_id,annotation_set_id")
     }
     fields: dict[bytes, Record] = {}
+    originals: list[Record] = []
     for use in source.rows("translation_use", USE_FIELDS):
         identifier = use_annotations.get(string(use["id"]))
         if identifier is None or identifier not in sets:
             continue
         location = pointer(use)
+        originals.append(location | {"annotation_set_id": identifier})
         if canonical(location["owner"]) not in owners.by_owner:
             continue
         if owners.pointer(location) != sets[identifier]["text_unit_id"]:
@@ -53,6 +56,9 @@ def annotations(
 
     assign_name_concepts(view)
     _concepts(source, view, decisions)
+    view["card_mentioned_by"] = mentioned_by(
+        view, originals, sets, decisions.card_name_targets
+    )
     validate_completeness(view, tuple(fields.values()), translated)
 
 

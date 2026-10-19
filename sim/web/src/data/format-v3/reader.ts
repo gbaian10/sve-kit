@@ -15,7 +15,7 @@ import { primaryKey, rowType } from "./schema"
 
 const FORMAT = "4.0.0"
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "4.0.0"
+const READER_CONTRACT_VERSION = "4.0.1"
 const CAPABILITIES: readonly string[] = [
   "column-partition-v1",
   "fragment-container-v1",
@@ -179,8 +179,14 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "4.
           purpose: file["purpose"] ?? null,
         }
         counts.push([table, owner[0] ?? null, owner[1] ?? null, partition, segment, rows.length])
+        if (
+          table === "card_mentioned_by" &&
+          (file["purpose"] !== "engine" || file["region"] !== null)
+        )
+          fail("shape", "card-name back references require shared engine")
         for (const row of rows) {
           if (
+            table !== "card_mentioned_by" &&
             row["region"] !== undefined &&
             row["region"] !== file["region"] &&
             file["purpose"] !== "images"

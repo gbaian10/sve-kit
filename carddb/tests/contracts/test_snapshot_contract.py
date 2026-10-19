@@ -44,7 +44,7 @@ class _DictSubclass(dict[str, JsonValue]):
 def test_schema_is_valid_and_covers_every_collection() -> None:
     Draft202012Validator.check_schema(schema())
     valid = [object_value(case) for case in array(fixture("schema-valid.json"))]
-    assert len(tables()) == 46
+    assert len(tables()) == 47
     assert set(tables()) <= {string(case["schema"]) for case in valid}
     for case in valid:
         validate(string(case["schema"]), case["value"])

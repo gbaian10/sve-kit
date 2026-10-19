@@ -82,12 +82,13 @@ def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
 ) -> None:
     result = projected(db)
     assert set(result.tables) == set(tables())
-    assert len(result.tables) == 46
+    assert len(result.tables) == 47
     assert all(
         rows
         for table, rows in result.tables.items()
         if table
         not in {
+            "card_mentioned_by",
             "annotation_set",
             "annotation_concept",
             "field_annotation",

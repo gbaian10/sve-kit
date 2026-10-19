@@ -46,6 +46,7 @@ PRINT = frozenset(
 ENGINE = frozenset(
     {
         "card_related",
+        "card_mentioned_by",
         "face_rules_name",
         "card_engine_support",
         "rules_name",
@@ -292,7 +293,7 @@ class FamilyLayout:
         )
         if table == "printing" and row["id"] in self.defaults:
             purpose = "catalog"
-        if purpose == "images":
+        if purpose == "images" or table == "card_mentioned_by":
             return purpose, ""
         if table in {"printing_product", "printing_image"}:
             return purpose, string(
