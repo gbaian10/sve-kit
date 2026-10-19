@@ -16,7 +16,7 @@
   `1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53`。
   這是輸入指紋，不要求 clone 者取得原建置 DB 才能執行基線測試。
 - 正向位置連接只比較 JP printing、face、欄位、section 與行號，沒有證明歷史 v0
-  卡文與目前來源完全相同。A1 的文字版本驗證與本基線的位置證據不得互相取代。
+  卡文與目前來源完全相同。[分類文字版本驗證](../schema/domains/effect-classifications.md#分類文字版本)與本基線的位置證據不得互相取代。
 
 官方文字的權利仍依 [LICENSING.md](../../LICENSING.md)；此基線不含圖片或語音。
 
@@ -47,7 +47,9 @@
 | 尚未知 | 證據不足，保留差異，不預設等價或強制拆框架 |
 
 凍結範圍包含 55 組，其中 10 組為優先組。另在 `handwritten_differences`
-記錄兩組手寫差異與對應的可執行測試名稱。`cost_timing` 的字串 `None`
+記錄兩組手寫差異：`card_nos` 與 `frame` 表明範圍，`classifications` 同樣綁 resolved hash，
+`conclusion`、`rationale` 與 `translation_review` 說明處置，`scenario` 必須對應引擎邊界測試。
+BP18 的兩卡共用同一 v0 分類，差異在手寫 body；其「舊標註修正」是 BP18-059 改用 placed 的手寫修正候選。`cost_timing` 的字串 `None`
 沿用 v0 的「無費用時點」分類值，不是 YAML null。
 
 這些結論評估的是標註差異，並未證明未來的共用 body 已保留所有行為。
@@ -61,7 +63,7 @@ JSON（UTF-8、鍵排序、無多餘空白、保留 Unicode）SHA-256；不抽�
 
 每個正向位置保留 `ability_indices` 及全部 `fragments`，包括 binding ID、frame ID、
 use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算，`line` 沿手寫 DSL
-從 1 起算。21 個多來源分片位置必須完整保留；後續組裝不能只取第一個 frame。
+從 1 起算。21 個多來源片段位置必須完整保留；後續組裝不能只取第一個 frame。
 同位置的多個 abilities 也不能只保留一個。
 
 `reverse_positions` 是沒有同位置 ability 的來源位置；每筆包含分類、原因及框架。
@@ -71,18 +73,27 @@ use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算�
 | 分類 | 凍結數量 | 處理 |
 | --- | --- | --- |
 | token | 30 | 引用 token 的欄位不複製成本卡效果；token 自身仍需獨立覆蓋 |
-| 跨行涵蓋 | 17 | 指向具體能力的 costs、additional_costs 或 body；模式本文須組裝 |
+| 跨行涵蓋 | 17 | 含 1 筆位置錯標（見下）；其餘指向 costs、additional_costs 或 body，模式本文須組裝 |
 | 通用規則 | 4 | 食事／EP 等由一般規則處理，不建立虛構能力 |
 | 說明 | 11 | 關鍵字、建構與裝備的說明文字，不重複執行 |
 | 真正缺漏 | 0 | 本次未發現無承接的獨立能力；不代表 422 卡全部正確 |
 
-BP07-P06 的傷害 body 已存在，但位置標成 section 0 line 2；草案是改成 effect line 3，
-不新增第二份傷害。CSD01-T01 的兩行歸通用規則。其餘 15 個空 abilities 卡的主 effect
+「通用規則」及「說明」只區分責任，不代表引擎已實作；例如ドライブチェック與タイトル構築開局配置仍須獨立確認支援。
+
+780 個正向位置包含 BP07-P06 這 1 筆已知無效對齊：傷害 body 標成 section 0 line 2，
+實際應在 effect line 3，不新增第二份傷害。既有來源更正只補 effect，section 的 token 定義後仍有重複句。
+`positive_alignment_exceptions` 保存 `card_no`、`ability`、`status: known_invalid_alignment`、
+原 `position`、`source_issue: uncorrected_duplicate`、既有 `source_correction` ID 及
+`proposed_position`；兩個位置都含 face／field／section／line。測試驗證原位置在正向基線、
+建議位置在反向基線且 covered_by 指回同一能力。能力移動後原行將成為未分類來源，
+須交由[來源更正流程](../schema/domains/authored-layout.md)處理重複，不能當作 token 效果。
+
+CSD01-T01 的兩行歸通用規則。其餘 15 個空 abilities 卡的主 effect
 為空；16 個空 abilities 卡都保留在測試基線內，不算作執行成功案例。
 
 ## 可執行差異情境
 
-[引擎邊界測試](../../sim/engine/tests/boundaries.rs)的 `dsl_a2_` 情境使用公開 Game／Catalog
+[引擎邊界測試](../../sim/engine/tests/boundaries.rs)的下列情境使用公開 Game／Catalog
 介面及合成卡面，無須私有卡表：
 
 | 情境 | 檢查的語義 |
@@ -98,7 +109,7 @@ BP18 測試刻意保存目前兩份程式的不同結果，**不是核可兩份�
 
 ```bash
 uv --directory carddb run pytest -n 4 tests/domains/effects/test_regression_baseline.py
-cargo test --locked -p sve-engine --test boundaries dsl_a2
+cargo test --locked -p sve-engine --test boundaries
 ```
 
 Python 基線測試驗證 AST、位置、分類版本與跨行 pointer；Rust 情境才驗證上述具體行為。
@@ -117,3 +128,19 @@ Python 基線測試驗證 AST、位置、分類版本與跨行 pointer；Rust �
 
 採納後更新對應草案及測試期望，保留 Git 中的舊版本與差異原因；不要用自動重錄所有
 指紋的方式掩蓋新變化。未採納前可直接撤回此草案，原分類、原 DSL 與翻譯完全不變。
+
+## 更新基線
+
+先審查具體變更，再只更新受影響卡片與判讀；不得為消除失敗而批次重錄全部 hash。
+
+- 只用 repo 可重算 `ast_sha256`（依上述完整卡片 canonical JSON 規則）及
+  `ability_indices`（依 face／field／section／line 分組、保留零起算索引）。
+  `classifications` 的 hash 則由分類 reader 的 resolved Classification 重算，並重新審查對應理由。
+- `fragments` 的 binding／use／frame／source hash／span，以及反向 `frame_ids`，
+  必須從契約記錄的凍結建置取得；若改用新建置，須一併更新 `basis`、來源版本及受影響範圍。
+  缺少該輸入時保留失敗並取得凍結來源，不能清空片段或移除反向位置來使測試通過。
+- ability 改位置時，同時檢查原位置與新位置的來源、正向／反向集合及 `covered_by`。
+  BP07-P06 移至 effect line 3 後，原 section 行須先經來源更正處理；在重複句仍存在的建置中，
+  該行應保留為來源異常的反向紀錄，不能默默漏掉。新來源與定位都驗證後，才更新或移除對齊例外。
+- BP18-059 修正 body 時保留清楚的行為差異證據，再更新 AST 期望與原 body 情境的預期結果；
+  不再把已修正的行為稱為已知缺陷。
