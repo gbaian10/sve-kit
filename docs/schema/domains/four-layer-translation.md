@@ -642,7 +642,7 @@ interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍�
 版本唯一差異的自動映射須先移除 normalizer_version 後比完整 frame-v1 payload bytes，並確認 occurrences／values／scope／接口語義不變、新目標存在且唯一。
 其他 canonical／schema 改動依精確來源用途重建，不因中文相同授予語義等價。interface_key 重算，相依 DSL 只延續實際存在且先前合格、通過既有型別／來源／可見範圍檢查的用途；不捏造 reviewed。
 不能從新版本重算未知歷史域，原 reference pending 與裁定 strength 保留。
-明示舊域格式及建置重驗見 §9.1.1；正式 reader 不因保留舊引用而恢復舊翻譯格式。
+明示舊域格式及寫入端驗證見 §9.1.1；正式 reader 不因保留舊引用而恢復舊翻譯格式。
 
 ### 9.1 裁定版本與引用來源
 
@@ -701,16 +701,26 @@ segments 須按順序且互不重疊。同一命名空間與 T 在不同裁定�
 同一 T 不得在不同裁定或同份裁定中混用裸字串與明示域，以免替未補證引用借用其他裁定的域。
 不把 frame ID、候選、處置或逐用途核可記錄寫進 authored。
 
-普通建置若有明示引用，就載入 A1 catalog 並由
-`domains.rulings.historical.validate` 檢查完整舊域；沒有明示引用時不載入：
+完整驗證只在資料寫入端執行，普通建置信任已審查資料。修改裁定引用或 A1 分類資料後，
+提交前執行獨立指令：
+
+```bash
+sve-carddb rulings validate --repo /absolute/candidate-repository --build-db /absolute/validated-build.sqlite
+```
+
+`build-db` 必須是已驗證、關閉且包含所選歷史來源版次的 offline 建置 DB；
+指令只讀取它，不產生或修補來源證據。產生器亦可於採納前呼叫
+`domains.rulings.historical.validate`，由已驗的來源邊界提供觀測。驗證內容包括：
 全部 cards × face／field／ordinal／line 必須恰好分割原模板的成員集合，
 每個 span 的文字長度與 hash 必須等於原成員 body。來源觀測由已驗的建置提供；
 同字不同 revision 的歷史選擇仍須以凍結舊快照與完整 face 證據審查，
 不能只靠當前 body 相同便宣稱證明了舊域。一次性遷移腳本與對帳產物不進版控。
 
-普通建置透過 `historical.rebuild` 重驗已提交的明示來源域：owner 存在、
+寫入端驗證明示來源域的 owner 存在、
 欄位全文 hash 相等、span 在指定行內（只有 LF 推進行號），以及 cards 確實屬於該來源 face。
-這些來源事實錯誤直接使建置失敗；不重跑舊 normalizer，也不在執行時讀 Git 歷史。
+這些來源事實錯誤直接使資料驗證失敗，不得採納。普通建置透過 `historical.rebuild`
+直接讀取已審查的用途清單，不載入 A1 catalog、不重查舊來源欄位，也不重驗成員、hash 或長度；
+不重跑舊 normalizer，也不在執行時讀 Git 歷史。
 新舊 scope 均從 occurrence 的 role 與 field 產生，domain 使用 `effect` 或 `section`，
 它只界定來源欄位，不宣稱 token 定義的執行語義。
 
@@ -789,18 +799,18 @@ unknown_legacy_scope 只用在引用層級。source_changed 表示舊 occurrence
 
 正式建置直接讀現行 format 2 裁定檔，不要求 repo 外的一次性遷移輸入、
 永久 authored allowlist 或 runtime Git 查詢。裸 T 引用按原 applies_to ordinal
-產生引用層級 pending；明示域引用經 §9.1.1 重驗後產生完整用途層級結果。
+產生引用層級 pending；明示域引用於寫入端通過 §9.1.1 後，普通建置直接讀取並產生完整用途層級結果。
 非模板 IR 引用原樣保留並獨立列帳；不符合支援形狀的引用拒絕建置。
 裁定來源記錄保留本次檔案 path 與實際 bytes hash。
 
 ### 9.4 完整性與執行邊界
 
 B 逐筆保留裁定原始 applies_to 清單與 ordinal，重複文字的引用仍各有一筆記錄。
-明示舊域的完整用途集合依 §9.1.1 對 A1 catalog 驗證。
+明示舊域的完整用途集合於寫入端依 §9.1.1 對 A1 catalog 驗證。
 對帳同時列出模板引用、非模板引用、引用層級 pending、用途層級 resolved／pending；
 不把引用數和用途列數相加，不以「輸出 0 個裁定」宣稱驗收完成。
 N0 的 resolution.build 依現行裁定的原始 ordinal 產生引用列；DB 檢查 SQL PK／FK 與逐列封閉型別。
-resolver 檢查裁定邏輯鍵唯一／互斥及完整用途集合；來源檢查由重建輸入邊界執行，
+resolver 檢查裁定邏輯鍵唯一／互斥及完整用途集合；已採納舊域不於建置重驗，當前候選來源由本次翻譯建置提供，
 DB 邊界另驗候選 frame 與 binding 都已存在於本次建置（FL-027）。
 
 active 裁定邊只能由已驗的用途層級 resolved 產生，且其 scope 僅限該用途。
@@ -810,7 +820,7 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 裁定正文仍可查讀，pending 原因仍可見；無用途級資格時不出適用該卡的肯定提示。
 有下游可執行資料要求 pending 引用時，拒絕該執行閉包，不把 pending 當 no-op。
 
-明示舊域格式與建置重驗不會自行改寫正式裁定資料。修改 applies_to、正文或其他
+明示舊域格式與寫入端驗證不會自行改寫正式裁定資料。修改 applies_to、正文或其他
 已解析內容須明示續版，保留未變的證據、日期與強度；舊引用與版本歷史仍可追溯。
 映射成功不自動繼承既有 reviewed／verified，也不重寫過去裁定決定。
 
