@@ -30,6 +30,7 @@ MINIMUM_TABLES = {
     "errata",
     "errata_version",
     "errata_change",
+    "errata_change_translation",
     "errata_printing",
     "source_correction",
     "correction_evidence",
@@ -62,11 +63,15 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
         | (EN_TABLES if include_en else set())
     )
     assert {table.name for table in schema.tables} == expected
-    assert len(schema.tables) == (59 if include_en else 55)
+    assert len(schema.tables) == (60 if include_en else 56)
     with create_database(schema) as database:
         with database.transaction():
             populate(database, include_en=include_en)
-        assert all(database.rows(table.name) for table in schema.tables)
+        assert all(
+            database.rows(table.name)
+            for table in schema.tables
+            if table.name != "errata_change_translation"
+        )
         assert database._read(
             "SELECT count(*) FROM sqlite_schema WHERE type = 'table'"
         ) == ((len(expected),),)
@@ -78,7 +83,16 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
 @pytest.mark.parametrize(
     ("group", "extra"),
     [
-        ("errata", {"errata", "errata_version", "errata_change", "errata_printing"}),
+        (
+            "errata",
+            {
+                "errata",
+                "errata_version",
+                "errata_change",
+                "errata_printing",
+                "errata_change_translation",
+            },
+        ),
         (
             "correction",
             {"source_correction", "correction_evidence", "correction_application"},

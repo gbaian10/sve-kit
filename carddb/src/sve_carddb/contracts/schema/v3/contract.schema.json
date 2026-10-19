@@ -1302,6 +1302,59 @@
         }
       ]
     },
+    "ErrataTranslation": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/Lang"
+        },
+        {
+          "$ref": "#/$defs/Text"
+        },
+        {
+          "$ref": "#/$defs/Text"
+        },
+        {
+          "enum": [
+            "project",
+            "machine"
+          ]
+        },
+        {
+          "$ref": "#/$defs/Bool"
+        }
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5,
+      "x-columns": [
+        "lang",
+        "before",
+        "after",
+        "origin",
+        "low_confidence"
+      ],
+      "x-types": [
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "enum": [
+            "project",
+            "machine"
+          ]
+        },
+        {
+          "scalar": "Bool"
+        }
+      ]
+    },
     "ErrataChange": {
       "type": "array",
       "prefixItems": [
@@ -1328,16 +1381,23 @@
         },
         {
           "$ref": "#/$defs/CorrectionValue"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ErrataTranslation"
+          }
         }
       ],
       "items": false,
-      "minItems": 4,
-      "maxItems": 4,
+      "minItems": 5,
+      "maxItems": 5,
       "x-columns": [
         "face_id",
         "field",
         "before",
-        "after"
+        "after",
+        "wording_translations"
       ],
       "x-types": [
         {
@@ -1363,6 +1423,11 @@
         },
         {
           "json": "CorrectionValue"
+        },
+        {
+          "array": {
+            "ref": "ErrataTranslation"
+          }
         }
       ],
       "allOf": [
@@ -14998,13 +15063,45 @@
             ]
           }
         },
+        "ErrataTranslation": {
+          "const": {
+            "columns": [
+              "lang",
+              "before",
+              "after",
+              "origin",
+              "low_confidence"
+            ],
+            "items": [
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "enum": [
+                  "project",
+                  "machine"
+                ]
+              },
+              {
+                "scalar": "Bool"
+              }
+            ]
+          }
+        },
         "ErrataChange": {
           "const": {
             "columns": [
               "face_id",
               "field",
               "before",
-              "after"
+              "after",
+              "wording_translations"
             ],
             "items": [
               {
@@ -15030,6 +15127,11 @@
               },
               {
                 "json": "CorrectionValue"
+              },
+              {
+                "array": {
+                  "ref": "ErrataTranslation"
+                }
               }
             ]
           }

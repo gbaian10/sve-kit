@@ -11,6 +11,7 @@ from sve_carddb.core.json import parse
 from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.core.provenance import Revision
 from sve_carddb.core.regions import Region
+from sve_carddb.domains.card_extras.reviewed_errata import validate as validate_errata
 from sve_carddb.domains.parsed_cards import codec
 from sve_carddb.domains.parsed_cards.generate import generate
 from sve_carddb.domains.parsed_cards.models import BatchFile, Family, Index
@@ -94,6 +95,7 @@ def validate_command(
         catalog = load(_absolute(root))
         if previous:
             catalog.validate_update(load(_absolute(previous)))
+        validate_errata(root, previous=previous)
     except OSError, ValueError:
         typer.echo("Parsed input validation failed.", err=True)
         raise typer.Exit(1) from None

@@ -722,7 +722,8 @@
       "f:a",
       "cost",
       null,
-      1
+      1,
+      []
     ]
   },
   {
@@ -2056,6 +2057,16 @@
       "c:target",
       "jp",
       "c:source"
+    ]
+  },
+  {
+    "schema": "ErrataTranslation",
+    "value": [
+      "zh-Hant",
+      "Synthetic before",
+      "Synthetic after",
+      "machine",
+      true
     ]
   }
 ]

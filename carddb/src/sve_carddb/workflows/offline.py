@@ -24,6 +24,7 @@ from sve_carddb.domains.card_extras import (
     populate_planned_card_extras,
     require_card_extras_ready,
 )
+from sve_carddb.domains.card_extras.reviewed_errata import read as read_errata
 from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
 from sve_carddb.domains.mechanics import load as load_mechanics
@@ -64,6 +65,8 @@ from sve_carddb.domains.text_observations import (
 from sve_carddb.domains.text_observations.composition import populate_text_preview
 from sve_carddb.domains.text_observations.equivalence import load_decisions
 from sve_carddb.domains.translations.corrected_sources import Corrections
+from sve_carddb.domains.translations.errata import apply as apply_errata_translations
+from sve_carddb.domains.translations.errata import load as load_errata_translations
 from sve_carddb.domains.translations.flavor import apply as apply_flavor
 from sve_carddb.domains.translations.flavor import load as load_flavor
 from sve_carddb.domains.translations.four_layer_build import Settings as FrameSettings
@@ -352,13 +355,15 @@ def _source_gaps(db: Database, extras: ExtrasPlan) -> list[JsonValue]:
 def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statements, too-many-branches] -- one transaction combines the checked domain plans and saves its completed database
     inputs: Inputs,
     *,
-    errata: tuple[ErrataPage, ...] = (),
+    errata: tuple[ErrataPage, ...] | None = None,
     bundle_dir: Path | None = None,
     image_index: ImageIndex | None = None,
 ) -> Built:
     """Build both regions from sealed sources, retaining every diagnostic source use."""
     from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
 
+    if errata is None:
+        errata = read_errata(inputs.repo / "card-data", store_id=inputs.store_id)
     if bundle_dir is not None:
         for protected in inputs.protected_inputs():
             output, source = bundle_dir.resolve(), protected.resolve()
@@ -456,7 +461,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         ("catalog/adoptions",),
         include_translations=True,
     )
+    errata_translations = load_errata_translations(authored_root(inputs.repo))
     configuration = adoptions.configuration() | {
+        "errata_translations": errata_translations.configuration(),
         "product_identity": identities.configuration(),
         "offline_recipe": inputs.model_dump(
             mode="json",
@@ -560,6 +567,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             )
             name_sources = translation_sources.stage(context)
             added = populate_planned_card_extras(db, extras, build=context)
+            errata_translation_report = apply_errata_translations(
+                db, errata_translations, revision=inputs.revision
+            )
             missing_badges = populate_badges(db, badges)
             populate_leader_frames(db, leader_frames)
             if names is not None:
@@ -698,6 +708,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "regions": ["en", "jp"],
             "counts": {table: len(rows) for table, rows in projection.tables.items()},
             "card_extras": extras.report(),
+            "errata_translations": errata_translation_report,
             "source_gaps": source_gaps,
             "regional_counts": {
                 region: {

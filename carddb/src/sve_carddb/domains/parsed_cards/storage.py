@@ -179,6 +179,8 @@ def load(root: Path) -> Catalog:
         | {"index.json"}
     )
     actual_paths = {p.relative_to(root).as_posix() for p in root.rglob("*.json")}
+    if (root / "errata").exists():
+        expected_paths |= {"errata/index.json", "errata/jp.json", "errata/en.json"}
     if expected_paths != actual_paths:
         raise ValueError("Parsed directory contains missing or unlisted JSON members")
     result = Catalog(index, tuple(files), batches)

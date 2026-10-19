@@ -122,7 +122,8 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | PrintingFace.observations | ObservedText | revision_id, state, source_url |
 | art.artists | ArtArtist | artist_id, role |
 | PrintingFace.stamps | PrintingStamp | stamp_id, position, color |
-| ErrataVersion.changes | ErrataChange | face_id, field, before, after |
+| ErrataVersion.changes | ErrataChange | face_id, field, before, after, wording_translations |
+| ErrataChange.wording_translations | ErrataTranslation | lang, before, after, origin, low_confidence |
 | ErrataVersion.printings | ErrataPrinting | printing_id, scope |
 | ruling_revision.replaced_scopes | ReplacedScope | scope_unit_id, replacement_revision_id |
 | ruling_revision.hints | RulingHint | lang, text_unit_id, parameter_schema |
@@ -183,6 +184,10 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 `{}`、省略 uint／variables、兩值域皆停用或 bounds 超出上述範圍也拒絕；無參數只能使用表列的空 parameters 表示。新增參數種類或變數值須依 §1.1 升版，不能靠更換 data_version 放寬。
 
 ### 3.3 公開更正值
+
+`ErrataChange.wording_translations` 為 `[{lang,before,after,origin,low_confidence}]`。
+每筆翻譯對應同一變更的前後公告片段；`origin` 限 machine／project，不授予官方身分。
+缺譯時為空陣列，仍顯示原文；不把譯文寫回 `before`／`after`，也不推定完整印刷卡文。
 
 `Correction.corrected_from` 與 `ErrataChange.before/after` 共用下表的 field 白名單與 `CorrectionValue` 型別對照；before、after 各自按同一 field 驗證。這些值是玩家可讀的來源原值／改值，不是 text_unit ID；field 也不是可任意存取公開欄位的路徑。
 

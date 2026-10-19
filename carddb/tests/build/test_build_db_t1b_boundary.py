@@ -210,9 +210,9 @@ def test_rebuild_revalidates_art(tmp_path: Path) -> None:
     assert path.read_bytes() == before
     rebuild_database(compile_minimum(include_en=True), path, populate)
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchall() == [(14,)]
+        assert connection.execute("PRAGMA user_version").fetchall() == [(15,)]
         assert connection.execute(
             "SELECT count(*) FROM sqlite_schema WHERE type='table'"
-        ).fetchall() == [(59,)]
+        ).fetchall() == [(60,)]
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
     assert list(tmp_path.iterdir()) == [path]

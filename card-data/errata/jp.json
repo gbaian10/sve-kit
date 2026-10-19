@@ -1,0 +1,1098 @@
+{
+  "format": 1,
+  "notices": [
+    {
+      "source": {
+        "id": "src:v1:a77da3d23c1cdb930cbc070499b083df97886240988bf8ff7348251de4f2ab70",
+        "url": "https://shadowverse-evolve.com/errata/%E3%82%A2%E3%83%B3%E3%83%89%E3%83%AD%E3%83%A1%E3%83%80/",
+        "sha256": "sha256:11fdcf0d24dcc53ce8d6cc9fa06aec877830e9f8b50d9390ba3e54cf64951640",
+        "fetched_at": "2026-10-02T13:01:47.705063Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:0a62dd2499086490792ae48f0fc2d9e8b24a933c2ce8fad8650510db1050c074",
+        "first_receipt_id": "sha256:dd22f96674416a50cfe3007d17b2ec5649e34559d22cbd0772229e16bcbbdc37"
+      },
+      "region": "jp",
+      "announced_on": "2023-02-20",
+      "effective_on": null,
+      "date_raw": "2023.02.20",
+      "reason": "この効果で付与された永続能力の有効な期間が不適切に捉えられるため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP04-103",
+          "face_id": "f:623e4af195ad57eda26e5d75a5067097",
+          "field": "effect",
+          "before_value": "《ファンファーレ》自分のリーダーと自分のフォロワーすべては「このターン、能力によるダメージを受けない」を持つ。",
+          "after_value": "《ファンファーレ》このターン、自分のリーダーと自分のフォロワーすべては「能力によるダメージを受けない」を持つ。",
+          "locator": "blocks/0/BP04-103",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP04-103",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "《ファンファーレ》自分のリーダーと自分のフォロワーすべては「このターン、能力によるダメージを受けない」を持つ。",
+          "after": "《ファンファーレ》このターン、自分のリーダーと自分のフォロワーすべては「能力によるダメージを受けない」を持つ。",
+          "raw_before": {
+            "start": 23596,
+            "end": 23761,
+            "sha256": "sha256:13d50305ff032ffda6890a71bd89adf4541082297d56342d570b02cd52e4b0be"
+          },
+          "raw_after": {
+            "start": 23808,
+            "end": 24010,
+            "sha256": "sha256:438c6b6220633298690cfd747876a3ce6f726bbba8a1ec1a983038c71e45bdb6"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:0aea6d05549be3db67bc535df7462f746e40fcb962b01335fe1931d1b0da1315",
+        "url": "https://shadowverse-evolve.com/errata/%E6%A0%B9%E6%BA%90%E3%81%B8%E3%81%AE%E5%9B%9E%E5%B8%B0/",
+        "sha256": "sha256:3039599c10e687ef0a26aa4a2d60756ca4c6b264d2ef996febdd154f0c18b8da",
+        "fetched_at": "2026-10-02T13:01:49.325556Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:d31c9064c0e1e3bc68b8d19dc9bcd2e4a79abc58927cd438fecd6d036944e8c4",
+        "first_receipt_id": "sha256:88e50c3e6990695569ca88faad646d1fc61a72ce87dfae8250e993d20e25e94b"
+      },
+      "region": "jp",
+      "announced_on": "2023-02-20",
+      "effective_on": null,
+      "date_raw": "2023.02.20",
+      "reason": "【コンボ_5】の条件を満たしている場合、目標を「選ぶ」必要があるのか不明瞭だったため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-008",
+          "face_id": "f:8416bf264ccd515297062a4c156bc3cc",
+          "field": "effect",
+          "before_value": "相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。【コンボ_5】1体を選ぶ代わりに相手のフォロワーすべて。（デッキに置いたトークンはゲームから取り除く）",
+          "after_value": "相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。【コンボ_5】それをデッキに置く代わりに、相手のフォロワーすべてをそれのプレイヤーはデッキの上か下に置く。（1体ずつ上か下か決める）（デッキに置いたトークンはゲームから取り除く）",
+          "locator": "blocks/0/BP01-008",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-008",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-P01",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。【コンボ_5】1体を選ぶ代わりに相手のフォロワーすべて。（デッキに置いたトークンはゲームから取り除く）",
+          "after": "相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。【コンボ_5】それをデッキに置く代わりに、相手のフォロワーすべてをそれのプレイヤーはデッキの上か下に置く。（1体ずつ上か下か決める）（デッキに置いたトークンはゲームから取り除く）",
+          "raw_before": {
+            "start": 23611,
+            "end": 23867,
+            "sha256": "sha256:a2e8c5f07ba9606d771ad7fbc730db74b36f1102cb1aa95b34ef7c5506f02e09"
+          },
+          "raw_after": {
+            "start": 23914,
+            "end": 24321,
+            "sha256": "sha256:5abdaa5fe5462d358dafb36e2075647b83c8274c881c1646cd9df8b9ab8b8541"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:1fac2c24592304a5c66241259652317f3b06de90050472928f3e0db377fbb74c",
+        "url": "https://shadowverse-evolve.com/errata/bp01-004/",
+        "sha256": "sha256:abb21a8ad60a6c67b64d5f3ed3055f37ff7d85de3dfabd698b047bcc8eb2493f",
+        "fetched_at": "2026-10-02T13:00:40.126232Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:9ed7b581db9aa5ca5a2c48ee059d3b173258ec9ed4b7be40ef35f4211232763b",
+        "first_receipt_id": "sha256:b9d30b6c4d0549df27a6ddf9e343103c1e7793438b268ae4318c3628948ebc93"
+      },
+      "region": "jp",
+      "announced_on": "2022-07-14",
+      "effective_on": null,
+      "date_raw": "2022.07.14",
+      "reason": "自分のカードのプレイに加え、能力のプレイや相手のカードのプレイなどを数えるように捉えられるため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-004",
+          "face_id": "f:57155e1e696c5ef9b523dd7f48d88075",
+          "field": "effect",
+          "before_value": "{《ファンファーレ》}これは{《攻撃力》}+Xする。Xは「これを含めず、このターン中にプレイした枚数」である。",
+          "after_value": "{《ファンファーレ》}これは{《攻撃力》}+Xする。Xは「これを含めず、このターン中に自分がプレイしたカードの枚数」である。",
+          "locator": "blocks/0/BP01-004",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-004",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "{《ファンファーレ》}これは{《攻撃力》}+Xする。Xは「これを含めず、このターン中にプレイした枚数」である。",
+          "after": "{《ファンファーレ》}これは{《攻撃力》}+Xする。Xは「これを含めず、このターン中に自分がプレイしたカードの枚数」である。",
+          "raw_before": {
+            "start": 23486,
+            "end": 23981,
+            "sha256": "sha256:a399249163a84cd2acec2045925418d5151744a44ad621bfef2ebe76f9037b14"
+          },
+          "raw_after": {
+            "start": 24022,
+            "end": 24607,
+            "sha256": "sha256:66e8f7bbaeed6877a0ee2f9553a1c0667d8c50d81d391f2b4d5b1a4f0dca1a38"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:bb01b9425124d0451a4609aa050d1f345da910e473198dfd963c9fb7e1b8fb85",
+        "url": "https://shadowverse-evolve.com/errata/bp01-101/",
+        "sha256": "sha256:8e65774f064a2306bc702018b07a207a23a17706f9898b5dcf4ae3a4eec8e9ea",
+        "fetched_at": "2026-10-02T13:01:51.993872Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:d7d9f6beaa9b863ad98e91533b91ff813421070a9d6ca6418fc98d744f8d9e3d",
+        "first_receipt_id": "sha256:9673fa8a5c308dfa69c8a3473010aaa246b1c6760673a8c0c8eefb1b4c2c1d10"
+      },
+      "region": "jp",
+      "announced_on": "2026-01-26",
+      "effective_on": null,
+      "date_raw": "2026.01.26",
+      "reason": "コラボパック「プリンセスコネクト！Re:Dive」収録のカード『ミミ』と区別するため、トークンの『ミミ』含む『ケルベロス』関連カードのカード名や能力テキストを修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-101",
+          "face_id": "f:fa9f2b0822645a2f8bf3a3b7fe3791bb",
+          "field": "effect",
+          "before_value": "《ファンファーレ》『ミミ』1枚か『ココ』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに1枚ずつ置く。",
+          "after_value": "《ファンファーレ》『冥焔の右腕・ミミ』1枚か『冥焔の左腕・ココ』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに1枚ずつ置く。",
+          "locator": "blocks/0/BP01-101",
+          "scope": "fragment"
+        },
+        {
+          "card_no": "BP01-102",
+          "face_id": "f:a68df31a2a5e5157b2e7f13bf1a01325",
+          "field": "effect",
+          "before_value": "【進化時】『ミミ』『ココ』1枚ずつEXエリアに置く。",
+          "after_value": "【進化時】『冥焔の右腕・ミミ』『冥焔の左腕・ココ』1枚ずつEXエリアに置く。",
+          "locator": "blocks/0/BP01-102",
+          "scope": "fragment"
+        },
+        {
+          "card_no": "BP01-T12",
+          "face_id": "f:53855af8db475294bf542b6fb7334959",
+          "field": "name",
+          "before_value": "『ミミ』",
+          "after_value": "『冥焔の右腕・ミミ』",
+          "locator": "blocks/1/BP01-T12",
+          "scope": "field"
+        },
+        {
+          "card_no": "BP01-T13",
+          "face_id": "f:476078b683025bc6af7e04ca4c9ad4ed",
+          "field": "name",
+          "before_value": "『ココ』",
+          "after_value": "『冥焔の左腕・ココ』",
+          "locator": "blocks/1/BP01-T13",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-101",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-102",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-SL13",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-SL14",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-097",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-035",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-036",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SL35",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SL36",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SP23",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SP24",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-U21",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-U22",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-T12",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-073",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-T13",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-074",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "『ケルベロス』の能力テキスト：《ファンファーレ》『ミミ』1枚か『ココ』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに1枚ずつ置く。\n『ケルベロス（EVOLVE）』の能力テキスト：【進化時】『ミミ』『ココ』1枚ずつEXエリアに置く。",
+          "after": "『ケルベロス』の能力テキスト：《ファンファーレ》『冥焔の右腕・ミミ』1枚か『冥焔の左腕・ココ』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに1枚ずつ置く。\n『ケルベロス（EVOLVE）』の能力テキスト：【進化時】『冥焔の右腕・ミミ』『冥焔の左腕・ココ』1枚ずつEXエリアに置く。",
+          "raw_before": {
+            "start": 24624,
+            "end": 24984,
+            "sha256": "sha256:2201cc2b69ceccd87de6fcfbb96b0a2491692a6f73fc3b06d9e7b7fbdc5aee22"
+          },
+          "raw_after": {
+            "start": 25072,
+            "end": 25824,
+            "sha256": "sha256:24779d12783d5f6ce9556792826b11d61979e46030a21b8deb769194a380ff56"
+          }
+        },
+        {
+          "ordinal": 1,
+          "context": [],
+          "before": "『ミミ』\nカード名：『ココ』",
+          "after": "『冥焔の右腕・ミミ』\nカード名：『冥焔の左腕・ココ』",
+          "raw_before": {
+            "start": 25855,
+            "end": 25916,
+            "sha256": "sha256:2a225f77b18ca728884f73bd00fdc28919fc30e46762ab26f897ecc74fd0d7b2"
+          },
+          "raw_after": {
+            "start": 25967,
+            "end": 26138,
+            "sha256": "sha256:12edf7545bc8f2e55a5da03a494655742bc835eb5342e59eecd4204f4874c918"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:69ca33c2a6115338bf7bfe41fd0253e98634cd1680416c8ccf13839b1660bb2d",
+        "url": "https://shadowverse-evolve.com/errata/bp02-115/",
+        "sha256": "sha256:9d275ada8cf5284674b252959495a77a60531c90d914c98adcf48e421fbe1ff1",
+        "fetched_at": "2026-10-02T13:01:54.853375Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:7edbe38c18733385d159eea37ebf571ded20d0aa1f25fbb02910308a6066b9cd",
+        "first_receipt_id": "sha256:28303bf1de25592b4c07899a090f4069839dd49986df48d29828ee18d59cbdfa"
+      },
+      "region": "jp",
+      "announced_on": "2024-09-10",
+      "effective_on": null,
+      "date_raw": "2024.09.10",
+      "reason": "多人数戦「グローリーファインダー」において、選んだフォロワーに対応するリーダーの《体力》のみが+3される直観的な挙動を実現するため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-115",
+          "face_id": "f:becd0ef470b45090b73d04cd862ec5c7",
+          "field": "effect",
+          "before_value": "《ファンファーレ》コスト2以下の相手のフォロワー1体を選ぶ。それを破壊する。相手のリーダーは《体力》+3する。",
+          "after_value": "《ファンファーレ》元のコスト2以下の相手の場のフォロワー1体を選ぶ。それを破壊する。それのリーダーは《体力》+3する。",
+          "locator": "blocks/0/BP02-115",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-115",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP02-P34",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "《ファンファーレ》コスト2以下の相手のフォロワー1体を選ぶ。それを破壊する。相手のリーダーは《体力》+3する。",
+          "after": "《ファンファーレ》元のコスト2以下の相手の場のフォロワー1体を選ぶ。それを破壊する。それのリーダーは《体力》+3する。",
+          "raw_before": {
+            "start": 23512,
+            "end": 23669,
+            "sha256": "sha256:bd5710ac4bf6c13acd5469ebc954fa2937b5eda9fca31aefa22fb2f343e4a467"
+          },
+          "raw_after": {
+            "start": 23720,
+            "end": 23926,
+            "sha256": "sha256:ac681ebb17679aceeb79a3e0f316a04cb97e36051e01452f6fdfa80bd50a7ea6"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:06d3544b3d86c6bb80226a80ad7bd92d29764c23a729b15b0d73d2a8e6eeb754",
+        "url": "https://shadowverse-evolve.com/errata/bp06-107/",
+        "sha256": "sha256:c5ff270bb2055a57446374c88700126a32c0b623df84eb8c8d2a1859bf1e6485",
+        "fetched_at": "2026-10-02T13:01:58.291678Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:5209c856abaaa07d82aa4b9859a35874b54293b365e96e269161340b193d2ef4",
+        "first_receipt_id": "sha256:efc06b6f45bbf3f1aeb74eb274e63ed285168584a0055589212db1fa633b10c2"
+      },
+      "region": "jp",
+      "announced_on": "2023-06-09",
+      "effective_on": null,
+      "date_raw": "2023.06.09",
+      "reason": "各プレイヤーが処理する効果が本来の想定と異なる挙動となっていたため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP06-107",
+          "face_id": "f:b5170ae3d60b513ab8fb139aa9f78dab",
+          "field": "effect",
+          "before_value": "《ファンファーレ》各プレイヤーは、自身の場のフォロワー1体を残し、それ以外の場のフォロワーすべてを墓場に置く。",
+          "after_value": "《ファンファーレ》各プレイヤーは、自身の場のフォロワー1体を残し、それ以外の自身の場のフォロワーすべてを墓場に置く。",
+          "locator": "blocks/0/BP06-107",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP06-107",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP06-SL19",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "《ファンファーレ》各プレイヤーは、自身の場のフォロワー1体を残し、それ以外の場のフォロワーすべてを墓場に置く。",
+          "after": "《ファンファーレ》各プレイヤーは、自身の場のフォロワー1体を残し、それ以外の自身の場のフォロワーすべてを墓場に置く。",
+          "raw_before": {
+            "start": 23624,
+            "end": 23787,
+            "sha256": "sha256:724260c90f35bfc0ab54830f26ea1854262faacef115aa0019a71c999d83f4fa"
+          },
+          "raw_after": {
+            "start": 23834,
+            "end": 24043,
+            "sha256": "sha256:d3f02df03dac6976519f1e20a0b282bec21ebf656caff0f68ddb39a2968d6f94"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:4cdd3593051b6d162c65d9dae644278dc2150cfeacf90a21290134bf46d4b53b",
+        "url": "https://shadowverse-evolve.com/errata/bp06-ld01/",
+        "sha256": "sha256:fd8fe65e660bac609e3cb2802c7231b7884f5f8f347100f19b5c50fb171b456d",
+        "fetched_at": "2026-10-02T13:02:00.816631Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:55e955c73c7085a6b39fd850c8718081aaf641bd09a4564c96e9347281086bbd",
+        "first_receipt_id": "sha256:9142d354e52d1eef7b4664bde568e74613d46450044b473a5c1d2e079fd90762"
+      },
+      "region": "jp",
+      "announced_on": "2024-03-29",
+      "effective_on": null,
+      "date_raw": "2024.03.29",
+      "reason": "本来のリーダーカードの命名規則と異なる名称が記載されていたため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP06-LD01",
+          "face_id": "f:fb584079d6c857369081d5eb936533fc",
+          "field": "name",
+          "before_value": "『リコリス』",
+          "after_value": "『優しき猛毒・リコリス』",
+          "locator": "blocks/0/BP06-LD01",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP06-LD01",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "『リコリス』",
+          "after": "『優しき猛毒・リコリス』",
+          "raw_before": {
+            "start": 23580,
+            "end": 23613,
+            "sha256": "sha256:342ff5a6a2550cfb24daa0f44803b215a45895858bfd81211dbd0d0f5a3979ba"
+          },
+          "raw_after": {
+            "start": 23660,
+            "end": 23748,
+            "sha256": "sha256:2e557a04a8160e5e5ae64243ee8c55d35ec35ccbdc61f04e5d50e203daa7ee6f"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:4bce739619c7ec831f40e51c2ac8b9db61c90ee62ad9a08c8ee5307aa3b053ac",
+        "url": "https://shadowverse-evolve.com/errata/bp06-ld02/",
+        "sha256": "sha256:0ed19e6c309feee9d7f6a885872ed3accd6902a41894b61ebb7523a9a3dafa93",
+        "fetched_at": "2026-10-02T13:02:03.181116Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:f2c929b05822facee8084b952e575e62954397a0fdb202b6ba03a332922b0af9",
+        "first_receipt_id": "sha256:fb8be6e833d4d553cd13ab5690d89ce1f1e5f4679e7b82ea06be869aaa6d750e"
+      },
+      "region": "jp",
+      "announced_on": "2024-03-29",
+      "effective_on": null,
+      "date_raw": "2024.03.29",
+      "reason": "本来のリーダーカードの命名規則と異なる名称が記載されていたため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP06-LD02",
+          "face_id": "f:49e1772e932059d7afaa233c0bf3c737",
+          "field": "name",
+          "before_value": "『水竜神の巫女』",
+          "after_value": "『清き水竜神の巫女』",
+          "locator": "blocks/0/BP06-LD02",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP06-LD02",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "『水竜神の巫女』",
+          "after": "『清き水竜神の巫女』",
+          "raw_before": {
+            "start": 23548,
+            "end": 23587,
+            "sha256": "sha256:033b54b9ce08f9153cd47258e137a841111b78c19bcb5a38592c81465ff79253"
+          },
+          "raw_after": {
+            "start": 23634,
+            "end": 23716,
+            "sha256": "sha256:80607bec21061ae6bd963499f1008491e4112b5ba27402168e03fdedf0a48f93"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:36c5abeae1a7b813fd58ecdb319935355d4462a334093a175dddb87f50d13b21",
+        "url": "https://shadowverse-evolve.com/errata/bp10-055/",
+        "sha256": "sha256:f3b86f21c15ee150a2c3edac352be60cc98f69f0f3bbd634a956ed91d559e723",
+        "fetched_at": "2026-10-02T13:02:06.050885Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:3b28291b97e103285726bc81f9672a7bf4260022b10eaf9628fe5ec5502c50da",
+        "first_receipt_id": "sha256:7a13ef88bd7fc273eac77e36e7ba2d544ac9ba1608190fbc9f9e7049658b03cd"
+      },
+      "region": "jp",
+      "announced_on": "2024-03-29",
+      "effective_on": null,
+      "date_raw": "2024.03.29",
+      "reason": "キーワード能力の記載に誤りがあったため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP10-055",
+          "face_id": "f:916d02cf69685029bc1697322af156bd",
+          "field": "effect",
+          "before_value": "【疾走】\nこれは守護を無視して攻撃できる。",
+          "after_value": "【疾走】\nこれは【守護】を無視して攻撃できる。",
+          "locator": "blocks/0/BP10-055",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP10-055",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP10-SL13",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "【疾走】\nこれは守護を無視して攻撃できる。",
+          "after": "【疾走】\nこれは【守護】を無視して攻撃できる。",
+          "raw_before": {
+            "start": 23588,
+            "end": 23654,
+            "sha256": "sha256:e328a56f1245d26e0d2a774ea902839aacdcd12aa221ff1212a508f95ca38b6e"
+          },
+          "raw_after": {
+            "start": 23701,
+            "end": 23847,
+            "sha256": "sha256:230e70dc68cf673d6b8566cef62b94fd850ed390cfd4fb2c02a7d26630dd86b0"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:a2c2dee85169990c87315aead2bdffab0cf74508f7f70c503d1cfd02c9e689cf",
+        "url": "https://shadowverse-evolve.com/errata/bp10-062/",
+        "sha256": "sha256:a8e495882dd9c720cd4a920a22fb2bbf2ed6dda32cbbe5a508d05e109dc8dcec",
+        "fetched_at": "2026-10-02T13:02:08.785770Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:b552ef5efebbd8219afd8f0824a4e544916012f20b72468be9c98910c39753e6",
+        "first_receipt_id": "sha256:bc950f13f5db60eda2e0e4996915ab914bdc60145e913fdef9d061bfd9160c35"
+      },
+      "region": "jp",
+      "announced_on": "2024-04-19",
+      "effective_on": null,
+      "date_raw": "2024.04.19",
+      "reason": "マスターが変更された状態で処理する効果が本来の想定と異なる挙動となっていたため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP10-062",
+          "face_id": "f:21d02b07192155c5ae30d8d2fcca981a",
+          "field": "effect",
+          "before_value": "【守護】\n《ファンファーレ》これがEXエリアからプレイされていたなら、自分のPPを4回復する。\n《ラストワード》相手のリーダーすべてに2ダメージ。これを自分のデッキの上から2番目かデッキの下に置く。",
+          "after_value": "【守護】\n《ファンファーレ》これがEXエリアからプレイされていたなら、自分のPPを4回復する。\n《ラストワード》相手のリーダーすべてに2ダメージ。これをデッキの上から2番目かデッキの下に置く。",
+          "locator": "blocks/0/BP10-062",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP10-062",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "【守護】\n《ファンファーレ》これがEXエリアからプレイされていたなら、自分のPPを4回復する。\n《ラストワード》相手のリーダーすべてに2ダメージ。これを自分のデッキの上から2番目かデッキの下に置く。",
+          "after": "【守護】\n《ファンファーレ》これがEXエリアからプレイされていたなら、自分のPPを4回復する。\n《ラストワード》相手のリーダーすべてに2ダメージ。これをデッキの上から2番目かデッキの下に置く。",
+          "raw_before": {
+            "start": 23564,
+            "end": 23890,
+            "sha256": "sha256:8823d385b7dbbf29961718dae8cad0b757e516a833ed77a370daeef9c7ec12bf"
+          },
+          "raw_after": {
+            "start": 23937,
+            "end": 24217,
+            "sha256": "sha256:2bd93aec63445f45d5b21c5bb83c08bd533059a6d55a75563251ee846155e8ea"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:0a8bd4710dea910d7def7f45972a8fcdfc87076efc60cbfd6bf50f193d5d9bb1",
+        "url": "https://shadowverse-evolve.com/errata/bp19-075/",
+        "sha256": "sha256:3f7c87bd6f75da6d920274f63ffb1eaa17d3a57438eb567f5a3917c71946c26b",
+        "fetched_at": "2026-10-02T13:02:47.061971Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:f8ad812c54fdfcacd2de96fc82f39ff9c30e738e3a89c7e493f508cce9626007",
+        "first_receipt_id": "sha256:7228d277620e7e9ec34ad47ab372abd18b62ada5621dab332e537e38a94ca0ca"
+      },
+      "region": "jp",
+      "announced_on": "2026-03-23",
+      "effective_on": null,
+      "date_raw": "2026.03.23",
+      "reason": "相手のターン中にも誘発する、本来の想定と異なる挙動となっていたため、修正しました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP19-075",
+          "face_id": "f:8b67c403a1f75f2b87fb70f56e5bdcce",
+          "field": "effect",
+          "before_value": "自分のリーダーの体力が減少したとき、「このターン中に自分のリーダーの体力が減少した回数」が4回以上なら、これは進化する。",
+          "after_value": "自分のターン中、自分のリーダーの体力が減少したとき、「このターン中に自分のリーダーの体力が減少した回数」が4回以上なら、これは進化する。",
+          "locator": "blocks/0/BP19-075",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP19-075",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP19-SL19",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "自分のリーダーの体力が減少したとき、「このターン中に自分のリーダーの体力が減少した回数」が4回以上なら、これは進化する。",
+          "after": "自分のターン中、自分のリーダーの体力が減少したとき、「このターン中に自分のリーダーの体力が減少した回数」が4回以上なら、これは進化する。",
+          "raw_before": {
+            "start": 23585,
+            "end": 23763,
+            "sha256": "sha256:02df2cbbd7b7405d0c6de3c3246364143ed8624bee4e1c1430bcb1df252ca385"
+          },
+          "raw_after": {
+            "start": 23852,
+            "end": 24070,
+            "sha256": "sha256:cc6a64448be1589bac6c2ad6d701b56196219080b35ecd208aa22d1fb21c0464"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:ff055ad041bc2aea5585524a379585852f704765001405c3ee97d0d8df04ea56",
+        "url": "https://shadowverse-evolve.com/errata/cp01-045/",
+        "sha256": "sha256:3dd552401a3ccf0b23906bec630a50bd83ee491257c619f47463b58ec33083ed",
+        "fetched_at": "2026-10-02T13:02:48.443791Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:c1bf4519bd97c07bfbae55c591255f4181b2d9be0a139e3bd96ac191c6105c0b",
+        "first_receipt_id": "sha256:abbd1cf698b13032d1e28661886e89f4800b86986a6cf506b0890b39ccd047f2"
+      },
+      "region": "jp",
+      "announced_on": "2022-09-22",
+      "effective_on": null,
+      "date_raw": "2022.09.22",
+      "reason": "EXエリアのカードの上限が残り2枚のときなど、デッキの上から3枚未満のカードを移動させる際、難解な処理が必要となっていたため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "CP01-045",
+          "face_id": "f:39c59b87f6dc53739ef4910a01612e78",
+          "field": "effect",
+          "before_value": "【1】自分のデッキの上3枚をEXエリアに置く。",
+          "after_value": "【1】自分のデッキの上1枚をEXエリアに置く。これを3回くり返す。",
+          "locator": "blocks/0/CP01-045",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "CP01-045",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "CP01-P33",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "【1】自分のデッキの上3枚をEXエリアに置く。",
+          "after": "【1】自分のデッキの上1枚をEXエリアに置く。これを3回くり返す。",
+          "raw_before": {
+            "start": 23541,
+            "end": 23602,
+            "sha256": "sha256:5fe8f29abe795977f252845b8338d59acaaf20631899493c7562addce2f0b1ee"
+          },
+          "raw_after": {
+            "start": 23651,
+            "end": 23807,
+            "sha256": "sha256:34d0e7339ad7ac519f7c0c16553785e5f5aaa497ebd6d574bc56e8695da91fcb"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:4d1fb153e46960c42877b6a2f72f5b12651cc6ac41ce26bc1aeed2882abd5439",
+        "url": "https://shadowverse-evolve.com/errata/cp03-004/",
+        "sha256": "sha256:2e555d584f484c71eeb98d3da5c135e91f1a18e7da54105be0f7bee564caa829",
+        "fetched_at": "2026-10-02T13:02:51.206893Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:f833c2183b24ed23ec3ac918f69410c377e08c473a08efd6e9dd125e09e0c7b6",
+        "first_receipt_id": "sha256:bf09e6f76cfd0d3544330dac7a7cf6f570d63d24d853996feee4096ad2344017"
+      },
+      "region": "jp",
+      "announced_on": "2024-08-01",
+      "effective_on": null,
+      "date_raw": "2024.08.01",
+      "reason": "2024年6月28日(金)発売のコラボパック「カードファイト!! ヴァンガード」に収録されている『CP03-004/SL04 ストームライダー バシル』につきまして、本来のイラストと異なっていたため修正いたしました。",
+      "exchange_offered": true,
+      "changes": [],
+      "printings": [
+        {
+          "card_no": "CP03-004",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "CP03-SL04",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [],
+      "review_note": "本公告僅修正插畫，沒有誤／正文字配對；保留理由與列出版次，不捏造文字變更。"
+    },
+    {
+      "source": {
+        "id": "src:v1:499a226d11da95b07f008f37f6565b1fcb98e7fa2ca521d759a9f4374de260a0",
+        "url": "https://shadowverse-evolve.com/errata/cp03-124/",
+        "sha256": "sha256:adddd5d1e35c95c8ed7225e97cef576ee9f957085330057f9e2e1da3eae677c3",
+        "fetched_at": "2026-10-02T13:02:53.874874Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:acd28f39fddaf21fa1e935fc9126c2f65b96d85d5704bbd45ef2bc34f267468d",
+        "first_receipt_id": "sha256:a7924f89a3ab59a683f6d4a99d3f80bbbd89ff7fd540fb25491488ce6d020af2"
+      },
+      "region": "jp",
+      "announced_on": "2024-06-24",
+      "effective_on": null,
+      "date_raw": "2024.06.24",
+      "reason": "能力テキストの記載に誤りがあったため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "CP03-124",
+          "face_id": "f:c71d6a9c0cdc5e51b99f5912b6a1d63d",
+          "field": "effect",
+          "before_value": "《起動》これを《アクト》墓場に置く：自分のデッキを上3枚見る。その中から、好きな枚数を好きな順にデッキの上に置く。",
+          "after_value": "《起動》これを《アクト》墓場に置く：自分のデッキの上3枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。",
+          "locator": "blocks/0/CP03-124",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "CP03-124",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-293",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "《起動》これを《アクト》墓場に置く：自分のデッキを上3枚見る。その中から、好きな枚数を好きな順にデッキの上に置く。",
+          "after": "《起動》これを《アクト》墓場に置く：自分のデッキの上3枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。",
+          "raw_before": {
+            "start": 23500,
+            "end": 23669,
+            "sha256": "sha256:dea991fe0ccc42793599ceae637e3b3a3525ace01b66c831773380f47c1907d2"
+          },
+          "raw_after": {
+            "start": 23737,
+            "end": 23946,
+            "sha256": "sha256:5837dabf1e16338da7ac6b42f0eff1acbe87f1fe1cec189c6001b3bc04877fb0"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:9200f436e3a527559ef5d96cb265d0ee1ac2bfe6559b53b292caa1f6dd6b37d8",
+        "url": "https://shadowverse-evolve.com/errata/cp04-t11/",
+        "sha256": "sha256:656389da8c5db4f5dad7503fe0d296fd07b26b6e5462afefa304db6a0833bc38",
+        "fetched_at": "2026-10-02T13:02:56.846863Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:a0c6d4e570ed02749dbd8b6d93de0d032f9979d50c8f55d8128ba87e082e40f9",
+        "first_receipt_id": "sha256:ca0a50decc16da23280c3eeaee7c6d617ce3de33caf9908e969b9b10c398e741"
+      },
+      "region": "jp",
+      "announced_on": "2026-01-29",
+      "effective_on": null,
+      "date_raw": "2026.01.29",
+      "reason": "『闇斧ナハトファング』の付与する能力の誘発条件が本来の想定と異なる挙動となっていたため、修正しました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "CP04-T11",
+          "face_id": "f:05105d180fc05478a2d228d8b43fb3ba",
+          "field": "effect",
+          "before_value": "これを装備しているフォロワーは「これが相手の場のフォロワーに能力ダメージを与えたとき、相手のリーダーすべてに3ダメージ」を持つ。",
+          "after_value": "これを装備しているフォロワーは「これが相手の場のフォロワー1体以上に能力ダメージを与えたとき、相手のリーダーすべてに3ダメージ」を持つ。",
+          "locator": "blocks/0/CP04-T11",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "CP04-T11",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "CP04-PR25",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "CP04-PR37",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "これを装備しているフォロワーは「これが相手の場のフォロワーに能力ダメージを与えたとき、相手のリーダーすべてに3ダメージ」を持つ。",
+          "after": "これを装備しているフォロワーは「これが相手の場のフォロワー1体以上に能力ダメージを与えたとき、相手のリーダーすべてに3ダメージ」を持つ。",
+          "raw_before": {
+            "start": 23590,
+            "end": 23780,
+            "sha256": "sha256:3f8a610f6dda120334b701d90435c1b1a06d98a0fe52f275ca6d8d23daf08ac3"
+          },
+          "raw_after": {
+            "start": 23868,
+            "end": 24122,
+            "sha256": "sha256:d618a9f78e0c9281091377a16fc487aed59d42960deb2bfd20b391bb0db555af"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:de693bdfbd8006996ebdf05d337284d336db25f354ae70a9d92d4f6297a014a6",
+        "url": "https://shadowverse-evolve.com/errata/csd02a-004/",
+        "sha256": "sha256:252ec3129d8edaf93bb8a149da30ad5caa45c30dc8582e04eb5880c99cd4a720",
+        "fetched_at": "2026-10-02T13:02:59.784044Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:67cdc7a3e13f1fa0b371c5fa05f5bdb33ef6a30b759a2ce7ce080182db1ce504",
+        "descriptor_sha256": "sha256:eabdce2711a09f1b93baf06ff691a1b4224d0b3e68d978e8e58e519fc0baee8e",
+        "first_receipt_id": "sha256:03e6de81e71724cd2ca2ffcf504fed77fe28d03867424b18103a79e4eb626792"
+      },
+      "region": "jp",
+      "announced_on": "2023-07-28",
+      "effective_on": null,
+      "date_raw": "2023.07.28",
+      "reason": "本来のフレーバーテキストとは異なる文言が記載されていたため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "CSD02a-004",
+          "face_id": "f:0f60df6ebf3752e280db757540a49cf5",
+          "field": "flavor",
+          "before_value": "みんなの夢を叶えて守る、トゥインクル☆ラブリーチカ！\nかがやく星の歌声を、世界中を響かせちゃうの！いっくよー！",
+          "after_value": "みんなの夢を叶えて守る、トゥインクル☆ラブリーチカ！\nかがやく星の歌声を、世界中に響かせちゃうの！いっくよー！",
+          "locator": "blocks/0/CSD02a-004",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "CSD02a-004",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "CSD02a-P01",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "みんなの夢を叶えて守る、トゥインクル☆ラブリーチカ！\nかがやく星の歌声を、世界中を響かせちゃうの！いっくよー！",
+          "after": "みんなの夢を叶えて守る、トゥインクル☆ラブリーチカ！\nかがやく星の歌声を、世界中に響かせちゃうの！いっくよー！",
+          "raw_before": {
+            "start": 23491,
+            "end": 23659,
+            "sha256": "sha256:dc891f40c8a2a394124ebba21298e2da2f2af7aae15fdce47b6aef15f94a962e"
+          },
+          "raw_after": {
+            "start": 23706,
+            "end": 23911,
+            "sha256": "sha256:d8658473daa34021d4aa970058bad5e403a15f325f6acd575e1312679ada2a3c"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    }
+  ]
+}

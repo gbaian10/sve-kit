@@ -139,6 +139,7 @@ def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
                 {
                     "face_id": "face",
                     "field": "effect",
+                    "wording_translations": [],
                     "before": "Before",
                     "after": "Synthetic text",
                 }

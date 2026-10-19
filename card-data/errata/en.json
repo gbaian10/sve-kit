@@ -1,0 +1,2743 @@
+{
+  "format": 1,
+  "notices": [
+    {
+      "source": {
+        "id": "src:v1:b21776b1c54dbf3595c0a7b29b6a39f7301d95c7b62f56b79cc6aa1d6db81006",
+        "url": "https://en.shadowverse-evolve.com/errata/a-class-pyromancy/",
+        "sha256": "sha256:1a7f119457b276841986895ed197b18e4b69772ece7feb4d965dfab1b2fa0388",
+        "fetched_at": "2026-10-02T13:03:45.775631Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:ee2382a62d2d94d4bcbf682e0212d44521dba4105ecbe029ecada6ea69083522",
+        "first_receipt_id": "sha256:185397f40ece2cf7fbd05bb84daf7580c35210c9693531364296a14209cab681"
+      },
+      "region": "en",
+      "announced_on": "2026-07-13",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Jul. 13, 2026                                              ",
+      "reason": "Due to an oversight in the quality control process, an erroneous trait name \"Ministry\" was used instead of \"Ward Office\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "PR-488EN",
+          "face_id": "f:4ad3783c057a55cf9062ffbb57567a97",
+          "field": "traits",
+          "before_value": [
+            "Togh Keyoh",
+            "Ministry"
+          ],
+          "after_value": [
+            "Togh Keyoh",
+            "Ward Office"
+          ],
+          "locator": "blocks/0/PR-488EN",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "PR-488EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Togh Keyoh / Ministry",
+          "after": "Togh Keyoh / Ward Office",
+          "raw_before": {
+            "start": 27657,
+            "end": 27678,
+            "sha256": "sha256:45202a6c7bfe1cce645052d9580b8fdf4a5f925344949ce112d11107f62e5f47"
+          },
+          "raw_after": {
+            "start": 27730,
+            "end": 27784,
+            "sha256": "sha256:4f5bc422a5a6cada4cdcbe765a8dcaba2a4c7d7047f08c3f8d3a3dae4cd4c19f"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:d8ca8a9cf3fb885f332d8fd116b26a11916a09f79fa21b61b565524b1c13bba0",
+        "url": "https://en.shadowverse-evolve.com/errata/archangel-reina/",
+        "sha256": "sha256:ea3b151fc52e425d2e869824457a974448681844d79682361f8566f9e65c7f61",
+        "fetched_at": "2026-10-02T13:04:31.220383Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:388ec8bdc1d474a4d32e5b716633e2040577bd58bdf8787fdd46258434eae9e8",
+        "first_receipt_id": "sha256:51c98a856972b18b5a4c5c9ad1ee19820b85a0573d01710ca6d74255f79ddff6"
+      },
+      "region": "en",
+      "announced_on": "2026-02-12",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 12, 2026                                              ",
+      "reason": "This card’s ability text wording did not account for situations where there are non-evolved followers in the evolve deck.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-108EN",
+          "face_id": "f:5ff80b35821055f8969a401dc2928246",
+          "field": "effect",
+          "before_value": "Recover X play points. X equals to the number of faceup followers in your evolve deck.",
+          "after_value": "Recover play points equal to the number of faceup evolved followers in your evolve deck.",
+          "locator": "blocks/0/BP02-108EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-108EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "GFB01a-033EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Recover X play points. X equals to the number of faceup followers in your evolve deck.",
+          "after": "Recover play points equal to the number of faceup evolved followers in your evolve deck.",
+          "raw_before": {
+            "start": 27661,
+            "end": 27747,
+            "sha256": "sha256:0d2d22b700eefa91150143959e3c01a7f340244058481b93e377b4d304b9c1a2"
+          },
+          "raw_after": {
+            "start": 27786,
+            "end": 27911,
+            "sha256": "sha256:d12a571908d76a8ca22fa21dbcbfeec87a821668537c85cc39bb09ac60d2924e"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:bcbff9d9cc71a591b6cfe33fd0f803cce4b0a96efba372635c7d2e65e1eb23fd",
+        "url": "https://en.shadowverse-evolve.com/errata/avaritia/",
+        "sha256": "sha256:40af38caf156e894a4e2e7b9768437d743dcbf8abc0cb4c63e182231baa9739e",
+        "fetched_at": "2026-10-02T13:04:33.546073Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:dc3c8a0b9dc658647d244578a4a8fe92e56070e125899f581957da8ae03cbce5",
+        "first_receipt_id": "sha256:cbc1212acb92cebc8538b7325cc08c667ad9db4e77cc5f4114d394166d136e78"
+      },
+      "region": "en",
+      "announced_on": "2024-09-06",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Sep. 6, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP05-034EN",
+          "face_id": "f:8d46064bfd09516a9823de83cfbd4505",
+          "field": "effect",
+          "before_value": "If you revealed an Octrice, Omen of Usurpation, return this card to your hand.",
+          "after_value": "If you revealed an Octrice, Omen of Usurpation, return this card to its owner’s hand.",
+          "locator": "blocks/0/BP05-034EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP05-034EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP05-P14EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "If you revealed an Octrice, Omen of Usurpation, return this card to your hand.",
+          "after": "If you revealed an Octrice, Omen of Usurpation, return this card to its owner’s hand.",
+          "raw_before": {
+            "start": 27612,
+            "end": 27692,
+            "sha256": "sha256:a68e7b1450c863393e2e91c65706eb565896562a99c5ff2831c45d818b22c875"
+          },
+          "raw_after": {
+            "start": 27725,
+            "end": 27847,
+            "sha256": "sha256:ccb733ea4c01b6619f9a484a671525391257af397ae3e993714d2aba9b0785b3"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:182dbb1a7a15ae658f934cb3bc24c87f196c506d0fb1786b055cf232426f737a",
+        "url": "https://en.shadowverse-evolve.com/errata/beastcall-aria/",
+        "sha256": "sha256:3e8cd0420ddb54df7aa5e3cf12b669b97c5087f62da654e8b76ab20761ff2e15",
+        "fetched_at": "2026-10-02T13:04:36.461104Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:3aea83687130dcf5fdd4594ac1a595ec7f964df97cfb6cd514606c83c5cd8940",
+        "first_receipt_id": "sha256:a0a4b4de6980cd1832ace23a85a204da4ca26f4e09ddc42b9f2035b55ff5ee8c"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-096EN",
+          "face_id": "f:8c062a39cff7590289c96c13de7a0a0c",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Tiger token.",
+          "after_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Tiger token.",
+          "locator": "blocks/0/BP02-096EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-096EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-032EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Tiger token.",
+          "after": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Tiger token.",
+          "raw_before": {
+            "start": 27656,
+            "end": 28057,
+            "sha256": "sha256:20e0325e90177723fb06707dcd2d025fa0566fa1c0900c92efc4069ea42c849f"
+          },
+          "raw_after": {
+            "start": 28096,
+            "end": 28538,
+            "sha256": "sha256:9e81182836f43029806d7a1231a2d603a534614e036df920be213b461a3c1470"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:b00a270907920d74538b4c21ac299df9e8b4a45f6ae66d0df51049d10e400763",
+        "url": "https://en.shadowverse-evolve.com/errata/beastly-vow/",
+        "sha256": "sha256:32cb03fbda40d711a134cbb4ead18a234ca203052079621f5d12d6a239b95266",
+        "fetched_at": "2026-10-02T13:04:39.316451Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:0d19f274ea480d63f98730f24df069bbbe0367c72e39cae20c704cfb69a52097",
+        "first_receipt_id": "sha256:ffdbc570d3310f3a1d7e4076e1a417583e513db5c29d7380a4f981c653614286"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "SD06-016EN",
+          "face_id": "f:8b7eb4b6bd37596faa3eedb70f5fb722",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Tiger token.",
+          "after_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Tiger token.",
+          "locator": "blocks/0/SD06-016EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "SD06-016EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Tiger token.",
+          "after": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Tiger token.",
+          "raw_before": {
+            "start": 27163,
+            "end": 27564,
+            "sha256": "sha256:88e9c048c609219def5c546d75927e94adf495a847861fbf497a75d04f5bd81e"
+          },
+          "raw_after": {
+            "start": 27603,
+            "end": 28045,
+            "sha256": "sha256:17806bb89696f9e9eddbb58cf967ce7bd1015fc8ad63fb7736bef20a43a558dd"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:f7eb7b3af90f98a4844b5887910560656927d92e0a43712d439857910776b037",
+        "url": "https://en.shadowverse-evolve.com/errata/cerberus/",
+        "sha256": "sha256:358a95fcf054ab6d26003d105f56d11ec6717e83505743716992eba49c84e3ba",
+        "fetched_at": "2026-10-02T13:04:41.990500Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:a8ec911e2596a2ba78cb55676dade6e6b053fdaae7d17400c2a77c99679687cd",
+        "first_receipt_id": "sha256:af3c1ee12172c54b3e0901db913d30c78ee5d39ab85094887c1b74661557c013"
+      },
+      "region": "en",
+      "announced_on": "2026-05-15",
+      "effective_on": null,
+      "date_raw": "\n                                                                         May 15, 2026                                              ",
+      "reason": "Card text for cards related to \"Cerberus\", including the token card \"Mimi\", has been changed in order to distinguish them from the cards released in crossover set \"Princess Connect! Re: Dive\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-101EN",
+          "face_id": "f:fa9f2b0822645a2f8bf3a3b7fe3791bb",
+          "field": "effect",
+          "before_value": "Put a Mimi or Coco token into your EX area.",
+          "after_value": "Put a Mimi, Infernal Right Paw or Coco, Infernal Left Paw token into your EX area.",
+          "locator": "blocks/0/BP01-101EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-101EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-SL13EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "GFB01c-012EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-035EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SL35EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SP23EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-U21EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-140EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Put a Mimi or Coco token into your EX area.",
+          "after": "Put a Mimi, Infernal Right Paw or Coco, Infernal Left Paw token into your EX area.",
+          "raw_before": {
+            "start": 27670,
+            "end": 27713,
+            "sha256": "sha256:9abd9b8994f424b6c7df12898f62ffc38575bd72c90158e91fc6d8c8be98910b"
+          },
+          "raw_after": {
+            "start": 27759,
+            "end": 27915,
+            "sha256": "sha256:1162dbfaf614da6872cc239880f47b2bd96197556f58f78ef9ec30c2a3335ad2"
+          }
+        },
+        {
+          "ordinal": 1,
+          "context": [],
+          "before": "Mimi\nCard Name: Coco",
+          "after": "Mimi, Infernal Right Paw\nCard Name: Coco, Infernal Left Paw",
+          "raw_before": {
+            "start": 27965,
+            "end": 28017,
+            "sha256": "sha256:b9224a457d3af14143a039a0f16bd9b72bc81439a7b40fc38fc18f78e46ec121"
+          },
+          "raw_after": {
+            "start": 28062,
+            "end": 28220,
+            "sha256": "sha256:97c395e2b2aef4faae10fc8fbdb98a6d97f5ae88c8458e8ab5927edecd16f82d"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:eff73f0421a9cbf74a8c96392327f2ce45ab4abddf3a3e50eb428f768a1377d1",
+        "url": "https://en.shadowverse-evolve.com/errata/cerberus_evolved/",
+        "sha256": "sha256:69506268ea1361bc198bd976f7d6e57b42f8b99e9b3fefb9e36105ba6dfbf8bd",
+        "fetched_at": "2026-10-02T13:04:45.220568Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:a51f2c34e163220c03c83142a624171c0a5e33b28d6799847360640cdc03dbfb",
+        "first_receipt_id": "sha256:6231d4bd53b78edd68f0d2c137fc32aea214d5a9b9c7a33138fdc8842956665f"
+      },
+      "region": "en",
+      "announced_on": "2026-05-15",
+      "effective_on": null,
+      "date_raw": "\n                                                                         May 15, 2026                                              ",
+      "reason": "Card text for cards related to \"Cerberus\", including the token card \"Mimi\", has been changed in order to distinguish them from the cards released in crossover set \"Princess Connect! Re: Dive\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-102EN",
+          "face_id": "f:a68df31a2a5e5157b2e7f13bf1a01325",
+          "field": "effect",
+          "before_value": "Put a Mimi and Coco token into your EX area.",
+          "after_value": "Put a Mimi, Infernal Right Paw and Coco, Infernal Left Paw token into your EX area.",
+          "locator": "blocks/0/BP01-102EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-102EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-SL14EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "GFB01c-013EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-036EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SL36EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-SP24EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "SP01-U22EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Put a Mimi and Coco token into your EX area.",
+          "after": "Put a Mimi, Infernal Right Paw and Coco, Infernal Left Paw token into your EX area.",
+          "raw_before": {
+            "start": 27676,
+            "end": 27720,
+            "sha256": "sha256:907642223c481974753d46c1c3508b32b6e69cadb2773ac1e5bb024d481d0bd9"
+          },
+          "raw_after": {
+            "start": 27766,
+            "end": 27923,
+            "sha256": "sha256:26af7724b3738d4d4aff97eb8aaa7ae6cc27d6c5f79b0f959b0c0c06e2b75f69"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:9e0f7079b39fc2af97000e421c92af82ecea910e4bbde1818ba19b324ea69dcf",
+        "url": "https://en.shadowverse-evolve.com/errata/coco-infernal-left-paw/",
+        "sha256": "sha256:2d36be9c6af2cd89687d8a30fe4692dc9f2a998344831ec21a7f60129f009e61",
+        "fetched_at": "2026-10-02T13:04:48.061137Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:ef2ae0c3bd505a5e4f2489dc5dc0c7f039c1e6bafa3b793e4003ea32473688c6",
+        "first_receipt_id": "sha256:b24850c36d936ccce905db0d12de52acf254ccac4681061935ae8b986bd4cf5b"
+      },
+      "region": "en",
+      "announced_on": "2026-05-15",
+      "effective_on": null,
+      "date_raw": "\n                                                                         May 15, 2026                                              ",
+      "reason": "Card text for cards related to \"Cerberus\", including the token card \"Mimi\", has been changed in order to distinguish them from the cards released in crossover set \"Princess Connect! Re: Dive\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-T13EN",
+          "face_id": "f:476078b683025bc6af7e04ca4c9ad4ed",
+          "field": "name",
+          "before_value": "Coco",
+          "after_value": "Coco, Infernal Left Paw",
+          "locator": "blocks/0/BP01-T13EN",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-T13EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "GFB01c-T02EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Coco",
+          "after": "Coco, Infernal Left Paw",
+          "raw_before": {
+            "start": 27722,
+            "end": 27737,
+            "sha256": "sha256:11b94effba1c11073da549fbd0d028b9c08209da6f0180bc6ad6ed3a73386408"
+          },
+          "raw_after": {
+            "start": 27789,
+            "end": 27853,
+            "sha256": "sha256:2c944e2246ad181f12c14be42453fbb2a0f8b9143166ccbe28eb21480b8aa136"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:7bd9a3db17c8662e713a5dbfcd49f0cd7c9b98b3f63f789839780c51ed8760e6",
+        "url": "https://en.shadowverse-evolve.com/errata/death-sentence/",
+        "sha256": "sha256:b215fbe3683581a2dfaa22ffd890da87cf3f7e368252df43f418fe4bc3fdd51b",
+        "fetched_at": "2026-10-02T13:04:50.948606Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:ef12bb13f6aee7cff1f9f4fbcf1da512857fa5d8eff9656a0e3da04f7471326c",
+        "first_receipt_id": "sha256:57ebfb447e9e153458c0622820cc734753d69fa7bde5c73c1c4570712e3da8d8"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "SD06-014EN",
+          "face_id": "f:ad16b15897165044b85b37869ef5d3fa",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select an enemy follower on the field and destroy it.",
+          "after_value": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select an enemy follower on the field and destroy it.",
+          "locator": "blocks/0/SD06-014EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "SD06-014EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-150EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-P30EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select an enemy follower on the field and destroy it.",
+          "after": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select an enemy follower on the field and destroy it.",
+          "raw_before": {
+            "start": 27683,
+            "end": 27995,
+            "sha256": "sha256:0dc423aeb70b21453ba958b83b3068989a34b02bb286518bc7b658c364535612"
+          },
+          "raw_after": {
+            "start": 28040,
+            "end": 28393,
+            "sha256": "sha256:9050904853492f61fa75478838d39487f643e27d168cbb9cc9da3cc3c3029985"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:baad21fcd6d69b4212a91822d4bb31521187b04a1df60152ab5e4aab0e4ea7ab",
+        "url": "https://en.shadowverse-evolve.com/errata/dire-bond/",
+        "sha256": "sha256:7601971d699d758721c9f79037f22f713b75dd118951fff2225830ebec5f2075",
+        "fetched_at": "2026-10-02T13:04:53.285813Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:26ce82d9bac4adf587ab7b2f4ec67700c511cdd64e712ac081760538acb53b25",
+        "first_receipt_id": "sha256:9c4705fb62a6ca5c7854785eb5eb23afe0ee74d864791d901773cc494ae6ad4e"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-108EN",
+          "face_id": "f:2afd11338f035722908fa2dbffe2425a",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Deal 1 damage to your leader. Draw a card.",
+          "after_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Deal 1 damage to your leader. Draw a card.",
+          "locator": "blocks/0/BP01-108EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-108EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Deal 1 damage to your leader. Draw a card.",
+          "after": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Deal 1 damage to your leader. Draw a card.",
+          "raw_before": {
+            "start": 27147,
+            "end": 27565,
+            "sha256": "sha256:c9c688f25cff7e27a8b79de6352dac37cdf54f4bf1766f9fb7ed43acced235a0"
+          },
+          "raw_after": {
+            "start": 27604,
+            "end": 28063,
+            "sha256": "sha256:8d11e4614a74e29d24fe0f80455489ca98011ad58b3a0d227ffaaa8ddac9dc74"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:61d6c5e33d89b7a5fe68dc2b2e3acd67871cf629b220ed88fbd5facc81fe6725",
+        "url": "https://en.shadowverse-evolve.com/errata/draconic-weapon/",
+        "sha256": "sha256:05f9a8ba0a68544fb252b4b11f006050cff6c39177f9520cf43fb4d0f24681ee",
+        "fetched_at": "2026-10-02T13:04:55.865702Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:759159c1ac8ba129d45db1f473849e12c0812861422bf58b3ffd61bdfb6bb469",
+        "first_receipt_id": "sha256:f724412c97faa183121de74dafe0c24a28e30e39329236cbf4f5782c32865d7c"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-T07EN",
+          "face_id": "f:33a0aa06c634574da15a9438b5f8bda8",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select a {icon_dragon|dragon} follower on your field. Give it {icon_hp|hp}+1 and the Armed trait.",
+          "after_value": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select a {icon_dragon|dragon} follower on your field. Give it {icon_hp|hp}+1 and the Armed trait.",
+          "locator": "blocks/0/BP02-T07EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-T07EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select a {icon_dragon|dragon} follower on your field. Give it {icon_hp|hp}+1 and the Armed trait.",
+          "after": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select a {icon_dragon|dragon} follower on your field. Give it {icon_hp|hp}+1 and the Armed trait.",
+          "raw_before": {
+            "start": 27195,
+            "end": 27741,
+            "sha256": "sha256:b4ca134ac15d2574a5e4aa800db9e221c668157dd294e91a29aa769c6ddea73b"
+          },
+          "raw_after": {
+            "start": 27780,
+            "end": 28369,
+            "sha256": "sha256:ab68122c0f82b49c0bccb36627a65b302a36822a9c6903a6d883f9ebf06ea2d5"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:2c52672bf7b609812ff2188ef00386126fd851d3e1f549b8c8de75defba4cea5",
+        "url": "https://en.shadowverse-evolve.com/errata/dragonic-overlord/",
+        "sha256": "sha256:70e55877276bfa7da2d449a0358de35b835de71166af2130bd1692159eb7ad2a",
+        "fetched_at": "2026-10-02T13:04:58.468429Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:56afa85a1509aa49777f85a62ab5c6b81213f0b1f439bb32cfd41a4cdd9deed7",
+        "first_receipt_id": "sha256:635878d466fc445a1b01bdcf7eaaa8bb793c2a0ea57db88c54575cf85f3529ce"
+      },
+      "region": "en",
+      "announced_on": "2025-08-08",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Aug. 8, 2025                                              ",
+      "reason": "There was a mistake in the translation of this card's ability where the original text omitted the phrase \"for the rest of this turn,\" which made it unclear that the granted effect was only for this turn.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "CSD03b-002EN",
+          "face_id": "f:65bcf72ab4185f049cac6dd3546400ee",
+          "field": "effect",
+          "before_value": "Deal it 5 damage and, if Overflow is active you, give this follower \"Once per turn, when this follower deals combat damage, refresh it.\"",
+          "after_value": "Deal it 5 damage and, if Overflow is active you, for the rest of this turn, this follower has \"Once per turn, when this follower deals combat damage, refresh it.\"",
+          "locator": "blocks/0/CSD03b-002EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "CSD03b-002EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "CSD03b-SL02EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Deal it 5 damage and, if Overflow is active you, give this follower \"Once per turn, when this follower deals combat damage, refresh it.\"",
+          "after": "Deal it 5 damage and, if Overflow is active you, for the rest of this turn, this follower has \"Once per turn, when this follower deals combat damage, refresh it.\"",
+          "raw_before": {
+            "start": 27689,
+            "end": 27827,
+            "sha256": "sha256:025dd9db6ef9f9a14d8c33ccb0a256bf47a2fda707314c4321c1e189d9b8cd0c"
+          },
+          "raw_after": {
+            "start": 27860,
+            "end": 28056,
+            "sha256": "sha256:d2888000aff08ff1a17dbfa1d721e39d590f1a7af55c402edd9a003ed8789c8e"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:38b3c407952960bd9497232c73dd78cab5671a1c8142c3c5d04040cc6b9e3482",
+        "url": "https://en.shadowverse-evolve.com/errata/dual-flames/",
+        "sha256": "sha256:6a9ee8230802db9a5dbba7b4e117cc91eb14f7f8e43c2978ea92841a616893a1",
+        "fetched_at": "2026-10-02T13:05:01.423178Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:9359a3aa868be4cd259323f16b21a689c0403859629a056b02d477b9c5741a9f",
+        "first_receipt_id": "sha256:888ede107f60f799050db48a942ff033e9984ebf9d5d904191e62d26cd121853"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "SD06-006EN",
+          "face_id": "f:e0c918c4bc955d01a736a9d0f9f76ee8",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Tiger token.",
+          "after_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Tiger token.",
+          "locator": "blocks/0/SD06-006EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "SD06-006EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Tiger token.",
+          "after": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Tiger token.",
+          "raw_before": {
+            "start": 27163,
+            "end": 27564,
+            "sha256": "sha256:20e0325e90177723fb06707dcd2d025fa0566fa1c0900c92efc4069ea42c849f"
+          },
+          "raw_after": {
+            "start": 27603,
+            "end": 28045,
+            "sha256": "sha256:9e81182836f43029806d7a1231a2d603a534614e036df920be213b461a3c1470"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:025043a6da797ae9074ec449ddd7d3826672eacbba70ca80e0e3cd44626a2fe0",
+        "url": "https://en.shadowverse-evolve.com/errata/enstatued-seraph/",
+        "sha256": "sha256:0c08ce9cb0683161ce631da7bf635c27bf1f0f54d82d46a3a59953cb0f5dd7a5",
+        "fetched_at": "2026-10-02T13:05:03.927422Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:4e40ff8c0ed561d3e548cb6088ae5a1f26c52a2bab31e10520c8483d205545ce",
+        "first_receipt_id": "sha256:b59991687a732b16ae3598f86b5ca39d36af5aac83b33f61702ac4644c67c51f"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-088EN",
+          "face_id": "f:db173799676e561199419c13dc7ece65",
+          "field": "effect",
+          "before_value": "Then, if this card has at least 4 prayer counters, put it into your cemetery, give your leader {icon_hp|hp}+10, and search your deck for up to 2 cards and put them into your EX area. Those cards cost 0 play points to play.",
+          "after_value": "Then, if this card has at least 4 prayer counters, put it into its owner’s cemetery, give your leader {icon_hp|hp}+10, and search your deck for up to 2 cards and put them into your EX area. Those cards cost 0 play points to play.",
+          "locator": "blocks/0/BP02-088EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-088EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP02-SL18EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Then, if this card has at least 4 prayer counters, put it into your cemetery, give your leader {icon_hp|hp}+10, and search your deck for up to 2 cards and put them into your EX area. Those cards cost 0 play points to play.",
+          "after": "Then, if this card has at least 4 prayer counters, put it into its owner’s cemetery, give your leader {icon_hp|hp}+10, and search your deck for up to 2 cards and put them into your EX area. Those cards cost 0 play points to play.",
+          "raw_before": {
+            "start": 27675,
+            "end": 27992,
+            "sha256": "sha256:174bbce9cffaa3fdee30f35e00c9e241e33e96ce8a0f027963d5b602cb5daf8c"
+          },
+          "raw_after": {
+            "start": 28031,
+            "end": 28389,
+            "sha256": "sha256:7af665ad99b535de985798d1e3df9a556cbfb9870780dcae85733567cc56134e"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:fda28fe71bcff715d6d9ae291031b9ba043ff091a9d3e8865b701422c1fd0f65",
+        "url": "https://en.shadowverse-evolve.com/errata/gildaria-anathema-of-peace/",
+        "sha256": "sha256:4413e978c52a85a87e52c3ce056fb2e5235daf72dc8103248307791ce6bbecb4",
+        "fetched_at": "2026-10-02T13:05:06.882397Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:6c43aed81061691fa0052440e2f43eb713d88abf0acbbe0fa6501588a36b569e",
+        "first_receipt_id": "sha256:1def7f41aa367d618d05f4a2830f2a4011e8227c22870fa157f180c79acdfe26"
+      },
+      "region": "en",
+      "announced_on": "2026-09-16",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Sep. 16, 2026                                              ",
+      "reason": "Due to an oversight in the quality control process, the original text specifies followers instead of cards, which makes the activation condition more restrictive than intended.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP19-022EN",
+          "face_id": "f:6108dce7663654e4850e9e64324b026c",
+          "field": "effect",
+          "before_value": "if there are 5 Swordcraft followers on your field",
+          "after_value": "if there are 5 Swordcraft cards on your field",
+          "locator": "blocks/0/BP19-022EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP19-022EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP19-SL08EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "if there are 5 Swordcraft followers on your field",
+          "after": "if there are 5 Swordcraft cards on your field",
+          "raw_before": {
+            "start": 27738,
+            "end": 27788,
+            "sha256": "sha256:5cb24ba7a734b42a40933ae688d7ce6cae61b4fd7e8dfa1debd9e91b944aa054"
+          },
+          "raw_after": {
+            "start": 27827,
+            "end": 27910,
+            "sha256": "sha256:8ca216acd44676101a50f016d287948e3c3f670e378dc3c85de95da8f7e13dd9"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:a278f6972d0a8feb7d34f34ffbbae41bd8802e85c483ab9c712ff17e45bdca2e",
+        "url": "https://en.shadowverse-evolve.com/errata/gilnelise-voracity-manifest/",
+        "sha256": "sha256:08380c7ec2cf751604b81ce3af40347e4fe421216371020c6bb293f0b4e74a8d",
+        "fetched_at": "2026-10-02T13:05:09.905401Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:a782ba6b41364604610ed1a45003e2f8c5282a9b804d63012cb5313c53eda38e",
+        "first_receipt_id": "sha256:622a6d5f97d0aa0b2cf97c733296c9e4b3cf9d210014e02365e4e661816246c3"
+      },
+      "region": "en",
+      "announced_on": "2026-09-16",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Sep. 16, 2026                                              ",
+      "reason": "Due to an oversight in the quality control process, an erroneous card name \"Sweetness of Voracity\" was used instead of \"Ravenous Sweetness\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP20-113EN",
+          "face_id": "f:387d6e6d5ba757879582c55759048ede",
+          "field": "effect",
+          "before_value": "put a Sweetness of Voracity token into your EX area.\nWhenever you play a Sweetness of Voracity,",
+          "after_value": "put a Ravenous Sweetness token into your EX area.\nWhenever you play a Ravenous Sweetness,",
+          "locator": "blocks/0/BP20-113EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP20-113EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP20-SL31EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP20-U08EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "put a Sweetness of Voracity token into your EX area.\nWhenever you play a Sweetness of Voracity,",
+          "after": "put a Ravenous Sweetness token into your EX area.\nWhenever you play a Ravenous Sweetness,",
+          "raw_before": {
+            "start": 27758,
+            "end": 27861,
+            "sha256": "sha256:02fd39902ab30056ea2ecc686f6fcc391343596dd6f40060a3a508615d2c928d"
+          },
+          "raw_after": {
+            "start": 27900,
+            "end": 28068,
+            "sha256": "sha256:0f8100bef0f4be1bf15262f1f4285dc093214eb4f9bfb31a034469663360a1fb"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:f330e81ccd0e3296c96b92c4684b417cd866cec68044dfaf7b4af35311f1faaa",
+        "url": "https://en.shadowverse-evolve.com/errata/guardian-sun/",
+        "sha256": "sha256:ec81ae3bae98d95f7e1836946e1b3873b5fe7197ccafe1bec80cdf7fbaa1a1cc",
+        "fetched_at": "2026-10-02T13:05:12.615393Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:d38f462e7ab0fee49eacb614474acaa596f0fd74b3a1c4937d48d7d3ae827dea",
+        "first_receipt_id": "sha256:db7fd7f8c5948b263f9697d3aab934d7207cf01e5ba2188153ad7f70df4a299e"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-149EN",
+          "face_id": "f:d97e17118a6058a0b68af440db7feeaa",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Select a follower with Ward on your field and give it {icon_power|power}+2/{icon_hp|hp}+2.",
+          "after_value": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Select a follower with Ward on your field and give it {icon_power|power}+2/{icon_hp|hp}+2.",
+          "locator": "blocks/0/BP01-149EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-149EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Select a follower with Ward on your field and give it {icon_power|power}+2/{icon_hp|hp}+2.",
+          "after": "{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Select a follower with Ward on your field and give it {icon_power|power}+2/{icon_hp|hp}+2.",
+          "raw_before": {
+            "start": 27171,
+            "end": 27826,
+            "sha256": "sha256:56fe0e459aa33462998197f982f35a084eeb3ff1ff150d0f69945eb789c166b9"
+          },
+          "raw_after": {
+            "start": 27865,
+            "end": 28561,
+            "sha256": "sha256:7b3bb10273231e6b273919e6590109cb72dfd142362bfcaf1a3f507eef4903f1"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:4e9e577cba194937e9243cb6fa2d9206afce62543d1706fa6b6bd22b64bd4b10",
+        "url": "https://en.shadowverse-evolve.com/errata/hare-of-illusions/",
+        "sha256": "sha256:90bd9f6c23a9fb8bd75271932162ae2be3d0e581a192ca1e7f7940545eaa2f10",
+        "fetched_at": "2026-10-02T13:05:15.683876Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:c23cb0a0d89755222eb3267fbe1e753b7f12773ed7c19d44f26ca548ffde8c5e",
+        "first_receipt_id": "sha256:8dcda15c0d26f7fa16b6f6765fcfc7c86a935787a74e3ce46e43ed57b6a188d9"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "SD06-002EN",
+          "face_id": "f:2045714d732b516eb2e24f6d45917ade",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select an enemy follower on the field and engage it.\n\r\n{icon_act|act} {icon_cost10|cost10}, {icon_stand|stand}, put this card into your cemetery: Banish each follower on the field.",
+          "after_value": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select an enemy follower on the field and engage it.\n\r\n{icon_act|act} {icon_cost10|cost10}, {icon_stand|stand}, put this card into its owner’s cemetery: Banish each follower on the field.",
+          "locator": "blocks/0/SD06-002EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "SD06-002EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select an enemy follower on the field and engage it.\n\r\n{icon_act|act} {icon_cost10|cost10}, {icon_stand|stand}, put this card into your cemetery: Banish each follower on the field.",
+          "after": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select an enemy follower on the field and engage it.\n\r\n{icon_act|act} {icon_cost10|cost10}, {icon_stand|stand}, put this card into its owner’s cemetery: Banish each follower on the field.",
+          "raw_before": {
+            "start": 27211,
+            "end": 27938,
+            "sha256": "sha256:c277265b2a247499ac28072acbb923bb9853f9d0289338a0143274c6826a760d"
+          },
+          "raw_after": {
+            "start": 27977,
+            "end": 28786,
+            "sha256": "sha256:be6d6fb156e172e5b30cdb3d2f1936ee92c19a16d34a6ae1a81e5ba37df9478a"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:d02127e60c508702090f510e74c3e10beaa06042f30f6cbdef3c3e59a61e5a37",
+        "url": "https://en.shadowverse-evolve.com/errata/harnessed-flame/",
+        "sha256": "sha256:96bf8ea47ecb7b4558d859a70681fa428d3d12fd813d635e3a582bce50c168e4",
+        "fetched_at": "2026-10-02T13:05:18.445604Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:0427a3caad37d62df20f382a2ef0de485dee0f70f78f4f2c8dfbbf4c39a855af",
+        "first_receipt_id": "sha256:c8a7992462e6ff35f06741693c687465ff19e653d4e33373de3530e33f63df4d"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-166EN",
+          "face_id": "f:1a478d204e1d54eda0e39afee7a004d2",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost01|cost2}, put this card and a Harnessed Glass from your field into your cemetery: Search your deck for a Flame and Glass and put it onto your field.",
+          "after_value": "{icon_act|act} {icon_cost01|cost2}, put this card and a Harnessed Glass from your field into their owners’ cemeteries: Search your deck for a Flame and Glass and put it onto your field.",
+          "locator": "blocks/0/BP01-166EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-166EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-P34EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost01|cost2}, put this card and a Harnessed Glass from your field into your cemetery: Search your deck for a Flame and Glass and put it onto your field.",
+          "after": "{icon_act|act} {icon_cost01|cost2}, put this card and a Harnessed Glass from your field into their owners’ cemeteries: Search your deck for a Flame and Glass and put it onto your field.",
+          "raw_before": {
+            "start": 27666,
+            "end": 28030,
+            "sha256": "sha256:63527aa3065b4db0f7f91ab71ee01e580a5b534154c77452b392e7677645b0ab"
+          },
+          "raw_after": {
+            "start": 28069,
+            "end": 28478,
+            "sha256": "sha256:dde987701150d42275434ac6877893fbd5047e8151387e92535de4a6c7c1ec9c"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:6787db28545e8602ebe1c9b1c5c2fc4e14c69b95c397bf7bc4cfa74b3b3d1047",
+        "url": "https://en.shadowverse-evolve.com/errata/harvest-festival/",
+        "sha256": "sha256:5193b77513b76e19cbca65786b54cf72c917e3841d2907cc2165bf3c233959ac",
+        "fetched_at": "2026-10-02T13:05:21.255531Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:680b803bc6048a54ec8ad8f8b6468707d1bf74208f26f0f6f84d220e8427c64c",
+        "first_receipt_id": "sha256:86ff149ea7e6291e0712f8895ed1b85767218bd9a37221dc7e160e1ccd947002"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s activated ability text did not account for situations where the owner and controller of the card are two different people. There was also a mistake in the translation of the automatic ability that would allow it to trigger when the card was moved from one player’s field to another.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-016EN",
+          "face_id": "f:b6ce21209128563088b25a938a4b20e7",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Give your leader {icon_hp|hp}+1.\nWhen this card leaves your field, draw a card.",
+          "after_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Give your leader {icon_hp|hp}+1.\nWhen this card leaves the field, draw a card.",
+          "locator": "blocks/0/BP01-016EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-016EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-001EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Give your leader {icon_hp|hp}+1.\nWhen this card leaves your field, draw a card.",
+          "after": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Give your leader {icon_hp|hp}+1.\nWhen this card leaves the field, draw a card.",
+          "raw_before": {
+            "start": 27690,
+            "end": 28242,
+            "sha256": "sha256:23f53d1c1f9a4dec8fc8e61c7c9a1dc7db75d7dc17fc56c33bcc05f66f90e563"
+          },
+          "raw_after": {
+            "start": 28287,
+            "end": 28911,
+            "sha256": "sha256:1eb2cd6afd7060f6abe7215a3bf7871ca5f247c0e205c9aa431767dcc7b01cfc"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:42352e0005d63ed86bd8f00d2efc44677f5937093a0f6153a8a9fa4416469bb6",
+        "url": "https://en.shadowverse-evolve.com/errata/hells-unleasher/",
+        "sha256": "sha256:e88eb50ae178f141447ed61af523a85199cf88e411eb008e23c4dc1a7352e3a7",
+        "fetched_at": "2026-10-02T13:05:24.211082Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:ad8b12e5d541c60a32c6d9f3c01251b5e8753df046ba53cc51661a886e1120bd",
+        "first_receipt_id": "sha256:72d2c08fc5f325c8352d9b42fc1a02a671e3254f581c07d64d6bdbd17947ed20"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-109EN",
+          "face_id": "f:d7554293cd9656d18ad11f1e47770ee1",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select a follower that costs at least 3 play points in your cemetery and add it to your hand.",
+          "after_value": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select a follower that costs at least 3 play points in your cemetery and add it to your hand.",
+          "locator": "blocks/0/BP01-109EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-109EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Select a follower that costs at least 3 play points in your cemetery and add it to your hand.",
+          "after": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Select a follower that costs at least 3 play points in your cemetery and add it to your hand.",
+          "raw_before": {
+            "start": 27213,
+            "end": 27565,
+            "sha256": "sha256:9ee8689581f18129a4f3746be7b024c106f7d8ebf195c42937ce606a1e92adc9"
+          },
+          "raw_after": {
+            "start": 27604,
+            "end": 27997,
+            "sha256": "sha256:4053aa87b4e97169645b52736c49307983b4f0f679f8966779517fd73e8ab265"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:208860e43dcba781a2d0d57a6ba6a846417b1bb1ab7b4363bb6578c8d2ead175",
+        "url": "https://en.shadowverse-evolve.com/errata/holy-sentinel/",
+        "sha256": "sha256:97397bd6f860e09796d222809e754c49846b1ea55fc5a70b5d6b330f65ffb68f",
+        "fetched_at": "2026-10-02T13:05:27.727695Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:63aeb7f6f538163754cfc06ebf87fa633dd3f32865f168fabfb3a4d8f572684c",
+        "first_receipt_id": "sha256:01ae2c0031d168d7e26ba5dbcafb265c5bbee5832e9be8ecebc5bef6023fd5e4"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "There was a mistake in the translation of this card’s automatic ability that would allow it to trigger when the card was moved from one player’s field to another.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-141EN",
+          "face_id": "f:52514f7234215c8b8721679092b102b6",
+          "field": "effect",
+          "before_value": "Once on each of your turns, when another amulet leaves your field, summon a Holy Tiger token and give it Ward.",
+          "after_value": "Once on each of your turns, when another amulet you control leaves the field, summon a Holy Tiger token and give it Ward.",
+          "locator": "blocks/0/BP01-141EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-141EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Once on each of your turns, when another amulet leaves your field, summon a Holy Tiger token and give it Ward.",
+          "after": "Once on each of your turns, when another amulet you control leaves the field, summon a Holy Tiger token and give it Ward.",
+          "raw_before": {
+            "start": 27179,
+            "end": 27289,
+            "sha256": "sha256:6fb94eaae5539dab51e2db761eb2e6337f6bcb1a33481f0be876ed2a544eba89"
+          },
+          "raw_after": {
+            "start": 27328,
+            "end": 27481,
+            "sha256": "sha256:53d170f22d9868a86ccc756ecfecf9354ac6014612ea70cba151faa7d3f559c6"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:266db53da24b9386de26697c1bc5304361344f60d876b4c4d1323ab6f159d5c7",
+        "url": "https://en.shadowverse-evolve.com/errata/lord-atomy/",
+        "sha256": "sha256:28feba29485eb564bd9c286fea82c1ee408e5e0af0a4cdff08c132b2ad4c134b",
+        "fetched_at": "2026-10-02T13:05:29.810588Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:f3c250acd46351bca9512dd74b7ad94b77ccb8a9ef73a756670c74a26b995e2f",
+        "first_receipt_id": "sha256:79aeb6d810e114ff1f76f74ed70b6836f37780ceee7cbe3f83d372e557170da0"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of a card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-103EN",
+          "face_id": "f:6678ee362470552e935d9de95d59bbbd",
+          "field": "effect",
+          "before_value": "When playing this card, put 4 reserved  {icon_nightmare|nightmare} cards from your field into your cemetery, or banish 4 {icon_nightmare|nightmare} cards in your EX area: This card costs 9 less to play.",
+          "after_value": "When playing this card, put 4 reserved  {icon_nightmare|nightmare} cards from your field into their owners’ cemeteries, or banish 4 {icon_nightmare|nightmare} cards in your EX area: This card costs 9 less to play.",
+          "locator": "blocks/0/BP01-103EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-103EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-SL15EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "When playing this card, put 4 reserved  {icon_nightmare|nightmare} cards from your field into your cemetery, or banish 4 {icon_nightmare|nightmare} cards in your EX area: This card costs 9 less to play.",
+          "after": "When playing this card, put 4 reserved  {icon_nightmare|nightmare} cards from your field into their owners’ cemeteries, or banish 4 {icon_nightmare|nightmare} cards in your EX area: This card costs 9 less to play.",
+          "raw_before": {
+            "start": 27629,
+            "end": 28021,
+            "sha256": "sha256:1d6493d08109997a270a714d9c6b4f942ddf69743a1e1548a3d90a8bc17ad1c6"
+          },
+          "raw_after": {
+            "start": 28060,
+            "end": 28497,
+            "sha256": "sha256:7b3c466047c46414c5e1606fffef6b8636173cc444fbbc2f64e957ac090b8c78"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:7fdca3b3c805c0854c52d1210e3453cb7146194a59d62cca717c6d4b73f6edda",
+        "url": "https://en.shadowverse-evolve.com/errata/masquerade-ghost/",
+        "sha256": "sha256:66715a53bd55ab7515961cdbd9290b25d47b35493784c670cb32331cb15710bc",
+        "fetched_at": "2026-10-02T13:05:32.524723Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:16c49c7ba052650161d76aa07a919e2a5a0f28387b62280f02600930dd96e76f",
+        "first_receipt_id": "sha256:5b627fc9422d59b9d05f62039069404371a64340c6e1e53b94b710117c768d88"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "There was a mistake in the translation of this card’s automatic ability that would allow it to trigger when the card was moved from one player’s field to another.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP03-075EN",
+          "face_id": "f:f6f585c84d425e63bab97c9b20e7bafe",
+          "field": "effect",
+          "before_value": "Whenever a Ghost leaves your field, summon a Gargantuan Ghost token.",
+          "after_value": "Whenever a Ghost you control leaves the field, summon a Gargantuan Ghost token.",
+          "locator": "blocks/0/BP03-075EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP03-075EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP03-SL16EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Whenever a Ghost leaves your field, summon a Gargantuan Ghost token.",
+          "after": "Whenever a Ghost you control leaves the field, summon a Gargantuan Ghost token.",
+          "raw_before": {
+            "start": 27675,
+            "end": 27745,
+            "sha256": "sha256:b35b7b9ccc4d96a2ed96e63ca662eb1210614e9e84dc6f10db29101c56930056"
+          },
+          "raw_after": {
+            "start": 27778,
+            "end": 27891,
+            "sha256": "sha256:1d84546169326c60b5c7d683b24fa908bac07d220ceae47b57ada446a8988b6a"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:3401800bd126a7391efeba36935749c5ea40573c6315b9f9ea96e398a488cee7",
+        "url": "https://en.shadowverse-evolve.com/errata/matikanefukukitaru/",
+        "sha256": "sha256:06f1825842e851353611717976bc5209eade3816e6c61bd624263cad001180d6",
+        "fetched_at": "2026-10-02T13:05:35.381581Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:eeb0b066218b203eee443cc7871af3c245d5168c1cd5ad8571bb77768343905b",
+        "first_receipt_id": "sha256:d674c18e2324dcad19939e01fe44ed96fcd008646d1f2ba2e002fd3677733add"
+      },
+      "region": "en",
+      "announced_on": "2025-11-29",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Nov. 29, 2025                                              ",
+      "reason": "Due to an oversight in the quality control process, the original text gives leaders +1 defense instead of +7 defense, which makes the granted effect weaker than what it was intended to be.",
+      "exchange_offered": true,
+      "changes": [
+        {
+          "card_no": "ECP01-052EN",
+          "face_id": "f:74168db71a5456b78ddd96d697b4f6d0",
+          "field": "effect",
+          "before_value": "Whenever a Fate's Forecast is put onto your field, give your leader {icon_hp|hp}+1.",
+          "after_value": "Whenever a Fate's Forecast is put onto your field, give your leader {icon_hp|hp}+7.",
+          "locator": "blocks/0/ECP01-052EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "ECP01-052EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "ECP01-P28EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Whenever a Fate's Forecast is put onto your field, give your leader {icon_hp|hp}+1.",
+          "after": "Whenever a Fate's Forecast is put onto your field, give your leader {icon_hp|hp}+7.",
+          "raw_before": {
+            "start": 27694,
+            "end": 27874,
+            "sha256": "sha256:e9dae97f97c0a131d252f139e98305c9591e8583ad22b93560f79ebc479765d3"
+          },
+          "raw_after": {
+            "start": 27907,
+            "end": 28117,
+            "sha256": "sha256:035fd1e768fe53c30c6e620a5aaebd31f1987dd92f45d9f94c55ee2357c98c87"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:0bf6906028c3caac78a11c00bc6b1076c658a5e5c24ea998b02dd870c5c309bb",
+        "url": "https://en.shadowverse-evolve.com/errata/may-eager-elf/",
+        "sha256": "sha256:61bfe4de3bb0e345055ba1ac0073f3bc6cb180bb4b276128da2761402f869cf3",
+        "fetched_at": "2026-10-02T13:05:38.433910Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:ab79342e4bf7d44b52036aab2c6eaa0e94215c991589f1cacb383aa99fa82cc6",
+        "first_receipt_id": "sha256:47b265b4e4bf8c6c7cff39bba24c2007713c05410bc2a09a6bbf40c9484dbf44"
+      },
+      "region": "en",
+      "announced_on": "2026-07-16",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Jul. 16, 2026                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP18-007EN",
+          "face_id": "f:71c484ffcd0853979903dcdb9969e669",
+          "field": "effect",
+          "before_value": "Select an enemy follower on the field and deal it 1 damage. If this wasn't put onto the field from hand, put this on the bottom of your deck.",
+          "after_value": "Select an enemy follower on the field. Deal it 1 damage and, if this wasn’t put onto the field from hand, put this on the bottom of its owner's deck.",
+          "locator": "blocks/0/BP18-007EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP18-007EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP18-P03EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Select an enemy follower on the field and deal it 1 damage. If this wasn't put onto the field from hand, put this on the bottom of your deck.",
+          "after": "Select an enemy follower on the field. Deal it 1 damage and, if this wasn’t put onto the field from hand, put this on the bottom of its owner's deck.",
+          "raw_before": {
+            "start": 27649,
+            "end": 27790,
+            "sha256": "sha256:e552edfa7e408b8adaf3670ef5ea0ae656d7b3f1e43832f62840d8487baa901f"
+          },
+          "raw_after": {
+            "start": 27842,
+            "end": 28030,
+            "sha256": "sha256:757e213e6982ea8ccffb6865e28377c2bab38b0361f86bf50e0814368c09096c"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:964198bd40b88496c18301897bd3baf580a02e070e29fbb6d727b472eb431769",
+        "url": "https://en.shadowverse-evolve.com/errata/mimi-infernal-right-paw/",
+        "sha256": "sha256:fb09b83082011c57cfecbaa129175b17403107eea3d21449365076362bde8065",
+        "fetched_at": "2026-10-02T13:05:41.009198Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:f4770a5e75496758aa79b0ab0b2ef836a6e4d061f107c2d3d37e83a59b99d2bc",
+        "first_receipt_id": "sha256:ff899437a3ee5f6e5f5ee37e9f2498ff120fd6ff04167bfea3e70ded52124598"
+      },
+      "region": "en",
+      "announced_on": "2026-05-15",
+      "effective_on": null,
+      "date_raw": "\n                                                                         May 15, 2026                                              ",
+      "reason": "Card text for cards related to \"Cerberus\", including the token card \"Mimi\", has been changed in order to distinguish them from the cards released in crossover set \"Princess Connect! Re: Dive\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-T12EN",
+          "face_id": "f:53855af8db475294bf542b6fb7334959",
+          "field": "name",
+          "before_value": "Mimi",
+          "after_value": "Mimi, Infernal Right Paw",
+          "locator": "blocks/0/BP01-T12EN",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-T12EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "GFB01c-T01EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Mimi",
+          "after": "Mimi, Infernal Right Paw",
+          "raw_before": {
+            "start": 27723,
+            "end": 27738,
+            "sha256": "sha256:963472dfeb77443ef5bac134171db913c047ef4f23f82346a6c73fc11f5117c1"
+          },
+          "raw_after": {
+            "start": 27790,
+            "end": 27855,
+            "sha256": "sha256:57c0da432a44c608d5b79a9ae69038996e412b6b11e3125b4c281535d1373573"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:06fed858d27d5dbefe9a3b8eda8e6ae0fd166cee3d9a822f14e59d095a8012e0",
+        "url": "https://en.shadowverse-evolve.com/errata/mordecai-the-duelist/",
+        "sha256": "sha256:72589bca3c8c6cafa0e4ebf54522cb01acf2074b784dd86eb9b2a0f88f3056bc",
+        "fetched_at": "2026-10-02T13:05:43.744213Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:fc2180cdd0881c96fd3c04198e8fa33632807c122924c81b8482cfdb7ea543f3",
+        "first_receipt_id": "sha256:177d66f6a12bbe4258d7338d3eb5801456b1d59ec9b415647ae7aefec0dd850f"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-107EN",
+          "face_id": "f:bcc4fd3daf3d593b9eaf2570170b0164",
+          "field": "effect",
+          "before_value": "{icon_lastword|lastword} Give your leader {icon_hp|hp}-3: Put this follower onto your field.",
+          "after_value": "{icon_lastword|lastword} Give your leader {icon_hp|hp}-3: Put this follower onto its owner’s field.",
+          "locator": "blocks/0/BP01-107EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-107EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP01-P21EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_lastword|lastword} Give your leader {icon_hp|hp}-3: Put this follower onto your field.",
+          "after": "{icon_lastword|lastword} Give your leader {icon_hp|hp}-3: Put this follower onto its owner’s field.",
+          "raw_before": {
+            "start": 27708,
+            "end": 27990,
+            "sha256": "sha256:db0a3711ea58ca53a4dcfb5ea95e5fddfffc933e84e8efa528a295ba4b10ee49"
+          },
+          "raw_after": {
+            "start": 28029,
+            "end": 28352,
+            "sha256": "sha256:755d95fb621b456a922c035a5abde1aa72db4d61afc1f5c71db1653d730faa52"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:9a1000e9bed348f948c6c6b058cc0bc3079e79cc43c915db3bf4dca6d47177b2",
+        "url": "https://en.shadowverse-evolve.com/errata/path-to-purgatory/",
+        "sha256": "sha256:0c9d1f33e62be88014a8dbb4c120fd5f71dc9d594a1e73ca6a51d37d4f630eb6",
+        "fetched_at": "2026-10-02T13:05:46.572065Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:259d50c153c16eed0d73352453062d5d3998eef80f1c7b59a35177ae98497009",
+        "first_receipt_id": "sha256:9727d31442795c6a0d80632aab7aa057f4e419ae237d7216ce63230fa68d8c32"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-162EN",
+          "face_id": "f:cb13bad5e8755ba0a3a7f1114d315452",
+          "field": "effect",
+          "before_value": "At the start of your end phase, if your leader’s {icon_hp|hp} is 6 or less, {icon_stand|stand}, put this card into your cemetery: Deal 6 damage to each enemy follower on the field.",
+          "after_value": "At the start of your end phase, if your leader’s {icon_hp|hp} is 6 or less, {icon_stand|stand}, put this card into its owner’s cemetery: Deal 6 damage to each enemy follower on the field.",
+          "locator": "blocks/0/BP01-162EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-162EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-015EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "At the start of your end phase, if your leader’s {icon_hp|hp} is 6 or less, {icon_stand|stand}, put this card into your cemetery: Deal 6 damage to each enemy follower on the field.",
+          "after": "At the start of your end phase, if your leader’s {icon_hp|hp} is 6 or less, {icon_stand|stand}, put this card into its owner’s cemetery: Deal 6 damage to each enemy follower on the field.",
+          "raw_before": {
+            "start": 27681,
+            "end": 28053,
+            "sha256": "sha256:7469a0fc57cf80d4277fac1fb230478a93c853d764eef691c1853aa3b626c373"
+          },
+          "raw_after": {
+            "start": 28092,
+            "end": 28505,
+            "sha256": "sha256:389cec3985816c0f0368674a8ff2ad24866310f14d5b034e510783acd4b486b8"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:19fe903eee86658e5c7dcc6b18ed045d9e118f6784c3f760a1971b69b32f186d",
+        "url": "https://en.shadowverse-evolve.com/errata/pinion-prayer/",
+        "sha256": "sha256:b08bb4b18e3ff312681afc44f2e9595db8eb53cee7ba7901b615b220b1806479",
+        "fetched_at": "2026-10-02T13:05:49.042300Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:587868663367dbf17538390a0952ee72967880cf2a3a0e926fc4518e6fa4cd08",
+        "first_receipt_id": "sha256:fe79b46807312acbedad9c52ea71b63e0f4ee77d67e97f0b98be72bbed195ac7"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "SD06-015EN",
+          "face_id": "f:17d22a37412a5691b1b42849eb635720",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Falcon token.",
+          "after_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Falcon token.",
+          "locator": "blocks/0/SD06-015EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "SD06-015EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Holy Falcon token.",
+          "after": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Holy Falcon token.",
+          "raw_before": {
+            "start": 27179,
+            "end": 27581,
+            "sha256": "sha256:60abd213a062c63b2acad2128ffdf0ae104dc8b0dcc321ecbcaab9a53bb5c147"
+          },
+          "raw_after": {
+            "start": 27620,
+            "end": 28065,
+            "sha256": "sha256:21c58c42b63617b6879f42c151d8c50d6d10cd423b4ce61128cee0e2540ecd54"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:12842c1b4db66bacf7165ad51a7791d9684558ba7b3c6951e9544ee8c4e15e35",
+        "url": "https://en.shadowverse-evolve.com/errata/purson/",
+        "sha256": "sha256:2bc3899ee1186d7e4e2c204d68ba2f5c920e4a4db490a41ab021ce30e61edc2b",
+        "fetched_at": "2026-10-02T13:05:52.016435Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:6e762765ec14c3b621d5eaea607934882117068d86cbe3080537a872acdb96e4",
+        "first_receipt_id": "sha256:71d181c25f46424c3da73a0f52a4f1e736d65f677ddc6af11a0787b296dd1168"
+      },
+      "region": "en",
+      "announced_on": "2024-07-02",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Jul. 2, 2024                                              ",
+      "reason": "There was a grammatical error in this card's ability text.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "GFB01c-004EN",
+          "face_id": "f:a3328d1abc6252d587a726d5901dfb9e",
+          "field": "effect",
+          "before_value": "Shuffle the rest and put them on the bottom your deck.",
+          "after_value": "Shuffle the rest and put them on the bottom of your deck.",
+          "locator": "blocks/0/GFB01c-004EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "GFB01c-004EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Shuffle the rest and put them on the bottom your deck.",
+          "after": "Shuffle the rest and put them on the bottom of your deck.",
+          "raw_before": {
+            "start": 27588,
+            "end": 27644,
+            "sha256": "sha256:29412f0a91d42b0d2245e9209c21141691006e80dc5376cb769adfef7db19ab6"
+          },
+          "raw_after": {
+            "start": 27677,
+            "end": 27768,
+            "sha256": "sha256:e2210d11b4c44edd881828083406c2f34f8ea1fa065a8fb4d33d16ab084db7ce"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:ae6086caa0b151f96061ac263a633b77fa5ad85feed839bcc3e42b92d9b93d06",
+        "url": "https://en.shadowverse-evolve.com/errata/ravenous-sweetness/",
+        "sha256": "sha256:956b04dce50209f86d29aef4613e844f3c8be30efbc1640cb2986ef979be143c",
+        "fetched_at": "2026-10-02T13:05:54.993111Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:397c6ece3643d6aa6ae6dfe4b9a7dce48e4fb2a8e429169a6ae7c2da5743e3f6",
+        "first_receipt_id": "sha256:adca01dd90262612f2d9624ba588e3c9d9dce29b2b5a0385b249c03711365b97"
+      },
+      "region": "en",
+      "announced_on": "2026-09-16",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Sep. 16, 2026                                              ",
+      "reason": "Due to an oversight in the quality control process, an erroneous card name \"Sweetness of Voracity\" was used instead of \"Ravenous Sweetness\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP20-T18EN",
+          "face_id": "f:56812f6d193257f782e97baa0d0df81f",
+          "field": "name",
+          "before_value": "Sweetness of Voracity",
+          "after_value": "Ravenous Sweetness",
+          "locator": "blocks/0/BP20-T18EN",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP20-T18EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Sweetness of Voracity",
+          "after": "Ravenous Sweetness",
+          "raw_before": {
+            "start": 27655,
+            "end": 27676,
+            "sha256": "sha256:f36b3718163308a9c5445eb53a03517a69dfec8c981860c9760bb3a28f4468dc"
+          },
+          "raw_after": {
+            "start": 27745,
+            "end": 27763,
+            "sha256": "sha256:ff307b273cb0259be562a17df782d267be4269356f8b7bd898e022938127ee30"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:be6765834d78c0a5507f1109394694c8665144fd0ba8ca85c10f6fe1b7cba67e",
+        "url": "https://en.shadowverse-evolve.com/errata/rulenye-valnareik/",
+        "sha256": "sha256:ac268a3114a24905331850d7104d3fd3af490e3b0547aba1b763348dad5d80d5",
+        "fetched_at": "2026-10-02T13:05:57.545220Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:7c17b9f8194483fddece1c1c4be3de573d7c80e4914af93aabb1a6ea66568835",
+        "first_receipt_id": "sha256:3a716915a4834d88aa0603b6645573d81f5944a4797423295007a2b6292e490c"
+      },
+      "region": "en",
+      "announced_on": "2026-09-10",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Sep. 10, 2026                                              ",
+      "reason": "Due to an oversight in the quality control process, an erroneous card name \"Ruleneye, Echoing Scream\" was used instead of \"Rulenye, Echoing Scream\".",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP20-075EN",
+          "face_id": "f:ff6a18cb3e575198ba7b8cde84912777",
+          "field": "effect",
+          "before_value": "Summon 2 Ruleneye, Echoing Scream tokens.",
+          "after_value": "Summon 2 Rulenye, Echoing Scream tokens.",
+          "locator": "blocks/0/BP20-075EN",
+          "scope": "fragment"
+        },
+        {
+          "card_no": "BP20-075EN",
+          "face_id": "f:ff6a18cb3e575198ba7b8cde84912777",
+          "field": "other",
+          "before_value": "Token text: Ruleneye, Echoing Scream",
+          "after_value": "Token text: Rulenye, Echoing Scream",
+          "locator": "blocks/1/BP20-075EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP20-075EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP20-SL21EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP20-U06EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes",
+            "Ability text"
+          ],
+          "before": "Summon 2 Ruleneye, Echoing Scream tokens.",
+          "after": "Summon 2 Rulenye, Echoing Scream tokens.",
+          "raw_before": {
+            "start": 27747,
+            "end": 27788,
+            "sha256": "sha256:ecc427926c25dff9b43ec5c89d2808ac0e8a91f6923c3381692a28e8ff6138d0"
+          },
+          "raw_after": {
+            "start": 27827,
+            "end": 27904,
+            "sha256": "sha256:f270effc6bcd644a03c65f1d5bc72b9dae9e9b25bad2cec0a86fa011b9ca4296"
+          }
+        },
+        {
+          "ordinal": 1,
+          "context": [
+            "Token text"
+          ],
+          "before": "Ruleneye, Echoing Scream",
+          "after": "Rulenye, Echoing Scream",
+          "raw_before": {
+            "start": 27967,
+            "end": 27991,
+            "sha256": "sha256:805c88bdefe53d5695f046a4c76d3523c4417cf7ea05e2e2ee1a5f3269b9c6c5"
+          },
+          "raw_after": {
+            "start": 28060,
+            "end": 28090,
+            "sha256": "sha256:a4b46c566e0f9de0ca668dd5268c85cb5e8d5cc091ae25f139ec5a7fbf5dda0a"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:4726e5073d803e65c6afa60588115633257716acf9b8a805d499b5bf9664f557",
+        "url": "https://en.shadowverse-evolve.com/errata/sacred-plea/",
+        "sha256": "sha256:9c631f47352c761f9a185199431a4b61cf453c79e0f632064c2e1c18ac014dc6",
+        "fetched_at": "2026-10-02T13:06:00.526366Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:3fe5925b98e99ce27de2c19ca56eb20eb9eb76e53564d691c3b5419a76ba61ab",
+        "first_receipt_id": "sha256:e633d2f42ff9a258573d51f6abd6d0dd371a90b9780540090572cf48febb31a8"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-133EN",
+          "face_id": "f:4fdbfa8713985083ade21726506a141e",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Draw a card.\n{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Draw 2 cards.",
+          "after_value": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Draw a card.\n{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Draw 2 cards.",
+          "locator": "blocks/0/BP01-133EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-133EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Draw a card.\n{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into your cemetery: Draw 2 cards.",
+          "after": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Draw a card.\n{icon_act|act} {icon_cost02|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Draw 2 cards.",
+          "raw_before": {
+            "start": 27163,
+            "end": 27826,
+            "sha256": "sha256:07c6cccbf3dfc96ebe58ba92a904c9a311c7ca7300a09e8e91c1ca23b65761f0"
+          },
+          "raw_after": {
+            "start": 27865,
+            "end": 28610,
+            "sha256": "sha256:f3164aea5cce5c2908597969fed876a45e2a6a480279c0cee3b380d56f838473"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:7fccb36bd98e1b79342a9754cfc0310d5d81699f232c66a9f9494413aa29d429",
+        "url": "https://en.shadowverse-evolve.com/errata/sirius-symboli-escorte-etoile/",
+        "sha256": "sha256:9ca12a4b5835b0dfd2f3a7bcac073f3da161ca6a66b3b6b5eae5e3d2446dbc84",
+        "fetched_at": "2026-10-02T13:06:02.995542Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:0c5d025b97824ab61d20f7373193826486d6ddb08cf4e6bf62dce1b9330ee9b6",
+        "first_receipt_id": "sha256:e42060480fad5f2413af87a0354e022bf18875729e99af12c8f418bddf8b501b"
+      },
+      "region": "en",
+      "announced_on": "2025-11-29",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Nov. 29, 2025                                              ",
+      "reason": "Due to an oversight in the quality control process, the original text gives this follower attack instead of defense, which makes the granted effect different to what it was intended to be.",
+      "exchange_offered": true,
+      "changes": [
+        {
+          "card_no": "ECP01-013EN",
+          "face_id": "f:7a7f5a47f70a53a587f0057d259f065a",
+          "field": "effect",
+          "before_value": "{icon_fanfare|power} If there are at least 3 Umamusume cards on your field, give this follower {icon_power|power}+1 and \"Strike - Draw a card. Discard a card.\"",
+          "after_value": "{icon_fanfare|power} If there are at least 3 Umamusume cards on your field, give this follower {icon_hp|hp}+1 and \"Strike - Draw a card. Discard a card.\"",
+          "locator": "blocks/0/ECP01-013EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "ECP01-013EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "ECP01-SL08EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "ECP01-SP08EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "ECP01-SSP08EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_fanfare|power} If there are at least 3 Umamusume cards on your field, give this follower {icon_power|power}+1 and \"Strike - Draw a card. Discard a card.\"",
+          "after": "{icon_fanfare|power} If there are at least 3 Umamusume cards on your field, give this follower {icon_hp|hp}+1 and \"Strike - Draw a card. Discard a card.\"",
+          "raw_before": {
+            "start": 27830,
+            "end": 28181,
+            "sha256": "sha256:ab1589f6311c8e0738332a48868b30e0ab0d392fbd725ba40d265dc0efc73909"
+          },
+          "raw_after": {
+            "start": 28214,
+            "end": 28591,
+            "sha256": "sha256:1a1251cad5f1e54dded6ee4a4aa544e8de3e488a890cfd0d6f0986e26affd92c"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:058e43e9eb08e51124bff41ee564b13c018595deb07970262047a331a2a23220",
+        "url": "https://en.shadowverse-evolve.com/errata/skullfane/",
+        "sha256": "sha256:35a8ebb1ef39fa4907b99053bd95d2f0e7620ac70584c4931ca47f5c3d2b88e8",
+        "fetched_at": "2026-10-02T13:06:05.270842Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:1734c51fb7a12b2c75ed115ecb03d3846875ab186bfb540155c50896ce99d702",
+        "first_receipt_id": "sha256:27c050abbf61cae8076da00d8bd27c1e35fed9cf1b4c6327b99fb8232868209f"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "There was a mistake in the translation of this card’s automatic ability that would allow it to trigger when the card was moved from one player’s field to another.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "SD06-001EN",
+          "face_id": "f:a30d7f6226365a56a9d991e765c6139e",
+          "field": "effect",
+          "before_value": "Whenever an amulet leaves your field, deal 2 damage to each enemy leader and enemy follower on the field.",
+          "after_value": "Whenever an amulet you control leaves the field, deal 2 damage to each enemy leader and enemy follower on the field.",
+          "locator": "blocks/0/SD06-001EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "SD06-001EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Whenever an amulet leaves your field, deal 2 damage to each enemy leader and enemy follower on the field.",
+          "after": "Whenever an amulet you control leaves the field, deal 2 damage to each enemy leader and enemy follower on the field.",
+          "raw_before": {
+            "start": 27147,
+            "end": 27252,
+            "sha256": "sha256:61bf05b50366374f37ba010a92708c3804fd04ad4f136360b881e22018260a44"
+          },
+          "raw_after": {
+            "start": 27291,
+            "end": 27439,
+            "sha256": "sha256:1ceb1fe2c13a9d15d91436917f8f45fb7295dea22f744012c57ebb29bfc2b510"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:c6e5ae547998a33ea01fbd26e5feedb36ca61e3e70038f01086f45db573dd49e",
+        "url": "https://en.shadowverse-evolve.com/errata/third-class-officer/",
+        "sha256": "sha256:c4334bb68b7af6d34468c2ffe545d14dc7306c8c35a55c9d78a6a48e703b976a",
+        "fetched_at": "2026-10-02T13:06:08.035446Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:015c086be9eadc89f8498e58eab141e8fada180e560884b1675d37da5adb94f3",
+        "first_receipt_id": "sha256:866923ad6d5171bfbedb9c13c2b61c9246de6ccd6eb058f8ebb9a48a004bc2c0"
+      },
+      "region": "en",
+      "announced_on": "2026-07-09",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Jul. 9, 2026                                              ",
+      "reason": "Due to an oversight in the quality control process, an erroneous trait name \"Ministry\" was used instead of \"Ward Office\", which changes what the card effect searches for.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP18-126EN",
+          "face_id": "f:fc876904f96a5d17932874f49089c947",
+          "field": "effect",
+          "before_value": "Search your deck for a Ministry card not named Third-Class Officer, reveal it, add it to your hand, then shuffle.",
+          "after_value": "Search your deck for a Ward Office card not named Third-Class Officer, reveal it, add it to your hand, then shuffle.",
+          "locator": "blocks/0/BP18-126EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP18-126EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP18-P49EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Search your deck for a Ministry card not named Third-Class Officer, reveal it, add it to your hand, then shuffle.",
+          "after": "Search your deck for a Ward Office card not named Third-Class Officer, reveal it, add it to your hand, then shuffle.",
+          "raw_before": {
+            "start": 27690,
+            "end": 27803,
+            "sha256": "sha256:4bc0c384d1006750b27c1570869ec859cac1d63c036fc3571b31b7fbf297296b"
+          },
+          "raw_after": {
+            "start": 27855,
+            "end": 28008,
+            "sha256": "sha256:c890c5b639d375577dbae96795d60e238ed670e6fb4d2dfeaa0cb19402b96f1e"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:18ffd9fa2d5657d7666de6528ab0ce5c5a303db17eca31f319ef00018ab03e20",
+        "url": "https://en.shadowverse-evolve.com/errata/transmogrified-wyrm/",
+        "sha256": "sha256:dfb0c64da3fe8a0f4c623d6a810370751bd31c814bad6e08560cbd3370b3f588",
+        "fetched_at": "2026-10-02T13:06:10.895682Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:0233043cf9903e783253356d8b8c1f8d6395d934f58feb7c5d4828db131ee3e0",
+        "first_receipt_id": "sha256:4073d9d83250e239af19d32f18d4faa6bc7bee703fe44db954ff548fe4b20f8b"
+      },
+      "region": "en",
+      "announced_on": "2023-10-20",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Oct. 20, 2023                                              ",
+      "reason": "There was a mistake in the translation of this card’s Fanfare ability that only allowed the player to select a card in their own EX area when they should be able to select a card from any player’s EX area.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-061EN",
+          "face_id": "f:49c5978cbc955ddf89e6b99a97502b36",
+          "field": "effect",
+          "before_value": "{icon_fanfare|fanfare} Select a card in your EX area and transform it into a Dragon token.",
+          "after_value": "{icon_fanfare|fanfare} Select a card in an EX area and transform it into a Dragon token.",
+          "locator": "blocks/0/BP02-061EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-061EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_fanfare|fanfare} Select a card in your EX area and transform it into a Dragon token.",
+          "after": "{icon_fanfare|fanfare} Select a card in an EX area and transform it into a Dragon token.",
+          "raw_before": {
+            "start": 27228,
+            "end": 27413,
+            "sha256": "sha256:7616637aa16860e55f321473455078aced14a982f7532b39c73921f862abce5b"
+          },
+          "raw_after": {
+            "start": 27452,
+            "end": 27667,
+            "sha256": "sha256:91064c7b9c33ce8c73326bda7c5abeeb324dd83df1746b5a0bebf23d82b2f173"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:1739ab85e8f836c8f87b79c5f626a29d7211e0eddec746ab3e8eb2edb6abe418",
+        "url": "https://en.shadowverse-evolve.com/errata/tribunal-of-good-and-evil/",
+        "sha256": "sha256:2ef2853e8091e1e850d1973082a89e50832b94eb85491bc22cda8e4d84697a98",
+        "fetched_at": "2026-10-02T13:06:13.261388Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:fbd3b7195969e2ab92e7290f37ae8e4baf472abd08b42296ccfa9cb323b890ab",
+        "first_receipt_id": "sha256:29e2b7ddf7e9fadaff47404e962835a81562ba8015637b327f96ae50d30c0d30"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-091EN",
+          "face_id": "f:f8899e4dd97a518aa9796e392a0d85c0",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Draw a card.",
+          "after_value": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Draw a card.",
+          "locator": "blocks/0/BP02-091EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-091EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_stand|stand}, put this card into your cemetery: Draw a card.",
+          "after": "{icon_act|act} {icon_stand|stand}, put this card into its owner’s cemetery: Draw a card.",
+          "raw_before": {
+            "start": 27275,
+            "end": 27546,
+            "sha256": "sha256:7b2d294d14ee63dff158a1eaf57fd73e64dce039081ab24f14108ea15eac96b5"
+          },
+          "raw_after": {
+            "start": 27585,
+            "end": 27897,
+            "sha256": "sha256:66dc40436c779f3a63a127178727083667c55b5d8d8544037183cf3fe0be846c"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:57a18209c357e4b0e07243a113ffedf460751fe8ae82a8dbe8a4f636032e6bd0",
+        "url": "https://en.shadowverse-evolve.com/errata/vampiric-fortress/",
+        "sha256": "sha256:31f377ff174454fedb926345a04010b70131ef6f55ee47ce8bf2b637cb87939a",
+        "fetched_at": "2026-10-02T13:06:16.206888Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:947594b8218ef268790801f445b1c903e164cbb075118dbf093dca15f144a94e",
+        "first_receipt_id": "sha256:63009febf332048f83770234b1dc30f17edf6df201c56ddb5435e515d5f61d85"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-075EN",
+          "face_id": "f:d98fd800661b529dae7a22e33b3d9f5e",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Forest Bat token.",
+          "after_value": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Forest Bat token.",
+          "locator": "blocks/0/BP02-075EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-075EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-035EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into your cemetery: Summon a Forest Bat token.",
+          "after": "{icon_act|act} {icon_cost01|cost2}, {icon_stand|stand}, put this card into its owner’s cemetery: Summon a Forest Bat token.",
+          "raw_before": {
+            "start": 27680,
+            "end": 28081,
+            "sha256": "sha256:98f10ff70cdc6fe85030a7a8b0979bd00d09c5b2b03824762e741979c2b98b39"
+          },
+          "raw_after": {
+            "start": 28120,
+            "end": 28562,
+            "sha256": "sha256:c59dc96ea3c9f5bb6acc098b0084b494e4cc6b7ef58d2a507e9e00c13e0ecba8"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:fb72b42f6d7a52d5f109a0e9c5a029bb018d11c02179e9ed76fd179f168ee5b0",
+        "url": "https://en.shadowverse-evolve.com/errata/vania-vampire-princess/",
+        "sha256": "sha256:9e81463de3460702d8ca1fcf7ad478128286af0084314f253b6616582715b769",
+        "fetched_at": "2026-10-02T13:06:19.458043Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:0dafadd81086e0abb697d7071632ec56ffc03e354556c9f63fa9c4610a028256",
+        "first_receipt_id": "sha256:f84898d211574b62752c8c83fd483846fefc266e6206376c88ddc37a5d1d4cb5"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP02-069EN",
+          "face_id": "f:6852442a73115bd29f5a4df687e53818",
+          "field": "effect",
+          "before_value": "{icon_act|act} {icon_cost01|cost2}, put a Forest Bat token from your field into your cemetery: Select an enemy follower on the field. Deal 3 damage to it and 1 damage to its leader.",
+          "after_value": "{icon_act|act} {icon_cost01|cost2}, put a Forest Bat token from your field into its owner’s cemetery: Select an enemy follower on the field. Deal 3 damage to it and 1 damage to its leader.",
+          "locator": "blocks/0/BP02-069EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP02-069EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP02-SL13EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP02-U05EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "{icon_act|act} {icon_cost01|cost2}, put a Forest Bat token from your field into your cemetery: Select an enemy follower on the field. Deal 3 damage to it and 1 damage to its leader.",
+          "after": "{icon_act|act} {icon_cost01|cost2}, put a Forest Bat token from your field into its owner’s cemetery: Select an enemy follower on the field. Deal 3 damage to it and 1 damage to its leader.",
+          "raw_before": {
+            "start": 27743,
+            "end": 28114,
+            "sha256": "sha256:900b36dc213bd5874c8f3cfa1284f04ac6157ec81559dc5509b757376aaf9ba6"
+          },
+          "raw_after": {
+            "start": 28153,
+            "end": 28565,
+            "sha256": "sha256:2c0090a0505fa16ed02bbc335ff0c9de88a3a2dbd816f053d3be819ae335bb6d"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:58d1996276229ac74f7d8ae233d99c5f33722091cc5b9e8199e108f7de41cde4",
+        "url": "https://en.shadowverse-evolve.com/errata/wardrobe-raider/",
+        "sha256": "sha256:f3cea31b754b0be2dd0485d7e6fd3775ae6da8a33acade88859c12c2a7b2f774",
+        "fetched_at": "2026-10-02T13:06:21.888453Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v1",
+        "batch_id": "sha256:d172d41e1e9f99882a1f5ad6a599d1e0e7745aec136acf8a3634ccfa2debc9a6",
+        "descriptor_sha256": "sha256:378284627f8c70007086b8b80bb1b37c0779f5a65f95e90b90bce6ed1e1a1300",
+        "first_receipt_id": "sha256:00024004ffc7e490bd3eaaacb2fa63aa5653feba5ba24e883563584c9720b908"
+      },
+      "region": "en",
+      "announced_on": "2024-02-01",
+      "effective_on": null,
+      "date_raw": "\n                                                                         Feb. 1, 2024                                              ",
+      "reason": "This card’s ability text wording did not account for situations where the owner and controller of the card are two different people.",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "BP01-123EN",
+          "face_id": "f:69eb128dc1e653f0ade815f332d070e4",
+          "field": "effect",
+          "before_value": "On Evolve, put a follower from your field into your cemetery: Select an enemy follower on the field and destroy it.",
+          "after_value": "On Evolve, put a follower from your field into its owner’s cemetery: Select an enemy follower on the field and destroy it.",
+          "locator": "blocks/0/BP01-123EN",
+          "scope": "fragment"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "BP01-123EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "On Evolve, put a follower from your field into your cemetery: Select an enemy follower on the field and destroy it.",
+          "after": "On Evolve, put a follower from your field into its owner’s cemetery: Select an enemy follower on the field and destroy it.",
+          "raw_before": {
+            "start": 27197,
+            "end": 27312,
+            "sha256": "sha256:7c78a3cf8c15b0d187c49f733d34e3b82de5479175730be7fe57b171950fa955"
+          },
+          "raw_after": {
+            "start": 27351,
+            "end": 27507,
+            "sha256": "sha256:75481e9f7cf4985e76b4905f7f7d1997ada5af56fd693bdab0ea5d25e9218233"
+          }
+        }
+      ],
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    }
+  ]
+}

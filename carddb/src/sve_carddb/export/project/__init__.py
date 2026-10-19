@@ -72,6 +72,7 @@ def _sort(view: dict[str, list[Record]]) -> None:
 def _nested_sort(row: Record) -> None:
     for name, keys in (
         ("translations", ["field", "ordinal", "target_lang"]),
+        ("wording_translations", ["lang"]),
         ("sections", ["ordinal"]),
         ("current", ["region"]),
         ("regions", ["region"]),
