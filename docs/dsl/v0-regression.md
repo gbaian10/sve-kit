@@ -86,7 +86,7 @@ use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算�
 原 `position`、`source_issue: uncorrected_duplicate`、既有 `source_correction` ID 及
 `proposed_position`；兩個位置都含 face／field／section／line。測試驗證原位置在正向基線、
 建議位置在反向基線且 covered_by 指回同一能力。能力移動後原行將成為未分類來源，
-須交由[來源更正流程](../schema/domains/authored-layout.md)處理重複，不能當作 token 效果。
+須交由[來源更正流程](../schema/domains/authored-layout.md#34-來源更正)處理重複，不能當作 token 效果。
 
 CSD01-T01 的兩行歸通用規則。其餘 15 個空 abilities 卡的主 effect
 為空；16 個空 abilities 卡都保留在測試基線內，不算作執行成功案例。
