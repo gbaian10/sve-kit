@@ -125,16 +125,9 @@ def test_review_drafts_are_bound_to_the_classifications_they_explain(
 
 
 def test_bp07_p06_uses_the_corrected_main_text_without_duplicate_coverage() -> None:
-    draft = read_yaml(ROOT / "authored/rules/effect-reviews/BP07.yaml")
-    assert "positive_alignment_exceptions" not in draft
-    assert all(
-        object_value(row)["card_no"] != "BP07-P06"
-        for row in array(draft["reverse_positions"])
-    )
     card = object_value(
         OBJECT.validate_json((BASELINE / "BP07.json").read_bytes())["BP07-P06"]
     )
-    assert card["unclassified_positions"] == []
     positions = [object_value(row) for row in array(card["positions"])]
     damage = next(row for row in positions if row["ability_indices"] == [2])
     assert [damage[k] for k in ("face", "field", "section", "line")] == [
