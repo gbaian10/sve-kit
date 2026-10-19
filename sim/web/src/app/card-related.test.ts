@@ -60,17 +60,15 @@ function origin(replaced = false) {
 }
 
 describe("loadCardRelated", () => {
-  it("reads only the engine bands of the card's family and keeps the rows that start at the card", async () => {
+  it("reads only the engine bands of the card's family and returns every relation row in them", async () => {
     const { client, snapshot, reads } = origin()
-    const rows = await loadCardRelated(client, snapshot, "c:base", "BP05")
+    const rows = await loadCardRelated(client, snapshot, "BP05")
     expect(reads.sort()).toEqual(["engine/shared/family-BP05/0", "engine/shared/family-BP05/1"])
-    expect(rows.map((row) => row["to_card_id"])).toEqual(["c:evolve", "c:token"])
+    expect(rows.map((row) => row["id"])).toEqual(["r1", "r2", "r3"])
   })
 
   it("fails when the snapshot was replaced while reading", async () => {
     const { client, snapshot } = origin(true)
-    await expect(loadCardRelated(client, snapshot, "c:base", "BP05")).rejects.toThrow(
-      "snapshot replaced",
-    )
+    await expect(loadCardRelated(client, snapshot, "BP05")).rejects.toThrow("snapshot replaced")
   })
 })

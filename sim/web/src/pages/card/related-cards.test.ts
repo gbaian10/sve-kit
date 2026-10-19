@@ -5,6 +5,7 @@ import type { CardSummary, SelectedText } from "../../data"
 import {
   type CardKind,
   evolveDirection,
+  fallbackBase,
   isEvolvePair,
   mentionedCards,
   relatedGroups,
@@ -182,31 +183,65 @@ describe("evolveDirection", () => {
   })
 })
 
+const cards = new Map(
+  [
+    summary("c:base", "BP05-052"),
+    summary("c:evolve", "BP05-053"),
+    summary("c:evolve2", "BP05-055"),
+    summary("c:token", "PR-108"),
+    summary("c:other", "BP05-070"),
+    summary("c:another", "BP05-010"),
+    summary("c:advance", "BP14-019"),
+    summary("c:advanceBase", "BP14-018"),
+    summary("c:spell", "BP05-090"),
+  ].map((card) => [card.cardId, card]),
+)
+const kinds: Record<string, CardKind> = {
+  "c:base": kind("Galmieux"),
+  "c:evolve": kind("Galmieux", "evolve"),
+  "c:evolve2": kind("Another evolve", "evolve"),
+  "c:token": kind("Puppet", "token"),
+  "c:other": kind("Other"),
+  "c:another": kind("Another"),
+  "c:advance": kind("Takeyomi, Paradise", "advance"),
+  "c:advanceBase": kind("Takeyomi, Captain"),
+  "c:spell": kind("Spell", "spell"),
+}
+const kindOf = (id: string) => kinds[id]
+
+describe("fallbackBase", () => {
+  const evolve2 = kind("Another evolve", "evolve")
+
+  it("picks the only plain follower among a renamed evolve card's relations", () => {
+    expect(
+      fallbackBase(evolve2, related("c:evolve2", "c:token", "c:other", "c:spell"), kindOf),
+    ).toBe("c:other")
+  })
+
+  it("decides nothing with no plain follower or with several", () => {
+    expect(
+      fallbackBase(evolve2, related("c:evolve2", "c:token", "c:spell"), kindOf),
+    ).toBeUndefined()
+    expect(fallbackBase(evolve2, related("c:evolve2"), kindOf)).toBeUndefined()
+    expect(
+      fallbackBase(evolve2, related("c:evolve2", "c:other", "c:another"), kindOf),
+    ).toBeUndefined()
+  })
+
+  it("never picks a token, an evolve card or an advance card, and yields to a same-named partner", () => {
+    expect(fallbackBase(evolve2, related("c:evolve2", "c:token"), kindOf)).toBeUndefined()
+    expect(fallbackBase(evolve2, related("c:evolve2", "c:evolve"), kindOf)).toBeUndefined()
+    expect(fallbackBase(evolve2, related("c:evolve2", "c:advance"), kindOf)).toBeUndefined()
+    // A same-named base exists: the name rule already pairs them, the plain follower stays a reference.
+    expect(
+      fallbackBase(kind("Galmieux", "evolve"), related("c:evolve", "c:base", "c:other"), kindOf),
+    ).toBeUndefined()
+    expect(fallbackBase(kind("Plain"), related("c:plain", "c:other"), kindOf)).toBeUndefined()
+  })
+})
+
 describe("relatedGroups", () => {
-  const cards = new Map(
-    [
-      summary("c:base", "BP05-052"),
-      summary("c:evolve", "BP05-053"),
-      summary("c:evolve2", "BP05-055"),
-      summary("c:token", "PR-108"),
-      summary("c:other", "BP05-070"),
-      summary("c:another", "BP05-010"),
-      summary("c:advance", "BP14-019"),
-      summary("c:advanceBase", "BP14-018"),
-    ].map((card) => [card.cardId, card]),
-  )
-  const kinds: Record<string, CardKind> = {
-    "c:base": kind("Galmieux"),
-    "c:evolve": kind("Galmieux", "evolve"),
-    "c:evolve2": kind("Another evolve", "evolve"),
-    "c:token": kind("Puppet", "token"),
-    "c:other": kind("Other"),
-    "c:another": kind("Another"),
-    "c:advance": kind("Takeyomi, Paradise", "advance"),
-    "c:advanceBase": kind("Takeyomi, Captain"),
-  }
   const representative = (id: string) => cards.get(id)
-  const kindOf = (id: string) => kinds[id]
   const card = (id: string): CardSummary => {
     const found = cards.get(id)
     if (!found) throw new Error(`missing synthetic card ${id}`)
@@ -271,6 +306,69 @@ describe("relatedGroups", () => {
     expect(numbers(groups.evolve.cards)).toEqual(["BP05-053"])
     expect(numbers(groups.mentions)).toEqual(["PR-108", "BP05-010"])
     expect(numbers(groups.otherOfficial)).toEqual(["BP05-070"])
+  })
+
+  it("pairs a renamed evolve card with its only plain follower, in both directions", () => {
+    const rows = new Map([
+      ["c:evolve2", related("c:evolve2", "c:token", "c:other")],
+      ["c:other", related("c:other", "c:evolve2", "c:token")],
+    ])
+    const partnerRelated = (id: string) => rows.get(id) ?? []
+    const fromEvolve = relatedGroups({
+      cardId: "c:evolve2",
+      related: partnerRelated("c:evolve2"),
+      mentions: [],
+      representative,
+      kind: kindOf,
+      partnerRelated,
+    })
+    expect(fromEvolve.evolve).toEqual({ direction: "from", cards: [card("c:other")] })
+    expect(numbers(fromEvolve.otherOfficial)).toEqual(["PR-108"])
+    const fromBase = relatedGroups({
+      cardId: "c:other",
+      related: partnerRelated("c:other"),
+      mentions: [],
+      representative,
+      kind: kindOf,
+      partnerRelated,
+    })
+    expect(fromBase.evolve).toEqual({ direction: "into", cards: [card("c:evolve2")] })
+    expect(numbers(fromBase.otherOfficial)).toEqual(["PR-108"])
+  })
+
+  it("keeps a renamed evolve card a reference when its rows are unknown or name two plain followers", () => {
+    // The evolve card's own rows are not loaded (another family): nothing to decide on.
+    const unknown = relatedGroups({
+      cardId: "c:other",
+      related: related("c:other", "c:evolve2"),
+      mentions: [],
+      representative,
+      kind: kindOf,
+    })
+    expect(unknown.evolve.cards).toEqual([])
+    expect(numbers(unknown.otherOfficial)).toEqual(["BP05-055"])
+    // Two plain followers on the evolve card's side: neither direction pairs.
+    const ambiguous = (id: string) =>
+      id === "c:evolve2" ? related("c:evolve2", "c:other", "c:another") : []
+    const fromBase = relatedGroups({
+      cardId: "c:other",
+      related: related("c:other", "c:evolve2"),
+      mentions: [],
+      representative,
+      kind: kindOf,
+      partnerRelated: ambiguous,
+    })
+    expect(fromBase.evolve.cards).toEqual([])
+    const fromEvolve = relatedGroups({
+      cardId: "c:evolve2",
+      related: ambiguous("c:evolve2"),
+      mentions: [],
+      representative,
+      kind: kindOf,
+      partnerRelated: ambiguous,
+    })
+    expect(fromEvolve.evolve.cards).toEqual([])
+    expect(numbers(fromEvolve.otherOfficial)).toEqual(["BP05-010", "BP05-070"])
   })
 
   it("never lists the card itself, a card without a representative printing, or a pair whose kind is unknown", () => {

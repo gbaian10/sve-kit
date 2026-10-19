@@ -23,8 +23,8 @@ const state = vi.hoisted(() => {
 })
 
 vi.mock("../../app/card-related", () => ({
-  loadCardRelated: (_client: unknown, _snapshot: unknown, cardId: string) => {
-    state.loads.push(cardId)
+  loadCardRelated: (_client: unknown, _snapshot: unknown, homeSetId: string) => {
+    state.loads.push(homeSetId)
     return state.failRows
       ? Promise.reject(new Error("synthetic engine failure"))
       : Promise.resolve(state.rows.map((row, index) => ({ id: `r${String(index)}`, ...row })))
@@ -207,7 +207,7 @@ describe("RelatedCards", () => {
   it("renders nothing for a card with no relations, mentions or other printings", async () => {
     await open()
     await waitFor(() => {
-      expect(state.loads).toEqual(["c:base"])
+      expect(state.loads).toEqual(["BP05"])
     })
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument()
   })
@@ -262,13 +262,34 @@ describe("RelatedCards", () => {
     ).toEqual(["/cards/BP05-052", "/cards/EBD02-005"])
   })
 
-  it("treats a differently named evolve card as a reference, not an evolve pair", async () => {
+  it("treats a differently named evolve card as a reference unless its own rows single this card out", async () => {
     state.rows = [{ from_card_id: "c:base", to_card_id: "c:evolve2" }]
-    await open()
+    const first = await open()
     await screen.findByRole("tablist")
     expect(screen.queryByRole("tab", { name: "進化後" })).not.toBeInTheDocument()
     const official = screen.getByRole("list", { name: "其他官方關聯" })
     expect(within(official).getByRole("link")).toHaveTextContent("BP05-055")
+    first.unmount()
+    // The renamed evolve card's rows sit in the same band: this card is its only plain follower.
+    state.rows = [
+      { from_card_id: "c:base", to_card_id: "c:evolve2" },
+      { from_card_id: "c:evolve2", to_card_id: "c:base" },
+      { from_card_id: "c:evolve2", to_card_id: "c:token" },
+    ]
+    const second = await open()
+    expect(await screen.findByRole("tab", { name: "進化後" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    )
+    expect(within(screen.getByRole("tabpanel")).getByRole("link")).toHaveTextContent("BP05-055")
+    second.unmount()
+    await open([], "c:evolve2", ["rev:evolve2"])
+    expect(await screen.findByRole("tab", { name: "進化前" })).toBeInTheDocument()
+    expect(
+      within(screen.getByRole("tabpanel"))
+        .getAllByRole("link")
+        .map((l) => l.textContent),
+    ).toEqual(expect.arrayContaining([expect.stringContaining("BP05-052")]))
   })
 
   it("falls back to the evolve card's representative printing when the bands cannot be pinned", async () => {
@@ -371,7 +392,7 @@ describe("RelatedCards", () => {
     state.mentions = ["base"]
     await open()
     await waitFor(() => {
-      expect(state.loads).toEqual(["c:base"])
+      expect(state.loads).toEqual(["BP05"])
     })
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument()
   })

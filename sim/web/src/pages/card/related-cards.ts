@@ -128,6 +128,34 @@ export function isEvolvePair(a: CardKind, b: CardKind): boolean {
   return false
 }
 
+const plainFollower = (kind: CardKind): boolean =>
+  kind.follower && !kind.token && !kind.evolve && !kind.advance
+
+const targetsOf = (rows: readonly Row[]): string[] => [
+  ...new Set(
+    rows.flatMap((row) => (typeof row["to_card_id"] === "string" ? [row["to_card_id"]] : [])),
+  ),
+]
+
+/**
+ * The base of a renamed evolve card: with no same-named partner at all, the one plain follower
+ * among its official relations. None or several plain followers decide nothing.
+ */
+export function fallbackBase(
+  self: CardKind,
+  related: readonly Row[],
+  kind: (cardId: string) => CardKind | undefined,
+): string | undefined {
+  if (!self.evolve) return undefined
+  const kinds = targetsOf(related).map((id) => ({ id, kind: kind(id) }))
+  if (
+    kinds.some((entry) => entry.kind && !entry.kind.evolve && sameName(self.name, entry.kind.name))
+  )
+    return undefined
+  const plain = kinds.filter((entry) => entry.kind && plainFollower(entry.kind))
+  return plain.length === 1 ? plain[0]?.id : undefined
+}
+
 export type EvolveDirection = "from" | "into"
 
 /** An evolve or advance card lists what it evolves from; any other card lists what it evolves into. */
@@ -157,6 +185,7 @@ export function relatedGroups({
   mentions,
   representative,
   kind,
+  partnerRelated = () => [],
 }: {
   readonly cardId: string
   /** Official `card_related` rows starting at this card. */
@@ -164,8 +193,18 @@ export function relatedGroups({
   readonly mentions: readonly CardSummary[]
   readonly representative: (cardId: string) => CardSummary | undefined
   readonly kind: (cardId: string) => CardKind | undefined
+  /** Official rows starting at a partner, when its bands are loaded; empty when unknown. */
+  readonly partnerRelated?: (cardId: string) => readonly Row[]
 }): RelatedGroups {
   const self = kind(cardId)
+  const fallback = self ? fallbackBase(self, related, kind) : undefined
+  // Both directions agree: a plain follower lists a renamed evolve card only when that card's own
+  // rows would pick it as the base.
+  const evolvesFrom = (target: string, other: CardKind): boolean =>
+    self !== undefined &&
+    (isEvolvePair(self, other) ||
+      target === fallback ||
+      (plainFollower(self) && fallbackBase(other, partnerRelated(target), kind) === cardId))
   const seen = new Set<string>([cardId])
   const evolve: CardSummary[] = []
   const official: CardSummary[] = []
@@ -176,7 +215,7 @@ export function relatedGroups({
     if (!card) continue
     seen.add(target)
     const other = kind(target)
-    if (self && other && isEvolvePair(self, other)) evolve.push(card)
+    if (other && evolvesFrom(target, other)) evolve.push(card)
     else official.push(card)
   }
   const mentioned: CardSummary[] = []

@@ -1,16 +1,11 @@
-import {
-  arrayValue,
-  type LoadedSnapshot,
-  type Row,
-  type SnapshotClient,
-  stringValue,
-} from "../data"
+import { arrayValue, type LoadedSnapshot, type Row, type SnapshotClient } from "../data"
 
 // Only the card's own family bands are read: the official lists already carry both directions.
+// Every row of those bands is returned, not just the card's own: a renamed evolve card is paired
+// from the rows of the other side, which usually sits in the same family.
 export async function loadCardRelated(
   client: SnapshotClient,
   snapshot: LoadedSnapshot,
-  cardId: string,
   homeSetId: string,
 ): Promise<readonly Row[]> {
   const keys = [...snapshot.files]
@@ -29,5 +24,4 @@ export async function loadCardRelated(
   return parts
     .filter((fragment) => fragment.table === "card_related")
     .flatMap((fragment) => fragment.rows)
-    .filter((row) => stringValue(row["from_card_id"]) === cardId)
 }

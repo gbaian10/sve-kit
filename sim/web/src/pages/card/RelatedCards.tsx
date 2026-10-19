@@ -56,10 +56,13 @@ function useCardRelated(
   const key = JSON.stringify([client.base, snapshot?.manifestHash ?? null, cardId, attempt])
   const [state, setState] = useState<RelatedState>()
   const homeSetId = catalog.index.card(cardId)?.["home_set_id"]
+  // Keyed by the manifest hash rather than the snapshot object, so a client that builds its
+  // snapshot view per call does not restart the read on every render.
   useEffect(() => {
+    const snapshot = client.snapshot()
     if (!snapshot || typeof homeSetId !== "string") return
     let active = true
-    void loadCardRelated(client, snapshot, cardId, homeSetId).then(
+    void loadCardRelated(client, snapshot, homeSetId).then(
       (rows) => {
         if (active) setState({ key, rows })
       },
@@ -70,7 +73,7 @@ function useCardRelated(
     return () => {
       active = false
     }
-  }, [client, snapshot, cardId, homeSetId, key])
+  }, [client, homeSetId, key])
   // A missing snapshot (synthetic pages) or an unknown card has no rows and nothing to wait for.
   if (!snapshot || typeof homeSetId !== "string") return { key, rows: [] }
   return state?.key === key ? state : undefined
@@ -249,12 +252,15 @@ export function RelatedCards({
     ]),
     edition,
   )
+  const rows = related?.rows ?? []
+  const rowsFrom = (id: string) => rows.filter((row) => row["from_card_id"] === id)
   const groups = relatedGroups({
     cardId,
-    related: related?.rows ?? [],
+    related: rowsFrom(cardId),
     mentions,
     representative: (id) => representativeOf(catalog, id, edition),
     kind: (id) => cardKindOf(catalog, id, edition),
+    partnerRelated: rowsFrom,
   })
   // This card's other printings and every printing of its evolve pairs live in other sets' bands.
   const pinned = usePinnedPrintings(
