@@ -1,0 +1,72 @@
+{
+  "SD01-016": {
+    "ast_sha256": "ead969827e97f3e6ea377c3dfdec69497697deb02ca61ed8bdb11080bb6fcb8e",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:7a78fe78b293f817ae9135bd2151bdf119e5c19e7ba2b48d6681991471841e5d",
+            "use_id": "use:cf135562f10cb848e270860c17ba8725e49e3d22dcd42c82cc9d17e76970426b",
+            "frame_id": "frame:7edfd757d563ec76a84826efab180df52aa30505a5eb62c52bf836a5c21e16d4",
+            "source_sha256": "a03dd4d10a02a828828a9578c91194884b262f4fb19d9575b22874f5798f3d3e",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 6,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:ec3c2d38def2fa1c5f06207cd508a48a8db7c30e619766b817c7ee5dcd8832c1",
+            "use_id": "use:cf135562f10cb848e270860c17ba8725e49e3d22dcd42c82cc9d17e76970426b",
+            "frame_id": "frame:fd9ddc4e65a60993157034c12cd3cb7fa25cfc86990304f59e53dacc64b33058",
+            "source_sha256": "a03dd4d10a02a828828a9578c91194884b262f4fb19d9575b22874f5798f3d3e",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 49,
+                  "start": 7
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": [
+      {
+        "face": 0,
+        "field": "section",
+        "section": 0,
+        "line": 1,
+        "frame_ids": [
+          "frame:3932d15513e5072f6380810bea3da5e6c1fd77e2d98a186d0d8837567a705b57"
+        ]
+      }
+    ]
+  }
+}

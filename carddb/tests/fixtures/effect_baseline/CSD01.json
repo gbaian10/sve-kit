@@ -1,0 +1,71 @@
+{
+  "CSD01-032": {
+    "ast_sha256": "6cd5e1004ed02076518e8b295e2fcae35e88bed9fb0e1c586aaeb7d27460b8b3",
+    "positions": [
+      {
+        "face": 0,
+        "field": "section",
+        "section": 0,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:f9eed756f07cecba108821d413649e0cbc10e8ae54312eb8f399d186e8b6c9e0",
+            "use_id": "use:b3e2681c0b8e136b0f6156d5f828df63026589820c08e94930fdf11c42de8f9d",
+            "frame_id": "frame:692ca1d8b6395dc1a3f59a385352063dc2b81bbd91a2d3b224de3b5ddc3e1510",
+            "source_sha256": "c5b5200342452cde425e90b5db756548f926d3122c1d6e1f118a89fb9bcfc3f8",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 26,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "frame_ids": [
+          "frame:11501a43f698a7cb378455341944bb0c461e9e4615c3afa0c2bccc1c46b87319",
+          "frame:29a76d827cd2478e5eb2cf0dab14eafc1e7b2a0aba615d0880affe39931df4ea"
+        ]
+      }
+    ]
+  },
+  "CSD01-T01": {
+    "ast_sha256": "2639bff5b21248d6c2614f09769c92b35217bf23388127f539380bc239eaa4e3",
+    "positions": [],
+    "unclassified_positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "frame_ids": [
+          "frame:bb083f8f55b3a8a6794d0fa191aeaf27f142eb79ff5367b3c07fe73543b217d8"
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "frame_ids": [
+          "frame:a1e0ed32d475274f35a018da0bbfe1cf5f7659909238f184b40f4efaf86b6e7f",
+          "frame:fdea153fd5d6406918254cf58d1923c536b58a7c780dde8295d9cc43b903d7ae"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:4dfadc8dd94f069987fcc96617a45e6b47862f7553b353c3c70543d55f9aff3d
+    priority: false
+    conclusion: 參數值差異
+    rationale: 場與墓場的條件計數不同，建立 token 流程相同；容量限制適用於兩者，不能因一組漏 V.zone-capacity 而免除。
+    classifications:
+      T5a5908a869: 9f65eed100fc08012f9c66c7a94fbb87ae3d519b0630339ffd7d6190bbaca9b8
+      T6927c95755: cb2dad3689e69e890ad047f92fa151566c13ce9a8319dccc5631d93fc998388a
+    examples:
+      T5a5908a869:
+        - BP21-SL09
+        - BP21-037
+        - PR-583
+      T6927c95755:
+        - BP15-SL11
+        - BP15-039
+        - PR-418
+    frames:
+      - frame:0cb67922cf6c929b950402e35089554e6631d3e6702e30313741192fab653d13
+      - frame:8590f67ab0abfb13d02ccc19459c5e079420e0550f392b92730b62e869d54ec0
+      - frame:a941dd3f802d9d95ec3596a5a34f2f01087394b3b70a8f0a6afcec1baf6b960b
+      - frame:c4c8e84e3015928ddc0d1ba5a9751461b6ff9ae8e5768de25dc6c98fdc225e71
+    uses:
+      - use:40eb1048a9a114df58e1b5b919a5468872216ccca3340559325e294b1e68fab7
+      - use:d0fba6eb519dc9e596b4970d78f5d99348adf55b8276630f7157194efd9619a5
+      - use:dd3383779c57c69a3b6e73993c0d6abea6f1dc1f61e6505a6c00e55d5b074b43
+      - use:e7c7dfa14314d677632ce2da3bdb750f964de1cdc4a3396b256e64b124bd3dda
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:48ec4ab73e3fde9117e69cfdf2c118facfd4c771bde195a3a7a2e4b1d3b5b705
+    priority: false
+    conclusion: 等價寫法
+    rationale: 進化時搜尋低費 follower；I.search 複合標註與 S.filter／D.resolve-choice 展開等價，保留上限及搜尋流程。
+    classifications:
+      T216a59943c: 827871930fa2c0fd159220ebf4c9843c707e6c4cc40071c5ceccc2dcfb070e11
+      T7dab31aaf9: 76647468a56d01dd0e03579a6cc210048197b02642f85db1c0c7331ab0728f5d
+    examples:
+      T216a59943c:
+        - CP02-P39
+        - CP02-048
+      T7dab31aaf9:
+        - BP15-005
+        - BP15-SL05
+        - PR-395
+    frames:
+      - frame:2c7cfe59c2fb369e402666b33ab811cc774cae940fa5e1fc68e79ad0e8fe2f45
+      - frame:46d609797aed2739bfffa567ef59cbb851d2339ab7a47fb71cffcf35ee4f9af6
+    uses:
+      - use:01e07e32ae7d45728537e96f5f54dc562a1720a338763be684200fbbef3d1856
+      - use:5ada36b909838a2d42a7772b1ce5242d9ce34e44e6230b66e384e4627b29ae59
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:b88420fc4c09c2f102dd7ac879f0d47eacbe67e107c7523d73716742fb3982d5
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 同為至多兩個目標與傷害；只差 A.sel，目標數量及傷害量仍保留。
+    classifications:
+      T019fa68492: a0a58068d737b0746cf2dd9506950683f8b19248ad35a877bc157d1c3c1660cf
+      Tc97736add8: 5cdec30322295d0f7ba04aabcc66b0d843d567805c1fb5168ec05d19a1b41af0
+    examples:
+      T019fa68492:
+        - CP02-P63
+        - CP02-078
+      Tc97736add8:
+        - BP15-P15
+        - BP15-067
+    frames:
+      - frame:307eb325d7136a10c306741f42ab019fe6d45d9e9e3b8fbed68cda2abab1ab00
+      - frame:fe046e12ef9e05a2fda2bf1d10a388a007c4605b8683e7c9e0f9d0b8722cca4b
+    uses:
+      - use:21f05a793788439b0b6acbdaa1204341100a1ff271fe825b8820b40a688dc3c1
+      - use:4abc07b05ab439f6878a46efefd554262c1eadb1196f4969e21dc68b2ad67d3d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:1427c67271c8187d4ef48dfea6a073f3e1f4220a2d71c360aa367190ea03a5ed
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 使用時場上數量門檻減費；A.effect、S.filter、B.ability 的粒度差異，維持 at-play 與 branch。
+    classifications:
+      T2734aadf7b: fc0f6a7bec0144e2e4822c49898008a84eb89a6880fc2fa34b30fa505daa145b
+      T829a458872: 1148f4c7052ed39eb610b8244a8a9f72a9448978c11c47258f4c81313b5fa8ce
+    examples:
+      T2734aadf7b:
+        - CP02-013
+        - CP02-P10
+      T829a458872:
+        - BP15-055
+    frames:
+      - frame:7d9fcbff263deb7dff100ef86fc0e1c46c8821182af664cff79fa24907e03d8a
+      - frame:8732fd50671a77626f71635c903d3c7d41e1c9437c9a34eb6fb3f323fe956def
+    uses:
+      - use:3a6b1ed9e83b751c78d96c3a942ea273987f187ed925128b05298ac3778cdbaa
+      - use:f4da37c2d48303060ef362328cebefb68cc4131100f470409ae92de1c3fe299d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP15-026
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:4d14524eaed5a457a960843c0ba12b45c3c1d8987a972dab8795ed3864b118eb
+      - frame:85ebb67f13cfb175e17937b635e3ad0f676e04ece240319ae63b748987a49608
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP15-079
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:74f4f60dbfa245fafd63f1e7f8401b3c1809aa7e2221ace194335c506c774375
+      - frame:a374e47cfcfeae42ce5b33b0e2df83f09ff91c85d783c8fd70bb5a9166af6aaa
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP15-083
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:5a7e57eaa2b191b821b46798f2db627226a3faa749aab83c29c7aa2c07897ab9
+      - frame:e0760592854d5612fb9a2689d9dec453a6879a5031927ef9a8be0a4de9738ad1
+    category: 跨行涵蓋
+    rationale: section 的兩隻 token 移墓場費用附在主 spell，括號是費用說明。
+    covered_by:
+      ability: 1
+      pointer: /costs
+  - card_no: BP15-PR10
+    face: 0
+    field: effect
+    section:
+    line: 2
+    frame_ids:
+      - frame:17076dadcf87e7d73feef28e4f3f4b55457a8c13048d4c3a6a02a28993ab345a
+    category: 跨行涵蓋
+    rationale: 第一行 choice 的兩個模式共同涵蓋第二行。
+    covered_by:
+      ability: 0
+      pointer: /body/modes
+  - card_no: BP15-SL23
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:74f4f60dbfa245fafd63f1e7f8401b3c1809aa7e2221ace194335c506c774375
+      - frame:a374e47cfcfeae42ce5b33b0e2df83f09ff91c85d783c8fd70bb5a9166af6aaa
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

@@ -1,0 +1,364 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:5ec6be1fbbe4ccb7b3732364280882f188ba4b936d0a6ce93652630baef90901
+    priority: false
+    conclusion: 參數值差異
+    rationale: Player／目的 Zone 不同；墓場與 EX 均保留有序移動，EX 的容量規則由目的地決定。T7346dc50a8 的 I.move 簡寫不能消掉來源順序。
+    classifications:
+      T3ca83dad68: af5d8cad5e9f1c674277625a2391f616c18a2c3cd3f2e2b47e0e942881e9cf3f
+      T7346dc50a8: 8dee9279a685ac6aec04a80073416c6a8bf18ab0e4a49b23257574acb348b78c
+      Te1885b6449: 8e152e19673beef934249bf2a2213e9114e84445a42006cb705a4897fa32f273
+    examples:
+      T3ca83dad68:
+        - BP20-R03
+        - BP05-SL04
+        - BP05-018
+      T7346dc50a8:
+        - BP20-P44
+        - BP20-083
+        - BP20-087
+      Te1885b6449:
+        - BP19-024
+        - BP14-112
+        - BP12-021
+    frames:
+      - frame:0398d5e84d019e1d68a960a48fcfb14c54e4d7e3882640530c14c900eab73464
+      - frame:055f8669ba9d11fd4c24927325bc0fb81ef097c7cb346c47069add97d3ba1d84
+      - frame:0d20d81171033112de78ba58ec4a09e8813204a1d2addd53ea3b4cfadad6bc31
+      - frame:0f4efe36ca49ed0149801456161000c5d5b8130e0cbcd189265c039579c1a7ad
+      - frame:131ae4b0885d9e686be8cdb16545c057702c1d44e57aacc5026e046c09e98e0b
+      - frame:25d02c2e84b5e0318b9711d9601b6f649bccf78bb1dcae4b85d545f4a82816d0
+      - frame:32e34c93cdfa848aa6a8b898d247619a30d92337a7b830a832204f4f250b1d26
+      - frame:372c8d84ca029cedb2c3c268603307386c8b9f86ab21bbe219960f04e816a175
+      - frame:4a260d3f5e3dfb6b19d7c8d4ddebcc33df4a5502b38d6a4fe819e5667f8b34a9
+      - frame:4f43b050820499dbbed3d96d40096d5168c18b49f21c86c01324e1c531f176aa
+      - frame:572989f21fcf5493ad35f24885ddc5bf90e03c13242f70753efe7bd320de9341
+      - frame:5aaa61b0e36de9f7faf3c1e7fb14fce8b19fd9fc828af658b3a7c5029e915c47
+      - frame:6a595c7a2427069255719d43eb636ca21d057d6147e7478ee79ca03be72c20a4
+      - frame:7fe285e39e12806b41986162798382490092e91f07f2512d2fe42f21ed541d38
+      - frame:8099f650e123bd9df2535ddb96bb43985c23d761c1437d1de2d4d430f1ea304e
+      - frame:8799c4469ffcf9a237bdf90fbef186c2a37dcca82cfc80f19f460a5e0fdf51a1
+      - frame:a7fa32423488fb159d543283f9ac10f43b3412e0ec896ecc48e3c76c345b9ae9
+      - frame:a9e27a9d7852456cd51dd27b845b1b34e1d4f67a9a0892ca000cff79ec000db5
+      - frame:ad5f9e42294e19d3f92715b111b69adc20b6c62d642716093347889b245404df
+      - frame:afbba9b8c68b6d81a487d03ec111413afa5f66367dfbfbc15a58610c7944df01
+      - frame:b58e8807e34b541d8285b013c3640e9692c763d46c6063ac570b1ea5b7d46db9
+      - frame:b820556a07220b38003cf37dc7d78b5281225dc868a59c96f005f023dad385ad
+      - frame:bb6b865a6b6b3fe3279299caaa99f222de8384e52f9492c526a42a0ec107703c
+      - frame:e456aab0650682a249f51580804564ac2294c69c125f4e55afbac1336fb9c4f2
+      - frame:edcc1f9da9828f7845daba471f1c5bcab4edd4d3a8a29a7f368b0e4b220bb8ac
+      - frame:ee5af9a103259ea1096c7d113db019904661eedda9505050683e6765bb616b88
+      - frame:f29272564f12e937dc567a324e85f83118be40c28fd3a3542529e2c552385caf
+      - frame:f41c67141074ff1e9cdf62b90735d59efb581000ab32edba0e46477d3fe3e9d6
+      - frame:f7a6a98cc24055bbe643c848f7dc24d8667651cde6b0c3a4fcb02211f76c0662
+    uses:
+      - use:08948e47e75b33d60669c590e38433393c3893b13f5e7fdb802c25fee0cbbeaf
+      - use:0ccf21dc140e467076e3c161f5ad4815dd94d043b7266c4b3f7f6a9c41303d45
+      - use:100e675cc771b727085dd898d70492e78d5fccdb07a1428fe4350ce27504c586
+      - use:140e7816862e314e442df3b211efc94a5e62e2cfaeabab18d4ad464fddabe19f
+      - use:1710938a696f10f0c5e5423b9c94f63da7e98f40cc085fbc3cf228b54629869c
+      - use:2b524108710deaee107f137920970ecced8a1b65885a482a882cf5d60d77ec5d
+      - use:2d09f87dd6c16a03358c42e5e548d9e73b41e2481712f286161bf89d3cffd851
+      - use:2f10f8c2778bdc7830a343673d84534d7f59c2a8f8407ae52b66b9869cea0786
+      - use:3607943794b8fbe77b38196e3c51f25479a164d8db48fb003f2449187150fc52
+      - use:37e339a2b6e789d97d266a2bd05635f0acda0ff598540ad68a10876d3dbc40fa
+      - use:4cf3a2b76e89548b6b13ff65f805676109672d89b7472e945a3fd1e5fbd29c67
+      - use:61e51d6991376415cda65bb2320a15d54d1d16795b9db26b2137d815ac7a7c2d
+      - use:6460e2fb2317c23060cb47f1633ac7b5c5e27d76337ef7f6c4248e16dbf1c12b
+      - use:64750d6b46ecf623986a7c7340368b13afc73ee28e79648962ab6511a391b25e
+      - use:723dbe53eec16a373a6e3495088233ba45d92a322f3da67680e28aeb1cc98ded
+      - use:7c88eba51da1974f9ecf298fa9ca1cb5775cca26d50ea9e25bde2d9c1bb3946e
+      - use:7ce3b2cb4d6ab44e5fde33000da6dc37707d347dd78664b49e9d18eff40ae926
+      - use:86c1876e0302e6bee846bec9d6965d0dae300233689d3c786589908d088e5375
+      - use:8de7b7c33898e3c5a866bd6797e5c3732f267d2e6986c6e36a07c6a001910d43
+      - use:9016cde14f622a8dd0faaf59686ea578854d2da3475681c30486eb35b3d9dac7
+      - use:9e5c5e8ec3bcb5e864abefb4b6878933a2c7ee4338f77eed554934d92b70d0d0
+      - use:a446657d4c42ee1aeffc2680c5c8bf45d962e979db958cb6e82368987a5182a5
+      - use:c44be60c385d994c38381f55cbec146262a3c1ed7f72a2d9a44f30731036969d
+      - use:c73beb32f6838ee6fb28e992c209787b7de25ed68ddf94c9d91aff657cca9338
+      - use:c958e51fa41a2fc8a9689304cd88e165632b6ff35713bdbdffaf7ce35b6d582c
+      - use:cadd781489aa4f1802926fd26fc69201a430a8aeac5bb1f37ac3e3a8c62f50f0
+      - use:d4154ab4c6c74efb3a4cfcc22063128bdbc8bd32f4e040b4c9194ba0d98bc3c7
+      - use:d8e62edcf3d73546710a9d763e1412571944f0ec16facfad50e2aaae3602b314
+      - use:fcfd0616a6d39f03e2497141c6d159c5c9df4946befa5c2270b4c177e2c3b275
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:0b4272b0318e01e56fc03a0d29daa9ef94dfabd1741186fad5e82e7bbce6c7ab
+    priority: false
+    conclusion: 等價寫法
+    rationale: search_to 巨集與 search／reveal／move／shuffle 展開描述同一搜尋流程；CardKind 值不同。共用前須保留展示與洗牌，不能把稀疏 IR 當完整操作清單。
+    classifications:
+      T7ac1a48b4a: 3018122bb1d359537f5ac48493e25a0ef85d6ccdc291aca692e4e49b98fd792d
+      Tf831f61371: 4e1ff16fda72458e7b851b3b57c6d2776b14ad3dca531fed089d183c56d038c6
+    examples:
+      T7ac1a48b4a:
+        - CP04-P37
+        - CP04-049
+        - EBD02-004
+      Tf831f61371:
+        - EBD04-013
+        - BP04-014
+        - BP04-104
+    frames:
+      - frame:061ed302140c2b66bd25ab39cf388f3174eca6f181a944bc4338e8fbf8f80593
+      - frame:60d9886eca10f63c9f5b26c3d4f2410366bbeac4f544a919b93cba95a8d81fe4
+      - frame:8c2a88382ebe5ef077e3f967b1be91a8f4fe1b6d5bdaa303f4a61b92dcf02049
+      - frame:bc868a6389ea063287c78e7b46c07bb56375bcb3ff149934cd640140b4f25be7
+      - frame:cb09249ae4580067edc1b6d864e279b18fb03836177758d004ea5270730a7555
+    uses:
+      - use:19a2172484863c0730fada2c4c0e25cacee699069de45541c314d9b46ca42bf1
+      - use:356b73091a03b5efacb0aecca88a85fc2a403d3bb8807a3035b54a8f17c1a7e1
+      - use:3aad6d0510f0336ad9560635895364f4c5c58e1c8c46b717c67438bc420e2579
+      - use:91d5b2de933ce2d481c80549f68bfe396ffc8c1a7452959cb60067e07e17f1fd
+      - use:f828edacc81b787f384b6655d94f73a761b6dc46cfb315971ac66a63edc78554
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:f1646da770b5e2982c2b0160aed250ce025e70bf41d5921298ccee408e1e48a1
+    priority: true
+    conclusion: 需來源變體
+    rationale: BP01-142 的墓場公開目標用 D.play-param／R.target；BP02-092 的手札選取用 D.resolve-choice／R.object。Zone 值會改變選取語義，共用前需明確的來源變體或有型別的選取模式，禁止直接統一成 target。此為保守的暫定標籤；若規則確認 Zone 本身足以決定選取模式，最終應改列參數值差異，不能把此草案當作已採納的來源拆分。
+    classifications:
+      T95b3a19a04: 2848f29564f19979645372e2a6b308a49ef2fec408c304734b409435d2a7a62c
+      Te3d5f53b3b: 567c33ea8c42056cd899c4cbb06191a9b4106637e4f4479f53d933393187a79b
+    examples:
+      T95b3a19a04:
+        - BP01-142
+        - SD06-007
+      Te3d5f53b3b:
+        - BP02-092
+        - PR-162
+    frames:
+      - frame:13f218f57acf18d25a95cf15144aaeea5bb9be438607572205b34e402d34bfb3
+      - frame:778b72c4c4ec7ca585fe89373cd3b495373fba2730623d95c74785e852c636e4
+    uses:
+      - use:3aba96402b38f6004ca3439e0ef173d0c58e43521510b5efce4e78155947bc2a
+      - use:dad2995db0e096ff33686cf8ffe86503f4d188baa015ca98c6f70bfa3e7c6f17
+    translation_review:
+      required_uses: []
+      conditional_uses:
+        - use:3aba96402b38f6004ca3439e0ef173d0c58e43521510b5efce4e78155947bc2a
+        - use:dad2995db0e096ff33686cf8ffe86503f4d188baa015ca98c6f70bfa3e7c6f17
+      trigger: 來源變體／選取語義採納時逐 use 比對，只有語義、leaf 或中文 render 改變才重審。
+  - id: shape:ecc4a5b0ba4090bbdba8e007e4b859ef4ffc686813e0fb6a846ac5ef45fba7c6
+    priority: false
+    conclusion: 參數值差異
+    rationale: Phase／Player 的開始或結束階段與玩家不同；B.trigger 的省寫不是不同控制。保留 phase_owner、phase_trigger 後才能共用。
+    classifications:
+      T3bc2d55370: c6d8bc7981660d09d273c1845cff53317a3b9e2b0505905ee8225f6e2b5edaf5
+      T891205aa57: 80d397cc72481395f78c272300340c571ca1f3f7528f1c5f116a2e3671626835
+      Tc65e4b2961: 92a40af6810bfa5f1ecb8d684943786656cf154f94f204937c18dfa677e15aef
+    examples:
+      T3bc2d55370:
+        - BP19-P27
+        - BP19-P28
+        - BP19-100
+      T891205aa57:
+        - EBD04-004
+        - EBD04-005
+        - BP15-SL24
+      Tc65e4b2961:
+        - BP20-R07
+        - BP20-T15
+        - BP05-SL09
+    frames:
+      - frame:14f8ef00051c1ac650e46336b323adf58ff06d812ac2d396c86744940debcd24
+      - frame:19f36c1035e21a0be2dd197b8e55eb86f51a260354f6649ef61968a23d0f6a02
+      - frame:1a5f50112ea15b66d446fc6d187cced4ec9d9c219a5495137c0ae0879d8c37d7
+      - frame:20165a1da651a74c1813c7a3c5de32ea1a968b36024f141ab8fbfc4a2a90ffc8
+      - frame:2175c31cb4a9440860fc06fd5ab1d7d7435cbf6ffe174075344c9edc404b2098
+      - frame:222f4dc7fdc0f271c571aa7f2e0bfe153230f7f2911c585e528b851523e40c1b
+      - frame:3bba88270e9635c97ef0ad7504e3fdfb224f643ccbe9611a0acacb5cb8ba4129
+      - frame:50208f1ace5e70e04796ee34cb79e6fb203c83fbdd11823b37b91d5b3f95b1ce
+      - frame:55a72df42246c389f93229434513c4407e97fdb7e119cb6de8e695af6dd49f43
+      - frame:b480f69a3fa174dbe8322f38a49a00e210dfd7f899b90b3aaa0ddbe9771a54ec
+      - frame:c4d9cefbdca77b3d566683fdf0293a61b44762736720576fbc36eface6048732
+      - frame:ffc190d47b7e8e2e3bf4ef45a17e58c9db9a1012f673b49d0c0520167e88a133
+    uses:
+      - use:1fb47605044fa235ec6b545b33a6349ba84c3973fc92838ff6cd484cf482d22c
+      - use:30bcc02354a75914e11d8b096a735c7f6a2d4fff59895e366f777a387f5a8745
+      - use:378ab14c71204dad37df920f932cc9e066575eeb37463fdd26c91442b1674c0a
+      - use:47840c4546ae90fdd833f73a85a37c5721c7b4f32546bb8ece58b8a0fa59d4e8
+      - use:4a0aecdc00e8d8d062900ca2663fc06374ca2a70ee1166b4825eaf8d64027176
+      - use:6d1d413e510ad8a687107e6044dc8f337f657fbbbf2b69521ebac6bd26d08cb1
+      - use:7887009e0fb01004e1fee0a8da14743e3e71946c496a0a85726dcbd080719cf7
+      - use:7d49210f44299d4d9bb23da518bc5e01a17c86753ead8340dd3ff58d63138215
+      - use:8789cd650587f5ff80c87a209f22a27ae21d874816020c35f68c4d3e35936223
+      - use:943b16dc3711cdf22092ee5342cf082950c2e481d19c34a046e492471f47a1b7
+      - use:a2d75c1ad31cacf7f1c3fdd11158d104619318dc7161e40ed7969c001ed55f24
+      - use:cbcd5a223782185f959d2c23d19bf14931cf87b941289b8de9e5c6974179d31c
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:1a05bd2dd2678454c5c97b75455f76cde355edee6fa4cdfd0cd35218f221eafb
+    priority: true
+    conclusion: 舊標註修正
+    rationale: ネクロチャージ與スペルチェイン均為門檻條件，這兩句沒有冒號支付動作。Ta3ed443790 的 PlayParameter 改為字串 None，補條件 branch 草案；門檻機制參數仍不同，C.at-play 保留。
+    classifications:
+      T3cb60b4abf: 5ca6469d6c71011f6f72c4d3cbf23c94647337243bc55b3ab4d047420b1c6c79
+      Ta3ed443790: 84f9709369f10fd3aac9c0bb65566dcf736a32534e3c7995d961a04433555963
+    examples:
+      T3cb60b4abf:
+        - BP15-U05
+        - BP15-082
+        - BP02-074
+      Ta3ed443790:
+        - BP21-P27
+        - BP21-053
+        - BP17-P31
+    frames:
+      - frame:3945f0ab186259ee1d829aca4dba99745b5173731426ee5a5e96de9cc6c19ca3
+      - frame:4804c6bb42300a5a33340185b6f9def7370bef7f63bd6f1bc82b6b30ce606071
+      - frame:6702b38f97627746203ec71ef2f1db870eaf399bbde7605264ccdd8f23f5ecb9
+      - frame:a2ba12cfaf9f5e28c144a8ecd1db4d34714f16a26297d66e42a5a9e9ad4c4d55
+      - frame:c3a557f8e08703485c6ad1a7aaac3171ea171ad66489b09d822e109953124299
+      - frame:f2e00d570652514577f8aaa1898fa00e073615caa21f1ceeb8fcd16000273d6f
+    uses:
+      - use:0ae0d4543aaf8e666d820f3b9022f4724c1917a1a4e0b71fcc3e0c802aefc7ee
+      - use:389ad20793e8060048620161ea37d85976b075d0211ded6941141958be25b581
+      - use:9e22fe52f2e39fd517a168c159560811240fc8fa1dfc59f44c8dcb63991048e9
+      - use:fba2c0ad2b45233677e902ae736036fcd53f2ee5066fa990c4b66627e468cb4d
+      - use:ffb353434db6e14765f3d55400e8b03d230e9a1c57e46e9fdf158d1fd4ab0892
+      - use:ffec26da529e057ecc2816beda0955c592b314b87c4859d186625a87170521ff
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:570897dd173b7403946c2a1dfe07c8acda9e25b0f352ee211360bb603b548867
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 階段開始觸發對對手 leader 傷害；T9fbb695b24 的 I.damage 簡寫應補 B.trigger／E.phase／T.player-set。
+    classifications:
+      T9fbb695b24: b1ec7504e27d2ffd6e338df4eecc1826f28813b91e069e9f5aee60d6e926ea10
+      Tb2d2a11a4d: e34dd08162f899e38ba74b0d5d5496d3bc493a9723640295fcc6283b1eb49076
+    examples:
+      T9fbb695b24:
+        - BP20-R07
+        - BP20-T16
+        - BP05-SL09
+      Tb2d2a11a4d:
+        - CSD02c-015
+        - CP02-P69
+        - CP02-084
+    frames:
+      - frame:3d543bb78fb0aa046a3a14e9162210370b0f18020e0099b2f21efc88decdee38
+      - frame:8c0aac7fd60595ad328eb3343578a61a794d23907a440296cf2ef3064c8caee4
+      - frame:91299fc88d071fd36a69a6159b495f1d3239719c62656a9504ad4eb939bf1040
+      - frame:dd2cfd1012586e4312edd42d0f483061a2634ee34c844da39e7d72eda78f4ab6
+    uses:
+      - use:1fb47605044fa235ec6b545b33a6349ba84c3973fc92838ff6cd484cf482d22c
+      - use:41675e909e48c8c2095b9ad58f6884320c77410edcc4dd1243637c9968b37c70
+      - use:c967ac410668d9173db7ae98c2f1d55e0205c9a64af777369923ba3d3ab5f35a
+      - use:ccd89c3d984b15a0b46f325d53216e0a9c2f194c6002bcc0eaf77a3d36b0150d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:490dd80d0dc78d00558b81bec7c4c46a1a11c792969cbebcf6a0f03eb517a656
+    priority: false
+    conclusion: 舊標註修正
+    rationale: amulet 存在條件後回復；A.sel、S.filter、S.zone 疏密差異，C.live 與 branch 不變。
+    classifications:
+      T59ccc40ff2: 721a051396a76fcf5fb76e7adbf659b15c7702777b74a0c3c09baf3fe3a21adb
+      T914249852c: ee481a6ea5bbbbc8e0ced8d389a3a727701929e99f460190b4ce61e21b79b986
+    examples:
+      T59ccc40ff2:
+        - BP04-051
+      T914249852c:
+        - BP09-099
+        - BP01-143
+    frames:
+      - frame:5c4d4449c87cf5efc9c308f88534101728a1860e322187ab712f95884c312bf7
+      - frame:aa085c301429272292927d891c9653edff90d144d9ca127f229ea1bc9eb88a08
+      - frame:cd2b2eeab41924b7b46d662a8eab96b34e76c6999924d38b2907d41ca7943d71
+    uses:
+      - use:8b16fab579391f223e18a147f087870bc293049d9b3137e53f9ec93b9927c7bd
+      - use:a5a62cb962457b3bdf54f89993f198b40a338f771fbc5adfe0e36769158e4ca4
+      - use:ce430f2d5ef7355b25bc05ee9096a63fa85dce76225b85042b613fa85beb134d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:1e0833983c97332a1ae19e4d93f33b641a3c1f1c04a5108e8203f41c68247cdc
+    priority: false
+    conclusion: 等價寫法
+    rationale: 搜尋至手牌的 reveal／shuffle 展開與複合標註；不能由 T4fb18136cf 未列 reveal 推成隱藏搜尋結果。
+    classifications:
+      T4fb18136cf: dd3ad86f26708c9fc3a1ac925c9ab092795204db03636590a6c7c57c26c80ec5
+      T505d7386bf: 7a6cd35d07219bea2749491191935d330ca2babd987616180e1c22a0bcc96382
+    examples:
+      T4fb18136cf:
+        - BP03-P26
+        - BP03-096
+      T505d7386bf:
+        - BP01-040
+    frames:
+      - frame:81aa6337134be452e8b89896376387a9bd8d607a621ed5a10e430da28e419a28
+      - frame:f5963f1a3b00932c8045d8d6e7aad846f84986118aa847e64b530087bcdba56b
+    uses:
+      - use:35de6bc985eceb6641ea48e5a354b802d87a90f70693194e894a802b01e0a96d
+      - use:fab838f14e5f8e60679ddceace5f74ee40333e194a1f3da6969915ab9dc4b746
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:17e00ac700cec8a430539fd2f5613997ad0842ba175908e4ac2e10462eaaffa0
+    priority: false
+    conclusion: 等價寫法
+    rationale: fanfare 搜尋 spell 的顯式 reveal／move／shuffle 與複合 I.search；搜尋篩選為參數，展示與洗牌不可省。
+    classifications:
+      T2024a1d750: f2b695f2e480a92b640ffb7e1086cf42cc0b1c4aff9e90c736117a8b5eee8b4d
+      Td53786e414: b1b1cc30991b8c2062fc12d7947ef28a00637016ce803a57d8b73b348f62e2ae
+    examples:
+      T2024a1d750:
+        - BP01-036
+        - PR-077
+      Td53786e414:
+        - BP09-001
+        - BP09-SL01
+        - BP09-U01
+    frames:
+      - frame:9ab97d3b57330aed38ade1901044a18c53a9b0a57bed8a2dd9970bb009e919b9
+      - frame:d4f14795cce8f2e96e662ec2e11af98707322e15318a78032cd3d99cf66e43a5
+    uses:
+      - use:4aa818aa046dc18d14cba09f1d67d7875f54e0589e81b33e41a7edf3382442db
+      - use:9285bf870d89d9bc894d4f5389179f26e10b8f2362a7ebe457eb7d4d22b91003
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP01-001
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:34cfbbbc8fe51b9e0264f304f3dd325e09e2a89a28d8af4c36434586103a9668
+      - frame:bf97485a57387a20f8f7c4729e9d9e15b05a714487a6dda6d244a02a77bab45b
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP01-125
+    face: 0
+    field: effect
+    section:
+    line: 3
+    frame_ids:
+      - frame:99d444c07f915410e9279dcd386d8dd4d34b9c1b8bcb03de41a04efaa2989b8e
+    category: 跨行涵蓋
+    rationale: 同一 spell 的第二個傷害步驟涵蓋第三行。
+    covered_by:
+      ability: 1
+      pointer: /body/steps/1

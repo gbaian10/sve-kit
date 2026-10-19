@@ -35,6 +35,7 @@
 | 定案（技術契約） | 查卡 keyword 登錄與 manual H1 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；沿既有投影，只產 has／partial，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
 | 定案（內部候選格式） | 效果分類與來源範圍 | `rules/classifications/<owner>/<sequence>.yaml`，`format: 2, kind: effect_classification_shard`；只保存候選，見[效果分類候選](effect-classifications.md)，不作 DSL 或公開搜尋選項 |
 | 定案（內部候選格式） | 分類文字版本 | `rules/classification-sources/<owner>/<sequence>.yaml`，`format: 1, kind: classification_source_shard`；依 owner 保存候選引用的精確 raw／body，見[效果分類候選](effect-classifications.md#分類文字版本) |
+| 草案（不採納語義） | 分類差異與手寫回歸判讀 | `rules/effect-reviews/<owner>.yaml`；來源反查、反向位置分類與修正方向，見 [v0 回歸契約](../../dsl/v0-regression.md) |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 

@@ -1,0 +1,62 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:c5df6613d4cda1795e06ae58ad7600cad591fdbc28c8bdc5919d26dbcf6231c0
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 條件賦予 storm；L.continuous／L.duration 與計數標記不齊，依各原文持續時間補齊，不能把授予當固有關鍵字。
+    classifications:
+      T932e3adc6e: e64a9f01a22931963f1ab4a20fbe3741cd0d345e5745070ccda7d4d38622ab85
+      Tfd273cdb9e: 636620bdf6c3398dcd63241d4fc4acc4149451a5fdd7856d2ba280eedf158762
+    examples:
+      T932e3adc6e:
+        - CSD01-025
+        - CP01-P47
+        - CP01-062
+      Tfd273cdb9e:
+        - BP19-SL17
+        - BP19-059
+    frames:
+      - frame:af930668557b9360583b24c1412b185c9d677cf51ca6ec6b9d9d8e88aead078f
+      - frame:b0f616137dede9c3f9f2a22b5f42451c8576b6601c99994e0e314216e564d558
+      - frame:e05de18c8e83dfe32c2def34e240b9efb4aa498ba77af4fbefc29f5e348cecad
+    uses:
+      - use:526bb523de2e1a946a503e0a520daf1421b0bb0e82fd59078da64bcfe45fdcb7
+      - use:841155d2c78342782a3beed31a8adcfcab4d8dd73d407943204f4596507a0f37
+      - use:c2cdc9c210dd2a138ecbb4c6daee35138c23331a6561f1c8706bebe3835faf53
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP19-SL11
+    face: 0
+    field: effect
+    section:
+    line: 2
+    frame_ids:
+      - frame:21e964501c24ba7ad512544eab5916e2fb5bfff65f2889d35201e138c5c5432b
+    category: 跨行涵蓋
+    rationale: 第一行進化時 choice 包含第二行模式。
+    covered_by:
+      ability: 0
+      pointer: /body/modes
+  - card_no: BP19-SL22
+    face: 0
+    field: effect
+    section:
+    line: 3
+    frame_ids:
+      - frame:f05c549f3a17a784870ab41d7ce5eb4ba4717a1d2bd618fa059f6a9462e890af
+    category: 跨行涵蓋
+    rationale: 第二行 end trigger 的 choice 包含第三行模式。
+    covered_by:
+      ability: 1
+      pointer: /body/modes

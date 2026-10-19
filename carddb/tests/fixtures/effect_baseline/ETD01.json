@@ -1,0 +1,133 @@
+{
+  "ETD01-011": {
+    "ast_sha256": "fd2b318484cebf67d0cc3dc26c4a3d8e9bd126383fd1fa6c14af0ca36cdd643b",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:d27e6856fa0e4de10a977fc2cd193438186bd1682a844f6755c14ed5b5f4f070",
+            "use_id": "use:66e6ba5423f4276ed4d779688929f1468371829d27c0f62d9544dda58fc39d89",
+            "frame_id": "frame:7839798ca49d49874e4443d4539e9c0b6e82c06e328fde0d8add0ac7725b71a0",
+            "source_sha256": "24bda8cf60c6a0f8014062230a5009512126302aa789bb812dcb64a7ae5417c4",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 58,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:c0fcef0fb852638b0883b1c50ea45ebe8f4c45e1c3c25db0a8754bfbd3b0a13d",
+            "use_id": "use:66e6ba5423f4276ed4d779688929f1468371829d27c0f62d9544dda58fc39d89",
+            "frame_id": "frame:8d3da93408d787fd1ff088f9a39546dcf8788a0c7d1408532d59e50a484c5ebe",
+            "source_sha256": "24bda8cf60c6a0f8014062230a5009512126302aa789bb812dcb64a7ae5417c4",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 92,
+                  "start": 59
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": [
+      {
+        "face": 0,
+        "field": "section",
+        "section": 0,
+        "line": 1,
+        "frame_ids": [
+          "frame:e705f8a935d89b72757903d8b3da410b1f3276e27dde53816909bede5059ae8e",
+          "frame:e7438862882c353035751c076ab1ba444ec9c8a9604adf8126714d17d28b53ea"
+        ]
+      }
+    ]
+  },
+  "ETD01-013": {
+    "ast_sha256": "61dd07a6ec6077ac7dd065dea7c568d34b06f5fdbd5cb584067d82fbaf824226",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:bffc6f1a6eb5dd898e92ae2be059ca23be8672562cf481f1a63c6c743d6822f1",
+            "use_id": "use:785b7c64f5844d57722744564f2031ce6e155cd69d87258dcc4409e579b2b542",
+            "frame_id": "frame:8ebd201e08a1e14f57b700f2fb76dc11afbf7f16261350a117e2ca75f1aac18c",
+            "source_sha256": "8433da8749fdabe8dbd70188bc746494e4ffba9663c7efb9610be997956180f3",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 19,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:3ffbc5cb2f5f2db34c0e1f935ee04501824bab152e97f3b998f6bca2bbc46179",
+            "use_id": "use:785b7c64f5844d57722744564f2031ce6e155cd69d87258dcc4409e579b2b542",
+            "frame_id": "frame:97d95151614560a593f1ff8d0d54dcf00103df1bb3bdb53a04d7eaf43eb91099",
+            "source_sha256": "8433da8749fdabe8dbd70188bc746494e4ffba9663c7efb9610be997956180f3",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 46,
+                  "start": 20
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": []
+  }
+}

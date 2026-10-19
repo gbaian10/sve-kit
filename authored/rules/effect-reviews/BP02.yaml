@@ -1,0 +1,86 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:45767369c9b376134bff02b22114fe01a966ab207b47db65cbd3c10aa5203551
+    priority: false
+    conclusion: 等價寫法
+    rationale: 搜尋至手牌的複合操作與展開標註；trait／kind 為參數。所有版本都保留 reveal／shuffle 義務，不將省略標記解讀為省略動作。
+    classifications:
+      T07bebcc9bf: fca2d988f75826d5a303b2bcee928221db7e01bfeb5336d786af7de0349fe714
+      T8663d0e447: bbb3d0233f1cd1e14590d6975af013dc0d0facb8411ca7064c60ea3f38a5d942
+      Td6c2e24eb4: f013960db055021e40bfad5618da9be90b3d1b8c515a768e06e3548a999897c2
+      Tf9ac1a59eb: 06bcc624777e94a7459001c9384aba41c0839f9cf866545bb8145a7fac5d0143
+      Tf9e3fd39b5: 762cc58f7a968775c3b448605b89d1afcab11b7cebd81a200a726f27f71a350f
+      Tfa11f9a51c: da2aaba5493ad7d805ca7ebf4adc6bb903f9c77e2cb3a117b76cc93138ff131d
+      Tffdaa1fbb9: 42dfe167c381e71cc59e1b4d3d60f8ac24ca457045f38ca12d7a873ca6da1477
+    examples:
+      T07bebcc9bf:
+        - BP02-034
+      T8663d0e447:
+        - BP09-079
+      Td6c2e24eb4:
+        - CP01-SL09
+        - CP01-SP09
+        - CP01-029
+      Tf9ac1a59eb:
+        - BP06-033
+      Tf9e3fd39b5:
+        - EBD04-018
+        - BP16-104
+        - PR-431
+      Tfa11f9a51c:
+        - BP19-027
+        - BP19-P06
+      Tffdaa1fbb9:
+        - CP01-P59
+        - CP01-077
+    frames:
+      - frame:162ab6019656d8ddf9408c76bbf06da0cba2433d002265b896d014e298bd6e25
+      - frame:271dbb8f956e643187b8dd5029a4b1f2b0b97c38a11ea7a936dd3fc2f80f6ccb
+      - frame:876f185f1c7e0dc75a458d3c64e7b306ce1fb08a3fc3b75f3ff4399d27c92e0f
+      - frame:923f27ddfd019c1e313c70538129e710a773d601b430729864b145ea0d528b34
+      - frame:9b933d739ceb45125da9303d9b7c80985ccc12a8d98c5ac48be40670405c76f5
+      - frame:bbdfac96ad608a2ae17edbe850e8d911386b5a6ede0ee935660a1537c8ae16cd
+      - frame:f7ae3e66588382862e7f41b5773b06bb2911f89dd1304b7c3889df3c43fdc0cb
+    uses:
+      - use:03267fc4fc2c1588b000f024df79a1e34da9221ba635c54de292c1fc453be45d
+      - use:1632d89d72f7d6c269873bf0d5af1dde03a7db34462b1a99f227d32b41b57789
+      - use:2446929feaa85cf78133072e576741826f584f5ef79b4ee18a6582b364fc736f
+      - use:45bc8d672d01f25bbaf0487bc1ca314f3fb2ecae99d60cfd7f8e2cd85bcaf590
+      - use:47d6956c7d28642cc1b3ae6820b63a65dd0bcc85ce29f388e5fd56d3805dd01d
+      - use:510da94347edaff47916cd4bc644216aaeed27c9cbe1f14fadc39b11ee7c5a58
+      - use:ec1ab1a3b01f03e29fa080c6562ef9b9d1bd9ea46e79449218e749ba322fd166
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:27626d8d9b5ca80e173295a4343244e92cecb4ce9597a7c72b202bcd063400ba
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 進化時選墓場目標回手，B.ability／A.sel 缺標；保留原 target 的合法性及移動流程。
+    classifications:
+      T78ecdbc760: 5adb8939ec6a9f5dca51a7e9206d88516b7bdb140ee1ec5782ad106d141c065e
+      Taf6727e46e: 35e81994dc64f9d98b696c7d5c1f0ef8a79d467b446c687446ffd8ab4d3640c5
+    examples:
+      T78ecdbc760:
+        - BP09-081
+      Taf6727e46e:
+        - BP02-103
+    frames:
+      - frame:3681a64a7548b89da1ae0aeee190859832c74b9752bcc7f874e9bc64fd84028c
+      - frame:b1d9143bfc76c21eea5c66c90e435592eeb45cf93b882eabbc6c06da8a0023db
+    uses:
+      - use:76d9d653298e4f78a2dedc1e071eb56d9c4cc259b1819c5c40f6d56b14f4e61e
+      - use:e15de9ef9d8aefe4646d8701a964c930f02c14e1f0a6c6f7a3e0fd62fb3a1392
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions: []

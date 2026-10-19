@@ -1,0 +1,94 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:1171d222df704aeb08ecb33a693260320e4e54241e2a1df0146b2d5f784dab9d
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 進化時兩個其他 trait 目標加值；補 B.ability 與原文對應的 L.duration，不更動目標時點。
+    classifications:
+      Td511fc45ef: 9636830400a21bcd5f39d495de1979d52e8c52497fae7c06699ddd75ec459446
+      Tf8b060a7df: 1f25e0cc09e41e3013d3d6bfa5366f55e022d14ca131c9e8a999702af6ac4394
+    examples:
+      Td511fc45ef:
+        - CP03-P16
+        - CP03-026
+      Tf8b060a7df:
+        - ECP02-002
+        - ECP02-SL02
+    frames:
+      - frame:47405064d1476d61869ecca4b53c6ad9d3ac123d3a9cd4813166eb6d746d0680
+      - frame:584902a704667980dd24b9c5604d288963ac15d2a1a5ee55bcb4cddcaa08d8f4
+    uses:
+      - use:111e0ce9fd26f374cebb3f01610921183c02ded02b47c5ebe3a74d940da55ab8
+      - use:8adf55e276e31e2c6200d657d63c0d5abfb11f9f71e547f9a2bb5a607495e084
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: CP03-015
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:8a0e1a4b1bc8d4da818b2128113d66fc5da78c936bdda64f0757ed218d00e799
+    category: 說明
+    rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
+  - card_no: CP03-016
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:597da3f6ee8f6784b7d4720152f4e4af6a2fe80ffb6baa53cb5a67a0cb5cccf8
+    category: 說明
+    rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
+  - card_no: CP03-017
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:08f440ade785991f8eb8bb7417c2fce38d974b6b3de4812a92249d4ff88c06ea
+    category: 說明
+    rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
+  - card_no: CP03-018
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:69d17251de50527e0a4cb50a7ebd3a065ebeb559cb2d5bf57ed85b15fb8da092
+    category: 說明
+    rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
+  - card_no: CP03-127
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:b1cae9486cb594dfc5644a9ead433d13e727e20d47d49835964f06b7ca82dfb6
+    category: 說明
+    rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。
+handwritten_differences:
+  - card_nos:
+      - CP03-009
+      - CP03-112
+      - CSD03a-006
+    frame: frame:beb3df31cb9eec50c0dd1bb8d91d092847a91874aa5713a144eb21542db5907e
+    classifications:
+      T85fc4f7014: c100543df9b94744d1c9094276ee05aa022e69530615251d0642220c22089d03
+    conclusion: 等價寫法
+    rationale: ride 的一般規則 lowering 補一次 link_resource；顯式宣告時不再補。保留 PP 與 EP 的支付條件；無可用資源必須拒絕，不能先扣 PP。共用 body 不負責再支付一次。
+    scenario: authored_ride_costs_share_one_payment_and_reject_missing_resources
+    translation_review:
+      required_uses: []
+      trigger: 只修正 DSL 或 lowering，不改來源語義；不得把同 frame 的全部卡號當中文重審清單。

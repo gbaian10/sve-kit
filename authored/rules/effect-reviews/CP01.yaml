@@ -1,0 +1,21 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups: []
+reverse_positions:
+  - card_no: CP01-085
+    face: 0
+    field: effect
+    section:
+    line: 1
+    frame_ids:
+      - frame:11501a43f698a7cb378455341944bb0c461e9e4615c3afa0c2bccc1c46b87319
+      - frame:29a76d827cd2478e5eb2cf0dab14eafc1e7b2a0aba615d0880affe39931df4ea
+    category: 通用規則
+    rationale: 食事與出走由一般規則處理；這行是共通動作的說明，不新增本卡專屬能力，也不宣稱引擎已實作。

@@ -1,0 +1,184 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:e42646312883f62a426a549c55b0e495a192feab8a61b510d7ef0cbfb1239ea7
+    priority: false
+    conclusion: 參數值差異
+    rationale: 場／墓場與 trait 是計數參數；所有組均 C.live、branch、I.life。S.zone／S.filter／T.player-ref 的疏密不是不同判定時點。
+    classifications:
+      T255d1f182f: 34bf3ba6c20ae19dcac7f25db1b1b38988156a43037091e14b9294351ce6d87b
+      T37028e9744: d3a16b348689adcb58f4a3ebfbf8358c5c7fffae0bf15445bb4e4473cd4fcb7b
+      T80f4a44247: c3e5e73d95feb3228ae669e2cc835bd9b294cfab4728d9860217832b69733dd1
+      T86bf3f3af9: 6c3a5816a3903ae55633e7c53c841258a0515798c420bda9f4d55fcbc5525272
+      Tf38c82beac: 488a97710d17857420d9c3d3e30400cc846eae626d310379fef3c3cc5f83d399
+    examples:
+      T255d1f182f:
+        - CP03-P69
+        - CP03-100
+      T37028e9744:
+        - ECP02-032
+        - ECP02-P16
+      T80f4a44247:
+        - BP18-P14
+        - BP18-032
+      T86bf3f3af9:
+        - BP05-012
+        - BP05-P07
+      Tf38c82beac:
+        - BP14-108
+    frames:
+      - frame:0c77d95500c47c8c3a5769075332b5cf13fabc27151efc06e819cc8d3c987fa4
+      - frame:5d965f58b6ab260a47aa5c399094d09fa42f8f1340fbd46f57de1be32137dc88
+      - frame:948ca6f9f913f5f8683a85fa6ea04c737829e5a5c910a34a104e85fb5a9246b6
+      - frame:ae36faaf7e26fbdd97acaecda186b1b92596f25ff45e65246354f5cee2622e4e
+      - frame:efab41265890d7f2cc59522daaf167bad5549c232e487b1dc972c028df17abba
+    uses:
+      - use:543ca63498f5dc153e44ec22da0b996caf522004d35a9f725802834917a576c9
+      - use:65a9c7e65039e57c2ef6ddf548a3671f329a56eb8b542960e7c7b63f4464027c
+      - use:b49f4a424baefcc3b655f503377fe7675d827994db2ab638152b1cc4ff08adb7
+      - use:f22051cc7fe0044c667daabc51488d07f874c190278d13b07eff356e82bc5989
+      - use:f51678b654ef3e2b438feb49b2e9b7be0a36b879dd9395695b6a8bb745805867
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:86e737134c9059b220b1b1fa4fe9d2f7c21dea55cfc494006f6bf49168cf9c91
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 支付棄牌費用後對目標傷害，PlayParameter 與 cost-of 一致；補齊 payment receipt 的標註，不改支付時點。
+    classifications:
+      T42d7e0f412: 378e3df07c7f6a30e51aa4a2afcfddf7400ffc1daeeeba85253a1b4e4aa2465f
+      T81bd73b6e5: 55fe8d4930194126ed538dee1005e1a4c766a02a00153f30809d521a32928ebc
+    examples:
+      T42d7e0f412:
+        - CSD03b-006
+        - CSD03b-P03
+      T81bd73b6e5:
+        - BP20-R05
+        - BP05-SL07
+        - BP05-035
+    frames:
+      - frame:0dc937a0ce48dc261499a1f8b40f7945aa53fd944d56e6cac1fdcba380c4fe8a
+      - frame:0e1d0014f78e366f8f85a562d40ad874d89b4c12e29330ae7513fddc67ff8a16
+    uses:
+      - use:3b3686a024d7b14be629a7632800229db65eb000e8046bd76b2ccb12d8cd83ab
+      - use:d5b909150530f40ecf116341bc4270db830b3a11619dd7141d54a5142a8ffac9
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:c936e72af04d61234f4134673034ad142c46896a56b4c32dacce4ef06e354c21
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 階段觸發選目標後傷害；T0b72be619b 只留 R.target、I.damage，補事件與選取標記。Phase／Player 的差異仍保留為參數。
+    classifications:
+      T0b72be619b: ecd6955eba9368f630e52e3a57b67df4309673d4c43455c7dfce6676f44a1293
+      T498f13e192: 21e13e23ca702864185a517a355c7bf2910fd866326a5895a260c54543b2abf8
+    examples:
+      T0b72be619b:
+        - BP21-PR05
+        - BP21-PR06
+        - BP19-P26
+      T498f13e192:
+        - BP05-P44
+        - BP05-093
+    frames:
+      - frame:1729237ac68f8a1274194eef2097d811d435007da594c6579b66ef5bae26277a
+      - frame:1a321be98659ca1dba9ffe55c3ae51360383fa5129e2394cdd18d73cee49686d
+      - frame:28119af4a5c9bff09bec906edeef96af244b99fdbceafdd8e3ee6a5f4024a584
+      - frame:379e95df6eb98a0d60c9beb820aa87fda966c90aa2bbb702740193c3a9c97a64
+      - frame:3d4e67dfbe202c66c6e01dab90011397916f3ac4d72a4df40ba7d0dd95821bce
+      - frame:d50cade8a1d0b4333ecb70adb96b928b657dd4ebb24617465a59466786994ed3
+    uses:
+      - use:0c7f77cf6568426585fca2996a6fd48a35a7230adbdef414870e5a48aa6ad08a
+      - use:163e2816c344d81b725887d413b50160c6ae4dd45c271ca8661ee3b984e8ca7c
+      - use:6c176926f8a2665ede8cee6f1316d87bd487a825104c9efdd5b23439f7d511a7
+      - use:733b7272d363b4dc4fccaf444ed97ba6e2847d0362db8d3ebbcf057ac653f923
+      - use:953076149650150927858f2c88963d8b0cad870cbc1c0de00207122cbb5e42d4
+      - use:bb3334478f480f6eb436f30fa9f2ecd569cc1a2f6986b51b8779d21c17efeda8
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:91598cad6e92ee4ff354f8b9b3354503faf12cbd35944affad5b01795b64c4ce
+    priority: false
+    conclusion: 等價寫法
+    rationale: 進化時搜尋後進場的原子／複合標註；搜尋條件參數不同。展開須包含搜尋、展示、進場及洗牌，不因 I.search 簡寫省掉後續。
+    classifications:
+      T05cae331c9: ad5b4b12ddf6a2d792d28719820119437e77b29502c31e9325a3bca6c26d5b29
+      T182a7d33e1: aaaee34e7af34cae140adf47b9fdbc68e8cbad97653f410d4f60e91ef05d3719
+      T23390c93d6: 742c482fc28271baf4dcada2bc7632663d0b5e81a233249b859ca28143d95b21
+      T55c15db83e: 95fa9bf651dcf01e304a2723f7d68a8d50d0a8c98e85fa4a5e5cc9affc20bce9
+      Tb832068c29: 22043c74e2b48d139e12f4574045ffaeec32ae77b018ed332456532a26a86a5a
+    examples:
+      T05cae331c9:
+        - BP21-SL07
+        - BP21-021
+      T182a7d33e1:
+        - BP05-005
+        - BP05-P02
+      T23390c93d6:
+        - BP20-028
+      T55c15db83e:
+        - EBD01-006
+        - BP13-004
+        - BP13-SL04
+      Tb832068c29:
+        - BP13-062
+        - BP13-P15
+    frames:
+      - frame:186571bea292fa7b6d972218ba5e00c961ba99180e2dc1554eff653cb4190df9
+      - frame:a8fdf2167da047e1433e0915fe5a265680194df1cdf8b6f79b8510e5629f5f75
+      - frame:c1f886a37a85f125418262f814ad2b7bbec742c05bd672bd6c2966ff6a824321
+      - frame:d4ee1ab1ca5349e8e63411b3f8f8ffb9c3b09c115a47263aee71ac77a46322c9
+      - frame:eef213817e8ba4acc528b61cc82e657f4b9048d55f0c08d0858093eb23aaebb8
+      - frame:f0ef455e2ead26c4e194d5030c393a167a7385680cffb1d783c38109d250fa4d
+    uses:
+      - use:2f775485a6d0c14f682dc12e734f4cb8a488f386a064345e1802493e41881472
+      - use:45ad494f4f1af4c2758d43fed0a0c53f9ede443611c402405024d827cdf37e05
+      - use:46b38d8f295926b6e94ff82f1c16e2ebbffd2537b303204a9f79157ab38d5906
+      - use:8bba787fd1bcfc1642ee12222f93e4840ad628e385c0e26b24ee6061d53d6f44
+      - use:9035248e5631c7177756bd5a226632d5c3afaf31427991f55bd34ee2dff0dca8
+      - use:a9fdcbc0c978bff1930231bf3f19a96fa8cad0b0a34fa04cce9dc5e50e7ebdb1
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:c14abc46e65ca410d501ad7f39459ec7c59d7a21540efaae2c969c34fa24da95
+    priority: false
+    conclusion: 參數值差異
+    rationale: trait／Zone 的計數門檻後抽牌，所有組同為 C.live、branch；S.filter／S.zone 的省略不是新來源語義。
+    classifications:
+      T6666a3ffe6: 3b30a5367d434f4ca1aa14cfa42171f7dec951f1175807810deb9212b5cb042e
+      Ta3975b987a: 50e741cd5b9a568afac5d068439393ce912ec0a6b62937706b94e53f695529f9
+      Tc3c6abf055: d21264b193b1af0d126ecae479aa94dcd470e687eefa39ef9cb9eb10129e2ac9
+    examples:
+      T6666a3ffe6:
+        - DSD01b-013
+        - DSD01b-P06
+      Ta3975b987a:
+        - BP20-004
+        - BP20-SL04
+      Tc3c6abf055:
+        - BP05-P21
+        - BP05-047
+    frames:
+      - frame:81f50ef0434fa296c8cd8fed7f65ca9b7ad744747ac2a0a7da656177617ca6c2
+      - frame:a552355353bc2ef587cf506c693ea4f7e8c99dcdd557ba94661f18c9a1b0f1a8
+      - frame:bd27cd0b4122da68a1dc402f1ff05b288ea6fd4c404f1c4685e7a393e6532a14
+    uses:
+      - use:0c647272876cb26b4fd4f4c901561c502068ad54f66cdd10169858e9b03c4ef0
+      - use:1e9d12757d9ca22f611b648b65c95ba4f6465416033c9f87bbf143dd383abaa8
+      - use:e03eb248bed800a89604691dc2e196e800d8ae981aecbacd53ce0b608f9e720c
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions: []

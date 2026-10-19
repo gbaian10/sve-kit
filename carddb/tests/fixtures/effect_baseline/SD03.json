@@ -1,0 +1,62 @@
+{
+  "SD03-005": {
+    "ast_sha256": "3520711070612014f479d1db71cc86467519deaf0ff6fa76057d7ffa8105b808",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:fdeca74ffba52a63f0f678f842e62c7f6db47ce0976d7328b39784a7a254d7bc",
+            "use_id": "use:3cbb34fa0e9461eb82ac59fc3de6a61c9cad8f0dd33a84e42e7b97e3e710dca8",
+            "frame_id": "frame:7edfd757d563ec76a84826efab180df52aa30505a5eb62c52bf836a5c21e16d4",
+            "source_sha256": "9e02456037610b117549197d5c2701b5fd3c579d068ada37b51720edc5f7346e",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 6,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:f23ea7f3d68c0e984b95a1eb5d14071550e9b1b8ad7004c53c3d8f2007617336",
+            "use_id": "use:3cbb34fa0e9461eb82ac59fc3de6a61c9cad8f0dd33a84e42e7b97e3e710dca8",
+            "frame_id": "frame:7f9b7bedb5b0df4e95c14c8aa85f9e325a729d5b1c762e98c16bc75c841fddf6",
+            "source_sha256": "9e02456037610b117549197d5c2701b5fd3c579d068ada37b51720edc5f7346e",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 12,
+                  "start": 7
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": []
+  }
+}

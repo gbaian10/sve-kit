@@ -1,0 +1,84 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:8d7eec23fc609f17bd4797bbc0843780d7d623fa6c62f60d2235390319ddfa03
+    priority: false
+    conclusion: 參數值差異
+    rationale: EX 與墓場計數為 Zone 參數；同為條件加值與賦予 assail。L.duration 依原文補齊，不因一組省略而變成永久。
+    classifications:
+      Tb0b93a44a6: da9bfba68b1407868978ab5a4f230313eff19b7f59e2737560b93c4d348a75c2
+      Td5357a692d: b014dead3eb00c5fc24f8bc66c42bfc71edec042ec4d123293273abc2858f516
+    examples:
+      Tb0b93a44a6:
+        - BP17-047
+        - BP17-P12
+      Td5357a692d:
+        - BP14-015
+    frames:
+      - frame:2ce358bce99be80b9b395e8e5ffe26deadc41915c4782d9f3e89741e8885b527
+      - frame:d5d399a5dcae20bd06e721ea813ead07832e8b8890a134cfd1ea763b234c7820
+    uses:
+      - use:05e30f3495436351f7090cf96201899434983c89164ab5f2c6a48fc6600d99f4
+      - use:58733c8f29cc0ffa0351b9718102cfe88a5190f854fb3fd3bb490e54a383c83c
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP14-022
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:1f6423414e8423bf2dd31b2d41b15e4816119f53ac2acafeb99046565bc71326
+      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP14-026
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:368d23617266c9aac2ea602a8044379d876fd4526448a3b1ca507bd9dc6f7b99
+      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP14-030
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:1173cc4c89c49211365e29d5c50bd4b70d77a24336d357dffcfbbe791f70fd12
+      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP14-034
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:b95bd292358b919e00118236219c51a475d964955eafd4dc7ed1a46b2269b9d4
+      - frame:f416386b9093115124fabb6704e5aa4c852327e27d315a479e40e7c0dffacc86
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP14-090
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:1d0b2e3a8082efb7dbc1db8164038c636aacd7ec4988272bad1a987aa1c45482
+      - frame:929d86ccc02ebf9f23fd05de000932f2be7e2cc1a7181213fcf88f7a2a788419
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

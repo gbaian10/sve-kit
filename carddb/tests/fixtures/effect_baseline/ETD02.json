@@ -1,0 +1,115 @@
+{
+  "ETD02-015": {
+    "ast_sha256": "a67e4e162fc4bc824991b24843989a9af74894fad3879ab0b38665ad25f87852",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:c6cc641aa3a4d962e632f930c55ed283df7a423aca2fac53c09924d31627aa9c",
+            "use_id": "use:040c3f28ca1ba410890c9422a7c593fef5588f7e8a6cfb4708ed78d5437d420e",
+            "frame_id": "frame:ca2ac00ba8f00f90d071d68ebc79255130d64c9f457efcd09098e1cd3fac5407",
+            "source_sha256": "1264cb7390913bd288c1db7b1c52fb91a5fe3b063d3000b162c972a578e6fa05",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 34,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": [
+      {
+        "face": 0,
+        "field": "section",
+        "section": 0,
+        "line": 1,
+        "frame_ids": [
+          "frame:8a6554f128b0e2d452e98ead662a8a137eded88b082bbd6c3ba9f3eed61b295d",
+          "frame:f415142ee7ae0a357acd7d98d44fd85ddea67826372353df5978f3e96b850120"
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "frame_ids": [
+          "frame:30b7ae45a760576906f6b52107f076e943c9dd2055a13a42bab5013bb7ce68cb"
+        ]
+      }
+    ]
+  },
+  "ETD02-019": {
+    "ast_sha256": "e0f8ebefc2b1de71f7274da018eb2dcf1195cf5404790bb69d6ca375b9e2fd04",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:450295829995dbb21000e309a47f17fc51392f1cf943b0aceacfa02dc5a91998",
+            "use_id": "use:30d1a4b84929fac546037ebefed6f4c8b3955abd3ef9b21e24035ab4bdc47b4a",
+            "frame_id": "frame:7edfd757d563ec76a84826efab180df52aa30505a5eb62c52bf836a5c21e16d4",
+            "source_sha256": "8e1b3fa39a486a398e5cf7deec025bf3a8976b44a4e1a869558aff7cddccb326",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 6,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:650d3134fa6aaaa2b3e3a0acb691f61a6af51cb24bff745ad8ec91678199ff16",
+            "use_id": "use:30d1a4b84929fac546037ebefed6f4c8b3955abd3ef9b21e24035ab4bdc47b4a",
+            "frame_id": "frame:c2f09798ad51403c3159518dfc22775abd34c1f9b069524355a3465d895eb171",
+            "source_sha256": "8e1b3fa39a486a398e5cf7deec025bf3a8976b44a4e1a869558aff7cddccb326",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 25,
+                  "start": 7
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": []
+  }
+}

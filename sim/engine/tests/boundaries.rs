@@ -265,6 +265,221 @@ fn movement_receipts_count_changes_and_bind_the_actual_results() {
 }
 
 #[test]
+fn chosen_and_actual_movement_results_diverge_at_ex_capacity() {
+    for (available, expected) in [(0_i64, 0_i64), (1, 1), (2, 2)] {
+        for reference in ["chosen", "placed"] {
+            let body = json!({"op":"seq","steps":[
+                {"op":"select","select":{"side":"self","zone":"deck"},"min":2_i64,"max":2_i64,"bind":"chosen"},
+                {"op":"move","subjects":"chosen","to":"ex","bind":"placed"},
+                {"op":"damage","subjects":"opponent.leader","amount":{"count":reference}}
+            ]});
+            let mut position = setup();
+            position["players"]["P1"]["zones"]["deck"] = json!([
+                {"id":"d1","card":"unit-follower"},
+                {"id":"d2","card":"unit-follower"}
+            ]);
+            position["players"]["P1"]["zones"]["ex"] = json!(
+                (available..5)
+                    .map(|n| json!({"id":format!("x{n}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            );
+            let mut engine = Game::new(
+                Arc::new(catalog(&body)),
+                &position,
+                &Value::Null,
+                &Value::Null,
+                "movement-results",
+            )
+            .unwrap();
+            engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "cast",
+                )
+                .unwrap();
+            engine
+                .decide(
+                    &json!({"do":"resolve-choice","select":["d1","d2"]}),
+                    "choose",
+                )
+                .unwrap();
+            if available < 2 {
+                let selected = if available == 0 {
+                    json!([])
+                } else {
+                    json!(["d1"])
+                };
+                engine
+                    .decide(
+                        &json!({"do":"resolve-choice","select":selected}),
+                        "capacity",
+                    )
+                    .unwrap();
+            }
+            assert_eq!(
+                engine.query(View::P1, "P1.ex_count").unwrap(),
+                Some(json!(5_i64))
+            );
+            assert_eq!(
+                engine.query(View::Referee, "P1.deck_count").unwrap(),
+                Some(json!(2_i64 - expected))
+            );
+            let count = if reference == "chosen" {
+                2_i64
+            } else {
+                expected
+            };
+            assert_eq!(
+                engine.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(20_i64 - count))
+            );
+        }
+    }
+}
+
+#[test]
+fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
+    let authored: Value =
+        serde_saphyr::from_str(include_str!("../../../authored/rules/effects/BP18.yaml")).unwrap();
+    for number in ["BP18-059", "BP18-SL14"] {
+        let body = &authored["cards"][number]["abilities"][0]["body"];
+        let facts = snapshot()
+            .lines()
+            .map(|line| {
+                let mut card: Value = serde_json::from_str(line).unwrap();
+                card["faces"][0]["traits"] = json!(["武闘竜人"]);
+                card.to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let loaded = Catalog::from_documents(
+            &facts,
+            &registry(),
+            &[("bp18".into(), document(body).to_string())],
+        )
+        .unwrap();
+        let mut position = setup();
+        position["players"]["P1"]["zones"]["deck"] = json!([
+            {"id":"d1","card":"unit-follower"},
+            {"id":"d2","card":"unit-follower"},
+            {"id":"d3","card":"unit-follower"},
+            {"id":"d4","card":"unit-follower"}
+        ]);
+        position["players"]["P1"]["zones"]["ex"] = json!(
+            (0_u8..5)
+                .map(|n| json!({"id":format!("x{n}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+        let mut engine = Game::new(
+            Arc::new(loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "remainder",
+        )
+        .unwrap();
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        engine
+            .decide(
+                &json!({"do":"resolve-choice","choice":"execute","select":["d1"]}),
+                "choose",
+            )
+            .unwrap();
+        engine
+            .decide(&json!({"do":"resolve-choice","select":[]}), "full")
+            .unwrap();
+        // Freeze the known chosen-binding defect, not correct card semantics (docs/dsl/v0-regression.md).
+        let (order, deck) = if number == "BP18-059" {
+            (json!(["d3", "d2"]), json!(["d1", "d4", "d3", "d2"]))
+        } else {
+            (json!(["d3", "d2", "d1"]), json!(["d4", "d3", "d2", "d1"]))
+        };
+        assert!(
+            engine
+                .legal()
+                .unwrap()
+                .contains(&json!({"do":"resolve-choice","order":order}))
+        );
+        engine
+            .decide(&json!({"do":"resolve-choice","order":order}), "bottom")
+            .unwrap();
+        assert_eq!(engine.query(View::Referee, "P1.deck").unwrap(), Some(deck));
+        assert_eq!(
+            engine.query(View::P1, "P1.ex_count").unwrap(),
+            Some(json!(5_i64))
+        );
+    }
+}
+
+#[test]
+fn authored_ride_costs_share_one_payment_and_reject_missing_resources() {
+    let cp03: Value =
+        serde_saphyr::from_str(include_str!("../../../authored/rules/effects/CP03.yaml")).unwrap();
+    let csd03: Value =
+        serde_saphyr::from_str(include_str!("../../../authored/rules/effects/CSD03a.yaml"))
+            .unwrap();
+    for (number, authored) in [
+        ("CP03-009", &cp03),
+        ("CP03-112", &cp03),
+        ("CSD03a-006", &csd03),
+    ] {
+        let costs = authored["cards"][number]["abilities"][0]["costs"]
+            .as_array()
+            .unwrap();
+        let links = costs
+            .iter()
+            .filter(|cost| cost["op"] == "link_resource")
+            .cloned()
+            .collect::<Vec<_>>();
+        let (loaded, initial) = ride_fixture(&links);
+        for available in [false, true] {
+            let mut position = initial.clone();
+            if !available {
+                position["players"]["P1"]["zones"]["evolve_deck"] = json!([]);
+            }
+            let mut engine = Game::new(
+                Arc::clone(&loaded),
+                &position,
+                &Value::Null,
+                &Value::Null,
+                "ride-cost",
+            )
+            .unwrap();
+            if !available {
+                assert!(
+                    !engine
+                        .legal()
+                        .unwrap()
+                        .iter()
+                        .any(|action| action["do"] == "activate")
+                );
+            }
+            let before = engine.digest().unwrap();
+            let step = engine.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"costs":{"1":["r2"]},"pay":{"pp":1_i64,"ep":0_i64}}),"ride").unwrap();
+            if available {
+                assert_eq!(step.outcome, "resolved");
+                assert_eq!(
+                    engine.query(View::P1, "P1.drive").unwrap(),
+                    Some(json!(["r2"]))
+                );
+                assert_eq!(
+                    engine.query(View::P1, "P1.pp.current").unwrap(),
+                    Some(json!(1_i64))
+                );
+            } else {
+                assert_eq!(step.outcome, "cannot-activate");
+                assert_eq!(engine.digest().unwrap(), before);
+            }
+        }
+    }
+}
+
+#[test]
 fn pp_recovery_receipts_use_the_actual_increase_after_capping() {
     for (amount, spend, recovered) in [(0_i64, 1_i64, 0_i64), (-1, 1, 0), (3, 0, 0), (3, 1, 1)] {
         let body = json!({"op":"seq","steps":[

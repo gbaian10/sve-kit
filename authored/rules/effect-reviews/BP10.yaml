@@ -1,0 +1,81 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:196e48e2e95db7ee32d3e611cb1827b12cb5602000cb394e09c22cbdcf28728a
+    priority: false
+    conclusion: 等價寫法
+    rationale: search_to 與搜尋展開同一操作家族，目的 EX／墓場是參數；EX 容量與洗牌仍由明確操作處理。
+    classifications:
+      T2149dd6a3e: abd27abf367f281fbd809d85cff4c5e7a91bd660b8754361346db73bc7e8e2c4
+      Tac1a96f95f: b5cbca5109cb675f579b4f8845a1d95cb36067d891b90edc35578e4702e0fe34
+    examples:
+      T2149dd6a3e:
+        - BP11-SL07
+        - BP11-035
+      Tac1a96f95f:
+        - BP10-013
+    frames:
+      - frame:58161226959a37cc6971ef3c51bd0178dc06aa57c8ad4bddf2dc67f8daf98438
+      - frame:ab60c18192d71c1e77bb2194de3518d5bf00234c77bd5fc73517dffa9b8dff05
+    uses:
+      - use:a04db8504d964e0d17dcec336f4bd09b87bf43130a9e98e4a23ef07fec36b2c7
+      - use:b9bdf451d5fdbf86471d363f8715f132f34f6148296488975a65540a9b20bdd3
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:2ad216b3a3de7924edd69ef9842f9b2e0012c9e565baa58bbbad0757612367e3
+    priority: false
+    conclusion: 等價寫法
+    rationale: 進化時搜尋至墓場／EX，目的 Zone 不同；I.search 的複合展開須保留 I.shuffle，不能據缺標合併掉洗牌。
+    classifications:
+      T16d4d05862: 51de6d12d72a07e9b2948ec1e34548cbfacae6a1dcb7bfe0d23cd888cbb54cd7
+      T456dd66bb8: c16a16dc266cf5b501d43c3b19710f7733c875abec6e2c2b23b5cb374b415378
+    examples:
+      T16d4d05862:
+        - CP04-SL18
+        - CP04-SP09
+        - CP04-U09
+      T456dd66bb8:
+        - BP10-014
+    frames:
+      - frame:5b177855f475e3c087e818f2c95d773901d32b9261795f0a07d66feec7f53d1e
+      - frame:d958499d55b016b75a49639d75b0f8ab2ea8340d74ac65d2468eb59a5fd627b5
+    uses:
+      - use:289853962154e8e49a895561a68da4a83a326a338c05393c3a81f908cf282add
+      - use:ce8460e8619745ef2b71f417a4efff48ac33ccd920b464f2678b63c00ba65f3b
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:04d0e0175c3f39ab915490c09f700bd2c2ba5b950fcd4adea81c8391b3cdfe48
+    priority: true
+    conclusion: 舊標註修正
+    rationale: 模式數量在使用時依墓場門檻決定，兩組 C.at-play 已一致；Tecae1f478a 漏 D.play-param，capture-of／scope-of 是同一數量依賴的不同標註。模式本文跨行需另組裝，不把首行當完整效果。
+    classifications:
+      Tecae1f478a: 4e18ab59e20846715fb43f92884f670d20e4697d39d1d285deaba84dda9fc17f
+      Tff09295a18: eed4dcc8895ac9037622b0d79431296c29eb13597450cb5c03b0acde82a4a1e0
+    examples:
+      Tecae1f478a:
+        - ECP02-059
+        - ECP02-P32
+      Tff09295a18:
+        - BP10-052
+    frames:
+      - frame:f3924df4d790ed72fb79ce2cdcdc9031aededb746c89fe8b290b849e322ed1ba
+      - frame:ffb957cd8b197a3cf4d63c377bdbda283836716df2004c83b8b8776223240e14
+    uses:
+      - use:35eeff095c760bd2c9c76eb886d3e93e574e7b885767ca4e3d4ede329757c5ec
+      - use:7182829dbb8502577aa19b1ab249c37a62a4383778441228641e6079f2a9fc8c
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions: []

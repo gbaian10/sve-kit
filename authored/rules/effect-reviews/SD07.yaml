@@ -1,0 +1,23 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups: []
+reverse_positions:
+  - card_no: SD07-011
+    face: 0
+    field: effect
+    section:
+    line: 1
+    frame_ids:
+      - frame:9d7b7096d201fb8070ed12d8528a761f7581fcab938e4c3d57feb0aa926a42a9
+    category: 跨行涵蓋
+    rationale: 第二行 spell 的可選加費涵蓋第一行。
+    covered_by:
+      ability: 0
+      pointer: /additional_costs/0

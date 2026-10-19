@@ -1,0 +1,132 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:98acee45bf16639ff6ea3919788e7fa3993d8086c0a5961069794a45f3583ed2
+    priority: true
+    conclusion: 舊標註修正
+    rationale: 代替傷害量在原傷害執行前依 C.live 決定，不能先造成原傷害再執行第二次傷害。統一 replacement 對傷害的依賴，移除把條件當後續效果的 sequence(1→2) 草案。
+    classifications:
+      Ta4da86a8d0: 81b73948917846a1f2f497aecbaa6522aea6fd28455a887c313386793b0fa167
+      Td3438fb1c2: b13873e36a29dc447adb1cf858ae372d85f32c0ff2bd163aac332b85eeebc94a
+      Tdf459f59f5: 42f31e0ea19a2415c5e6a06e6c07b851695c10fa16c0bfff5bb8a8f8dad6a98c
+    examples:
+      Ta4da86a8d0:
+        - CP02-P27
+        - CP02-033
+      Td3438fb1c2:
+        - BP18-SL06
+        - BP18-U02
+        - BP18-021
+      Tdf459f59f5:
+        - ECP01-SSP10
+        - ECP01-020
+        - ECP01-SL10
+    frames:
+      - frame:128c2c473b4e8c3943a5049cea5adaf03d0031a1f875c71bfa97f712ede3851a
+      - frame:3f009f5a19701859f9f04edd31fba00caab16d6464d8715adfa2f4a07caeddfc
+      - frame:be4e13ced510eac8e6f8308db9502e5bf13a616786a03858f73b4185d996d515
+    uses:
+      - use:9996ec5b5bcf24bd1e90075497f581df046fdcb52df39f24dd2948850266bdf5
+      - use:cfe11c67392f43bf3e0d0e0ca938f582a9a25bcfebd09b53a18b9b000e558498
+      - use:f8956c42f809c276e6b6a9f802cc16eab79cda293d671ec7bc42a76d9e3bbdb3
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:9ac7ed2ebf86367c9e45dec539c4dbb97a302ead9aaf0a6f6aadd916085e9e40
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 起動時自身 act、移入墓場作費用後對 trait 目標加值；補支付 receipt 與原文持續時間，不把費用算成效果。
+    classifications:
+      T923a5a162c: 296ca341cf7251eb72d12ca0d10ddcfc471d201d312d8734c2b554c2290b339d
+      Taedae46557: e3ac7ef5e5438608a182d9b6660f4c776f61111ccfdb15a8d92ec12fb9589be0
+    examples:
+      T923a5a162c:
+        - BP18-P16
+        - BP18-038
+      Taedae46557:
+        - CSD03a-016
+        - CSD03a-P08
+        - CSD03b-016
+    frames:
+      - frame:5e5fb7a6845ed1619b79d6c912eb89f7d79a2e7190612436ad8d1adaba5635db
+      - frame:7a2b71c1e7c1ecc6a36918f3891ea870459c6ab2d5f61663881aaf722cae94d5
+      - frame:abd0d1bc0d8815a73140755d85279f7256d0801b18476a2199a4145a4fc2bbbf
+    uses:
+      - use:bb81f45d95b23f7b4a62c8c8f706469de073caa376a0d9333c9e23f26e107143
+      - use:c00a757c1ce87f670141db2528b6a60588635d855c8b2d3c13a47f7092783a36
+      - use:ea68c437bacd5d889af499757758c6c7df55d0a8bb90f22f31fe4c7cb17032f5
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:39273d2e3459a40f42a1b761eb219f4cca3f9a9de7ba99ba59d6a6e684e23c4e
+    priority: true
+    conclusion: 舊標註修正
+    rationale: 代替傷害量是同一次傷害的條件，不是第二次執行；Td4cc60ce5f 的 sequence(1→2) 不得直譯成先造成 2 再造成 4，採 replacement 依賴草案。
+    classifications:
+      T47ba15557f: 8cd1def541454b7e0f50edcaa79e4009c0e728cd433698005036da10937da296
+      Td4cc60ce5f: 2c26b913f3c5e02bfcb888d48865836e15bd22c65c7c6631e20b4e1ecc1f5d22
+    examples:
+      T47ba15557f:
+        - BP21-PR10
+        - DSD01a-009
+        - DSD01a-P03
+      Td4cc60ce5f:
+        - BP18-P31
+        - BP18-076
+    frames:
+      - frame:79a06f430a855c1335456fa94c2b46ae2be00058953a713fa4cb8e09631bd3fd
+      - frame:87bb79777091abd978e2a68ea2feba3d00113eb981bdc4a4ab62961875f6074a
+    uses:
+      - use:0f0d6a8bcf39443308b2945daac375751ea021f1b34d264e4ffbf05f1854daae
+      - use:2100d122390fabf56bf88dba9d462631b7caea3b68b245a2ec19a3c1fe9b202d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:565c07f17ce79d5a9f67da584c044c89cfe855abd0eac4e4deb79c6c18c6ea50
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 墓場目標進場只差 T.receipt；移動成功集合須一致保留，不能由缺標推為 chosen 集合。
+    classifications:
+      Tbc7506a26b: d2a24c1cd92000ea3311a2f27edc8587b2c2719b8fa663e30a41cd9b879d19d7
+      Tca6d846b60: 8e5fa7a9830d99520a644c6576621e33ba0f9897a6baf62ef889187b6085fce4
+    examples:
+      Tbc7506a26b:
+        - CP03-P14
+        - CP03-020
+      Tca6d846b60:
+        - BP18-P34
+        - BP18-085
+    frames:
+      - frame:942ef15147238f0fe8bb94203128bef548fd5ed4a94fd6e9275337344abdb63b
+      - frame:a8be943b55dbf5a191c32996d94d833c413f1587194dfb836ea368fc08e56d81
+    uses:
+      - use:2dabd43271df1d0e1a4b2b94d02ca93224015332591130845e0c77be494d4f27
+      - use:f65c8a4d4bd454530d384a58c5a87bc01f0276548747f23061ec37508786f4c2
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions: []
+handwritten_differences:
+  - card_nos:
+      - BP18-059
+      - BP18-SL14
+    frame: frame:78d2da158c70c053b6a1caf54694bc7eb718077f88d9c0c9654bc2bfb0ae65d2
+    classifications:
+      Tfccbd93286: 9466c301dfb8ac36e0ff475d4a7b40b06c072315024f6fbd2d8e2d8ab1f4df88
+    conclusion: 舊標註修正
+    rationale: 兩卡共用同一個 v0 分類，差異在手寫 body，非 v0 標註；此處「舊標註修正」指手寫 DSL 修正候選。BP18-059 應改用 placed。提案以實際移入 EX 的 placed 作為剩餘牌差集及減費對象；chosen 在 EX 已滿時會留下未移動的牌，兩份 AST 不能視為 alpha-renaming。先保存差異，不在本次改來源或原 DSL；placed 是否在所有替代移動下都足夠，仍須規則審核。
+    scenario: original_bp18_bodies_keep_different_remainders_when_ex_is_full
+    translation_review:
+      required_uses: []
+      trigger: 只修正 DSL 或 lowering，不改來源語義；不得把同 frame 的全部卡號當中文重審清單。

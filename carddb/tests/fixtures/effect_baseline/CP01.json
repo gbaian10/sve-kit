@@ -1,0 +1,166 @@
+{
+  "CP01-013": {
+    "ast_sha256": "2ed194d0da0f132c9dd85fbc60bbcc51abea298133dd2f191e9a4fa842a849d7",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:c14f8a4a7f85a32fbd68ef0af716b8da8d52f1b5416fc1d86f181b3ec9010ba9",
+            "use_id": "use:1adee9d40435805d4989b55dd01425cd22df7a81f7636ea04a74087dd961c7ab",
+            "frame_id": "frame:73d22d21bb31641668261859bd90d4c55aa30e9c4d06fdd3abeb41d161f78b6e",
+            "source_sha256": "59497aebb6c1650943207a9318c38c5e22361a8a5fcc70890433c9c2230e39a0",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 19,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:678e3c2617fb50bb0b66a8fb1fa14c88384255a52cf9016e605aff100f98f230",
+            "use_id": "use:1adee9d40435805d4989b55dd01425cd22df7a81f7636ea04a74087dd961c7ab",
+            "frame_id": "frame:e7f1a6efbf51bd905349bff49ad12dc482b2233309850101b18d0d16d9d40c00",
+            "source_sha256": "59497aebb6c1650943207a9318c38c5e22361a8a5fcc70890433c9c2230e39a0",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 64,
+                  "start": 20
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": []
+  },
+  "CP01-019": {
+    "ast_sha256": "fb2449d37be0d7a97b127a6094c02a7975ec78bb4c6775862c00e4b6ccf37a46",
+    "positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:c17069f8147c23d8630d9042ff03c893ca12ca17628ce06bb46358d16bd01863",
+            "use_id": "use:f019418bb5800647789c4c078daf41a8a61cf026ea826cee778724a97366fd03",
+            "frame_id": "frame:73d22d21bb31641668261859bd90d4c55aa30e9c4d06fdd3abeb41d161f78b6e",
+            "source_sha256": "bf3835ed95ce3f98f39db69e96fc17ab1a2eafd268a3d98d4839f457ca6dac1e",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 19,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 2,
+        "ability_indices": [
+          1
+        ],
+        "fragments": [
+          {
+            "id": "bind:2c2a0e3ac5432d39e8838b579fbac852bc8824ac3c740beceecf38cb0cca3f79",
+            "use_id": "use:f019418bb5800647789c4c078daf41a8a61cf026ea826cee778724a97366fd03",
+            "frame_id": "frame:67838f3b697e17127a7767c406be9364d34735d691372f17fcf24dc767a57f4a",
+            "source_sha256": "bf3835ed95ce3f98f39db69e96fc17ab1a2eafd268a3d98d4839f457ca6dac1e",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 91,
+                  "start": 20
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": []
+  },
+  "CP01-085": {
+    "ast_sha256": "232cb292a16fad2db969a09e0780ada277016529ec7caf0ed05a309461f872e3",
+    "positions": [
+      {
+        "face": 0,
+        "field": "section",
+        "section": 0,
+        "line": 1,
+        "ability_indices": [
+          0
+        ],
+        "fragments": [
+          {
+            "id": "bind:f9eed756f07cecba108821d413649e0cbc10e8ae54312eb8f399d186e8b6c9e0",
+            "use_id": "use:b3e2681c0b8e136b0f6156d5f828df63026589820c08e94930fdf11c42de8f9d",
+            "frame_id": "frame:692ca1d8b6395dc1a3f59a385352063dc2b81bbd91a2d3b224de3b5ddc3e1510",
+            "source_sha256": "c5b5200342452cde425e90b5db756548f926d3122c1d6e1f118a89fb9bcfc3f8",
+            "span": {
+              "anchor": null,
+              "role": "body",
+              "segments": [
+                {
+                  "end": 26,
+                  "start": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "unclassified_positions": [
+      {
+        "face": 0,
+        "field": "effect",
+        "section": null,
+        "line": 1,
+        "frame_ids": [
+          "frame:11501a43f698a7cb378455341944bb0c461e9e4615c3afa0c2bccc1c46b87319",
+          "frame:29a76d827cd2478e5eb2cf0dab14eafc1e7b2a0aba615d0880affe39931df4ea"
+        ]
+      }
+    ]
+  }
+}

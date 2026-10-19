@@ -1,0 +1,182 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:e7f88a72173c57d22edacd72b400dfe0aca72a38dd68098f39f85b70502e477a
+    priority: true
+    conclusion: 舊標註修正
+    rationale: 自身／對手為 Player 值；Ta04a31d3e6 漏 capture-of(0→1)。目標在使用時選取，覺醒於解決時檢查，不是第二次選取。
+    classifications:
+      T14a1a108c4: 72f3c8249db915e272790ab8cab2261cfc1141611ba3928ad664b1d30ed833e8
+      Ta04a31d3e6: 236ddc8c9a68369026ec24cadef2441bb44bdbb92a2dd3f93407c5a3cba61b14
+    examples:
+      T14a1a108c4:
+        - BP14-058
+        - BP13-061
+        - BP13-P14
+      Ta04a31d3e6:
+        - BP15-P16
+        - BP15-072
+    frames:
+      - frame:06e8bc5f966b6261e09dfe2bd2e60be2f48e824eecbd600d42c2d064eec491e8
+      - frame:276034a313efd36550eab7a31ea0317f81d32c11560be2fdb66055a57cbde5e9
+      - frame:5bbb42f4ef4fb0df2c96ea6a660c0b39d89d24c5a0fd131001fe7c73ea252602
+      - frame:e41e220ea2d63a3c63b3a8004893db394ca0597364bd40fac6376375b5e4c9bb
+    uses:
+      - use:7a1be2e5cb846a7d683757be184b18d31edc91343e41160f2cd7b76e546d3604
+      - use:939ea85c33eae5ca724515b5c75a317924bcf544abf285229db188718e950f96
+      - use:ddb3106058c1fc7a1d2c259ad737dd33f139ffd22289fe3a0cd426c6020432f3
+      - use:ee8df3839e0b51b16f6681682abd1e04d917cce165e8e1c274ecbedc7ce8e97d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:0894a60235e1c25726ecfbd510f6590681599b63d4d7cf463585dc369acd2ece
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 進化時的墓場目標與進場相同；T6bf91b32e0 省略選取／移動結果標記。必須保留實際進場結果，不能由缺 T.receipt 推成無結果。
+    classifications:
+      T2e41caff56: 85a305b730f24522370789ad43d4f778a856f6ba046ae1e23b7f6ba2ee915563
+      T6bf91b32e0: 82034a30d2cd8fe115b35a6a13f502474f1ea4c7cc0f7c6a9e8676eb108de136
+      Tbbb0abf4bc: 2bf011fba25bff8c71e25fdfbddb1ff1cf17be1adfd77f619ca2dda1de975401
+    examples:
+      T2e41caff56:
+        - BP21-SL18
+        - BP21-074
+      T6bf91b32e0:
+        - CSD02c-011
+        - CSD02c-P08
+      Tbbb0abf4bc:
+        - BP16-P18
+        - BP16-080
+        - BP13-083
+    frames:
+      - frame:0c2232bbc8be2095deb5e0a2ac8b9c206be40b8c2e7d38d6347805b03b855897
+      - frame:3cb5398763a356f323a5e51c193d27868c38738e46194363c6f34ae501f4bc19
+      - frame:c68143421e91249f22aa44ce751adadf5a333e04fa39aa047894415b9adfee2d
+      - frame:fe8969df524834eafa9663e13111725243fdc725d6bb4a1942f666c818c92d51
+    uses:
+      - use:1ef497a0532c98433819a4bd80d3cbdda54750b30583288a488ca4e3cd2c07d7
+      - use:43feedd6b8ecdcee9dfbcf3be0f3415aceead21e2ca08dc6d99dd6b57be2aa67
+      - use:9869898bf0d22caf39a5fead161a8b6d4113421135051783360afe50eeb08b15
+      - use:dbb06f5d0aa547a0a6e9a93cb46a42c66553b5bad2e9668f83d68c6212312ea5
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:8b302a5ac138f9beee040e709e9971740b3fad9b4a3f0d5049224ce7b5518804
+    priority: true
+    conclusion: 舊標註修正
+    rationale: 冒號前棄牌是使用參數的費用，失敗不得抽牌。補漏的同 clause cost-of(0→0)，不可把未列 relation 的版本當免費抽牌；trait／張數另作參數。
+    classifications:
+      T141bf7b18a: b8cbee9c30407884a7e058fd146df0f050ce5be6c4bc58a928569d7a0258943a
+      T2c2f2b95f6: fd61b953481215b9286fcce104c597e38e897220ec737ea96871df111fb2cec8
+      T9c1aa0e655: 85cb43051d6e94f947d905de6ac29a39c4a02691de3107882d26898903f1d931
+      T9cb53155f2: dde39034cae191539b2a9cffc255933b1f6098f751f066cbe3777909ff66e64d
+      Tc0f3fe0513: cf2fde69f44b2366d9e4d49b3459d6a9c0c5c50ca7a7f787a3c15e0dfd83f122
+      Td538543655: 6d803f844cfec4ab1e8d614d38f78dd016a611ad4098e35e29af8b03ad42e7e8
+      Td786a6ac12: 17f05be28f843fcc62f993fb77e42380196a8822ca2b32e0d6634d8b1d1dfa65
+      Tdf78e90499: 816acf6491eccb6f9721eab9b9ce9d6e1df88222f2a88f15bc568815e368704d
+      Tf1a9b3f7a8: d898f3a2d40100c7bcba30c5c4ac65675ddce991358c76d610c977fc98aee758
+    examples:
+      T141bf7b18a:
+        - BP21-SL10
+        - BP21-038
+        - BP21-041
+      T2c2f2b95f6:
+        - ECP02-070
+        - ECP02-P38
+      T9c1aa0e655:
+        - ECP02-026
+        - ECP02-SL13
+      T9cb53155f2:
+        - BP18-P38
+        - BP18-089
+      Tc0f3fe0513:
+        - BP21-002
+        - BP21-SL02
+      Td538543655:
+        - CSD03a-013
+        - CP03-P24
+        - CP03-036
+      Td786a6ac12:
+        - BP19-P21
+        - BP19-080
+      Tdf78e90499:
+        - SD07-019
+        - BP13-032
+      Tf1a9b3f7a8:
+        - CP03-P46
+        - CP03-068
+    frames:
+      - frame:267f4c951c239afed99acaede708afc2ba8b1e63cd974912960daea04f4a47ed
+      - frame:27d6b6e2445521457b9a536721376bf79f4d213276c56d3b473b6f8ba4d82368
+      - frame:30ed7cd085dc3933252cc007dd1ccb7fad01ab92bb287b8a033a3fe15e0fee50
+      - frame:336eec062aede40d1abba4047d159417a95b619cafec80b29276464b49bd1191
+      - frame:57636218cfdf2e663a2d7374492ceb4933ffd4150e3be6eb7b6dd3d96db04031
+      - frame:5f7d40a9fd26aa9c23656b0c01b8e40915ebab12e3b91331478a78831b651d2e
+      - frame:b7fa609fc01983e9067a6124e0c3c513b5e96038493fdaf66c9319c1bc69ea4c
+      - frame:db23b3a020bcd3afd4415ee1efa6dc941ea4c641b87b77b913f4f602e1032b85
+      - frame:dd1f430abc435365da80b3cf06bc89f8f14401a9afb3087140eea96d2a3428a4
+      - frame:e3dabf432f8c77995e0b7e445bc01d22216ce6a4b5e9590810cb891f84b890ef
+      - frame:e7e37dea641c44d200b747ca6a5c2e9d3e7bbc6d9eee9830be0b420deb55c9af
+      - frame:f69583f3fdd6a444f915fe7ced96f2a49c217a2feb3f196086db23d62cbd8a8d
+    uses:
+      - use:2a9c4d29e792a88f64e5e0f2c54897fbb2df24ec4eecdc4ab0b64152dbd5f7d7
+      - use:37926b130dbaa69da79bfc52f95ba3da8671936efd5d1e7ef9e6d0f9e6f5db02
+      - use:42a7584e98a4db731138a0db5b13416f2bdcd9c60b131fc6bdaf1eef15d529fa
+      - use:4aa5a72e4cecd865e1f178d89f2a4f01fadb5407863f61e422b30c41c4427e34
+      - use:6b5c6ada6a3f03946987aae73d1b3bb31a1dcf19f7bfb934add00cfd81b6f8e5
+      - use:6de14c396223d591b99a36d520f8c5d3534023438844cad61e15aefe4a607e69
+      - use:996ba2bddf3ddc81815da349fe01a7cb165bf1f8c9bf69d17a9dae7abc945ae2
+      - use:b142afa04d00564f1de827f26d7053326eada2f4c8b0f23a33a1a5a6cb7b4c18
+      - use:c58a92c550f0cdf0afd446e168b9bc1c69ae6018aea6aaca8074308f7832ff93
+      - use:c605adbe606d73643844b24c818d7588bbc158c0a2c052edf74eb54088a10d54
+      - use:ca3b3d44cc8d41166d898010a1bf29da90d2a87a590401cfe01ceef7e4c42e20
+      - use:f593393e7133240fef6c2996d6d42884b627d317a9cbb6490e3693af900a6211
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:47493b6282c9a6cedb66fb83f07ecf598771e457c899df33c0b616a46f971336
+    priority: false
+    conclusion: 參數值差異
+    rationale: 場上數量與墓場 trait 數量是條件參數；兩者皆使用時選取目標、解決時檢查條件傷害。S.filter／S.zone 的省寫不改控制。
+    classifications:
+      T44dbf155c4: 8edb9fa381c3140574381d835f69f1f041d8188ebc8f6ee0156db20cbf52740d
+      Tcd9624c114: 8b2049acd3816a82e52710ec775022961cc22b238147c81f3383f699b87d0c83
+    examples:
+      T44dbf155c4:
+        - SD07-017
+        - BP13-030
+      Tcd9624c114:
+        - BP15-054
+    frames:
+      - frame:2ca01e265eb740a68641984d8cba0f1bbae27c63c0b0786ea05a7185fe972ef9
+      - frame:887d08807ad03c0c41a95f5734f7f77689fe26777363d53c5a9b69b4ec1b4823
+    uses:
+      - use:1f72bad20a07691766d412cca936671fb30e72101e40ea4f07a50a5c928394b2
+      - use:acbd860097bed53af687bb9302423d6e925980c9893947b1b69acae3bdf77fc9
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP13-060
+    face: 0
+    field: effect
+    section:
+    line: 1
+    frame_ids:
+      - frame:a7492b277f4cd11db4b8bdebeb13434a28e4182ba4cedc3caa53dfe5e639fc6e
+    category: 跨行涵蓋
+    rationale: 加費選項附於下一行 spell。
+    covered_by:
+      ability: 0
+      pointer: /additional_costs/0

@@ -1,0 +1,158 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:d8ab5e67fa5f640efe6e32f1bfb7d0b57d5b2e04d98435c6367ce819be733ec9
+    priority: false
+    conclusion: 等價寫法
+    rationale: 可選手牌 follower 進場的 A.choose／A.optional 與 I.move／K.may 簡寫；D.resolve-choice 已一致，不轉成使用時目標。
+    classifications:
+      T6047092fc5: cfe0114b4625d3f8cea33f3f1449c2d8c614bdfa89cde5458201eb1001e395de
+      Tb55bc41a0f: ff44d3569ea4cdff9861c0fc806eb5aacbf7030d56cc46b5db90969611e7a581
+    examples:
+      T6047092fc5:
+        - BP06-SL11
+        - BP06-055
+      Tb55bc41a0f:
+        - SP01-U25
+        - SP01-041
+        - SP01-SL41
+    frames:
+      - frame:33e21750591cd2fad68ca25034d064b4932b4f1113f22efc5db1740a668fde6c
+      - frame:969b316ee1954aa59e8dd4b1bfe49e1f16ae1269481396d15465f8285a47af25
+    uses:
+      - use:1653534a0bb060094fc6dd5bcb23c736fbaa7a480cc6b00a0e53567a51a8fa6f
+      - use:7a149518aa1d86cf583c1e52d46bd5836a8834f2751d55dcc9123cdc4680c08d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:d5f0459516785d4520bc4ed97f47ff9336cbb0383276e7eac26af597270102af
+    priority: false
+    conclusion: 尚未知
+    rationale: R.follow-move 與 T.receipt、I.move 的混用尚不足以判定是追蹤移動後物件或只記結果；另有墓場／消滅區參數。未定義 follow-move 契約前不共用，也不宣稱必須拆正式框架。未知的是標註的含意，不是同組卡文之間的語義差異；釐清後預期收斂為同一種標註，目前沒有需要來源變體的證據。
+    classifications:
+      T19c5441488: 641832d69d5276ea9001cec083bc0a64e44d2293bd4d2e1cede33546eff39a1c
+      T75fc20f8d1: 887fef462892ea751eb9cf9d4ac82d95fb3540351d7d01802e49cdb21bce1374
+      T913be83fd8: f33b527f775d3930fe2bb7eb15e1c9c4eabe1cbf8232bc7c1b1af8492f07f32d
+      Tac09ac1337: 57e9acbc917b1463ce3f9b3a041d98266c20673f24ef60a961ca12ff44a84064
+      Tebbc424da6: f27798cc5713f437ed32c36aebd31eaf214cdc66632840708a4ea2d8264b1780
+    examples:
+      T19c5441488:
+        - CP03-P32
+        - CP03-049
+      T75fc20f8d1:
+        - BP06-053
+      T913be83fd8:
+        - BP11-SL10
+        - BP11-052
+      Tac09ac1337:
+        - BP12-089
+        - BP12-P16
+      Tebbc424da6:
+        - ECP02-057
+        - ECP02-P30
+    frames:
+      - frame:37cac397a6dad9e63c57e37e44ea010d62b70e9f5e3a825c5271551c5c460843
+      - frame:62a5ed11800356d6e4449eed5d022bf3d90cd22b104269bb5b60a94ebc30c1a8
+      - frame:8ad5903209782cb9731bb7effe738177791827e00f1836daad06437188e1aba3
+      - frame:acbca5e2fdb31e0c15df0f6100838a329a561daef31f109a014e4a14706a976b
+      - frame:e8e939866b4a71bdde8d7d822b63d60ff44bb37229600aad9ceb9a1ad9eca0f7
+    uses:
+      - use:00f962e8d5a57278153aeb75e15ffa9aac7a8774672d5f52fa115f627784f820
+      - use:0fbd8e65ba21306e7392e834f11158c48ef80816c4fe56928a91cd32adb89cc6
+      - use:5e5fa3660c6ba2805107e08071cf2405250055af259e523b363064393ae93fd6
+      - use:bfe0cabe71eef8aa159fcf0af27215aa26cf05af2267d4655a8882fd78abf689
+      - use:d9536d21e3be6352c84b0bf676f67406e39dca1b5085ee3dfcd73663932cd12a
+    translation_review:
+      required_uses: []
+      conditional_uses:
+        - use:00f962e8d5a57278153aeb75e15ffa9aac7a8774672d5f52fa115f627784f820
+        - use:0fbd8e65ba21306e7392e834f11158c48ef80816c4fe56928a91cd32adb89cc6
+        - use:5e5fa3660c6ba2805107e08071cf2405250055af259e523b363064393ae93fd6
+        - use:bfe0cabe71eef8aa159fcf0af27215aa26cf05af2267d4655a8882fd78abf689
+        - use:d9536d21e3be6352c84b0bf676f67406e39dca1b5085ee3dfcd73663932cd12a
+      trigger: follow-move 的追蹤與結果責任釐清並採納時逐 use 比對；只有來源語義、leaf 或中文 render 改變才重審，單純統一標註不重派。
+  - id: shape:9ecbbb219f8fcbfbd8df9efba026b093f8801c22093543a01a1a59d012765273
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 冒號費用後回復與抽牌；T5124ed3a7f 補 D.play-param，另一組補 receipt 標記。不能把生命回復誤併入支付項。
+    classifications:
+      T5124ed3a7f: 030dfbbab87cb962e8e5573e29acf0022ee70e2f85cc7355e2c0bdc2030c22af
+      Tbc5684dbcd: 923f447b5cbc93c2876fab68c1b7e9a4e2a7dd2098d15b1052e46593d6c10e30
+    examples:
+      T5124ed3a7f:
+        - ECP02-SL29
+        - ECP02-061
+      Tbc5684dbcd:
+        - BP06-085
+    frames:
+      - frame:499cc6ac0948749ff21d7927f327971f75013982661860ee3e9b7cf2ffd257ab
+      - frame:8d90447e5126f08ab4da2fbd5ba484aec8dd07951e02c9484fdcd0c15ae9d16f
+    uses:
+      - use:54cfee1f88493348a79e73e9f3772c305778928df3b3ea801f73c27bf347e3b9
+      - use:aa06adb6f02c21a441eb24218beef60b4c76baef5265b921f6666cd53298e951
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:8a7e426099541d24708ffb95a05fb1f1290d3ccfefb6c68f43f2931a0804d5e5
+    priority: false
+    conclusion: 參數值差異
+    rationale: 牌庫頂移墓場的 Player 值不同；I.move 簡寫仍需 S.ordered 來源順序，quick 不由此局部 body 判定。
+    classifications:
+      T7c3b9072aa: 699f7bc901e8f239d461721eb528efc256af5e55d47484344bdef0fe46aeef7f
+      Tfb5fee5a0e: a93f749db8dffd51e0b3219ef87b3ec015cdd08823386b5d0df34cc540d1c241
+    examples:
+      T7c3b9072aa:
+        - BP06-028
+        - PR-526
+      Tfb5fee5a0e:
+        - BP09-085
+    frames:
+      - frame:8822560861a1ef265e043aed44c7e1593a99f74ebee8e7a5e65c58edca33db1e
+      - frame:dfbf276d3cc6908201044c79d5d2fbc3e42f73019589e0564c0b26403488af86
+    uses:
+      - use:dcd7b7e42366d05e1447f6e00e120fdc779419d3bfcecdde80546c4842eee630
+      - use:ef1f9e2b0acea734d057bfbdd4829329a700a76be0986ecf3a08d06f12d33fbc
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP06-035
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:1a9f1a5cd93538dc31f30eb602d78b36f09dcd61ed52bb20eba34e9e6d6267d3
+      - frame:603bd2edbb2fa5ea104b47ee7411011f53226e3f698f10a79463fab13480152f
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP06-042
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:37f9e16bbd02321dfeb96b1a475c7f554c8135916acf842b65f0fb5657e39346
+      - frame:3b1a395bb7cb6a6ad93d9e1d25027fe217fd464f7f11ecdf0aa71fbffa39afad
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP06-073
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:74f4f60dbfa245fafd63f1e7f8401b3c1809aa7e2221ace194335c506c774375
+      - frame:a374e47cfcfeae42ce5b33b0e2df83f09ff91c85d783c8fd70bb5a9166af6aaa
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

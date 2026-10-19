@@ -1,0 +1,55 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:08bfbacf6469f60dff3c8beb08e5cb86713d4110a10fd7a214c3b980af478452
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 使用時條件減費，C.at-play 與 replacement 一致；A.effect、B.ability 的有無屬標註粒度，不是另一個支付動作。
+    classifications:
+      T240c80ceca: 5a8a6f6a806acdf0d3c700d587a62cc570ebbed80ba82b5197ef7fffafec1ed4
+      Tf29c2206e7: de006226f6098a76c349c3ce6205680fbcd6d2a31ab9da4c1296e29327374174
+    examples:
+      T240c80ceca:
+        - BP03-030
+        - BP03-031
+      Tf29c2206e7:
+        - BP13-111
+    frames:
+      - frame:2121ddb8843c795d25e04d093268450b960903ff43c1d5db633fd2e89e96e6a1
+      - frame:90f56b94a1651334a980c0a11353771bb29e0b30022c7e3211ac376d8bb25a5c
+      - frame:c1a6678e3966906d30ad86540f00878b75bf5dff65a87f98df2d0f04d5eed269
+    uses:
+      - use:410cf216795d6f6b3137242d297f0e9d675dda7fb9f414d5422d7157b0d8de2d
+      - use:63ae7f99143d5777a6d4a7505f53735e4841c702779cfa171b95d75158c8adb7
+      - use:d21cda8e66c54e596a8a89dbee1a28d481334aa5d09159c3d19f3e7ca300dc0d
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP03-011
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:3932d15513e5072f6380810bea3da5e6c1fd77e2d98a186d0d8837567a705b57
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP03-SL07
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:598d47a987304643013b3973140c74af4d5772a40544d865017bb67e336cbdd4
+      - frame:c9da241be877f8de18f9b0f6322c41865ed209b014e6f88b2f747f426e88905e
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。

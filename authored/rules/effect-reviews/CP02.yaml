@@ -1,0 +1,47 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:ab1d1feb15beac05631d2c2e658ecc28db70c59d8376d82fae36f5867766dc6f
+    priority: false
+    conclusion: 舊標註修正
+    rationale: 傷害後依場上數量抽牌，兩組的 sequence、branch、C.live 相同；A.sel／S.zone 只是對選取及計數標註不齊。
+    classifications:
+      T183bb231ca: 931f12f0397d00fae97adb5f543d20e6ae3e7ebef8f894dc30ba7cb2eb7d4bec
+      T2aaa88399f: e068f2e85b98282d0f957462b5f4a4af3b3874f1752042d5d8836fab09ba6a87
+    examples:
+      T183bb231ca:
+        - CP02-P32
+        - CP02-041
+        - PR-440
+      T2aaa88399f:
+        - CP04-P41
+        - CP04-053
+    frames:
+      - frame:0940cbb7cfbef5783b91fc7388a7fdda9743c03aca7f804648a2185cb47f9c1a
+      - frame:19a9e2a69dd9d1afcf640afe11e35863f9dadfc6451c469e72ddf6b750fb29e5
+      - frame:d757ae88dfe197c8143be6dbfcb62b2a4e6865d8598a2aa2e92d5d92e976e6b3
+    uses:
+      - use:3aad9200104e474930e159a63a8ff88585576a9aecf41f4d80c52e3281de83c5
+      - use:7a94e83e75032d8fb0a5659dfcc99e3b972e19e8f6e17606385782ea0d3fd8d6
+      - use:a136031acd7b79e5d8da8fa72bdb16b79a76aeea8347e193df111b8b4a6bd46c
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: CP02-T01
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:1776e800465c6ad932aaedaf39b4ccc22bab02bd0f70ccfb56701f091e8f3e6f
+    category: 說明
+    rationale: 括號說明既有關鍵字或通用建構／裝備規則；不複製成另一個效果。

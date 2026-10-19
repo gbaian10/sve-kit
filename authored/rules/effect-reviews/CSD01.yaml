@@ -1,0 +1,40 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups: []
+reverse_positions:
+  - card_no: CSD01-032
+    face: 0
+    field: effect
+    section:
+    line: 1
+    frame_ids:
+      - frame:11501a43f698a7cb378455341944bb0c461e9e4615c3afa0c2bccc1c46b87319
+      - frame:29a76d827cd2478e5eb2cf0dab14eafc1e7b2a0aba615d0880affe39931df4ea
+    category: 通用規則
+    rationale: 食事與出走由一般規則處理；這行是共通動作的說明，不新增本卡專屬能力，也不宣稱引擎已實作。
+  - card_no: CSD01-T01
+    face: 0
+    field: effect
+    section:
+    line: 1
+    frame_ids:
+      - frame:bb083f8f55b3a8a6794d0fa191aeaf27f142eb79ff5367b3c07fe73543b217d8
+    category: 通用規則
+    rationale: 資源與 EP 的使用／開始配置由通用規則處理；不建立空卡效果來灌高完成率。
+  - card_no: CSD01-T01
+    face: 0
+    field: effect
+    section:
+    line: 2
+    frame_ids:
+      - frame:a1e0ed32d475274f35a018da0bbfe1cf5f7659909238f184b40f4efaf86b6e7f
+      - frame:fdea153fd5d6406918254cf58d1923c536b58a7c780dde8295d9cc43b903d7ae
+    category: 通用規則
+    rationale: 資源與 EP 的使用／開始配置由通用規則處理；不建立空卡效果來灌高完成率。

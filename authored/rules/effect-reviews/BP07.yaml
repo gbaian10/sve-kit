@@ -1,0 +1,189 @@
+format: 1
+kind: effect_review_draft
+status: candidate
+basis:
+  classifications:
+    recipe: v0-classification-candidates-1
+    inputs_hash: sha256:f5ccad46e3853db09b3de7ed1d2f5db01d166afd1aae83c8684338206c6fee25
+  normalizer: four-layer-jp-v6
+  build_sha256: 1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53
+groups:
+  - id: shape:0080fc2201a85d64155cfe16cac5fc3d842c2ba90425cbd26431f8567636950a
+    priority: true
+    conclusion: 舊標註修正
+    rationale: 可使用條件管住整個起動能力；Te2447d722d 的 scope-of(2→2) 是重複的自指，移除草案保留 2→0、2→1。Zone／trait／門檻另作參數。
+    classifications:
+      T02b0c1dea1: aa1a635f5da14555df367c60ee9dc8fc26b6f7779535d1caaa7d31bb944c31e9
+      T7c27e7b2af: c184355655598bc87e05d6083da2b99d9914be34ef74132d16a690ee6d02c4c9
+      Te2447d722d: 5092a3cb3237413bfa51199f46f9f533c7e21d72b0028f8ae26fa7526da78ce5
+    examples:
+      T02b0c1dea1:
+        - BP12-061
+      T7c27e7b2af:
+        - BP07-106
+        - PR-179
+      Te2447d722d:
+        - DSD01b-017
+        - BP09-065
+        - PR-228
+    frames:
+      - frame:0fc29e691cad1bb6309d026e549699d626f50975dad9ff1b41f200b947866832
+      - frame:51ea67d82dc74f9a3b659da3881c08520842ffca6f0f749f8531bc2779034252
+      - frame:56c58f78938db5b4d757bc83ae1b559758b5eb06056238a64d6e6ebca0e994d6
+    uses:
+      - use:10375c29492728da66f3faaab1ac02f3dccac95721914b9f128dfe737ce9a3a7
+      - use:62f3950c4494c34196f9cf64de700ec6f2a3d463eb4580ed17334f92173a7e8b
+      - use:a3e7c8551703b54c3dbe867d45d8e96810c4c40673ee8d322f034327428d75a9
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:26782df1a678b577af78a8ad397b0c2af30d0216ccb340122ae80f56ce1f777c
+    priority: false
+    conclusion: 等價寫法
+    rationale: fanfare 搜尋進場，I.search 簡寫與展開同一流程；搜尋條件不同。必須展開洗牌、展示、容量裁減，不能以簡寫缺標記宣稱無副作用。
+    classifications:
+      T0235c84c8c: 4d1667f3821e54a0fec8e236dc95b1fbd89bec27c7d8cab985f3bc865f0fbb15
+      T8f181c20b5: ba3b47c41bc1fe58232d6bb9d857a4873f8c4b1ab0989d6d854abb32bebb9d2b
+      T9f7ed74a23: 971978e44c2c9f8ba65e3a2e377577c74d2d9d8d62eb5d755d7fa4bb87e53eca
+      Tbda403e786: 3fd9ccc92b78d93c53749f0f29e693e1f0d476054cff83fd39118835d4cb6011
+    examples:
+      T0235c84c8c:
+        - BP10-040
+      T8f181c20b5:
+        - BP07-072
+        - PR-180
+      T9f7ed74a23:
+        - CSD02b-004
+        - CSD02b-P01
+      Tbda403e786:
+        - BP10-103
+    frames:
+      - frame:2af2bd3772da0505da6fa32800381fcfad54ad24b6e980dc7735d57118405a63
+      - frame:597bf24bac7da5778806b9cbecc87e5d1baba3fc7e5efb86213a5901ce014d84
+      - frame:9d0a01371bc8086de5828014ddaec9c5d90485c1ea45522ee294b28a2ddbd11a
+      - frame:eda9799c107fe591ab4d7c5b1d5d9713d640e8487fe856a4ff204c291aeb5edd
+    uses:
+      - use:294c59ef3f64b208a78ecae48797caec8eb0093d19ecd3325ea6705a03feb65d
+      - use:848ce5b71e3920d81f261ab24fe5694bd749dfe5d52014816ef6cf7d3316cb85
+      - use:a13fe72e3cc28df53976720911e70c5d5800a69bde636f3e230e79ae0e70903f
+      - use:b0d2f614bd90985ce1e377dec8c47e968963aca8f7f17ce0b6ca47932c3d6b4f
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:8a64accb885acb8b32b66ad820051d6baffeba7ed5fccd9045bae833888d9f5c
+    priority: false
+    conclusion: 舊標註修正
+    rationale: lastword 解決時選擇支付棄牌再抽牌；A.act.discard／B.ability 缺標，不能從其他 fanfare 的 PlayParameter 類推提早支付。
+    classifications:
+      T810aa49538: da046a4f956c9558000e69aeb2bdd1118addeb34612bae9f85ff3a5d1e947591
+      Tdebe28d7ba: 99a046c3a80a96c0c1bd6bd9934ec25acd9132dc9508135c09bc7592c42f5eea
+      Te5808d3bae: 28716f278124148eaafd5aea88201f3578488bae13f9da037b8e23f79f895a01
+    examples:
+      T810aa49538:
+        - BP07-116
+        - PR-206
+        - PR-339
+      Tdebe28d7ba:
+        - BP07-112
+        - PR-205
+        - PR-338
+      Te5808d3bae:
+        - ECP01-042
+        - ECP01-P22
+    frames:
+      - frame:3a7fe320c0f79c30d2679be4593d0d213bd8a3f071cf8760bdd991b606dd9eb1
+      - frame:c2d53b8110ec67a53c793c94934d8bbcef21728c168ce724d24114d29aa8263b
+      - frame:cbf87d30857c188457bbfb7a40b9eb6e2df05febe1e473cd00de13827b0aee01
+    uses:
+      - use:338fd1201bd5cb2bb2ccc596d0f951ed26ef1108503a8c03adf209e274e61b28
+      - use:5d100c056626d77cd1d8c9933f48e995aa627746549ce72c58bdcfc822cb869d
+      - use:81a17dd02a45c38b60ed4a2f67212e8715c706e40f0ce148199ed1b43dcfcaff
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+  - id: shape:2ac18c88a7cb6ffc493beee48c31bf0f9a9963c665dd5a383c80e365e3f7b868
+    priority: false
+    conclusion: 參數值差異
+    rationale: X 依場上數量求值；兩組均 X.binding 與計數，差別在 trait 篩選值，保留 filter，不把 X 當一般固定 Nat。
+    classifications:
+      T2e033f6635: b02417e9214c99aa413ca4869e2119483fccf2c97a7a980dd3feaeb8d5169e79
+      Tde113dcc2c: 98c82306ecd0381b8dc6106f520799ea7bd5c1ed252d84b89c365b908d8c06b0
+    examples:
+      T2e033f6635:
+        - BP12-P28
+        - BP12-T05
+      Tde113dcc2c:
+        - BP07-059
+    frames:
+      - frame:3be2b2e43d755c4bcb8faefef942ee341ac121f71b5c8dff4f3cfedefa4c9bd6
+      - frame:6667042892d515473f52ff7f03aef158278168ab2aa9c6538c0db9e7c97de443
+    uses:
+      - use:1badab42cb7380d82ac4caa64b16dadf44e02daf57a08d6780a99d3f21ff82d0
+      - use:72f8a1533809948adc6319f27059cd1eebdf6a6086236358592e8e0149c23ba5
+    translation_review:
+      required_uses: []
+      conditional_uses: []
+      trigger: 只改 DSL 標註，未改正式來源語義；不重派中文。
+reverse_positions:
+  - card_no: BP07-030
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:289d80b9139a8bde82a89d2dcb6bce18e0fe5086f7003a5ea0adb5a5d8ffaee0
+      - frame:2aca42653f49e9eb39e6681453cb66d5fd7f522f944080dbfd32c9708b61993f
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP07-035
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:593f974669ab7e5b2c00a849d2d43ea1129a0ed0c2a90c32a5366b42371d9091
+      - frame:e42770b2bfd9af7958c4f1a5ab0a904364848e47da95b17c0fd9d9df09db74e1
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP07-P06
+    face: 0
+    field: section
+    section: 0
+    line: 1
+    frame_ids:
+      - frame:0786e3f6dd5d4055a09a7f2077558c29492841266530f460b6b203f41942266c
+      - frame:2aca42653f49e9eb39e6681453cb66d5fd7f522f944080dbfd32c9708b61993f
+    category: token
+    rationale: 本卡引用的 token 欄位；不是本卡的獨立能力。token 自身效果需依 token 身分另行覆蓋，這裡不宣稱已可執行。
+  - card_no: BP07-P06
+    face: 0
+    field: effect
+    section:
+    line: 3
+    frame_ids:
+      - frame:329671b7b82b6e62fb79e7237c7e9ad6ba359441c3c8b07e131ad31742b45b5a
+    category: 跨行涵蓋
+    rationale: 傷害 body 已有，但標成 section 0 line 2；草案移至 effect line 3，保留 additional_costs，不另複製能力。原位置是凍結 section 未更正的重複句；移動後必須由來源更正流程處理該殘留行，詳見 positive_alignment_exceptions。
+    covered_by:
+      ability: 2
+      pointer: /body
+positive_alignment_exceptions:
+  - card_no: BP07-P06
+    ability: 2
+    status: known_invalid_alignment
+    position:
+      face: 0
+      field: section
+      section: 0
+      line: 2
+    source_issue: uncorrected_duplicate
+    source_correction: x:d529a2a90bd757f2be41c721eb0eaf4b
+    proposed_position:
+      face: 0
+      field: effect
+      section:
+      line: 3
+    rationale: 既有來源更正只補 effect，section 仍在 token 定義後保留重複傷害句。能力應移至 proposed_position；原位置隨即成為無分類來源行，須由來源更正流程移除重複，不能當作 token 效果或新增第二份傷害。
