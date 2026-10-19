@@ -368,6 +368,7 @@ const zhTW = {
       reference: "參考",
       printings: "其他版本",
       mentions: "這張卡提到",
+      mentionedBy: "提到這張卡",
       otherOfficial: "其他官方關聯",
       loadFailed: "關聯卡牌載入失敗。",
     },

@@ -65,6 +65,7 @@ def initial(source: Source) -> dict[str, list[Record]]:
     }
     for name in (
         *MEDIA_TABLES,
+        "card_mentioned_by",
         "annotation_set",
         "annotation_concept",
         "field_annotation",

@@ -52,6 +52,7 @@ logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Sche
 | `ruling_revision` 的 scopes/evidence/cards/hints | 建置器提供的有效 scope、supersession、精確 QA/CR 引文／source URL、ruling_card/hint | 不推測文字切段；沒有明確有效 scope 或 undecided 不提供提示；無 active scope 接點直接拒絕 |
 | `rules_profile.revisions/restriction.members` | profile revision、restriction member | 未有資料 []；不從沒有 restriction 宣稱牌組合法 |
 | `card_related.applicable_regions` | 已驗證的 reskin 地區投影 | reskin 缺 eligibility 不出列；其他 relation=null，不推 DSL 或同名張數 |
+| `card_mentioned_by` | 每個 `face.current` 的效果、段落及其已選用翻譯／來源標註，加上官方單向 `card_related` | 卡名標註只取已確認公開目標；官方單向列依來源卡的公開 printing 地區收錄；不掃名稱、風味文或未選用歷史，不由相同字串補推；聯集去重並排除自身與非公開目標 |
 | `digital_art.digital_card_id/phase`、link/voice 的 phase | `digital_face` 的 parent/phase | nullable phase 保留 null；數位資訊只留被實體關聯、圖、語音引用的閉包 |
 | `keyword.name_unit_id/actions` | 同概念 `glossary_term.source_ja` 與 mechanic_action | 明列 glossary 概念；符號不推測機制；無能力集合為 [] |
 | `mechanic_projection/card_mechanic_coverage` | 建置端新鮮投影直投，驗最短 include/exclude 編碼 | 缺 coverage 為未知；partial 不證明 absent；EN block 不計 full |
@@ -106,3 +107,17 @@ uv --directory carddb run pytest tests/export/test_snapshot_project.py
 區域反例分別覆蓋混合日期、未確認 mapping／release／role、角色衝突、未知代碼、divergence 範圍與 QA 現行版本。
 整體反例驗離線 DB 版號與 join 後的引用閉包；圖片狀態、版本與衍生檔閉包由獨立圖片流程及索引驗證。
 正式卡文不進 fixture 或回報；真實封存來源與合成資料的數量須分開記錄。
+
+### 卡名反查投影
+
+`card_mentioned_by` 合併一張卡所有卡面現行版本的效果與段落引用，並聯集這些欄位已選用的各介面語言翻譯標註。
+英文只沿用現有 `FieldTranslation.source` 選用結果；選到日文依據時，同時取該精確來源欄位與來源 owner 的段落標註，
+不自行挑日文 current、不依卡號配對、不以共用字串找來源。未選用的歷史版本不計；已被選為來源的版本仍計入。
+卡名 concept 的目標依既有人工確認結果，並與公開 card 集合取交集；無目標的 concept 不出列。
+反查是卡面地區的資料，切換介面語言不改變結果；此表不代表效果 DSL、裁定或構築規則。
+
+官方單向關聯也納入反查：只取 `relation=official_unspecified` 且不存在反向卡片對的 `card_related`，
+反向是否存在以全部 relation 判斷；自指不納入。原列 `from_card_id → to_card_id` 轉為被提到者 `to_card_id`、
+提到者 `from_card_id`，依來源卡在公開 printing 出現的地區各出一列，不要求目標也有該區 printing。
+兩端都必須是公開 card；與標註反查聯集後，依 `(card_id,region,from_card_id)` 去重。
+官方關聯未必是卡文的字面提及；此表不據此推導雙向關係或規則語義。

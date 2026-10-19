@@ -6,7 +6,17 @@ from typing import TYPE_CHECKING
 
 import httpx
 import pytest
-from sve_carddb.export.read_api import INDEX, ExportError, load_export
+from sve_carddb.export.read_api import (
+    INDEX,
+    ExportError,
+    canonical,
+    closure,
+    digest,
+    load_export,
+    object_value,
+    parse,
+    string,
+)
 from typer.testing import CliRunner
 
 from sve_publish import gc
@@ -17,8 +27,9 @@ from sve_publish.adapter import (
     Stored,
 )
 from sve_publish.cli import app
-from sve_publish.headers import IMAGE_HEADERS
+from sve_publish.headers import IMAGE_HEADERS, INDEX_HEADERS, JSON_HEADERS
 from sve_publish.inventory import INVENTORY
+from sve_publish.snapshot_diff import missing_members
 
 from .r2_export_fixtures import export
 from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
@@ -266,3 +277,35 @@ def test_cli_dry_run_lists_and_execute_deletes(
     assert empty.exit_code == 0, empty.output
     assert json.loads(empty.stdout)["deleted"] == []
     assert empty.stderr == "GC: 0 candidates\n"
+
+
+@pytest.mark.parametrize("slot", ["current", "previous"])
+def test_diff_and_gc_accept_retained_reader_4_0_0_manifests(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+    slot: str,
+) -> None:
+    store, state, _ = remote
+    _first, _second, current = three_versions(images, roots, store)
+    index = object_value(parse(state.objects[INDEX].raw))
+    entry = object_value(index[slot])
+    manifest = object_value(parse(state.objects[string(entry["manifest_path"])].raw))
+    manifest["min_reader_version"] = "4.0.0"
+    raw = canonical(manifest)
+    path = "snapshots/manifests/" + digest(raw)[7:] + ".json"
+    entry.update(
+        min_reader_version="4.0.0", manifest_path=path, manifest_sha256=digest(raw)
+    )
+    state.objects[path] = Stored(raw, '"legacy-minimum"', JSON_HEADERS)
+    state.objects[INDEX] = Stored(canonical(index), '"mixed-window"', INDEX_HEADERS)
+
+    missing = missing_members(store, index, current.members)
+    expected = {string(current.entry["manifest_path"])} if slot == "current" else set()
+    assert {member.key for member in missing} == expected
+    result = gc.collect(store, SNAPSHOT_PREFIXES, execute=False)
+    candidates = result["candidates"]
+    assert isinstance(candidates, list)
+    assert not set(candidates).intersection(closure(path, manifest))
+    assert gc.collect_images(store, IMAGE_PREFIXES, execute=False)["candidates"] == []
+    assert not any(operation == "DELETE" for operation, _key, _ in state.operations)

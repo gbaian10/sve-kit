@@ -58,6 +58,7 @@ def exported(logical: tuple[Projection, Ownership]) -> Snapshot:
 def test_join_equals_public_projection(
     exported: Snapshot, logical: tuple[Projection, Ownership]
 ) -> None:
+    assert exported.manifest["min_reader_version"] == "4.0.1"
     exported.verify(logical[0])
 
 

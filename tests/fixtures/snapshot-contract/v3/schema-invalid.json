@@ -523,5 +523,22 @@
       "text": "PR",
       "extra": 1
     }
+  },
+  {
+    "name": "mentioned-by-missing-source",
+    "value": [
+      "c:target",
+      "jp"
+    ],
+    "target": "card_mentioned_by"
+  },
+  {
+    "name": "mentioned-by-invalid-region",
+    "value": [
+      "c:target",
+      "cn",
+      "c:source"
+    ],
+    "target": "card_mentioned_by"
   }
 ]

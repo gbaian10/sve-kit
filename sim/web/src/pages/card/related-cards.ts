@@ -178,6 +178,30 @@ const byCardNo = (a: CardSummary, b: CardSummary): number =>
   a.cardNo.localeCompare(b.cardNo, "en", { numeric: true }) ||
   a.printingId.localeCompare(b.printingId, "en")
 
+export function referencingCards(
+  rows: readonly Row[],
+  cardId: string,
+  edition: Region,
+  catalog: Catalog,
+): CardSummary[] {
+  const ids = new Set(
+    rows.flatMap((row) =>
+      row["card_id"] === cardId &&
+      row["region"] === edition &&
+      row["from_card_id"] !== cardId &&
+      typeof row["from_card_id"] === "string"
+        ? [row["from_card_id"]]
+        : [],
+    ),
+  )
+  return [...ids]
+    .flatMap((id) => {
+      const card = representativeOf(catalog, id, edition)
+      return card ? [card] : []
+    })
+    .sort(byCardNo)
+}
+
 // A card appears once: evolve pairs first, then the text's mentions, then the remaining official rows.
 export function relatedGroups({
   cardId,

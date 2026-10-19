@@ -22,9 +22,10 @@ function origin(replaced = false) {
       file("engine/shared/family-BP05/0", "engine", [
         ["card_engine_support", "home_set", "BP05", "bootstrap", "family-BP05:band-0", 1],
         ["card_related", "home_set", "BP05", "detail", "family-BP05:band-0", 2],
+        ["card_mentioned_by", "home_set", "BP05", "detail", "family-BP05:band-0", 1],
       ]),
       file("engine/shared/family-BP05/1", "engine", [
-        ["card_related", "home_set", "BP05", "detail", "family-BP05:band-1", 1],
+        ["card_mentioned_by", "home_set", "BP05", "detail", "family-BP05:band-1", 1],
       ]),
       file("engine/shared/family-BP06/0", "engine", [
         ["card_related", "home_set", "BP06", "detail", "family-BP06:band-0", 1],
@@ -47,10 +48,13 @@ function origin(replaced = false) {
                 { id: "r1", from_card_id: "c:base", to_card_id: "c:evolve" },
                 { id: "r2", from_card_id: "c:other", to_card_id: "c:base" },
               ]),
+              fragment(key, "card_mentioned_by", [
+                { card_id: "c:base", region: "jp", from_card_id: "c:cross-family" },
+              ]),
             ]
           : [
-              fragment(key, "card_related", [
-                { id: "r3", from_card_id: "c:base", to_card_id: "c:token" },
+              fragment(key, "card_mentioned_by", [
+                { card_id: "c:other", region: "en", from_card_id: "c:token" },
               ]),
             ],
       )
@@ -64,7 +68,11 @@ describe("loadCardRelated", () => {
     const { client, snapshot, reads } = origin()
     const rows = await loadCardRelated(client, snapshot, "BP05")
     expect(reads.sort()).toEqual(["engine/shared/family-BP05/0", "engine/shared/family-BP05/1"])
-    expect(rows.map((row) => row["id"])).toEqual(["r1", "r2", "r3"])
+    expect(rows.related.map((row) => row["id"])).toEqual(["r1", "r2"])
+    expect(rows.mentionedBy).toEqual([
+      { card_id: "c:base", region: "jp", from_card_id: "c:cross-family" },
+      { card_id: "c:other", region: "en", from_card_id: "c:token" },
+    ])
   })
 
   it("fails when the snapshot was replaced while reading", async () => {

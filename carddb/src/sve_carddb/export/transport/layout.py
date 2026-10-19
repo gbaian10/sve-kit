@@ -30,6 +30,7 @@ CARD_TABLES = frozenset(
         "mechanic_projection",
         "card_mechanic_coverage",
         "card_related",
+        "card_mentioned_by",
         "digital_link",
         "digital_link_coverage",
         "card_voice",

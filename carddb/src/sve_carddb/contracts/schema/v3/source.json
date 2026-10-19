@@ -106,6 +106,7 @@
     "rules_profile",
     "restriction",
     "card_related",
+    "card_mentioned_by",
     "digital_card",
     "digital_art",
     "digital_link",
@@ -192,7 +193,9 @@
     "restriction_bootstrap",
     "restriction_bootstrap_fragment",
     "card_related_detail",
+    "card_mentioned_by_detail",
     "card_related_detail_fragment",
+    "card_mentioned_by_detail_fragment",
     "digital_card_detail",
     "digital_card_detail_fragment",
     "digital_art_detail",
@@ -1022,6 +1025,16 @@
                   }
                 ]
               }
+            },
+            "card_mentioned_by": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/card_mentioned_by_detail_fragment"
+                  }
+                ]
+              }
             }
           },
           "additionalProperties": false
@@ -1230,6 +1243,9 @@
           "bootstrap": "field_annotation_bootstrap",
           "detail": "field_annotation_detail",
           "history": "field_annotation_history"
+        },
+        "card_mentioned_by": {
+          "detail": "card_mentioned_by_detail"
         }
       },
       "x-tables": [
@@ -1257,6 +1273,7 @@
         "rules_profile",
         "restriction",
         "card_related",
+        "card_mentioned_by",
         "digital_card",
         "digital_art",
         "digital_link",
@@ -1386,6 +1403,7 @@
                   "rules_profile",
                   "restriction",
                   "card_related",
+                  "card_mentioned_by",
                   "digital_card",
                   "digital_art",
                   "digital_link",
@@ -1831,7 +1849,10 @@
           "uniqueItems": true
         },
         "min_reader_version": {
-          "const": "4.0.0"
+          "enum": [
+            "4.0.0",
+            "4.0.1"
+          ]
         },
         "required_capabilities": {
           "const": [
@@ -12256,6 +12277,55 @@
         }
       },
       "constraints": {}
+    },
+    "card_mentioned_by": {
+      "fields": {
+        "card_id": {
+          "schema": {
+            "$ref": "#/$defs/ID"
+          },
+          "descriptor": {
+            "scalar": "ID"
+          }
+        },
+        "region": {
+          "schema": {
+            "$ref": "#/$defs/Region"
+          },
+          "descriptor": {
+            "scalar": "Region"
+          }
+        },
+        "from_card_id": {
+          "schema": {
+            "$ref": "#/$defs/ID"
+          },
+          "descriptor": {
+            "scalar": "ID"
+          }
+        }
+      },
+      "constraints": {
+        "x-primary-key": [
+          "card_id",
+          "region",
+          "from_card_id"
+        ]
+      }
+    },
+    "card_mentioned_by_detail": {
+      "fields": {
+        "card_id": {
+          "from": "card_mentioned_by"
+        },
+        "region": {
+          "from": "card_mentioned_by"
+        },
+        "from_card_id": {
+          "from": "card_mentioned_by"
+        }
+      },
+      "constraints": {}
     }
   },
   "nested": [
@@ -12442,6 +12512,9 @@
       "bootstrap": "field_annotation_bootstrap",
       "detail": "field_annotation_detail",
       "history": "field_annotation_history"
+    },
+    "card_mentioned_by": {
+      "detail": "card_mentioned_by_detail"
     }
   }
 }

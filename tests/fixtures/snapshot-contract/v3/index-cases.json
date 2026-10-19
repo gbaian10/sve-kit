@@ -8,7 +8,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -24,13 +24,13 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -736,7 +736,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -794,7 +794,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -810,12 +810,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       }
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -1521,7 +1521,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -1589,7 +1589,7 @@
         "data_version": "20261005T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -1611,7 +1611,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -1627,12 +1627,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       }
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -2338,7 +2338,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -2373,7 +2373,7 @@
         "data_version": "20261005T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -2428,7 +2428,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -2444,12 +2444,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       }
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -3155,7 +3155,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -3223,7 +3223,7 @@
         "data_version": "20260929T010203Z-0001",
         "published_at": "2026-09-29T01:02:03Z",
         "format_version": "4.0.0",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -3240,12 +3240,12 @@
           "validation_policy_id": null
         },
         "manifest_path": "snapshots/manifests/0000000000000000000000000000000000000000000000000000000000000000.json",
-        "manifest_sha256": "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435"
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:9946a393b7a0118e4530533374a839bc3fc556505756e2d9f1f955969fa71435": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -3951,7 +3951,7 @@
           "zh-Hant"
         ],
         "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "min_reader_version": "4.0.0",
+        "min_reader_version": "4.0.1",
         "partitioning": {
           "algorithm": "sha256-mod-v1",
           "bucket_count": 64
@@ -3976,5 +3976,1519 @@
       }
     },
     "error": "Index manifest path must match its hash"
+  },
+  {
+    "name": "mixed-reader-minimum-window",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "4.0.0",
+        "min_reader_version": "4.0.1",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad.json",
+        "manifest_sha256": "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad"
+      },
+      "previous": {
+        "data_version": "20260929T010202Z-0001",
+        "published_at": "2026-09-29T01:02:02Z",
+        "format_version": "4.0.0",
+        "min_reader_version": "4.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/5c4adc6fc4da15cd6c6dc8b377e5cff0ab76ee8961211d98104febf5d30d527f.json",
+        "manifest_sha256": "sha256:5c4adc6fc4da15cd6c6dc8b377e5cff0ab76ee8961211d98104febf5d30d527f"
+      }
+    },
+    "manifests": {
+      "sha256:20dcbf6eedaa71270898a1baac9d041c2cc172320497f25f587ddec29d984bad": {
+        "changes_ref": null,
+        "config_ref": {
+          "key": "config",
+          "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+        },
+        "coverage": {
+          "mechanics": [],
+          "reviews": [],
+          "translations": []
+        },
+        "data_as_of": "2026-09-29",
+        "data_version": "20260929T010203Z-0001",
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "errata_card_ids": [],
+        "files": [
+          {
+            "bytes": 205,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "path": "snapshots/blobs/c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 208,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "path": "snapshots/blobs/a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 275,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "path": "snapshots/blobs/19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "translation",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1002,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "path": "snapshots/blobs/66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "product_family",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 356,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "path": "snapshots/blobs/dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1017,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "path": "snapshots/blobs/df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "product",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "vocabulary",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 5149,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "card",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "card_engine_support",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "face",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                2
+              ],
+              [
+                "face_revision",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                2
+              ],
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1218,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "config",
+            "path": "snapshots/blobs/04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f.json",
+            "role": "config",
+            "row_counts": [],
+            "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f",
+            "purpose": "config",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "images/detail/global/global/band/12",
+            "role": "images",
+            "row_counts": [
+              [
+                "image_asset",
+                "global",
+                null,
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/e9d315b8016407e6ff5858c8994344225fc0447fef501f27ef2e993dec4a0ae6.json",
+            "sha256": "sha256:e9d315b8016407e6ff5858c8994344225fc0447fef501f27ef2e993dec4a0ae6",
+            "bytes": 319,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 533,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "key": "images/detail/global/global/band/55",
+            "path": "snapshots/blobs/69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c.json",
+            "role": "images",
+            "row_counts": [
+              [
+                "image_asset",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "image_variant",
+                "global",
+                null,
+                "detail",
+                "shared",
+                5
+              ]
+            ],
+            "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c",
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/0",
+            "role": "images",
+            "row_counts": [
+              [
+                "printing_image",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/1ad784a109a8496e465d77aec8b84fe76d204bd080362d3d3e7fe689db5fbf2c.json",
+            "sha256": "sha256:1ad784a109a8496e465d77aec8b84fe76d204bd080362d3d3e7fe689db5fbf2c",
+            "bytes": 527,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/1",
+            "role": "images",
+            "row_counts": [
+              [
+                "printing_image",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/e2148ed15439e4fa5803c289d889387a4b30e2d099f7ccef19143232f13cf522.json",
+            "sha256": "sha256:e2148ed15439e4fa5803c289d889387a4b30e2d099f7ccef19143232f13cf522",
+            "bytes": 529,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 39,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "programs",
+            "path": "snapshots/blobs/f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921.json",
+            "role": "programs",
+            "row_counts": [],
+            "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
+            "purpose": "programs",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 210,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/15",
+            "path": "snapshots/blobs/f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1061,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/18",
+            "path": "snapshots/blobs/a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_symbol",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "translation",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 340,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/19",
+            "path": "snapshots/blobs/7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "digital_card",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 206,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/23",
+            "path": "snapshots/blobs/72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "role": "text",
+            "row_counts": [
+              [
+                "digital_card",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/e330966b8ac83f0d7db1bc086a87ba61c62ac43976ba35db211c60eb7da29853.json",
+            "sha256": "sha256:e330966b8ac83f0d7db1bc086a87ba61c62ac43976ba35db211c60eb7da29853",
+            "bytes": 185,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1079,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/6",
+            "path": "snapshots/blobs/bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "ruling_revision",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 3284,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "face_revision",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ],
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "digital_link",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 2587,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "path": "snapshots/blobs/c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1356,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "face_revision",
+                "home_set",
+                "set:a",
+                "history",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          }
+        ],
+        "format_version": "4.0.0",
+        "languages": [
+          "ja",
+          "zh-Hant"
+        ],
+        "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "min_reader_version": "4.0.1",
+        "partitioning": {
+          "algorithm": "sha256-mod-v1",
+          "bucket_count": 64
+        },
+        "published_at": "2026-09-29T01:02:03Z",
+        "qa_card_ids": [],
+        "regions": [
+          "jp"
+        ],
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "restriction_coverage": [],
+        "source_windows": []
+      },
+      "sha256:5c4adc6fc4da15cd6c6dc8b377e5cff0ab76ee8961211d98104febf5d30d527f": {
+        "changes_ref": null,
+        "config_ref": {
+          "key": "config",
+          "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+        },
+        "coverage": {
+          "mechanics": [],
+          "reviews": [],
+          "translations": []
+        },
+        "data_as_of": "2026-09-29",
+        "data_version": "20260929T010202Z-0001",
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "errata_card_ids": [],
+        "files": [
+          {
+            "bytes": 205,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "path": "snapshots/blobs/c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 208,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "path": "snapshots/blobs/a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 275,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "path": "snapshots/blobs/19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "translation",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1002,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "path": "snapshots/blobs/66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "product_family",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 356,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "path": "snapshots/blobs/dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "text_unit",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1017,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "path": "snapshots/blobs/df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "product",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "vocabulary",
+                "global",
+                null,
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 5149,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877.json",
+            "role": "bootstrap",
+            "row_counts": [
+              [
+                "card",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "card_engine_support",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "face",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                2
+              ],
+              [
+                "face_revision",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                2
+              ],
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ],
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "bootstrap",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877",
+            "purpose": "catalog",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1218,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "config",
+            "path": "snapshots/blobs/04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f.json",
+            "role": "config",
+            "row_counts": [],
+            "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f",
+            "purpose": "config",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "images/detail/global/global/band/12",
+            "role": "images",
+            "row_counts": [
+              [
+                "image_asset",
+                "global",
+                null,
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/e9d315b8016407e6ff5858c8994344225fc0447fef501f27ef2e993dec4a0ae6.json",
+            "sha256": "sha256:e9d315b8016407e6ff5858c8994344225fc0447fef501f27ef2e993dec4a0ae6",
+            "bytes": 319,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 533,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "key": "images/detail/global/global/band/55",
+            "path": "snapshots/blobs/69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c.json",
+            "role": "images",
+            "row_counts": [
+              [
+                "image_asset",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "image_variant",
+                "global",
+                null,
+                "detail",
+                "shared",
+                5
+              ]
+            ],
+            "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c",
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/0",
+            "role": "images",
+            "row_counts": [
+              [
+                "printing_image",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/1ad784a109a8496e465d77aec8b84fe76d204bd080362d3d3e7fe689db5fbf2c.json",
+            "sha256": "sha256:1ad784a109a8496e465d77aec8b84fe76d204bd080362d3d3e7fe689db5fbf2c",
+            "bytes": 527,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/1",
+            "role": "images",
+            "row_counts": [
+              [
+                "printing_image",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/e2148ed15439e4fa5803c289d889387a4b30e2d099f7ccef19143232f13cf522.json",
+            "sha256": "sha256:e2148ed15439e4fa5803c289d889387a4b30e2d099f7ccef19143232f13cf522",
+            "bytes": 529,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "images",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 39,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "programs",
+            "path": "snapshots/blobs/f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921.json",
+            "role": "programs",
+            "row_counts": [],
+            "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921",
+            "purpose": "programs",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 210,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/15",
+            "path": "snapshots/blobs/f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1061,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/18",
+            "path": "snapshots/blobs/a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_symbol",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "translation",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 340,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/19",
+            "path": "snapshots/blobs/7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "digital_card",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 206,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/23",
+            "path": "snapshots/blobs/72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "text_unit",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "role": "text",
+            "row_counts": [
+              [
+                "digital_card",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+              }
+            ],
+            "path": "snapshots/blobs/e330966b8ac83f0d7db1bc086a87ba61c62ac43976ba35db211c60eb7da29853.json",
+            "sha256": "sha256:e330966b8ac83f0d7db1bc086a87ba61c62ac43976ba35db211c60eb7da29853",
+            "bytes": 185,
+            "compressed_bytes": {
+              "br": null
+            },
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1079,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/6",
+            "path": "snapshots/blobs/bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "ruling_revision",
+                "global",
+                null,
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 3284,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "face_revision",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ],
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                1
+              ],
+              [
+                "digital_link",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                2
+              ]
+            ],
+            "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 2587,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "path": "snapshots/blobs/c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "printing",
+                "home_set",
+                "set:a",
+                "detail",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          },
+          {
+            "bytes": 1356,
+            "compressed_bytes": {
+              "br": null
+            },
+            "dependencies": [],
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac.json",
+            "role": "text",
+            "row_counts": [
+              [
+                "face_revision",
+                "home_set",
+                "set:a",
+                "history",
+                "shared",
+                1
+              ]
+            ],
+            "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac",
+            "purpose": "detail",
+            "region": null,
+            "segment": "shared",
+            "source_refs": []
+          }
+        ],
+        "format_version": "4.0.0",
+        "languages": [
+          "ja",
+          "zh-Hant"
+        ],
+        "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "min_reader_version": "4.0.0",
+        "partitioning": {
+          "algorithm": "sha256-mod-v1",
+          "bucket_count": 64
+        },
+        "published_at": "2026-09-29T01:02:02Z",
+        "qa_card_ids": [],
+        "regions": [
+          "jp"
+        ],
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "restriction_coverage": [],
+        "source_windows": []
+      }
+    },
+    "selected_data_version": "20260929T010203Z-0001"
   }
 ]

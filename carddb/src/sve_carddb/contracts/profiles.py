@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 MEDIA = "4.0.0"
+READER_VERSION = "4.0.1"
 
 
 @dataclass(frozen=True)
@@ -51,7 +52,7 @@ PROFILES = (
             "public-annotation-v1",
             "rules-name-on-demand-v1",
         ),
-        min_reader_version=MEDIA,
+        min_reader_version=READER_VERSION,
         text_bands=Bands(family=64, shared=8, overrides=(("BP01", 32), ("CP04", 32))),
         image_bands=Bands(family=32, shared=1),
     ),

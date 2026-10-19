@@ -28,6 +28,7 @@ _CARD_TABLES = {
     "mechanic_projection",
     "card_mechanic_coverage",
     "card_related",
+    "card_mentioned_by",
     "digital_link",
     "digital_link_coverage",
     "card_voice",
@@ -362,6 +363,15 @@ def _summaries(view: View, manifest: Row) -> None:
         raise ValueError("Mechanic universe hash mismatch")
 
 
+def _back_references(view: View, manifest: Row) -> None:
+    if any(
+        row["region"] not in array(manifest["regions"])
+        or row["card_id"] == row["from_card_id"]
+        for row in view["card_mentioned_by"]
+    ):
+        raise ValueError("Invalid card-name back reference")
+
+
 def validate_view(view: View, manifest: Row, fragments: list[Fragment]) -> None:
     """Check public relationships without any build DB or source evidence."""
     _owners(view, fragments)
@@ -378,6 +388,7 @@ def validate_view(view: View, manifest: Row, fragments: list[Fragment]) -> None:
     validate_annotations(
         view, tuple(string(lang) for lang in array(manifest.get("languages", [])))
     )
+    _back_references(view, manifest)
     if {row["card_id"] for row in view["card_engine_support"]} != {
         row["id"] for row in view["card"]
     }:
@@ -973,6 +984,7 @@ def _placement_purpose(
         if table
         in {
             "card_related",
+            "card_mentioned_by",
             "face_rules_name",
             "card_engine_support",
             "rules_name",
@@ -1013,6 +1025,10 @@ def _placement_purpose(
 def _placement_region(
     fragment: Fragment, row: Row, file: Row, printing_regions: dict[str, str]
 ) -> None:
+    if fragment.table == "card_mentioned_by":
+        if file["purpose"] != "engine" or file["region"] is not None:
+            raise ValueError("Card-name back references require shared engine")
+        return
     if (
         row.get("region") is not None
         and row["region"] != file["region"]

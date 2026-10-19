@@ -44,7 +44,7 @@ class _DictSubclass(dict[str, JsonValue]):
 def test_schema_is_valid_and_covers_every_collection() -> None:
     Draft202012Validator.check_schema(schema())
     valid = [object_value(case) for case in array(fixture("schema-valid.json"))]
-    assert len(tables()) == 46
+    assert len(tables()) == 47
     assert set(tables()) <= {string(case["schema"]) for case in valid}
     for case in valid:
         validate(string(case["schema"]), case["value"])
@@ -397,9 +397,10 @@ def test_matching_member_hash_cannot_bypass_payload_schema(member: str) -> None:
         snapshot.verify(Projection({}, {}, {}))
 
 
-def test_reader_minimum_version_is_fixed() -> None:
+@pytest.mark.parametrize("minimum", ["0.9.0", "4.0.2"])
+def test_reader_minimum_version_must_be_supported(minimum: str) -> None:
     manifest = object_value(fixture("manifest.json"))
-    manifest["min_reader_version"] = "0.9.0"
+    manifest["min_reader_version"] = minimum
     with pytest.raises(ValidationError):
         read_snapshot(manifest, payloads())
 
