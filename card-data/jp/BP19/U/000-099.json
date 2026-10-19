@@ -1,0 +1,526 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP19",
+  "range": "U/000-099",
+  "products": {
+    "products-a899716ab2a7fb7e": [
+      {
+        "name": "ブースターパック「天魔八虐」",
+        "date": "2026-03-27",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP19",
+          "https://shadowverse-evolve.com/products/bp19/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP19-U01",
+      "documents": {
+        "documents-c89080c244241a62": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-U01",
+            "faces": [
+              {
+                "name": "剪定の咎人・マガチヨ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "八獄",
+                  "エルフ族"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【疾走】\n【進化時】相手の場のフォロワー1体を選ぶ。【コンボ_3】それに4ダメージ。\n【超進化時】自分の場の他の八獄・フォロワーすべては【疾走】を持つ。",
+                "sections": [],
+                "flavor": "この場、森に芽吹きし渡世にて。\n――剪定の咎人・マガチヨ",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-u01.png",
+                "trait_raw": "八獄・エルフ族"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2554",
+                "date": "2026-03-25",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2553",
+                "date": "2026-03-25",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-001"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4a9ddb65207e452451bb76aa36785ed4779c06987a8742530a2bce7900de6c23",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-U01",
+            "fetched_at": "2026-09-24T18:58:31.901177Z"
+          },
+          "document_ref": "documents-c89080c244241a62"
+        }
+      ]
+    },
+    {
+      "card_no": "BP19-U02",
+      "documents": {
+        "documents-0bd294f1297c8941": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-U02",
+            "faces": [
+              {
+                "name": "出航の咎人・バルバロス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "八獄",
+                  "盗賊"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "これが場にいる限り、自分のターン中、自分がEXエリアの財宝・カードをプレイする際、コストを-1する。\n自分のターン中、自分が財宝・カードをプレイしたとき、下記から1つチョイスする。このターン、この能力でチョイスした選択肢はチョイスできない。【1】相手の場のフォロワー1体を選ぶ。それを破壊する。【2】相手のデッキの上2枚を墓場に置く。【3】自分のPPを2回復する。",
+                "sections": [],
+                "flavor": "逢魔時だ。ボクらの時間だ。\n――出航の咎人・バルバロス",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-u02.png",
+                "trait_raw": "八獄・盗賊"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2564",
+                "date": "2026-03-25",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「自分のターン中、自分が財宝・カードをプレイしたとき、～」という能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】や【3】をチョイスする必要があります。"
+              },
+              {
+                "id": "Q2563",
+                "date": "2026-03-25",
+                "question": "自分の場に『出航の咎人・バルバロス（EVOLVE）』が2体いる状況で、一方の『出航の咎人・バルバロス（EVOLVE）』の「自分のターン中、自分が財宝・カードをプレイしたとき、～」という能力で【1】をチョイスした場合、そのターン中、もう一方の『出航の咎人・バルバロス（EVOLVE）』の「自分のターン中、自分が財宝・カードをプレイしたとき、～」という能力で【1】をチョイスすることができますか？",
+                "answer": "はい。【1】をチョイスすることができます。\n一方の『出航の咎人・バルバロス（EVOLVE）』の「自分のターン中、自分が財宝・カードをプレイしたとき、～」という能力で【1】をチョイスした場合、そのターン中、その『出航の咎人・バルバロス（EVOLVE）』の「自分のターン中、自分が財宝・カードをプレイしたとき、～」という能力で再度【1】をチョイスすることはできません。"
+              },
+              {
+                "id": "Q2562",
+                "date": "2026-03-25",
+                "question": "自分の場に『出航の咎人・バルバロス』が2体いる状況で、自分のターン中、自分がEXエリアの財宝・カードをプレイする際、そのコストを-2しますか？",
+                "answer": "はい。それぞれの『出航の咎人・バルバロス』の能力が適用されるため、そのコストを-2します。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-019"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d340df43f4e05fc24badd54340637730c815db8dbf3983f933c83a891b3a81b5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-U02",
+            "fetched_at": "2026-09-24T18:58:34.699636Z"
+          },
+          "document_ref": "documents-0bd294f1297c8941"
+        }
+      ]
+    },
+    {
+      "card_no": "BP19-U03",
+      "documents": {
+        "documents-ac9b3593e9e82c1f": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-U03",
+            "faces": [
+              {
+                "name": "耽溺の咎人・セフィー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "八獄",
+                  "錬金術師",
+                  "禁忌"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】下記から1つチョイスする。自分の墓場の八獄・フォロワーが10枚以上なら、代わりに2つまで。\n【1】相手の場のフォロワー1体を選ぶ。それに5ダメージ。【2】『多頭の実験体』1体を場に出す。\n【超進化時】自分の場の『没頭の実験体』や『多頭の実験体』2体まで選ぶ。それは【疾走】を持つ。",
+                "sections": [],
+                "flavor": "五体を腑分け、叡智に臨む。\n――耽溺の咎人・セフィー",
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-u03.png",
+                "trait_raw": "八獄・錬金術師・禁忌"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2573",
+                "date": "2026-03-25",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q2572",
+                "date": "2026-03-25",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。"
+              },
+              {
+                "id": "Q2554",
+                "date": "2026-03-25",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2553",
+                "date": "2026-03-25",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-038"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-048"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3166179e253b92e14ac145ed8c02a755e8c3c8a27d727e2ec6f8e60b9839cfc2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-U03",
+            "fetched_at": "2026-09-24T18:58:37.233126Z"
+          },
+          "document_ref": "documents-ac9b3593e9e82c1f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP19-U04",
+      "documents": {
+        "documents-ced444512dc356ab": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-U04",
+            "faces": [
+              {
+                "name": "遊猟の咎人・アンテマリア",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "八獄",
+                  "ドラゴニュート"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "5",
+                "text": "これはEXエリアからプレイできない。\n{ファンファーレ}EXエリアの八獄・カード2枚を墓場に置く：これは【疾走】【ドレイン】を持つ。\n{ラストワード}これをEXエリアに置く。",
+                "sections": [],
+                "flavor": "世界を齧る、殻は邪魔。\n――遊猟の咎人・アンテマリア",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-u04.png",
+                "trait_raw": "八獄・ドラゴニュート"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2581",
+                "date": "2026-03-25",
+                "question": "自分のEXエリアにカードが5枚ある状況で、このフォロワーが場から墓場に置かれた場合、《ラストワード》能力の処理はどうなりますか？",
+                "answer": "EXエリアに置くことができないので、墓場から移動しません。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:89e0e23d149a4445ef81816449d90e52bb36d2e40a95a63dbea108280dd63723",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-U04",
+            "fetched_at": "2026-09-24T18:58:39.913517Z"
+          },
+          "document_ref": "documents-ced444512dc356ab"
+        }
+      ]
+    },
+    {
+      "card_no": "BP19-U05",
+      "documents": {
+        "documents-1a714ce5248f8b9a": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-U05",
+            "faces": [
+              {
+                "name": "勅令の咎人・イステンデッド",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "八獄",
+                  "死霊術師"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "自分のターンごとに1回、自分の墓場が10枚以上で自分の他の元のコスト3以下の八獄・フォロワーが場から墓場に置かれたとき、それを場に出す。それの{ファンファーレ}能力は誘発しない。\n{ファンファーレ}自分のデッキの上2枚を墓場に置く。\n{起動}これを{アクト}場の「これと同名を除く八獄・フォロワー」1体を墓場に置く：相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": "不要。必要。もう決まってる。\n――勅令の咎人・イステンデッド",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-u05.png",
+                "trait_raw": "八獄・死霊術師"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2620",
+                "date": "2026-04-09",
+                "question": "何らかの能力により、自分のターン中に自分の場の『勅令の咎人・イステンデッド』と『深淵の大佐』が同時に墓場に置かれた場合、『勅令の咎人・イステンデッド』の能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q2590",
+                "date": "2026-03-25",
+                "question": "自分のターン中、自分の墓場が9枚の状況で、自分の『深淵の大佐』が場から墓場に置かれた場合、このフォロワーの「自分のターンごとに1回、自分の墓場が10枚以上で自分の他の元のコスト3以下の八獄・フォロワーが場から墓場に置かれたとき、～」という能力は誘発しますか？",
+                "answer": "いいえ。誘発しません。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dcb08087a8fad7c197498c6c700852b064f990dc8cb589c11e37a49ca6a05d4e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-U05",
+            "fetched_at": "2026-09-24T18:58:42.531485Z"
+          },
+          "document_ref": "documents-1a714ce5248f8b9a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP19-U06",
+      "documents": {
+        "documents-d7fe16ed2d8e22b8": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-U06",
+            "faces": [
+              {
+                "name": "結盟の咎人・エルラーデ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "八獄",
+                  "先導"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "これが場にいる限り、エンドフェイズが来たときに誘発する自分の能力は追加で1回誘発する。\n自分のエンドフェイズが来たとき、下記から1つチョイスする。自分の場に他の八獄・フォロワーがいるなら、代わりに2つまで。\n【1】相手の場のフォロワー1体を選ぶ。それに4ダメージ。【2】自分のリーダーは{体力}+1する。これをスタンドする。【3】1枚引く。",
+                "sections": [],
+                "flavor": "オメルタは楔、囚われの刻印。\n――結盟の咎人・エルラーデ",
+                "illustrator": "ヤナガワ",
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-u06.png",
+                "trait_raw": "八獄・先導"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2624",
+                "date": "2026-04-10",
+                "question": "自分の場に『結盟の咎人・エルラーデ』と祈りカウンターが3個の『封じられし熾天使』がある状況で、自分のエンドフェイズを迎えた場合、この『封じられし熾天使』の「自分のエンドフェイズが来たとき、～」という能力で自分のリーダーは合計で《体力》+20することができますか？",
+                "answer": "いいえ。この場合、自分のリーダーは合計で《体力》+10します。\n『結盟の咎人・エルラーデ』の「これが場にいる限り、エンドフェイズが来たときに誘発する自分の能力は追加で1回誘発する。」という能力によって、その『封じられし熾天使』の「自分のエンドフェイズが来たとき、～」という能力は2回誘発しますが、2回目の「自分のエンドフェイズが来たとき、～」という能力の解決時、「これの祈りカウンターが4個以上なら、」を満たさないため、何も起こりません。"
+              },
+              {
+                "id": "Q2605",
+                "date": "2026-03-25",
+                "question": "『結盟の咎人・エルラーデ』がスタンド状態でも、「自分のエンドフェイズが来たとき、」の能力のチョイスで【2】を選択することができますか？",
+                "answer": "はい。選択することができます。その場合、「これをスタンドする。」は何も起こりません。"
+              },
+              {
+                "id": "Q2604",
+                "date": "2026-03-25",
+                "question": "このフォロワーが自分の場にいる状況で、相手のエンドフェイズを迎えた場合、自分のEXエリアの『ネクベト』の「相手のエンドフェイズが来たとき、～」という能力は何回誘発しますか？",
+                "answer": "2回誘発します。"
+              },
+              {
+                "id": "Q2603",
+                "date": "2026-03-25",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「自分のエンドフェイズが来たとき、～」という能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】や【3】をチョイスする必要があります。"
+              },
+              {
+                "id": "Q2602",
+                "date": "2026-03-25",
+                "question": "このフォロワーが自分の場に2体いる状況で、自分のエンドフェイズを迎えた場合、エンドフェイズが来たときに誘発する自分の能力は何回誘発しますか？",
+                "answer": "3回誘発します。"
+              },
+              {
+                "id": "Q2573",
+                "date": "2026-03-25",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f199b8fd2016e1518e34c98f5b7c0dd1172b1d926ab03cc4534ee60115cdfa12",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-U06",
+            "fetched_at": "2026-09-24T18:58:45.210448Z"
+          },
+          "document_ref": "documents-d7fe16ed2d8e22b8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP19-U07",
+      "documents": {
+        "documents-60738287011e30cb": {
+          "region": "jp",
+          "record": {
+            "number": "BP19-U07",
+            "faces": [
+              {
+                "name": "機鋒の咎人・カットスロート",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "八獄",
+                  "超克"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「天魔八虐」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手の場のフォロワー2体まで選ぶ。それに4ダメージを割りふる。\n【超進化時】相手の場のフォロワー1体を選ぶ。それとそれのリーダーに8ダメージ。",
+                "sections": [],
+                "flavor": "鋭利の才、天賦の煥発。\n――機鋒の咎人・カットスロート",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP19/bp19-u07.png",
+                "trait_raw": "八獄・超克"
+              }
+            ],
+            "release_date": "2026-03-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2554",
+                "date": "2026-03-25",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2553",
+                "date": "2026-03-25",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-a899716ab2a7fb7e",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-110"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9a8001cbb0194b961d55e47c66a52bcc60938dce3ed5080c1224d9120306fa04",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP19-U07",
+            "fetched_at": "2026-09-24T18:58:47.992950Z"
+          },
+          "document_ref": "documents-60738287011e30cb"
+        }
+      ]
+    }
+  ]
+}

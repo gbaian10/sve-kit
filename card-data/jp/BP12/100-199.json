@@ -1,0 +1,954 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP12",
+  "range": "100-199",
+  "products": {
+    "products-ab3e512eb34698eb": [
+      {
+        "name": "ブースターパック第12弾「黒鉄の侵略者」",
+        "date": "2024-10-18",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP12",
+          "https://shadowverse-evolve.com/products/bp12/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP12-100",
+      "documents": {
+        "documents-e4e224d759b8b8f3": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-100",
+            "faces": [
+              {
+                "name": "ブレッシングバード",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "鳥族"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "1",
+                "text": "【突進】\n{ラストワード}{コスト1}：『ホーリーファルコン』1体を場に出す。",
+                "sections": [
+                  "『ホーリーファルコン』{ビショップ}鳥族・フォロワー{コスト3}{攻撃力}2/{体力}2【疾走】"
+                ],
+                "flavor": null,
+                "illustrator": "小玉",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-100.png",
+                "trait_raw": "鳥族"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9f5a5e221c8ea39e35dfa45249c395474d6ffbaf6c09940563a511fdba15a194",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-100",
+            "fetched_at": "2026-09-24T20:52:30.558331Z"
+          },
+          "document_ref": "documents-e4e224d759b8b8f3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-101",
+      "documents": {
+        "documents-40dfcfe175ccbdd8": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-101",
+            "faces": [
+              {
+                "name": "巡礼の道",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ラストワード}『ホーリーファルコン』1体を場に出す。\n{起動}{コスト4}これを墓場に置く：自分のリーダーは{体力}+2する。2枚引く。",
+                "sections": [
+                  "『ホーリーファルコン』{ビショップ}鳥族・フォロワー{コスト3}{攻撃力}2/{体力}2【疾走】"
+                ],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-101.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:787a05f6ef83c7e06d41022a9c1b0163d4eb7b80553005986e907caf1f8c848f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-101",
+            "fetched_at": "2026-09-24T20:52:33.459212Z"
+          },
+          "document_ref": "documents-40dfcfe175ccbdd8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-102",
+      "documents": {
+        "documents-96049192112f5ae7": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-102",
+            "faces": [
+              {
+                "name": "誓いの炎",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}『ホーリータイガー』1枚をEXエリアに置く。\n{起動}これを{アクト}：自分の場の『ホーリータイガー』1体を選ぶ。それは【疾走】を持つ。",
+                "sections": [
+                  "『ホーリータイガー』{ビショップ}獣・フォロワー{コスト4}{攻撃力}4/{体力}4【突進】"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-102.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-T10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:77d2812ac0a930dbf8401e2d79b709b425dfc70ca9cc9e36b97e7302c49f118f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-102",
+            "fetched_at": "2026-09-24T20:52:36.548921Z"
+          },
+          "document_ref": "documents-96049192112f5ae7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-103",
+      "documents": {
+        "documents-f75f2497f3802e45": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-103",
+            "faces": [
+              {
+                "name": "鋼鉄と大地の神",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "自然",
+                  "大神"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "これを自分の手札から捨てたとき、場の『ナテラの大樹』1つを{アクト}：自分の墓場の「これと同名を除く自然・カード」1枚を選ぶ。それを手札に加える。\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、機械・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。『リペアモード』1枚をEXエリアに置く。自分のPPを3回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-103.png",
+                "trait_raw": "機械・自然・大神"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1705",
+                "date": "2024-10-15",
+                "question": "『鋼鉄と大地の神』の「これを自分の手札から捨てたとき」の能力は、自分の場の『ナテラの大樹』をアクトせずにプレイしないことを選択することはできますか？",
+                "answer": "はい。自分の場の『ナテラの大樹』をアクトせずにプレイしないことを選択できます。"
+              },
+              {
+                "id": "Q1704",
+                "date": "2024-10-15",
+                "question": "自分のエンドフェイズに手札の枚数上限の超過によって『鋼鉄と大地の神』を捨てたとき、自分の場の『ナテラの大樹』をアクトすることで『鋼鉄と大地の神』の能力で自分の墓場の『鋼鉄と大地の神』以外の自然・カード1枚を手札に加えることができますか？",
+                "answer": "はい。自分の場の『ナテラの大樹』をアクトすることで自分の墓場の『鋼鉄と大地の神』以外の自然・カード1枚を手札に加えることができます。その場合、手札が再び8枚以上となるため、改めて手札が7枚以下になるように捨てる必要があります。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:601fd629c04a2704ee07e31f3adf4bf7a72fdb98e20a82e12189ace6e3ba4dec",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-103",
+            "fetched_at": "2026-09-24T20:52:39.267283Z"
+          },
+          "document_ref": "documents-f75f2497f3802e45"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-104",
+      "documents": {
+        "documents-f1c517ffc70cbacc": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-104",
+            "faces": [
+              {
+                "name": "デュアルエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "自然",
+                  "天使"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『リペアモード』1枚か『ナテラの大樹』1枚をEXエリアに置く。",
+                "sections": [
+                  "『リペアモード』{ニュートラル}機械・スペル{コスト1}{クイック}自分のリーダーは{体力}+1する。\n『ナテラの大樹』{ニュートラル}自然・アミュレット{コスト1}これが場を離れたとき、1枚引く。自分の手札1枚を捨てる。{起動}{コスト1}：これを墓場に置く。"
+                ],
+                "flavor": null,
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-104.png",
+                "trait_raw": "機械・自然・天使"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-105"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:29a0eec1991047a45703b4582a5aad26c9f9c7934f1c08d71395a905608cf4e0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-104",
+            "fetched_at": "2026-09-24T20:52:42.164585Z"
+          },
+          "document_ref": "documents-f1c517ffc70cbacc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-105",
+      "documents": {
+        "documents-4dcb2c1b8e00acba": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-105",
+            "faces": [
+              {
+                "name": "デュアルエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "機械",
+                  "自然",
+                  "天使"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。自分の場や自分のEXエリアの機械・カードや自然・カードが5枚以上なら、それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-105.png",
+                "trait_raw": "機械・自然・天使"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1706",
+                "date": "2024-10-15",
+                "question": "このフォロワーの【進化時】能力は、自分の場の自然・カード2枚、自分のEXエリアの機械・カード3枚のような状況でも条件を満たしますか？",
+                "answer": "はい。自分の場と自分のEXエリアに機械・カード、自然・カードが合計5枚以上ある場合に条件を満たします。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-104"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6fa58b6c32ea79d3b50eea7462c69f8f1c5238208ae814d3c7dbae48dec8eb6f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-105",
+            "fetched_at": "2026-09-24T20:52:44.766729Z"
+          },
+          "document_ref": "documents-4dcb2c1b8e00acba"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-106",
+      "documents": {
+        "documents-8c4c1cf26c598a5c": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-106",
+            "faces": [
+              {
+                "name": "熾天使の剣",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】元のコスト2以下の相手の場のカード1枚を選ぶ。それを破壊する。【2】{コスト2}：元のコスト6以下の相手の場のカード1枚を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "オーベン道玄坂",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-106.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1707",
+                "date": "2024-10-15",
+                "question": "エボルヴフォロワーの元のコストの値は、進化前のカードの元のコストの値ですか？",
+                "answer": "はい。進化前のカードの元のコストの値です。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:896e78a3be9bbc4bc6e2f65d00bdb80151611c7566a59d5d9f550db1526ad6d2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-106",
+            "fetched_at": "2026-09-24T20:52:47.482017Z"
+          },
+          "document_ref": "documents-8c4c1cf26c598a5c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-107",
+      "documents": {
+        "documents-92735c994ac5d64b": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-107",
+            "faces": [
+              {
+                "name": "荒野の休息",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "荒野",
+                  "自然"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のデッキの上3枚を見る。その中から、荒野・カードか自然・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。自分の場か自分のEXエリアに荒野・カードがあるなら、自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "doughnutz",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-107.png",
+                "trait_raw": "荒野・自然"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:da60eb3976a8688ebf6ede34c146f8ee5684dad1a16efdb0bdb949a6e231809b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-107",
+            "fetched_at": "2026-09-24T20:52:50.258883Z"
+          },
+          "document_ref": "documents-92735c994ac5d64b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-108",
+      "documents": {
+        "documents-6b48f148106734b3": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-108",
+            "faces": [
+              {
+                "name": "ラブソングシンガー",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "シンガー"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それをアクトする。\n{起動}{コスト2}：相手の場のフォロワー1体を選ぶ。それをアクトする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "CKYM",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-108.png",
+                "trait_raw": "シンガー"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-109"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cf907fc952f8cb9e28c8d06243e2531f6ca78c8b134e0f9c2893f512803ed93f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-108",
+            "fetched_at": "2026-09-24T20:52:52.805221Z"
+          },
+          "document_ref": "documents-6b48f148106734b3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-109",
+      "documents": {
+        "documents-02528963027ff2cc": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-109",
+            "faces": [
+              {
+                "name": "ラブソングシンガー",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "シンガー"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】このターン、相手の場のフォロワーすべてはダメージを与えない。\n{起動}{コスト2}：相手の場のフォロワー1体を選ぶ。それをアクトする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "CKYM",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-109.png",
+                "trait_raw": "シンガー"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1709",
+                "date": "2024-10-15",
+                "question": "このフォロワーの【進化時】能力をプレイしたターンに、相手の場の『ターミナルウェポン』を破壊した場合、自分のリーダーは4ダメージを受けますか？",
+                "answer": "いいえ。ダメージを受けません。"
+              },
+              {
+                "id": "Q1708",
+                "date": "2024-10-15",
+                "question": "このフォロワーの【進化時】能力をプレイした後に相手の場に出たフォロワーは、【進化時】能力をプレイしたターン中、ダメージを与えますか。",
+                "answer": "はい。このフォロワーの【進化時】能力をプレイした後に相手の場に出たフォロワーは、【進化時】能力をプレイしたターン中、ダメージを与えます。\nこの【進化時】能力は、この能力をプレイする際に相手の場にいるフォロワーすべてがダメージを与えなくなる能力です。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-108"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ec006213b0f77bb347dfa92eb2b3edd8691f90cf3cfa7a1545f0230ca0e610f1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-109",
+            "fetched_at": "2026-09-24T20:52:55.635883Z"
+          },
+          "document_ref": "documents-02528963027ff2cc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-110",
+      "documents": {
+        "documents-8d1d42670b3d992d": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-110",
+            "faces": [
+              {
+                "name": "美食の伝道者",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "コック"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{ファンファーレ}自分のリーダーは{体力}+3する。\n{ラストワード}下記から1つチョイスする。【1】自分のデッキから元のコスト3以下のコック・フォロワー1枚を探し、場に出す。【2】1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "TEDDY",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-110.png",
+                "trait_raw": "コック"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e76e3e98e53754308b8319e39c957dfb8e3912ff0a456e1cdfeeb44fd9b0fe1c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-110",
+            "fetched_at": "2026-09-24T20:52:58.464744Z"
+          },
+          "document_ref": "documents-8d1d42670b3d992d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-111",
+      "documents": {
+        "documents-f7d6d6bdea9dfeee": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-111",
+            "faces": [
+              {
+                "name": "ゴブリンスクラム",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "ゴブリン"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "これは自分の場のゴブリン・フォロワーが2体以下なら、プレイできない。\n相手の場のフォロワー1体を選ぶ。それを破壊する。それのリーダーに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-111.png",
+                "trait_raw": "ゴブリン"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:810c70af79524d9c5ebcb49752cef0a327529dc721f49a7da67522a21dc4a324",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-111",
+            "fetched_at": "2026-09-24T20:53:01.206017Z"
+          },
+          "document_ref": "documents-f7d6d6bdea9dfeee"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-112",
+      "documents": {
+        "documents-2eca2a2b0a86a3db": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-112",
+            "faces": [
+              {
+                "name": "ロマントレジャーハンター",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "傭兵"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "ようやく辿り着いたその場所で、ようやく見つけたその宝。\n達成感、解放感、だけどほんの少しの――虚無感。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-112.png",
+                "trait_raw": "傭兵"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-113"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0a094987896dd5d5043a6219f80a6505b23822d566296544c22c4910795c68d7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-112",
+            "fetched_at": "2026-09-24T20:53:03.927086Z"
+          },
+          "document_ref": "documents-2eca2a2b0a86a3db"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-113",
+      "documents": {
+        "documents-a74d39ccded8f7df": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-113",
+            "faces": [
+              {
+                "name": "ロマントレジャーハンター",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "傭兵"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "3",
+                "text": "【進化時】手札1枚を捨てる：サイコロをふる。4から6なら、3枚引く。",
+                "sections": [],
+                "flavor": "場所でもなく、宝でもなく、欲しかったものはただ一つ。\n未知なるものへの高揚感――彼女はそれをロマンと呼んだ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-113.png",
+                "trait_raw": "傭兵"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-112"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:51da6e21d37bd5173705b6b7932ec31c2a4a995cd0626e8d0cfc5ee060871dba",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-113",
+            "fetched_at": "2026-09-24T20:53:06.373689Z"
+          },
+          "document_ref": "documents-a74d39ccded8f7df"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-114",
+      "documents": {
+        "documents-9d8293c450832cee": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-114",
+            "faces": [
+              {
+                "name": "風来の絵描き",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "傭兵"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分のデッキから元のコストXのフォロワー1枚を探し、EXエリアに置く。Xは「選んだフォロワーの元のコスト」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "matabi",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-114.png",
+                "trait_raw": "傭兵"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1707",
+                "date": "2024-10-15",
+                "question": "エボルヴフォロワーの元のコストの値は、進化前のカードの元のコストの値ですか？",
+                "answer": "はい。進化前のカードの元のコストの値です。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9910f6d20226bb0ed0aec7739dbcb672134de409806dd26ba7a63e8f4de367e2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-114",
+            "fetched_at": "2026-09-24T20:53:09.302799Z"
+          },
+          "document_ref": "documents-9d8293c450832cee"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-115",
+      "documents": {
+        "documents-0976d8779f49bfd2": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-115",
+            "faces": [
+              {
+                "name": "探偵の推理",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "探偵"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "カード名1つを指定する。自分のデッキの上1枚を公開する。公開したカードが指定したカード名なら、2枚引く。公開したカードが指定したカード名でないなら、1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-115.png",
+                "trait_raw": "探偵"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1713",
+                "date": "2024-10-15",
+                "question": "カード名1つを指定する際、完全に一致した正式名称を指定する必要がありますか？",
+                "answer": "いいえ。カードを特定できる情報を示し、お互いのプレイヤーが1種を特定できる場合は正式名称を指定する必要はありません。コミュニケーションを取りながらバトルを行いましょう。\nまた、公認・公式大会においてカードの名称がわからない場合、各大会規約に従って、カードを特定できる情報を示すことでジャッジにカード名を教えてもらうことができます。"
+              },
+              {
+                "id": "Q1712",
+                "date": "2024-10-15",
+                "question": "カード名1つを指定する際、『フェアリー』などのトークン・カードのカード名を指定することができますか？",
+                "answer": "はい。トークン・カードのカード名を指定することができます。"
+              },
+              {
+                "id": "Q1711",
+                "date": "2024-10-15",
+                "question": "カード名1つを指定する際、『澄明なる頭脳・博衣こより』などのコラボ名を指定することができますか？",
+                "answer": "いいえ。コラボ名はカード名ではないので、指定することができません。\nまた、『陰陽の開祖・クオン』を指定して、『澄明なる頭脳・博衣こより』を公開した場合、指定したカード名を持つため、2枚引くことができます。"
+              },
+              {
+                "id": "Q1710",
+                "date": "2024-10-15",
+                "question": "カードを公開して1枚引く場合、引くカードはその公開したカードですか？",
+                "answer": "はい。公開したカードです。2枚引く場合、公開したカードに加えてもう1枚カードを引きます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9cc03ecaedc40b78dc12439f7fa6fd27fe927cece076d1470758b4874a69e657",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-115",
+            "fetched_at": "2026-09-24T20:53:11.999380Z"
+          },
+          "document_ref": "documents-0976d8779f49bfd2"
+        }
+      ]
+    }
+  ]
+}

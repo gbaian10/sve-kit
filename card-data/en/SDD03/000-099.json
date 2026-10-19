@@ -1,0 +1,1509 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD03",
+  "range": "000-099",
+  "products": {
+    "products-7120495b5b8273bb": [
+      {
+        "name": "Showdown Deck: Runecraft",
+        "date": "Mar. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=SDD03",
+          "https://en.shadowverse-evolve.com/products/sdd/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SDD03-001EN",
+      "documents": {
+        "documents-d6ca55b8f5d83101": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-001EN",
+            "faces": [
+              {
+                "name": "Sweet-Tooth Medusa",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Mage / Gorgon"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\n{icon_fanfare|[fanfare]} Search your deck for a card that costs 2 or less, reveal it, add it to your hand, then shuffle.\nDuring your turn, whenever an enemy follower is put from the field into the cemetery, summon a Serpent token.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\n{icon_fanfare|[fanfare]} Search your deck for a card that costs 2 or less, reveal it, add it to your hand, then shuffle.\nDuring your turn, whenever an enemy follower is put from the field into the cemetery, summon a Serpent token.",
+                "speech": "{icon_nightmare|[abysscraft]}{icon_cost01|[cost01]} Serpent (Follower - Demon) {icon_power|[attack]}0/{icon_hp|[defense]}1 | Bane.",
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-001EN.png",
+                "trait_raw": "Mage / Gorgon",
+                "traits": [
+                  "Mage",
+                  "Gorgon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1059 (Jan. 31, 2025)",
+                "question": "I have this follower on my field, and there are 4 enemy Fairy tokens on the field. If I play Crimson Meteor Storm and destroy all 4 Fairy tokens, do I summon 4 Serpent tokens?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-002EN|Sweet-Tooth Medusa}",
+                "href": "/cards/?cardno=SDD03-002EN"
+              },
+              {
+                "label": "{SDD03-T06EN|Serpent}",
+                "href": "/cards/?cardno=SDD03-T06EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:236b308f76c54d4c3ee0c2d41416850213cc54071d739540570ca8df93869dc3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-001EN",
+            "fetched_at": "2026-09-27T14:38:44.086145Z"
+          },
+          "document_ref": "documents-d6ca55b8f5d83101"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-002EN",
+      "documents": {
+        "documents-e50987f6d0c28be2": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-002EN",
+            "faces": [
+              {
+                "name": "Sweet-Tooth Medusa",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Mage / Gorgon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "4"
+                },
+                "text": "On Evolve - Select up to 2 enemy followers on the field and deal 5 damage divided between them.\nDuring your turn, whenever an enemy follower is put from the field into the cemetery, summon a Serpent token.\n{icon_q|[q]}{icon_act|[act]} Bury 2 cards named Serpent: The next card you play this turn costs 2 less.",
+                "sections": [],
+                "raw_text": "On Evolve - Select up to 2 enemy followers on the field and deal 5 damage divided between them.\nDuring your turn, whenever an enemy follower is put from the field into the cemetery, summon a Serpent token.\n{icon_q|[q]}{icon_act|[act]} Bury 2 cards named Serpent: The next card you play this turn costs 2 less.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-002EN.png",
+                "trait_raw": "Mage / Gorgon",
+                "traits": [
+                  "Mage",
+                  "Gorgon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1060 (Jan. 31, 2025)",
+                "question": "If I activate this follower's ability twice in the same turn, does the next card I play cost 4 less?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1059 (Jan. 31, 2025)",
+                "question": "I have this follower on my field, and there are 4 enemy Fairy tokens on the field. If I play Crimson Meteor Storm and destroy all 4 Fairy tokens, do I summon 4 Serpent tokens?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-001EN|Sweet-Tooth Medusa}",
+                "href": "/cards/?cardno=SDD03-001EN"
+              },
+              {
+                "label": "{SDD03-T06EN|Serpent}",
+                "href": "/cards/?cardno=SDD03-T06EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4eab191d74212eb3960964d4ca23409b1a36ef3cced9596482b93544082bdd73",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-002EN",
+            "fetched_at": "2026-09-27T14:38:46.785286Z"
+          },
+          "document_ref": "documents-e50987f6d0c28be2"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-003EN",
+      "documents": {
+        "documents-84398a2d540dc8c0": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-003EN",
+            "faces": [
+              {
+                "name": "Ceridwen, Eternity Hunter",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Alchemist / Forbidden"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Earth Rite: Put an Instant Poison token into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Earth Rite: Put an Instant Poison token into your EX area.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost02|[cost02]} Instant Poison (Spell - Alchemist/Forbidden) | Select an enemy follower on the field. Deal 4 damage to it and 2 damage to its leader.",
+                "illustrator": "Enarain",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-003EN.png",
+                "trait_raw": "Alchemist / Forbidden",
+                "traits": [
+                  "Alchemist",
+                  "Forbidden"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-004EN|Ceridwen, Eternity Hunter}",
+                "href": "/cards/?cardno=SDD03-004EN"
+              },
+              {
+                "label": "{SDD03-T04EN|Instant Poison}",
+                "href": "/cards/?cardno=SDD03-T04EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ac52d39e1955dedd55e583e5bb7722f94d7baca4f74a8444a31ccb23e4ebc9ee",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-003EN",
+            "fetched_at": "2026-09-27T14:38:49.471825Z"
+          },
+          "document_ref": "documents-84398a2d540dc8c0"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-004EN",
+      "documents": {
+        "documents-d272057aa8306311": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-004EN",
+            "faces": [
+              {
+                "name": "Ceridwen, Eternity Hunter",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Alchemist / Forbidden"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "The 1st Forbidden token you play each turn costs 2 less.\nOn Evolve - Earth Rite: Put an Eternal Potion token into your EX area.",
+                "sections": [],
+                "raw_text": "The 1st Forbidden token you play each turn costs 2 less.\nOn Evolve - Earth Rite: Put an Eternal Potion token into your EX area.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost02|[cost02]} Eternal Potion (Spell - Alchemist/Forbidden) | Select a {icon_witch|[runecraft]} follower in your cemetery that costs 3 or less and summon it. Give it Rush and \"At the start of your end phase, destroy this.\"",
+                "illustrator": "Enarain",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-004EN.png",
+                "trait_raw": "Alchemist / Forbidden",
+                "traits": [
+                  "Alchemist",
+                  "Forbidden"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1154 (Apr. 4, 2025)",
+                "question": "I've already played a Forbidden token this turn. If I evolve this follower, then play another Forbidden token, does it cost 2 less?",
+                "answer": "No. The next Forbidden token you play would be your second of the turn."
+              },
+              {
+                "title": "Q1153 (Apr. 4, 2025)",
+                "question": "I have 2 copies of this follower on my field. Does the first Forbidden token I play this turn cost 4 less?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-003EN|Ceridwen, Eternity Hunter}",
+                "href": "/cards/?cardno=SDD03-003EN"
+              },
+              {
+                "label": "{SDD03-T05EN|Eternal Potion}",
+                "href": "/cards/?cardno=SDD03-T05EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76311583fce680282e50bca63cbbbf67bb31524ede4a090a77ce5e572bce1ff7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-004EN",
+            "fetched_at": "2026-09-27T14:38:52.225198Z"
+          },
+          "document_ref": "documents-d272057aa8306311"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-005EN",
+      "documents": {
+        "documents-58ee2e3af5ba2e52": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-005EN",
+            "faces": [
+              {
+                "name": "Faust, Truthseeker",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Alchemist"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for up to 2 Earth Sigil amulets that cost a total of 4 or less, put them into your EX area, then shuffle. They cost 0 to play this turn.\nAt the start of your end phase, Earth Rite: Select a follower on your field. Give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and deal 2 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for up to 2 Earth Sigil amulets that cost a total of 4 or less, put them into your EX area, then shuffle. They cost 0 to play this turn.\nAt the start of your end phase, Earth Rite: Select a follower on your field. Give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and deal 2 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-005EN.png",
+                "trait_raw": "Alchemist",
+                "traits": [
+                  "Alchemist"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1156 (Apr. 4, 2025)",
+                "question": "I have 4 cards in my EX area. What happens when I play this follower's Fanfare ability?",
+                "answer": "If you find 2 Earth Sigil amulets in your deck, pick one of them to put into your EX area, then shuffle your deck.\n\nIf you only find one, or choose to \"only find one\" even when there are more, put it into your EX area, then shuffle your deck.\n\nYou can also choose to not find any, in which case you simply shuffle your deck.\n\nIn any case, Earth Sigil amulets you put into your EX area this way cost 0 to play for the rest of the turn."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ecffc94d1d4d844e9f5304ce802b20e11f724bd5ada11ebe27a382d41e362bec",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-005EN",
+            "fetched_at": "2026-09-27T14:38:54.898148Z"
+          },
+          "document_ref": "documents-58ee2e3af5ba2e52"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-006EN",
+      "documents": {
+        "documents-1f121efa1335ad25": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-006EN",
+            "faces": [
+              {
+                "name": "Ancient Alchemist",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Alchemist"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "5",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost03|[cost03]}: Evolve this.\n{icon_fanfare|[fanfare]} Earth Rite: Put 2 Guardform Golem tokens into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost03|[cost03]}: Evolve this.\n{icon_fanfare|[fanfare]} Earth Rite: Put 2 Guardform Golem tokens into your EX area.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost02|[cost02]} Guardform Golem (Follower - Golem) {icon_power|[attack]}2/{icon_hp|[defense]}3 | Ward.",
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-006EN.png",
+                "trait_raw": "Alchemist",
+                "traits": [
+                  "Alchemist"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-007EN|Ancient Alchemist}",
+                "href": "/cards/?cardno=SDD03-007EN"
+              },
+              {
+                "label": "{SDD03-T02EN|Guardform Golem}",
+                "href": "/cards/?cardno=SDD03-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7c323dcbe57a9109ec39394149f4acdbdf1041e74cf88cd98f7d74346f87a820",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-006EN",
+            "fetched_at": "2026-09-27T14:38:57.452946Z"
+          },
+          "document_ref": "documents-1f121efa1335ad25"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-007EN",
+      "documents": {
+        "documents-cce4d24f9e560c34": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-007EN",
+            "faces": [
+              {
+                "name": "Ancient Alchemist",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Alchemist"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "3"
+                },
+                "text": "Any Golem follower you play costs 1 less.\nWhenever a Golem follower is put onto your field, select an enemy leader or enemy follower on the field and deal it 3 damage.",
+                "sections": [],
+                "raw_text": "Any Golem follower you play costs 1 less.\nWhenever a Golem follower is put onto your field, select an enemy leader or enemy follower on the field and deal it 3 damage.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-007EN.png",
+                "trait_raw": "Alchemist",
+                "traits": [
+                  "Alchemist"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q187 (Jun. 30, 2023)",
+                "question": "If I have 2 copies of this follower on my field, and I play a Golem follower, does that Golem follower cost 2 less play points?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-006EN|Ancient Alchemist}",
+                "href": "/cards/?cardno=SDD03-006EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1a85cc74161f78f51857df6221508f0326cf2eac2a3d32f83f91aea49ee367b4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-007EN",
+            "fetched_at": "2026-09-27T14:39:00.615008Z"
+          },
+          "document_ref": "documents-cce4d24f9e560c34"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-008EN",
+      "documents": {
+        "documents-f91d4825380457a5": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-008EN",
+            "faces": [
+              {
+                "name": "Riley, Hydroshaman",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Mage"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Earth Rite: Choose 1. If this was put onto the field from the cemetery, choose up to 3 instead. (1) Select an enemy follower on the field and deal it 5 damage. (2) Give this {icon_power|[attack]}+3. (3) Draw 2 cards.\n{icon_act|[act]} {icon_cost06|[cost06]}: Summon this from your cemetery. Give it Storm and \"{icon_lastword|[lastwords]} Banish this.\"",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Earth Rite: Choose 1. If this was put onto the field from the cemetery, choose up to 3 instead. (1) Select an enemy follower on the field and deal it 5 damage. (2) Give this {icon_power|[attack]}+3. (3) Draw 2 cards.\n{icon_act|[act]} {icon_cost06|[cost06]}: Summon this from your cemetery. Give it Storm and \"{icon_lastword|[lastwords]} Banish this.\"",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-008EN.png",
+                "trait_raw": "Mage",
+                "traits": [
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1039 (Nov. 15, 2024)",
+                "question": "When playing this follower's Fanfare ability, if I can't select an enemy follower on the field, can I still choose option 1 to have nothing happen?",
+                "answer": "No. If you can't select an enemy follower, you would be required to choose either option 2 or option 3."
+              },
+              {
+                "title": "Q995 (Nov. 15, 2024)",
+                "question": "When choosing multiple options, can I choose the same option multiple times?",
+                "answer": "No, you can't."
+              },
+              {
+                "title": "Q994 (Nov. 15, 2024)",
+                "question": "I have given this follower the Last Words ability \"Banish this card\" with its activated ability, and there is a Staircase to Paradise on my field. Do I put a soul counter on Staircase to Paradise when this follower is destroyed?",
+                "answer": "Yes. Before this follower is banished, it is first put into the cemetery, triggering Last Words and Staircase to Paradise's automatic ability simultaneously."
+              },
+              {
+                "title": "Q993 (Nov. 15, 2024)",
+                "question": "Can I play this follower's activated ability only while it's in my cemetery?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3ecd1b57705fd1f38421f0d5e974e4e5c5a861ea2e7037b7d85516b20f7a9f50",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-008EN",
+            "fetched_at": "2026-09-27T14:39:03.559795Z"
+          },
+          "document_ref": "documents-f91d4825380457a5"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-009EN",
+      "documents": {
+        "documents-50a8356ea0e3b821": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-009EN",
+            "faces": [
+              {
+                "name": "Acid Golem",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Golem / Arcanaform / Forbidden"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Earth Rite: Select an enemy leader or enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Earth Rite: Select an enemy leader or enemy follower on the field and deal it 2 damage.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-009EN.png",
+                "trait_raw": "Golem / Arcanaform / Forbidden",
+                "traits": [
+                  "Golem",
+                  "Arcanaform",
+                  "Forbidden"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-010EN|Acid Golem}",
+                "href": "/cards/?cardno=SDD03-010EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:26895c0237dbea2fbc94579dd9236d02c4752e05931a2006d76c28d38d430d93",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-009EN",
+            "fetched_at": "2026-09-27T14:39:06.499507Z"
+          },
+          "document_ref": "documents-50a8356ea0e3b821"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-010EN",
+      "documents": {
+        "documents-46478197d2dd2cdc": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-010EN",
+            "faces": [
+              {
+                "name": "Acid Golem",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Golem / Arcanaform / Forbidden"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and deal it 2 damage.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-010EN.png",
+                "trait_raw": "Golem / Arcanaform / Forbidden",
+                "traits": [
+                  "Golem",
+                  "Arcanaform",
+                  "Forbidden"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-009EN|Acid Golem}",
+                "href": "/cards/?cardno=SDD03-009EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:72f71afab72d7b8e03dc5e0c967744fd6bae78af95b076eac4ebf1eece52f06c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-010EN",
+            "fetched_at": "2026-09-27T14:39:09.240052Z"
+          },
+          "document_ref": "documents-46478197d2dd2cdc"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-011EN",
+      "documents": {
+        "documents-8c6163aa89fa8ff3": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-011EN",
+            "faces": [
+              {
+                "name": "Artistic Arcanist",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Mage"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\nRush. Bane. Drain. (When a follower with Drain attacks and deals damage, its leader gains defense equal to the damage dealt.)\n{icon_act|[act]} Earth Rite: Select another follower on your field and give it Rush, Bane, or Drain.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\nRush. Bane. Drain. (When a follower with Drain attacks and deals damage, its leader gains defense equal to the damage dealt.)\n{icon_act|[act]} Earth Rite: Select another follower on your field and give it Rush, Bane, or Drain.",
+                "speech": null,
+                "illustrator": "matabi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-011EN.png",
+                "trait_raw": "Mage",
+                "traits": [
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1472 (Sep. 19, 2025)",
+                "question": "Can I play this follower's activated ability multiple times per turn?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-012EN|Artistic Arcanist}",
+                "href": "/cards/?cardno=SDD03-012EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:660d4cfc1a76e31af10d064751e11ee38d1b952f0999691ee42187dc38f5fb0a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-011EN",
+            "fetched_at": "2026-09-27T14:39:12.327696Z"
+          },
+          "document_ref": "documents-8c6163aa89fa8ff3"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-012EN",
+      "documents": {
+        "documents-3df3f66a8e33bef4": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-012EN",
+            "faces": [
+              {
+                "name": "Artistic Arcanist",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Mage"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "3"
+                },
+                "text": "Bane. Drain.\nOn Evolve - Select an enemy follower on the field and put it into its owner's EX area.\n{icon_act|[act]} Earth Rite: Select another follower on your field and give it Rush, Bane, or Drain.",
+                "sections": [],
+                "raw_text": "Bane. Drain.\nOn Evolve - Select an enemy follower on the field and put it into its owner's EX area.\n{icon_act|[act]} Earth Rite: Select another follower on your field and give it Rush, Bane, or Drain.",
+                "speech": null,
+                "illustrator": "matabi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-012EN.png",
+                "trait_raw": "Mage",
+                "traits": [
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1510 (Sep. 19, 2025)",
+                "question": "If the selected enemy follower's owner's EX area is full, can I still put it into the EX area?",
+                "answer": "No, it remains on the field."
+              },
+              {
+                "title": "Q1509 (Sep. 19, 2025)",
+                "question": "If I put an enemy advanced follower into the EX area from the field, do I put that follower faceup on top of its owner's evolve deck?",
+                "answer": "No. It remains in its owner's EX area after you put it there."
+              },
+              {
+                "title": "Q1508 (Sep. 19, 2025)",
+                "question": "If I put an enemy token follower into the EX area from the field, is that token follower removed from the game?",
+                "answer": "No. It remains in its owner's EX area after you put it there.\n\nFollower and amulet tokens may exist in the EX area, field, and resolution zone. They are only removed from the game immediately after movement to other zones."
+              },
+              {
+                "title": "Q1507 (Sep. 19, 2025)",
+                "question": "If I put a follower into the EX area, does it lose any damage dealt or abilities given to it?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1472 (Sep. 19, 2025)",
+                "question": "Can I play this follower's activated ability multiple times per turn?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-011EN|Artistic Arcanist}",
+                "href": "/cards/?cardno=SDD03-011EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f91f7d0c3a669eb06a60256b315162a8507655be1ae25dbea092425f6240d681",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-012EN",
+            "fetched_at": "2026-09-27T14:39:15.259144Z"
+          },
+          "document_ref": "documents-3df3f66a8e33bef4"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-013EN",
+      "documents": {
+        "documents-c9f842de22b33c23": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-013EN",
+            "faces": [
+              {
+                "name": "Price of Magic",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Earth Sigil"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field with 4 defense or less and banish it.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field with 4 defense or less and banish it.",
+                "speech": null,
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-013EN.png",
+                "trait_raw": "Earth Sigil",
+                "traits": [
+                  "Earth Sigil"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:521e443653bf68f1d3b95450e30ebbdcccae9362a82bee69f3b8679bdb62c4f3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-013EN",
+            "fetched_at": "2026-09-27T14:39:17.853949Z"
+          },
+          "document_ref": "documents-c9f842de22b33c23"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-014EN",
+      "documents": {
+        "documents-ce1bd4fadbfd49a5": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-014EN",
+            "faces": [
+              {
+                "name": "Gingerbread House",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Earth Sigil / Fable"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+3.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+3.",
+                "speech": null,
+                "illustrator": "Dencho (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-014EN.png",
+                "trait_raw": "Earth Sigil / Fable",
+                "traits": [
+                  "Earth Sigil",
+                  "Fable"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5f03909d0c266778f7b11d5e251251271f67c97668c7b6322b0b55f976c754b2",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-014EN",
+            "fetched_at": "2026-09-27T14:39:20.622176Z"
+          },
+          "document_ref": "documents-ce1bd4fadbfd49a5"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-015EN",
+      "documents": {
+        "documents-f7483b78fe5af55e": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-015EN",
+            "faces": [
+              {
+                "name": "Summoning Drills",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Alchemist / Earth Sigil"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Summon a Guardform Golem token.\n{icon_fanfare|[fanfare]} Discard a card: Put a Strikeform Golem token into your EX area. Give each Golem follower on your field and in your EX area {icon_power|[attack]}+1.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Summon a Guardform Golem token.\n{icon_fanfare|[fanfare]} Discard a card: Put a Strikeform Golem token into your EX area. Give each Golem follower on your field and in your EX area {icon_power|[attack]}+1.",
+                "speech": null,
+                "illustrator": "aji",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-015EN.png",
+                "trait_raw": "Alchemist / Earth Sigil",
+                "traits": [
+                  "Alchemist",
+                  "Earth Sigil"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1166 (Apr. 4, 2025)",
+                "question": "If my EX area is full when playing this amulet's second Fanfare ability, do I still give each Golem follower on my field and in my EX area +1 attack, even though I can't put a Strikeform Golem token into my EX area?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1165 (Apr. 4, 2025)",
+                "question": "Can I choose the order in which I resolve this amulet's two Fanfare abilities?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-T01EN|Strikeform Golem}",
+                "href": "/cards/?cardno=SDD03-T01EN"
+              },
+              {
+                "label": "{SDD03-T02EN|Guardform Golem}",
+                "href": "/cards/?cardno=SDD03-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a0330f4d0ea435088b80f13e254727ddb7957e83c96e7f39af4944f4f03a603b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-015EN",
+            "fetched_at": "2026-09-27T14:39:23.722268Z"
+          },
+          "document_ref": "documents-f7483b78fe5af55e"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-016EN",
+      "documents": {
+        "documents-df69a032632cfe85": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-016EN",
+            "faces": [
+              {
+                "name": "Rabbit Mage",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Mage / Beast"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "1",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Summon a Magic Sediment token.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Summon a Magic Sediment token.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost01|[cost01]} Magic Sediment (Amulet - Earth Sigil) | Stack.",
+                "illustrator": "Chatalaw",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-016EN.png",
+                "trait_raw": "Mage / Beast",
+                "traits": [
+                  "Mage",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-017EN|Rabbit Mage}",
+                "href": "/cards/?cardno=SDD03-017EN"
+              },
+              {
+                "label": "{SDD03-T03EN|Magic Sediment}",
+                "href": "/cards/?cardno=SDD03-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0ee5d9c09de6ca3025ac9b76ac52af23ed9cca8657d9290e274efa6bf0f96c9e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-016EN",
+            "fetched_at": "2026-09-27T14:39:26.382925Z"
+          },
+          "document_ref": "documents-df69a032632cfe85"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-017EN",
+      "documents": {
+        "documents-f84eafb29b2938c5": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-017EN",
+            "faces": [
+              {
+                "name": "Rabbit Mage",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Mage / Beast"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "On Evolve - Look at the top 4 cards of your deck. You may reveal a card with Earth Rite from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "On Evolve - Look at the top 4 cards of your deck. You may reveal a card with Earth Rite from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "Chatalaw",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-017EN.png",
+                "trait_raw": "Mage / Beast",
+                "traits": [
+                  "Mage",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-016EN|Rabbit Mage}",
+                "href": "/cards/?cardno=SDD03-016EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d980abd2c02b6cd4a7a7e6e706e80be0b74525cc42e98b8620a633542442c3b1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-017EN",
+            "fetched_at": "2026-09-27T14:39:29.050184Z"
+          },
+          "document_ref": "documents-f84eafb29b2938c5"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-018EN",
+      "documents": {
+        "documents-273f1484ab6e5ab3": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-018EN",
+            "faces": [
+              {
+                "name": "Beastfaced Mage",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Mage / Beast"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_act|[act]} {icon_stand|[engage]}, Earth Rite: Select an enemy follower on the field and deal it 2 damage.\n{icon_lastword|[lastwords]} Summon a Magic Sediment token.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_stand|[engage]}, Earth Rite: Select an enemy follower on the field and deal it 2 damage.\n{icon_lastword|[lastwords]} Summon a Magic Sediment token.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost01|[cost01]} Magic Sediment (Amulet - Earth Sigil) | Stack.",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-018EN.png",
+                "trait_raw": "Mage / Beast",
+                "traits": [
+                  "Mage",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": [
+              {
+                "label": "{SDD03-T03EN|Magic Sediment}",
+                "href": "/cards/?cardno=SDD03-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aaf40bedd62196bfc2a261963fc417f4c2dab57042cff6a1cee33d15bc3f844b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-018EN",
+            "fetched_at": "2026-09-27T14:39:32.009976Z"
+          },
+          "document_ref": "documents-273f1484ab6e5ab3"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-019EN",
+      "documents": {
+        "documents-98031ae76c814e62": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-019EN",
+            "faces": [
+              {
+                "name": "Teachings of Creation",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Earth Sigil"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Draw a card.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Draw a card.",
+                "speech": null,
+                "illustrator": "YaoLiang",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-019EN.png",
+                "trait_raw": "Earth Sigil",
+                "traits": [
+                  "Earth Sigil"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5e260b397b9fbe827ac97d6fbad6fa4f37065c4a16030af1c9a6b2bcaef381da",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-019EN",
+            "fetched_at": "2026-09-27T14:39:34.852053Z"
+          },
+          "document_ref": "documents-98031ae76c814e62"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-020EN",
+      "documents": {
+        "documents-86cddfd5db70428d": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-020EN",
+            "faces": [
+              {
+                "name": "Red-Hot Ritual",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Earth Sigil"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 3 damage.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 3 damage.",
+                "speech": null,
+                "illustrator": "RESS",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-020EN.png",
+                "trait_raw": "Earth Sigil",
+                "traits": [
+                  "Earth Sigil"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:36401a72472473731090ee92dc13e07e229d873d96b7bd3f56387c7e40daee84",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-020EN",
+            "fetched_at": "2026-09-27T14:39:37.623398Z"
+          },
+          "document_ref": "documents-86cddfd5db70428d"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-021EN",
+      "documents": {
+        "documents-a7d883c57acac8c5": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-021EN",
+            "faces": [
+              {
+                "name": "Witch's Cauldron",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Mage / Earth Sigil"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. You may reveal a card with Earth Rite from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Look at the top 4 cards of your deck. You may reveal a card with Earth Rite from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-021EN.png",
+                "trait_raw": "Mage / Earth Sigil",
+                "traits": [
+                  "Mage",
+                  "Earth Sigil"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q464 (Jan. 31, 2024)",
+                "question": "Can I add another Witch's Cauldron to my hand with this amulet's Fanfare ability?",
+                "answer": "No. This amulet doesn't have Earth Rite."
+              }
+            ],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:88ff1204e87c4f42d494fba328293778c5c728d3e5b80bc1fc8a8a1d0d2d9fd1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-021EN",
+            "fetched_at": "2026-09-27T14:39:39.888054Z"
+          },
+          "document_ref": "documents-a7d883c57acac8c5"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-022EN",
+      "documents": {
+        "documents-c0e3777b05817097": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-022EN",
+            "faces": [
+              {
+                "name": "Mirror of Truth",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Mage / Earth Sigil"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Select an Alchemist follower in your cemetery that costs 3 or less and summon it.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Select an Alchemist follower in your cemetery that costs 3 or less and summon it.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-022EN.png",
+                "trait_raw": "Mage / Earth Sigil",
+                "traits": [
+                  "Mage",
+                  "Earth Sigil"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6e9345475f9a119a8e26890a6c675dd8c530d9881bd87a93da954d940bd7a2f0",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-022EN",
+            "fetched_at": "2026-09-27T14:39:42.730282Z"
+          },
+          "document_ref": "documents-c0e3777b05817097"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD03-023EN",
+      "documents": {
+        "documents-180a11b012158bfe": {
+          "region": "en",
+          "record": {
+            "number": "SDD03-023EN",
+            "faces": [
+              {
+                "name": "Grand Spire",
+                "info": {
+                  "Card Set": "Showdown Deck: Runecraft",
+                  "Card Type": "Amulet",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Mage / Earth Sigil"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Stack.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "Stack.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 2 damage.",
+                "speech": null,
+                "illustrator": "Melodyoflost",
+                "image": "/wordpress/wp-content/images/cardlist/SDD03/SDD03-023EN.png",
+                "trait_raw": "Mage / Earth Sigil",
+                "traits": [
+                  "Mage",
+                  "Earth Sigil"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7120495b5b8273bb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1f3e0532e2ca77059a2a79006c90272fc5f2c78be40543a933708c864f08f0e9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD03-023EN",
+            "fetched_at": "2026-09-27T14:39:45.294112Z"
+          },
+          "document_ref": "documents-180a11b012158bfe"
+        }
+      ]
+    }
+  ]
+}

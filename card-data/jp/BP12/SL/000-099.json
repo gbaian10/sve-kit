@@ -1,0 +1,1768 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP12",
+  "range": "SL/000-099",
+  "products": {
+    "products-ab3e512eb34698eb": [
+      {
+        "name": "ブースターパック第12弾「黒鉄の侵略者」",
+        "date": "2024-10-18",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP12",
+          "https://shadowverse-evolve.com/products/bp12/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP12-SL01",
+      "documents": {
+        "documents-422ac25445534a3a": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL01",
+            "faces": [
+              {
+                "name": "アウェイキングガイア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "植物族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "11",
+                "power": "5",
+                "hp": "5",
+                "text": "これをプレイする際、自分の墓場の自然・カード5枚につき、コストを-5する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl01.png",
+                "trait_raw": "自然・植物族"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1622",
+                "date": "2024-10-15",
+                "question": "自分の墓場の自然・カードが10枚の場合、これをプレイする際、コストを-10しますか？",
+                "answer": "はい。コストを-10します。\n自分の墓場の自然・カードが5枚以上、9枚以下ならコストを-5。10枚以上、14枚以下ならコストを-10。15枚以上、19枚以下ならコストを-15します。（以降も同様です。）"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f2aa60c55a017d0fec9b5a8f76063550f42c043c6f8f27568ba1a110599c518b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL01",
+            "fetched_at": "2026-09-24T20:46:28.500608Z"
+          },
+          "document_ref": "documents-422ac25445534a3a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL02",
+      "documents": {
+        "documents-c08aed485e6570a1": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL02",
+            "faces": [
+              {
+                "name": "森を彩る者・エルフクイーン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【コンボ_3】1枚引く。",
+                "sections": [],
+                "flavor": "煌めくもの。脆く、儚くも、強きもの。\nそれこそが、森に息づく命……私が背負う輝きだ！",
+                "illustrator": "原田いすか",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl02.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:31a266127e02c66ab9139c9351273d90eb4f4df859a49b9f03f5ee459ba5d4ca",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL02",
+            "fetched_at": "2026-09-24T20:46:31.407000Z"
+          },
+          "document_ref": "documents-c08aed485e6570a1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL03",
+      "documents": {
+        "documents-30f739165e4b3c29": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL03",
+            "faces": [
+              {
+                "name": "森を彩る者・エルフクイーン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー2体まで選ぶ。それに2ダメージを割りふる。【コンボ_3】代わりに4ダメージ。",
+                "sections": [],
+                "flavor": "木々の憂い、花の怒り、全てを背負うが女王の務め。\n私は進む。一人ではない、森と共に！",
+                "illustrator": "原田いすか",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl03.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1623",
+                "date": "2024-10-15",
+                "question": "自分のターン中、手札から『森を彩る者・エルフクイーン』をプレイし、次にEXエリアから『フェアリー』をプレイしました。その後、場に出した『森を彩る者・エルフクイーン』を進化した場合、【進化時】能力にある【コンボ_3】の条件を満たしていますか？",
+                "answer": "いいえ。フォロワーの進化はカードのプレイには含まず、このターンにプレイしたカードは『森を彩る者・エルフクイーン』と『フェアリー』の2枚のみのため、【コンボ_3】の条件を満たしていません。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:abb8a3fe8d83c071f4dbdba237a9a0800b9270eba28b1235743cdb1c65b856d2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL03",
+            "fetched_at": "2026-09-24T20:46:33.949538Z"
+          },
+          "document_ref": "documents-30f739165e4b3c29"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL04",
+      "documents": {
+        "documents-9282b5294cbbb759": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL04",
+            "faces": [
+              {
+                "name": "重なり合う決意",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "自然",
+                  "エルフ族",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】場の自然・カード1枚をEXエリアに置く：相手の場のフォロワー1体を選ぶ。それに3ダメージ。【2】『フェアリー』2体を場に出す。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl04.png",
+                "trait_raw": "自然・エルフ族・獣"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1630",
+                "date": "2024-10-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、【1】をチョイスして、自分の場の自然・カードをEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、【1】をチョイスしてこのスペルをプレイすることができないため、コストの支払いもできず、自分の場の自然・カードをEXエリアに置くことができません。"
+              },
+              {
+                "id": "Q1629",
+                "date": "2024-10-15",
+                "question": "【1】のコストによってトークンをEXエリアに置いた場合、そのトークンはゲームから取り除かれますか？",
+                "answer": "いいえ。ゲームからは取り除かれず、EXエリアに置かれます。\nトークンであるフォロワーやアミュレットは場とEXエリアと解決領域でのみ存在できます。それ以外の領域に移動した場合、移動を行った直後に取り除きます。"
+              },
+              {
+                "id": "Q1628",
+                "date": "2024-10-15",
+                "question": "【1】のコストによってEXエリアに置かれたフォロワーは、それまでに与えられていたダメージや能力などはすべて失われますか？",
+                "answer": "はい。失われます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-T06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4e7adb9f6faa6397f7a94a5ba2375b77e30d9e474d74c743d5a2bd67fc8e0c3d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL04",
+            "fetched_at": "2026-09-24T20:46:36.898366Z"
+          },
+          "document_ref": "documents-9282b5294cbbb759"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL05",
+      "documents": {
+        "documents-f8a7be5252c5e641": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL05",
+            "faces": [
+              {
+                "name": "ライノスナイト・パトリック",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "指揮官",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}『ナテラの大樹』1枚を場かEXエリアに置いてよい。",
+                "sections": [
+                  "『ナテラの大樹』{ニュートラル}自然・アミュレット{コスト1}これが場を離れたとき、1枚引く。自分の手札1枚を捨てる。{起動}{コスト1}：これを墓場に置く。"
+                ],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl05.png",
+                "trait_raw": "自然・指揮官・獣"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1639",
+                "date": "2024-10-15",
+                "question": "《ファンファーレ》能力の「『ナテラの大樹』1枚を場かEXエリアに置いてよい。」は自分の場か自分のEXエリアのどちらかが上限枚数の場合、上限枚数でない方に『ナテラの大樹』を置く必要がありますか？",
+                "answer": "いいえ。「『ナテラの大樹』1枚を場かEXエリアに置いてよい。」は自分の場と自分のEXエリアのどちらにも『ナテラの大樹』を置かないことが選択できます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL06"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:68be49b26e7d8e838b1e890e5d54b6fbea39efea08982842944864b76d848d6e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL05",
+            "fetched_at": "2026-09-24T20:46:39.467403Z"
+          },
+          "document_ref": "documents-f8a7be5252c5e641"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL06",
+      "documents": {
+        "documents-ff0070275e29f462": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL06",
+            "faces": [
+              {
+                "name": "ライノスナイト・パトリック",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "自然",
+                  "指揮官",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】自分の場や自分のEXエリアの自然・カードが5枚以上なら、自分のPPを5回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl06.png",
+                "trait_raw": "自然・指揮官・獣"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:272aac97f7ff05d2e054e46006ebf964c0315b5c6a3e28876edbff16c9079df4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL06",
+            "fetched_at": "2026-09-24T20:46:42.309990Z"
+          },
+          "document_ref": "documents-ff0070275e29f462"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL07",
+      "documents": {
+        "documents-be5bbeeaf68cc6f7": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL07",
+            "faces": [
+              {
+                "name": "スカイセイバー・リーシャ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "自分の場の『黄昏の刃・ナノ』が進化したとき、下記から1つチョイスする。【1】『トワイライトソード』1枚をEXエリアに置く。【2】自分のリーダーは{体力}+2する。\n{ファンファーレ}自分のデッキから『黄昏の刃・ナノ』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl07.png",
+                "trait_raw": "指揮官"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-P04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-P25"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:92aeb52adafcee2c51141d430d3c498cfb6606d24018668ae51173b9bc7c92f5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL07",
+            "fetched_at": "2026-09-24T20:46:44.989074Z"
+          },
+          "document_ref": "documents-be5bbeeaf68cc6f7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL08",
+      "documents": {
+        "documents-fb821b2f46abf3c3": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL08",
+            "faces": [
+              {
+                "name": "信念の剣閃",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "自然",
+                  "指揮官",
+                  "兵士",
+                  "獣",
+                  "プリンセス"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、追加コストとして場の『ナテラの大樹』2つをアクトする。（追加コストを支払わなければプレイできない）\n相手の場のフォロワー1体と自分の場の自然・フォロワー1体まで選ぶ。前者に5ダメージ。前者のリーダーに2ダメージ。後者は{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl08.png",
+                "trait_raw": "自然・指揮官・兵士・獣・プリンセス"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1642",
+                "date": "2024-10-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、自分の場の自然・フォロワーを目標にこのスペルをプレイし、選んだ自然・フォロワーの攻撃力と体力を+1することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、自分の場の自然・フォロワー1体の攻撃力と体力を+1することができません。"
+              },
+              {
+                "id": "Q1641",
+                "date": "2024-10-15",
+                "question": "相手の場のフォロワーを選ぶことができ、自分の場の自然・フォロワーを選ぶことができない場合、このスペルをプレイすることができますか？",
+                "answer": "はい。自分の場の自然・フォロワー1体まで選ぶ場合、0体を選ぶことができるため、このスペルをプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f71c7d2a697f8c46f8907790a1b06b52a112c0ad92fb63a415a293ec91adc6f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL08",
+            "fetched_at": "2026-09-24T20:46:47.930560Z"
+          },
+          "document_ref": "documents-fb821b2f46abf3c3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL09",
+      "documents": {
+        "documents-eaeda45140e238ce": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL09",
+            "faces": [
+              {
+                "name": "天地の侵略者・ベルフォメット",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『遮断の触手』1体を場に出す。\n{起動}{コスト3}EXエリアの機械・トークン2枚を消滅し、手札のこれをEXエリアに置く：『遮断の触手』1体か『蹂躙の触手』1体を場に出す。",
+                "sections": [
+                  "『遮断の触手』{ウィッチ}機械・超克・フォロワー{コスト3}{攻撃力}2/{体力}4【守護】{ラストワード}自分のリーダーは{体力}+4する。"
+                ],
+                "flavor": null,
+                "illustrator": "萩オス",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl09.png",
+                "trait_raw": "機械・超克"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1649",
+                "date": "2024-10-15",
+                "question": "「《起動》《コスト3》EXエリアの機械・トークン2枚を消滅し、手札のこれをEXエリアに置く：『遮断の触手』1体か『蹂躙の触手』1体を場に出す。」という能力は、『天地の侵略者・ベルフォメット』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『天地の侵略者・ベルフォメット』が手札にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1648",
+                "date": "2024-10-15",
+                "question": "自分のEXエリアに『リペアモード』が5枚ある場合、このフォロワーの「《起動》《コスト3》EXエリアの機械・トークン2枚を消滅し、手札のこれをEXエリアに置く：『遮断の触手』1体か『蹂躙の触手』1体を場に出す。」という能力をプレイすることができますか？",
+                "answer": "はい。コストの処理として先にEXエリアの機械・トークン2枚を消滅し、その後に手札のこのフォロワーをEXエリアに置くため、自分のEXエリアに『リペアモード』が5枚ある場合でも《起動》能力をプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-P26"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-P27"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3908dd1b991dc0fb50f1f47d06ebd8b36e08e26f2708850c882a2f5c5f9608b1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL09",
+            "fetched_at": "2026-09-24T20:46:50.776645Z"
+          },
+          "document_ref": "documents-eaeda45140e238ce"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL10",
+      "documents": {
+        "documents-19f7f17e829336ad": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL10",
+            "faces": [
+              {
+                "name": "天地の侵略者・ベルフォメット",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "機械",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "【進化時】手札の機械・カード1枚を捨てる：『蹂躙の触手』1体を場に出す。\n{起動}{コスト2}EXエリアの機械・トークン1枚を消滅：『蹂躙の触手』1体を場に出す。",
+                "sections": [
+                  "『蹂躙の触手』{ウィッチ}機械・超克・フォロワー{コスト3}{攻撃力}4/{体力}2【疾走】{ラストワード}相手の場のフォロワー1体を選ぶ。それに4ダメージ。"
+                ],
+                "flavor": null,
+                "illustrator": "萩オス",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl10.png",
+                "trait_raw": "機械・超克"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-P27"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fcef07d36fec48695cc358eac70bd8570c92d90c8f41592cdeebea26474abe97",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL10",
+            "fetched_at": "2026-09-24T20:46:53.239679Z"
+          },
+          "document_ref": "documents-19f7f17e829336ad"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL11",
+      "documents": {
+        "documents-0619db9e1125ac86": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL11",
+            "faces": [
+              {
+                "name": "インフィニットウィッチ・ドロシー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、魔法使い・フォロワーと魔法使い・スペルそれぞれ1枚まで公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}：自分の手札の{ウィッチ}スペル1枚をEXエリアに置いてよい。このターン、それをプレイする際、コストを-3する。この能力は自分の墓場の魔法使い・フォロワーが5枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl11.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1651",
+                "date": "2024-10-15",
+                "question": "このフォロワーの《ファンファーレ》能力でデッキから見たカードがすべて魔法使い・フォロワーであり、魔法使い・スペルがなかった場合、その中から魔法使い・フォロワー1枚のみを公開して手札に加えることができますか？",
+                "answer": "はい。手札に加えることができます。また、デッキから見たカードがすべて魔法使い・スペルであり、魔法使い・フォロワーがなかった場合も同様に、その中から魔法使い・スペル1枚のみを公開して手札に加えることができます。"
+              },
+              {
+                "id": "Q1650",
+                "date": "2024-10-15",
+                "question": "このフォロワーの《起動》能力で『次元の超越』をEXエリアに置き、そのターン中に、墓場のスペル10枚を消滅させて『次元の超越』をプレイする場合、コスト4でプレイすることができますか？",
+                "answer": "はい。『次元の超越』の能力でコスト7になった後、コストが-3されるためコスト4でプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ea0f0acb591ce249849be01554006ec775c8463c6dc79d5dba0ca64f004cfafa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL11",
+            "fetched_at": "2026-09-24T20:46:55.862377Z"
+          },
+          "document_ref": "documents-0619db9e1125ac86"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL12",
+      "documents": {
+        "documents-0ac080f9002729e4": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL12",
+            "faces": [
+              {
+                "name": "結束の魔術",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "機械",
+                  "魔法使い",
+                  "ゴーレム"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の墓場の機械・カードが5枚以上なら、自分のデッキから元のコスト3以下の機械・フォロワー1枚と元のコスト1の{ウィッチ}スペル1枚を探し、前者を場に出す。後者をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl12.png",
+                "trait_raw": "機械・魔法使い・ゴーレム"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1655",
+                "date": "2024-10-15",
+                "question": "『結束の魔術』をプレイした場合、元のコスト3以下の機械・フォロワー1枚を場に出さない、または元のコスト1の《ウィッチ》スペル1枚をEXエリアに置かないという選択をすることは可能ですか？",
+                "answer": "はい。可能です。デッキからカードを探す際に、元のコスト3以下の機械・フォロワーや元のコスト1の《ウィッチ》スペルを見つけない選択をすることができます。"
+              },
+              {
+                "id": "Q1654",
+                "date": "2024-10-15",
+                "question": "自分の墓場の機械・カードが4枚以下の場合、このスペルをプレイすることができますか？",
+                "answer": "はい。プレイすることができます。\nその場合、条件を満たしていないため、それ以降の効果は働きません。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f48c1f34807ab66b0b7fd206ae52add9dc8113f7bafca5f03443d6c3c5d86e05",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL12",
+            "fetched_at": "2026-09-24T20:46:58.804336Z"
+          },
+          "document_ref": "documents-0ac080f9002729e4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL13",
+      "documents": {
+        "documents-e16291c739f36359": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL13",
+            "faces": [
+              {
+                "name": "運命への反逆",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "機械",
+                  "超克"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "7",
+                "power": "-",
+                "hp": "-",
+                "text": "これを消滅する。各プレイヤーは、自身の手札すべてと自身の墓場すべてをデッキに戻し、シャッフルし、5枚引く。このターン、次に自分がカードをプレイする際、コストを-7する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩オス",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl13.png",
+                "trait_raw": "機械・超克"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1657",
+                "date": "2024-10-15",
+                "question": "『運命の反逆』の「このターン、次に自分がカードをプレイする際、コストを-7する。」によって、次にカードをプレイする際にコストを-7するのは各プレイヤーですか？",
+                "answer": "いいえ。次にカードをプレイする際にコストを-7するのは、自分のみです。（『運命の反逆』のマスターのみです。）\n「各プレイヤーは、自身の手札すべてと自身の墓場すべてをデッキに戻し、シャッフルし、5枚引く。」は、バトルに参加しているすべてのプレイヤーが行います。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:39c065f221cd85bdf6357abb426685b69bc3f6cdf973729336920360146c9d00",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL13",
+            "fetched_at": "2026-09-24T20:47:01.515808Z"
+          },
+          "document_ref": "documents-e16291c739f36359"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL14",
+      "documents": {
+        "documents-410cb314dd74d419": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL14",
+            "faces": [
+              {
+                "name": "波濤のプレシオサウルス",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "竜族",
+                  "海洋"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のターン中、自分が手札を1枚以上捨てたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}場の『ナテラの大樹』1つを消滅：1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl14.png",
+                "trait_raw": "自然・竜族・海洋"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1668",
+                "date": "2024-10-15",
+                "question": "自分のエンドフェイズに手札の枚数上限の超過によって、自分の手札から『光の道筋』を捨てました。その後、『光の道筋』の能力によって1枚引くため、再度手札の上限枚数を超過し手札を捨てますが、この場合、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は何回誘発しますか？",
+                "answer": "2回誘発します。\n1回目の手札の枚数上限の超過によって『光の道筋』を捨てたときに、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力と『光の道筋』の能力が同時に誘発し待機状態になります。その後のチェックタイミングで2つの能力を解決した後、『光の道筋』の能力によって再度手札の上限枚数を超過するため、自分の手札1枚を捨てます。このタイミングで「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力が誘発するため、計2回誘発します。"
+              },
+              {
+                "id": "Q1667",
+                "date": "2024-10-15",
+                "question": "自分の手札が9枚の状況でエンドフェイズを迎え、手札の枚数上限の超過によって自分の手札2枚を捨てた場合、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は何回誘発しますか？",
+                "answer": "手札の枚数上限の超過によって2枚を同時に捨てているため、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は1回のみ誘発します。"
+              },
+              {
+                "id": "Q1666",
+                "date": "2024-10-15",
+                "question": "自分のターン中、何らかの能力によって自分の手札を2枚以上同時に捨てた場合、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は何回誘発しますか？",
+                "answer": "自分の手札を2枚以上同時に捨てた場合でも「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は1回のみ誘発します。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL15"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fbdde4eb4c8bf5ac5211598ea2e45503bf0de48259af7d69ab57888ff1ff45ce",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL14",
+            "fetched_at": "2026-09-24T20:47:03.876954Z"
+          },
+          "document_ref": "documents-410cb314dd74d419"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL15",
+      "documents": {
+        "documents-95e5e3ea909cbe6e": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL15",
+            "faces": [
+              {
+                "name": "波濤のプレシオサウルス",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "自然",
+                  "竜族",
+                  "海洋"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "自分のターン中、自分が手札を1枚以上捨てたとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n【進化時】手札1枚を捨てる：自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl15.png",
+                "trait_raw": "自然・竜族・海洋"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1668",
+                "date": "2024-10-15",
+                "question": "自分のエンドフェイズに手札の枚数上限の超過によって、自分の手札から『光の道筋』を捨てました。その後、『光の道筋』の能力によって1枚引くため、再度手札の上限枚数を超過し手札を捨てますが、この場合、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は何回誘発しますか？",
+                "answer": "2回誘発します。\n1回目の手札の枚数上限の超過によって『光の道筋』を捨てたときに、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力と『光の道筋』の能力が同時に誘発し待機状態になります。その後のチェックタイミングで2つの能力を解決した後、『光の道筋』の能力によって再度手札の上限枚数を超過するため、自分の手札1枚を捨てます。このタイミングで「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力が誘発するため、計2回誘発します。"
+              },
+              {
+                "id": "Q1667",
+                "date": "2024-10-15",
+                "question": "自分の手札が9枚の状況でエンドフェイズを迎え、手札の枚数上限の超過によって自分の手札2枚を捨てた場合、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は何回誘発しますか？",
+                "answer": "手札の枚数上限の超過によって2枚を同時に捨てているため、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は1回のみ誘発します。"
+              },
+              {
+                "id": "Q1666",
+                "date": "2024-10-15",
+                "question": "自分のターン中、何らかの能力によって自分の手札を2枚以上同時に捨てた場合、「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は何回誘発しますか？",
+                "answer": "自分の手札を2枚以上同時に捨てた場合でも「自分のターン中、自分が手札を1枚以上捨てたとき、～」という能力は1回のみ誘発します。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL14"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a1354028a27b3d79590caa88e43841e908bfaa9fa1899f04cc37a98f42425be8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL15",
+            "fetched_at": "2026-09-24T20:47:06.838257Z"
+          },
+          "document_ref": "documents-95e5e3ea909cbe6e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL16",
+      "documents": {
+        "documents-5c730d76c11dbb9c": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL16",
+            "faces": [
+              {
+                "name": "ドラゴンイクシード・ギルヴァ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "9",
+                "power": "6",
+                "hp": "6",
+                "text": "これを自分の手札から捨てたとき、これをEXエリアに置いてよい。\n【守護】\n{ファンファーレ}場の他のフォロワーすべてと相手のリーダーすべてに6ダメージ。\n{起動}{コスト3}EXエリアのこれを墓場に置く：相手の場のフォロワー1体を選ぶ。それに6ダメージ。この能力は【覚醒】状態なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "塚本陽子",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl16.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1670",
+                "date": "2024-10-15",
+                "question": "「《起動》《コスト3》EXエリアのこれを墓場に置く：相手の場のフォロワー1体を選ぶ。それに6ダメージ。この能力は【覚醒】状態なら使える。」という能力は、『ドラゴンイクシード・ギルヴァ』がEXエリアにある場合に有効となる能力ですか？",
+                "answer": "はい。『ドラゴンイクシード・ギルヴァ』がEXエリアにある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q1669",
+                "date": "2024-10-15",
+                "question": "自分のエンドフェイズに手札の枚数上限の超過によって『ドラゴンイクシード・ギルヴァ』を捨てたとき、『ドラゴンイクシード・ギルヴァ』の能力でその『ドラゴンイクシード・ギルヴァ』をEXエリアに置くことはできますか？",
+                "answer": "はい。『ドラゴンイクシード・ギルヴァ』をEXエリアに置くことができます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6185860f88a42f6a9aa451a243f072b4dcf5a2963818c90b1e97d28a89b07139",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL16",
+            "fetched_at": "2026-09-24T20:47:09.799732Z"
+          },
+          "document_ref": "documents-5c730d76c11dbb9c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL17",
+      "documents": {
+        "documents-1f867690c556b488": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL17",
+            "faces": [
+              {
+                "name": "ドラゴニックレイジ",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "自然",
+                  "ドラゴニュート",
+                  "キラー"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "【覚醒】状態である限り、これは{クイック}を持つ。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。『ナテラの大樹』1つを場に出す。",
+                "sections": [
+                  "『ナテラの大樹』{ニュートラル}自然・アミュレット{コスト1}これが場を離れたとき、1枚引く。自分の手札1枚を捨てる。{起動}{コスト1}：これを墓場に置く。"
+                ],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl17.png",
+                "trait_raw": "自然・ドラゴニュート・キラー"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1672",
+                "date": "2024-10-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルをプレイして『ナテラの大樹』1つを場に出すことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、『ナテラの大樹』1つを場に出すことができません。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:26ec1dbadffa9f1b96316939f97601f891c23f10d10aecb15fb6f550155392f2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL17",
+            "fetched_at": "2026-09-24T20:47:12.670587Z"
+          },
+          "document_ref": "documents-1f867690c556b488"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL18",
+      "documents": {
+        "documents-f1c5fccfae3d8f92": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL18",
+            "faces": [
+              {
+                "name": "夜明けの吸血鬼・ノイン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "吸血鬼"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『プロダクトマシーン』1体か『フォレストバット』1体を場に出す。『プロダクトマシーン』1枚か『フォレストバット』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl18.png",
+                "trait_raw": "機械・吸血鬼"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL19"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T08"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4494b86943ab190d9dfdef8af3da1a19603bd6ef2ed2257b0558e97f5192b1cd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL18",
+            "fetched_at": "2026-09-24T20:47:15.547584Z"
+          },
+          "document_ref": "documents-f1c5fccfae3d8f92"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL19",
+      "documents": {
+        "documents-38bc43bf9536c91b": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL19",
+            "faces": [
+              {
+                "name": "夜明けの吸血鬼・ノイン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "機械",
+                  "吸血鬼"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】自分の場と自分のEXエリアの元のコスト1のフォロワーすべては{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "忌々しき陽光は、黒鉄の機構が阻む。\n今やこの身は自由なり――さぁ、夜明けを笑おう。",
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl19.png",
+                "trait_raw": "機械・吸血鬼"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c9ff4d76be72de68371f38fced7a5b91d185d82ffdca7d54c420cda3cef72ad9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL19",
+            "fetched_at": "2026-09-24T20:47:18.402307Z"
+          },
+          "document_ref": "documents-38bc43bf9536c91b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL20",
+      "documents": {
+        "documents-eccecfef99f6829b": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL20",
+            "faces": [
+              {
+                "name": "死期を視るもの・グレモリー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のデッキの上2枚を墓場に置く。\n{起動}{コスト1}：自分の墓場のこれを場に出す。これは「{ラストワード}これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl20.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1680",
+                "date": "2024-10-15",
+                "question": "自分の墓場が『死期を視るもの・グレモリー』を含めて10枚の状況で、自分の場に『死期を視るもの・グレモリー』がいない場合、「《起動》《コスト1》：自分の墓場のこれを場に出す。これは「《ラストワード》これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。」という《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。"
+              },
+              {
+                "id": "Q1679",
+                "date": "2024-10-15",
+                "question": "「《起動》《コスト1》：自分の墓場のこれを場に出す。これは「《ラストワード》これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。」という《起動》能力は、『死期を視るもの・グレモリー』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『死期を視るもの・グレモリー』が墓場にある場合に有効となる能力です。\n『死期を視るもの・グレモリー』が墓場にある状況で、かつ自分の墓場が10枚以上あり、自分の場に他の『死期を視るもの・グレモリー』がいない場合に、この《起動》能力をプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc660fdb9205bdc50e4e35c305f5b911d11aea3a7dd2a80499e582b3a869ad0f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL20",
+            "fetched_at": "2026-09-24T20:47:21.363303Z"
+          },
+          "document_ref": "documents-eccecfef99f6829b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL21",
+      "documents": {
+        "documents-d1a8a2ba44dd2a83": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL21",
+            "faces": [
+              {
+                "name": "絆の共振",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "機械",
+                  "死霊術師",
+                  "魔界"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "5",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の墓場の機械・フォロワーを元のコストの合計が5以下になるように2枚まで選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": "それは偶然、あるいは必然。\n邂逅が勇気を生み、勇気が明日を生む。",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl21.png",
+                "trait_raw": "機械・死霊術師・魔界"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a0a798b7e68b63ead7441abf8ee9616ff8a5c46ea0ee467f539f3a6b7175d0d1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL21",
+            "fetched_at": "2026-09-24T20:47:24.155226Z"
+          },
+          "document_ref": "documents-d1a8a2ba44dd2a83"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL22",
+      "documents": {
+        "documents-1475130c32533dfa": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL22",
+            "faces": [
+              {
+                "name": "紅のワルツ",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "機械",
+                  "魔界",
+                  "吸血鬼"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】相手のリーダーすべてに2ダメージ。自分のリーダーに1ダメージ。【2】『プロダクトマシーン』1体を場に出す。『プロダクトマシーン』1枚をEXエリアに置く。自分の場に『真紅の抗戦者・モノ』がいるなら、EXエリアに置く代わりに場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ラエル",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl22.png",
+                "trait_raw": "機械・魔界・吸血鬼"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1688",
+                "date": "2024-10-15",
+                "question": "お互いのリーダーの体力が1の状況で、このスペルをプレイして【1】をチョイスした場合、バトルは引き分けになりますか？",
+                "answer": "はい。引き分けになります。"
+              },
+              {
+                "id": "Q1687",
+                "date": "2024-10-15",
+                "question": "自分の場に『真紅の抗戦者・モノ』がいる状況で、このスペルをプレイして【2】をチョイスした場合、『プロダクトマシーン』2体を場に出しますか？",
+                "answer": "はい。『プロダクトマシーン』2体を場に出します。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-SL13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-SL14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f32b2cdb83242432132e718a20ef55686b01b11a7ee07ff918fb0f425a7c9a8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL22",
+            "fetched_at": "2026-09-24T20:47:27.015154Z"
+          },
+          "document_ref": "documents-1475130c32533dfa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL23",
+      "documents": {
+        "documents-cb1ab4e16c3f86c4": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL23",
+            "faces": [
+              {
+                "name": "極炎のドラグーン・ローラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "信仰",
+                  "偶像"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}『リペアモード』1枚をEXエリアに置く。これが能力によって場に出ていたなら、これは進化する。",
+                "sections": [
+                  "『リペアモード』{ニュートラル}機械・スペル{コスト1}{クイック}自分のリーダーは{体力}+1する。"
+                ],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl23.png",
+                "trait_raw": "機械・信仰・偶像"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1699",
+                "date": "2024-10-15",
+                "question": "『百機王・グライアス』の《ファンファーレ》能力によって、自分の墓場から『極炎のドラグーン・ローラ』や『機械鞭の僧侶』を場に出した場合、「これが能力によって場に出ていたなら、」を満たしますか？",
+                "answer": "はい。満たします。"
+              },
+              {
+                "id": "Q1696",
+                "date": "2024-10-15",
+                "question": "『極炎のドラグーン・ローラ』が相手のターン中に何らかの能力によって場に出た場合でも、《ファンファーレ》能力によって進化しますか？",
+                "answer": "はい。相手のターン中であっても、能力によって場に出ているので進化します。"
+              },
+              {
+                "id": "Q1695",
+                "date": "2024-10-15",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL24"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dbcbf00c4ddbf862e884c6bf6aa6d9bb3015dee3c1c8a93d0f38148295da6271",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL23",
+            "fetched_at": "2026-09-24T20:47:29.881159Z"
+          },
+          "document_ref": "documents-cb1ab4e16c3f86c4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL24",
+      "documents": {
+        "documents-cd1e3d2074ef1592": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL24",
+            "faces": [
+              {
+                "name": "極炎のドラグーン・ローラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "機械",
+                  "信仰",
+                  "偶像"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに「自分の場の機械・フォロワーの数」と同じダメージ。【2】これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl24.png",
+                "trait_raw": "機械・信仰・偶像"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1697",
+                "date": "2024-10-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-SL23"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:899f03dac279a2bbb226eb364cf07b8c4f3a32b8426005bb7db079eb1d8b1f1c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL24",
+            "fetched_at": "2026-09-24T20:47:32.613618Z"
+          },
+          "document_ref": "documents-cd1e3d2074ef1592"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL25",
+      "documents": {
+        "documents-9fe177b26add4fbb": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL25",
+            "faces": [
+              {
+                "name": "炎氷の司祭・カラト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "自分のターンごとに1回、自分のアミュレットが場を離れたとき、相手のリーダーすべてに1ダメージ。\n{ファンファーレ}場のアミュレット1つを墓場に置く：相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分のPPを4回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "mstk",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl25.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1698",
+                "date": "2024-10-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることで自分のPPを4回復することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができず、自分のPPを4回復することができません。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed1f825f80a6eddbaf5ddb4a5028cb909a8241acace842b83cd79726b6870604",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL25",
+            "fetched_at": "2026-09-24T20:47:35.630938Z"
+          },
+          "document_ref": "documents-9fe177b26add4fbb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL26",
+      "documents": {
+        "documents-c9ca9e63ab4726c5": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL26",
+            "faces": [
+              {
+                "name": "包み込む願い",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "自然",
+                  "信仰",
+                  "光輝",
+                  "獣"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分のリーダーは{体力}+2する。2枚引く。【2】自分のデッキから「カード名に『ムニャール』を含むカード」をカード名が異なるように2枚まで探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl26.png",
+                "trait_raw": "自然・信仰・光輝・獣"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-102"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-P29"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae5a77dbd828131049a681a4fa2c423f948b2b6154cd500754c423c7693f0d7e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL26",
+            "fetched_at": "2026-09-24T20:47:38.163808Z"
+          },
+          "document_ref": "documents-c9ca9e63ab4726c5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-SL27",
+      "documents": {
+        "documents-9239aef7b404a310": {
+          "region": "jp",
+          "record": {
+            "number": "BP12-SL27",
+            "faces": [
+              {
+                "name": "鋼鉄と大地の神",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "自然",
+                  "大神"
+                ],
+                "rarity": "SL",
+                "product": "ブースターパック第12弾「黒鉄の侵略者」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "これを自分の手札から捨てたとき、場の『ナテラの大樹』1つを{アクト}：自分の墓場の「これと同名を除く自然・カード」1枚を選ぶ。それを手札に加える。\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、機械・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。『リペアモード』1枚をEXエリアに置く。自分のPPを3回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP12/bp12-sl27.png",
+                "trait_raw": "機械・自然・大神"
+              }
+            ],
+            "release_date": "2024-10-18",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1705",
+                "date": "2024-10-15",
+                "question": "『鋼鉄と大地の神』の「これを自分の手札から捨てたとき」の能力は、自分の場の『ナテラの大樹』をアクトせずにプレイしないことを選択することはできますか？",
+                "answer": "はい。自分の場の『ナテラの大樹』をアクトせずにプレイしないことを選択できます。"
+              },
+              {
+                "id": "Q1704",
+                "date": "2024-10-15",
+                "question": "自分のエンドフェイズに手札の枚数上限の超過によって『鋼鉄と大地の神』を捨てたとき、自分の場の『ナテラの大樹』をアクトすることで『鋼鉄と大地の神』の能力で自分の墓場の『鋼鉄と大地の神』以外の自然・カード1枚を手札に加えることができますか？",
+                "answer": "はい。自分の場の『ナテラの大樹』をアクトすることで自分の墓場の『鋼鉄と大地の神』以外の自然・カード1枚を手札に加えることができます。その場合、手札が再び8枚以上となるため、改めて手札が7枚以下になるように捨てる必要があります。"
+              }
+            ],
+            "products_ref": "products-ab3e512eb34698eb",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP12-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b2bcdb11f7b182b9db9a25526440e21badcb850d0a7c0df7647f3bb132bbf247",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL27",
+            "fetched_at": "2026-09-24T20:47:40.910792Z"
+          },
+          "document_ref": "documents-9239aef7b404a310"
+        }
+      ]
+    }
+  ]
+}

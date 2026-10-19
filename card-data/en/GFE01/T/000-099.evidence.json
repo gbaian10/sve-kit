@@ -1,0 +1,102 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "GFE01",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-5384a7593c76b01a": [
+        {
+          "ordinal": 0,
+          "name": "Gloryfinder Events Vol. 1",
+          "date_raw": null,
+          "href_raw": [
+            "/cards/searchresults?expansion=GFE01",
+            "https://en.shadowverse-evolve.com/events/preview-trials/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFE01",
+            "https://en.shadowverse-evolve.com/events/preview-trials/"
+          ],
+          "matches": [
+            {
+              "kind": "expansion_link",
+              "search_url": "https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFE01",
+              "expansion_code": "GFE01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": [
+            "unverified_link"
+          ]
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:e39b2351759a544161e9654547cb6f5e0bcc3c37854d87b3d2691ece4426762f": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:5b8dad4f7729e8541d36e5460b754e1424d1bb267c70034a748c6aecc408d7fc",
+        "raw_bytes": 35525,
+        "first_receipt_id": "sha256:04d185e5bf4b61d2c08330acfbc65090d37655829c934f877d0072abb560f55c",
+        "descriptor_sha256": "sha256:8ad87c87b737a9c35eec73af70507ee68fbfe220054747193fd58cc723248559",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:f4b39f24019eb70642b6217a68dcfcee58e136028a74c6dadb0522710e5a301f"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5384a7593c76b01a",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:1ec4f188b1fc6340c0a8b4ba8fdd4db088e5df186a1a0d7460c4c84387dc746d"
+    }
+  }
+}

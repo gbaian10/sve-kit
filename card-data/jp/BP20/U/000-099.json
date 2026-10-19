@@ -1,0 +1,608 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP20",
+  "range": "U/000-099",
+  "products": {
+    "products-64a59b8ef1d39a34": [
+      {
+        "name": "ブースターパック「絶傑を継ぐ者」",
+        "date": "2026-05-22",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP20",
+          "https://shadowverse-evolve.com/products/bp20/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP20-U01",
+      "documents": {
+        "documents-53e8dffd43a35269": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U01",
+            "faces": [
+              {
+                "name": "不殺の継承者・クルル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "継承者",
+                  "狩人"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それは{攻撃力}-3/{体力}-3する。\n【超進化時】相手の場のフォロワーすべては{攻撃力}-3/{体力}-3する。",
+                "sections": [],
+                "flavor": "君にたくさん注いであげる。\n――不殺の継承者・クルル",
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u01.png",
+                "trait_raw": "絶傑・継承者・狩人"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2628",
+                "date": "2026-05-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2627",
+                "date": "2026-05-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2626",
+                "date": "2026-05-18",
+                "question": "フォロワーの攻撃力がマイナスの値になることがありますか？",
+                "answer": "はい。何らかの効果によって攻撃力はマイナスの値になることがあります。攻撃力がマイナスの値になったフォロワーによる攻撃や交戦のダメージは、ダメージ自体を与えません。"
+              }
+            ],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-002"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1e1ae32bb2975289302500a55540dc5a239b563eee32e5a2026efacf4c19cac3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U01",
+            "fetched_at": "2026-09-24T18:49:23.599244Z"
+          },
+          "document_ref": "documents-53e8dffd43a35269"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U02",
+      "documents": {
+        "documents-ea63873bc7514e75": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U02",
+            "faces": [
+              {
+                "name": "簒奪の継承者・シンセライズ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "継承者",
+                  "盗賊"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "これの融合カウンター1個につき、これが与える能力ダメージを+2する。\n【進化時】相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n【超進化時】相手のリーダーすべてと相手の場のフォロワーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": "貧富貴賤、ご愁傷様です。\n――簒奪の継承者・シンセライズ",
+                "illustrator": "タケバヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u02.png",
+                "trait_raw": "絶傑・継承者・盗賊"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2639",
+                "date": "2026-05-18",
+                "question": "これの融合カウンターが1個の状況で、このフォロワーの【進化時】能力をプレイして、相手の場の『プリンセスソード』を装備したフォロワーを選んだ場合、このフォロワーは『プリンセスソード』を装備したフォロワーに何ダメージ与えますか？",
+                "answer": "3ダメージです。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、相手の場の『プリンセスソード』を装備したフォロワーがダメージを受けるので、相手が適用順を選択します。\n『簒奪の継承者・シンセライズ』に適用されている「与えるダメージを+2」と相手の場の『プリンセスソード』を装備したフォロワーの「受けるダメージを-2」を適用し、最終的に3ダメージになります。"
+              },
+              {
+                "id": "Q2638",
+                "date": "2026-05-18",
+                "question": "これの融合カウンターが1個で、相手の場に『永久の盾・シオン』がいる状況です。\nこの状況で、このフォロワーの【超進化時】能力をプレイしました。\nこの場合、このフォロワーは、相手のリーダーと相手の『永久の盾・シオン』に何ダメージ与えますか？",
+                "answer": "『永久の盾・シオン』が場にいる方のプレイヤー（相手）の選択により、「ダメージを与えない」もしくは「2ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、相手のリーダーと相手の場の『永久の盾・シオン』がダメージを受けるので、相手が適用順を選択します。（『永久の盾・シオン』のマスターが適用順を選択します。）\n『簒奪の継承者・シンセライズ』に適用されている「これの融合カウンター1個につき、これが与える能力ダメージを+2する。」と『永久の盾・シオン』の「これが場にいる限り、これと自分のリーダーが受けるダメージを-1する。」を任意の順で適用することができます。\n\n①「受けるダメージを-1」→「与えるダメージを+2」の順で適用する場合\n「受けるダメージを-1」を適用し、『簒奪の継承者・シンセライズ』が与えるダメージが0ダメージになります。この時点で、0ダメージ与える行動は全く行われなくなるため、ダメージを与えるという行動自体が存在しなくなります。その後、「与えるダメージを+2」を適用しますが、ダメージを与えるという行動自体がすでに存在しないため、何も適用されません。よって、最終的に「ダメージを与えない」となります。\n\n②「与えるダメージを+2」→「受けるダメージを-1」の順で適用する場合\n「与えるダメージを+2」を適用し、『簒奪の継承者・シンセライズ』が与えるダメージが3ダメージになります。その後、「受けるダメージを-1」を適用し、『簒奪の継承者・シンセライズ』が与えるダメージが2ダメージになります。"
+              },
+              {
+                "id": "Q2637",
+                "date": "2026-05-18",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              },
+              {
+                "id": "Q2628",
+                "date": "2026-05-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2627",
+                "date": "2026-05-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-020"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:db45510b31552696a189c16039a28b0d1dba4194229bc30ea5152645cf2c4be8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U02",
+            "fetched_at": "2026-09-24T18:49:26.379487Z"
+          },
+          "document_ref": "documents-ea63873bc7514e75"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U03",
+      "documents": {
+        "documents-3a86959c7886c3f9": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U03",
+            "faces": [
+              {
+                "name": "真実の継承者・ヴェハリヤー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "継承者",
+                  "魔法使い"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "-",
+                "power": "1",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それを破壊する。\n【超進化時】自分の墓場の元のコスト9以下の{ウィッチ}スペル1枚を選ぶ。それをEXエリアに置く。このターン、それをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": "曝け出された色は阿頼耶。\n――真実の継承者・ヴェハリヤー",
+                "illustrator": "u介",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u03.png",
+                "trait_raw": "絶傑・継承者・魔法使い"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2628",
+                "date": "2026-05-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2627",
+                "date": "2026-05-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-038"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:92493de85f4a6768f5b7f719d7be9497cc473168ad660d17a651787504490cdc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U03",
+            "fetched_at": "2026-09-24T18:49:29.343715Z"
+          },
+          "document_ref": "documents-3a86959c7886c3f9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U04",
+      "documents": {
+        "documents-a804df46d192ecba": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U04",
+            "faces": [
+              {
+                "name": "破壊の継承者・アクシア",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "継承者",
+                  "アイドル"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "ターンごとに1回、自分の場にアイドル・アミュレットが出たとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n【進化時】場の他のアイドル・カード1枚を墓場に置く：自分のデッキから「カード名に『リーシェナ』を含むフォロワー」1枚を探し、手札に加える。\n【超進化時】相手のリーダーすべてに「自分の場のアイドル・カードの枚数」と同じダメージ。",
+                "sections": [],
+                "flavor": "壊せ、永劫無極の我が歌よ。\n――破壊の継承者・アクシア",
+                "illustrator": "ni02",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u04.png",
+                "trait_raw": "絶傑・継承者・アイドル"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2649",
+                "date": "2026-05-18",
+                "question": "何らかの能力により、相手のターン中に自分の場にアイドル・アミュレットが出た場合、「ターンごとに1回、自分の場にアイドル・アミュレットが出たとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q2628",
+                "date": "2026-05-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2627",
+                "date": "2026-05-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP15-039"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-037"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-040"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-R07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0a2ec7082a358f9c4ebb9b25020c4a99e3ab225291f6f59a30f24755814bfe0d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U04",
+            "fetched_at": "2026-09-24T18:49:31.876651Z"
+          },
+          "document_ref": "documents-a804df46d192ecba"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U05",
+      "documents": {
+        "documents-c51ae93b2bbc2a5e": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U05",
+            "faces": [
+              {
+                "name": "烈絶の顕現・ガルミーユ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "竜族"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【覚醒】状態である限り、これは【疾走】を持つ。\n自分のターンごとに1回、これが能力ダメージを受けたとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}『クレスト 烈絶の顕現・ガルミーユ』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "抗いなさい、その熱で！\n――烈絶の顕現・ガルミーユ",
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u05.png",
+                "trait_raw": "絶傑・竜族"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2658",
+                "date": "2026-05-18",
+                "question": "自分のターン中、このフォロワーの体力が0以下になるように能力ダメージを受けた場合、「自分のターン中、これが能力ダメージを受けたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、体力が0以下になったフォロワーの破壊処理が行われた後に、解決します。"
+              },
+              {
+                "id": "Q2657",
+                "date": "2026-05-18",
+                "question": "『烈絶の顕現・ガルミーユ』の「【覚醒】状態である限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。【覚醒】状態である限り、『烈絶の顕現・ガルミーユ』は【疾走】を持ちます。\n『烈絶の顕現・ガルミーユ』を場に出した後に自分のPPが6以下から7以上になり【覚醒】状態を満たした場合、【疾走】を持ちます。\n『烈絶の顕現・ガルミーユ』を場に出した後に自分のPPが7以上から6以下になり【覚醒】状態を満たさなくなった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q2637",
+                "date": "2026-05-18",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              }
+            ],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:de6fc1dd97ee3c05f33048eb323cd68c3571f368e9f1f659553a1428e7cb81c1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U05",
+            "fetched_at": "2026-09-24T18:49:34.524670Z"
+          },
+          "document_ref": "documents-c51ae93b2bbc2a5e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U06",
+      "documents": {
+        "documents-e9cf2653808ce886": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U06",
+            "faces": [
+              {
+                "name": "絶叫と愛絶の顕現・ルルナイ＆ヴァーナレク",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "死霊術師",
+                  "魔界"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】下記から1つチョイスする。【1】『絶叫の残響・ルルナイ』2体を場に出す。【2】これは【疾走】を持つ。自分の場の{ナイトメア}絶傑・フォロワーすべては{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "「言葉は死に」「憎悪が満ちる」\n――絶叫と愛絶の顕現・ルルナイ＆ヴァーナレク",
+                "illustrator": "ヒダヤーマン",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u06.png",
+                "trait_raw": "絶傑・死霊術師・魔界"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-075"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-T17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e6c694882a50dd425a207a6f6ebfc42eb5cbc1ef6e829be4c80d8c2679daa5ad",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U06",
+            "fetched_at": "2026-09-24T18:49:37.551331Z"
+          },
+          "document_ref": "documents-e9cf2653808ce886"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U07",
+      "documents": {
+        "documents-47e2a0aeee44834e": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U07",
+            "faces": [
+              {
+                "name": "安息の継承者・ヒメカ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "継承者",
+                  "狂信"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキから「これと同名を除く絶傑・狂信・カード」1枚を探し、手札に加える。\n【超進化時】{コスト2}：自分のデッキから「これと同名を除く元のコスト4以下の絶傑・狂信・フォロワー」1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "もっと人に優しくしよう！\n――安息の継承者・ヒメカ",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u07.png",
+                "trait_raw": "絶傑・継承者・狂信"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2628",
+                "date": "2026-05-18",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2627",
+                "date": "2026-05-18",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-094"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bf59c773b2a296d97f60d886260e9bda0c7bffb04aa4ae967390b4a4cab5eca5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U07",
+            "fetched_at": "2026-09-24T18:49:40.515138Z"
+          },
+          "document_ref": "documents-47e2a0aeee44834e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-U08",
+      "documents": {
+        "documents-cebb9982c33eada8": {
+          "region": "jp",
+          "record": {
+            "number": "BP20-U08",
+            "faces": [
+              {
+                "name": "干絶の顕現・ギルネリーゼ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック「絶傑を継ぐ者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【ドレイン】\n自分が『干絶の甘露』をプレイしたとき、相手の場のフォロワー1体を選ぶ。それに5ダメージ。\n{ファンファーレ}場の他のフォロワー1体を選ぶ。それは{攻撃力}+3/{体力}-3する。自分のSEPが0なら、『干絶の甘露』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "天地は干上がり、私をねだる。\n――干絶の顕現・ギルネリーゼ",
+                "illustrator": "毎日まにち",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/bp20-u08.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2026-05-22",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2681",
+                "date": "2026-05-18",
+                "question": "5ターン目以前にこのフォロワーの《ファンファーレ》能力をプレイした場合、《ファンファーレ》能力の「自分のSEPが0なら、」の条件を満たしますか？",
+                "answer": "いいえ。満たしません。\nゲームの準備の際、各プレイヤーのSEPを1にします。"
+              },
+              {
+                "id": "Q2680",
+                "date": "2026-05-18",
+                "question": "場の他のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイして、『干絶の甘露』1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。場の他のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができず、『干絶の甘露』1枚をEXエリアに置くことができません。"
+              }
+            ],
+            "products_ref": "products-64a59b8ef1d39a34",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-T18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:58deee20eec816015ee47eaca127b69cee5e70a849bd5f9d566cb335a809f1af",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP20-U08",
+            "fetched_at": "2026-09-24T18:49:43.488293Z"
+          },
+          "document_ref": "documents-cebb9982c33eada8"
+        }
+      ]
+    }
+  ]
+}

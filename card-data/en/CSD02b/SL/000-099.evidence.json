@@ -1,0 +1,160 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD02b",
+  "range": "SL/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-dd499aa64a8c7ff0": [
+        {
+          "ordinal": 0,
+          "name": "Crossover Starter Deck “Cool”",
+          "date_raw": "Oct. 11, 2024",
+          "href_raw": [
+            "/cards/searchresults?expansion=CSD02B",
+            "https://en.shadowverse-evolve.com/products/csd02/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=CSD02B",
+            "https://en.shadowverse-evolve.com/products/csd02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/csd02/",
+              "expansion_code": "CSD02B"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": [],
+      "related-fa479346dcc35e67": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=CSD02b-T01EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:873bc2afb7c8177e963b948423f2848dcf571ac21018f9ea4330958ea59dd632": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:cd3f99f352f4a4cf6b6a6797bb6db4610f1deda975f3bb80add94f92afda2a71",
+        "raw_bytes": 36346,
+        "first_receipt_id": "sha256:c6c842055caacb647acb5b3b4e9caa214ffcb5b9179403b329ba8a1f88ee5fcb",
+        "descriptor_sha256": "sha256:b37ae8a9f0f09a7eb87aedaa20ddc79a429e24e55422051fa6b2a613ea48fa73",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:1a1f8dff8d3cd3bf54c85239034f377f0a839fab9f1a4177c2bea55e20c03904"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-dd499aa64a8c7ff0",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-fa479346dcc35e67",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:eeb3c55b33603d4c86e8fbffc6466c2bea0a7105627b512c62cc567d2e235f85"
+    },
+    "src:v1:c05837a5a3df7099f846d5795f71e7308ade7c69f19f0202e077cf5650eb520f": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:e3937eb2dbb005b86d5c54f7e6d84e1393f8da3fb69cc88b593b34468374c96e",
+        "raw_bytes": 36497,
+        "first_receipt_id": "sha256:27683f00c81e908280d5a7697547c56f37f9c399f0c34677360549fa40cae18b",
+        "descriptor_sha256": "sha256:6ced5f6a520cf599f97f8e3e5edc4b7ee2c91dcef953292308e5cc6ee31a4960",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:6e0998069fcd7b20aff6819e98c592e3e27954124f3477a94f8a6e2423ee722b"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-dd499aa64a8c7ff0",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-fa479346dcc35e67",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:11bf710ad917252a7b7a5f9949f3bd58701aec12383cf2e575626d03ec10c1da"
+    },
+    "src:v1:c70a3d1135417d32f7ef208913261fd1dc676e57467e9aa00a900c68a8dad133": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:93a7e0b9e77fae34d95b48b225c089926f0df5ddc5b174a2f6166882fc223c58",
+        "raw_bytes": 35758,
+        "first_receipt_id": "sha256:b15ace23ea67244ba9059370b14772d09ea04a9a671002ec471477b449aac998",
+        "descriptor_sha256": "sha256:7e94f4e8679a569a25cd9e69398a0dbc317efd84aaa8e7fe2e5dcf0631057422",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:23d58e7bd73ff1b9aa9bd940c41778d2a1d1dfcab574de28c543e6e8520380f2"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-dd499aa64a8c7ff0",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:8a0635f85ede66bbe0e87c98b8f90590dbe868e6dbf50885bf1a8905cf2ec275"
+    }
+  }
+}

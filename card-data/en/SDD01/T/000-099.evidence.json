@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD01",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-38331ec89b8fd50a": [
+        {
+          "ordinal": 0,
+          "name": "Showdown Deck: Forestcraft",
+          "date_raw": "Mar. 20, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=SDD01",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SDD01",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sdd/",
+              "expansion_code": "SDD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:5a75e15c532249b8557eb9359ce60da473c31e1f0e11dc1de26fa2863abf94e6": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:870e958ec116981f48d74eeb9fea6cc6efa57a79a1ddb1956209d2b6b5f72437",
+        "raw_bytes": 35267,
+        "first_receipt_id": "sha256:5ba766ed4ed7bfe4fa02b795fd3e4fd916e13b60e7b33b7db93dbd59e914101c",
+        "descriptor_sha256": "sha256:926c708eb10d43236a2663ae786fb29fab981531d23f8d6584046fda54a79542",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:198f490f4ce64882c20fdca539d2783dc5f176244a21047b0ac4e3fd267694c5"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-38331ec89b8fd50a",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:f991fb46ce6f846a1bb3334461f9b00bdd4ab540b02e4dc9388c72d34ecb9c8b"
+    },
+    "src:v1:82734b69d43a95681d0dceca0fd6b6acb9b3490d4e095200c4699b6e5b6a85db": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:6ed5511464f99e2dd87a63f3dc24e7d316dcf9d6fd21dec0a6c07e1e8f247793",
+        "raw_bytes": 35259,
+        "first_receipt_id": "sha256:3c5ff67c68e008ab6bfbf12c6305fd7bded3b37266549f8c23da77d838270bca",
+        "descriptor_sha256": "sha256:124eae44ef7151bb65d62e1499f6b448f59edd16c6b37642aa7e44fdfcb69fc6",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:b546f911dafce525dd1ddec15af4acc3c38a855afcfa98aea722b4a354514692"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-38331ec89b8fd50a",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:860e113e12e79cfbe596f75e67d242412c8306a4cf24b7534c637ceae1d41c4a"
+    }
+  }
+}

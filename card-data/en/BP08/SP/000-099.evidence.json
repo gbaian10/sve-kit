@@ -1,0 +1,138 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP08",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-e0184a31e88445ef": [
+        {
+          "ordinal": 0,
+          "name": "Booster Set #8 \"Alterchaotica\"",
+          "date_raw": "Feb. 7, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP08",
+            "https://en.shadowverse-evolve.com/products/bp08/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP08",
+            "https://en.shadowverse-evolve.com/products/bp08/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp08/",
+              "expansion_code": "BP08"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-10fdd98016192772": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP08-SP01EN"
+        }
+      ],
+      "related-3e1918a0b8a36c46": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP08-SP02EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:2f63b92d672ca53295e8c334bbe942dbbe41380773927d9dbadce34cb08fb79a": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:01dc3eea79718df7d0e41984d5a4d5336d244d102efd22e05555ab677572e1d9",
+        "raw_bytes": 36339,
+        "first_receipt_id": "sha256:a5057d7af08b7a04b52c697b8185ad7e42871004a73844e70c851388ac30380a",
+        "descriptor_sha256": "sha256:8d9102f08222211a155a890b7f1f5918ff2c66002a7eef3ba62090e262a2d5c6",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:56c5f068cef48ce5ca0f7747e132dece58f801483a0458bf270194911f8fdc76"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e0184a31e88445ef",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-3e1918a0b8a36c46",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:509b8140129e77a840e6ea9b59a4634f608a12dc5a2396592210c07c74354fc6"
+    },
+    "src:v1:d9d68a2e5243e6aba3266159d0b041a813277f2ac83c22061ad22ebaca3df6b2": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:326445c1b41924c8b49e49927a61b9d88aa7b1c39a24cfbf583ee5e7569f7563",
+        "raw_bytes": 35977,
+        "first_receipt_id": "sha256:bc75b9087577be315cc655b4f40335a4c60c0709f13479be46c4dd61251cf86c",
+        "descriptor_sha256": "sha256:fe101bace0c025d44ba4cbf5b7dd4eda858e4bf0b5f8cf7252d0b7ca0943a329",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:6bbfc3513d3636dbb0df9decb25e8f2a329d8fb3240a1ea2dce51c14354394d7"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e0184a31e88445ef",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-10fdd98016192772",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:ef4080d74669ce13cdb6e1daa76676b84ab1d5bc6e1068aed502d4985b4c906f"
+    }
+  }
+}

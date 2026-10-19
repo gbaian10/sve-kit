@@ -1,0 +1,139 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP15",
+  "range": "SP/000-099",
+  "products": {
+    "products-25b035cfb3a6e126": [
+      {
+        "name": "ブースターパック「絶傑の試練」",
+        "date": "2025-04-11",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP15",
+          "https://shadowverse-evolve.com/products/bp15/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP15-SP01",
+      "documents": {
+        "documents-41d53a8f78118754": {
+          "region": "jp",
+          "record": {
+            "number": "BP15-SP01",
+            "faces": [
+              {
+                "name": "絶大の唯我・マゼルベイン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「絶傑の試練」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "4",
+                "text": "{ファンファーレ}手札3枚を捨てる：『絶大の証明』1枚をEXエリアに置く。\n{起動}墓場の『唯我の絶傑・マゼルベイン』1枚を消滅：相手のリーダーすべてに2ダメージ。2枚引く。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP15/bp15-sp01.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2025-04-11",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-25b035cfb3a6e126",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-103"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP15-PR27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:31e6256a344ec44cbf617dae1a1e5a380b515f3d33861ed76ef99e42f61a8a8d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP15-SP01",
+            "fetched_at": "2026-09-24T20:13:06.977415Z"
+          },
+          "document_ref": "documents-41d53a8f78118754"
+        }
+      ]
+    },
+    {
+      "card_no": "BP15-SP02",
+      "documents": {
+        "documents-bd1bda9190a1068a": {
+          "region": "jp",
+          "record": {
+            "number": "BP15-SP02",
+            "faces": [
+              {
+                "name": "干絶の飢餓・ギルネリーゼ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック「絶傑の試練」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のリーダーの体力が10以下である限り、これは【ドレイン】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP15/bp15-sp02.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2025-04-11",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2041",
+                "date": "2025-04-07",
+                "question": "『干絶の飢餓・ギルネリーゼ』の「自分のリーダーの体力が10以下である限り、これは【ドレイン】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分のリーダーの体力が10以下である限り、『干絶の飢餓・ギルネリーゼ』は【ドレイン】を持ちます。\n『干絶の飢餓・ギルネリーゼ』を場に出した後に自分のリーダーの体力が11以上から10以下になった場合、【ドレイン】を持ちます。\n『干絶の飢餓・ギルネリーゼ』を場に出した後に自分のリーダーの体力が10以下から11以上になった場合、【ドレイン】を失います。"
+              }
+            ],
+            "products_ref": "products-25b035cfb3a6e126",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP15-114"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc3210b302fabafc413d886568a1991f10e6b07c26fdaa1699403b8b2718be09",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP15-SP02",
+            "fetched_at": "2026-09-24T20:13:09.914522Z"
+          },
+          "document_ref": "documents-bd1bda9190a1068a"
+        }
+      ]
+    }
+  ]
+}

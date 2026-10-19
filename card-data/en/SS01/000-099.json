@@ -1,0 +1,340 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SS01",
+  "range": "000-099",
+  "products": {
+    "products-0dbfbaf2f5767f1c": [
+      {
+        "name": "Worlds Beyond Swordcraft Starter Set",
+        "date": "Jun. 20, 2025",
+        "links": [
+          "/cards/searchresults?expansion=SS01",
+          "https://en.shadowverse-evolve.com/products/wbss/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SS01-001EN",
+      "documents": {
+        "documents-707d6a019e55a529": {
+          "region": "en",
+          "record": {
+            "number": "SS01-001EN",
+            "faces": [
+              {
+                "name": "Monochrome Duel",
+                "info": {
+                  "Card Set": "Worlds Beyond Swordcraft Starter Set",
+                  "Card Type": "Spell",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Commander / Fable"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_cost02|[cost02]}, banish this card from your cemetery: Give each Knight on your field {icon_power|[attack]}+1 and Storm.",
+                "sections": [
+                  "Search your deck for a Queen Hemera the White and Queen Magnus the Black, summon them, then shuffle your deck. Give them {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+                ],
+                "raw_text": "{icon_act|[act]} {icon_cost02|[cost02]}, banish this card from your cemetery: Give each Knight on your field {icon_power|[attack]}+1 and Storm.\n----------\nSearch your deck for a Queen Hemera the White and Queen Magnus the Black, summon them, then shuffle your deck. Give them {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Kouta Nagamori",
+                "image": "/wordpress/wp-content/images/cardlist/SS01/SS01-001EN.png",
+                "trait_raw": "Commander / Fable",
+                "traits": [
+                  "Commander",
+                  "Fable"
+                ]
+              }
+            ],
+            "release_date": "Jun. 20, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1149 (Apr. 4, 2025)",
+                "question": "Can I choose to summon Queen Hemera the White but not Queen Magnus the Black, or vice versa?",
+                "answer": "Yes. Even if both are in your deck, you can choose to \"not find\" either or both of them."
+              },
+              {
+                "title": "Q1148 (Apr. 4, 2025)",
+                "question": "Can I only play this spell's activated ability when it's in my cemetery?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-0dbfbaf2f5767f1c",
+            "related_cards": [
+              {
+                "label": "{SS01-002EN|Queen Hemera the White}",
+                "href": "/cards/?cardno=SS01-002EN"
+              },
+              {
+                "label": "{SS01-003EN|Queen Magnus the Black}",
+                "href": "/cards/?cardno=SS01-003EN"
+              },
+              {
+                "label": "{SD02-T01EN|Knight}",
+                "href": "/cards/?cardno=SD02-T01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:be7c6637e16991bc914fd521f73aad08ffad4af54a733bc8ad5ccf2e8b150a81",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SS01-001EN",
+            "fetched_at": "2026-09-27T16:06:43.279185Z"
+          },
+          "document_ref": "documents-707d6a019e55a529"
+        }
+      ]
+    },
+    {
+      "card_no": "SS01-002EN",
+      "documents": {
+        "documents-dd69bbf613d41e85": {
+          "region": "en",
+          "record": {
+            "number": "SS01-002EN",
+            "faces": [
+              {
+                "name": "Queen Hemera the White",
+                "info": {
+                  "Card Set": "Worlds Beyond Swordcraft Starter Set",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Commander / Fable / Lightborne"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "4"
+                },
+                "text": "Rush.\n{icon_fanfare|[fanfare]} Summon a Knight token. If there's a Queen Magnus the Black on your field, summon 2 instead.\nStrike - Put a Knight token into your EX area.",
+                "sections": [],
+                "raw_text": "Rush.\n{icon_fanfare|[fanfare]} Summon a Knight token. If there's a Queen Magnus the Black on your field, summon 2 instead.\nStrike - Put a Knight token into your EX area.",
+                "speech": "{icon_royal|[swordcraft]}{icon_cost01|[cost01]} Knight (Follower - Officer) {icon_power|[attack]}1/{icon_hp|[defense]}1",
+                "illustrator": "Onineko",
+                "image": "/wordpress/wp-content/images/cardlist/SS01/SS01-002EN.png",
+                "trait_raw": "Commander / Fable / Lightborne",
+                "traits": [
+                  "Commander",
+                  "Fable",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Jun. 20, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0dbfbaf2f5767f1c",
+            "related_cards": [
+              {
+                "label": "{SS01-003EN|Queen Magnus the Black}",
+                "href": "/cards/?cardno=SS01-003EN"
+              },
+              {
+                "label": "{SD02-T01EN|Knight}",
+                "href": "/cards/?cardno=SD02-T01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2327ae76558b3e29ce149dd057156a9e5659963c3072dd67babce055694786e7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SS01-002EN",
+            "fetched_at": "2026-09-27T16:06:46.270885Z"
+          },
+          "document_ref": "documents-dd69bbf613d41e85"
+        }
+      ]
+    },
+    {
+      "card_no": "SS01-003EN",
+      "documents": {
+        "documents-b3b1f0253e6ebf4e": {
+          "region": "en",
+          "record": {
+            "number": "SS01-003EN",
+            "faces": [
+              {
+                "name": "Queen Magnus the Black",
+                "info": {
+                  "Card Set": "Worlds Beyond Swordcraft Starter Set",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Commander / Fable / Cutthroat"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "While this card is on your field, each Queen Hemera the White on your field has Assail.\n{icon_act|[act]} {icon_stand|[engage]}: Select up to 2 other {icon_royal|[swordcraft]} followers on your field and give them {icon_power|[attack]}+1.",
+                "sections": [],
+                "raw_text": "While this card is on your field, each Queen Hemera the White on your field has Assail.\n{icon_act|[act]} {icon_stand|[engage]}: Select up to 2 other {icon_royal|[swordcraft]} followers on your field and give them {icon_power|[attack]}+1.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/SS01/SS01-003EN.png",
+                "trait_raw": "Commander / Fable / Cutthroat",
+                "traits": [
+                  "Commander",
+                  "Fable",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Jun. 20, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0dbfbaf2f5767f1c",
+            "related_cards": [
+              {
+                "label": "{SS01-002EN|Queen Hemera the White}",
+                "href": "/cards/?cardno=SS01-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c9eb9ad50562ff6f591a143aafab4371fd27e1fb0b0735924275fe35dfa0a29a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SS01-003EN",
+            "fetched_at": "2026-09-27T16:06:49.125069Z"
+          },
+          "document_ref": "documents-b3b1f0253e6ebf4e"
+        }
+      ]
+    },
+    {
+      "card_no": "SS01-004EN",
+      "documents": {
+        "documents-1aa21dd9eed2f440": {
+          "region": "en",
+          "record": {
+            "number": "SS01-004EN",
+            "faces": [
+              {
+                "name": "Savage Swordsman",
+                "info": {
+                  "Card Set": "Worlds Beyond Swordcraft Starter Set",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Officer"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} If there's a token follower on your field, give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} If there's a token follower on your field, give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SS01/SS01-004EN.png",
+                "trait_raw": "Officer",
+                "traits": [
+                  "Officer"
+                ]
+              }
+            ],
+            "release_date": "Jun. 20, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0dbfbaf2f5767f1c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:819b1f833dfe06957eed4d4b0af9e3f74558e8cc8f441c1222bba7faa3aa8818",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SS01-004EN",
+            "fetched_at": "2026-09-27T16:06:51.820014Z"
+          },
+          "document_ref": "documents-1aa21dd9eed2f440"
+        }
+      ]
+    },
+    {
+      "card_no": "SS01-005EN",
+      "documents": {
+        "documents-3f6e13c1ec787a35": {
+          "region": "en",
+          "record": {
+            "number": "SS01-005EN",
+            "faces": [
+              {
+                "name": "Novice Trooper",
+                "info": {
+                  "Card Set": "Worlds Beyond Swordcraft Starter Set",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Officer"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "Storm.",
+                "sections": [],
+                "raw_text": "Storm.",
+                "speech": null,
+                "illustrator": "naturaljuice",
+                "image": "/wordpress/wp-content/images/cardlist/SS01/SS01-005EN.png",
+                "trait_raw": "Officer",
+                "traits": [
+                  "Officer"
+                ]
+              }
+            ],
+            "release_date": "Jun. 20, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0dbfbaf2f5767f1c",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8a74881dea33b8d1983eaa787ff78f9ec38b831bdb798ff134c34c2235539a67",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SS01-005EN",
+            "fetched_at": "2026-09-27T16:06:54.425237Z"
+          },
+          "document_ref": "documents-3f6e13c1ec787a35"
+        }
+      ]
+    }
+  ]
+}

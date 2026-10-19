@@ -1,0 +1,1163 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP07",
+  "range": "100-199",
+  "products": {
+    "products-0eef63b68124d284": [
+      {
+        "name": "ブースターパック第7弾「森羅鋼鉄」",
+        "date": "2023-10-27",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP07",
+          "https://shadowverse-evolve.com/products/bp07/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP07-100",
+      "documents": {
+        "documents-90b0042d5e25f7be": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-100",
+            "faces": [
+              {
+                "name": "森の参謀・ムニャール",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "光輝",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "【疾走】\n【攻撃時】相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-100.png",
+                "trait_raw": "自然・光輝・獣"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0959ed2d577bac31669f2e5701b1e40867ff6e3444c673ec4378113b1c3cfd15",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-100",
+            "fetched_at": "2026-09-24T22:02:38.599035Z"
+          },
+          "document_ref": "documents-90b0042d5e25f7be"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-101",
+      "documents": {
+        "documents-13425de7dc550031": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-101",
+            "faces": [
+              {
+                "name": "セイント・コア",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "機械"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキの上2枚を見る。その中から、機械・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}墓場に置く：『リペアモード』1枚をEXエリアに置く。この能力は自分の場の機械・フォロワーが2体以上なら使える。",
+                "sections": [
+                  "『リペアモード』{ニュートラル}機械・スペル{コスト1}{クイック}自分のリーダーは{体力}+1する。"
+                ],
+                "flavor": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-101.png",
+                "trait_raw": "機械"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1dd64f70e5c3a04490f14efaa40c61493d4acfe672fc8dbe84e120cbc65c7264",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-101",
+            "fetched_at": "2026-09-24T22:02:41.570942Z"
+          },
+          "document_ref": "documents-13425de7dc550031"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-102",
+      "documents": {
+        "documents-e4f783c210c448dd": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-102",
+            "faces": [
+              {
+                "name": "ムニャール登場",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "自然",
+                  "光輝",
+                  "獣"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、{ビショップ}フォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{起動}{コスト1}これを{アクト}墓場に置く：自分の手札の「カード名に『ムニャール』を含むフォロワー」1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-102.png",
+                "trait_raw": "自然・光輝・獣"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1036",
+                "date": "2023-10-20",
+                "question": "自分の手札に「カード名に『ムニャール』を含むフォロワー」がない状況で、『ムニャール登場』の《起動》能力をプレイし、コストの支払いによって、その『ムニャール登場』を墓場に置くことができますか？",
+                "answer": "はい。自分の手札に「カード名に『ムニャール』を含むフォロワー」がなくても、『ムニャール登場』の《起動》能力をプレイし、コストの支払いによって、その『ムニャール登場』を墓場に置くことができます。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-100"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6641867d7380bcdfae17133bc9e3c01dfb165f12ce840b28f87f9b698f6ab998",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-102",
+            "fetched_at": "2026-09-24T22:02:44.344363Z"
+          },
+          "document_ref": "documents-e4f783c210c448dd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-103",
+      "documents": {
+        "documents-558ecb7e7a26f039": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-103",
+            "faces": [
+              {
+                "name": "機械神",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "大神"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "{ファンファーレ}墓場の機械・カード3枚を消滅：下記から2つまでチョイスする。【1】相手の場のフォロワー1体を選ぶ。それを破壊する。【2】相手の場のアミュレット1つを選ぶ。それを破壊する。【3】相手のリーダーすべてに3ダメージ。【4】自分のデッキから「これと同名を除く機械・カード」1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "mstk",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-103.png",
+                "trait_raw": "機械・大神"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1593",
+                "date": "2024-08-20",
+                "question": "相手の場のフォロワーやアミュレットを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】や【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】や【2】をチョイスすることができず、【3】や【4】をチョイスする必要があります。（【3】や【4】をチョイスし、コストを支払わずに何も起こらないことを選択できます。）"
+              },
+              {
+                "id": "Q1008",
+                "date": "2023-10-20",
+                "question": "2つ以上の選択肢をチョイスするとき、１つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:763ff533de811265c2f3b2042ecbb0035165bfc1a6443393f2c99c3878e9c800",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-103",
+            "fetched_at": "2026-09-24T22:02:46.907688Z"
+          },
+          "document_ref": "documents-558ecb7e7a26f039"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-104",
+      "documents": {
+        "documents-228074fa40544c93": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-104",
+            "faces": [
+              {
+                "name": "母なる君",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "大神"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "4",
+                "power": "0",
+                "hp": "4",
+                "text": "【突進】【指定攻撃】【必殺】\n{ラストワード}場かEXエリアの『ナテラの大樹』1枚を消滅：これをアクト状態で場に出す。これは進化する。進化しなかったなら、これは消滅する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-104.png",
+                "trait_raw": "自然・大神"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1051",
+                "date": "2023-11-10",
+                "question": "自分の場の『母なる君』で相手の場の『冥守の戦士・カムラ』を攻撃し、両者とも破壊されて墓場に置かれました。『母なる君』の《ラストワード》能力で『母なる君』を場に出して進化した場合、相手は『冥守の戦士・カムラ』の《ラストワード》能力で『母なる君（EVOLVE）』を破壊することができますか？",
+                "answer": "はい。破壊することができます。\n『母なる君』が『冥守の戦士・カムラ』に攻撃し、両者ともに破壊されて墓場に置かれた場合、《ラストワード》能力が同時に誘発します。誘発して待機状態になった能力はターンプレイヤーから解決するため、先に『母なる君』の《ラストワード》能力を解決し、自分の場に『母なる君』が出て進化します。その後、非ターンプレイヤーが『冥守の戦士・カムラ』の《ラストワード》能力を解決します。この時点で相手の場に『母なる君（EVOLVE）』がいるため、目標に選ぶことで破壊することができます。"
+              },
+              {
+                "id": "Q1050",
+                "date": "2023-11-10",
+                "question": "『簒奪の絶傑・オクトリス（EVOLVE）』の【進化時】能力で、相手の墓場の『母なる君』を自分のEXエリアに置きました。その『母なる君』をプレイし、その後、場から墓場に置かれた場合、《ラストワード》能力の処理はどうなりますか？",
+                "answer": "『母なる君』のオーナー側をプレイヤーA、『簒奪の絶傑・オクトリス（EVOLVE）』のマスターをプレイヤーBとします。\nプレイヤーBが《ラストワード》能力のコストを支払った場合、プレイヤーAの場に『母なる君』が出ますが、進化することはできず消滅します。\n\n以下、詳細な説明です。\n①『母なる君』が場から墓場に置かれる場合、オーナーであるプレイヤーAの墓場に置かれます。\n②『母なる君』が場から墓場に置かれたため、《ラストワード》能力が誘発し、プレイヤーBがプレイします。\n③《ラストワード》能力のコストをプレイヤーBが支払い、プレイヤーBの場かEXエリアの『ナテラの大樹』を消滅させます。（コストを支払わない選択も可能です。）\n④「これをアクト状態で場に出す」によってオーナーであるプレイヤーAの場に『母なる君』が出ます。\n⑤「これは進化する」を処理する際、《ラストワード》能力をプレイしたのはプレイヤーBですが、場に出た『母なる君』のマスターはプレイヤーAなので、プレイヤーBがプレイヤーAのエボルヴデッキから『母なる君（EVOLVE）』を選択し、公開する必要があります。しかし、エボルヴデッキは非公開領域のため、プレイヤーBがプレイヤーAのエボルヴデッキを確認することはできず、『母なる君（EVOLVE）』を選択して公開することができないため、進化することができません。\n⑥進化しなかったため、場に出た『母なる君』は消滅します。"
+              },
+              {
+                "id": "Q1038",
+                "date": "2023-10-20",
+                "question": "このフォロワーが《ラストワード》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              },
+              {
+                "id": "Q1037",
+                "date": "2023-10-20",
+                "question": "『メイドリーダー（EVOLVE）』の【進化時】能力によって、自分のデッキから『母なる君』を探して手札に加えることができますか？",
+                "answer": "いいえ。『母なる君』は《進化》能力（進化することができる起動能力・「丸E」のアイコン）を持たないので『メイドリーダー（EVOLVE）』の進化時能力によって、手札に加えることができません。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-105"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2464d029f1aa7166dfb0f5e0ec4396c9018c31819e9eefa9521dceac46c6f0e8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-104",
+            "fetched_at": "2026-09-24T22:02:49.808214Z"
+          },
+          "document_ref": "documents-228074fa40544c93"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-105",
+      "documents": {
+        "documents-3850be2a4ac56eb8": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-105",
+            "faces": [
+              {
+                "name": "母なる君",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "自然",
+                  "大神"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【守護】\n{ラストワード}自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "マナの輝きは、命の輝き。穢れは消え、自然が彩る。\n勇気ある者たちに感謝を。母は、今ここに戻りました――。",
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-105.png",
+                "trait_raw": "自然・大神"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-104"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:42d6d8c7ed2ee9ccdbb1f3df7ce19c27bafe229060476d9071158e35a6c39c11",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-105",
+            "fetched_at": "2026-09-24T22:02:52.790909Z"
+          },
+          "document_ref": "documents-3850be2a4ac56eb8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-106",
+      "documents": {
+        "documents-8db5d89b0797a620": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-106",
+            "faces": [
+              {
+                "name": "マシンエンジェル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "天使"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}『プロダクトマシーン』1枚か『リペアモード』1枚をEXエリアに置く。\n{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに4ダメージ。この能力は自分の墓場の機械・カードが5枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Melodyoflost",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-106.png",
+                "trait_raw": "機械・天使"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7989649f5866d6bb03786a2e42a52715fb6874c63a2706d8a6345e053a2aeb61",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-106",
+            "fetched_at": "2026-09-24T22:02:55.543596Z"
+          },
+          "document_ref": "documents-8db5d89b0797a620"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-107",
+      "documents": {
+        "documents-d6e00852c796f4b9": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-107",
+            "faces": [
+              {
+                "name": "荒野の案内人",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "傭兵"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}『ナテラの大樹』1枚を場かEXエリアに置いてよい。その後、自分の場や自分のEXエリアの自然・カードが5枚以上なら、自分のデッキの上3枚を見る。その中から、自然・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [
+                  "『ナテラの大樹』{ニュートラル}自然・アミュレット{コスト1}これが場を離れたとき、1枚引く。自分の手札1枚を捨てる。{起動}{コスト1}：これを墓場に置く。"
+                ],
+                "flavor": null,
+                "illustrator": "NAVAR",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-107.png",
+                "trait_raw": "自然・傭兵"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1039",
+                "date": "2023-10-20",
+                "question": "自分の場や自分のEXエリアの自然・カードが3枚の状況で、『荒野の案内人』をプレイした場合、《ファンファーレ》能力の「自分の場や自分のEXエリアの自然・カードが5枚以上なら、」の条件を満たしますか？",
+                "answer": "『荒野の案内人』の《ファンファーレ》能力によって、場かEXエリアに『ナテラの大樹』1枚を置いた場合、『荒野の案内人』自身とその『ナテラの大樹』で自分の場や自分のEXエリアの自然・カードが5枚になるので条件を満たします。\n『荒野の案内人』の《ファンファーレ》能力によって、場かEXエリアのどちらにも『ナテラの大樹』を置かなかった場合、自分の場や自分のEXエリアの自然・カードは4枚なので条件を満たしません。"
+              },
+              {
+                "id": "Q988",
+                "date": "2023-10-20",
+                "question": "《ファンファーレ》能力の「『ナテラの大樹』1枚を場かEXエリアに置いてよい。」は自分の場か自分のEXエリアのどちらかが上限枚数の場合、上限枚数でない方に『ナテラの大樹』を置く必要がありますか？",
+                "answer": "いいえ。「『ナテラの大樹』1枚を場かEXエリアに置いてよい。」は自分の場と自分のEXエリアのどちらにも『ナテラの大樹』を置かないことが選択できます。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0c76dcb06702d2206f6565c9e6d50c3372cabf9c4f7ee7b50e34073a5f73e5aa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-107",
+            "fetched_at": "2026-09-24T22:02:58.506204Z"
+          },
+          "document_ref": "documents-d6e00852c796f4b9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-108",
+      "documents": {
+        "documents-d769774ca9a0fb6f": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-108",
+            "faces": [
+              {
+                "name": "粛清の英雄・メイシア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは進化する。\n【攻撃時】自分の墓場の元のコスト3以下の{ニュートラル}スペル1枚を選ぶ。それのコストを0にしてプレイする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-108.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1042",
+                "date": "2023-10-20",
+                "question": "相手の場のフォロワーがアクト状態の『ベルエンジェル』1体のみの状況で、『粛清の英雄・メイシア』で相手の場の『ベルエンジェル』に攻撃しました。『粛清の英雄・メイシア』の【攻撃時】能力によって、自分の墓場の『粛清の一刀』をプレイし、攻撃目標に選択した『ベルエンジェル』を破壊した場合、この『粛清の英雄・メイシア』は攻撃目標を相手のリーダーに変更して相手のリーダーを攻撃することができますか？",
+                "answer": "いいえ。【攻撃時】能力などによって、攻撃目標として選択したフォロワーが場を離れた場合でも、攻撃目標を変更することはできません。そのため、『粛清の英雄・メイシア』の【攻撃時】能力でプレイした『粛清の一刀』によって、攻撃目標に選択した『ベルエンジェル』が破壊された場合でも、その『粛清の英雄・メイシア』は相手のリーダーを攻撃することができません。"
+              },
+              {
+                "id": "Q1041",
+                "date": "2023-10-20",
+                "question": "相手の場のフォロワーを選ぶことができない場合、『粛清の一刀』をプレイして自分の場の『粛清の英雄・メイシア』の攻撃力を+することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができないので、『粛清の一刀』をプレイすることができず、自分の場の『粛清の英雄・メイシア』の攻撃力を+することができません。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-109"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:92a1b0012eceb73469d9f7bfc8d97df3dd9ff4c3ff97a8b760ba30e856d7098b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-108",
+            "fetched_at": "2026-09-24T22:03:01.263348Z"
+          },
+          "document_ref": "documents-d769774ca9a0fb6f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-109",
+      "documents": {
+        "documents-223182a743ac6ca2": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-109",
+            "faces": [
+              {
+                "name": "粛清の英雄・メイシア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "4",
+                "text": "【攻撃時】自分の墓場の元のコスト3以下の{ニュートラル}スペル1枚を選ぶ。それのコストを0にしてプレイする。\n【進化時】{コスト5}：自分のデッキの上5枚を墓場に置く。これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-109.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1042",
+                "date": "2023-10-20",
+                "question": "相手の場のフォロワーがアクト状態の『ベルエンジェル』1体のみの状況で、『粛清の英雄・メイシア』で相手の場の『ベルエンジェル』に攻撃しました。『粛清の英雄・メイシア』の【攻撃時】能力によって、自分の墓場の『粛清の一刀』をプレイし、攻撃目標に選択した『ベルエンジェル』を破壊した場合、この『粛清の英雄・メイシア』は攻撃目標を相手のリーダーに変更して相手のリーダーを攻撃することができますか？",
+                "answer": "いいえ。【攻撃時】能力などによって、攻撃目標として選択したフォロワーが場を離れた場合でも、攻撃目標を変更することはできません。そのため、『粛清の英雄・メイシア』の【攻撃時】能力でプレイした『粛清の一刀』によって、攻撃目標に選択した『ベルエンジェル』が破壊された場合でも、その『粛清の英雄・メイシア』は相手のリーダーを攻撃することができません。"
+              },
+              {
+                "id": "Q1041",
+                "date": "2023-10-20",
+                "question": "相手の場のフォロワーを選ぶことができない場合、『粛清の一刀』をプレイして自分の場の『粛清の英雄・メイシア』の攻撃力を+することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができないので、『粛清の一刀』をプレイすることができず、自分の場の『粛清の英雄・メイシア』の攻撃力を+することができません。"
+              },
+              {
+                "id": "Q1040",
+                "date": "2023-10-20",
+                "question": "自分のデッキが4枚以下の状態でこのフォロワーの【進化時】能力を解決する場合、【疾走】を持ちますか？",
+                "answer": "はい。【疾走】を持ちます。\n自分のデッキが1枚から4枚の場合、「自分のデッキの上5枚を墓場に置く。」によって、可能な限りデッキを墓場に置きます。5枚を墓場に置くことができなくても「これは【疾走】を持つ。」が適用されます。\n自分のデッキが0枚の場合、「自分のデッキの上5枚を墓場に置く。」は単に行われず、「これは【疾走】を持つ。」が適用されます。（また、敗北することもありません。）"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-108"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:71de325512b2a21b9a635d601e142d83db2b55125b71f8c8c0e67bc21b1ceba6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-109",
+            "fetched_at": "2026-09-24T22:03:04.185931Z"
+          },
+          "document_ref": "documents-223182a743ac6ca2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-110",
+      "documents": {
+        "documents-aff214a707b48c5d": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-110",
+            "faces": [
+              {
+                "name": "メカゴブリン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "ゴブリン"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ラストワード}『リペアモード』1枚をEXエリアに置く。",
+                "sections": [
+                  "『リペアモード』{ニュートラル}機械・スペル{コスト1}{クイック}自分のリーダーは{体力}+1する。"
+                ],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-110.png",
+                "trait_raw": "機械・ゴブリン"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-111"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:41a447b044771dfa1c8ff7ae2fc6828f042d4dfaf0579d7eae6f19c5612a2a20",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-110",
+            "fetched_at": "2026-09-24T22:03:07.074443Z"
+          },
+          "document_ref": "documents-aff214a707b48c5d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-111",
+      "documents": {
+        "documents-3ff9d9a73ed2ef0f": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-111",
+            "faces": [
+              {
+                "name": "メカゴブリン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "機械",
+                  "ゴブリン"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】『プロダクトマシーン』1体を出す。\n{ラストワード}『リペアモード』1枚をEXエリアに置く。",
+                "sections": [
+                  "『プロダクトマシーン』{ニュートラル}機械・フォロワー{コスト1}{攻撃力}1/{体力}1{起動}これを{アクト}場の機械・フォロワー3体を墓場に置く：相手の場のフォロワー1体を選ぶ。それに5ダメージ。"
+                ],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-111.png",
+                "trait_raw": "機械・ゴブリン"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-110"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c7bd6726f7b85fcd595e3205efe57f412fd8a3876aa190b34b4f316f448e5d24",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-111",
+            "fetched_at": "2026-09-24T22:03:09.639364Z"
+          },
+          "document_ref": "documents-3ff9d9a73ed2ef0f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-112",
+      "documents": {
+        "documents-2a6f5a09505c8291": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-112",
+            "faces": [
+              {
+                "name": "ワンダーコック",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "コック"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "{ファンファーレ}『ナテラの大樹』1枚を場かEXエリアに置いてよい。自分のリーダーは{体力}+1する。\n{ラストワード}手札の自然・カード1枚を捨てる：1枚引く。",
+                "sections": [
+                  "『ナテラの大樹』{ニュートラル}自然・アミュレット{コスト1}これが場を離れたとき、1枚引く。自分の手札1枚を捨てる。{起動}{コスト1}：これを墓場に置く。"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-112.png",
+                "trait_raw": "自然・コック"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1043",
+                "date": "2023-10-20",
+                "question": "《ファンファーレ》能力によって、自分の場か自分のEXエリアに『ナテラの大樹』を置かなくても、「自分のリーダーは《体力》+1する。」が働きますか？",
+                "answer": "はい。働きます。"
+              },
+              {
+                "id": "Q988",
+                "date": "2023-10-20",
+                "question": "《ファンファーレ》能力の「『ナテラの大樹』1枚を場かEXエリアに置いてよい。」は自分の場か自分のEXエリアのどちらかが上限枚数の場合、上限枚数でない方に『ナテラの大樹』を置く必要がありますか？",
+                "answer": "いいえ。「『ナテラの大樹』1枚を場かEXエリアに置いてよい。」は自分の場と自分のEXエリアのどちらにも『ナテラの大樹』を置かないことが選択できます。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f72b7e0075aeb89ff6ea2186e4330de818243a178ae2b55a3cc1f372a2fd683b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-112",
+            "fetched_at": "2026-09-24T22:03:12.647634Z"
+          },
+          "document_ref": "documents-2a6f5a09505c8291"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-113",
+      "documents": {
+        "documents-2e53b16c60f258ec": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-113",
+            "faces": [
+              {
+                "name": "粛清の一刀",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それを破壊する。自分の場の『粛清の英雄・メイシア』すべては{攻撃力}+Xする。Xは「自分の墓場のフォロワーの数」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ナダレ",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-113.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1042",
+                "date": "2023-10-20",
+                "question": "相手の場のフォロワーがアクト状態の『ベルエンジェル』1体のみの状況で、『粛清の英雄・メイシア』で相手の場の『ベルエンジェル』に攻撃しました。『粛清の英雄・メイシア』の【攻撃時】能力によって、自分の墓場の『粛清の一刀』をプレイし、攻撃目標に選択した『ベルエンジェル』を破壊した場合、この『粛清の英雄・メイシア』は攻撃目標を相手のリーダーに変更して相手のリーダーを攻撃することができますか？",
+                "answer": "いいえ。【攻撃時】能力などによって、攻撃目標として選択したフォロワーが場を離れた場合でも、攻撃目標を変更することはできません。そのため、『粛清の英雄・メイシア』の【攻撃時】能力でプレイした『粛清の一刀』によって、攻撃目標に選択した『ベルエンジェル』が破壊された場合でも、その『粛清の英雄・メイシア』は相手のリーダーを攻撃することができません。"
+              },
+              {
+                "id": "Q1041",
+                "date": "2023-10-20",
+                "question": "相手の場のフォロワーを選ぶことができない場合、『粛清の一刀』をプレイして自分の場の『粛清の英雄・メイシア』の攻撃力を+することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができないので、『粛清の一刀』をプレイすることができず、自分の場の『粛清の英雄・メイシア』の攻撃力を+することができません。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-108"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-109"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a562b38a44be7b1ec8f693cefbaae32d7384e8a7c01ae44fd0f38dd6ac35efd1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-113",
+            "fetched_at": "2026-09-24T22:03:15.353830Z"
+          },
+          "document_ref": "documents-2e53b16c60f258ec"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-114",
+      "documents": {
+        "documents-51f5b8f0655db185": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-114",
+            "faces": [
+              {
+                "name": "ギャル天使・アルディス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のリーダーは{体力}+3する。",
+                "sections": [],
+                "flavor": "割とガチめにサゲてね？サゲてんじゃんね！\nってことはウチの出番ってワケでー！",
+                "illustrator": "雨乃テツオ",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-114.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-115"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:27a2c30d08d0a5d93ed265d81a6bef7a587ff5ed373cccb51d18a49da0e23c12",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-114",
+            "fetched_at": "2026-09-24T22:03:17.908688Z"
+          },
+          "document_ref": "documents-51f5b8f0655db185"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-115",
+      "documents": {
+        "documents-555235b00cd0eb01": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-115",
+            "faces": [
+              {
+                "name": "ギャル天使・アルディス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "6",
+                "text": "{ラストワード}相手のリーダーすべてに3ダメージ。",
+                "sections": [],
+                "flavor": "サゲてる時はウチがいるっしょ！\nつまりバイブス上げちゃうってコトなんで、よろー！",
+                "illustrator": "雨乃テツオ",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-115.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-114"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c6658ad1d4a3780efebb53760c7cc5f50bae2461512bd50f2670c0e957e2974a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-115",
+            "fetched_at": "2026-09-24T22:03:22.004134Z"
+          },
+          "document_ref": "documents-555235b00cd0eb01"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-116",
+      "documents": {
+        "documents-5febb931761311bf": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-116",
+            "faces": [
+              {
+                "name": "メカニカルガンナー",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "機械",
+                  "傭兵"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "{ファンファーレ}『プロダクトマシーン』1枚か『リペアモード』1枚をEXエリアに置く。\n{ラストワード}手札の機械・カード1枚を捨てる：1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-116.png",
+                "trait_raw": "機械・傭兵"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:537b3b5d7493b38ae73d3b15f64cfa4839a2c2654cee5f627552fdd5b447eed4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-116",
+            "fetched_at": "2026-09-24T22:03:23.396756Z"
+          },
+          "document_ref": "documents-5febb931761311bf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP07-117",
+      "documents": {
+        "documents-430fb9653174e1c3": {
+          "region": "jp",
+          "record": {
+            "number": "BP07-117",
+            "faces": [
+              {
+                "name": "エクストリームキャロット",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "自然",
+                  "傭兵"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第7弾「森羅鋼鉄」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【突進】\n{ラストワード}{コスト1}場かEXエリアの『ナテラの大樹』1枚を消滅：自分のデッキから『エクストリームキャロット』1枚を探し、場に出す。自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "David Demaret",
+                "image": "/wordpress/wp-content/images/cardlist/BP07/bp07-117.png",
+                "trait_raw": "自然・傭兵"
+              }
+            ],
+            "release_date": "2023-10-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1045",
+                "date": "2023-10-20",
+                "question": "《ラストワード》能力のコストとして、自分の場の『ナテラの大樹』を消滅させた場合、『エクストリームキャロット』の能力を解決した後に、『ナテラの大樹』の「これが場を離れたとき、」の能力を解決しますか？",
+                "answer": "はい。『エクストリームキャロット』の能力を解決した後に、『ナテラの大樹』の能力を解決します。"
+              },
+              {
+                "id": "Q1044",
+                "date": "2023-10-20",
+                "question": "《ラストワード》能力によって、自分のデッキの『エクストリームキャロット』を見つけない選択をしても、「自分のリーダーは《体力》+1する。」が働きますか？",
+                "answer": "はい。働きます。"
+              }
+            ],
+            "products_ref": "products-0eef63b68124d284",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP07-T03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a1497414e39373479bc053388e8a2bfc77f48afef478a7475208dcd9a79cdf92",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP07-117",
+            "fetched_at": "2026-09-24T22:03:26.214001Z"
+          },
+          "document_ref": "documents-430fb9653174e1c3"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD08",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-3c460ab61399bc96": [
+        {
+          "ordinal": 0,
+          "name": "スターターデッキ「燃え尽きぬ炎」",
+          "date_raw": "2025-06-27",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=SD08",
+            "https://shadowverse-evolve.com/products/sd07_08/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=SD08",
+            "https://shadowverse-evolve.com/products/sd07_08/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/sd07_08/",
+              "expansion_code": "SD08"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:ca15a8d502330a3bf4f48dbd68aae680b911ecd82a3af184c6be97238689fbf0": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:879018fb6db2cb17415bd80706ce03f585604bbf28c9c6706373c92fbb009cf0",
+        "raw_bytes": 36496,
+        "first_receipt_id": "sha256:d7581f0d2192a7be6e5219ea12aa41d57b0cc771f934329007870dd1c1bc7fc2",
+        "descriptor_sha256": "sha256:226b81fcd5dfa06996db01b201b37807ebe36be6586e0351dd5f58639e6bdaa8",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:c5f9b028507333db23875ce8885f0a1c4a1d2c253e7802df7f0b4ac888964777"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-3c460ab61399bc96",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:88f53834bbeb6b6f7e6dae366dce63e60d74cd5c3a508bb6c3373ea9b931efa9"
+    }
+  }
+}

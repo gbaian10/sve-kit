@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP02",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-e9ac81ce1302ffe3": [
+        {
+          "ordinal": 0,
+          "name": "Booster Set #2 “Reign of Bahamut”",
+          "date_raw": "Sep. 29, 2023",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP02",
+            "https://en.shadowverse-evolve.com/products/bp02/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP02",
+            "https://en.shadowverse-evolve.com/products/bp02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp02/",
+              "expansion_code": "BP02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:3d39a72733e8915d4b81fc86b01e03069e91c7d973b375276ae2e9dbf5fee3ef": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:81f0093ca524cfcebb32ddf1d506991bad7c153295ce1c270544831830e049ec",
+        "raw_bytes": 35361,
+        "first_receipt_id": "sha256:c45bdb2389d784e9aecb31a93e7aa16f455f0d8a841547bb7d92c0a8135dee09",
+        "descriptor_sha256": "sha256:08cc3ae3607f7aaa8d94c6b0204d3bc167f63c1001ac39242bd90fd06cfb3642",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:aaa9336d79d859f6464575fa6449b98d971db73bde323fada411b9597bd96540"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e9ac81ce1302ffe3",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5ddb6d41c0359fa6538978e00b4d0749024bfa3850857d1a9be40b7af98c5361"
+    },
+    "src:v1:b42aa0bd4b102e352cfc1e47cf3aa00eb1f64645477dd227571a651862b49c06": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:556f342c278db4b8eafcf0c82accfe6337ea9c5668952b0dbed35dc5975f10d9",
+        "raw_bytes": 35386,
+        "first_receipt_id": "sha256:0ae0f26c01f0030faf7440140236daab68ed35731f166b27008c55246c9cf8b7",
+        "descriptor_sha256": "sha256:c90a0c85891bbf49c6c165f4f2278aac8993369855566234652df8d4f837ace0",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:fc34e711d7d8bb1a3b87b9756de455219a115881fbf773c0fb4081f29ac65fd5"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-e9ac81ce1302ffe3",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:0f0433e686aa8835115951a58aac7d31b5f097a81d9593285b9022a5020224e0"
+    }
+  }
+}

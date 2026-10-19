@@ -1,0 +1,184 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP09",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-92e2819c6cb0e920": [
+        {
+          "ordinal": 0,
+          "name": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+          "date_raw": "Apr. 11, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP09",
+            "https://en.shadowverse-evolve.com/products/bp09/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP09",
+            "https://en.shadowverse-evolve.com/products/bp09/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp09/",
+              "expansion_code": "BP09"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-1503af15cbb2c4f4": [
+        {
+          "stable_source_key": "Q1228",
+          "official_number": "Q1228",
+          "locator": "qa-block:0",
+          "published_on": "2025-04-04",
+          "date_raw": "Apr. 4, 2025"
+        },
+        {
+          "stable_source_key": "Q1227",
+          "official_number": "Q1227",
+          "locator": "qa-block:1",
+          "published_on": "2025-04-04",
+          "date_raw": "Apr. 4, 2025"
+        }
+      ],
+      "qa-9902f6a330eab0b6": [
+        {
+          "stable_source_key": "Q1217",
+          "official_number": "Q1217",
+          "locator": "qa-block:0",
+          "published_on": "2025-04-04",
+          "date_raw": "Apr. 4, 2025"
+        },
+        {
+          "stable_source_key": "Q1216",
+          "official_number": "Q1216",
+          "locator": "qa-block:1",
+          "published_on": "2025-04-04",
+          "date_raw": "Apr. 4, 2025"
+        },
+        {
+          "stable_source_key": "Q1215",
+          "official_number": "Q1215",
+          "locator": "qa-block:2",
+          "published_on": "2025-04-04",
+          "date_raw": "Apr. 4, 2025"
+        }
+      ]
+    },
+    "related": {
+      "related-30fb1350e942ef4c": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP09-065EN"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cards/?cardno=BP09-T04EN"
+        }
+      ],
+      "related-95668a379d885f9f": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP09-039EN"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cards/?cardno=BP09-046EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:011ddef84b9c997216a3000eba3055cfab722e593d406e33ae2c9134eb8352d3": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:4677c6a463053c9c1cc2145b009e69ba35595b62aace36b0c12e7a9e37ffe1b4",
+        "raw_bytes": 37981,
+        "first_receipt_id": "sha256:94d9bf4a55aa7f4d7f49c9475e112266a808a47ea0b9b9eae0a19c46a67aabaa",
+        "descriptor_sha256": "sha256:7f8daaab078ed7be12f4ec890ceb9906f710072a5f8449addcb6e2f89f1c9979",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:2c85403c959976d246edff6b1a0874f07cfb510d5b9c5f0f561b7366e48a0801"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-92e2819c6cb0e920",
+        "qa": "qa-1503af15cbb2c4f4",
+        "related": "related-30fb1350e942ef4c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:c2c1cbe97425d0610c12f1bbd7344e4e1350c03faeecc70e76158d89377c630a"
+    },
+    "src:v1:17d7e65eba8ed6a04289adb30502f47f7335083afa3cc15c0f1b4bc0c9f6bb2f": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:3dfd6ff7cdf46762862a294c2f107caa2caec11bef2b9f0208946156c4895825",
+        "raw_bytes": 37856,
+        "first_receipt_id": "sha256:f853a5f3d84151c6b19157f32c620d66486c13ce33e699a7650b73047799e8ac",
+        "descriptor_sha256": "sha256:7cdb6cd1bfaa647f173ecb9613b88588c413c1fab036fab91d7af9fc936c6ca7",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:3498aa7bb5191fe66dff8b015be649d1d0c72769fafdcc5322605d0a1d79673e"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-92e2819c6cb0e920",
+        "qa": "qa-9902f6a330eab0b6",
+        "related": "related-95668a379d885f9f",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:8159fa2f6765e2d6805350aece700dcc0fce1b2da914b738d1b076b438841bf7"
+    }
+  }
+}

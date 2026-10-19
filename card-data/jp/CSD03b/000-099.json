@@ -1,0 +1,1038 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD03b",
+  "range": "000-099",
+  "products": {
+    "products-6e89f22a0e4dab95": [
+      {
+        "name": "コラボスターターデッキ「黙示録の炎」",
+        "date": "2024-06-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=CSD03B",
+          "https://shadowverse-evolve.com/products/csd03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CSD03b-001",
+      "documents": {
+        "documents-d9a6fad0291af81a": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-001",
+            "faces": [
+              {
+                "name": "ドラゴニック・オーバーロード",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "LG",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【ツインドライブ】\n【覚醒】状態であり、自分の場に他のかげろう・フォロワーがいる限り、これは【疾走】を持つ。（【疾走】を持つフォロワーは、場に出たターンから攻撃できる）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "デザイン：伊藤彰　イラスト：TMS",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-001.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1466",
+                "date": "2024-05-02",
+                "question": "【覚醒】状態であり、自分の場に他のかげろう・フォロワーが1体いる状況で、【疾走】を持った『ドラゴニック・オーバーロード』が場に出たターンに攻撃し、攻撃目標として相手のリーダーを選択しました。その後のクイックタイミングにおいて『エクスキューション』などで自分の場の他のかげろう・フォロワーが破壊され、攻撃している『ドラゴニック・オーバーロード』が【疾走】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【疾走】を失っていても、その攻撃は行われます。"
+              },
+              {
+                "id": "Q1465",
+                "date": "2024-05-02",
+                "question": "『ドラゴニック・オーバーロード』の「【覚醒】状態であり、自分の場に他のかげろう・フォロワーがいる限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。【覚醒】状態かつ、自分の場に他のかげろう・フォロワーがいる限り、『ドラゴニック・オーバーロード』は【疾走】を持ちます。\n『ドラゴニック・オーバーロード』を場に出した後に条件2つを満たした場合、【疾走】を持ちます。\n『ドラゴニック・オーバーロード』を場に出した後にいずれかの条件を満たさなくなった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q1455",
+                "date": "2024-05-02",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03b-002"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c9c28a9171f59a0fdda18e5f20bb0608d9603cc721cdd4043d4d3f16e8b224b5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-001",
+            "fetched_at": "2026-09-24T21:12:11.684698Z"
+          },
+          "document_ref": "documents-d9a6fad0291af81a"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-002",
+      "documents": {
+        "documents-165c4bbf2412548c": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-002",
+            "faces": [
+              {
+                "name": "ドラゴニック・オーバーロード",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "LG",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【ツインドライブ】\n【覚醒】状態であり、自分の場に他のかげろう・フォロワーがいる限り、これは【疾走】を持つ。\n【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。【覚醒】状態なら、このターン、これは「これが交戦ダメージを与えたとき、これをスタンドする。この能力は1ターンに1回働く」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-002.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1467",
+                "date": "2024-05-02",
+                "question": "相手の場のフォロワーを選ぶことができない場合、【覚醒】状態であれば、このフォロワーの【進化時】能力をプレイし、そのターン、「これが交戦ダメージを与えたとき、これをスタンドする。この能力は1ターンに1回働く」を持つことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができず、【覚醒】状態であっても「これが交戦ダメージを与えたとき、これをスタンドする。この能力は1ターンに1回働く」を持つことができません。"
+              },
+              {
+                "id": "Q1466",
+                "date": "2024-05-02",
+                "question": "【覚醒】状態であり、自分の場に他のかげろう・フォロワーが1体いる状況で、【疾走】を持った『ドラゴニック・オーバーロード』が場に出たターンに攻撃し、攻撃目標として相手のリーダーを選択しました。その後のクイックタイミングにおいて『エクスキューション』などで自分の場の他のかげろう・フォロワーが破壊され、攻撃している『ドラゴニック・オーバーロード』が【疾走】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【疾走】を失っていても、その攻撃は行われます。"
+              },
+              {
+                "id": "Q1465",
+                "date": "2024-05-02",
+                "question": "『ドラゴニック・オーバーロード』の「【覚醒】状態であり、自分の場に他のかげろう・フォロワーがいる限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。【覚醒】状態かつ、自分の場に他のかげろう・フォロワーがいる限り、『ドラゴニック・オーバーロード』は【疾走】を持ちます。\n『ドラゴニック・オーバーロード』を場に出した後に条件2つを満たした場合、【疾走】を持ちます。\n『ドラゴニック・オーバーロード』を場に出した後にいずれかの条件を満たさなくなった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q1455",
+                "date": "2024-05-02",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03b-001"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7ec976536e833818e8ec364683adb11cf9d19475faa6c345eced98a858bb5574",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-002",
+            "fetched_at": "2026-09-24T21:12:14.339604Z"
+          },
+          "document_ref": "documents-165c4bbf2412548c"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-003",
+      "documents": {
+        "documents-8389830bf8baa3e0": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-003",
+            "faces": [
+              {
+                "name": "ドラゴンモンク ゴクウ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "LG",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n{起動}これを{アクト}墓場のかげろう・カード4枚を消滅：相手のリーダーすべてと相手の場のフォロワーすべてに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "齋藤直葵",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-003.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f76ae5725c52743bb0d8028016eeca142a1c5c53611fd94c6d6b4bb07791f3e9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-003",
+            "fetched_at": "2026-09-24T21:12:17.018739Z"
+          },
+          "document_ref": "documents-8389830bf8baa3e0"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-004",
+      "documents": {
+        "documents-10fa901ce23484ba": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-004",
+            "faces": [
+              {
+                "name": "ドラゴンナイト アリフ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは『勝利の化身 アリフ』に進化する。\n{ファンファーレ}自分の墓場に『鎧の化身 バー』と『槍の化身 ター』があるなら、これは『勝利の化身 アリフ』に進化する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "増田幹生",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-004.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1468",
+                "date": "2024-05-02",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03b-005"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1a166e7dec865ddabfefb0b6bfc33c1524f4a7db5a8b3b57717e78f938757368",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-004",
+            "fetched_at": "2026-09-24T21:12:19.843031Z"
+          },
+          "document_ref": "documents-10fa901ce23484ba"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-005",
+      "documents": {
+        "documents-02ee735eb0b80045": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-005",
+            "faces": [
+              {
+                "name": "勝利の化身 アリフ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【ツインドライブ】（【ツインドライブ】を持つフォロワーは、攻撃したとき、ドライブチェックを2回する）\n【進化時】自分のデッキの上3枚を見る。その中から、「『ドラゴンナイト アリフ』を除くかげろう・フォロワー」1枚をEXエリアに置いてよい。残りを好きな順にデッキの下に置く。このターン、それをプレイする際、コストを-3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "増田幹生",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-005.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1455",
+                "date": "2024-05-02",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03b-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:406cb00753cf33ec2b708730e0566a0c3279af80fc0e4b52abbba6d039a9137a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-005",
+            "fetched_at": "2026-09-24T21:12:22.415357Z"
+          },
+          "document_ref": "documents-02ee735eb0b80045"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-006",
+      "documents": {
+        "documents-838e300c7bd5eb71": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-006",
+            "faces": [
+              {
+                "name": "バーサーク・ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。それに3ダメージ。これは{攻撃力}+1/{体力}+1する。\n{ファンファーレ}手札のかげろう・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "コガラツ",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-006.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1460",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03b-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d3456e35a9fb4eb3547e05c4dab0dfc9c57637145275bc9271be83d9dd84b037",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-006",
+            "fetched_at": "2026-09-24T21:12:25.163273Z"
+          },
+          "document_ref": "documents-838e300c7bd5eb71"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-007",
+      "documents": {
+        "documents-fcc7357c43918caf": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-007",
+            "faces": [
+              {
+                "name": "ワイバーンガード バリィ",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【2】手札のかげろう・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。それのリーダーに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-007.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fa80f804ac0651128801e88f44d109d7bf91bfb9c46b723ac617c3d491ebad1d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-007",
+            "fetched_at": "2026-09-24T21:12:27.983661Z"
+          },
+          "document_ref": "documents-fcc7357c43918caf"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-008",
+      "documents": {
+        "documents-3a1e6514a2a5d62d": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-008",
+            "faces": [
+              {
+                "name": "ドラゴンナイト ネハーレン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。それに2ダメージ。これは{攻撃力}+1/{体力}+1する。\n【攻撃時】相手のリーダーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "辻野芳輝",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-008.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1464",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】や【攻撃時】能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】や【攻撃時】能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1463",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】と【攻撃時】能力は、任意の順番で解決することができますか？",
+                "answer": "はい。任意の順番で解決できます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03b-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:51e66419727ee8726e9674aef94c1ae230deeb7b587926864134e0bb47197ca2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-008",
+            "fetched_at": "2026-09-24T21:12:30.770875Z"
+          },
+          "document_ref": "documents-3a1e6514a2a5d62d"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-009",
+      "documents": {
+        "documents-f612a9ce97a752bf": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-009",
+            "faces": [
+              {
+                "name": "鎧の化身 バー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "【守護】（これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない）\n{ファンファーレ}1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Hirokorin",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-009.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0b171d3202d7b054f4b5fbf3ba88a181a55e31a49b566dfc1f26032b0fafbb37",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-009",
+            "fetched_at": "2026-09-24T21:12:33.578061Z"
+          },
+          "document_ref": "documents-f612a9ce97a752bf"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-010",
+      "documents": {
+        "documents-8daf09916ca6d343": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-010",
+            "faces": [
+              {
+                "name": "連撃のサザーランド",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分の場のヴァンガード・フォロワー1体を選ぶ。それは{攻撃力}+3する。\n{起動}これを{アクト}墓場に置く：相手の場のフォロワー1体を選ぶ。それに「これの攻撃力」と同じダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "百瀬寿",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-010.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1469",
+                "date": "2024-05-02",
+                "question": "このフォロワーの《起動》能力によって相手の場のフォロワーへ与えるダメージは、これが場にいる際の攻撃力と同じ値ですか？",
+                "answer": "はい。このフォロワーの攻撃力が5の状況で《起動》能力をプレイした場合、コストとしてこのフォロワーは墓場へ置かれますが、目標に選んだフォロワーに5ダメージを与えることができます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9a2a95eafc0faa02e4166763ff09668019f937651cce943b8e9cb0ae0a51918",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-010",
+            "fetched_at": "2026-09-24T21:12:36.120612Z"
+          },
+          "document_ref": "documents-8daf09916ca6d343"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-011",
+      "documents": {
+        "documents-63437fb32c207d3f": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-011",
+            "faces": [
+              {
+                "name": "従者 レアス",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{憑依}{コスト2}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキからかげろう・フォロワー1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "百瀬寿",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-011.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1460",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03b-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:05428a59af4e3105dc95b915d6922fb7d0560e15711b0b45027b414708dcd2db",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-011",
+            "fetched_at": "2026-09-24T21:12:38.864613Z"
+          },
+          "document_ref": "documents-63437fb32c207d3f"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-012",
+      "documents": {
+        "documents-d975daa0a7063eb3": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-012",
+            "faces": [
+              {
+                "name": "槍の化身 ター",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "1",
+                "text": "【突進】【指定攻撃】（【指定攻撃】を持つフォロワーは、スタンド状態のフォロワーを攻撃できる）\n{ファンファーレ}【覚醒】状態なら、相手のリーダーすべてに2ダメージ。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "松島一夫",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-012.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d564962caffea45908472cf4d71113939f51d831943716771c4213884ce677d3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-012",
+            "fetched_at": "2026-09-24T21:12:41.725669Z"
+          },
+          "document_ref": "documents-d975daa0a7063eb3"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-013",
+      "documents": {
+        "documents-65b7dec1cbed214a": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-013",
+            "faces": [
+              {
+                "name": "ガトリングクロー・ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{起動}これを{アクト}：1枚引く。この能力はこのターン、相手のフォロワーが場から墓場に置かれていたなら使える。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": null,
+                "illustrator": "山宗",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-013.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1420",
+                "date": "2024-06-24",
+                "question": "このターン中に、相手の場から墓場に置かれたフォロワーがトークン・フォロワーのみの場合、『ガトリングクロー・ドラゴン』の《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。\nトークン・フォロワーは場から墓場に置かれた直後に消去されます。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:78b67f7ad85cf988963395c9a8df3f15638c3a186a512c6a1854ffd34c94a29b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-013",
+            "fetched_at": "2026-09-24T21:12:44.628224Z"
+          },
+          "document_ref": "documents-65b7dec1cbed214a"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-014",
+      "documents": {
+        "documents-129c9634906196a8": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-014",
+            "faces": [
+              {
+                "name": "リザードソルジャー ガンルー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに1ダメージ。この能力は自分の場に他のかげろう・フォロワーがいるなら使える。\n{起動}{コスト2}：これをスタンドする。このターン、これは相手を攻撃できない。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "山宗",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-014.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1421",
+                "date": "2024-06-24",
+                "question": "このフォロワーがスタンド状態の場合、「《起動》《コスト2》：これをスタンドする。このターン、これは相手を攻撃できない。」という《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。\nその場合、「このターン、これは相手を攻撃できない。」によって、このターン、相手のリーダーと相手の場のフォロワーを攻撃することができなくなります。"
+              }
+            ],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:facfc8be2fa9a1650f31933006d51f4e621b68820a1878c69a430135eba34fcb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-014",
+            "fetched_at": "2026-09-24T21:12:47.549785Z"
+          },
+          "document_ref": "documents-129c9634906196a8"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-015",
+      "documents": {
+        "documents-02af32aaac011fba": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-015",
+            "faces": [
+              {
+                "name": "ドラゴンモンク ゲンジョウ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【守護】\n{ファンファーレ}自分のリーダーは{体力}+1する。【覚醒】状態なら、代わりに{体力}+2する。（自分のPP最大値が7以上なら、【覚醒】状態になる）",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "百瀬寿",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-015.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:82ebf5758d44c700fefaf3a6e2ba6c2d90d5d1e009e0095f8c2d71e202be824b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-015",
+            "fetched_at": "2026-09-24T21:12:50.312685Z"
+          },
+          "document_ref": "documents-02af32aaac011fba"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-016",
+      "documents": {
+        "documents-4aa2a5272c383718": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-016",
+            "faces": [
+              {
+                "name": "リザードランナー アンドゥー",
+                "card_class": "ドラゴン",
+                "card_type": "アミュレット",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "【スタートアミュレット】\n{起動}これを{アクト}墓場に置く：自分の場のヴァンガード・フォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。",
+                "sections": [
+                  "（※自分のデッキ構築が「カードファイト!! ヴァンガード」タイトル構築なら、自分のデッキから【スタートアミュレット】を持つカード1枚を場に出した状態でバトルを開始する）"
+                ],
+                "flavor": null,
+                "illustrator": "安達洋介",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-016.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b512d1a8eac217aff4565d83ac6882448ab448b71ef3d963237096d88109f971",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-016",
+            "fetched_at": "2026-09-24T21:12:53.053378Z"
+          },
+          "document_ref": "documents-4aa2a5272c383718"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-017",
+      "documents": {
+        "documents-359cb51b5192c29d": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03b-017",
+            "faces": [
+              {
+                "name": "ドライブポイント",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・エボルヴ",
+                "traits": [],
+                "rarity": "-",
+                "product": "コラボスターターデッキ「黙示録の炎」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": "これはエボルヴデッキに10枚まで入れることができる。",
+                "sections": [
+                  "（ドライブを持ったフォロワーは、【突進】【シングルドライブ】を持つ。【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/csd03b-017.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6e89f22a0e4dab95",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4f59a3395a9ebfcb426b19ee88d266b97e28140f894b9c8b3d53659f8495c5db",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03b-017",
+            "fetched_at": "2026-09-24T21:12:55.347557Z"
+          },
+          "document_ref": "documents-359cb51b5192c29d"
+        }
+      ]
+    }
+  ]
+}

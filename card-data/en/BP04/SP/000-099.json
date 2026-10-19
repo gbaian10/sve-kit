@@ -1,0 +1,106 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP04",
+  "range": "SP/000-099",
+  "products": {
+    "products-f9f8e75f7ab2fdd3": [
+      {
+        "name": "Booster Set #4 “Cosmic Mythos”",
+        "date": "Apr. 12, 2024",
+        "links": [
+          "/cards/searchresults?expansion=BP04",
+          "https://en.shadowverse-evolve.com/products/bp04/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP04-SP01EN",
+      "documents": {
+        "documents-e985268315fa69d5": {
+          "region": "en",
+          "record": {
+            "number": "BP04-SP01EN",
+            "faces": [
+              {
+                "name": "Lelouch, Righteous Emperor",
+                "info": {
+                  "Card Set": "Booster Set #4 “Cosmic Mythos”",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Special",
+                  "Trait": "Departed"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "6",
+                  "power": "5"
+                },
+                "text": "{icon_fanfare|[fanfare]} Necrocharge (10): Select up to 2 {icon_nightmare|[abysscraft]} followers that cost 2 play points or less in your cemetery and put them onto your field. Give each other follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1. NC (20): Give {icon_power|[attack]}+3/{icon_hp|[defense]}+3 instead.\nWhile this card is on your field, each {icon_nightmare|[abysscraft]} follower on your field has Rush.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Necrocharge (10): Select up to 2 {icon_nightmare|[abysscraft]} followers that cost 2 play points or less in your cemetery and put them onto your field. Give each other follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1. NC (20): Give {icon_power|[attack]}+3/{icon_hp|[defense]}+3 instead.\nWhile this card is on your field, each {icon_nightmare|[abysscraft]} follower on your field has Rush.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP04/BP04-SP01EN.png",
+                "trait_raw": "Departed",
+                "traits": [
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Apr. 12, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q625 (Apr. 12, 2024)",
+                "question": "If I put Spartoi Sergeant onto my field with this follower's Fanfare ability, can I play Spartoi Sergeant's Fanfare ability before giving it +1/+1?",
+                "answer": "No. You finish resolving this follower's Fanfare ability before playing Spartoi Sergeant's Fanfare ability."
+              },
+              {
+                "title": "Q591 (Apr. 12, 2024)",
+                "question": "When playing this follower's Fanfare ability, do I give +1/+1 (or +3/+3) to each follower on my field other than this follower, or other than the Abysscraft followers I just put from my cemetery onto my field?",
+                "answer": "You give the buff to each follower on your field other than this follower."
+              },
+              {
+                "title": "Q590 (Apr. 12, 2024)",
+                "question": "If I have exactly 10 cards in my cemetery when I play this follower's Fanfare ability, does Necrocharge (10) still trigger? If I have exactly 20, does Necrocharge (20) still trigger?",
+                "answer": "Yes, and yes. Necrocharge references the number of cards in your cemetery at the moment the effect with Necrocharge begins to be resolved."
+              },
+              {
+                "title": "Q589 (Apr. 12, 2024)",
+                "question": "If I steal an enemy Abysscraft follower when this follower is on my field, does this follower's ability give the stolen follower Rush?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q588 (Apr. 12, 2024)",
+                "question": "Does this follower give itself Rush?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-f9f8e75f7ab2fdd3",
+            "related_cards": [
+              {
+                "label": "{BP04-082EN|Demonlord Eachtar}",
+                "href": "/cards/?cardno=BP04-082EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:25de6623c83e10085b2deaed1da8e595cf68b835a4e9692f5ef077b1463de637",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP04-SP01EN",
+            "fetched_at": "2026-09-27T17:53:48.607104Z"
+          },
+          "document_ref": "documents-e985268315fa69d5"
+        }
+      ]
+    }
+  ]
+}

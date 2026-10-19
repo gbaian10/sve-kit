@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP05",
+  "range": "UT/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f6e1dffbac623dfd": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-cdec1ff2c9ef3573": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック第5弾「永劫なる絶傑」",
+          "date_raw": "2023-04-28",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP05",
+            "https://shadowverse-evolve.com/products/bp05/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP05",
+            "https://shadowverse-evolve.com/products/bp05/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp05/",
+              "expansion_code": "BP05"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:bd82901a53b35fda8de73fc6b68bb9da04528c6e9e094adb2220a780486f2107": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:ede1b0d32244b49c29507f8ac9e6386e4a8b41b8587731c7731ccc0fd25d838a",
+        "raw_bytes": 36607,
+        "first_receipt_id": "sha256:2acc8f01fa8a7264c03e210cea9f0fc66cab128abd4b6c341272615255673281",
+        "descriptor_sha256": "sha256:56d1618c30d5feeb0b2dd5eefc25800d531857fba2ef8047110ec0030c3defdb",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f6e1dffbac623dfd",
+            "result_hash": "sha256:82fa755438ccad9dccdde6bfe1271bd7975c79bb25493dfc84a85674fb1866c3"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-cdec1ff2c9ef3573",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:4f247efbb24e03d188a2c2e4922ccc55288fdec88a2706ae755f12df565a8228"
+    }
+  }
+}

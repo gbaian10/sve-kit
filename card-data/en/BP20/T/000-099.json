@@ -1,0 +1,1257 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP20",
+  "range": "T/000-099",
+  "products": {
+    "products-eb47d00ae38b6235": [
+      {
+        "name": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+        "date": "Sep. 25, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP19-BP20",
+          "https://en.shadowverse-evolve.com/products/bp1920/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP20-T01EN",
+      "documents": {
+        "documents-0b2871aa0ee3c699": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T01EN",
+            "faces": [
+              {
+                "name": "Crest: Krulle, Heir to Unkilling",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Heir / Hunter"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_cost00|[cost00]}: Select an enemy follower on the field and change its defense to 1. Activate only once per turn.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_cost00|[cost00]}: Select an enemy follower on the field and change its defense to 1. Activate only once per turn.",
+                "speech": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T01EN.png",
+                "trait_raw": "Omen / Heir / Hunter",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Hunter"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2447 (Sep. 10, 2026)",
+                "question": "If I have this crest and a Fairy Wisp in my EX area when I play Optimistic Beastmaster's activated ability, how much damage does it deal?",
+                "answer": "It would deal 1 damage."
+              },
+              {
+                "title": "Q2446 (Sep. 10, 2026)",
+                "question": "Do crests count as 0-cost cards for abilities that specify cards with different costs, such as Lucille, Keeper of Relics?",
+                "answer": "No. Crests do not have a cost."
+              },
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-002EN|Krulle, Heir to Unkilling}",
+                "href": "/cards/?cardno=BP20-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:65c95e98d4cd7585e5dab0b1aa72f1cc721a5c62a05c1fc092c7c5784e83929d",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T01EN",
+            "fetched_at": "2026-09-27T13:32:59.672935Z"
+          },
+          "document_ref": "documents-0b2871aa0ee3c699"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T02EN",
+      "documents": {
+        "documents-001afe059fdbe31b": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T02EN",
+            "faces": [
+              {
+                "name": "Crest: Octrice, Hollowness Manifest",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Thief"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your main phase or whenever you play or fuse a Loot card, place a reversal counter on this. Then, if this has at least 8 reversal counters, banish it, search your deck for a Thief card, reveal it, add it to your hand, then shuffle.",
+                "sections": [],
+                "raw_text": "At the start of your main phase or whenever you play or fuse a Loot card, place a reversal counter on this. Then, if this has at least 8 reversal counters, banish it, search your deck for a Thief card, reveal it, add it to your hand, then shuffle.",
+                "speech": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T02EN.png",
+                "trait_raw": "Omen / Thief",
+                "traits": [
+                  "Omen",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2449 (Sep. 10, 2026)",
+                "question": "If I Fuse multiple cards at once, such as with Sinciro, Heir to Usurpation's activated ability, do I still only place 1 reversal counter on this crest?",
+                "answer": "Yes, that's correct."
+              },
+              {
+                "title": "Q2448 (Sep. 10, 2026)",
+                "question": "Does this crest's ability trigger if I play a Loot card at Quick timing after my opponent declares an attack?",
+                "answer": "Yes. Additionally, since it was played at Quick timing, you would resolve the Loot card's ability and this crest's ability before resolving the opponent's attack."
+              },
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-019EN|Octrice, Hollowness Manifest}",
+                "href": "/cards/?cardno=BP20-019EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:69dcc4db9a2acefdc65b60ff21ac434ce4a88726902362d4e4316e850eccf422",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T02EN",
+            "fetched_at": "2026-09-27T13:33:05.377771Z"
+          },
+          "document_ref": "documents-001afe059fdbe31b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T03EN",
+      "documents": {
+        "documents-ad28b2f589111dcb": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T03EN",
+            "faces": [
+              {
+                "name": "White Psalm, New Revelation",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Amulet / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Idolatry"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this.\n{icon_lastword|[lastwords]} Summon a Black Psalm, New Revelation token. Give your leader {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this.\n{icon_lastword|[lastwords]} Summon a Black Psalm, New Revelation token. Give your leader {icon_hp|[defense]}+1.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost01|[cost01]} Black Psalm, New Revelation (Amulet - Omen/Idolatry) | {icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this. {icon_lastword|[lastwords]} Summon a White Psalm, New Revelation token. Deal 1 damage to each enemy leader.",
+                "illustrator": "Mew",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T03EN.png",
+                "trait_raw": "Omen / Idolatry",
+                "traits": [
+                  "Omen",
+                  "Idolatry"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-T04EN|Black Psalm, New Revelation}",
+                "href": "/cards/?cardno=BP20-T04EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9c7e636f138e174e49f8ce4f066aabcb4c587d8f15a76fbe372fb0f79487d939",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T03EN",
+            "fetched_at": "2026-09-27T13:33:11.270319Z"
+          },
+          "document_ref": "documents-ad28b2f589111dcb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T04EN",
+      "documents": {
+        "documents-fb511e8a931e34a0": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T04EN",
+            "faces": [
+              {
+                "name": "Black Psalm, New Revelation",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Amulet / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Idolatry"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this.\n{icon_lastword|[lastwords]} Summon a White Psalm, New Revelation token. Deal 1 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this.\n{icon_lastword|[lastwords]} Summon a White Psalm, New Revelation token. Deal 1 damage to each enemy leader.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost01|[cost01]} White Psalm, New Revelation (Amulet - Omen/Idolatry) | {icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this. {icon_lastword|[lastwords]} Summon a Black Psalm, New Revelation token. Give your leader {icon_hp|[defense]}+1.",
+                "illustrator": "Mew",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T04EN.png",
+                "trait_raw": "Omen / Idolatry",
+                "traits": [
+                  "Omen",
+                  "Idolatry"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-T03EN|White Psalm, New Revelation}",
+                "href": "/cards/?cardno=BP20-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cca5ba0feb35c9bc938e7c034dcb6a1eb5e92f9fddd742c79796918f61e42fea",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T04EN",
+            "fetched_at": "2026-09-27T13:33:14.182104Z"
+          },
+          "document_ref": "documents-fb511e8a931e34a0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T05EN",
+      "documents": {
+        "documents-6c19ff4f8a023014": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T05EN",
+            "faces": [
+              {
+                "name": "Crest: Galmieux, Ardor Manifest",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Wyrmkin"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_cost00|[cost00]}: Select an Omen follower on your field and deal it 1 damage. Activate only once per turn.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_cost00|[cost00]}: Select an Omen follower on your field and deal it 1 damage. Activate only once per turn.",
+                "speech": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T05EN.png",
+                "trait_raw": "Omen / Wyrmkin",
+                "traits": [
+                  "Omen",
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-056EN|Galmieux, Ardor Manifest}",
+                "href": "/cards/?cardno=BP20-056EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:62a68a798e586186fadb49e35f43b7a59d83dd4652f8170725a972a007176840",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T05EN",
+            "fetched_at": "2026-09-27T13:33:16.815418Z"
+          },
+          "document_ref": "documents-6c19ff4f8a023014"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T06EN",
+      "documents": {
+        "documents-b60abb9589dfac5a": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T06EN",
+            "faces": [
+              {
+                "name": "Crest: Sham-Nacha, Heir to Entwining",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Heir / Encroacher"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "If you would choose 1 or more options, choose any number instead.",
+                "sections": [],
+                "raw_text": "If you would choose 1 or more options, choose any number instead.",
+                "speech": null,
+                "illustrator": "ko-yahu",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T06EN.png",
+                "trait_raw": "Omen / Heir / Encroacher",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Encroacher"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2460 (Sep. 10, 2026)",
+                "question": "I have an Oceanus and a Sham-Nacha, Heir to Entwining on my field, and I evolve the latter, putting its crest into my EX area. When resolving Oceanus's triggered automatic ability, can I choose any number of options instead?",
+                "answer": "Yes. The crest would already be in your EX area by the time you need to resolve Oceanus's ability."
+              },
+              {
+                "title": "Q2453 (Sep. 10, 2026)",
+                "question": "If I have this crest in my EX area, can I use Hamelin's Fanfare ability to put a token of the same name into my EX area?",
+                "answer": "No. Each player can only have 1 copy of a crest with the same name in their EX area."
+              },
+              {
+                "title": "Q2452 (Sep. 10, 2026)",
+                "question": "When choosing multiple options, can I choose what order they are resolved in?",
+                "answer": "No. You must resolve them in the order listed on the card."
+              },
+              {
+                "title": "Q2451 (Sep. 10, 2026)",
+                "question": "When choosing \"any number instead,\" can I choose 0?",
+                "answer": "No. You must choose at least 1 option."
+              },
+              {
+                "title": "Q2450 (Sep. 10, 2026)",
+                "question": "When choosing \"any number instead,\" can I choose the same option more than once?",
+                "answer": "No, you can't."
+              },
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-077EN|Sham-Nacha, Heir to Entwining}",
+                "href": "/cards/?cardno=BP20-077EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d664971f8fa1ae2f02ac974a32a71423446a1cb842be71c06057721f60367d7c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T06EN",
+            "fetched_at": "2026-09-27T13:33:19.456812Z"
+          },
+          "document_ref": "documents-b60abb9589dfac5a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T07EN",
+      "documents": {
+        "documents-473fcad5ca4e4948": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T07EN",
+            "faces": [
+              {
+                "name": "Crest: Marwynn, Despair Manifest",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your end phase, select an enemy leader or enemy follower on the field and deal it 1 damage. If there are at least 3 crests in your EX area, deal 2 damage instead. If there are 5, deal 4 damage instead.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, select an enemy leader or enemy follower on the field and deal it 1 damage. If there are at least 3 crests in your EX area, deal 2 damage instead. If there are 5, deal 4 damage instead.",
+                "speech": null,
+                "illustrator": "KUNARU",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T07EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-093EN|Marwynn, Despair Manifest}",
+                "href": "/cards/?cardno=BP20-093EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c78199747928d1353378d3a195a70de53d6781c1e01ed910bf0b2405ab472c86",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T07EN",
+            "fetched_at": "2026-09-27T13:33:21.945259Z"
+          },
+          "document_ref": "documents-473fcad5ca4e4948"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T08EN",
+      "documents": {
+        "documents-cf34d281ed4a9a35": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T08EN",
+            "faces": [
+              {
+                "name": "Crest: Himeka, Heir to Repose",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Heir / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your end phase, select an enemy follower on the field and, if there are at least 3 crests in your EX area, give it {icon_power|[attack]}-2/{icon_hp|[defense]}-2. If there are 5, give {icon_power|[attack]}-4/{icon_hp|[defense]}-4 instead.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, select an enemy follower on the field and, if there are at least 3 crests in your EX area, give it {icon_power|[attack]}-2/{icon_hp|[defense]}-2. If there are 5, give {icon_power|[attack]}-4/{icon_hp|[defense]}-4 instead.",
+                "speech": null,
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T08EN.png",
+                "trait_raw": "Omen / Heir / Zealot",
+                "traits": [
+                  "Omen",
+                  "Heir",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2403 (Sep. 10, 2026)",
+                "question": "Can a follower have negative attack?",
+                "answer": "Yes. A follower's attack can be reduced to a negative number by effects. A follower with negative attack doesn't deal attack or combat damage."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-094EN|Himeka, Heir to Repose}",
+                "href": "/cards/?cardno=BP20-094EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e532f626dd125977d48d306116faa8abfe8743700fc7c63e76278852744bb9e6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T08EN",
+            "fetched_at": "2026-09-27T13:33:25.178852Z"
+          },
+          "document_ref": "documents-cf34d281ed4a9a35"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T09EN",
+      "documents": {
+        "documents-ff5783628469d91a": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T09EN",
+            "faces": [
+              {
+                "name": "Crest: Congregant of Repose",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your end phase, select an Omen follower on your field and, if there are at least 3 crests in your EX area, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, select an Omen follower on your field and, if there are at least 3 crests in your EX area, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Gen",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T09EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-097EN|Congregant of Repose}",
+                "href": "/cards/?cardno=BP20-097EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ee01dfcc3b39d10b96866d62a593954046cb3a13a9afda1c46ff71a563ffe881",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T09EN",
+            "fetched_at": "2026-09-27T13:33:28.051843Z"
+          },
+          "document_ref": "documents-ff5783628469d91a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T10EN",
+      "documents": {
+        "documents-bbe339be8e4e0149": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T10EN",
+            "faces": [
+              {
+                "name": "Crest: Supplicant of Repose",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your end phase, if there are at least 3 crests in your EX area, give your leader {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, if there are at least 3 crests in your EX area, give your leader {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Sudaka Ao",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T10EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-102EN|Supplicant of Repose}",
+                "href": "/cards/?cardno=BP20-102EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bde31ea09201ea6f53deec6e0919617000aa03df4fe9066c1f6cccefa49ff248",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T10EN",
+            "fetched_at": "2026-09-27T13:33:30.394135Z"
+          },
+          "document_ref": "documents-bbe339be8e4e0149"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T11EN",
+      "documents": {
+        "documents-310f0af67df986de": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T11EN",
+            "faces": [
+              {
+                "name": "Crest: Mjerrabaine, Great Manifest",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Crest / Token",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your end phase, if there's 1 card or less in your hand, draw a card.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, if there's 1 card or less in your hand, draw a card.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T11EN.png",
+                "trait_raw": "Omen",
+                "traits": [
+                  "Omen"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2454 (Sep. 10, 2026)",
+                "question": "If this crest is the only card in my EX area when I play Shiki Ichinose's On Evolve ability, does my leader take damage?",
+                "answer": "No. Crests do not have a cost."
+              },
+              {
+                "title": "Q2453 (Sep. 10, 2026)",
+                "question": "If I have this crest in my EX area, can I use Hamelin's Fanfare ability to put a token of the same name into my EX area?",
+                "answer": "No. Each player can only have 1 copy of a crest with the same name in their EX area."
+              },
+              {
+                "title": "Q2447 (Sep. 10, 2026)",
+                "question": "If I have this crest and a Fairy Wisp in my EX area when I play Optimistic Beastmaster's activated ability, how much damage does it deal?",
+                "answer": "It would deal 1 damage."
+              },
+              {
+                "title": "Q2446 (Sep. 10, 2026)",
+                "question": "Do crests count as 0-cost cards for abilities that specify cards with different costs, such as Lucille, Keeper of Relics?",
+                "answer": "No. Crests do not have a cost."
+              },
+              {
+                "title": "Q2445 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be selected by abilities that select cards?",
+                "answer": "Yes, they can."
+              },
+              {
+                "title": "Q2444 (Sep. 10, 2026)",
+                "question": "Can crests in the EX area be banished or transformed?",
+                "answer": "Yes, they can."
+              }
+            ],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": [
+              {
+                "label": "{BP20-112EN|Mjerrabaine, Great Manifest}",
+                "href": "/cards/?cardno=BP20-112EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:864c46c374177bec49c0ac1c522e26e86507297e26149fdcac63a4f107894e20",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T11EN",
+            "fetched_at": "2026-09-27T13:33:33.316408Z"
+          },
+          "document_ref": "documents-310f0af67df986de"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T12EN",
+      "documents": {
+        "documents-6d318b6313bc807c": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T12EN",
+            "faces": [
+              {
+                "name": "Annihilating Onslaught",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Spell / Token",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Hunter"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "If there are at least 6 Hunter cards in your cemetery, deal 6 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "If there are at least 6 Hunter cards in your cemetery, deal 6 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "Yuu Fujiki",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T12EN.png",
+                "trait_raw": "Omen / Hunter",
+                "traits": [
+                  "Omen",
+                  "Hunter"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:66943ab399c26379596de73953a74ce7e37294cf3e6cd2f1f2449a96cf836b4c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T12EN",
+            "fetched_at": "2026-09-27T13:33:39.308428Z"
+          },
+          "document_ref": "documents-6d318b6313bc807c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T13EN",
+      "documents": {
+        "documents-da29b5d3876256aa": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T13EN",
+            "faces": [
+              {
+                "name": "Melodious Monody",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Spell / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Idolatry"
+                },
+                "stats": {
+                  "cost": "0",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "As an additional cost to play this, you may engage any number of Idolatry cards on your field.",
+                "sections": [
+                  "Select an enemy follower on the field and deal it damage equal to 2 times the number of Idolatry cards you engaged as the additional cost to play this."
+                ],
+                "raw_text": "As an additional cost to play this, you may engage any number of Idolatry cards on your field.\n----------\nSelect an enemy follower on the field and deal it damage equal to 2 times the number of Idolatry cards you engaged as the additional cost to play this.",
+                "speech": null,
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T13EN.png",
+                "trait_raw": "Omen / Idolatry",
+                "traits": [
+                  "Omen",
+                  "Idolatry"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bbf8cddc9304d5860a37bfff707dc784aee7975c36b673517778178712acdca8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T13EN",
+            "fetched_at": "2026-09-27T13:33:47.849470Z"
+          },
+          "document_ref": "documents-da29b5d3876256aa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T14EN",
+      "documents": {
+        "documents-41498608e7d83877": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T14EN",
+            "faces": [
+              {
+                "name": "Ersatz Elimination",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Spell / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Mage"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select an Omen–Mage follower in your cemetery that costs 3 or less and summon it.",
+                "sections": [],
+                "raw_text": "Select an Omen–Mage follower in your cemetery that costs 3 or less and summon it.",
+                "speech": null,
+                "illustrator": "Tricky Agura",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T14EN.png",
+                "trait_raw": "Omen / Mage",
+                "traits": [
+                  "Omen",
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:51954426acb71f35a14b55563ac7d407cd0302e743b0fb6c14ad12b63ba5db53",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T14EN",
+            "fetched_at": "2026-09-27T13:33:50.651775Z"
+          },
+          "document_ref": "documents-41498608e7d83877"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T15EN",
+      "documents": {
+        "documents-e2fd1475e7c159f3": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T15EN",
+            "faces": [
+              {
+                "name": "Destruction in White",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Amulet / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Idolatry"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your main phase, give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "At the start of your main phase, give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Kazashino",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T15EN.png",
+                "trait_raw": "Omen / Idolatry",
+                "traits": [
+                  "Omen",
+                  "Idolatry"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b2f88f4f9f9b4502d7481ce9f79db845802efb9ebbe71680a152d31eda472644",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T15EN",
+            "fetched_at": "2026-09-27T13:33:53.619483Z"
+          },
+          "document_ref": "documents-e2fd1475e7c159f3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T16EN",
+      "documents": {
+        "documents-19f6a486818be7b0": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T16EN",
+            "faces": [
+              {
+                "name": "Destruction in Black",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Amulet / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Idolatry"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your main phase, deal 2 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "At the start of your main phase, deal 2 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "Kazashino",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T16EN.png",
+                "trait_raw": "Omen / Idolatry",
+                "traits": [
+                  "Omen",
+                  "Idolatry"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5be610c1c3fe248d0156c1b8816fddc8a8f397b07f73bf9b871b79e64056d64f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T16EN",
+            "fetched_at": "2026-09-27T13:33:56.341649Z"
+          },
+          "document_ref": "documents-19f6a486818be7b0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T17EN",
+      "documents": {
+        "documents-615207a7f91d6ea5": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T17EN",
+            "faces": [
+              {
+                "name": "Rulenye, Echoing Scream",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Follower / Token",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen / Necromancer"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "1",
+                  "power": "2"
+                },
+                "text": "Rush. Assail.",
+                "sections": [],
+                "raw_text": "Rush. Assail.",
+                "speech": null,
+                "illustrator": "Takanashi Nakago",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T17EN.png",
+                "trait_raw": "Omen / Necromancer",
+                "traits": [
+                  "Omen",
+                  "Necromancer"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e5fe0e404c2494b230f405e09d5009e04ab3ed7e3127799516cc15e78abd9345",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T17EN",
+            "fetched_at": "2026-09-27T13:34:01.734835Z"
+          },
+          "document_ref": "documents-615207a7f91d6ea5"
+        }
+      ]
+    },
+    {
+      "card_no": "BP20-T18EN",
+      "documents": {
+        "documents-5378026c2e7358dc": {
+          "region": "en",
+          "record": {
+            "number": "BP20-T18EN",
+            "faces": [
+              {
+                "name": "Ravenous Sweetness",
+                "info": {
+                  "Card Set": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
+                  "Card Type": "Spell / Token",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "-",
+                  "Trait": "Omen"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Deal 2 damage to each enemy leader. Give your leader {icon_hp|[defense]}+2. Draw 2 cards. Each opponent discards 2 random cards.",
+                "sections": [],
+                "raw_text": "Deal 2 damage to each enemy leader. Give your leader {icon_hp|[defense]}+2. Draw 2 cards. Each opponent discards 2 random cards.",
+                "speech": null,
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/BP20/BP20-T18EN.png",
+                "trait_raw": "Omen",
+                "traits": [
+                  "Omen"
+                ]
+              }
+            ],
+            "release_date": "Sep. 25, 2026",
+            "errata_url": "https://en.shadowverse-evolve.com/errata/ravenous-sweetness/",
+            "notes": [
+              "This card's printed name contains an erratum. See here for more details."
+            ],
+            "qa": [],
+            "products_ref": "products-eb47d00ae38b6235",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:94e8f70f71cd05080220d578efce2c0597f8b38a43eb4f1bf10e12efe69d8587",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP20-T18EN",
+            "fetched_at": "2026-09-27T13:34:09.860590Z"
+          },
+          "document_ref": "documents-5378026c2e7358dc"
+        }
+      ]
+    }
+  ]
+}

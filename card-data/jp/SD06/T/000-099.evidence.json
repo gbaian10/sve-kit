@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD06",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-84c32a8863c503e5": [
+        {
+          "ordinal": 0,
+          "name": "スターターデッキ第6弾「穢れし洗礼」",
+          "date_raw": "2022-04-28",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=SD06",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=SD06",
+            "https://shadowverse-evolve.com/products/sd01_06/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/sd01_06/",
+              "expansion_code": "SD06"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:044257f1a152b7bdce4fb57120177cdba55a8af8b0e100f0f977c72edea8cc00": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:d6dc2559f99fd7d7bbdc0f2abbfc7f35a3a12e9ea05ff1ac4301633c669fe3b1",
+        "raw_bytes": 36781,
+        "first_receipt_id": "sha256:4fbf5da256345f2f5b5a923111b4b3c6339e2ee2002595d60c4b8b547de6a226",
+        "descriptor_sha256": "sha256:136ec3509ed16e07fc7b992cbac3f5e26233fde476da1a78960f75695f9d3886",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:2aee1e128d55118ecc03985e79aa9ec77639dcd5ff8c7de6392c5ba2a0c0cdc9"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-84c32a8863c503e5",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:377afff7f735c254f7d6301fc5a5db3f7bea58ee5b371e5047ddcc5180a30d5c"
+    },
+    "src:v1:136baa01395995b7807c8e110b2b314c5c2093eb75e93047ab0539b3758780e3": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:76ab467ff422d21af5c848e9f8ddc7daa274b1f85d053ff4252aae94a45e2d90",
+        "raw_bytes": 36796,
+        "first_receipt_id": "sha256:c6dae5a1d4592b5d2c52e9615cd8ebf91440b450712ec5bde21888919dce9936",
+        "descriptor_sha256": "sha256:2a999710c4e866eddbf7e4c696da5a864bfdafa369b07e150b3f2742914d1674",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:6e94808d726e20dd43ac9e890f75ff992416c4e60438211fe674eaa5cbf765c1"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-84c32a8863c503e5",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:d08e11bae1a87f1ee43605d403014a120ba5228b2339403155291d957fc73882"
+    }
+  }
+}

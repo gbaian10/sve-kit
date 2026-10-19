@@ -1,0 +1,1866 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP06",
+  "range": "P/000-099",
+  "products": {
+    "products-32707fb1f5d81ffd": [
+      {
+        "name": "ブースターパック第6弾「絶対なる覇者」",
+        "date": "2023-06-16",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP06",
+          "https://shadowverse-evolve.com/products/bp06/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP06-P01",
+      "documents": {
+        "documents-5713d35cae7a6904": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P01",
+            "faces": [
+              {
+                "name": "原生林の族長",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}これが能力によって場に出ていたなら、これは進化する。",
+                "sections": [],
+                "flavor": "育つ種は新たな芽吹きと成り、次なる広がりを示さん。\n森の広がり止めんとする者共あらば、それを強者共が阻む。",
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p01.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q787",
+                "date": "2023-06-09",
+                "question": "『原生林の族長』が《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              },
+              {
+                "id": "Q786",
+                "date": "2023-06-09",
+                "question": "『フォレストエース・リマーガ』の《ファンファーレ》能力や【進化時】能力によって『原生林の族長』を場に出した場合、『原生林の族長』は《ファンファーレ》能力によって進化しますか？",
+                "answer": "はい。能力によって場に出ているので進化します。"
+              },
+              {
+                "id": "Q785",
+                "date": "2023-06-09",
+                "question": "『原生林の族長』が、相手のターン中に何らかの能力によって場に出た場合でも、《ファンファーレ》能力によって進化しますか？",
+                "answer": "はい。相手のターン中であっても、能力によって場に出ているので進化します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:be86b76a2a2d79454d027f968108288989da61c00a1f684acdbe5d3ba2fee032",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P01",
+            "fetched_at": "2026-09-24T22:30:11.565092Z"
+          },
+          "document_ref": "documents-5713d35cae7a6904"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P02",
+      "documents": {
+        "documents-f5058b858e51ccf7": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P02",
+            "faces": [
+              {
+                "name": "原生林の族長",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】自分の墓場の元のコスト2以下の狩人・フォロワー2枚まで選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": "阻まれることなくば、森は世界そのものとならん。\n強者に魅入られし者共は、新たな世界を始めん。",
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p02.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q789",
+                "date": "2023-06-09",
+                "question": "『原生林の族長（EVOLVE）』の【進化時】能力によって、自分の墓場から、『不殺の従者』と『アーチャー』を場に出した場合、『アーチャー』と同時に場に出た『不殺の従者』によって、『アーチャー』の「自分の場に他のフォロワーが出たとき、」という能力は誘発しますか？",
+                "answer": "はい。『アーチャー』の能力が誘発します。"
+              },
+              {
+                "id": "Q788",
+                "date": "2023-06-09",
+                "question": "『原生林の族長（EVOLVE）』の【進化時】能力によって、自分の墓場から、『アーチャー』2体を場に出した場合、『アーチャー』の「自分の場に他のフォロワーが出たとき、」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。『アーチャー』の能力がそれぞれ誘発します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5cd29c0b8b6e14677c4c84968f4915b6ad0dece4a0ea894ff24b76d751b77b91",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P02",
+            "fetched_at": "2026-09-24T22:30:14.069152Z"
+          },
+          "document_ref": "documents-f5058b858e51ccf7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P03",
+      "documents": {
+        "documents-fa416a188dd4e8fa": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P03",
+            "faces": [
+              {
+                "name": "スピリットシャイン",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "精霊"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分の場か自分のEXエリアの妖精・トークン1枚を選ぶ。それは{攻撃力}+2/{体力}+2する。【2】『フェアリー』2枚をEXエリアに置く。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p03.png",
+                "trait_raw": "精霊"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ed479d86ee0d93b1545d07bc80b5d9d71ca1eaedd60f634ff445f9a4660fcaa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P03",
+            "fetched_at": "2026-09-24T22:30:16.977833Z"
+          },
+          "document_ref": "documents-fa416a188dd4e8fa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P04",
+      "documents": {
+        "documents-26e35232f19c7f40": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P04",
+            "faces": [
+              {
+                "name": "クロスボウスナイパー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}手札の狩人・カード1枚を捨てる：相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに1ダメージ。1枚引く。",
+                "sections": [],
+                "flavor": "狩るも狩られるも、決めるのは俺じゃない。お前じゃない。\nこの風がそれを決める。祈れ。矢が届かんことをな。",
+                "illustrator": "イシバシヨウスケ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p04.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b7fc6020e74bf9f8cc05da8d8eeaa7c94be248b7d2b488cc1195cfd063bfbdb4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P04",
+            "fetched_at": "2026-09-24T22:30:19.538773Z"
+          },
+          "document_ref": "documents-26e35232f19c7f40"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P05",
+      "documents": {
+        "documents-0cb0f86fc93f6318": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P05",
+            "faces": [
+              {
+                "name": "クロスコンビネーション",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "場の狩人・フォロワー2体を{アクト}：相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "始まりに種ありて、無たる大地に芽吹かん。\n芽が大地に根付きし時、之を護ると誓いし者、出でる。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p05.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q797",
+                "date": "2023-06-09",
+                "question": "相手の場にこのスペルで選ぶことのできるフォロワーがいない場合、このスペルをプレイすることはできますか？",
+                "answer": "いいえ。目標を選ぶことができない場合、このスペルをプレイすることはできません。"
+              },
+              {
+                "id": "Q796",
+                "date": "2023-06-09",
+                "question": "自分の場に狩人・フォロワーがいない場合、相手の場のフォロワーを選んでこのスペルをプレイすることはできますか？",
+                "answer": "はい。相手の場のフォロワーを選ぶことができれば、プレイすることができます。その場合、任意の追加コストである「場の狩人・フォロワー2体を《アクト》」を支払うことなく、効果を適用しません。\nまた、自分の場に狩人・フォロワーが2体以上いる場合でも、相手の場のフォロワーを選ぶことさえできれば、任意の追加コストである「場の狩人・フォロワー2体を《アクト》」を支払うことなく、効果を適用しない選択をし、プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e883ab659cc090fb9b98d05a93ea9532eead47059cfa132e8fe9c0acf59f85df",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P05",
+            "fetched_at": "2026-09-24T22:30:22.349853Z"
+          },
+          "document_ref": "documents-0cb0f86fc93f6318"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P06",
+      "documents": {
+        "documents-cf380a398de7aeda": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P06",
+            "faces": [
+              {
+                "name": "ペインレスサムライ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "これは交戦ダメージを受けない。\n{起動}{コスト2}：これは{攻撃力}+1/{体力}+1して、【突進】を持つ。",
+                "sections": [],
+                "flavor": "敷かれよ、侍。女房の尻に。童の歌に笑われん。\nされど彼ら、鍛え続けし。待つは一つ、為すべきを為す時。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p06.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q801",
+                "date": "2023-06-09",
+                "question": "『ペインレスサムライ』は【必殺】の効果によって破壊されますか？",
+                "answer": "はい。破壊されます。"
+              },
+              {
+                "id": "Q800",
+                "date": "2023-06-09",
+                "question": "「交戦ダメージ」とは何ですか？",
+                "answer": "「交戦ダメージ」とは、フォロワーに対する攻撃によるフォロワー同士の与えるダメージです。\n自分の『ペインレスサムライ』が相手のフォロワーに攻撃した場合でも、相手のフォロワーが自分の『ペインレスサムライ』に攻撃した場合でも、そのお互いに与えあうダメージは交戦ダメージです。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:01802524da2b64bf69ccf582080182840218f5050c1032cf2bc60ad6f627d3cf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P06",
+            "fetched_at": "2026-09-24T22:30:24.968255Z"
+          },
+          "document_ref": "documents-cf380a398de7aeda"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P07",
+      "documents": {
+        "documents-6716769ed32df514": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P07",
+            "faces": [
+              {
+                "name": "貴族の舞踏",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "貴族",
+                  "ダンサー"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "6",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のデッキの上5枚を見る。その中から、元のコスト3以下の{ロイヤル}フォロワーを元のコストの合計が7以下になるように好きな枚数場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "鳩屋ハト",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p07.png",
+                "trait_raw": "貴族・ダンサー"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q804",
+                "date": "2023-06-09",
+                "question": "『貴族の舞踏』によって、『静かなる炎将・マーズ』と『マッハナイト』を場に出した場合、『静かなる炎将・マーズ』と同時に場に出た『マッハナイト』によって、『静かなる炎将・マーズ』の能力が誘発し、『マッハナイト』の攻撃力を+1しますか？",
+                "answer": "はい。『静かなる炎将・マーズ』の能力が誘発し、『マッハナイト』の攻撃力を+1します。"
+              },
+              {
+                "id": "Q803",
+                "date": "2023-06-09",
+                "question": "『貴族の舞踏』によって、《ファンファーレ》能力などの誘発する能力を持っているフォロワーが複数体場に出た場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\nまず『貴族の舞踏』の解決を行います。その後、《ファンファーレ》能力などの誘発条件を満たし待機状態となった能力の中からどれを先にプレイするか選択することができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e2832922667034ccd036d24fb82cfbf42ba9d892d81f89d70903a2094601327e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P07",
+            "fetched_at": "2026-09-24T22:30:27.587057Z"
+          },
+          "document_ref": "documents-6716769ed32df514"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P08",
+      "documents": {
+        "documents-60fc06755f3fdacf": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P08",
+            "faces": [
+              {
+                "name": "秘伝の抜刀者",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "金床と黒鉄足りぬほどの戦、戦、また戦。\n何時しか一つになりし大戦、刀を振るうは侍のみ。",
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p08.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:619980fe1f0f0204ef3ef2d931db2774dd937d0e6955c60590bf23164de75289",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P08",
+            "fetched_at": "2026-09-24T22:30:30.215347Z"
+          },
+          "document_ref": "documents-60fc06755f3fdacf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P09",
+      "documents": {
+        "documents-2ae5d7bc62da009a": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P09",
+            "faces": [
+              {
+                "name": "秘伝の抜刀者",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】手札1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに5ダメージ。",
+                "sections": [],
+                "flavor": "侍の血が流れに流れ、長き戦は遂に決せん。\n侍は、斬るもの全て斬り尽くさん。",
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p09.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cd5e712ba94f3320c03791ef6e2fe72569278936877099b9a9d506ee0fe80c16",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P09",
+            "fetched_at": "2026-09-24T22:30:32.807013Z"
+          },
+          "document_ref": "documents-2ae5d7bc62da009a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P10",
+      "documents": {
+        "documents-ae2c62af197b304d": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P10",
+            "faces": [
+              {
+                "name": "居合の真髄",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "場の{ロイヤル}フォロワー1体を{アクト}：相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": "時の将軍、病に臥せり。天下を目指す侍、ずらり。\n数多の刀が鞘走り、合戦の雨が降らん。",
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p10.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q806",
+                "date": "2023-06-09",
+                "question": "このスペルの能力にあるコスト「場の《ロイヤル》フォロワー1体を《アクト》」について、相手のフォロワーを《アクト》してコストを支払うことができますか？",
+                "answer": "いいえ。相手のフォロワーをアクトしてコストを支払うことができません。自分の場の《ロイヤル》フォロワー1体を《アクト》することでコストを支払うことができます。コストはその能力をプレイするプレイヤーが使用しているカードや、そのプレイヤーに属しているものからのみ支払うことができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae557b2003b65faed34fd3a65bf7aa911f7a3d719720daedd65fa76b9eaac4f7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P10",
+            "fetched_at": "2026-09-24T22:30:35.703368Z"
+          },
+          "document_ref": "documents-ae2c62af197b304d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P11",
+      "documents": {
+        "documents-aa9c8d9eaafd67d0": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P11",
+            "faces": [
+              {
+                "name": "鬼呼びの導師",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "陰陽師"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n自分の場に式神・フォロワーが出たとき、それは{攻撃力}+1して、【突進】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p11.png",
+                "trait_raw": "陰陽師"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7ef943866886255106be3283a783b0a66289c6c64c0d4c829eece39cadcb9c0a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P11",
+            "fetched_at": "2026-09-24T22:22:14.819322Z"
+          },
+          "document_ref": "documents-aa9c8d9eaafd67d0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P12",
+      "documents": {
+        "documents-407e436dca0ef438": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P12",
+            "faces": [
+              {
+                "name": "鬼呼びの導師",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "陰陽師"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "自分の場に式神・フォロワーが出たとき、それは{攻撃力}+1して、【突進】を持つ。\n【進化時】『形代』1体を出す。",
+                "sections": [
+                  "『形代』{ウィッチ}式神・フォロワー{コスト2}{攻撃力}2/{体力}2{ラストワード}1枚引く。自分の手札1枚を捨てる。"
+                ],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p12.png",
+                "trait_raw": "陰陽師"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P11"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3bcd6ff470018b823cc43703d89a19c41d2b5c51e97dfcfaa0ed0320b26deca7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P12",
+            "fetched_at": "2026-09-24T22:22:17.641584Z"
+          },
+          "document_ref": "documents-407e436dca0ef438"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P13",
+      "documents": {
+        "documents-e784e011ecabf55e": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P13",
+            "faces": [
+              {
+                "name": "クラシカルソーサラー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "陰陽師"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "4",
+                "text": "自分の場に式神・フォロワーが出たとき、それは【守護】を持つ。\n{ファンファーレ}自分の墓場の陰陽師・カードやスペルが7枚以上なら、『形代』1体を出す。自分のリーダーは{体力}+2する。",
+                "sections": [
+                  "『形代』{ウィッチ}式神・フォロワー{コスト2}{攻撃力}2/{体力}2{ラストワード}1枚引く。自分の手札1枚を捨てる。"
+                ],
+                "flavor": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p13.png",
+                "trait_raw": "陰陽師"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q815",
+                "date": "2023-06-09",
+                "question": "自分の墓場の陰陽師・カードやスペルが7枚以上ではない場合でも、《ファンファーレ》能力によって、自分のリーダーの体力を+2することはできますか？",
+                "answer": "いいえ。自分の墓場の陰陽師・カードやスペルが7枚以上ではない場合、それ以降の効果は働かず、自分のリーダーの体力を+2することができません。"
+              },
+              {
+                "id": "Q814",
+                "date": "2023-06-09",
+                "question": "タイプに陰陽師を持ち、スペルでもある『式神の使役』は、「自分の墓場の陰陽師・カードやスペルが7枚以上なら、」によって参照する際に、2枚分数えますか？",
+                "answer": "いいえ。『式神の使役』は1枚分として数えます。\n「自分の墓場の陰陽師・カードやスペルの枚数の合計」とは、自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの合計枚数です。"
+              },
+              {
+                "id": "Q813",
+                "date": "2023-06-09",
+                "question": "「自分の墓場の陰陽師・カードやスペルが7枚以上なら、」とはどのようなカードの枚数を参照しますか？",
+                "answer": "自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの枚数を参照します。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:14648d44b948b2d89cfe8b27a9c3ad3620dbeeaad17f3f1efaa0685964b08b6a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P13",
+            "fetched_at": "2026-09-24T22:22:20.276760Z"
+          },
+          "document_ref": "documents-e784e011ecabf55e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P14",
+      "documents": {
+        "documents-2feb1a15322f5acb": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P14",
+            "faces": [
+              {
+                "name": "大紅蓮",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "7",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、【スペルチェイン_10】コストを-2する。\n相手の場のフォロワーすべてに6ダメージ。相手のリーダーすべてに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p14.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bcc7da5b10641a42c4cd7371805ec6de72da8e74991cbce1ea5fb6ab5b9364f4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P14",
+            "fetched_at": "2026-09-24T22:22:23.000180Z"
+          },
+          "document_ref": "documents-2feb1a15322f5acb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P15",
+      "documents": {
+        "documents-d9f84d9a4f0040a6": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P15",
+            "faces": [
+              {
+                "name": "符術の門弟",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "陰陽師"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ラストワード}自分のデッキから『式神の使役』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "おそろしきは陰陽道。つたはれり、ゆゆしき呪い。\n占術として流行りし後に、戦で用いられ、げにおそろしき。",
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p15.png",
+                "trait_raw": "陰陽師"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q816",
+                "date": "2023-06-09",
+                "question": "《ラストワード》能力によって、自分のデッキに『式神の使役』がないことが分かっている場合でも、デッキの『式神の使役』を探し、見つけない選択をしてデッキをシャッフルする必要がありますか？",
+                "answer": "はい。その場合でもデッキをシャッフルする必要があります。誘発した《ラストワード》能力は解決する必要があり、自分のデッキに『式神の使役』がある場合でもない場合でも、デッキから『式神の使役』を探し、その後シャッフルします。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-042"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4b59171fd0622eeeb830c12df9eda047948dc01bcff69d142e9678d8404bd543",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P15",
+            "fetched_at": "2026-09-24T22:22:25.566339Z"
+          },
+          "document_ref": "documents-d9f84d9a4f0040a6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P16",
+      "documents": {
+        "documents-9169b5fa5cbcf390": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P16",
+            "faces": [
+              {
+                "name": "不死鳥の女帝",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "不死鳥"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "3",
+                "text": "【突進】\n{ラストワード}PP最大値を-1：これをアクト状態で場に出す。",
+                "sections": [],
+                "flavor": "不倶戴天の敵との競り合い、勝負の終わりは何処にある？\n答えを示すべく立ち上がりしは、緑の双剣、英俊豪傑。",
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p16.png",
+                "trait_raw": "不死鳥"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q823",
+                "date": "2023-06-09",
+                "question": "自分のPP最大値が6、残りPPが6の状態で、《ラストワード》能力のコストを支払い、PP最大値が-1されてPP最大値が5になりました。この場合、残りのPPはいくつになりますか？",
+                "answer": "残りのPPは5になります。\n残りのPPがPP最大値より上回る状況になる場合、残りのPPはPP最大値と同じ値になります。"
+              },
+              {
+                "id": "Q822",
+                "date": "2023-06-09",
+                "question": "自分のPP最大値が0の場合、《ラストワード》能力のコストである「PP最大値を-1」を支払うことができますか？",
+                "answer": "いいえ。自分のPP最大値が0の場合、そのコストを支払うことができません。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2d71c0cfae2804badd4f19cbbc866a7e38efe4e4581d45fe1b737b8681e44a1d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P16",
+            "fetched_at": "2026-09-24T22:22:28.559671Z"
+          },
+          "document_ref": "documents-9169b5fa5cbcf390"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P17",
+      "documents": {
+        "documents-0abb4b467efe6223": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P17",
+            "faces": [
+              {
+                "name": "氷上の竜戦士",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "竜族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【覚醒】状態なら、これは{攻撃力}+1して、【疾走】を持つ。",
+                "sections": [],
+                "flavor": "ノリにノリにノってくぜ？ノれないヤツは置いてくぜ？\nここは氷上、オレのホーム。ノれないやつはくたばりな。",
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p17.png",
+                "trait_raw": "ドラゴニュート・竜族"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:75bc66972a1cdfce996d6a2a9d9ed8d56cd14b4c767d972127204a89937197cb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P17",
+            "fetched_at": "2026-09-24T22:22:31.414026Z"
+          },
+          "document_ref": "documents-0abb4b467efe6223"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P18",
+      "documents": {
+        "documents-e5e976a753977d18": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P18",
+            "faces": [
+              {
+                "name": "氷上の竜戦士",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ドラゴニュート",
+                  "竜族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "これは【守護】を無視して攻撃できる。",
+                "sections": [],
+                "flavor": "おいおいどうしたガチガチか？氷の上は初めてか？\nだったら残念、さようなら。オレがクールに仕留めてやるよ。",
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p18.png",
+                "trait_raw": "ドラゴニュート・竜族"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b1a0ef7b68f331b2e3706093020986cba63e8697ea357702ba78fd142a3ea512",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P18",
+            "fetched_at": "2026-09-24T22:22:34.246876Z"
+          },
+          "document_ref": "documents-e5e976a753977d18"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P19",
+      "documents": {
+        "documents-92ea5de7a72b2166": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P19",
+            "faces": [
+              {
+                "name": "水鱗の猛者",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "4",
+                "text": "【守護】\n{ファンファーレ}【覚醒】状態なら、自分のデッキの上5枚を見る。その中から、元のコスト5以上の{ドラゴン}フォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "根岸千秋",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p19.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:78eaca22606c6dd6d2f8a25147211cbae2a4955b44550f47763d2cd4d78ce76e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P19",
+            "fetched_at": "2026-09-24T22:22:37.353886Z"
+          },
+          "document_ref": "documents-92ea5de7a72b2166"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P20",
+      "documents": {
+        "documents-3e1ed7ed5d1e7171": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P20",
+            "faces": [
+              {
+                "name": "ソードウィップドラグーン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}相手の場のフォロワー2体まで選ぶ。それに2ダメージを割りふる。【覚醒】状態なら、代わりに4ダメージ。",
+                "sections": [],
+                "flavor": "驚天動地の最中に現る三つの国。龍人対戦、ここに開幕！\n三国決して相容れず。互いに仇敵、不倶戴天。",
+                "illustrator": "BIYO",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p20.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3c1b0947c812c49e8d6cc0a078d2e77eb727869d2672120ae8c2ad0e5e655f34",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P20",
+            "fetched_at": "2026-09-24T22:22:39.875489Z"
+          },
+          "document_ref": "documents-3e1ed7ed5d1e7171"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P21",
+      "documents": {
+        "documents-0aea7b82cd3adaf3": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P21",
+            "faces": [
+              {
+                "name": "酒呑童子",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖怪"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【必殺】\n{ファンファーレ}墓場の妖怪・カード2枚を消滅：これは進化する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p21.png",
+                "trait_raw": "妖怪"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q839",
+                "date": "2023-06-09",
+                "question": "《進化》能力を使用し『大妖狐・ギンセツ』が進化したターンに『酒呑童子』をプレイしました。その場合、『酒呑童子』は《ファンファーレ》能力によって進化することはできますか？",
+                "answer": "はい。『酒呑童子』は進化することができます。\n進化前の『大妖狐・ギンセツ』が持っているような《進化》能力（進化することができる起動能力）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、このような制限はありません。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ec36bf70a68eab89de586431c1dbcc9d055afcd492a8ea11ee239b0e124ca8e2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P21",
+            "fetched_at": "2026-09-24T22:22:42.410858Z"
+          },
+          "document_ref": "documents-0aea7b82cd3adaf3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P22",
+      "documents": {
+        "documents-73b38933041b3ffb": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P22",
+            "faces": [
+              {
+                "name": "酒呑童子",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "妖怪"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "5",
+                "text": "【疾走】【必殺】\n【進化時】自分の場の他の妖怪・フォロワー1体を選ぶ。それは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p22.png",
+                "trait_raw": "妖怪"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7648ceedb90960e9a5e0e925ebdb4d8a6a44aef958cc16c65d140e5ac88d3b30",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P22",
+            "fetched_at": "2026-09-24T22:22:45.021754Z"
+          },
+          "document_ref": "documents-73b38933041b3ffb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P23",
+      "documents": {
+        "documents-79ec3edd24e7bc20": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P23",
+            "faces": [
+              {
+                "name": "ベアーベルセルク",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "獣"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "4",
+                "text": "【突進】\n【攻撃時】リーダーすべてに1ダメージ。\n{ラストワード}自分のリーダーは{体力}+4する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩オス",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p23.png",
+                "trait_raw": "獣"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:df27ac9a2d15eef2c127a12ba9a40f75a2e3f8ca03b3686b904095fbf7788523",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P23",
+            "fetched_at": "2026-09-24T22:22:48.006979Z"
+          },
+          "document_ref": "documents-79ec3edd24e7bc20"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P24",
+      "documents": {
+        "documents-4f2ab2a4b6363a52": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P24",
+            "faces": [
+              {
+                "name": "夢魔の新参",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界",
+                  "吸血鬼"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}{ラストワード}『フォレストバット』1体を出す。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p24.png",
+                "trait_raw": "魔界・吸血鬼"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ebb0dd31aae9d31cadd289de6a493fab66744c1ff9855441beec1cd994d323f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P24",
+            "fetched_at": "2026-09-24T22:22:50.774681Z"
+          },
+          "document_ref": "documents-4f2ab2a4b6363a52"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P25",
+      "documents": {
+        "documents-d0dddf62d568dc6c": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P25",
+            "faces": [
+              {
+                "name": "百鬼夜行",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "妖怪"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のデッキの上5枚を見る。その中から、妖怪・フォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p25.png",
+                "trait_raw": "妖怪"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5a283740fa232151e1916e179a5dd58304b81c4349726d42f46b25a1eb01c1d9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P25",
+            "fetched_at": "2026-09-24T22:22:53.607096Z"
+          },
+          "document_ref": "documents-d0dddf62d568dc6c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P26",
+      "documents": {
+        "documents-f8ffaf2d06997464": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P26",
+            "faces": [
+              {
+                "name": "神聖なる先導者",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "【守護】\n{起動}これを{アクト}墓場の【守護】を持つフォロワー3枚を消滅：相手の場のフォロワー1体を選ぶ。それを消滅させる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p26.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q854",
+                "date": "2023-06-09",
+                "question": "『ダイヤモンドマスター』のような《ファンファーレ》能力で【守護】を持つことができるフォロワーを、『神聖なる先導者』の《起動》能力のコストとして選択することはできますか？",
+                "answer": "いいえ。できません。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a46ba82e7ef7b169159227bc4d54ee7c25d98c5105c043bdd254f8973daf6968",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P26",
+            "fetched_at": "2026-09-24T22:22:56.151516Z"
+          },
+          "document_ref": "documents-f8ffaf2d06997464"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P27",
+      "documents": {
+        "documents-9184e5fb3e3fbde8": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P27",
+            "faces": [
+              {
+                "name": "聖なる槍使い",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}自分の場に他の【守護】を持つフォロワーがいるなら、相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p27.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P28"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f984306c40b39e47ee45c5257c72d8221a9d58946a40e257e27371cf2e958e51",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P27",
+            "fetched_at": "2026-09-24T22:22:58.924057Z"
+          },
+          "document_ref": "documents-9184e5fb3e3fbde8"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P28",
+      "documents": {
+        "documents-29892991173440e2": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P28",
+            "faces": [
+              {
+                "name": "聖なる槍使い",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "【守護】\n【進化時】相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "「救うことなど出来はしない。あの時からもう終わっていた。\n聖騎士団長としての結論を記す。――この世は悲劇だ」",
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p28.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-P27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bdeea82f3c8c46d6393eaaed0d09a9a4e686e441c0ff3b9bb1fbeeb131502cbd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P28",
+            "fetched_at": "2026-09-24T22:23:01.619489Z"
+          },
+          "document_ref": "documents-29892991173440e2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P29",
+      "documents": {
+        "documents-4ef3a9121fb17e68": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P29",
+            "faces": [
+              {
+                "name": "聖杖の司祭",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【守護】\n{ラストワード}自分のデッキから『聖杖の司祭』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "「悲劇の世界。神様に見捨てられた世界。\nだから僕が……神様の代わりにみんなを救うんだ！」",
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p29.png",
+                "trait_raw": "先導"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3c6310f1842ed7b628cdb4de98d94eed751e7c28470c519e873f40636fe42fe5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P29",
+            "fetched_at": "2026-09-24T22:23:04.569146Z"
+          },
+          "document_ref": "documents-4ef3a9121fb17e68"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P30",
+      "documents": {
+        "documents-85e234e0b536b42b": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P30",
+            "faces": [
+              {
+                "name": "コンセントレイト",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "0",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\nこれは自分のターン中、プレイできない。\n自分の残りPPが2以上なら、自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "オーベン道玄坂",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p30.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q863",
+                "date": "2023-06-09",
+                "question": "相手のターン中のクイックタイミングにおいて、『コンセントレイト』をプレイし解決した後、その効果によって手札に加えたカードがクイックを持つカードであった場合、続けてプレイすることはできますか？",
+                "answer": "はい。続けてプレイすることができます。"
+              },
+              {
+                "id": "Q862",
+                "date": "2023-06-09",
+                "question": "相手のターン中のクイックタイミングにおいて、『コンセントレイト』をプレイし解決した後に、続けて他のクイックを持つカードや能力をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。\n例えば、相手のターン中のクイックタイミングにおいて、自分の残りPPが2である場合、『コンセントレイト』をプレイし解決した後に、続けて『烈火の魔弾』をプレイすることができます。"
+              },
+              {
+                "id": "Q861",
+                "date": "2023-06-09",
+                "question": "相手のターン中のクイックタイミングにおいて、自分の残りPPが1以下の場合でも、『コンセントレイト』をプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、特に効果を得ることはなく、プレイされます。（1枚引くこともできません。）"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1720834132f13f036e360183935a2c3982f53acf3f5ffbdb0f23ecb4874516d8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P30",
+            "fetched_at": "2026-09-24T22:23:07.338335Z"
+          },
+          "document_ref": "documents-85e234e0b536b42b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P31",
+      "documents": {
+        "documents-a80a74608d949d3b": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P31",
+            "faces": [
+              {
+                "name": "頂きの闘技場",
+                "card_class": "ニュートラル",
+                "card_type": "アミュレット",
+                "traits": [
+                  "挑戦者"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "6",
+                "power": "-",
+                "hp": "-",
+                "text": "これがある限り、場のフォロワーすべては、フォロワーへ攻撃できるなら、リーダーを攻撃できない。\n{ファンファーレ}各プレイヤーは、自身のデッキの上3枚を見る。その中から、フォロワー1枚を場に出してよい。残りを墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Josh Hutchinson",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p31.png",
+                "trait_raw": "挑戦者"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q873",
+                "date": "2023-06-09",
+                "question": "『頂きの闘技場』によって、お互いの場に出たフォロワーがそれぞれ《ファンファーレ》能力を持っていた場合、その誘発したそれぞれの《ファンファーレ》能力は、どちら側から解決しますか？",
+                "answer": "『頂きの闘技場』の処理がすべて解決した後、誘発したそれぞれの《ファンファーレ》能力は、ターンプレイヤー側から解決します。\n\n例：『頂きの闘技場』の《ファンファーレ》能力によって、ターンプレイヤー側の場に『バハムート』（「バハムートA」とします）、非ターンプレイヤー側の場に『バハムート』（「バハムートB」とします）が出る場合\n\n①『頂きの闘技場』の《ファンファーレ》能力を解決します。ターンプレイヤー側の場に「バハムートA」が出ました。「バハムートA」の《ファンファーレ》能力が誘発し待機状態になります。非ターンプレイヤー側の場に「バハムートB」が出ました。「バハムートB」の《ファンファーレ》能力が誘発し待機状態になります。\n②ターンプレイヤー側で待機状態となっている「バハムートA」の《ファンファーレ》能力を解決します。「バハムートB」を破壊します。\n③非ターンプレイヤー側で待機状態となっている「バハムートB」の《ファンファーレ》能力を解決します。「バハムートA」を破壊します。（この時点で「バハムートB」は墓場にありますが、誘発した《ファンファーレ》能力は問題なく解決します。）"
+              },
+              {
+                "id": "Q872",
+                "date": "2023-06-09",
+                "question": "『頂きの闘技場』の《ファンファーレ》能力を解決する場合、各プレイヤーの処理順はどのようになりますか？",
+                "answer": "複数のプレイヤーが同時になんらかの選択を伴う処理を行うよう求められた場合、ターンプレイヤーから先に処理を行います。非ターンプレイヤーは、ターンプレイヤーの処理の内容を知ってから自分の選択を行います。\n（例えば『ゴッドコロシアムマンモス』の《ラストワード》能力によって『頂きの闘技場』が場に出た場合、現在のターンがどちらのターンか注意して処理を行いましょう。）\n以下、処理順です。\n\n①お互いに、自身のデッキの上3枚を見ます。\n②ターンプレイヤーは、その中からフォロワー1体を場に出してよいです。（場に出たカードは公開します。）\n③非ターンプレイヤーは、その中からフォロワー1体を場に出してよいです。（ターンプレイヤーの処理の内容を知ってから自身の選択を行うことができます。）\n④お互いに、残りを墓場に置きます。"
+              },
+              {
+                "id": "Q871",
+                "date": "2023-06-09",
+                "question": "『頂きの闘技場』の「これがある限り、場のフォロワーすべては、フォロワーへ攻撃できるなら、リーダーを攻撃できない。」という能力は、どのような能力ですか？",
+                "answer": "『頂きの闘技場』が場にある限り、「自分と相手を含むすべての場のフォロワーは、フォロワーを攻撃することができるなら、リーダーを攻撃することができない」という能力です。\nまた、「攻撃しない」という選択をとることができます。(お互いの場のフォロワーを攻撃することができるのであれば、攻撃しなければならない、という能力ではありません。）\n具体例は以下になります。\n\n①自分の場にフォロワー1体、相手の場にアクト状態のフォロワー1体\n自分の場のフォロワーは、相手の場のフォロワーを攻撃することができるので、相手のリーダーを攻撃することができません。\n②自分の場にフォロワー1体、相手の場にスタンド状態のフォロワー1体\n自分の場のフォロワーは、相手の場のフォロワーを攻撃することができないので、相手のリーダーを攻撃することができます。\n③自分の場に【指定攻撃】を持つフォロワー1体、相手の場にスタンド状態のフォロワー1体\n自分の場の【指定攻撃】を持つフォロワーは、相手の場のフォロワーを攻撃することができるので、相手のリーダーを攻撃することができません。\n④自分の場に【指定攻撃】を持つフォロワー1体、相手の場に【威圧】を持つアクト状態のフォロワー1体\n自分の場のフォロワーは、相手の場のフォロワーを攻撃することができないので、相手のリーダーを攻撃することができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aeafce9570dae9be435427a881eccd78e3cbdc1d2d6bb82431eb527acd3be9a2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P31",
+            "fetched_at": "2026-09-24T22:23:10.026251Z"
+          },
+          "document_ref": "documents-a80a74608d949d3b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP06-P32",
+      "documents": {
+        "documents-4861dcc2f9b0bfe4": {
+          "region": "jp",
+          "record": {
+            "number": "BP06-P32",
+            "faces": [
+              {
+                "name": "両雄激突",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "挑戦者"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第6弾「絶対なる覇者」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場のフォロワー1体と相手の場のフォロワー1体を選ぶ。前者に「後者の攻撃力」と同じダメージ。後者に「前者の攻撃力」と同じダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ezusuke",
+                "image": "/wordpress/wp-content/images/cardlist/BP06/bp06-p32.png",
+                "trait_raw": "挑戦者"
+              }
+            ],
+            "release_date": "2023-06-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q886",
+                "date": "2023-07-13",
+                "question": "攻撃力が0のフォロワーと『侮蔑の従者』を目標に『両雄激突』をプレイしたとき、『侮蔑の従者』の能力は誘発し、そのプレイヤーは1枚引くことができますか？",
+                "answer": "いいえ。1枚引くことができません。"
+              },
+              {
+                "id": "Q874",
+                "date": "2023-06-09",
+                "question": "『両雄激突』は、自分の場のフォロワーと相手の場のフォロワーを選ぶことができる場合にのみ、プレイすることができますか？",
+                "answer": "はい。その場合にのみ、プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-32707fb1f5d81ffd",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5ff000f24416caebacaad9741178dd9224c004340e354a363b662ec5ec2a7853",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP06-P32",
+            "fetched_at": "2026-09-24T22:23:12.842106Z"
+          },
+          "document_ref": "documents-4861dcc2f9b0bfe4"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD05",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-8f396e529508581a": [
+        {
+          "ordinal": 0,
+          "name": "Showdown Deck: Abysscraft",
+          "date_raw": "Mar. 20, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=SDD05",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SDD05",
+            "https://en.shadowverse-evolve.com/products/sdd/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sdd/",
+              "expansion_code": "SDD05"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-0696c01a83102621": [
+        {
+          "stable_source_key": "Q1562",
+          "official_number": "Q1562",
+          "locator": "qa-block:0",
+          "published_on": "2025-09-19",
+          "date_raw": "Sep. 19, 2025"
+        },
+        {
+          "stable_source_key": "Q1561",
+          "official_number": "Q1561",
+          "locator": "qa-block:1",
+          "published_on": "2025-09-19",
+          "date_raw": "Sep. 19, 2025"
+        },
+        {
+          "stable_source_key": "Q1560",
+          "official_number": "Q1560",
+          "locator": "qa-block:2",
+          "published_on": "2025-09-19",
+          "date_raw": "Sep. 19, 2025"
+        },
+        {
+          "stable_source_key": "Q1559",
+          "official_number": "Q1559",
+          "locator": "qa-block:3",
+          "published_on": "2025-09-19",
+          "date_raw": "Sep. 19, 2025"
+        }
+      ],
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:49a9255a1b87d76392f52c21314fc580e33c7fc6512137d5d38a6f829241e90d": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:e6f3f482e8384f08743a9bc0371936db62a7601796247f1d423f812def8437b5",
+        "raw_bytes": 35642,
+        "first_receipt_id": "sha256:0d1fc8558aa8127c79762dae0caa7763cf176b98723a56a23cd1fdc56263dc06",
+        "descriptor_sha256": "sha256:9a3e21c63e009e8f830e7a946d61f48298b82d25333ed0f269f78fa77caed97f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:2a30e37651424a3c4af484f2fd2b9533e1bf8f523869f8c8ca5f5a12973d52ec"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-8f396e529508581a",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:0e623882a96754222adbc14076e0094c36f8732008ac19d98c467ec016fb5df4"
+    },
+    "src:v1:f48905358a50a46ee5ec9956f69a51178d967c0aa1653cc6f5db135427f8e141": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:a004ae49000bf5c742f5dce3184cf18eee47a7f213b3f469f2191b6a3b729df3",
+        "raw_bytes": 38389,
+        "first_receipt_id": "sha256:b2a97f81f95771b0e149ac9c81a335f0c7f44c511600841ed38691ce834dc241",
+        "descriptor_sha256": "sha256:bb302a49d08813033fd23e300dbb9742a791045b33b2c00c39e741fb8a64871f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:42b1f32aa7326c89ee6840d80f0a2b6a93b3aa79fb63c7b396d82b7e844bef4a"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-8f396e529508581a",
+        "qa": "qa-0696c01a83102621",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:15de016324d1194fb4a5ec012841008515fb19f84163b8581b51ea7eafa810fe"
+    }
+  }
+}

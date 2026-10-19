@@ -1,0 +1,5179 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CP03",
+  "range": "P/000-099",
+  "products": {
+    "products-e42dad60ddd5e7ea": [
+      {
+        "name": "コラボパック「カードファイト!! ヴァンガード」",
+        "date": "2024-06-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=CP03",
+          "https://shadowverse-evolve.com/products/cp03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CP03-P01",
+      "documents": {
+        "documents-69117eae0bb782fb": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P01",
+            "faces": [
+              {
+                "name": "潮騒の水将 アルゴス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは『ネイブルゲイザー・ドラゴン』に進化する。\n自分の場のアクアフォース・フォロワーが攻撃したとき、このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、自分のリーダーは{体力}+2する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "竜徹",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p01.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1387",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃したとき、このフォロワーの能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "このフォロワーの能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1386",
+                "date": "2024-06-24",
+                "question": "このフォロワーが自分の場に2体以上いる状況で、自分の場のアクアフォース・フォロワーが攻撃した場合、「自分の場のアクアフォース・フォロワーが攻撃したとき、このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、自分のリーダーは《体力》+2する。1枚引く。」という能力は、それぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              },
+              {
+                "id": "Q1385",
+                "date": "2024-06-24",
+                "question": "「自分の場のアクアフォース・フォロワーが攻撃したとき、このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、自分のリーダーは《体力》+2する。1枚引く。」という能力は、攻撃したフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が3回目の場合のみ有効ですか。",
+                "answer": "はい。3回目の場合のみ有効です。\n攻撃したフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が2回目の場合や、4回目以降の場合は有効ではありません。"
+              },
+              {
+                "id": "Q1375",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃した際のクイックタイミングで、そのフォロワーが破壊されていた場合、その攻撃は「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができますか？",
+                "answer": "はい。攻撃フォロワーがクイックタイミングで破壊されていても攻撃した事象は発生しているため、「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7cb8c892fcc1b714675ed7f8745699dfbd3ec9a4ca90e7a2b9711b903cc4b5f6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P01",
+            "fetched_at": "2026-09-24T21:25:39.539584Z"
+          },
+          "document_ref": "documents-69117eae0bb782fb"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P02",
+      "documents": {
+        "documents-56a68700a28ddd3d": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P02",
+            "faces": [
+              {
+                "name": "ネイブルゲイザー・ドラゴン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "2",
+                "hp": "4",
+                "text": "【ツインドライブ】\n自分の場のアクアフォース・フォロワーが攻撃したとき、このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、自分のリーダーは{体力}+2する。1枚引く。\n【進化時】自分の手札の元のコスト1のアクアフォース・フォロワー1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "安達洋介",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p02.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1389",
+                "date": "2024-06-24",
+                "question": "【ツインドライブ】や「自分の場のアクアフォース・フォロワーが攻撃したとき、～」という能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】や「自分の場のアクアフォース・フォロワーが攻撃したとき、～」という能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1388",
+                "date": "2024-06-24",
+                "question": "【ツインドライブ】と「自分の場のアクアフォース・フォロワーが攻撃したとき、～」という能力は、任意の順番で解決することができますか？",
+                "answer": "はい。任意の順番で解決できます。"
+              },
+              {
+                "id": "Q1387",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃したとき、このフォロワーの能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "このフォロワーの能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1386",
+                "date": "2024-06-24",
+                "question": "このフォロワーが自分の場に2体以上いる状況で、自分の場のアクアフォース・フォロワーが攻撃した場合、「自分の場のアクアフォース・フォロワーが攻撃したとき、このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、自分のリーダーは《体力》+2する。1枚引く。」という能力は、それぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              },
+              {
+                "id": "Q1385",
+                "date": "2024-06-24",
+                "question": "「自分の場のアクアフォース・フォロワーが攻撃したとき、このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、自分のリーダーは《体力》+2する。1枚引く。」という能力は、攻撃したフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が3回目の場合のみ有効ですか。",
+                "answer": "はい。3回目の場合のみ有効です。\n攻撃したフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が2回目の場合や、4回目以降の場合は有効ではありません。"
+              },
+              {
+                "id": "Q1375",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃した際のクイックタイミングで、そのフォロワーが破壊されていた場合、その攻撃は「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができますか？",
+                "answer": "はい。攻撃フォロワーがクイックタイミングで破壊されていても攻撃した事象は発生しているため、「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:99806b0a7f2dc464944031a12e96f9b2803029aa45caf3fa04434bb3b0f8b533",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P02",
+            "fetched_at": "2026-09-24T21:25:42.019829Z"
+          },
+          "document_ref": "documents-56a68700a28ddd3d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P03",
+      "documents": {
+        "documents-15858531dd833899": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P03",
+            "faces": [
+              {
+                "name": "ハイドロハリケーン・ドラゴン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "8",
+                "power": "5",
+                "hp": "5",
+                "text": "これをプレイする際、このターン、自分の場のアクアフォース・フォロワーが3回以上攻撃していたなら、コストを-6する。\n【ツインドライブ】\n{ファンファーレ}相手の場のフォロワー2体まで選ぶ。それを破壊する。これによって破壊した相手の場のフォロワー1体につき、相手のリーダーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "増田幹生",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p03.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1380",
+                "date": "2024-06-24",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1375",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃した際のクイックタイミングで、そのフォロワーが破壊されていた場合、その攻撃は「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができますか？",
+                "answer": "はい。攻撃フォロワーがクイックタイミングで破壊されていても攻撃した事象は発生しているため、「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae69c9598f1e533acd1f1f3025f10d432bee8d60b3bebc90a5caf1fe004978e1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P03",
+            "fetched_at": "2026-09-24T21:14:15.964759Z"
+          },
+          "document_ref": "documents-15858531dd833899"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P04",
+      "documents": {
+        "documents-bde50e39ba710518": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P04",
+            "faces": [
+              {
+                "name": "波状螺旋の水将 ベネディクト",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキから元のコスト1のアクアフォース・フォロワーをカード名が異なるように2枚まで探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ひと和",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p04.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:53e34731d00bd7bd72cec4a1cfff658763cdc114967e44645df343638fc50a9e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P04",
+            "fetched_at": "2026-09-24T21:14:18.671827Z"
+          },
+          "document_ref": "documents-bde50e39ba710518"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P05",
+      "documents": {
+        "documents-bdf35abdd26279bd": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P05",
+            "faces": [
+              {
+                "name": "ティアーナイト ヴァレリア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1して、【疾走】と「【攻撃時】相手の場のフォロワー1体を選ぶ。このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、それに2ダメージ」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "百瀬寿",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p05.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1393",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】や【攻撃時】能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】や【攻撃時】能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1392",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】と【攻撃時】能力は、任意の順番で解決することができますか？",
+                "answer": "はい。任意の順番で解決できます。"
+              },
+              {
+                "id": "Q1391",
+                "date": "2024-06-24",
+                "question": "このフォロワーが【ドライブ獲得時】に持つ「【攻撃時】相手の場のフォロワー1体を選ぶ。このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、それに2ダメージ」という能力は、このフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が3回目の場合のみ有効ですか？",
+                "answer": "はい。3回目の場合のみ有効です。\nこのフォロワーが攻撃したとき、このフォロワーの攻撃を含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が2回目の場合や、4回目以降の場合は有効ではありません。"
+              },
+              {
+                "id": "Q1375",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃した際のクイックタイミングで、そのフォロワーが破壊されていた場合、その攻撃は「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができますか？",
+                "answer": "はい。攻撃フォロワーがクイックタイミングで破壊されていても攻撃した事象は発生しているため、「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:04215694e608c438a28d688e0395aebb65cbbb6b60721169e67b41e253b108a4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P05",
+            "fetched_at": "2026-09-24T21:14:21.349204Z"
+          },
+          "document_ref": "documents-bdf35abdd26279bd"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P06",
+      "documents": {
+        "documents-5de2088a8618711b": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P06",
+            "faces": [
+              {
+                "name": "ティアーナイト ラザロス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "これは「相手の能力ダメージ」を受けない。",
+                "sections": [],
+                "flavor": "蒼き騎士達は、長い時をかけ、兵を練り続けてきた。",
+                "illustrator": "由利真珠郎",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p06.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1394",
+                "date": "2024-06-24",
+                "question": "「能力ダメージ」とは何ですか？",
+                "answer": "「能力ダメージ」とは、フォロワー同士の交戦によってお互いに与える交戦ダメージや攻撃ダメージを除くあらゆるダメージです。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:41c790dc0a1936b1f355afce2a55578e9907e1d05be332bc6119b5b3353fc4c7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P06",
+            "fetched_at": "2026-09-24T21:14:24.111639Z"
+          },
+          "document_ref": "documents-5de2088a8618711b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P07",
+      "documents": {
+        "documents-b3c15e78cd091894": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P07",
+            "faces": [
+              {
+                "name": "発光信号のペンギン兵",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキの上1枚を見る。その中から、1枚を公開して手札に加えてよい。元のコスト1のアクアフォース・フォロワーを公開したなら、自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "三好載克",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p07.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:da6d895551ea825be3540298c98d3d5183c8d31113ccabc16cacca7ee9a48f6b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P07",
+            "fetched_at": "2026-09-24T21:14:26.760102Z"
+          },
+          "document_ref": "documents-b3c15e78cd091894"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P08",
+      "documents": {
+        "documents-ba14ebc96ec23b75": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P08",
+            "faces": [
+              {
+                "name": "翠玉の盾 パスカリス",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【2】手札のアクアフォース・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のデッキの上1枚を見る。その中から、元のコスト1のアクアフォース・フォロワー1枚を公開して手札に加えてよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "てるみぃ",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p08.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1395",
+                "date": "2024-06-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルの【2】をチョイスし、コストを支払うことで自分のデッキの上1枚を見て、元のコスト1のアクアフォース・フォロワー1枚を手札に加えることができますか？",
+                "answer": "いいえ。【2】をチョイスして相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、コストを支払うこともできないため、自分のデッキの上1枚を見て、元のコスト1のアクアフォース・フォロワーを手札に加えることができません。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:89a93c8f0ba47140938d3c6de76915c23fca303624111104e1021bd3209db330",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P08",
+            "fetched_at": "2026-09-24T21:14:29.464558Z"
+          },
+          "document_ref": "documents-ba14ebc96ec23b75"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P09",
+      "documents": {
+        "documents-33f8c71f541b3160": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P09",
+            "faces": [
+              {
+                "name": "バトルシップ・インテリジェンス",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【疾走】",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "石田バル",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p09.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b2e5d93872c2b462f980efc0885e1ebeffd0c0ec9f9ee58e5862090361fe012d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P09",
+            "fetched_at": "2026-09-24T21:14:32.433650Z"
+          },
+          "document_ref": "documents-33f8c71f541b3160"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P10",
+      "documents": {
+        "documents-9a7f5f004f026515": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P10",
+            "faces": [
+              {
+                "name": "輝石通信のラッコ兵",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "{ファンファーレ}1枚引く。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": "我が軍は優勢也。繰り返す、我が軍は優勢也！",
+                "illustrator": "田所哲平",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p10.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5738291303e4f31b6d854fae1bda4ac17aca515d8b149f430f776f1ca3f1f92d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P10",
+            "fetched_at": "2026-09-24T21:14:35.096621Z"
+          },
+          "document_ref": "documents-9a7f5f004f026515"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P11",
+      "documents": {
+        "documents-2cfd65116b1a7cd8": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P11",
+            "faces": [
+              {
+                "name": "高速遊撃のイルカ兵",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【突進】\n{ファンファーレ}相手の場のフォロワー1体まで選ぶ。それをアクトするかスタンドする。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "田所哲平",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p11.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d8ad898dc7e4672522e2b6db22c0fc4d53562860e1bb62b371efe2d8dee5e276",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P11",
+            "fetched_at": "2026-09-24T21:14:37.689032Z"
+          },
+          "document_ref": "documents-2cfd65116b1a7cd8"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P12",
+      "documents": {
+        "documents-fa51fb1db9a4151c": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P12",
+            "faces": [
+              {
+                "name": "虹色秘薬の医療士官",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【守護】\n自分のエンドフェイズが来たとき、このターン、自分の場のアクアフォース・フォロワーが3回以上攻撃していたなら、自分のリーダーは{体力}+2する。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "ひと和",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p12.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1375",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃した際のクイックタイミングで、そのフォロワーが破壊されていた場合、その攻撃は「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができますか？",
+                "answer": "はい。攻撃フォロワーがクイックタイミングで破壊されていても攻撃した事象は発生しているため、「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0376adde664663aed46ff21c5eee90d6857c84649b8a501aa99999b8207cbcf7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P12",
+            "fetched_at": "2026-09-24T21:14:40.402212Z"
+          },
+          "document_ref": "documents-fa51fb1db9a4151c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P13",
+      "documents": {
+        "documents-9fc7cbec01008c04": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P13",
+            "faces": [
+              {
+                "name": "コーラル・アサルト",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n自分の場のアクアフォース・フォロワーが攻撃したとき、相手の場のフォロワー1体を選ぶ。このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、それに2ダメージ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。それに2ダメージ。これは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ZB",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p13.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1398",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】や「自分の場のアクアフォース・フォロワーが攻撃したとき、～」という能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】や「自分の場のアクアフォース・フォロワーが攻撃したとき、～」という能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1397",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】と「自分の場のアクアフォース・フォロワーが攻撃したとき、～」という能力は、任意の順番で解決することができますか？",
+                "answer": "はい。任意の順番で解決できます。"
+              },
+              {
+                "id": "Q1396",
+                "date": "2024-06-24",
+                "question": "「自分の場のアクアフォース・フォロワーが攻撃したとき、相手の場のフォロワー1体を選ぶ。このターン、3回目の自分の場のアクアフォース・フォロワーの攻撃なら、それに2ダメージ。」という能力は、攻撃したフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が3回目の場合のみ有効ですか。",
+                "answer": "はい。3回目の場合のみ有効です。\n攻撃したフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が2回目の場合や、4回目以降の場合は有効ではありません。"
+              },
+              {
+                "id": "Q1375",
+                "date": "2024-06-24",
+                "question": "自分の場のアクアフォース・フォロワーが攻撃した際のクイックタイミングで、そのフォロワーが破壊されていた場合、その攻撃は「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができますか？",
+                "answer": "はい。攻撃フォロワーがクイックタイミングで破壊されていても攻撃した事象は発生しているため、「そのターン中に自分の場のアクアフォース・フォロワーが攻撃した回数」に数えることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:235b4193f1a313da998c997e89acbee0b0940e8f42f830dbd4f0444ac41ee518",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P13",
+            "fetched_at": "2026-09-24T21:14:43.054709Z"
+          },
+          "document_ref": "documents-9fc7cbec01008c04"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P14",
+      "documents": {
+        "documents-cff064bda4bfa155": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P14",
+            "faces": [
+              {
+                "name": "戦場の歌姫 シンシア",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "アクアフォース"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の墓場の元のコスト1のアクアフォース・フォロワー1枚を選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": "海域の天候は、バトルセイレーンが支配する。",
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p14.png",
+                "trait_raw": "ヴァンガード・アクアフォース"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:994341a8d15f089b9aaf1238684dbe6cd5ed41b18c6cc225052a495462ba5bf9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P14",
+            "fetched_at": "2026-09-24T21:14:45.672744Z"
+          },
+          "document_ref": "documents-cff064bda4bfa155"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P15",
+      "documents": {
+        "documents-1a608c4df6ce64d6": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P15",
+            "faces": [
+              {
+                "name": "ハイドッグブリーダー アカネ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "5",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは『ソウルセイバー・ドラゴン』に進化する。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、元のコスト2以下のロイヤルパラディン・フォロワー2枚まで場に出してよい。残りを好きな順にデッキの下に置く。それは【突進】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タイキ",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p15.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P16"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:37ac89da548c2cd8f43a7238e1bbc814e00ad39cedea01ae4a641960d824f213",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P15",
+            "fetched_at": "2026-09-24T21:14:48.240028Z"
+          },
+          "document_ref": "documents-1a608c4df6ce64d6"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P16",
+      "documents": {
+        "documents-1bab1f9ca91b36dc": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P16",
+            "faces": [
+              {
+                "name": "ソウルセイバー・ドラゴン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【ツインドライブ】\n【進化時】自分の場の他のロイヤルパラディン・フォロワー2体まで選ぶ。それは{攻撃力}+2/{体力}+2する。",
+                "sections": [],
+                "flavor": "ホーリー・チャージング・ロアーは、勇者の魂を揺さぶる。",
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p16.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1380",
+                "date": "2024-06-24",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P15"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:014a8a288dc38dae2a4636e044e0ad740e84084d85947321d151e911483f5316",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P16",
+            "fetched_at": "2026-09-24T21:14:50.769574Z"
+          },
+          "document_ref": "documents-1bab1f9ca91b36dc"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P17",
+      "documents": {
+        "documents-0cf159b9ca926f3e": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P17",
+            "faces": [
+              {
+                "name": "忠義の騎士 ベディヴィア",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "【守護】\n{ファンファーレ}自分の場に「カード名に『ブラスター』を含むフォロワー」がいるなら、これは{攻撃力}+1して、【疾走】を持つ。",
+                "sections": [],
+                "flavor": "影が道を分かった時も、彼の忠義は揺らがなかった。",
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p17.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P64"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL05"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL15"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL16"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL17"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL18"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL19"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-SL03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-SL04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3026c6d374012a158e8a46f020eaac1bdc25f7c68fe9bb60c341d1803a1f8044",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P17",
+            "fetched_at": "2026-09-24T21:14:53.611844Z"
+          },
+          "document_ref": "documents-0cf159b9ca926f3e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P18",
+      "documents": {
+        "documents-87735cd53d07a2c3": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P18",
+            "faces": [
+              {
+                "name": "友誼の騎士 ケイ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "4",
+                "hp": "3",
+                "text": "これをプレイする際、エボルヴデッキの表向きの「カード名に『ブラスター』を含むエボルヴフォロワー」1枚を裏向きにする：コストを-3する。\n【突進】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p18.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL17"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL19"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-SL04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:772c75c2cf0b414f3fd5c95a5200a99e686001fb30ca2fd99ceb3537e499601e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P18",
+            "fetched_at": "2026-09-24T21:14:56.574378Z"
+          },
+          "document_ref": "documents-87735cd53d07a2c3"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P19",
+      "documents": {
+        "documents-813ca80f516caf0d": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P19",
+            "faces": [
+              {
+                "name": "みるびる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}手札のロイヤルパラディン・カード1枚を公開：1枚引く。",
+                "sections": [],
+                "flavor": "愛らしいだけではない。 素晴らしい参謀なのだ。",
+                "illustrator": "デザイン：伊藤彰　／　イラスト：三好載克",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p19.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a64741336a40f827df907392c37a57d79d0954e818b0261ed583f27612e91864",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P19",
+            "fetched_at": "2026-09-24T21:14:59.171776Z"
+          },
+          "document_ref": "documents-813ca80f516caf0d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P20",
+      "documents": {
+        "documents-271939dc281cd922": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P20",
+            "faces": [
+              {
+                "name": "若年のペガサスナイト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、元のコスト2以下のロイヤルパラディン・フォロワー1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": "天空を駆ける若き騎士たち。未来は彼らと共にある。",
+                "illustrator": "Ryo-ta.H",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p20.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5ac1b93ee8f66853175c5236cab641738c172a278f2cdf6ae1f1a54ad86fe11b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P20",
+            "fetched_at": "2026-09-24T21:15:02.150682Z"
+          },
+          "document_ref": "documents-271939dc281cd922"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P21",
+      "documents": {
+        "documents-e5f1df4d76ec16a2": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P21",
+            "faces": [
+              {
+                "name": "といぷがる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}元のコスト4以上の自分の場のヴァンガード・フォロワー1体を選ぶ。それは{攻撃力}+2/{体力}+2して、【突進】【指定攻撃】を持つ。",
+                "sections": [],
+                "flavor": "僕が力を貸してあげるんだから、勝って当たり前さ。",
+                "illustrator": "森チャック",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p21.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:20ee5f712522f57d038875a3e8ebc72d02b0d796ce4dc004bb80477abd0ed6ce",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P21",
+            "fetched_at": "2026-09-24T21:15:04.584147Z"
+          },
+          "document_ref": "documents-e5f1df4d76ec16a2"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P22",
+      "documents": {
+        "documents-0008dbceb5935735": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P22",
+            "faces": [
+              {
+                "name": "ぽーんがる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキの上1枚を見る。その中から、1枚を公開して手札に加えてよい。ロイヤルパラディン・カードを公開したなら、相手のリーダーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "田所哲平",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p22.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:98704c44ca1d39f66478f237cb5645af3826215891b32378e020bbd6d8856555",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P22",
+            "fetched_at": "2026-09-24T21:15:07.389129Z"
+          },
+          "document_ref": "documents-0008dbceb5935735"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P23",
+      "documents": {
+        "documents-e7a79bc451348d7e": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P23",
+            "faces": [
+              {
+                "name": "未来の騎士 リュー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}手札のヴァンガード・カード1枚を捨てる：自分のデッキから『ブラスター・ブレード』1枚を探し、手札に加える。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "山崎太郎",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p23.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9af50c33c008ea6bb7693aaaf469b18e86bae8794884baea26fdca404ca07ee7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P23",
+            "fetched_at": "2026-09-24T21:15:10.034449Z"
+          },
+          "document_ref": "documents-e7a79bc451348d7e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P24",
+      "documents": {
+        "documents-3e79c7b7a4686df9": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P24",
+            "faces": [
+              {
+                "name": "まぁるがる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}手札のロイヤルパラディン・カード1枚を捨てる：1枚引く。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": "ハイドッグの武器は、牙だけじゃない。",
+                "illustrator": "田所哲平",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p24.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76a76d4e71e4c08a6da856449b64c5e3acf979c8428c161fcaaaac3134134e35",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P24",
+            "fetched_at": "2026-09-24T21:15:12.530258Z"
+          },
+          "document_ref": "documents-3e79c7b7a4686df9"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P25",
+      "documents": {
+        "documents-e9bf96aa0f5980e6": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P25",
+            "faces": [
+              {
+                "name": "ふろうがる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "自分のエンドフェイズが来たとき、これをスタンドする。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "松島一夫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p25.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0fbfc5649c9039f74e9f211f9d9d1339a1505293696befd0e79c417b5df9ce97",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P25",
+            "fetched_at": "2026-09-24T21:15:15.541256Z"
+          },
+          "document_ref": "documents-e9bf96aa0f5980e6"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P26",
+      "documents": {
+        "documents-4ef0b82b80084ffd": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P26",
+            "faces": [
+              {
+                "name": "世界樹の巫女 エレイン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のリーダーは{体力}+2する。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "武井宏之",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p26.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7601a63bd907f46721341d51fe0437827c7d49dae2a1262bc9b11fce6699a0f4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P26",
+            "fetched_at": "2026-09-24T21:15:18.319046Z"
+          },
+          "document_ref": "documents-4ef0b82b80084ffd"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P27",
+      "documents": {
+        "documents-219b83bc5f8864d1": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P27",
+            "faces": [
+              {
+                "name": "スターライト・ユニコーン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "自分の場のフォロワーがドライブチェックしたとき、それは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "聖域の一角獣は、汚れなき者だけに忠誠を捧げる。",
+                "illustrator": "碧風羽",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p27.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1404",
+                "date": "2024-06-24",
+                "question": "自分の場のフォロワーがドライブチェックを行い、トリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を実行する前に「自分の場のフォロワーがドライブチェックしたとき、～」という能力を解決することはできますか？",
+                "answer": "いいえ。ドライブチェックによる処理がすべて終了した後に「自分の場のフォロワーがドライブチェックしたとき、～」という能力を解決します。"
+              },
+              {
+                "id": "Q1403",
+                "date": "2024-06-24",
+                "question": "自分の場のフォロワーの【ツインドライブ】が働いた場合、このフォロワーの「自分の場のフォロワーがドライブチェックしたとき、」という能力は2回誘発しますか？",
+                "answer": "はい。2回誘発します。\n【ツインドライブ】が働いた場合、1回目のドライブチェックと2回目のドライブチェックの際にそれぞれ誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3b384d4d4a51b74c6ce01a0275d7969d8408684a874933d158d40731d74e8cb9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P27",
+            "fetched_at": "2026-09-24T21:15:20.889702Z"
+          },
+          "document_ref": "documents-219b83bc5f8864d1"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P28",
+      "documents": {
+        "documents-1a1480bffea9a89d": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P28",
+            "faces": [
+              {
+                "name": "真理の騎士 ゴードン",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに3ダメージ。【2】このターン、自分のリーダーが次に受けるダメージを-5する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p28.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2779",
+                "date": "2026-07-27",
+                "question": "【2】をチョイスしてこのカードを2回プレイした場合、このターン、自分のリーダーが次に受けるダメージを-10しますか？",
+                "answer": "はい。このターン、自分のリーダーが次に受けるダメージを-10します。\nまた、次にダメージ受ける際、1回目の『真理の騎士 ゴードン』の効果が適用されダメージを受けない状況となった場合、この時点でダメージ受ける行動がなくなるため、2回目の『真理の騎士 ゴードン』の効果は適用先がなく効果が継続します。"
+              },
+              {
+                "id": "Q1406",
+                "date": "2024-06-24",
+                "question": "自分のリーダーの体力が11以上でこのスペルの【2】の効果が有効な場合、相手の『アザゼル（EVOLVE）』の【進化時】能力で自分のリーダーの体力は10になりますか？",
+                "answer": "はい。ダメージではないため、自分のリーダーの体力は10になります。"
+              },
+              {
+                "id": "Q1405",
+                "date": "2024-06-24",
+                "question": "『ベルエンジェル』など攻撃力0以下のフォロワーによるリーダーへの攻撃に、『真理の騎士 ゴードン』のチョイスにおける【2】の能力は適用されますか？",
+                "answer": "いいえ。攻撃力0以下のフォロワーによるリーダーへの攻撃はダメージを与えないので、『真理の騎士 ゴードン』の【2】の能力は適用されません。また、ダメージを受けていないので『真理の騎士 ゴードン』の【2】の能力は継続します。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8d5669e0c3b89af39908ca0ef22b750a8d53c53f4c769c9b0162265fc8666b35",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P28",
+            "fetched_at": "2026-09-24T21:15:23.456333Z"
+          },
+          "document_ref": "documents-1a1480bffea9a89d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P29",
+      "documents": {
+        "documents-4d9829b7ea9cbd45": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P29",
+            "faces": [
+              {
+                "name": "クリムゾン・ビーストテイマー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは『バーキング・マンティコア』に進化する。\n【守護】\n{ファンファーレ}手札のペイルムーン・カード1枚を消滅：2枚引く。",
+                "sections": [],
+                "flavor": "―――緋炎の鞭が解き放つ。",
+                "illustrator": "碧風羽",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p29.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P30"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b5e29e212a11ff2e60e5df9c4030254c5a530e4eed99e4631007736983ed045b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P29",
+            "fetched_at": "2026-09-24T21:15:26.168562Z"
+          },
+          "document_ref": "documents-4d9829b7ea9cbd45"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P30",
+      "documents": {
+        "documents-ab947bd6279b9fad": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P30",
+            "faces": [
+              {
+                "name": "バーキング・マンティコア",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【守護】【ツインドライブ】\n【進化時】相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": "クリムゾン・ビーストテイマー 「さあ、芸をお見せ！」",
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p30.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1380",
+                "date": "2024-06-24",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P29"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c6a2fdc5fca4e2ed1b032194a4ba58d78d0c51efd82480036e56e7c227c3c0c5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P30",
+            "fetched_at": "2026-09-24T21:15:28.726876Z"
+          },
+          "document_ref": "documents-ab947bd6279b9fad"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P31",
+      "documents": {
+        "documents-9b25585ee9461749": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P31",
+            "faces": [
+              {
+                "name": "ミストレス・ハリケーン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}自分の消滅領域が5枚以上なら、これは【疾走】を持つ。\n{起動}これを{アクト}消滅：相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": "女王様の鞭音に、下僕達は喜んで馳せ参じる。",
+                "illustrator": "碧風羽",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p31.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1407",
+                "date": "2024-06-24",
+                "question": "自分の消滅領域が5枚の状況で、『銀の茨の竜使い ルキエ』をプレイし、《ファンファーレ》能力で『ミストレス・ハリケーン』1体と『ニトロジャグラー』1体を場に出しました。この場合、『ニトロジャグラー』の《ファンファーレ》能力を先に解決し、その後『ミストレス・ハリケーン』の《ファンファーレ》能力を解決することで、この『ミストレス・ハリケーン』は【疾走】を持ちますか？",
+                "answer": "はい。『ミストレス・ハリケーン』は【疾走】を持ちます。\n『銀の茨の竜使い ルキエ』の《ファンファーレ》能力で『ミストレス・ハリケーン』と『ニトロジャグラー』を同時に場に出した場合、それぞれ《ファンファーレ》能力が誘発し、待機状態になります。\n待機状態になっている自動能力は任意の順番で解決することができるため、『ニトロジャグラー』から解決し、「自分のデッキの上5枚を見る。その中から、2枚まで消滅させてよい。残りを好きな順にデッキの下に置く。」という能力によって、2枚を消滅させることで自分の消滅領域が5枚になります。その後『ミストレス・ハリケーン』の《ファンファーレ》能力を解決する時点で自分の消滅領域は5枚あるため、「自分の消滅領域が5枚以上なら、」の条件を満たし、【疾走】を持ちます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f3345d3ec6a77d726ec97316d9ab4b33944d6f916753adc783fe862419a27cd5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P31",
+            "fetched_at": "2026-09-24T21:15:31.812665Z"
+          },
+          "document_ref": "documents-9b25585ee9461749"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P32",
+      "documents": {
+        "documents-77bf5adeb2bd21df": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P32",
+            "faces": [
+              {
+                "name": "ゴールデン・ビーストテイマー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{ファンファーレ}自分の消滅領域の元のコスト2以下のペイルムーン・フォロワー1枚を選ぶ。それを場に出す。\n{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに「自分の場のペイルムーン・フォロワーの数」と同じダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "デザイン：伊藤彰　イラスト： 碧風羽",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p32.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1408",
+                "date": "2024-06-24",
+                "question": "『銀の茨の竜使い ルキエ』の《ファンファーレ》能力で『ゴールデン・ビーストテイマー』1体と『ニトロジャグラー』1体を場に出しました。『ニトロジャグラー』の《ファンファーレ》能力を先に解決し、元のコスト2以下のペイルムーン・フォロワーを消滅させた場合、そのフォロワーを『ゴールデン・ビーストテイマー』の《ファンファーレ》能力で場に出すことができますか？",
+                "answer": "はい。場に出すことができます。\n『銀の茨の竜使い ルキエ』の《ファンファーレ》能力で『ゴールデン・ビーストテイマー』と『ニトロジャグラー』を同時に場に出した場合、それぞれ《ファンファーレ》能力が誘発し、待機状態になります。\n待機状態になっている自動能力は任意の順番で解決することができるため、『ニトロジャグラー』から解決し、元のコスト2以下のペイルムーン・フォロワーを消滅させた場合、その後『ゴールデン・ビーストテイマー』の《ファンファーレ》能力を解決する時点で、そのフォロワーは消滅領域にあるため、《ファンファーレ》能力で場に出すことができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:088b82139553ab3b8173e5341efb77653f977651a123c25359e8cdf490e46bfd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P32",
+            "fetched_at": "2026-09-24T21:15:34.439810Z"
+          },
+          "document_ref": "documents-77bf5adeb2bd21df"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P33",
+      "documents": {
+        "documents-356e9df50d31aaa6": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P33",
+            "faces": [
+              {
+                "name": "星空の旋律使い ファラ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。これは{攻撃力}+1/{体力}+1する。自分の消滅領域が5枚以上なら、それを破壊する。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "碧風羽",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p33.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1411",
+                "date": "2024-06-24",
+                "question": "このフォロワーの【ドライブ獲得時】能力は、自分の消滅領域のカードが4枚以下の場合でも、このフォロワーの攻撃力と体力を+1することができますか？",
+                "answer": "はい。自分の消滅領域のカードが4枚以下の場合でも、このフォロワーの攻撃力と体力を+1することができます。"
+              },
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8cdc005a35053ee806ec716382b72bf8345ba8ddfc264a0ed51aff19fd8f0b77",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P33",
+            "fetched_at": "2026-09-24T21:15:36.942156Z"
+          },
+          "document_ref": "documents-356e9df50d31aaa6"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P34",
+      "documents": {
+        "documents-a62af04391d86921": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P34",
+            "faces": [
+              {
+                "name": "ターコイズ・ビーストテイマー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。それに2ダメージ。これは{攻撃力}+1/{体力}+1する。自分のデッキの上1枚を消滅させる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "碧風羽",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p34.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d492e4b558cda5e922b0b23b5b5feb44d118443be5844ca9ff7c2d2de4d33f0e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P34",
+            "fetched_at": "2026-09-24T21:15:39.603287Z"
+          },
+          "document_ref": "documents-a62af04391d86921"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P35",
+      "documents": {
+        "documents-a8e3ccd0af993f1e": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P35",
+            "faces": [
+              {
+                "name": "ダークメタル・バイコーン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{起動}これを{アクト}：1枚引く。自分の手札1枚を消滅させる。",
+                "sections": [],
+                "flavor": "ペイルムーンの公演がある国では、不審な死や事件が相次ぐという。",
+                "illustrator": "コガラツ",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p35.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4e7640accf777c50e0f890d57da7d929e7b296c8448cd1cbab1dc2845f23c3ed",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P35",
+            "fetched_at": "2026-09-24T21:15:42.444176Z"
+          },
+          "document_ref": "documents-a8e3ccd0af993f1e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P36",
+      "documents": {
+        "documents-02d6291aaec79f1b": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P36",
+            "faces": [
+              {
+                "name": "ニトロジャグラー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "4",
+                "hp": "4",
+                "text": "自分の消滅領域が5枚以上ある限り、これは【必殺】【守護】を持つ。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、2枚まで消滅させてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "デザイン：伊藤彰　イラスト：山崎太郎",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p36.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1412",
+                "date": "2024-06-24",
+                "question": "『ニトロジャグラー』の「自分の消滅領域が5枚以上ある限り、これは【必殺】【守護】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の消滅領域にカードが5枚以上ある限り、『ニトロジャグラー』は【必殺】と【守護】を持ちます。\n『ニトロジャグラー』を場に出した後に自分の消滅領域が4枚以下から5枚以上になった場合、【必殺】と【守護】を持ちます。\n『ニトロジャグラー』を場に出した後に自分の消滅領域が5枚以上から4枚以下になった場合、【必殺】と【守護】を失います。"
+              },
+              {
+                "id": "Q1408",
+                "date": "2024-06-24",
+                "question": "『銀の茨の竜使い ルキエ』の《ファンファーレ》能力で『ゴールデン・ビーストテイマー』1体と『ニトロジャグラー』1体を場に出しました。『ニトロジャグラー』の《ファンファーレ》能力を先に解決し、元のコスト2以下のペイルムーン・フォロワーを消滅させた場合、そのフォロワーを『ゴールデン・ビーストテイマー』の《ファンファーレ》能力で場に出すことができますか？",
+                "answer": "はい。場に出すことができます。\n『銀の茨の竜使い ルキエ』の《ファンファーレ》能力で『ゴールデン・ビーストテイマー』と『ニトロジャグラー』を同時に場に出した場合、それぞれ《ファンファーレ》能力が誘発し、待機状態になります。\n待機状態になっている自動能力は任意の順番で解決することができるため、『ニトロジャグラー』から解決し、元のコスト2以下のペイルムーン・フォロワーを消滅させた場合、その後『ゴールデン・ビーストテイマー』の《ファンファーレ》能力を解決する時点で、そのフォロワーは消滅領域にあるため、《ファンファーレ》能力で場に出すことができます。"
+              },
+              {
+                "id": "Q1407",
+                "date": "2024-06-24",
+                "question": "自分の消滅領域が5枚の状況で、『銀の茨の竜使い ルキエ』をプレイし、《ファンファーレ》能力で『ミストレス・ハリケーン』1体と『ニトロジャグラー』1体を場に出しました。この場合、『ニトロジャグラー』の《ファンファーレ》能力を先に解決し、その後『ミストレス・ハリケーン』の《ファンファーレ》能力を解決することで、この『ミストレス・ハリケーン』は【疾走】を持ちますか？",
+                "answer": "はい。『ミストレス・ハリケーン』は【疾走】を持ちます。\n『銀の茨の竜使い ルキエ』の《ファンファーレ》能力で『ミストレス・ハリケーン』と『ニトロジャグラー』を同時に場に出した場合、それぞれ《ファンファーレ》能力が誘発し、待機状態になります。\n待機状態になっている自動能力は任意の順番で解決することができるため、『ニトロジャグラー』から解決し、「自分のデッキの上5枚を見る。その中から、2枚まで消滅させてよい。残りを好きな順にデッキの下に置く。」という能力によって、2枚を消滅させることで自分の消滅領域が5枚になります。その後『ミストレス・ハリケーン』の《ファンファーレ》能力を解決する時点で自分の消滅領域は5枚あるため、「自分の消滅領域が5枚以上なら、」の条件を満たし、【疾走】を持ちます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5e3b9208e13083ebfc38ab28b53902154a0ff0d7064ed8b080e131414aa78865",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P36",
+            "fetched_at": "2026-09-24T21:15:45.269598Z"
+          },
+          "document_ref": "documents-02d6291aaec79f1b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P37",
+      "documents": {
+        "documents-1706d736d5f59c80": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P37",
+            "faces": [
+              {
+                "name": "ミッドナイト・バニー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキの上2枚を見る。その中から、1枚を手札に加える。1枚を消滅させる。",
+                "sections": [],
+                "flavor": "バニーちゃんが箱の中へ！ 果たしてどうなる！？",
+                "illustrator": "叶之明",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p37.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4fec064a5cdfcd73346c20525ee78e3cf60a5d989e1abc3a724529e48f4b8da0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P37",
+            "fetched_at": "2026-09-24T21:15:48.149155Z"
+          },
+          "document_ref": "documents-1706d736d5f59c80"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P38",
+      "documents": {
+        "documents-831a9e263946e1b9": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P38",
+            "faces": [
+              {
+                "name": "冥界の催眠術師",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【2】手札のペイルムーン・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のデッキの上3枚を消滅させる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "喜久屋めがね",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p38.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1413",
+                "date": "2024-06-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルの【2】をチョイスし、コストを支払うことで自分のデッキの上3枚を消滅させることができますか？",
+                "answer": "いいえ。【2】をチョイスして相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、コストを支払うこともできないため、自分のデッキの上3枚を消滅させることができません。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8d920bcbe451943dd342d1fa9a85882334044343547cc7237cf051cc7eb95c82",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P38",
+            "fetched_at": "2026-09-24T21:15:50.749028Z"
+          },
+          "document_ref": "documents-831a9e263946e1b9"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P39",
+      "documents": {
+        "documents-7938f820f8887a5e": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P39",
+            "faces": [
+              {
+                "name": "ダイナマイト・ジャグラー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキの上1枚を消滅させる。自分の消滅領域が5枚以上なら、相手のリーダーすべてに2ダメージ。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "齋藤直葵",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p39.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1414",
+                "date": "2024-06-24",
+                "question": "自分の消滅領域が4枚の状況で、このフォロワーの《ファンファーレ》能力をプレイした場合、相手のリーダーすべてに2ダメージ与えることができますか？",
+                "answer": "はい。このフォロワーの《ファンファーレ》能力によって、自分のデッキの上1枚を消滅させたことで自分の消滅領域が5枚になった場合でも相手のリーダーすべてに2ダメージ与えることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ce55f436b07568aa0ba27d2f8d3706cb363393cfc4f539d0ad2fc4953458343",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P39",
+            "fetched_at": "2026-09-24T21:15:53.345647Z"
+          },
+          "document_ref": "documents-7938f820f8887a5e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P40",
+      "documents": {
+        "documents-231cc2eff1279035": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P40",
+            "faces": [
+              {
+                "name": "レインボー・マジシャン",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}自分の消滅領域のペイルムーン・カード1枚を選ぶ。それを手札に加える。自分の手札1枚を消滅させる。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": null,
+                "illustrator": "由利真珠郎",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p40.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c40ba18eb3ae79eb86f1507d6c2c911e1e5eced10045618ba5e93db3dca08cdb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P40",
+            "fetched_at": "2026-09-24T21:15:56.178774Z"
+          },
+          "document_ref": "documents-231cc2eff1279035"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P41",
+      "documents": {
+        "documents-e1cb6b377703df4e": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P41",
+            "faces": [
+              {
+                "name": "スカイハイ・ウォーカー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "{起動}これを消滅：自分の場の他のペイルムーン・フォロワー1体を選ぶ。それをスタンドする。このターン、それは相手のリーダーを攻撃できない。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "ToMo",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p41.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0138d90584a1210d47f24e26f2ee37851436f19eb9750f996c28b8321f7995c3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P41",
+            "fetched_at": "2026-09-24T21:15:59.117173Z"
+          },
+          "document_ref": "documents-e1cb6b377703df4e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P42",
+      "documents": {
+        "documents-cffb75f194719d18": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P42",
+            "faces": [
+              {
+                "name": "お菓子なピエロ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のリーダーは{体力}+2する。自分のデッキの上1枚を消滅させる。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "山﨑奈苗",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p42.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9991ac50b520eaa3083f8405134830760dbdbb09d05c5a3dd0ea2ff739bdc542",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P42",
+            "fetched_at": "2026-09-24T21:16:01.677487Z"
+          },
+          "document_ref": "documents-cffb75f194719d18"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P43",
+      "documents": {
+        "documents-8b564886cd4b69e0": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P43",
+            "faces": [
+              {
+                "name": "スカル・ジャグラー",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "ペイルムーン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の墓場のペイルムーン・カード2枚を選ぶ。それを消滅させる。1枚引く。（2枚を選べなければプレイできない）",
+                "sections": [],
+                "flavor": "投げる骸骨？ ほら、そこらじゅうにあるじゃないか！",
+                "illustrator": "funbolt",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p43.png",
+                "trait_raw": "ヴァンガード・ペイルムーン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a5e9859e5c1c2fa76ab16c719a148afea67781058d1a2acd3e525a74da23eda9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P43",
+            "fetched_at": "2026-09-24T21:16:04.192640Z"
+          },
+          "document_ref": "documents-8b564886cd4b69e0"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P44",
+      "documents": {
+        "documents-87b4c10a08169d62": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P44",
+            "faces": [
+              {
+                "name": "ブレイジングコア・ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト3}：これは『ブレイジングフレア・ドラゴン』に進化する。\n{進化}{コスト1}墓場の『アイアンテイル・ドラゴン』1枚と『ガトリングクロー・ドラゴン』1枚を消滅：これは『ブレイジングフレア・ドラゴン』に進化する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "山宗",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p44.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P45"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P54"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P57"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f6ddad07a40953ed7a7e9701ebb029d31c6b5d9835e3547acd3169a8c6967936",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P44",
+            "fetched_at": "2026-09-24T21:16:07.205655Z"
+          },
+          "document_ref": "documents-87b4c10a08169d62"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P45",
+      "documents": {
+        "documents-da6ac0e5714fec28": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P45",
+            "faces": [
+              {
+                "name": "ブレイジングフレア・ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "【ツインドライブ】\n【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。それのリーダーに3ダメージ。",
+                "sections": [],
+                "flavor": "竜は不滅、吐息は無限、魔炎イモータル・フレイム！",
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p45.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1380",
+                "date": "2024-06-24",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P44"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b4cb5765da6f31fcbd02fe18af8e632d09056d91406211e86ec9c1227dfd862d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P45",
+            "fetched_at": "2026-09-24T21:16:10.005617Z"
+          },
+          "document_ref": "documents-da6ac0e5714fec28"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P46",
+      "documents": {
+        "documents-a9c8a97a76aab391": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P46",
+            "faces": [
+              {
+                "name": "ドラゴニック・エクスキューショナー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "5",
+                "hp": "5",
+                "text": "【突進】\n{ファンファーレ}手札のかげろう・カード1枚を捨てる：2枚引く。",
+                "sections": [],
+                "flavor": "焼き焦がせ処刑の刃、バーニング・エクスキューション！",
+                "illustrator": "トニーたけざき",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p46.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5ed49abeb6c0767ef5adc4527cf7d498b2037ad8c4fa5c15cb65b5c53da78664",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P46",
+            "fetched_at": "2026-09-24T21:16:12.798867Z"
+          },
+          "document_ref": "documents-a9c8a97a76aab391"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P47",
+      "documents": {
+        "documents-3d83de4872496a77": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P47",
+            "faces": [
+              {
+                "name": "ボーテックス・ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "5",
+                "power": "6",
+                "hp": "6",
+                "text": "{ファンファーレ}墓場のかげろう・カード3枚を消滅：相手の場のフォロワー2体まで選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": "戦場を渦巻く地獄の業火、バーニング・ヘル！",
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p47.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5add0656f8214420d2af7de87ba14d621d1940482fd605d3e84da679755b78a4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P47",
+            "fetched_at": "2026-09-24T21:16:15.466771Z"
+          },
+          "document_ref": "documents-3d83de4872496a77"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P48",
+      "documents": {
+        "documents-0cbd3ab65f35b986": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P48",
+            "faces": [
+              {
+                "name": "ベリコウスティドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー2体まで選ぶ。それに4ダメージを割りふる。これは{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分のリーダーは{体力}+2する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "デザイン：伊藤彰　イラスト：前河悠一",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p48.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d77e875a891273f5c179361075394f4895582ff08ad7d9c6f196e4abefe28dce",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P48",
+            "fetched_at": "2026-09-24T21:16:18.188125Z"
+          },
+          "document_ref": "documents-0cbd3ab65f35b986"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P49",
+      "documents": {
+        "documents-cc0134968f77a7a4": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P49",
+            "faces": [
+              {
+                "name": "臥竜 ストライケン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "5",
+                "hp": "5",
+                "text": "これは相手を攻撃できない。\n自分のドライブチェックによってトリガーしたとき、このターン、これは能力すべてを失う。",
+                "sections": [],
+                "flavor": "臥竜は静かに待ち続ける。天に舞い上がるその時を。",
+                "illustrator": "デザイン：伊藤彰　イラスト：コガラツ",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p49.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1419",
+                "date": "2024-06-24",
+                "question": "自分のドライブチェックによって、前の自分のターンから自分の場にいる『臥竜 ストライケン』を目標にスタンドトリガーの処理を実行した場合、その『臥竜 ストライケン』は相手のリーダーを攻撃することができますか？",
+                "answer": "いいえ。相手のリーダーを攻撃できません。\nスタンドトリガーの処理は、対象が「このターン、相手のリーダーを攻撃できない」という能力を持つわけではないため、『臥竜 ストライケン』の「自分のドライブチェックによってトリガーしたとき、このターン、これは能力すべてを失う。」という能力によって能力をすべて失った場合も、相手のリーダーを攻撃することができません。（アクト状態の相手の場のフォロワーには攻撃することができます。）"
+              },
+              {
+                "id": "Q1418",
+                "date": "2024-06-24",
+                "question": "「自分のドライブチェックによってトリガーしたとき、～」という能力は、どのようなタイミングで誘発する能力ですか？",
+                "answer": "自分のドライブチェックによって、トリガーの処理を実行したときに誘発する能力です。トリガーを持つカードをトリガー領域に置いたとしても、そのトリガーの処理を実行しなかった場合、誘発しません。\n【ツインドライブ】によってドライブチェックを2回行い、2回トリガーの処理を実行した場合、「自分のドライブチェックによってトリガーしたとき、～」という能力が2回誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:05d8e7902a415c467117eb3e0b8eb1c23b843ffc01882187614196c97aac3bf8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P49",
+            "fetched_at": "2026-09-24T21:16:20.887936Z"
+          },
+          "document_ref": "documents-cc0134968f77a7a4"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P50",
+      "documents": {
+        "documents-2bae492df6adf37f": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P50",
+            "faces": [
+              {
+                "name": "ドラゴンモンク ゴジョー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキの上2枚を見る。その中から、かげろう・フォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。【覚醒】状態なら、代わりにかげろう・フォロワー2枚まで公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p50.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a16f2971b83c345caf6ea3f9002d749d3de5e6a2a30259d4cfdf3f039599980d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P50",
+            "fetched_at": "2026-09-24T21:16:23.973258Z"
+          },
+          "document_ref": "documents-2bae492df6adf37f"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P51",
+      "documents": {
+        "documents-16696d8c96b96026": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P51",
+            "faces": [
+              {
+                "name": "魔竜戦鬼 ヤクシャ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】相手の場のアミュレット1つを選ぶ。それを破壊する。【2】相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "魔竜光臨！",
+                "illustrator": "NINNIN",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p51.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1586",
+                "date": "2024-08-20",
+                "question": "相手の場のアミュレットを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:608bbca5d8c62f3b00a67390e9e7fb01f2973638dae3bf46c79addb392d26771",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P51",
+            "fetched_at": "2026-09-24T21:16:26.777719Z"
+          },
+          "document_ref": "documents-16696d8c96b96026"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P52",
+      "documents": {
+        "documents-8fbb4063ce4ec5cd": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P52",
+            "faces": [
+              {
+                "name": "魔竜導師 キンナラ",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手の場のフォロワー1体を選ぶ。それに6ダメージ。",
+                "sections": [],
+                "flavor": "幾人もの聖騎士が、魔竜導師の呪いの前に力尽きた。",
+                "illustrator": "イトウヨウイチ",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p52.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:329857fb2f66d8875f79a6a9944a6097ed8493d6355ef5eb254b6ad967598db0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P52",
+            "fetched_at": "2026-09-24T21:16:29.694961Z"
+          },
+          "document_ref": "documents-8fbb4063ce4ec5cd"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P53",
+      "documents": {
+        "documents-5a7603dffe46e567": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P53",
+            "faces": [
+              {
+                "name": "槍の化身 ター",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "1",
+                "text": "【突進】【指定攻撃】\n{ファンファーレ}【覚醒】状態なら、相手のリーダーすべてに2ダメージ。（自分のPP最大値が7以上なら、【覚醒】状態になる）",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "松島一夫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p53.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:65b5e816937ca7283dd8a1580b060d7d542a2b50f9265fdfdc42ff83429349b7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P53",
+            "fetched_at": "2026-09-24T21:16:32.452798Z"
+          },
+          "document_ref": "documents-5a7603dffe46e567"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P54",
+      "documents": {
+        "documents-c0ba0638be0dd187": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P54",
+            "faces": [
+              {
+                "name": "ガトリングクロー・ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{起動}これを{アクト}：1枚引く。この能力はこのターン、相手のフォロワーが場から墓場に置かれていたなら使える。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": null,
+                "illustrator": "山宗",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p54.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1420",
+                "date": "2024-06-24",
+                "question": "このターン中に、相手の場から墓場に置かれたフォロワーがトークン・フォロワーのみの場合、『ガトリングクロー・ドラゴン』の《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。\nトークン・フォロワーは場から墓場に置かれた直後に消去されます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:56b800daf1aae4600f777c547f2233cff09c79389b38ce32d76e7ecec26e8a1b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P54",
+            "fetched_at": "2026-09-24T21:16:35.682158Z"
+          },
+          "document_ref": "documents-c0ba0638be0dd187"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P55",
+      "documents": {
+        "documents-66948edd99cafaf3": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P55",
+            "faces": [
+              {
+                "name": "リザードソルジャー ガンルー",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに1ダメージ。この能力は自分の場に他のかげろう・フォロワーがいるなら使える。\n{起動}{コスト2}：これをスタンドする。このターン、これは相手を攻撃できない。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "山宗",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p55.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1421",
+                "date": "2024-06-24",
+                "question": "このフォロワーがスタンド状態の場合、「《起動》《コスト2》：これをスタンドする。このターン、これは相手を攻撃できない。」という《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。\nその場合、「このターン、これは相手を攻撃できない。」によって、このターン、相手のリーダーと相手の場のフォロワーを攻撃することができなくなります。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aab0545b633984c5bf743a7d7949dc5d923c21df51f6d9471226d1c15700d333",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P55",
+            "fetched_at": "2026-09-24T21:16:38.213151Z"
+          },
+          "document_ref": "documents-66948edd99cafaf3"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P56",
+      "documents": {
+        "documents-74a699c3d8a35beb": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P56",
+            "faces": [
+              {
+                "name": "ドラゴンモンク ゲンジョウ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【守護】\n{ファンファーレ}自分のリーダーは{体力}+1する。【覚醒】状態なら、代わりに{体力}+2する。（自分のPP最大値が7以上なら、【覚醒】状態になる）",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "百瀬寿",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p56.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:752cd4cc13e25f2408e42869d841762cbaf60c887376deea6313789cd492847e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P56",
+            "fetched_at": "2026-09-24T21:16:42.996485Z"
+          },
+          "document_ref": "documents-74a699c3d8a35beb"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P57",
+      "documents": {
+        "documents-5fd82897bfcfcf7d": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P57",
+            "faces": [
+              {
+                "name": "アイアンテイル・ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "かげろう"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "{起動}これを{アクト}：これは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": "鋼鉄の尾の一打ちは、魔法の鎧すら打ち砕く。",
+                "illustrator": "山宗",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p57.png",
+                "trait_raw": "ヴァンガード・かげろう"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2dc0a8b742a7bdf4038e606c0cb25e0f5d376dc02513fd662ecb30c48fa0070a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P57",
+            "fetched_at": "2026-09-24T21:16:43.714485Z"
+          },
+          "document_ref": "documents-5fd82897bfcfcf7d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P58",
+      "documents": {
+        "documents-2ed11bff53d64b3c": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P58",
+            "faces": [
+              {
+                "name": "髑髏の魔女 ネヴァン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキの上3枚を見る。その中から、シャドウパラディン・カード1枚を公開して手札に加えてよい。残りを墓場に置く。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p58.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e14ab76e43ba764d1d919112d526a6e9742de0bc839b1444343e7ea2473e6f0f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P58",
+            "fetched_at": "2026-09-24T21:16:46.190249Z"
+          },
+          "document_ref": "documents-2ed11bff53d64b3c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P59",
+      "documents": {
+        "documents-86d0cc6d7fa76e96": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P59",
+            "faces": [
+              {
+                "name": "虚空の騎士 マスカレード",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "自分の墓場にシャドウパラディン・カードが10枚以上ある限り、これは【突進】【必殺】を持つ。\n【攻撃時】自分の墓場に「カード名に『ブラスター』を含むフォロワー」があるなら、相手のリーダーすべてに2ダメージ。\n{ファンファーレ}自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "余湖裕輝",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p59.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1429",
+                "date": "2024-06-24",
+                "question": "『虚空の騎士 マスカレード』の「自分の墓場にシャドウパラディン・カードが10枚以上ある限り、これは【突進】【必殺】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場にシャドウパラディン・カードが10枚以上ある限り、『虚空の騎士 マスカレード』は【突進】と【必殺】を持ちます。\n『虚空の騎士 マスカレード』を場に出した後に自分の墓場のシャドウパラディン・カードが9枚以下から10枚以上になった場合、【突進】と【必殺】を持ちます。\n『虚空の騎士 マスカレード』を場に出した後に自分の墓場のシャドウパラディン・カードが10枚以上から9枚以下になった場合、【突進】と【必殺】を失います。"
+              },
+              {
+                "id": "Q1401",
+                "date": "2024-06-24",
+                "question": "【攻撃時】能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【攻撃時】能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P64"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL05"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL15"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL16"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL18"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c5751e9a1c3a33029a2e88a0847303ad07287aa43af9f5e980dbb599699b5cfa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P59",
+            "fetched_at": "2026-09-24T21:16:49.079889Z"
+          },
+          "document_ref": "documents-86d0cc6d7fa76e96"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P60",
+      "documents": {
+        "documents-5de4db1b0dcc0e2d": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P60",
+            "faces": [
+              {
+                "name": "カースド・ランサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "自分のエンドフェイズが来たとき、相手の場のフォロワー1体を選ぶ。自分の墓場のシャドウパラディン・カードが10枚以上なら、それを破壊する。\n{ファンファーレ}自分のリーダーは{体力}+3する。自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "S.of.L",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p60.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9e45bf535c674bce432825d0cc1273324ae8815deb6ea0e0e398176cab2a4ebf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P60",
+            "fetched_at": "2026-09-24T21:16:52.096054Z"
+          },
+          "document_ref": "documents-5de4db1b0dcc0e2d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P61",
+      "documents": {
+        "documents-fad5d5eec3ac6fa2": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P61",
+            "faces": [
+              {
+                "name": "暗闇の騎士 ルゴス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。それに2ダメージ。これは{攻撃力}+1/{体力}+1する。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "増田幹生",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p61.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d2afd690454a554ccf4df31dfa78c6ceada37ec6f6f068abe6988abdb3218a8b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P61",
+            "fetched_at": "2026-09-24T21:16:54.841317Z"
+          },
+          "document_ref": "documents-fad5d5eec3ac6fa2"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P62",
+      "documents": {
+        "documents-8538adf8400568c0": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P62",
+            "faces": [
+              {
+                "name": "黒の賢者 カロン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": "現実を見なよ。やるべきことは現実の先にあるんだ。",
+                "illustrator": "KEI",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p62.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aa60415adffb289c2f32244b6d0dbdb0a7492a360d654e57a8f520a9890d8803",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P62",
+            "fetched_at": "2026-09-24T21:16:57.772373Z"
+          },
+          "document_ref": "documents-8538adf8400568c0"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P63",
+      "documents": {
+        "documents-4b5c53ce18680913": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P63",
+            "faces": [
+              {
+                "name": "ドランバウ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "自分の墓場にシャドウパラディン・カードが10枚以上ある限り、これは【必殺】を持つ。\n自分の場のフォロワーがドライブチェックしたとき、自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "森チャック",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p63.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1430",
+                "date": "2024-06-24",
+                "question": "『ドランバウ』の「自分の墓場にシャドウパラディン・カードが10枚以上ある限り、これは【必殺】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場にシャドウパラディン・カードが10枚以上ある限り、『ドランバウ』は【必殺】を持ちます。\n『ドランバウ』を場に出した後に自分の墓場のシャドウパラディン・カードが9枚以下から10枚以上になった場合、【必殺】を持ちます。\n『ドランバウ』を場に出した後に自分の墓場のシャドウパラディン・カードが10枚以上から9枚以下になった場合、【必殺】を失います。"
+              },
+              {
+                "id": "Q1404",
+                "date": "2024-06-24",
+                "question": "自分の場のフォロワーがドライブチェックを行い、トリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を実行する前に「自分の場のフォロワーがドライブチェックしたとき、～」という能力を解決することはできますか？",
+                "answer": "いいえ。ドライブチェックによる処理がすべて終了した後に「自分の場のフォロワーがドライブチェックしたとき、～」という能力を解決します。"
+              },
+              {
+                "id": "Q1403",
+                "date": "2024-06-24",
+                "question": "自分の場のフォロワーの【ツインドライブ】が働いた場合、このフォロワーの「自分の場のフォロワーがドライブチェックしたとき、」という能力は2回誘発しますか？",
+                "answer": "はい。2回誘発します。\n【ツインドライブ】が働いた場合、1回目のドライブチェックと2回目のドライブチェックの際にそれぞれ誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e339e3ab4e8e8a882c7aa6644de22dc5a93b6ca70cc4b4fd819c3cd168995c88",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P63",
+            "fetched_at": "2026-09-24T21:17:00.796441Z"
+          },
+          "document_ref": "documents-4b5c53ce18680913"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P64",
+      "documents": {
+        "documents-6aa6d8951d5b10c8": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P64",
+            "faces": [
+              {
+                "name": "ブラスター・ジャベリン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "【突進】\n{ファンファーレ}手札のヴァンガード・カード1枚を捨てる：自分のデッキから『ファントム・ブラスター・ドラゴン』か『ブラスター・ダーク』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "デザイン：伊藤彰 イラスト：竜徹",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p64.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL16"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ac650afafffaa9eba8f5423d82a46ee7498ec697d5114d7245cb31f695f8fa8f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P64",
+            "fetched_at": "2026-09-24T21:17:03.365411Z"
+          },
+          "document_ref": "documents-6aa6d8951d5b10c8"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P65",
+      "documents": {
+        "documents-dc3b43f85216ab53": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P65",
+            "faces": [
+              {
+                "name": "暗黒の盾 マクリール",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【2】手札のシャドウパラディン・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "増田幹生",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p65.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1431",
+                "date": "2024-06-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルの【2】をチョイスし、コストを支払うことで自分のデッキの上1枚を墓場に置くことができますか？",
+                "answer": "いいえ。【2】をチョイスして相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、コストを支払うこともできないため、自分のデッキの上1枚を墓場に置くことができません。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3a25919844f31c6a3c000be2572047f836a09e0ee8d1d6958474efaed0311c0d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P65",
+            "fetched_at": "2026-09-24T21:17:05.902094Z"
+          },
+          "document_ref": "documents-dc3b43f85216ab53"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P66",
+      "documents": {
+        "documents-67c9800c961a3815": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P66",
+            "faces": [
+              {
+                "name": "グリム・リーパー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "自分の墓場にシャドウパラディン・カードが10枚以上ある限り、これは【疾走】を持つ。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "THORES柴本",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p66.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1432",
+                "date": "2024-06-24",
+                "question": "『グリム・リーパー』の「自分の墓場にシャドウパラディン・カードが10枚以上ある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場にシャドウパラディン・カードが10枚以上ある限り、『グリム・リーパー』は【疾走】を持ちます。\n『グリム・リーパー』を場に出した後に自分の墓場のシャドウパラディン・カードが9枚以下から10枚以上になった場合、【疾走】を持ちます。\n『グリム・リーパー』を場に出した後に自分の墓場のシャドウパラディン・カードが10枚以上から9枚以下になった場合、【疾走】を失います。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4fd20c7385463adb7941ba12133b2815f14859f9d5b00303c8d7aced0164ffbd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P66",
+            "fetched_at": "2026-09-24T21:17:08.740112Z"
+          },
+          "document_ref": "documents-67c9800c961a3815"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P67",
+      "documents": {
+        "documents-b5d2e71c9f84a660": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P67",
+            "faces": [
+              {
+                "name": "アビス・フリーザー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}手札のシャドウパラディン・カード1枚を捨てる：自分の墓場のシャドウパラディン・フォロワー1枚を選ぶ。それを手札に加える。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": null,
+                "illustrator": "前河悠一",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p67.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1433",
+                "date": "2024-06-24",
+                "question": "このフォロワーの《ファンファーレ》能力で墓場のシャドウパラディン・フォロワー1枚を選ぶ際、《ファンファーレ》能力のコストとして捨てたカードを選ぶことはできますか？",
+                "answer": "いいえ。コストを支払う前に目標を選ぶ必要があるため、選ぶことはできません。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5f445a86cd41fd90cced849686c26c65672b77f4f5b2a17f98829c025761f696",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P67",
+            "fetched_at": "2026-09-24T21:17:11.314860Z"
+          },
+          "document_ref": "documents-b5d2e71c9f84a660"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P68",
+      "documents": {
+        "documents-566ccf09b50f861f": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P68",
+            "faces": [
+              {
+                "name": "ダークサイド・トランペッター",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "自分のエンドフェイズが来たとき、自分の場のシャドウパラディン・フォロワー1体を選ぶ。自分の墓場のシャドウパラディン・カードが10枚以上なら、それをスタンドする。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "竜徹",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p68.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8e69e8512978788e796ee6f8faea89092d4b1af37b6adfd141b2ec573c95ad1d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P68",
+            "fetched_at": "2026-09-24T21:17:13.987497Z"
+          },
+          "document_ref": "documents-566ccf09b50f861f"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P69",
+      "documents": {
+        "documents-8b54a593bf1c375f": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P69",
+            "faces": [
+              {
+                "name": "アビス・ヒーラー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分の墓場のシャドウパラディン・カードが10枚以上なら、自分のリーダーは{体力}+3する。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "Azusa",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p69.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d90147af856be5e673ce7656ff69a3bb75a1ee5e36ee4dceb7914cc8b5b569bb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P69",
+            "fetched_at": "2026-09-24T21:17:16.893508Z"
+          },
+          "document_ref": "documents-8b54a593bf1c375f"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P70",
+      "documents": {
+        "documents-2bfc365989bbbcbe": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P70",
+            "faces": [
+              {
+                "name": "秘薬の魔女 アリアンロッド",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分の手札のシャドウパラディン・カード1枚を捨ててよい。そうしたなら、2枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p70.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ad913ea632e563fca6dcf990f15eb62fe4b15af1ed7710d874c1e161b784fa1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P70",
+            "fetched_at": "2026-09-24T21:17:19.362199Z"
+          },
+          "document_ref": "documents-2bfc365989bbbcbe"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P71",
+      "documents": {
+        "documents-326af6e9b112c7b3": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P71",
+            "faces": [
+              {
+                "name": "グルルバウ",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "シャドウパラディン"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手の場のフォロワー1体と自分の墓場のシャドウパラディン・フォロワー1枚まで選ぶ。前者を破壊する。後者を手札に加える。",
+                "sections": [],
+                "flavor": "訓練された魔犬は、訓練された戦士を圧倒する。",
+                "illustrator": "米谷尚展",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p71.png",
+                "trait_raw": "ヴァンガード・シャドウパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1434",
+                "date": "2024-06-24",
+                "question": "相手の場のフォロワーを選ぶことができず、自分の墓場のシャドウパラディン・フォロワー1枚を選ぶことができる場合、このスペルをプレイして選んだシャドウパラディン・フォロワーを手札に加えることができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、自分の墓場のシャドウパラディン・フォロワーを手札に加えることができません。\nまた、相手の場のフォロワーを選ぶことができ、自分の墓場にシャドウパラディン・フォロワーがいない場合は、自分の墓場のシャドウパラディン・フォロワー0体を選ぶことでこのスペルをプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d6d51f7cf352b08704b09fd94a177ff6bcc965f9723db2296281bf88423d2e9d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P71",
+            "fetched_at": "2026-09-24T21:17:22.152171Z"
+          },
+          "document_ref": "documents-326af6e9b112c7b3"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P72",
+      "documents": {
+        "documents-810ce96620473404": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P72",
+            "faces": [
+              {
+                "name": "サイレント・トム",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【シングルドライブ】\n{ファンファーレ}自分の墓場のカード1枚まで選ぶ。それを自分のデッキの上から3番目に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "TMS",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p72.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1438",
+                "date": "2024-06-24",
+                "question": "自分の墓場にカードがある場合、このフォロワーの《ファンファーレ》能力によって自分の墓場のカード0枚を選び、デッキの上から3番目にカードを置かないことができますか？",
+                "answer": "はい。1枚まで選ぶとき、0枚を選ぶことができるため、自分の墓場にカードがある場合でも、そのカードを選ばないことでデッキの上から3番目に置かないことができます。"
+              },
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P73"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3a07e250b606f039784d39d47a6a169f946ece6e84de13360a59b5ff38c1beaa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P72",
+            "fetched_at": "2026-09-24T21:17:24.784216Z"
+          },
+          "document_ref": "documents-810ce96620473404"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P73",
+      "documents": {
+        "documents-b61705667842762e": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P73",
+            "faces": [
+              {
+                "name": "サイレント・トム",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【シングルドライブ】\n【進化時】手札のオラクルシンクタンク・カード1枚を捨てる：体力5以下の相手の場のフォロワー1体を選ぶ。それを消滅させる。",
+                "sections": [],
+                "flavor": "ふっ、オレを捕まえたいなら、いい女を連れてきな。",
+                "illustrator": "松井勝法",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p73.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-P72"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e1551ce6cd45068ee61b5d1b6bf1bb751fb06836f4bd0ebf641c93e401e2c6c2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P73",
+            "fetched_at": "2026-09-24T21:17:27.450830Z"
+          },
+          "document_ref": "documents-b61705667842762e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P74",
+      "documents": {
+        "documents-f5e5841dea6ea543": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P74",
+            "faces": [
+              {
+                "name": "邪眼の美姫 エウリュアレー",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【突進】【ツインドライブ】\n自分のターンごとに1回、自分のドライブチェックによってトリガーしたとき、1枚引く。",
+                "sections": [],
+                "flavor": "私の目を見て。それだけが、貴方に許された自由。",
+                "illustrator": "Morechand",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p74.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1418",
+                "date": "2024-06-24",
+                "question": "「自分のドライブチェックによってトリガーしたとき、～」という能力は、どのようなタイミングで誘発する能力ですか？",
+                "answer": "自分のドライブチェックによって、トリガーの処理を実行したときに誘発する能力です。トリガーを持つカードをトリガー領域に置いたとしても、そのトリガーの処理を実行しなかった場合、誘発しません。\n【ツインドライブ】によってドライブチェックを2回行い、2回トリガーの処理を実行した場合、「自分のドライブチェックによってトリガーしたとき、～」という能力が2回誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              },
+              {
+                "id": "Q1380",
+                "date": "2024-06-24",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c432f353f77972049676bc835a62f8bd0a84068dba3ad3b88e59e9274c09ba66",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P74",
+            "fetched_at": "2026-09-24T21:17:30.204895Z"
+          },
+          "document_ref": "documents-f5e5841dea6ea543"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P75",
+      "documents": {
+        "documents-a233b619eb7cce13": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P75",
+            "faces": [
+              {
+                "name": "メイデン・オブ・ライブラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}：1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "萩谷薫",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p75.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1185970d3cefb2a3eadf80c4119684b43a9379eb28321871365b2ebc566d9c1d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P75",
+            "fetched_at": "2026-09-24T21:17:32.772224Z"
+          },
+          "document_ref": "documents-a233b619eb7cce13"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P76",
+      "documents": {
+        "documents-7e54b17ffd73e6dd": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P76",
+            "faces": [
+              {
+                "name": "バトルシスター ここあ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n自分のドライブチェックによってトリガーしたとき、相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分のリーダーは{体力}+2する。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のデッキの上5枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "S.of.L",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p76.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1439",
+                "date": "2024-06-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「自分のドライブチェックによってトリガーしたとき、～」という能力をプレイして、自分のリーダーの体力を+2することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの「自分のドライブチェックによってトリガーしたとき、～」という能力をプレイできず、自分のリーダーの体力を+2することができません。"
+              },
+              {
+                "id": "Q1418",
+                "date": "2024-06-24",
+                "question": "「自分のドライブチェックによってトリガーしたとき、～」という能力は、どのようなタイミングで誘発する能力ですか？",
+                "answer": "自分のドライブチェックによって、トリガーの処理を実行したときに誘発する能力です。トリガーを持つカードをトリガー領域に置いたとしても、そのトリガーの処理を実行しなかった場合、誘発しません。\n【ツインドライブ】によってドライブチェックを2回行い、2回トリガーの処理を実行した場合、「自分のドライブチェックによってトリガーしたとき、～」という能力が2回誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              },
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:53e70890ec17f7c6b9140cbec180ddf80062835b6bba416a5fb70d423bfa1bca",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P76",
+            "fetched_at": "2026-09-24T21:17:35.597669Z"
+          },
+          "document_ref": "documents-7e54b17ffd73e6dd"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P77",
+      "documents": {
+        "documents-c4e6293fea52f28a": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P77",
+            "faces": [
+              {
+                "name": "オラクルガーディアン ワイズマン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "自分のターンごとに1回、自分のドライブチェックによってトリガーしたとき、相手のリーダーすべてに2ダメージ。自分のリーダーは{体力}+2する。\n{ファンファーレ}自分の墓場のカード1枚まで選ぶ。それを自分のデッキの上から3番目に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "春乃壱",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p77.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1438",
+                "date": "2024-06-24",
+                "question": "自分の墓場にカードがある場合、このフォロワーの《ファンファーレ》能力によって自分の墓場のカード0枚を選び、デッキの上から3番目にカードを置かないことができますか？",
+                "answer": "はい。1枚まで選ぶとき、0枚を選ぶことができるため、自分の墓場にカードがある場合でも、そのカードを選ばないことでデッキの上から3番目に置かないことができます。"
+              },
+              {
+                "id": "Q1418",
+                "date": "2024-06-24",
+                "question": "「自分のドライブチェックによってトリガーしたとき、～」という能力は、どのようなタイミングで誘発する能力ですか？",
+                "answer": "自分のドライブチェックによって、トリガーの処理を実行したときに誘発する能力です。トリガーを持つカードをトリガー領域に置いたとしても、そのトリガーの処理を実行しなかった場合、誘発しません。\n【ツインドライブ】によってドライブチェックを2回行い、2回トリガーの処理を実行した場合、「自分のドライブチェックによってトリガーしたとき、～」という能力が2回誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b2c9152028903186559419c88042fbd507a1b2e5291f9bf3938e3dfbb0b948ce",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P77",
+            "fetched_at": "2026-09-24T21:17:38.388547Z"
+          },
+          "document_ref": "documents-c4e6293fea52f28a"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P78",
+      "documents": {
+        "documents-6ac9c464ed684c8e": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P78",
+            "faces": [
+              {
+                "name": "稲葉の白兎",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。自分のリーダーは{体力}+1する。\n{ファンファーレ}自分の墓場のカード1枚まで選ぶ。それを自分のデッキの上から3番目に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "山﨑奈苗",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p78.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1438",
+                "date": "2024-06-24",
+                "question": "自分の墓場にカードがある場合、このフォロワーの《ファンファーレ》能力によって自分の墓場のカード0枚を選び、デッキの上から3番目にカードを置かないことができますか？",
+                "answer": "はい。1枚まで選ぶとき、0枚を選ぶことができるため、自分の墓場にカードがある場合でも、そのカードを選ばないことでデッキの上から3番目に置かないことができます。"
+              },
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1cc6b2b1b98a311569eeb98ead197d3ff98b1453b898c0463ed4085236767f4a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P78",
+            "fetched_at": "2026-09-24T21:17:41.159225Z"
+          },
+          "document_ref": "documents-6ac9c464ed684c8e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P79",
+      "documents": {
+        "documents-a7e01da9e04c660d": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P79",
+            "faces": [
+              {
+                "name": "三日月の女神 ツクヨミ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "{ファンファーレ}自分のデッキの上3枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}：自分のデッキの上1枚を公開する。『半月の女神 ツクヨミ』を公開したなら、公開したカードを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "武井宏之",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p79.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1435",
+                "date": "2024-06-24",
+                "question": "『月と太陽』によって、このフォロワーを自分のデッキから探して場に出すことはできますか？",
+                "answer": "いいえ。できません。\nまた、『月と太陽』の《起動》能力で墓場のこのフォロワーを場に出すこともできません。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-SL21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e38f8bf135b414be44038d397dd99c507b4fa83c531d5c5b754ec6cec2f81a9a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P79",
+            "fetched_at": "2026-09-24T21:17:43.743166Z"
+          },
+          "document_ref": "documents-a7e01da9e04c660d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P80",
+      "documents": {
+        "documents-75ac0e528e34f515": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P80",
+            "faces": [
+              {
+                "name": "バトルシスター しょこら",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【2】手札のオラクルシンクタンク・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のデッキの上2枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "S.of.L",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p80.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1440",
+                "date": "2024-06-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルの【2】をチョイスし、コストを支払うことで自分のデッキの上2枚を見て、そのカードをデッキの上や下に置くことができますか？",
+                "answer": "いいえ。【2】をチョイスして相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、コストを支払うこともできないため、自分のデッキの上2枚を見て、そのカードをデッキの上や下に置くことができません。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bf96997b35628d5c81229854eda4b33d1cfe2eaa82b010250ccb438472ab9f52",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P80",
+            "fetched_at": "2026-09-24T21:17:46.506315Z"
+          },
+          "document_ref": "documents-75ac0e528e34f515"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P81",
+      "documents": {
+        "documents-7337541c9570baf2": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P81",
+            "faces": [
+              {
+                "name": "オラクルガーディアン ニケ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "【突進】【指定攻撃】\n自分のドライブチェックによってトリガーしたとき、これは【疾走】を持つ。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "ToMo",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p81.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1418",
+                "date": "2024-06-24",
+                "question": "「自分のドライブチェックによってトリガーしたとき、～」という能力は、どのようなタイミングで誘発する能力ですか？",
+                "answer": "自分のドライブチェックによって、トリガーの処理を実行したときに誘発する能力です。トリガーを持つカードをトリガー領域に置いたとしても、そのトリガーの処理を実行しなかった場合、誘発しません。\n【ツインドライブ】によってドライブチェックを2回行い、2回トリガーの処理を実行した場合、「自分のドライブチェックによってトリガーしたとき、～」という能力が2回誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5204ac95885a0bf276cd88110abcfcfd422f62f8f5e478665c12def326f336ec",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P81",
+            "fetched_at": "2026-09-24T21:17:49.480358Z"
+          },
+          "document_ref": "documents-7337541c9570baf2"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P82",
+      "documents": {
+        "documents-bb3c29aa69ca93c4": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P82",
+            "faces": [
+              {
+                "name": "ドリーム・イーター",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}1枚引く。自分の手札1枚を自分のデッキの上から3番目に置く。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": null,
+                "illustrator": "パトリシア",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p82.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:46889a199aed86d3066e9457986880f11bf9e8db2506ccdca3eb78f2cd7b0750",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P82",
+            "fetched_at": "2026-09-24T21:17:52.088848Z"
+          },
+          "document_ref": "documents-bb3c29aa69ca93c4"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P83",
+      "documents": {
+        "documents-99fd6b5b42766b3a": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P83",
+            "faces": [
+              {
+                "name": "E・アラーマー",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "{ファンファーレ}自分の場のヴァンガード・フォロワー1体を選ぶ。それをスタンドする。このターン、それは相手のリーダーを攻撃できない。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "石田バル",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p83.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e19b9c0ce9939a96c919dc0b2d0089ee0456f2fa0917d9ac19e169ddc03a7072",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P83",
+            "fetched_at": "2026-09-24T21:17:54.713788Z"
+          },
+          "document_ref": "documents-99fd6b5b42766b3a"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P84",
+      "documents": {
+        "documents-73d40d1a3d1ac9a2": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P84",
+            "faces": [
+              {
+                "name": "ロゼンジ・メイガス",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【守護】\n自分のドライブチェックによってトリガーしたとき、自分のリーダーは{体力}+1する。\n{ファンファーレ}自分のデッキの上2枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p84.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1418",
+                "date": "2024-06-24",
+                "question": "「自分のドライブチェックによってトリガーしたとき、～」という能力は、どのようなタイミングで誘発する能力ですか？",
+                "answer": "自分のドライブチェックによって、トリガーの処理を実行したときに誘発する能力です。トリガーを持つカードをトリガー領域に置いたとしても、そのトリガーの処理を実行しなかった場合、誘発しません。\n【ツインドライブ】によってドライブチェックを2回行い、2回トリガーの処理を実行した場合、「自分のドライブチェックによってトリガーしたとき、～」という能力が2回誘発して待機状態になります。その後【ツインドライブ】の処理がすべて終了した後のチェックタイミングで待機状態になっている能力を解決します。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:66747ac5de4e57f972dab2d2a256fa5d1bff96dad6681fd84ae1c5a4b88ef825",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P84",
+            "fetched_at": "2026-09-24T21:18:18.005578Z"
+          },
+          "document_ref": "documents-73d40d1a3d1ac9a2"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P85",
+      "documents": {
+        "documents-78024cb3796e9090": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P85",
+            "faces": [
+              {
+                "name": "戦巫女 タギツヒメ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。それに2ダメージ。これは{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分のデッキの上2枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "高田明美",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p85.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1390",
+                "date": "2024-06-24",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP03-127"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c79bc48312a0661b153bf6926e5a0f53245ec06b91ed4a553e4803914c81d9e9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P85",
+            "fetched_at": "2026-09-24T21:18:18.452148Z"
+          },
+          "document_ref": "documents-78024cb3796e9090"
+        }
+      ]
+    },
+    {
+      "card_no": "CP03-P86",
+      "documents": {
+        "documents-b7c7b1a59bc8e8ca": {
+          "region": "jp",
+          "record": {
+            "number": "CP03-P86",
+            "faces": [
+              {
+                "name": "ラック・バード",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "オラクルシンクタンク"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "コラボパック「カードファイト!! ヴァンガード」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分のデッキの上3枚を見る。その中から、好きな枚数を好きな順にデッキの上に置く。残りを好きな順にデッキの下に置く。【2】自分の墓場のトリガーを持つフォロワー5枚を選ぶ。それをデッキに戻し、シャッフルする。1枚引く。自分のPPを1回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヨシザワ／モレシャン",
+                "image": "/wordpress/wp-content/images/cardlist/CP03/cp03-p86.png",
+                "trait_raw": "ヴァンガード・オラクルシンクタンク"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1441",
+                "date": "2024-06-24",
+                "question": "【2】をチョイスした際に、自分の墓場のトリガーを持つフォロワー5枚を選ぶことができない場合、このスペルをプレイすることができますか？",
+                "answer": "いいえ。プレイすることができません。スペルをプレイするためには適切な目標を選ぶ必要があります。"
+              }
+            ],
+            "products_ref": "products-e42dad60ddd5e7ea",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:36292c9a94fb104d93401a6899e85edd9e1f8569a5a3a5d704091b9faa7fd1e0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP03-P86",
+            "fetched_at": "2026-09-24T21:18:20.950069Z"
+          },
+          "document_ref": "documents-b7c7b1a59bc8e8ca"
+        }
+      ]
+    }
+  ]
+}

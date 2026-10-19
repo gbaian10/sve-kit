@@ -1,0 +1,4163 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "GFB01d",
+  "range": "000-099",
+  "products": {
+    "products-62812d03c9c6a351": [
+      {
+        "name": "Gloryfinder Bundle #1 “Guide to Glory”",
+        "date": "Jul. 19, 2024",
+        "links": [
+          "/cards/searchresults?expansion=GFB01",
+          "https://en.shadowverse-evolve.com/products/gfb01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "GFB01d-001EN",
+      "documents": {
+        "documents-c726f98dab4dca17": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-001EN",
+            "faces": [
+              {
+                "name": "Laina, Sister of Judgment",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Zealot"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWard.\n{icon_fanfare|[fanfare]} Select an opponent. They bury a follower. Give your leader {icon_hp|[defense]} equal to the buried follower's defense.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWard.\n{icon_fanfare|[fanfare]} Select an opponent. They bury a follower. Give your leader {icon_hp|[defense]} equal to the buried follower's defense.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-001EN.png",
+                "trait_raw": "Faith / Zealot",
+                "traits": [
+                  "Faith",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q771 (Jun. 28, 2024)",
+                "question": "If an opponent only has a Heavenly Aegis, which has Aura and \"This follower can't be destroyed by abilities,\" on their field, can this follower's Fanfare ability cause them to bury it?",
+                "answer": "Yes. Aura prevents the card from being selected by enemy abilities, but in this case Heavenly Aegis is not being selected by an ability. Also, burying a card isn't the same as destroying it."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-002EN|Laina, Sister of Judgment}",
+                "href": "/cards/?cardno=GFB01d-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:555f9c626f84e197caa42e1cc9ed97109f2817e10700730385aa9fcac63c1100",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-001EN",
+            "fetched_at": "2026-09-27T17:31:38.546618Z"
+          },
+          "document_ref": "documents-c726f98dab4dca17"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-002EN",
+      "documents": {
+        "documents-519da5559285b5f0": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-002EN",
+            "faces": [
+              {
+                "name": "Laina, Sister of Judgment",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "2"
+                },
+                "text": "Bane. Ward.\nAt the start of your end phase, each opponent who has a follower with X attack on their field deals 4 damage to their leader. X equals the highest attack among followers on the field.",
+                "sections": [],
+                "raw_text": "Bane. Ward.\nAt the start of your end phase, each opponent who has a follower with X attack on their field deals 4 damage to their leader. X equals the highest attack among followers on the field.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-002EN.png",
+                "trait_raw": "Faith / Zealot",
+                "traits": [
+                  "Faith",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q772 (Jun. 28, 2024)",
+                "question": "How does this follower's ability work?",
+                "answer": "Each opponent who has a follower with the highest attack among all followers on the field deals 4 damage to their own leader.\n\nFor example, if the highest attack value among the followers on the field is 3, and one of your opponents has a 3-attack follower on their field, their leader takes 4 damage. If 2 of your opponents each have a 3-attack follower on their field, their leaders each take 4 damage. If you have the only 3-attack follower on the field in this case, then nothing happens."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-001EN|Laina, Sister of Judgment}",
+                "href": "/cards/?cardno=GFB01d-001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6f461e28b6b4e65fb4872177374db7cdf09812830cb9a3e4db47855e06684f0f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-002EN",
+            "fetched_at": "2026-09-27T17:31:41.329347Z"
+          },
+          "document_ref": "documents-519da5559285b5f0"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-003EN",
+      "documents": {
+        "documents-ae050ed18d3bc5e3": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-003EN",
+            "faces": [
+              {
+                "name": "Garula, Ruler of Storms",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Avian"
+                },
+                "stats": {
+                  "cost": "6",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} If your leader is {icon_bishop|[havencraft]}, search your deck for a 3-cost amulet and 1-cost amulet, summon them, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} If your leader is {icon_bishop|[havencraft]}, search your deck for a 3-cost amulet and 1-cost amulet, summon them, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "Mstk",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-003EN.png",
+                "trait_raw": "Faith / Avian",
+                "traits": [
+                  "Faith",
+                  "Avian"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q774 (Jun. 28, 2024)",
+                "question": "If both the amulets I summon with this follower's ability have Fanfare abilities, in what order do I resolve them?",
+                "answer": "Since they are summoned at the same time, you may resolve them in any order."
+              },
+              {
+                "title": "Q773 (Jun. 28, 2024)",
+                "question": "Can I choose to summon only one amulet with this follower's Fanfare ability?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-004EN|Garula, Ruler of Storms}",
+                "href": "/cards/?cardno=GFB01d-004EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a55766f6c0d1ba2f82c5ce50b46e7f40e0a4e059d9bacefbcf2856fd09d1fb02",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-003EN",
+            "fetched_at": "2026-09-27T17:31:43.690916Z"
+          },
+          "document_ref": "documents-ae050ed18d3bc5e3"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-004EN",
+      "documents": {
+        "documents-03da0931a36b43a5": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-004EN",
+            "faces": [
+              {
+                "name": "Garula, Ruler of Storms",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Avian"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "At the start of your end phase, select an enemy leader or enemy follower on the field. Deal it damage equal to the number of amulets on your field.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, select an enemy leader or enemy follower on the field. Deal it damage equal to the number of amulets on your field.",
+                "speech": null,
+                "illustrator": "Mstk",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-004EN.png",
+                "trait_raw": "Faith / Avian",
+                "traits": [
+                  "Faith",
+                  "Avian"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-003EN|Garula, Ruler of Storms}",
+                "href": "/cards/?cardno=GFB01d-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:213e03067ef4ed9e374ba08740dacc8c643a35250aa8078e6331fb10224902ce",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-004EN",
+            "fetched_at": "2026-09-27T17:31:46.215744Z"
+          },
+          "document_ref": "documents-03da0931a36b43a5"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-005EN",
+      "documents": {
+        "documents-d01716a334f2b2df": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-005EN",
+            "faces": [
+              {
+                "name": "Lion of the Golden City",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Each player may add an amulet from their cemetery to their hand.\n{icon_act|[act]} {icon_cost05|[cost05]}, {icon_stand|[engage]}: You may summon an amulet from your hand.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Each player may add an amulet from their cemetery to their hand.\n{icon_act|[act]} {icon_cost05|[cost05]}, {icon_stand|[engage]}: You may summon an amulet from your hand.",
+                "speech": null,
+                "illustrator": "Kazashino",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-005EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4cf80ac52e815db0404e4eea5aa38b111a4b647969354684b864bab7057a17b0",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-005EN",
+            "fetched_at": "2026-09-27T17:31:49.209224Z"
+          },
+          "document_ref": "documents-d01716a334f2b2df"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-006EN",
+      "documents": {
+        "documents-e123001476e8071c": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-006EN",
+            "faces": [
+              {
+                "name": "Elysian Saint-Hares",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Luminary / Beast / Lightborne"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Choose one of the following. (1) Search your deck for a 1-cost follower, summon it, then shuffle your deck. (2) Select a card in your banished zone and add it to your hand.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Choose one of the following. (1) Search your deck for a 1-cost follower, summon it, then shuffle your deck. (2) Select a card in your banished zone and add it to your hand.",
+                "speech": null,
+                "illustrator": "Nejita",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-006EN.png",
+                "trait_raw": "Luminary / Beast / Lightborne",
+                "traits": [
+                  "Luminary",
+                  "Beast",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-007EN|Elysian Saint-Hares}",
+                "href": "/cards/?cardno=GFB01d-007EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1d721100d7c99454ce9582f97a8e788c593d33e4d9b54245c3782c95fa884d74",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-006EN",
+            "fetched_at": "2026-09-27T17:31:51.876580Z"
+          },
+          "document_ref": "documents-e123001476e8071c"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-007EN",
+      "documents": {
+        "documents-954f84fdb83b74fe": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-007EN",
+            "faces": [
+              {
+                "name": "Elysian Saint-Hares",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Luminary / Beast / Lightborne"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "Ward.\nOn Evolve - Draw a card. Each player rolls a 6-sided die. Each player with the highest roll gives their leader {icon_hp|[defense]}+3 and draws a card.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Draw a card. Each player rolls a 6-sided die. Each player with the highest roll gives their leader {icon_hp|[defense]}+3 and draws a card.",
+                "speech": null,
+                "illustrator": "Nejita",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-007EN.png",
+                "trait_raw": "Luminary / Beast / Lightborne",
+                "traits": [
+                  "Luminary",
+                  "Beast",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-006EN|Elysian Saint-Hares}",
+                "href": "/cards/?cardno=GFB01d-006EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:90ceda6dda48097e864c3ccec7c26c306c2c43d9039b6021bb5d7e7153d9379e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-007EN",
+            "fetched_at": "2026-09-27T17:31:54.392761Z"
+          },
+          "document_ref": "documents-954f84fdb83b74fe"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-008EN",
+      "documents": {
+        "documents-4208b185ffc25899": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-008EN",
+            "faces": [
+              {
+                "name": "Odin",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Legendary",
+                  "Trait": "Deity"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "4",
+                  "power": "5"
+                },
+                "text": "Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)\n{icon_fanfare|[fanfare]} Select up to 1 card on each opponent's field and banish them.",
+                "sections": [],
+                "raw_text": "Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)\n{icon_fanfare|[fanfare]} Select up to 1 card on each opponent's field and banish them.",
+                "speech": null,
+                "illustrator": "Ryosuke Aiba (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-008EN.png",
+                "trait_raw": "Deity",
+                "traits": [
+                  "Deity"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:71f5ccca56eda1470be9973921b5f4cae4c7a6f3acb49a1e22670dfea25bfff4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-008EN",
+            "fetched_at": "2026-09-27T17:31:57.355720Z"
+          },
+          "document_ref": "documents-4208b185ffc25899"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-009EN",
+      "documents": {
+        "documents-2cf9a127c07a6911": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-009EN",
+            "faces": [
+              {
+                "name": "Imperial Dragoon",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Dragonheart"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Deal each enemy leader and enemy follower on the field damage equal to the number of cards in your hand. Discard your hand.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Deal each enemy leader and enemy follower on the field damage equal to the number of cards in your hand. Discard your hand.",
+                "speech": null,
+                "illustrator": "anyu",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-009EN.png",
+                "trait_raw": "Dragonheart",
+                "traits": [
+                  "Dragonheart"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q305 (Sep. 29, 2023)",
+                "question": "If there are no enemy followers on the field, can I choose to not play this follower's Fanfare ability and not discard my hand?",
+                "answer": "No. This follower's Fanfare ability does not have a cost, so you cannot choose not to play it, and must discard your hand."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-010EN|Imperial Dragoon}",
+                "href": "/cards/?cardno=GFB01d-010EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:90530d4d460df3975c4431fa7bf617cd4b7bf00bf6ab60c60513bcc4de6017b9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-009EN",
+            "fetched_at": "2026-09-27T17:32:00.368432Z"
+          },
+          "document_ref": "documents-2cf9a127c07a6911"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-010EN",
+      "documents": {
+        "documents-451c64627f90f3b0": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-010EN",
+            "faces": [
+              {
+                "name": "Imperial Dragoon",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Dragonheart"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "7",
+                  "power": "7"
+                },
+                "text": "On Evolve - Draw 3 cards.",
+                "sections": [],
+                "raw_text": "On Evolve - Draw 3 cards.",
+                "speech": null,
+                "illustrator": "anyu",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-010EN.png",
+                "trait_raw": "Dragonheart",
+                "traits": [
+                  "Dragonheart"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-009EN|Imperial Dragoon}",
+                "href": "/cards/?cardno=GFB01d-009EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9b23e0a38790ce2a2e0b039d21499a46434e8a67658078d8688aed0f16d68074",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-010EN",
+            "fetched_at": "2026-09-27T17:32:03.189733Z"
+          },
+          "document_ref": "documents-451c64627f90f3b0"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-011EN",
+      "documents": {
+        "documents-8dbc2c2d68f20382": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-011EN",
+            "faces": [
+              {
+                "name": "Jeanne d'Arc",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Luminary"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Deal 2 damage to each enemy follower on the field.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Deal 2 damage to each enemy follower on the field.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-011EN.png",
+                "trait_raw": "Luminary",
+                "traits": [
+                  "Luminary"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-012EN|Jeanne d'Arc}",
+                "href": "/cards/?cardno=GFB01d-012EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3e4e93f45a03db243187344a60d287e71b155b99d59ee4a7d693a47d4e0dcbbd",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-011EN",
+            "fetched_at": "2026-09-27T17:32:05.977461Z"
+          },
+          "document_ref": "documents-8dbc2c2d68f20382"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-012EN",
+      "documents": {
+        "documents-14f9b02411d8419c": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-012EN",
+            "faces": [
+              {
+                "name": "Jeanne d'Arc",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Luminary"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "4"
+                },
+                "text": "On Evolve - Deal 2 damage to each enemy follower on the field. Give each other follower on your field {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "On Evolve - Deal 2 damage to each enemy follower on the field. Give each other follower on your field {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-012EN.png",
+                "trait_raw": "Luminary",
+                "traits": [
+                  "Luminary"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-011EN|Jeanne d'Arc}",
+                "href": "/cards/?cardno=GFB01d-011EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8fbc03fc7beecccb68b41520d72f2fbc442af448ea9e98c97bec5740d004eb1c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-012EN",
+            "fetched_at": "2026-09-27T17:32:08.866703Z"
+          },
+          "document_ref": "documents-14f9b02411d8419c"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-013EN",
+      "documents": {
+        "documents-576662178fbc81a0": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-013EN",
+            "faces": [
+              {
+                "name": "Heavenly Aegis",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Eidolon"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "8",
+                  "power": "8"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_evolve|[evolve]} Discard 3 cards: Evolve this follower.\nAura. (Cards with Aura can't be selected for enemy spells or abilities.)\nThis card can't be destroyed by abilities. (It can still be destroyed by ability damage.)",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\n{icon_evolve|[evolve]} Discard 3 cards: Evolve this follower.\nAura. (Cards with Aura can't be selected for enemy spells or abilities.)\nThis card can't be destroyed by abilities. (It can still be destroyed by ability damage.)",
+                "speech": null,
+                "illustrator": "Nejita",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-013EN.png",
+                "trait_raw": "Faith / Eidolon",
+                "traits": [
+                  "Faith",
+                  "Eidolon"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q341 (Sep. 29, 2023)",
+                "question": "Can I select and destroy this follower with Dark Offering?",
+                "answer": "No. You can select it, but it will not be destroyed."
+              },
+              {
+                "title": "Q340 (Sep. 29, 2023)",
+                "question": "If I select this follower with Dark Offering's ability, can I still play the rest of the ability?",
+                "answer": "Yes. Heavenly Aegis will not be destroyed, but you still give your leader 3 defense and draw a card."
+              },
+              {
+                "title": "Q339 (Sep. 29, 2023)",
+                "question": "Can this card be destroyed by spell abilities?",
+                "answer": "No, it can't."
+              },
+              {
+                "title": "Q323 (Sep. 29, 2023)",
+                "question": "Would this follower be banished by Hare of Illusion's \"Banish each follower on the field\" activated ability?",
+                "answer": "Yes, it would."
+              },
+              {
+                "title": "Q322 (Sep. 29, 2023)",
+                "question": "Do I have to pay 2 play points and discard 3 cards to evolve this follower?",
+                "answer": "No. You can choose to either pay 2 play points or discard 3 cards to evolve."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-014EN|Heavenly Aegis}",
+                "href": "/cards/?cardno=GFB01d-014EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5285111f911d9432117eadce604a0aae1092928eb575ef9272af80ec91abf3b3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-013EN",
+            "fetched_at": "2026-09-27T17:32:11.306302Z"
+          },
+          "document_ref": "documents-576662178fbc81a0"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-014EN",
+      "documents": {
+        "documents-f7e2aca8f6810935": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-014EN",
+            "faces": [
+              {
+                "name": "Heavenly Aegis",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Eidolon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "10",
+                  "power": "10"
+                },
+                "text": "Aura.\nThis card can't be destroyed by abilities.\nOn Evolve - For the rest of this turn and during each opponent's next turn, this follower doesn't take damage.",
+                "sections": [],
+                "raw_text": "Aura.\nThis card can't be destroyed by abilities.\nOn Evolve - For the rest of this turn and during each opponent's next turn, this follower doesn't take damage.",
+                "speech": null,
+                "illustrator": "Nejita",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-014EN.png",
+                "trait_raw": "Faith / Eidolon",
+                "traits": [
+                  "Faith",
+                  "Eidolon"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q341 (Sep. 29, 2023)",
+                "question": "Can I select and destroy this follower with Dark Offering?",
+                "answer": "No. You can select it, but it will not be destroyed."
+              },
+              {
+                "title": "Q340 (Sep. 29, 2023)",
+                "question": "If I select this follower with Dark Offering's ability, can I still play the rest of the ability?",
+                "answer": "Yes. Heavenly Aegis will not be destroyed, but you still give your leader 3 defense and draw a card."
+              },
+              {
+                "title": "Q339 (Sep. 29, 2023)",
+                "question": "Can this card be destroyed by spell abilities?",
+                "answer": "No, it can't."
+              },
+              {
+                "title": "Q323 (Sep. 29, 2023)",
+                "question": "Would this follower be banished by Hare of Illusion's \"Banish each follower on the field\" activated ability?",
+                "answer": "Yes, it would."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-013EN|Heavenly Aegis}",
+                "href": "/cards/?cardno=GFB01d-013EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2a01197466eaf59d91326f5de8e26cd9422be97d793a1b46a7cd68ca10fcebf7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-014EN",
+            "fetched_at": "2026-09-27T17:32:14.436968Z"
+          },
+          "document_ref": "documents-f7e2aca8f6810935"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-015EN",
+      "documents": {
+        "documents-4160bf0f3e3fe189": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-015EN",
+            "faces": [
+              {
+                "name": "Princess Snow White",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Fable / Princess"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} If this card was put onto the field from hand, place a Fable counter on it. If not, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\n{icon_lastword|[lastwords]} If this card had a Fable counter, put this card into its owner's EX area.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} If this card was put onto the field from hand, place a Fable counter on it. If not, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\n{icon_lastword|[lastwords]} If this card had a Fable counter, put this card into its owner's EX area.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-015EN.png",
+                "trait_raw": "Faith / Fable / Princess",
+                "traits": [
+                  "Faith",
+                  "Fable",
+                  "Princess"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q487 (Jan. 31, 2024)",
+                "question": "If I put this follower into my EX area with its Last Words ability, does it keep its Fable counters?",
+                "answer": "No. Counters disappear when moving off the field.\n\nWhen this follower moves to your cemetery with at least one Fable counter on it, its Last Words ability triggers. At the same time, the counters disappear, because they count as effects applied to the follower when it was on the field, and when a card moves zones, any applied effects from the previous zone don't carry over unless indicated otherwise. Then, you resolve this follower's Last Words ability, putting it into its owner's EX area."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:564725ca825ce66be8a7778522727a1fd84fe00d6eb5ae6d605823b949a6e770",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-015EN",
+            "fetched_at": "2026-09-27T17:32:17.245180Z"
+          },
+          "document_ref": "documents-4160bf0f3e3fe189"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-016EN",
+      "documents": {
+        "documents-29325ab542f5f02a": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-016EN",
+            "faces": [
+              {
+                "name": "Aether of the White Wing",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Faith / Luminary / Lightborne"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Search your deck for a {icon_bishop|[havencraft]} follower not named Aether of the White Wing that costs less than your max play points, summon it, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Search your deck for a {icon_bishop|[havencraft]} follower not named Aether of the White Wing that costs less than your max play points, summon it, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-016EN.png",
+                "trait_raw": "Faith / Luminary / Lightborne",
+                "traits": [
+                  "Faith",
+                  "Luminary",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ba34f3707524d3feb4133ada03d977b30b11696dceb6022a3cd5c40d228731da",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-016EN",
+            "fetched_at": "2026-09-27T17:32:19.603961Z"
+          },
+          "document_ref": "documents-29325ab542f5f02a"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-017EN",
+      "documents": {
+        "documents-d69ab47c4439337d": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-017EN",
+            "faces": [
+              {
+                "name": "Lucifer",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Angel / Fallen Angel"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "7",
+                  "power": "6"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost00|[cost00]}: Evolve this follower.\nWard.\nAt the start of your end phase, give your leader {icon_hp|[defense]}+4.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost00|[cost00]}: Evolve this follower.\nWard.\nAt the start of your end phase, give your leader {icon_hp|[defense]}+4.",
+                "speech": null,
+                "illustrator": "Mushimaro",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-017EN.png",
+                "trait_raw": "Angel / Fallen Angel",
+                "traits": [
+                  "Angel",
+                  "Fallen Angel"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q272 (Jun. 30, 2023)",
+                "question": "If I put a Lucifer onto my field with Death's Breath's effect and then evolve it, does it still have Ward?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-018EN|Lucifer}",
+                "href": "/cards/?cardno=GFB01d-018EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4f7fa22f3f500538f4e4a127b0d12a670156bda0cd2ccd903179d5410af5422d",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-017EN",
+            "fetched_at": "2026-09-27T17:32:22.535329Z"
+          },
+          "document_ref": "documents-d69ab47c4439337d"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-018EN",
+      "documents": {
+        "documents-7b3ce8e574d90722": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-018EN",
+            "faces": [
+              {
+                "name": "Lucifer",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Angel / Fallen Angel"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "7",
+                  "power": "8"
+                },
+                "text": "Bane. (After this follower fights another follower, destroy that follower.)\nAt the start of your end phase, deal 4 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "Bane. (After this follower fights another follower, destroy that follower.)\nAt the start of your end phase, deal 4 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "Mushimaro",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-018EN.png",
+                "trait_raw": "Angel / Fallen Angel",
+                "traits": [
+                  "Angel",
+                  "Fallen Angel"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q272 (Jun. 30, 2023)",
+                "question": "If I put a Lucifer onto my field with Death's Breath's effect and then evolve it, does it still have Ward?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-017EN|Lucifer}",
+                "href": "/cards/?cardno=GFB01d-017EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9535e4f2ef550598b661e562a33cdd4fc294db777c71dbd838f626f54dd26cd4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-018EN",
+            "fetched_at": "2026-09-27T17:32:24.825715Z"
+          },
+          "document_ref": "documents-7b3ce8e574d90722"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-019EN",
+      "documents": {
+        "documents-ea5e4af81d7d4b33": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-019EN",
+            "faces": [
+              {
+                "name": "Valhallan General",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Luminary"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nAura. (Cards with Aura can't be selected for enemy spells or abilities.)\nAt the start of your end phase, change this follower's defense to 4.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nAura. (Cards with Aura can't be selected for enemy spells or abilities.)\nAt the start of your end phase, change this follower's defense to 4.",
+                "speech": null,
+                "illustrator": "Tricky Agura",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-019EN.png",
+                "trait_raw": "Faith / Luminary",
+                "traits": [
+                  "Faith",
+                  "Luminary"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q775 (Jun. 28, 2024)",
+                "question": "If I have a Valhallan General with 5 or more defense on my field, and I give it \"This doesn't take ability damage\" with Andromeda's ability, do I still have to change this follower's defense to 4 at the start of my end phase?",
+                "answer": "Yes. \"Changing\" defense isn't the same as dealing ability damage."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-020EN|Valhallan General}",
+                "href": "/cards/?cardno=GFB01d-020EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:068ce1f0dadd739c0be944f4cc69c54230c573383de61bb69cec89fc5a91da9b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-019EN",
+            "fetched_at": "2026-09-27T17:32:28.051371Z"
+          },
+          "document_ref": "documents-ea5e4af81d7d4b33"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-020EN",
+      "documents": {
+        "documents-9ef1f8cb44ce6942": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-020EN",
+            "faces": [
+              {
+                "name": "Valhallan General",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Luminary"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "Aura.\nOn Evolve - Engage each enemy follower on the field.\nAt the start of your end phase, change this follower's defense to 5.",
+                "sections": [],
+                "raw_text": "Aura.\nOn Evolve - Engage each enemy follower on the field.\nAt the start of your end phase, change this follower's defense to 5.",
+                "speech": null,
+                "illustrator": "Tricky Agura",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-020EN.png",
+                "trait_raw": "Faith / Luminary",
+                "traits": [
+                  "Faith",
+                  "Luminary"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-019EN|Valhallan General}",
+                "href": "/cards/?cardno=GFB01d-019EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:15be0a19642d44e4e8f5de31685bd2ad54bdb50c5f956824ed5cb9cc1f499168",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-020EN",
+            "fetched_at": "2026-09-27T17:32:30.574495Z"
+          },
+          "document_ref": "documents-9ef1f8cb44ce6942"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-021EN",
+      "documents": {
+        "documents-61d21e37c231379a": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-021EN",
+            "faces": [
+              {
+                "name": "Greater Priestess",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "4",
+                  "power": "1"
+                },
+                "text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Select a card in an opponent's EX area and banish it.",
+                "sections": [],
+                "raw_text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Select a card in an opponent's EX area and banish it.",
+                "speech": null,
+                "illustrator": "sime",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-021EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q776 (Jun. 28, 2024)",
+                "question": "Can I select and banish an enemy follower with Aura in the EX area with this follower's ability?",
+                "answer": "Yes. Aura and similar keyword abilities are only valid while on the field."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2a0de34491039eee2622417c16d739cb6448dd793f1bdc7c98178486ee778dde",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-021EN",
+            "fetched_at": "2026-09-27T17:32:33.090971Z"
+          },
+          "document_ref": "documents-61d21e37c231379a"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-022EN",
+      "documents": {
+        "documents-2a13314ee369fe8d": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-022EN",
+            "faces": [
+              {
+                "name": "Grimaud, Holy Fox",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "6",
+                  "hp": "6",
+                  "power": "4"
+                },
+                "text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Recover play points equal to 2 times the number of amulets on your field.",
+                "sections": [],
+                "raw_text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Recover play points equal to 2 times the number of amulets on your field.",
+                "speech": null,
+                "illustrator": "Akira Miyazaki",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-022EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eaec804c1f86751f4fe8526ffc626ed06a77d8e0c5f9b57bc4fb81b2ce5c2dfa",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-022EN",
+            "fetched_at": "2026-09-27T17:32:36.089262Z"
+          },
+          "document_ref": "documents-2a13314ee369fe8d"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-023EN",
+      "documents": {
+        "documents-c2f0dcd25fde3582": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-023EN",
+            "faces": [
+              {
+                "name": "Themis's Purge",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "When this card is discarded by an enemy ability, select an enemy follower on the field. Destroy it and draw a card.",
+                "sections": [
+                  "{icon_quick|[quick]}\nSelect an opponent. Destroy each follower on their field and give your leader {icon_hp|[defense]}+1 for every follower destroyed."
+                ],
+                "raw_text": "When this card is discarded by an enemy ability, select an enemy follower on the field. Destroy it and draw a card.\n----------\n{icon_quick|[quick]}\nSelect an opponent. Destroy each follower on their field and give your leader {icon_hp|[defense]}+1 for every follower destroyed.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-023EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6afa8cff0e840de7cc5449d3df5d3b31fe2a70f2ef98d07f7738798d36dc4c24",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-023EN",
+            "fetched_at": "2026-09-27T17:32:38.882722Z"
+          },
+          "document_ref": "documents-c2f0dcd25fde3582"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-024EN",
+      "documents": {
+        "documents-1a722f00da426c1f": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-024EN",
+            "faces": [
+              {
+                "name": "Noble Fangs",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Eidolon"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_fanfare|[fanfare]} Select an enemy follower on the field and a follower on your field. Deal the first follower damage equal to the second's attack.\n{icon_q|[q]}{icon_act|[act]} {icon_cost03|[cost03]}, {icon_stand|[engage]}, bury this card: Select an enemy follower on the field and a follower on your field. Deal the first follower and its leader damage equal to the second's attack.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Select an enemy follower on the field and a follower on your field. Deal the first follower damage equal to the second's attack.\n{icon_q|[q]}{icon_act|[act]} {icon_cost03|[cost03]}, {icon_stand|[engage]}, bury this card: Select an enemy follower on the field and a follower on your field. Deal the first follower and its leader damage equal to the second's attack.",
+                "speech": null,
+                "illustrator": "Kouta Nagamori",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-024EN.png",
+                "trait_raw": "Faith / Eidolon",
+                "traits": [
+                  "Faith",
+                  "Eidolon"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3fc36bb9d55b421c8cc03c6c232498482c6fee533051c589806b2cfd7386ee7a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-024EN",
+            "fetched_at": "2026-09-27T17:32:41.728820Z"
+          },
+          "document_ref": "documents-1a722f00da426c1f"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-025EN",
+      "documents": {
+        "documents-ec70b12444433ca5": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-025EN",
+            "faces": [
+              {
+                "name": "Athena",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Deity"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "6",
+                  "power": "3"
+                },
+                "text": "While this card is reserved on your field, it takes damage instead of your leader.\n{icon_lastword|[lastwords]} Select an enemy leader and deal it 3 damage.",
+                "sections": [],
+                "raw_text": "While this card is reserved on your field, it takes damage instead of your leader.\n{icon_lastword|[lastwords]} Select an enemy leader and deal it 3 damage.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-025EN.png",
+                "trait_raw": "Deity",
+                "traits": [
+                  "Deity"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q780 (Jun. 28, 2024)",
+                "question": "If I have more than one reserved copy of this follower on my field, and my leader takes damage, does each copy take that damage instead?",
+                "answer": "No. You choose which copy takes the damage."
+              },
+              {
+                "title": "Q779 (Jun. 28, 2024)",
+                "question": "If I play Fiery Embrace with Spellchain (10) and select a reserved enemy Athena, can I deal 3 damage to its leader?",
+                "answer": "Yes. By the time you resolve \"Deal 3 damage to that follower's leader,\" Athena is already destroyed and no longer on the field, so its ability is no longer valid."
+              },
+              {
+                "title": "Q778 (Jun. 28, 2024)",
+                "question": "If I play Honest Cohort while Raio, Omen of Truth is on my field, and select a reserved enemy Athena, can I deal 3 damage to its leader?",
+                "answer": "No. Honest Cohort deals 6 damage to Athena, bringing it to 0 defense, but it isn't destroyed until after Honest Cohort is fully resolved, so Athena's ability is still valid when you would've dealt 3 damage to its leader."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:77de26613eca1aaa7c347cb48f9aed57c113590762ebc42de60d517629931c8c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-025EN",
+            "fetched_at": "2026-09-27T17:32:44.636911Z"
+          },
+          "document_ref": "documents-ec70b12444433ca5"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-026EN",
+      "documents": {
+        "documents-00c464dd21702365": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-026EN",
+            "faces": [
+              {
+                "name": "Altaia, Holy Angel",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Gloryfinder",
+                  "Rarity": "Gold",
+                  "Trait": "Angel"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "Rush. Assail. (Followers with Assail can attack reserved followers.)\n{icon_fanfare|[fanfare]} Deal 5 damage to each enemy {icon_neutral|[neutral]} follower on the field.",
+                "sections": [],
+                "raw_text": "Rush. Assail. (Followers with Assail can attack reserved followers.)\n{icon_fanfare|[fanfare]} Deal 5 damage to each enemy {icon_neutral|[neutral]} follower on the field.",
+                "speech": null,
+                "illustrator": "Mushimaro",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-026EN.png",
+                "trait_raw": "Angel",
+                "traits": [
+                  "Angel"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:25aed25ad3b12b60050097567f0bb50260053f6d455f21d9117d6c66f9d6867e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-026EN",
+            "fetched_at": "2026-09-27T17:32:47.616922Z"
+          },
+          "document_ref": "documents-00c464dd21702365"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-027EN",
+      "documents": {
+        "documents-51579e9d95c369e1": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-027EN",
+            "faces": [
+              {
+                "name": "Odette, White Swan",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Fable"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "6",
+                  "power": "4"
+                },
+                "text": "{icon_fanfare|[fanfare]} Give {icon_hp|[defense]}+2 to your leader and each other follower on your field.\n{icon_lastword|[lastwords]} Give {icon_hp|[defense]}+2 to your leader and each follower on your field.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Give {icon_hp|[defense]}+2 to your leader and each other follower on your field.\n{icon_lastword|[lastwords]} Give {icon_hp|[defense]}+2 to your leader and each follower on your field.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-027EN.png",
+                "trait_raw": "Faith / Fable",
+                "traits": [
+                  "Faith",
+                  "Fable"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:856b1239e00ce3381414478fca45ee743555ce212d6e80d38a84f4db7da65986",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-027EN",
+            "fetched_at": "2026-09-27T17:32:50.488862Z"
+          },
+          "document_ref": "documents-51579e9d95c369e1"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-028EN",
+      "documents": {
+        "documents-a9be9ae49820e198": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-028EN",
+            "faces": [
+              {
+                "name": "Apostle of Repose",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\nAt the start of each opponent's main phase, recover 1 play point.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\nAt the start of each opponent's main phase, recover 1 play point.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-028EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-029EN|Apostle of Repose}",
+                "href": "/cards/?cardno=GFB01d-029EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d036fe36682c27e77d91afceb070bd76923b40a58ec1b9b1c4c45b6fae02ce2b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-028EN",
+            "fetched_at": "2026-09-27T17:32:52.784040Z"
+          },
+          "document_ref": "documents-a9be9ae49820e198"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-029EN",
+      "documents": {
+        "documents-3456cf92fbc631a1": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-029EN",
+            "faces": [
+              {
+                "name": "Apostle of Repose",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select a reserved enemy follower on the field and banish it.\nAt the start of each opponent's main phase, recover 2 play points.",
+                "sections": [],
+                "raw_text": "On Evolve - Select a reserved enemy follower on the field and banish it.\nAt the start of each opponent's main phase, recover 2 play points.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-029EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-028EN|Apostle of Repose}",
+                "href": "/cards/?cardno=GFB01d-028EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1df74b671cb430cbc6b75c4d0ee34a2e000bb1ad378eced3ca2ed269531db945",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-029EN",
+            "fetched_at": "2026-09-27T17:32:55.969188Z"
+          },
+          "document_ref": "documents-3456cf92fbc631a1"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-030EN",
+      "documents": {
+        "documents-6f10fe1726037efc": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-030EN",
+            "faces": [
+              {
+                "name": "Hakrabi",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Luminary / Zealot"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "4"
+                },
+                "text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Discard an amulet: Search your deck for a 1-cost amulet, summon it, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Discard an amulet: Search your deck for a 1-cost amulet, summon it, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-030EN.png",
+                "trait_raw": "Luminary / Zealot",
+                "traits": [
+                  "Luminary",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6d0dcad2af47dcbe92ac3f0922d0c81f1c24a7e77f513f26d9490e0404a8d1a5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-030EN",
+            "fetched_at": "2026-09-27T17:32:58.564341Z"
+          },
+          "document_ref": "documents-6f10fe1726037efc"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-031EN",
+      "documents": {
+        "documents-d61514a0b444d430": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-031EN",
+            "faces": [
+              {
+                "name": "Themis's Decree",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Destroy each follower on the field.",
+                "sections": [],
+                "raw_text": "Destroy each follower on the field.",
+                "speech": null,
+                "illustrator": "sime",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-031EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q229 (Jun. 30, 2023)",
+                "question": "Can I destroy enemy followers on the field that have Aura with this spell's ability?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f9fe31fb1dc624577601c4dff3c6af5a054c962b494fbf006ac16a4fafd63e21",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-031EN",
+            "fetched_at": "2026-09-27T17:33:00.911560Z"
+          },
+          "document_ref": "documents-d61514a0b444d430"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-032EN",
+      "documents": {
+        "documents-611df79e250137a8": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-032EN",
+            "faces": [
+              {
+                "name": "Sacred Plea",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_stand|[engage]}, bury this card: Draw a card.\n{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this card: Draw 2 cards.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_stand|[engage]}, bury this card: Draw a card.\n{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this card: Draw 2 cards.",
+                "speech": null,
+                "illustrator": "Ayaka Suda",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-032EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8bda299bb1ef3a759a34c9597d85055324036e0b67bf77deae783ea30b9335b8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-032EN",
+            "fetched_at": "2026-09-27T17:33:03.689411Z"
+          },
+          "document_ref": "documents-611df79e250137a8"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-033EN",
+      "documents": {
+        "documents-66e5904720404d4c": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-033EN",
+            "faces": [
+              {
+                "name": "Globe of the Starways",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Celestial"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.\n{icon_q|[q]}{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this card: Give your leader {icon_hp|[defense]}+1. Draw a card.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.\n{icon_q|[q]}{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this card: Give your leader {icon_hp|[defense]}+1. Draw a card.",
+                "speech": null,
+                "illustrator": "Dencho (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-033EN.png",
+                "trait_raw": "Faith / Celestial",
+                "traits": [
+                  "Faith",
+                  "Celestial"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:99f560ad4b8cdc9cb82db456ce17d7f2e52f9deed78dc50a2029cd1087ca8e94",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-033EN",
+            "fetched_at": "2026-09-27T17:33:06.766917Z"
+          },
+          "document_ref": "documents-66e5904720404d4c"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-034EN",
+      "documents": {
+        "documents-b159be3cfa13b483": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-034EN",
+            "faces": [
+              {
+                "name": "Ancient Protector",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Eidolon / Lightborne"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "While this card is on your field, you can't lose the game, and opponents can't win.\nWhen your leader's defense becomes 0 or less, bury this card and change your leader's defense to 1.",
+                "sections": [],
+                "raw_text": "While this card is on your field, you can't lose the game, and opponents can't win.\nWhen your leader's defense becomes 0 or less, bury this card and change your leader's defense to 1.",
+                "speech": null,
+                "illustrator": "alchemaniac",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-034EN.png",
+                "trait_raw": "Eidolon / Lightborne",
+                "traits": [
+                  "Eidolon",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q738 (Jun. 14, 2024)",
+                "question": "This amulet is on my field and my leader's defense is 2. My opponent has 2 copies of Dracomancer's Rites on their field. It's now the start of their end phase, and they've discarded a card this turn. Do I lose the game? In other words, would the relevant abilities be resolved in the following order?\n\n1. My opponent deals 2 damage to my leader with one Dracomancer's Rites.\n2. This amulet's ability is triggered, so I put it into its owner's cemetery and change my leader's defense to 1.\n3. My opponent deals 2 damage to my leader with the other Dracomancer's Rites.",
+                "answer": "No. At the start of your opponent's end phase, the abilities of both copies of Dracomancer's Rites are triggered and become pending. Your opponent starts by resolving one instance of the ability, dealing 2 damage to your leader. Since your leader now has 0 defense, this amulet's ability triggers and becomes pending.\n\nAt this point, there are two pending abilities: the other instance of Dracomancer's Rites's ability for your opponent and this amulet's ability for you. When both players control pending abilities, the active player resolves theirs first. Therefore, your opponent must resolve the remaining Dracomancer's Rites ability, dealing 2 damage to your leader and bringing its defense to -2.\n\nLastly, you resolve this amulet's ability, putting it into its owner's cemetery and changing your leader's defense to 1."
+              },
+              {
+                "title": "Q737 (Jun. 14, 2024)",
+                "question": "If an enemy Deepwood Anomaly deals attack damage to my leader during my opponent's turn while this amulet is on my field, bringing my leader's defense to 0 or less, does my opponent win the game?",
+                "answer": "No. When the enemy Deepwood Anomaly deals attack damage to your leader, its ability triggers, and at the same time this amulet's ability triggers, since your leader's defense has become 0 or less.\n\nWhen both players control pending abilities, the active player resolves theirs first. In this case, your opponent is the active player, so they resolve Deepwood Anomaly's ability.\n\nAt this point, this amulet is still on your field, so its effect \"you can't lose the game, and opponents can't win\" is applied at the same time as Deepwood Anomaly's effect \"win the game,\" which is nullified because prohibiting effects always take precedence. As a result, your opponent doesn't win, and their Deepwood Anomaly's ability becomes resolved.\n\nThen, you resolve this amulet's ability, putting it into its owner's cemetery and changing your leader's defense to 1."
+              },
+              {
+                "title": "Q717 (Jun. 14, 2024)",
+                "question": "Can I concede while this amulet is on my field?",
+                "answer": "Yes. All players may concede at any time, regardless of card abilities."
+              },
+              {
+                "title": "Q716 (Jun. 14, 2024)",
+                "question": "If I lose due to tournament rules (running out of time, etc.) but I have this amulet on my field, do I still lose the game?",
+                "answer": "Yes. Card abilities have no influence over tournament rules."
+              },
+              {
+                "title": "Q715 (Jun. 14, 2024)",
+                "question": "If an enemy Deepwood Anomaly attacks my leader while this amulet is on my field, do I lose the game?",
+                "answer": "No. If a card's effect instructs a player to perform an action (\"win the game\") that is prohibited by another active effect (\"you can't lose the game, and opponents can't win\"), the prohibiting effect takes precedence."
+              },
+              {
+                "title": "Q714 (Jun. 14, 2024)",
+                "question": "If my leader's defense changes from 0 to 1 with this amulet's ability, does Elana's Prayer's ability trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q713 (Jun. 14, 2024)",
+                "question": "If I have 2 copies of this amulet on my field when my leader's defense becomes 0 or less, can I put only 1 copy into its owner's cemetery?",
+                "answer": "No. You put both copies into their owner's cemetery and change your leader's defense to 1."
+              },
+              {
+                "title": "Q712 (Jun. 14, 2024)",
+                "question": "If I draw a card when my deck is empty, but this amulet is on my field, do I lose the game?",
+                "answer": "No, you don't."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8db6614abfb80c4fed3fd273c2c51b6bc6a5cd19914966b978f2177e5638120a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-034EN",
+            "fetched_at": "2026-09-27T17:33:09.407725Z"
+          },
+          "document_ref": "documents-b159be3cfa13b483"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-035EN",
+      "documents": {
+        "documents-507044b2379e7255": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-035EN",
+            "faces": [
+              {
+                "name": "Path to Purgatory",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Archfiend"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_fanfare|[fanfare]} Draw 3 cards. Deal 3 damage to your leader.\nAt the start of your end phase, if your leader's defense is 6 or less, {icon_stand|[engage]}, bury this card: Deal 6 damage to each enemy follower on the field.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Draw 3 cards. Deal 3 damage to your leader.\nAt the start of your end phase, if your leader's defense is 6 or less, {icon_stand|[engage]}, bury this card: Deal 6 damage to each enemy follower on the field.",
+                "speech": null,
+                "illustrator": "Ryosuke Aiba (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-035EN.png",
+                "trait_raw": "Archfiend",
+                "traits": [
+                  "Archfiend"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c21db7ffb932a93c6005a2d4ef5394cc485848f231e565646fa53b8fc6b454e9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-035EN",
+            "fetched_at": "2026-09-27T17:33:12.605345Z"
+          },
+          "document_ref": "documents-507044b2379e7255"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-036EN",
+      "documents": {
+        "documents-3b76c7961bf05e1e": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-036EN",
+            "faces": [
+              {
+                "name": "Geno, Machine Artisan",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Commander / Supreme"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWhenever you play an amulet, select a follower on your field and give it {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWhenever you play an amulet, select a follower on your field and give it {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-036EN.png",
+                "trait_raw": "Commander / Supreme",
+                "traits": [
+                  "Commander",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-037EN|Geno, Machine Artisan}",
+                "href": "/cards/?cardno=GFB01d-037EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5c69813383f8bc154d055825cba4eac7aa4816f9d19047c295616d6585adecbc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-036EN",
+            "fetched_at": "2026-09-27T17:33:15.139839Z"
+          },
+          "document_ref": "documents-3b76c7961bf05e1e"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-037EN",
+      "documents": {
+        "documents-1641a7b46cbd04af": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-037EN",
+            "faces": [
+              {
+                "name": "Geno, Machine Artisan",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Commander / Supreme"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.\nWhenever you play an amulet, select a follower on your field and give it {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "On Evolve - Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.\nWhenever you play an amulet, select a follower on your field and give it {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-037EN.png",
+                "trait_raw": "Commander / Supreme",
+                "traits": [
+                  "Commander",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-036EN|Geno, Machine Artisan}",
+                "href": "/cards/?cardno=GFB01d-036EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:deddd297516b185a622a07daad2f38b67c8ceecd1ab02ef0000b9e2e25ab8dd7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-037EN",
+            "fetched_at": "2026-09-27T17:33:17.730217Z"
+          },
+          "document_ref": "documents-1641a7b46cbd04af"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-038EN",
+      "documents": {
+        "documents-2013b45e64c8fbcf": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-038EN",
+            "faces": [
+              {
+                "name": "Iron Staff Mechanic",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Mage / Supreme"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Search your deck for a 1-cost card, put it into your EX area, then shuffle your deck. It costs 1 less to play this turn.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Search your deck for a 1-cost card, put it into your EX area, then shuffle your deck. It costs 1 less to play this turn.",
+                "speech": null,
+                "illustrator": "Usugumo Nezu",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-038EN.png",
+                "trait_raw": "Mage / Supreme",
+                "traits": [
+                  "Mage",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-039EN|Iron Staff Mechanic}",
+                "href": "/cards/?cardno=GFB01d-039EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:629a3538c801b52f7979825d363e6f929b5309a2e704a0292aadc5fa2c9ec832",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-038EN",
+            "fetched_at": "2026-09-27T17:33:20.703110Z"
+          },
+          "document_ref": "documents-2013b45e64c8fbcf"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-039EN",
+      "documents": {
+        "documents-3c1426349f782297": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-039EN",
+            "faces": [
+              {
+                "name": "Iron Staff Mechanic",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Mage / Supreme"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "On Evolve - Search your deck for a 1-cost card, put it into your EX area, then shuffle your deck. It costs 1 less to play this turn.",
+                "sections": [],
+                "raw_text": "On Evolve - Search your deck for a 1-cost card, put it into your EX area, then shuffle your deck. It costs 1 less to play this turn.",
+                "speech": null,
+                "illustrator": "Usugumo Nezu",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-039EN.png",
+                "trait_raw": "Mage / Supreme",
+                "traits": [
+                  "Mage",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-038EN|Iron Staff Mechanic}",
+                "href": "/cards/?cardno=GFB01d-038EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d42f8927229964af99e30d103bd6c5b8c675344e186780c8b6e1692005b34d3a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-039EN",
+            "fetched_at": "2026-09-27T17:33:23.587900Z"
+          },
+          "document_ref": "documents-3c1426349f782297"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-040EN",
+      "documents": {
+        "documents-7cd49958e685621f": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-040EN",
+            "faces": [
+              {
+                "name": "Shenlong",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "5",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\nWard. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Draw 2 cards. Discard a card.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.\nWard. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Draw 2 cards. Discard a card.",
+                "speech": null,
+                "illustrator": "Toshiaki Takayama",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-040EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-041EN|Shenlong}",
+                "href": "/cards/?cardno=GFB01d-041EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:76086e27179c104c9643785d0f2bb428355cfddcb7b6cdafc4b7d40fc6626533",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-040EN",
+            "fetched_at": "2026-09-27T17:33:26.287720Z"
+          },
+          "document_ref": "documents-7cd49958e685621f"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-041EN",
+      "documents": {
+        "documents-f6ffba49a03834da": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-041EN",
+            "faces": [
+              {
+                "name": "Shenlong",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "5"
+                },
+                "text": "Ward.\nOn Evolve - Give your leader {icon_hp|[defense]}+5.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Give your leader {icon_hp|[defense]}+5.",
+                "speech": null,
+                "illustrator": "Toshiaki Takayama",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-041EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-040EN|Shenlong}",
+                "href": "/cards/?cardno=GFB01d-040EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5f7833bd77bf7f85e5a0a02a410f346c286d389e4780083292834753b21b4035",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-041EN",
+            "fetched_at": "2026-09-27T17:33:29.111227Z"
+          },
+          "document_ref": "documents-f6ffba49a03834da"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-042EN",
+      "documents": {
+        "documents-2cdcd44570db798d": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-042EN",
+            "faces": [
+              {
+                "name": "Serpent Wrath",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Deal it 5 damage and, if Overflow is active for you, draw a card. (Overflow is active if you have at least 7 max play points.)",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Deal it 5 damage and, if Overflow is active for you, draw a card. (Overflow is active if you have at least 7 max play points.)",
+                "speech": null,
+                "illustrator": "Aogachou",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-042EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e8004a736052535ccf0d078612d73e35dbd006f61e2e637acfbbb5579171b155",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-042EN",
+            "fetched_at": "2026-09-27T17:33:31.978289Z"
+          },
+          "document_ref": "documents-2cdcd44570db798d"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-043EN",
+      "documents": {
+        "documents-4a4bde7be4ea703d": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-043EN",
+            "faces": [
+              {
+                "name": "Priest of the Cudgel",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-043EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-044EN|Priest of the Cudgel}",
+                "href": "/cards/?cardno=GFB01d-044EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5ab880e4fdfadfa873b2060b7f92a387f8c0743964692378ff099d02d2e5261b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-043EN",
+            "fetched_at": "2026-09-27T17:33:34.961641Z"
+          },
+          "document_ref": "documents-4a4bde7be4ea703d"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-044EN",
+      "documents": {
+        "documents-8f3be7f3b5168a70": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-044EN",
+            "faces": [
+              {
+                "name": "Priest of the Cudgel",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "On Evolve - Select an enemy follower with 3 defense or less on the field and banish it.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower with 3 defense or less on the field and banish it.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-044EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-043EN|Priest of the Cudgel}",
+                "href": "/cards/?cardno=GFB01d-043EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0ea1868055e0c78a6e861eb01671bf64cc27d4bdd674d6c84f9dedcf97fb5655",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-044EN",
+            "fetched_at": "2026-09-27T17:33:37.822871Z"
+          },
+          "document_ref": "documents-8f3be7f3b5168a70"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-045EN",
+      "documents": {
+        "documents-31e42f34c1ce638b": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-045EN",
+            "faces": [
+              {
+                "name": "Prism Priestess",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower.",
+                "speech": null,
+                "illustrator": "Tsune-kun",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-045EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-046EN|Prism Priestess}",
+                "href": "/cards/?cardno=GFB01d-046EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c6fd13ebba657075aee96a5de6e20c4440e5e2a99671ba7edd15a5470526a5e1",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-045EN",
+            "fetched_at": "2026-09-27T17:33:40.673099Z"
+          },
+          "document_ref": "documents-31e42f34c1ce638b"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-046EN",
+      "documents": {
+        "documents-6a558e17b19bee64": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-046EN",
+            "faces": [
+              {
+                "name": "Prism Priestess",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "On Evolve - Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "On Evolve - Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "Tsune-kun",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-046EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q232 (Jun. 30, 2023)",
+                "question": "When playing this follower's ability, do I have to reveal the card from my deck before adding it to my hand?",
+                "answer": "Yes. This is necessary to show that the card is one of the cards specified."
+              },
+              {
+                "title": "Q231 (Jun. 30, 2023)",
+                "question": "If there are no amulets in my deck, can I still play this follower's ability?",
+                "answer": "Yes, you can. After looking through your deck, you would shuffle it without adding an amulet to your hand."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-045EN|Prism Priestess}",
+                "href": "/cards/?cardno=GFB01d-045EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:493f0819a904653c6a9249838a922314ca563a2908761821ab4bf2d147e63a02",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-046EN",
+            "fetched_at": "2026-09-27T17:33:43.241898Z"
+          },
+          "document_ref": "documents-6a558e17b19bee64"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-047EN",
+      "documents": {
+        "documents-2994d325e331bd92": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-047EN",
+            "faces": [
+              {
+                "name": "Radiance Angel",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWard. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Draw a card.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWard. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Draw a card.",
+                "speech": null,
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-047EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-048EN|Radiance Angel}",
+                "href": "/cards/?cardno=GFB01d-048EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cab5377e71ea73ec62033a212732b96d372c91ae022ff0388708c41da82c0060",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-047EN",
+            "fetched_at": "2026-09-27T17:33:46.203079Z"
+          },
+          "document_ref": "documents-2994d325e331bd92"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-048EN",
+      "documents": {
+        "documents-1aa5e156f3121a92": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-048EN",
+            "faces": [
+              {
+                "name": "Radiance Angel",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "4"
+                },
+                "text": "Ward.\nOn Evolve - Give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-048EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-047EN|Radiance Angel}",
+                "href": "/cards/?cardno=GFB01d-047EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4874a4e1b46d22b69656ca02526a6698eb0bdd35c4b385f22b8b278761843bb9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-048EN",
+            "fetched_at": "2026-09-27T17:33:49.129141Z"
+          },
+          "document_ref": "documents-1aa5e156f3121a92"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-049EN",
+      "documents": {
+        "documents-6dc9900323acf516": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-049EN",
+            "faces": [
+              {
+                "name": "Disciple of Repose",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "At the start of each opponent's main phase, select an enemy follower on the field and deal it 1 damage.",
+                "sections": [],
+                "raw_text": "At the start of each opponent's main phase, select an enemy follower on the field and deal it 1 damage.",
+                "speech": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-049EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e03c54abbc8b7d76c2f89d040af5b2f5fb866b5932dc2e4e1a671e0b89fc7ff7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-049EN",
+            "fetched_at": "2026-09-27T17:33:52.063062Z"
+          },
+          "document_ref": "documents-6dc9900323acf516"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-050EN",
+      "documents": {
+        "documents-a4f454e1a86260c2": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-050EN",
+            "faces": [
+              {
+                "name": "Silver Cog Spinner",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Luminary / Lightborne"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "5"
+                },
+                "text": "{icon_fanfare|[fanfare]} If there are at least 5 cards in your hand, recover 2 play points. If there are 5 or less cards, draw a card.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} If there are at least 5 cards in your hand, recover 2 play points. If there are 5 or less cards, draw a card.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-050EN.png",
+                "trait_raw": "Luminary / Lightborne",
+                "traits": [
+                  "Luminary",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q721 (Jun. 14, 2024)",
+                "question": "If my hand has 5 cards when I play this follower's Fanfare ability, do I both recover 2 play points and draw a card?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q720 (Jun. 14, 2024)",
+                "question": "If my hand has 4 cards when I play this follower's Fanfare ability, can I draw a card, then recover 2 play points because my hand would then have 5 cards?",
+                "answer": "No. Aside from selections made as a prerequisite to play an ability, abilities are resolved in the written order."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cdd3ea3ab0dd6645f2c36e5325f0bf19632843a7a3e44145c0fd9775465269f7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-050EN",
+            "fetched_at": "2026-09-27T17:33:56.996092Z"
+          },
+          "document_ref": "documents-a4f454e1a86260c2"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-051EN",
+      "documents": {
+        "documents-f6354b6f49eaccca": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-051EN",
+            "faces": [
+              {
+                "name": "Acolyte's Light",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Banish it and give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Banish it and give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Tob",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-051EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q131 (Jun. 30, 2023)",
+                "question": "If there are no enemy followers on the field, can I still play this spell to give my leader +2 defense?",
+                "answer": "No. You must be able to select a follower to play this spell."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5eb44d778f2fb417d09020f36447a9e69c5a322677c1739c11754478804219af",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-051EN",
+            "fetched_at": "2026-09-27T17:33:57.486215Z"
+          },
+          "document_ref": "documents-f6354b6f49eaccca"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-052EN",
+      "documents": {
+        "documents-86c27882f9c90cda": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-052EN",
+            "faces": [
+              {
+                "name": "Blackened Scripture",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Zealot"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower with 3 defense or less on the field and banish it.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower with 3 defense or less on the field and banish it.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-052EN.png",
+                "trait_raw": "Zealot",
+                "traits": [
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q234 (Jun. 30, 2023)",
+                "question": "Can I select a follower whose original defense is greater than 3 but currently has 3 defense or less with this spell?",
+                "answer": "Yes. This spell only looks at the follower's current defense."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8be6c9646da20379c796cd94d13f438ff96ee2cde71425c9ac1eaa68217af21b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-052EN",
+            "fetched_at": "2026-09-27T17:34:00.239635Z"
+          },
+          "document_ref": "documents-86c27882f9c90cda"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-053EN",
+      "documents": {
+        "documents-29475346570c0760": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-053EN",
+            "faces": [
+              {
+                "name": "Beastcall Aria",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_fanfare|[fanfare]} Summon a Holy Falcon token.\n{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this card: Summon a Holy Tiger token.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Summon a Holy Falcon token.\n{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this card: Summon a Holy Tiger token.",
+                "speech": "{icon_bishop|[havencraft]}{icon_cost03|[cost03]} Holy Falcon (Follower - Avian) {icon_power|[attack]}2/{icon_hp|[defense]}2 | Storm.\n{icon_bishop|[havencraft]}{icon_cost04|[cost04]} Holy Tiger (Follower - Beast) {icon_power|[attack]}4/{icon_hp|[defense]}4 | Rush.",
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-053EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-T01EN|Holy Falcon}",
+                "href": "/cards/?cardno=GFB01d-T01EN"
+              },
+              {
+                "label": "{GFB01d-T02EN|Holy Tiger}",
+                "href": "/cards/?cardno=GFB01d-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b21279023208b8ee975b53a1a8cc91d9e3b0419acf4a730b1d42caabcbdba3cb",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-053EN",
+            "fetched_at": "2026-09-27T17:34:02.757993Z"
+          },
+          "document_ref": "documents-29475346570c0760"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-054EN",
+      "documents": {
+        "documents-8828bc0d9381a251": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-054EN",
+            "faces": [
+              {
+                "name": "Purehearted Singer",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Musical"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "2",
+                  "power": "1"
+                },
+                "text": "{icon_fanfare|[fanfare]}{icon_lastword|[lastwords]} Draw a card.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]}{icon_lastword|[lastwords]} Draw a card.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-054EN.png",
+                "trait_raw": "Musical",
+                "traits": [
+                  "Musical"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d2afa6f78e428eb54d71ed7f50fad6cddfa51884710ffa8c21eb2c66f393a4f4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-054EN",
+            "fetched_at": "2026-09-27T17:34:05.897099Z"
+          },
+          "document_ref": "documents-8828bc0d9381a251"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-055EN",
+      "documents": {
+        "documents-18214a34589883c9": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-055EN",
+            "faces": [
+              {
+                "name": "Rosa, Mech Wing Maiden",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Angel / Supreme"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWard. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\nWard. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)",
+                "speech": null,
+                "illustrator": "u-suke",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-055EN.png",
+                "trait_raw": "Angel / Supreme",
+                "traits": [
+                  "Angel",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-056EN|Rosa, Mech Wing Maiden}",
+                "href": "/cards/?cardno=GFB01d-056EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8521bc8f7944518d25ff927e8a53795b7f7c3608a7fa85479cb2a4c17653ad67",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-055EN",
+            "fetched_at": "2026-09-27T17:34:08.832906Z"
+          },
+          "document_ref": "documents-18214a34589883c9"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-056EN",
+      "documents": {
+        "documents-56734176f5d8851d": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-056EN",
+            "faces": [
+              {
+                "name": "Rosa, Mech Wing Maiden",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Angel / Supreme"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "2"
+                },
+                "text": "Ward.\nOn Evolve - Draw a card.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Draw a card.",
+                "speech": null,
+                "illustrator": "u-suke",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-056EN.png",
+                "trait_raw": "Angel / Supreme",
+                "traits": [
+                  "Angel",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": [
+              {
+                "label": "{GFB01d-055EN|Rosa, Mech Wing Maiden}",
+                "href": "/cards/?cardno=GFB01d-055EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed3ee503cba68448ed7601c9d597400cf9113af7fa9b5af2f0f5e08331c2c734",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-056EN",
+            "fetched_at": "2026-09-27T17:34:11.791227Z"
+          },
+          "document_ref": "documents-56734176f5d8851d"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-057EN",
+      "documents": {
+        "documents-72c8f97ca14dc2ce": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-057EN",
+            "faces": [
+              {
+                "name": "Execution",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Fiend"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy card on the field and destroy it.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy card on the field and destroy it.",
+                "speech": null,
+                "illustrator": "Tricky Agura",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-057EN.png",
+                "trait_raw": "Fiend",
+                "traits": [
+                  "Fiend"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4d3e3f4875a96f981080b532c196a854ae029940cc1f44f984337728cbdff963",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-057EN",
+            "fetched_at": "2026-09-27T17:34:14.316356Z"
+          },
+          "document_ref": "documents-72c8f97ca14dc2ce"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-058EN",
+      "documents": {
+        "documents-e05456ca73f53b1e": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-058EN",
+            "faces": [
+              {
+                "name": "Starry Elf",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Elf / Celestial"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for an amulet, reveal it, add it to your hand, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-058EN.png",
+                "trait_raw": "Elf / Celestial",
+                "traits": [
+                  "Elf",
+                  "Celestial"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2b191b175d978b31b49c4efc0908c26b79546e74895183117cb5fc099b2113db",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-058EN",
+            "fetched_at": "2026-09-27T17:34:17.383410Z"
+          },
+          "document_ref": "documents-e05456ca73f53b1e"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-059EN",
+      "documents": {
+        "documents-0a77cc04e862e85f": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-059EN",
+            "faces": [
+              {
+                "name": "Mark of the Six",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Omen / Hunter"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nThe next time your leader would take damage this turn, it doesn't take damage.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nThe next time your leader would take damage this turn, it doesn't take damage.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-059EN.png",
+                "trait_raw": "Omen / Hunter",
+                "traits": [
+                  "Omen",
+                  "Hunter"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q652 (Jun. 14, 2024)",
+                "question": "If a follower with 0 attack, such as Bellringer Angel, attacks my leader, does it use up this spell's effect?",
+                "answer": "No. This spell's effect applies \"the next time your leader would take damage this turn.\" Followers with 0 attack don't deal attack damage, so the effect remains on your leader after the attack."
+              },
+              {
+                "title": "Q651 (Jun. 14, 2024)",
+                "question": "If I play this spell when my leader has at least 11 defense, then my opponent plays Azazel's On Evolve ability, does my leader's defense still become 10?",
+                "answer": "Yes. Azazel's On Evolve ability doesn't deal damage."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:864da86a307265a7bf00b6987b239be085df9f0a8615b8a6dc999bef19d68fe8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-059EN",
+            "fetched_at": "2026-09-27T17:34:20.065300Z"
+          },
+          "document_ref": "documents-0a77cc04e862e85f"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-060EN",
+      "documents": {
+        "documents-ce878e13ddab7f95": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-060EN",
+            "faces": [
+              {
+                "name": "Blazing Breath",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower on the field and deal it 2 damage. If Overflow is active for you, deal 4 damage instead. (Overflow is active if you have at least 7 max play points.)",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower on the field and deal it 2 damage. If Overflow is active for you, deal 4 damage instead. (Overflow is active if you have at least 7 max play points.)",
+                "speech": null,
+                "illustrator": "Illfill",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-060EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q106 (Jun. 30, 2023)",
+                "question": "If Overflow is active for me, does this spell deal 6 damage to the enemy follower?",
+                "answer": "No. When Overflow is active, it deals 4 damage."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1b61854f77c1e421bad9fa1d1d3e9363a4d6861216a1b97fe78b4dd9b294eda5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-060EN",
+            "fetched_at": "2026-09-27T17:34:22.647939Z"
+          },
+          "document_ref": "documents-ce878e13ddab7f95"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-061EN",
+      "documents": {
+        "documents-3d7ece4aae1e3c88": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-061EN",
+            "faces": [
+              {
+                "name": "Dragon's Nest",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_stand|[engage]}, bury this card: Give your leader {icon_hp|[defense]}+2. If Overflow is active for you, draw a card. (Overflow is active if you have at least 7 max play points.)",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_stand|[engage]}, bury this card: Give your leader {icon_hp|[defense]}+2. If Overflow is active for you, draw a card. (Overflow is active if you have at least 7 max play points.)",
+                "speech": null,
+                "illustrator": "ZOUNOSE",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-061EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:55b473a186fb6a9484b3a02989f4063d16b478a6f6417e7d354b2c42c1376482",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-061EN",
+            "fetched_at": "2026-09-27T17:34:25.919738Z"
+          },
+          "document_ref": "documents-3d7ece4aae1e3c88"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-062EN",
+      "documents": {
+        "documents-bc73e04281fc8b2e": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-062EN",
+            "faces": [
+              {
+                "name": "Undying Resentment",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Spell",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Departed"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Deal it 3 damage and bury the top card of your deck.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower on the field. Deal it 3 damage and bury the top card of your deck.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-062EN.png",
+                "trait_raw": "Departed",
+                "traits": [
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q125 (Jun. 30, 2023)",
+                "question": "If there are no enemy followers on the field, can I still play this spell to put the top card of my deck into my cemetery?",
+                "answer": "No. You must be able to select a follower to play this spell."
+              },
+              {
+                "title": "Q124 (Jun. 30, 2023)",
+                "question": "If there is an enemy follower on the field that I can select, and I have 0 cards in my deck, can I still play this spell?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:321f4807274d203a4e2acec2ebaf941fe1e2135e8de0dfb7cd19a48e923d650e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-062EN",
+            "fetched_at": "2026-09-27T17:34:28.653929Z"
+          },
+          "document_ref": "documents-bc73e04281fc8b2e"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-063EN",
+      "documents": {
+        "documents-46f5be62501f091a": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-063EN",
+            "faces": [
+              {
+                "name": "Snake Priestess",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Zealot"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)",
+                "sections": [],
+                "raw_text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)",
+                "speech": null,
+                "illustrator": "COGA",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-063EN.png",
+                "trait_raw": "Zealot",
+                "traits": [
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cb6c787c3fb2722e10609fb367ef1e17b4fc9f477edd7de1949d641bd493e8e5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-063EN",
+            "fetched_at": "2026-09-27T17:34:30.982171Z"
+          },
+          "document_ref": "documents-46f5be62501f091a"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-064EN",
+      "documents": {
+        "documents-c397c13e52efc06f": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-064EN",
+            "faces": [
+              {
+                "name": "Curate",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Faith"
+                },
+                "stats": {
+                  "cost": "6",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+5. Draw a card.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+5. Draw a card.",
+                "speech": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-064EN.png",
+                "trait_raw": "Faith",
+                "traits": [
+                  "Faith"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fcdb782a9cc36769bdc91aa9eb80ae4cf5e6c3171e2a322177d789c553c095b8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-064EN",
+            "fetched_at": "2026-09-27T17:34:33.960725Z"
+          },
+          "document_ref": "documents-c397c13e52efc06f"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-065EN",
+      "documents": {
+        "documents-03aae179d02487f7": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-065EN",
+            "faces": [
+              {
+                "name": "Servant of Repose",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "At the start of each opponent's main phase, give your leader {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "At the start of each opponent's main phase, give your leader {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Chiaki Negishi",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-065EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:68a2bf2e7bf4b8ccc25b624f2d1179f03d192dd5c8b8bce5d6c4c1ef39dfcc87",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-065EN",
+            "fetched_at": "2026-09-27T17:34:37.094776Z"
+          },
+          "document_ref": "documents-03aae179d02487f7"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-066EN",
+      "documents": {
+        "documents-a24e58e4974a18d6": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-066EN",
+            "faces": [
+              {
+                "name": "Death Sentence",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Zealot"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "This card is put onto the field engaged.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select an enemy follower on the field and destroy it.",
+                "sections": [],
+                "raw_text": "This card is put onto the field engaged.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select an enemy follower on the field and destroy it.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-066EN.png",
+                "trait_raw": "Zealot",
+                "traits": [
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q140 (Jun. 30, 2023)",
+                "question": "Can I pay the cost for this amulet's activated ability when it's engaged?",
+                "answer": "No. The cost requires you to engage it, so if it's already engaged, you cannot pay the cost."
+              },
+              {
+                "title": "Q139 (Jun. 30, 2023)",
+                "question": "Does this amulet come onto the field in the reserved state before becoming engaged?",
+                "answer": "No. It comes onto the field in the engaged state."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4ce633e89360c88c1d36d8cbe576c7c3b9ad1094acb46f73e47e351a482f12af",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-066EN",
+            "fetched_at": "2026-09-27T17:34:39.510013Z"
+          },
+          "document_ref": "documents-a24e58e4974a18d6"
+        }
+      ]
+    },
+    {
+      "card_no": "GFB01d-067EN",
+      "documents": {
+        "documents-ae5f0e6ab63ef8a6": {
+          "region": "en",
+          "record": {
+            "number": "GFB01d-067EN",
+            "faces": [
+              {
+                "name": "Realm of Repose",
+                "info": {
+                  "Card Set": "Gloryfinder Bundle #1 “Guide to Glory”",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Omen / Zealot"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_q|[q]}{icon_act|[act]} {icon_stand|[engage]}, bury this card: For the rest of this turn, if your leader would take more than 4 damage, it takes 4 instead.",
+                "sections": [],
+                "raw_text": "{icon_q|[q]}{icon_act|[act]} {icon_stand|[engage]}, bury this card: For the rest of this turn, if your leader would take more than 4 damage, it takes 4 instead.",
+                "speech": null,
+                "illustrator": "AOGIRI",
+                "image": "/wordpress/wp-content/images/cardlist/GFB01/GFB01d-067EN.png",
+                "trait_raw": "Omen / Zealot",
+                "traits": [
+                  "Omen",
+                  "Zealot"
+                ]
+              }
+            ],
+            "release_date": "Jul. 19, 2024",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q723 (Jun. 14, 2024)",
+                "question": "Does this amulet's ability mean my leader can't take more than a total of 4 damage on the turn I activate it?",
+                "answer": "No. Any single instance of damage greater than 4 dealt to your leader that turn is reduced to 4.\n\nFor example, if your leader takes 5 damage twice, both instances are reduced to 4 for a total of 8 damage. If your leader takes 6 damage and then 3 damage, the first instance is reduced to 4 and the second is unaffected, giving a total of 7 damage."
+              }
+            ],
+            "products_ref": "products-62812d03c9c6a351",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0976536edb59fd8eaab1bb89e1d3e28d816c9f06dad05c8ac6b9658ab1f6b80a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=GFB01d-067EN",
+            "fetched_at": "2026-09-27T17:34:42.483064Z"
+          },
+          "document_ref": "documents-ae5f0e6ab63ef8a6"
+        }
+      ]
+    }
+  ]
+}

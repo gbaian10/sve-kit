@@ -1,0 +1,1383 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD05",
+  "range": "000-099",
+  "products": {
+    "products-505dcec4dbba7398": [
+      {
+        "name": "Showdown Deck: Abysscraft",
+        "date": "Mar. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=SDD05",
+          "https://en.shadowverse-evolve.com/products/sdd/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SDD05-001EN",
+      "documents": {
+        "documents-e13ca97905502caa": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-001EN",
+            "faces": [
+              {
+                "name": "VI. Milteo, The Lovers",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Arcana / Demon"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_fanfare|[fanfare]} Discard a card: Reveal cards from the top of your deck until you reveal 2 followers that cost 3 or less. Summon them. Shuffle the rest and put them on the bottom of your deck.\nAt the start of your end phase, Necrocharge (20) - Evolve this.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Discard a card: Reveal cards from the top of your deck until you reveal 2 followers that cost 3 or less. Summon them. Shuffle the rest and put them on the bottom of your deck.\nAt the start of your end phase, Necrocharge (20) - Evolve this.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-001EN.png",
+                "trait_raw": "Arcana / Demon",
+                "traits": [
+                  "Arcana",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1303 (Jun. 13, 2025)",
+                "question": "If I have 4 cards on my field including this follower when playing its Fanfare ability, what happens?",
+                "answer": "You would resolve the ability as normal, except you would choose 1 of the revealed followers to summon and shuffle the other with the rest of the revealed cards before putting them on the bottom of your deck."
+              },
+              {
+                "title": "Q1302 (Jun. 13, 2025)",
+                "question": "If I reveal all the cards in my deck and only reveal 1 follower that costs 3 or less, do I still summon that follower?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1301 (Jun. 13, 2025)",
+                "question": "If I reveal all the cards in my deck and don't reveal any followers that cost 3 or less, what happens?",
+                "answer": "You would shuffle all the cards you revealed and put them back in the deck area."
+              },
+              {
+                "title": "Q1300 (Jun. 13, 2025)",
+                "question": "If I evolve this follower with its automatic ability, can I evolve another follower using its evolve ability in the same turn?",
+                "answer": "Yes. Although you can only activate one evolve ability per turn, other abilities that evolve followers do not count towards this limit."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-002EN|VI. Milteo, The Lovers}",
+                "href": "/cards/?cardno=SDD05-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fdb669de0b9c9890615de7276c0138d55785c1516362a9f14ce62830ab863aca",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-001EN",
+            "fetched_at": "2026-09-27T14:40:57.976027Z"
+          },
+          "document_ref": "documents-e13ca97905502caa"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-002EN",
+      "documents": {
+        "documents-54ca52c1815f43f0": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-002EN",
+            "faces": [
+              {
+                "name": "VI. Milteo, The Lovers",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Arcana / Demon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "On Evolve - {icon_cost02|[cost02]}: Destroy each enemy follower on the field. Change each enemy leader's defense to 6.",
+                "sections": [],
+                "raw_text": "On Evolve - {icon_cost02|[cost02]}: Destroy each enemy follower on the field. Change each enemy leader's defense to 6.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-002EN.png",
+                "trait_raw": "Arcana / Demon",
+                "traits": [
+                  "Arcana",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1304 (Jun. 13, 2025)",
+                "question": "If an opponent's leader has 5 defense or less, does this follower's On Evolve ability still change its defense to 6?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-001EN|VI. Milteo, The Lovers}",
+                "href": "/cards/?cardno=SDD05-001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c4bca72d51b8327c7ee5e63d039249cf169a769f6d9747a5b7e57fad3fcd5f2a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-002EN",
+            "fetched_at": "2026-09-27T14:41:00.867524Z"
+          },
+          "document_ref": "documents-54ca52c1815f43f0"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-003EN",
+      "documents": {
+        "documents-964b6a92b71d9239": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-003EN",
+            "faces": [
+              {
+                "name": "Iceschillendrig, Gilded Autocrat",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} If there's no Magitrain on your field, summon one.\nWhenever this becomes engaged, each opponent discards a card.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} If there's no Magitrain on your field, summon one.\nWhenever this becomes engaged, each opponent discards a card.",
+                "speech": null,
+                "illustrator": "Nambo Attall",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-003EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1490 (Sep. 19, 2025)",
+                "question": "If I select Iceschillendrig, Gilded Autocrat with Nahtnaught, Cursed Queen's activated ability, does Iceschillendrig, Gilded Autocrat's automatic ability trigger?",
+                "answer": "Yes, it does. You would then resolve it at the next confirmation timing."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-004EN|Iceschillendrig, Gilded Autocrat}",
+                "href": "/cards/?cardno=SDD05-004EN"
+              },
+              {
+                "label": "{SDD05-T01EN|Magitrain}",
+                "href": "/cards/?cardno=SDD05-T01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:472193930f86ba34ff67f9ea20ac97b09fe43d155ef1e35ef214711433945b04",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-003EN",
+            "fetched_at": "2026-09-27T14:41:03.573240Z"
+          },
+          "document_ref": "documents-964b6a92b71d9239"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-004EN",
+      "documents": {
+        "documents-1b82ce4aca0a6e9b": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-004EN",
+            "faces": [
+              {
+                "name": "Iceschillendrig, Gilded Autocrat",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "On Evolve - Discard a card: Select 2 followers in your cemetery and add them to your hand.\nWhenever this becomes engaged, each opponent discards a card.\nDuring your turn, whenever a player discards a card, select an enemy follower on the field and engage it.",
+                "sections": [],
+                "raw_text": "On Evolve - Discard a card: Select 2 followers in your cemetery and add them to your hand.\nWhenever this becomes engaged, each opponent discards a card.\nDuring your turn, whenever a player discards a card, select an enemy follower on the field and engage it.",
+                "speech": null,
+                "illustrator": "Nambo Attall",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-004EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1525 (Sep. 19, 2025)",
+                "question": "If an opponent discards multiple cards during my turn, does this follower's second automatic ability trigger for each of them?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1524 (Sep. 19, 2025)",
+                "question": "When selecting followers from my cemetery, can I select the card I discarded as part of the cost of this follower's ability?",
+                "answer": "No. You must select the followers before paying the cost."
+              },
+              {
+                "title": "Q1523 (Sep. 19, 2025)",
+                "question": "If I have fewer than 2 followers in my cemetery, can I still play this follower's On Evolve ability?",
+                "answer": "No, you can't."
+              },
+              {
+                "title": "Q1490 (Sep. 19, 2025)",
+                "question": "If I select Iceschillendrig, Gilded Autocrat with Nahtnaught, Cursed Queen's activated ability, does Iceschillendrig, Gilded Autocrat's automatic ability trigger?",
+                "answer": "Yes, it does. You would then resolve it at the next confirmation timing."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-003EN|Iceschillendrig, Gilded Autocrat}",
+                "href": "/cards/?cardno=SDD05-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:29099b2d70c226c5817f6835cc01833c76822a3dbf85997ab19f17841066ae57",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-004EN",
+            "fetched_at": "2026-09-27T14:41:06.358542Z"
+          },
+          "document_ref": "documents-1b82ce4aca0a6e9b"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-005EN",
+      "documents": {
+        "documents-216849cc3c3f445a": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-005EN",
+            "faces": [
+              {
+                "name": "Illganeau, Horror Astray",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_fanfare|[fanfare]} Select a Wasteland follower in your cemetery that costs 3 or less. Necrocharge (10) - You may summon it. If you do, banish this.\n{icon_lastword|[lastwords]} Put this into its owner's EX area. Bury the top card of your deck.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Select a Wasteland follower in your cemetery that costs 3 or less. Necrocharge (10) - You may summon it. If you do, banish this.\n{icon_lastword|[lastwords]} Put this into its owner's EX area. Bury the top card of your deck.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-005EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1529 (Sep. 19, 2025)",
+                "question": "There are 10 or more cards in my cemetery. If I summon and destroy this follower with Nephthys's Fanfare ability, can I select this follower in the cemetery when resolving its own Fanfare ability?",
+                "answer": "Yes. It is in the cemetery by the time you resolve its Fanfare ability, so you may select it. If you do, you do not banish it. Additionally, if you choose to resolve its Last Words ability after its Fanfare ability, you do not put it into its owner's EX area."
+              },
+              {
+                "title": "Q1528 (Sep. 19, 2025)",
+                "question": "There are 10 or more cards in my cemetery. If I summon and destroy this follower with Nephthys's Fanfare ability, then resolve this follower's Fanfare ability and summon a Wasteland follower that costs 3 or less from my cemetery, do I banish this follower?",
+                "answer": "No. It is no longer on the field by the time you resolve its Fanfare ability."
+              },
+              {
+                "title": "Q1527 (Sep. 19, 2025)",
+                "question": "If I summon and destroy this follower with Nephthys's Fanfare ability, can I resolve this follower's Last Words ability before its Fanfare ability?",
+                "answer": "Yes. Since its Last Words ability and Fanfare ability would both be pending at the same time, you may resolve them in any order."
+              },
+              {
+                "title": "Q1526 (Sep. 19, 2025)",
+                "question": "If my EX area is full, and this follower is put into the cemetery from the field, how should I resolve its Last Words ability?",
+                "answer": "It remains in the cemetery."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:72c34090716bba491244aa2d68d0995d79d62b609e09865d3a3c28a85f7eed1a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-005EN",
+            "fetched_at": "2026-09-27T14:41:09.168629Z"
+          },
+          "document_ref": "documents-216849cc3c3f445a"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-006EN",
+      "documents": {
+        "documents-588d692706e25363": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-006EN",
+            "faces": [
+              {
+                "name": "Demonlord Eachtar",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Departed"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "6",
+                  "power": "5"
+                },
+                "text": "Each {icon_nightmare|[abysscraft]} follower on your field has Rush.\n{icon_fanfare|[fanfare]} Necrocharge (10) - Select up to 2 {icon_nightmare|[abysscraft]} followers in your cemetery that cost 2 or less and summon them. Give each other follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1. NC (20) - Give {icon_power|[attack]}+3/{icon_hp|[defense]}+3 instead.",
+                "sections": [],
+                "raw_text": "Each {icon_nightmare|[abysscraft]} follower on your field has Rush.\n{icon_fanfare|[fanfare]} Necrocharge (10) - Select up to 2 {icon_nightmare|[abysscraft]} followers in your cemetery that cost 2 or less and summon them. Give each other follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1. NC (20) - Give {icon_power|[attack]}+3/{icon_hp|[defense]}+3 instead.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-006EN.png",
+                "trait_raw": "Departed",
+                "traits": [
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q625 (Apr. 12, 2024)",
+                "question": "If I put Spartoi Sergeant onto my field with this follower's Fanfare ability, can I play Spartoi Sergeant's Fanfare ability before giving it +1/+1?",
+                "answer": "No. You finish resolving this follower's Fanfare ability before playing Spartoi Sergeant's Fanfare ability."
+              },
+              {
+                "title": "Q591 (Apr. 12, 2024)",
+                "question": "When playing this follower's Fanfare ability, do I give +1/+1 (or +3/+3) to each follower on my field other than this follower, or other than the Abysscraft followers I just put from my cemetery onto my field?",
+                "answer": "You give the buff to each follower on your field other than this follower."
+              },
+              {
+                "title": "Q590 (Apr. 12, 2024)",
+                "question": "If I have exactly 10 cards in my cemetery when I play this follower's Fanfare ability, does Necrocharge (10) still trigger? If I have exactly 20, does Necrocharge (20) still trigger?",
+                "answer": "Yes, and yes. Necrocharge references the number of cards in your cemetery at the moment the effect with Necrocharge begins to be resolved."
+              },
+              {
+                "title": "Q589 (Apr. 12, 2024)",
+                "question": "If I steal an enemy Abysscraft follower when this follower is on my field, does this follower's ability give the stolen follower Rush?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q588 (Apr. 12, 2024)",
+                "question": "Does this follower give itself Rush?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:144cc9c6f5f0147723bb0930b3591129d07d87a91c604083b420b0f2b28aaa43",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-006EN",
+            "fetched_at": "2026-09-27T14:41:11.977776Z"
+          },
+          "document_ref": "documents-588d692706e25363"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-007EN",
+      "documents": {
+        "documents-503bbc3f4c639765": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-007EN",
+            "faces": [
+              {
+                "name": "Doublame, Duke and Dame",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Demon"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Bury the top card of your deck.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Bury the top card of your deck.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-007EN.png",
+                "trait_raw": "Demon",
+                "traits": [
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-008EN|Doublame, Duke and Dame}",
+                "href": "/cards/?cardno=SDD05-008EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a9d468242af1980d105642a002cb8c6dcdbfa3d82b62b031a6a26b89a1d150d6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-007EN",
+            "fetched_at": "2026-09-27T14:41:14.317178Z"
+          },
+          "document_ref": "documents-503bbc3f4c639765"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-008EN",
+      "documents": {
+        "documents-790704ff78c4f9dc": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-008EN",
+            "faces": [
+              {
+                "name": "Doublame, Duke and Dame",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Demon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and deal it 2 damage. Necrocharge (10) - Deal 4 damage instead. (If your cemetery contains at least 10 cards, perform Necrocharge (10).)",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and deal it 2 damage. Necrocharge (10) - Deal 4 damage instead. (If your cemetery contains at least 10 cards, perform Necrocharge (10).)",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-008EN.png",
+                "trait_raw": "Demon",
+                "traits": [
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-007EN|Doublame, Duke and Dame}",
+                "href": "/cards/?cardno=SDD05-007EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:63f06311cc6ae34ffb15740748636ed206d92004e58dfd8010cf745f4903c659",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-008EN",
+            "fetched_at": "2026-09-27T14:41:17.182746Z"
+          },
+          "document_ref": "documents-790704ff78c4f9dc"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-009EN",
+      "documents": {
+        "documents-d3906bb74805c860": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-009EN",
+            "faces": [
+              {
+                "name": "Greatpick Corpse",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wasteland / Departed"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Bury another card: Select an enemy follower on the field and deal it 4 damage.\nOnce per turn, when a 1-cost token card you control leaves the field, summon a token of the same name.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Bury another card: Select an enemy follower on the field and deal it 4 damage.\nOnce per turn, when a 1-cost token card you control leaves the field, summon a token of the same name.",
+                "speech": null,
+                "illustrator": "BIYO",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-009EN.png",
+                "trait_raw": "Wasteland / Departed",
+                "traits": [
+                  "Wasteland",
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1534 (Sep. 19, 2025)",
+                "question": "If I have multiple copies of this follower on my field, and a 1-cost token card I control leaves the field, will each copy's ability trigger?",
+                "answer": "Yes, they will."
+              },
+              {
+                "title": "Q1533 (Sep. 19, 2025)",
+                "question": "If a 1-cost token card leaves my field during my opponent's turn, does this follower's automatic ability trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1532 (Sep. 19, 2025)",
+                "question": "If a Baccherus, Peppy Ghostie leaves my field, can I summon a Ghost token with this follower's automatic ability?",
+                "answer": "No, you can't. Baccherus, Peppy Ghostie is not a token card."
+              },
+              {
+                "title": "Q1531 (Sep. 19, 2025)",
+                "question": "If multiple 1-cost token cards leave the field at the same time, can I choose which one to summon with this follower's ability?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d51c1fde93515135ad9f15961b42031ec864a77e64c72220ef7fa5d9cf17d725",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-009EN",
+            "fetched_at": "2026-09-27T14:41:19.937738Z"
+          },
+          "document_ref": "documents-d3906bb74805c860"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-010EN",
+      "documents": {
+        "documents-03f4e029a18b2ba5": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-010EN",
+            "faces": [
+              {
+                "name": "Kagero, Swordbound Soul",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wasteland / Departed"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "Necrocharge (10) - This has Rush and Bane. (After this follower fights another follower, destroy that follower.)\n{icon_fanfare|[fanfare]} Choose 1. (1) Select a Soulstrike in your cemetery and put it into your EX area. NC (20) - It costs 2 less to play this turn. (2) Bury the top 2 cards of your deck.",
+                "sections": [],
+                "raw_text": "Necrocharge (10) - This has Rush and Bane. (After this follower fights another follower, destroy that follower.)\n{icon_fanfare|[fanfare]} Choose 1. (1) Select a Soulstrike in your cemetery and put it into your EX area. NC (20) - It costs 2 less to play this turn. (2) Bury the top 2 cards of your deck.",
+                "speech": null,
+                "illustrator": "Mayoko",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-010EN.png",
+                "trait_raw": "Wasteland / Departed",
+                "traits": [
+                  "Wasteland",
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1727 (Nov. 14, 2025)",
+                "question": "If my Necrocharge drops below 10 after this follower enters the field, does it lose Rush and Bane?",
+                "answer": "Yes. Its Necrocharge (10) ability is passive, so it is only effective while your Necrocharge is 10 or above."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-016EN|Soulstrike}",
+                "href": "/cards/?cardno=SDD05-016EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6d331e249d329abf4532009a4f55493de6f54bd6784ae53ce61e472f31f96c50",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-010EN",
+            "fetched_at": "2026-09-27T14:41:22.686068Z"
+          },
+          "document_ref": "documents-03f4e029a18b2ba5"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-011EN",
+      "documents": {
+        "documents-9fa94ade66adeac9": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-011EN",
+            "faces": [
+              {
+                "name": "Chris, Beyond the Patch",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Departed / Cutthroat"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_fanfare|[fanfare]} Select an {icon_nightmare|[abysscraft]} follower in your cemetery not named Chris, Beyond the Patch that costs 5 or less. Necrocharge (10) - Summon it and give it Ward.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Select an {icon_nightmare|[abysscraft]} follower in your cemetery not named Chris, Beyond the Patch that costs 5 or less. Necrocharge (10) - Summon it and give it Ward.",
+                "speech": null,
+                "illustrator": "Enarain",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-011EN.png",
+                "trait_raw": "Departed / Cutthroat",
+                "traits": [
+                  "Departed",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1728 (Nov. 14, 2025)",
+                "question": "If I have exactly 10 cards in my cemetery when I play this follower's Fanfare ability, does Necrocharge (10) still trigger?",
+                "answer": "Yes. Necrocharge references the number of cards in your cemetery at the moment the effect with Necrocharge begins to be resolved."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bc881a9e2846773d134228675c90a265abe1a6a13a60ab003a1747d51f0b3258",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-011EN",
+            "fetched_at": "2026-09-27T14:41:24.945183Z"
+          },
+          "document_ref": "documents-9fa94ade66adeac9"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-012EN",
+      "documents": {
+        "documents-22d7803d6047c027": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-012EN",
+            "faces": [
+              {
+                "name": "Dead to Rights",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Spell",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} Banish this and an Iceschillendrig, Gilded Autocrat from your cemetery: Select an enemy follower on the field and engage it.",
+                "sections": [
+                  "{icon_quick|[quick]}\nSelect an enemy follower on the field and give it {icon_power|[attack]}-2/{icon_hp|[defense]}-2."
+                ],
+                "raw_text": "{icon_act|[act]} Banish this and an Iceschillendrig, Gilded Autocrat from your cemetery: Select an enemy follower on the field and engage it.\n----------\n{icon_quick|[quick]}\nSelect an enemy follower on the field and give it {icon_power|[attack]}-2/{icon_hp|[defense]}-2.",
+                "speech": null,
+                "illustrator": "Nambo Attall",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-012EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1537 (Sep. 19, 2025)",
+                "question": "My opponent has an evolved Ginsetsu, Great Fox and an evolved Shuten-Doji on their field, and they attack my leader with the latter. I play this spell at quick timing, giving the evolved Shuten-Doji -2 attack and defense. Since the evolved Ginsetsu, Great Fox's ability increases Yokai followers' damage dealt by 1, does my leader take 1 damage?",
+                "answer": "No. A follower with 0 or less attack doesn't deal damage, and Ginsetsu, Great Fox's \"if a Yokai follower on your field would deal damage, it deals that much plus 1 instead\" only takes effect when damage is dealt."
+              },
+              {
+                "title": "Q1536 (Sep. 19, 2025)",
+                "question": "Can a follower have negative attack?",
+                "answer": "Yes. A follower's attack can be reduced to a negative number by effects. A follower with negative attack doesn't deal attack or combat damage."
+              },
+              {
+                "title": "Q1535 (Sep. 19, 2025)",
+                "question": "Can this spell's activated ability only be played while it's in the cemetery?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-003EN|Iceschillendrig, Gilded Autocrat}",
+                "href": "/cards/?cardno=SDD05-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aa709a1ab517099f9e0e8367c978d2cc35d29aaa18c33961b7372ec339fcf59b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-012EN",
+            "fetched_at": "2026-09-27T14:41:27.758851Z"
+          },
+          "document_ref": "documents-22d7803d6047c027"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-013EN",
+      "documents": {
+        "documents-0ec38ba922ae250c": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-013EN",
+            "faces": [
+              {
+                "name": "Wretch",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this. Activate only if this was put onto the field from the cemetery.\nRush. (Followers with Rush can attack enemy followers on the turn they're put onto your field.)\n{icon_lastword|[lastwords]} Summon a Bullet Bike token. Bury the top 2 cards of your deck.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this. Activate only if this was put onto the field from the cemetery.\nRush. (Followers with Rush can attack enemy followers on the turn they're put onto your field.)\n{icon_lastword|[lastwords]} Summon a Bullet Bike token. Bury the top 2 cards of your deck.",
+                "speech": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-013EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-014EN|Wretch}",
+                "href": "/cards/?cardno=SDD05-014EN"
+              },
+              {
+                "label": "{SDD05-T02EN|Bullet Bike}",
+                "href": "/cards/?cardno=SDD05-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d1c56b671814152313b4979b8c54ba427206d366f9e31962035155d6e46d6e28",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-013EN",
+            "fetched_at": "2026-09-27T14:41:30.584886Z"
+          },
+          "document_ref": "documents-0ec38ba922ae250c"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-014EN",
+      "documents": {
+        "documents-58d6536fd42a08ab": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-014EN",
+            "faces": [
+              {
+                "name": "Wretch",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "4"
+                },
+                "text": "Storm.\nOn Evolve - Select an enemy follower on the field and deal it 5 damage.\n{icon_lastword|[lastwords]} Summon a Bullet Bike token. Bury the top 2 cards of your deck.",
+                "sections": [],
+                "raw_text": "Storm.\nOn Evolve - Select an enemy follower on the field and deal it 5 damage.\n{icon_lastword|[lastwords]} Summon a Bullet Bike token. Bury the top 2 cards of your deck.",
+                "speech": "{icon_neutral|[neutral]}{icon_cost01|[cost01]} Bullet Bike (Amulet - Wasteland/Mount) | {icon_act|[act]} Bury this: Select a follower on your field. Give it Rush and, if it's a Wasteland follower, {icon_power|[attack]}+1.",
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-014EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-013EN|Wretch}",
+                "href": "/cards/?cardno=SDD05-013EN"
+              },
+              {
+                "label": "{SDD05-T02EN|Bullet Bike}",
+                "href": "/cards/?cardno=SDD05-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c53dabc36557ba9651c804060a225ca26889a2812052b1cd7f3c44e14b6b275e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-014EN",
+            "fetched_at": "2026-09-27T14:41:33.045916Z"
+          },
+          "document_ref": "documents-58d6536fd42a08ab"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-015EN",
+      "documents": {
+        "documents-1df12ace6db570fc": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-015EN",
+            "faces": [
+              {
+                "name": "Wretched Tryst",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Spell",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Departed / Demon"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select 2 Wasteland followers in your cemetery that cost 3 or less. Necrocharge (10) - Summon them.",
+                "sections": [],
+                "raw_text": "Select 2 Wasteland followers in your cemetery that cost 3 or less. Necrocharge (10) - Summon them.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-015EN.png",
+                "trait_raw": "Wasteland / Departed / Demon",
+                "traits": [
+                  "Wasteland",
+                  "Departed",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1540 (Sep. 19, 2025)",
+                "question": "If I have fewer than 10 cards in my cemetery, can I still play this spell?",
+                "answer": "Yes, you can. However, you would not fulfill the requirements for Necrocharge (10)."
+              },
+              {
+                "title": "Q1539 (Sep. 19, 2025)",
+                "question": "If I have fewer than 2 Wasteland followers that cost 3 or less in my cemetery, can I still play this spell?",
+                "answer": "No, you can't."
+              }
+            ],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7228f7427d25117479ba4d64be7865ccedbe8e09f2972da0d02310cffab89496",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-015EN",
+            "fetched_at": "2026-09-27T14:41:35.761228Z"
+          },
+          "document_ref": "documents-1df12ace6db570fc"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-016EN",
+      "documents": {
+        "documents-3e7397673920fb6a": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-016EN",
+            "faces": [
+              {
+                "name": "Soulstrike",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Spell",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Departed"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select an enemy follower on the field and deal it 4 damage. Necrocharge (20) - Deal 4 damage to its leader.",
+                "sections": [],
+                "raw_text": "Select an enemy follower on the field and deal it 4 damage. Necrocharge (20) - Deal 4 damage to its leader.",
+                "speech": null,
+                "illustrator": "Mayoko",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-016EN.png",
+                "trait_raw": "Wasteland / Departed",
+                "traits": [
+                  "Wasteland",
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:edbb5c8fbe7241da77e3f8978d41fa2e510132bf73b799c872fde6a022f3c8d5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-016EN",
+            "fetched_at": "2026-09-27T14:41:38.737590Z"
+          },
+          "document_ref": "documents-3e7397673920fb6a"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-017EN",
+      "documents": {
+        "documents-d78f1dce1153e679": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-017EN",
+            "faces": [
+              {
+                "name": "Grave Desecration",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Amulet",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Departed"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_fanfare|[fanfare]} Bury the top 2 cards of your deck.\n{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this: Select a Departed follower in your cemetery and add it to your hand.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Bury the top 2 cards of your deck.\n{icon_act|[act]} {icon_cost02|[cost02]}, {icon_stand|[engage]}, bury this: Select a Departed follower in your cemetery and add it to your hand.",
+                "speech": null,
+                "illustrator": "NAVAR",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-017EN.png",
+                "trait_raw": "Departed",
+                "traits": [
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d21ca0489466735530ac8f2903da31e4a6b5c18dfbff51b60005a5498bd0c613",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-017EN",
+            "fetched_at": "2026-09-27T14:41:41.539565Z"
+          },
+          "document_ref": "documents-d78f1dce1153e679"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-018EN",
+      "documents": {
+        "documents-1e427dd6cc59c6eb": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-018EN",
+            "faces": [
+              {
+                "name": "Skeleton Dreamer",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wasteland / Departed"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "Whenever this gains attack or defense, give it Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)\n{icon_lastword|[lastwords]} Summon a Bullet Bike token. Bury the top card of your deck.",
+                "sections": [],
+                "raw_text": "Whenever this gains attack or defense, give it Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)\n{icon_lastword|[lastwords]} Summon a Bullet Bike token. Bury the top card of your deck.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-018EN.png",
+                "trait_raw": "Wasteland / Departed",
+                "traits": [
+                  "Wasteland",
+                  "Departed"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-T02EN|Bullet Bike}",
+                "href": "/cards/?cardno=SDD05-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:07a347a8323d6750f8aba03c7316a114d4662a62db3bdc6466fef8e7e4cc6988",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-018EN",
+            "fetched_at": "2026-09-27T14:41:44.289527Z"
+          },
+          "document_ref": "documents-1e427dd6cc59c6eb"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-019EN",
+      "documents": {
+        "documents-145495b11f9d115d": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-019EN",
+            "faces": [
+              {
+                "name": "Wandering Chef",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Chef"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} If there's a Mount card on your field or in your EX area, give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} If there's a Mount card on your field or in your EX area, give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Yamamoto Shikaku",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-019EN.png",
+                "trait_raw": "Wasteland / Chef",
+                "traits": [
+                  "Wasteland",
+                  "Chef"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-020EN|Wandering Chef}",
+                "href": "/cards/?cardno=SDD05-020EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:99cf90f0838d598204c7b653833acbff12e8d8d51b76cc86f6bb07cc58e6dccb",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-019EN",
+            "fetched_at": "2026-09-27T14:41:47.222434Z"
+          },
+          "document_ref": "documents-145495b11f9d115d"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD05-020EN",
+      "documents": {
+        "documents-d1f2186701e8d8f4": {
+          "region": "en",
+          "record": {
+            "number": "SDD05-020EN",
+            "faces": [
+              {
+                "name": "Wandering Chef",
+                "info": {
+                  "Card Set": "Showdown Deck: Abysscraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Chef"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Look at the top 4 cards of your deck. You may reveal a Wasteland card from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "On Evolve - Look at the top 4 cards of your deck. You may reveal a Wasteland card from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "Yamamoto Shikaku",
+                "image": "/wordpress/wp-content/images/cardlist/SDD05/SDD05-020EN.png",
+                "trait_raw": "Wasteland / Chef",
+                "traits": [
+                  "Wasteland",
+                  "Chef"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-505dcec4dbba7398",
+            "related_cards": [
+              {
+                "label": "{SDD05-019EN|Wandering Chef}",
+                "href": "/cards/?cardno=SDD05-019EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:60a641893a2ff6fbc38ce4948a40bf88903c3407ce20fa699e24a79dfedd40fc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD05-020EN",
+            "fetched_at": "2026-09-27T14:41:49.775296Z"
+          },
+          "document_ref": "documents-d1f2186701e8d8f4"
+        }
+      ]
+    }
+  ]
+}

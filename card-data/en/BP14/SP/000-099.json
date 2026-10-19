@@ -1,0 +1,147 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP14",
+  "range": "SP/000-099",
+  "products": {
+    "products-177d6359db64d92e": [
+      {
+        "name": "Combined Set \"Banquet of Dreams & Trial of the Omens\"",
+        "date": "Jan. 23, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP14-BP15",
+          "https://en.shadowverse-evolve.com/products/bp14-bp15/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP14-SP01EN",
+      "documents": {
+        "documents-2f059a4b900e176a": {
+          "region": "en",
+          "record": {
+            "number": "BP14-SP01EN",
+            "faces": [
+              {
+                "name": "Merlin",
+                "info": {
+                  "Card Set": "Combined Set \"Banquet of Dreams & Trial of the Omens\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Special",
+                  "Trait": "Mage"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\n{icon_fanfare|[fanfare]} Search your deck for a spell, reveal it, add it to your hand, then shuffle.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\n{icon_fanfare|[fanfare]} Search your deck for a spell, reveal it, add it to your hand, then shuffle.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP14/BP14-SP01EN.png",
+                "trait_raw": "Mage",
+                "traits": [
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Jan. 23, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q185 (Jun. 30, 2023)",
+                "question": "If there are no spells in my deck, can I still play this follower's Fanfare ability?",
+                "answer": "Yes, you can. After looking through your deck, you would shuffle it without adding a spell to your hand."
+              }
+            ],
+            "products_ref": "products-177d6359db64d92e",
+            "related_cards": [
+              {
+                "label": "{BP01-053EN|Merlin}",
+                "href": "/cards/?cardno=BP01-053EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5af82ee6e2103dd467383ff1c85da2ec1908525ff144aab642930399fc55d3cd",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP14-SP01EN",
+            "fetched_at": "2026-09-27T14:56:17.032669Z"
+          },
+          "document_ref": "documents-2f059a4b900e176a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-SP02EN",
+      "documents": {
+        "documents-305af491b4568b24": {
+          "region": "en",
+          "record": {
+            "number": "BP14-SP02EN",
+            "faces": [
+              {
+                "name": "Paracelise, Demon of Greed",
+                "info": {
+                  "Card Set": "Combined Set \"Banquet of Dreams & Trial of the Omens\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Special",
+                  "Trait": "Festive / Demon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "On Evolve - Select an enemy follower on the field. Deal 5 damage to it, 2 damage to its leader, give your leader {icon_hp|[defense]}+2, and put the top card of your deck into your EX area.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field. Deal 5 damage to it, 2 damage to its leader, give your leader {icon_hp|[defense]}+2, and put the top card of your deck into your EX area.",
+                "speech": null,
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/BP14/BP14-SP02EN.png",
+                "trait_raw": "Festive / Demon",
+                "traits": [
+                  "Festive",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Jan. 23, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-177d6359db64d92e",
+            "related_cards": [
+              {
+                "label": "{BP14-072EN|Paracelise, Demon of Greed}",
+                "href": "/cards/?cardno=BP14-072EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e5ae9c94e55a034289f135ff9bd7dcf2db8103e18f5411e2776d7b2667b3ec2a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP14-SP02EN",
+            "fetched_at": "2026-09-27T14:56:19.891108Z"
+          },
+          "document_ref": "documents-305af491b4568b24"
+        }
+      ]
+    }
+  ]
+}

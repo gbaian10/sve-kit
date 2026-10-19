@@ -1,0 +1,132 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP06",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-347e49b492b5d561": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-notice-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-f9db432e8e0b4dd9": {
+        "parser": "parsers-347e49b492b5d561",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-18c19f21b9ed344d": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック第6弾「絶対なる覇者」",
+          "date_raw": "2023-06-16",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP06",
+            "https://shadowverse-evolve.com/products/bp06/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP06",
+            "https://shadowverse-evolve.com/products/bp06/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp06/",
+              "expansion_code": "BP06"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-2823d3d4e6bc4744": [
+        "https://shadowverse-evolve.com/errata/bp06-ld02/"
+      ],
+      "errata-75b5b869aa261727": [
+        "https://shadowverse-evolve.com/errata/bp06-ld01/"
+      ]
+    }
+  },
+  "observations": {
+    "src:v1:516526ff2ffe4575338862f12f77b94b67719422472e9b8b9d63b21df35158f2": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:87c017bf79554cc506b5ea9885fab7d576fe50b40c882b500d822dbee1c0ac0b",
+        "raw_bytes": 36834,
+        "first_receipt_id": "sha256:0689847ec9050df5439da966109b57785b6ef3e84cc954dbac00140964a646d3",
+        "descriptor_sha256": "sha256:f55305e470d92125387f0a0baec87eb79657a5e1f5235a5d03b2cfef8fd5132f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f9db432e8e0b4dd9",
+            "result_hash": "sha256:aa1a052663b4deec6d04bf314b254a89eb16b66ce6a61a9eda582e9ca67f4ce9"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-18c19f21b9ed344d",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-75b5b869aa261727"
+      },
+      "content_hash": "sha256:4aa64164221fd8dc8997428c7f24920efb3a6fb5797fa37a31132e24e6dcd515"
+    },
+    "src:v1:c0f23d203f917fee73dd15a60e8f2968bc58d1b271dd954dc72502b4bb645eb5": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:25c350cf8c2edf0c9a8905d1d6b74a0fa75ce9a41cf7ca6f592f77c1567db111",
+        "raw_bytes": 36822,
+        "first_receipt_id": "sha256:aa58d8ee283fd7d2f9b6b8bf292200393a6cf52768f00480f89fbfe425b77670",
+        "descriptor_sha256": "sha256:64b64a555da9f287041cf7a4eb79220ba0bb8456e622e9108a109320c740c09f",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-f9db432e8e0b4dd9",
+            "result_hash": "sha256:ac7bc11875327af9cec7eb848f4b683787d69518091360de2d319cfd0fcf03ad"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-18c19f21b9ed344d",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-2823d3d4e6bc4744"
+      },
+      "content_hash": "sha256:fc7ca4dc02338a7e4c1a1ebec7346ad10a9fbfc702cf55b1c39036b58c5a8475"
+    }
+  }
+}

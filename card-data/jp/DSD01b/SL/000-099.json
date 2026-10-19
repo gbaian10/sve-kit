@@ -1,0 +1,221 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "DSD01b",
+  "range": "SL/000-099",
+  "products": {
+    "products-78ede256f7a50fef": [
+      {
+        "name": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+        "date": "2024-04-19",
+        "links": [
+          "/cardlist/cardsearch?expansion=DSD01",
+          "https://shadowverse-evolve.com/products/dsd01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "DSD01b-SL01",
+      "documents": {
+        "documents-b5107482d25c1b43": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-SL01",
+            "faces": [
+              {
+                "name": "気高き雷・ロマロニア",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "SL",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "3",
+                "power": "1",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【必殺】\n{ラストワード}自分の場に『遺されし電撃』があるなら、自分の場の『遺されし電撃』すべてに雷カウンター1個を置く。自分の場に『遺されし電撃』がないなら、『遺されし電撃』1つを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-sl01.png",
+                "trait_raw": "ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1246",
+                "date": "2024-03-01",
+                "question": "自分の場のカードが『気高き雷・ロマロニア』2体のみの状況で、相手が『テミスの審判』をプレイし、『気高き雷・ロマロニア』2体が破壊されました。この場合、『遺されし電撃』2つを場に出すことができますか？",
+                "answer": "いいえ。『遺されし電撃』2つを場に出すことはできません。\n『テミスの審判』によって『気高き雷・ロマロニア』2体が破壊され墓場に置かれた場合、それぞれの《ラストワード》能力が同時に誘発し待機状態になります。待機状態になっている1体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』がないため、『遺されし電撃』1つを場に出します。その後、2体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』があるため、『遺されし電撃』を出すことはなく、自分の場の『遺されし電撃』すべてに雷カウンター1個を置きます。"
+              },
+              {
+                "id": "Q1245",
+                "date": "2024-03-01",
+                "question": "『気高き雷・ロマロニア』の《ラストワード》能力を解決する際に自分の場に『遺されし電撃』がない場合、『遺されし電撃』1つを場に出した後、自分の場に『遺されし電撃』があるので、自分の場の『遺されし電撃』すべてに雷カウンター1個を置くことができますか？",
+                "answer": "いいえ。雷カウンターを置くことができず、『遺されし電撃』1つを場に出すことのみ行います。プレイの前提となる選択肢を除き、能力の処理はテキストの表記の順に行います。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-SL02"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:95c04e6e3d983d5df93ab132e8863cd4b076b39e3273d89b2468623e6e0f870a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-SL01",
+            "fetched_at": "2026-09-24T21:28:21.434802Z"
+          },
+          "document_ref": "documents-b5107482d25c1b43"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-SL02",
+      "documents": {
+        "documents-c1d81ce100c6eee5": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-SL02",
+            "faces": [
+              {
+                "name": "気高き雷・ロマロニア",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ドラゴニュート",
+                  "武闘竜人"
+                ],
+                "rarity": "SL",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "4",
+                "text": "【指定攻撃】【必殺】\n【進化時】相手の場のフォロワー1体を選ぶ。自分の場にアミュレットがあるなら、それに3ダメージ。\n{ラストワード}自分の場に『遺されし電撃』があるなら、自分の場の『遺されし電撃』すべてに雷カウンター1個を置く。自分の場に『遺されし電撃』がないなら、『遺されし電撃』1つを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-sl02.png",
+                "trait_raw": "ドラゴニュート・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1246",
+                "date": "2024-03-01",
+                "question": "自分の場のカードが『気高き雷・ロマロニア』2体のみの状況で、相手が『テミスの審判』をプレイし、『気高き雷・ロマロニア』2体が破壊されました。この場合、『遺されし電撃』2つを場に出すことができますか？",
+                "answer": "いいえ。『遺されし電撃』2つを場に出すことはできません。\n『テミスの審判』によって『気高き雷・ロマロニア』2体が破壊され墓場に置かれた場合、それぞれの《ラストワード》能力が同時に誘発し待機状態になります。待機状態になっている1体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』がないため、『遺されし電撃』1つを場に出します。その後、2体目の『気高き雷・ロマロニア』の《ラストワード》能力を解決する際、自分の場に『遺されし電撃』があるため、『遺されし電撃』を出すことはなく、自分の場の『遺されし電撃』すべてに雷カウンター1個を置きます。"
+              },
+              {
+                "id": "Q1245",
+                "date": "2024-03-01",
+                "question": "『気高き雷・ロマロニア』の《ラストワード》能力を解決する際に自分の場に『遺されし電撃』がない場合、『遺されし電撃』1つを場に出した後、自分の場に『遺されし電撃』があるので、自分の場の『遺されし電撃』すべてに雷カウンター1個を置くことができますか？",
+                "answer": "いいえ。雷カウンターを置くことができず、『遺されし電撃』1つを場に出すことのみ行います。プレイの前提となる選択肢を除き、能力の処理はテキストの表記の順に行います。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-SL01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=DSD01b-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9870e41f8ce42a5c99e60f4e838cee9c1e5e26674062523acf7e054b19b17c8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-SL02",
+            "fetched_at": "2026-09-24T21:28:23.972264Z"
+          },
+          "document_ref": "documents-c1d81ce100c6eee5"
+        }
+      ]
+    },
+    {
+      "card_no": "DSD01b-SL03",
+      "documents": {
+        "documents-c45d61d406ad82bb": {
+          "region": "jp",
+          "record": {
+            "number": "DSD01b-SL03",
+            "faces": [
+              {
+                "name": "暴竜・伊達政宗",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い",
+                  "武闘竜人"
+                ],
+                "rarity": "SL",
+                "product": "DXスターターデッキ「学院に咲く双華」「武なる雷鳴」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【必殺】\n{ファンファーレ}自分の場の武闘竜人・カードが3枚以上なら、これは{攻撃力}+2/{体力}+2して、【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/DSD01/dsd01b-sl03.png",
+                "trait_raw": "竜使い・武闘竜人"
+              }
+            ],
+            "release_date": "2024-04-19",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1247",
+                "date": "2024-03-01",
+                "question": "自分の場の武闘竜人・カードを参照する際、『遺されし電撃』を参照することができますか？",
+                "answer": "はい。『遺されし電撃』は武闘竜人・アミュレットなので、武闘竜人・カードを参照する際に参照することができます。"
+              }
+            ],
+            "products_ref": "products-78ede256f7a50fef",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:646a8a1f57b6dd3ef9411a0e37fb61c3fee537a3c49e822b6b2df150d47abfd5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=DSD01b-SL03",
+            "fetched_at": "2026-09-24T21:28:26.535706Z"
+          },
+          "document_ref": "documents-c45d61d406ad82bb"
+        }
+      ]
+    }
+  ]
+}

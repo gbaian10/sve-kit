@@ -1,0 +1,229 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD03b",
+  "range": "SL/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      },
+      "presence-9cf7031b2866d97f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "unknown",
+        "reason_code": "incomplete_source"
+      }
+    },
+    "products": {
+      "products-aa3d8420e38846ab": [
+        {
+          "ordinal": 0,
+          "name": "Crossover Starter Deck \"Apocalyptic Fire\"",
+          "date_raw": "Aug. 15, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=CSD03B",
+            "https://en.shadowverse-evolve.com/products/csd03/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=CSD03B",
+            "https://en.shadowverse-evolve.com/products/csd03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/csd03/",
+              "expansion_code": "CSD03B"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-0ddb7d5dab953d54": [
+        {
+          "stable_source_key": "Q1468",
+          "official_number": "Q1468",
+          "locator": "qa-block:0",
+          "published_on": "2025-08-08",
+          "date_raw": "Aug. 8, 2025"
+        },
+        {
+          "stable_source_key": "Q1458",
+          "official_number": "Q1458",
+          "locator": "qa-block:1",
+          "published_on": "2025-08-08",
+          "date_raw": "Aug. 8, 2025"
+        },
+        {
+          "stable_source_key": "Q1456",
+          "official_number": "Q1456",
+          "locator": "qa-block:2",
+          "published_on": "2025-08-08",
+          "date_raw": "Aug. 8, 2025"
+        }
+      ],
+      "qa-4f53cda18c2baa0c": [],
+      "qa-bd349b330b2c15c3": [
+        {
+          "stable_source_key": "Q1469",
+          "official_number": "Q1469",
+          "locator": "qa-block:0",
+          "published_on": "2025-08-08",
+          "date_raw": "Aug. 8, 2025"
+        },
+        {
+          "stable_source_key": "Q1468",
+          "official_number": "Q1468",
+          "locator": "qa-block:1",
+          "published_on": "2025-08-08",
+          "date_raw": "Aug. 8, 2025"
+        },
+        {
+          "stable_source_key": "Q1458",
+          "official_number": "Q1458",
+          "locator": "qa-block:2",
+          "published_on": "2025-08-08",
+          "date_raw": "Aug. 8, 2025"
+        },
+        {
+          "stable_source_key": "Q1456",
+          "official_number": "Q1456",
+          "locator": "qa-block:3",
+          "published_on": "2025-08-08",
+          "date_raw": "Aug. 8, 2025"
+        }
+      ]
+    },
+    "related": {
+      "related-2fcb08d1ae9830fb": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=CSD03b-SL02EN"
+        }
+      ],
+      "related-4f53cda18c2baa0c": [],
+      "related-57d4394df60caf3a": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=CSD03b-SL01EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": [],
+      "errata-c5659a70dbf94920": [
+        "https://en.shadowverse-evolve.com/errata/dragonic-overlord/"
+      ]
+    }
+  },
+  "observations": {
+    "src:v1:13c8e8264d926f2508c0b5242290490b13066f05927536733a6df9f81167bfc9": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:81bedbfde78dbd8f67791c2a884cb73f3236a356a3a49d4ea46d395b55d0f3ed",
+        "raw_bytes": 38352,
+        "first_receipt_id": "sha256:c6fe46ab0387fb80c98b4106edd7d8f41b0543564cbe3621b0fe3376d936baeb",
+        "descriptor_sha256": "sha256:42fe602d06f7ec7c39b608775bcfa7e40acdae52ea9e06d10bdc150d103168bc",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:87fa67f5636c12b3ca3478b80217b479b6f0bec7cfb16d6905cbc706e16602a2"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-aa3d8420e38846ab",
+        "qa": "qa-0ddb7d5dab953d54",
+        "related": "related-2fcb08d1ae9830fb",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:e9f54cacaef5793109a6c7a472722b1672d68a017b17682c213a9183f471fe74"
+    },
+    "src:v1:81b0de15007d4d0a9a45b18e96eec5e148fe5705b6f73229088fec5a19b5f6ad": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:e18db2ba3f0754bceb525532561056c5cd856d00f6d8e39135cee869a8c13302",
+        "raw_bytes": 35795,
+        "first_receipt_id": "sha256:bd47f35d2f472f65b72db07324d11288562b079851554769c62164d351906e10",
+        "descriptor_sha256": "sha256:a0867e6c0d8b5b95fdccd21bab6677b60db46d96cf36309154b9718e33cc2eee",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:6aa0f96c5999585529586038921174b60c93da84e3c0127bf259414301ebf2a4"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-aa3d8420e38846ab",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:0239bcd0a1b8357a52ca9aab2cc31f2dfd39906e87cd1911c5290c663c0f4fef"
+    },
+    "src:v1:afb5168c9ddc6f2753978a1b046e9c3f111edd6d7305b0c8a37d54758d3ad570": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:e04e00920c2513090c48e6f4fb2278f161e03c2ab23a303db72b5adff7b08c8a",
+        "raw_bytes": 39005,
+        "first_receipt_id": "sha256:8bd6e5400de68478efd099820178f04f3ade1a1239ca65bb43335a9fa89fa5d0",
+        "descriptor_sha256": "sha256:7a26cddd595794cba5ecd5e0254ba5256990003ef9eac57f2e26748db9c83c12",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-9cf7031b2866d97f",
+            "result_hash": "sha256:30e41427c3688ecc6d9719a051a01c8750c3a4cd956bb5acab909455012f3851"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-aa3d8420e38846ab",
+        "qa": "qa-bd349b330b2c15c3",
+        "related": "related-57d4394df60caf3a",
+        "errata_urls": "errata-c5659a70dbf94920"
+      },
+      "content_hash": "sha256:140ca2554f3583c41819d0edde67824557dd7e9587c004670b1b88c52fca5a55"
+    }
+  }
+}

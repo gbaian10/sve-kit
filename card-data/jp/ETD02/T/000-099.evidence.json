@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "ETD02",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-0c36545f4ba7708f": [
+        {
+          "ordinal": 0,
+          "name": "エントリーデッキシャドウバースＦ第2弾「真壁スバル」",
+          "date_raw": "2022-11-19",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=ETD02",
+            "https://shadowverse-evolve.com/products/etd01-03/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=ETD02",
+            "https://shadowverse-evolve.com/products/etd01-03/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/etd01-03/",
+              "expansion_code": "ETD02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:c6a2249232983e4493ba7fd395a7c6270f1bf45e67d541a6e91ba77e0ba29277": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:a8bc8292da3c8b2038dac036effcd23159ef0f8a83b32fd9b4f466eb61962b48",
+        "raw_bytes": 36852,
+        "first_receipt_id": "sha256:8b8f2c5950d42d66119fcf66e0d8008161d63f0b4f5bbd55c5b6ad7e2e8b5c7d",
+        "descriptor_sha256": "sha256:1241a4448099665d09c382c0458279332d1df934c246f212f5cd042472896cda",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:cb6deefebc70733bd0ac505ddf7558daf9c539889309f9503371794732e8d255"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-0c36545f4ba7708f",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:d6847e8075a767e83b52bf9405463e8295de02e6d1cfb8a0fbab46dfd9f5394c"
+    },
+    "src:v1:d0a6dc1af09768b9edf947a8a347df0f849bd133a491d644fadfecb61d8a78a1": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:1c211515d43a412d4ba121478dc2e07200f35a5fb32856176d09395e0b08189e",
+        "raw_bytes": 37000,
+        "first_receipt_id": "sha256:ae9400fa2573d6adf7f3a063040d2e9c5b5262b1b6b68f56afeff3d9873f5088",
+        "descriptor_sha256": "sha256:24ab32252dc7303f1cea82aafb5089638b98af890d96d6f4647c5e98d3a8813e",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:f54442af80a89177618dcdf5599efa2781d6070e0d30804bb03d5ce38fd31e73"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-0c36545f4ba7708f",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:6d8cc4d8e2418384e9276afeefb83dc6ec5c00e28105071e833d92f5c1097d17"
+    }
+  }
+}

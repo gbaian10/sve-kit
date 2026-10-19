@@ -1,0 +1,155 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD02a",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-8bd10ed02df12bd1": [
+        {
+          "ordinal": 0,
+          "name": "Crossover Starter Deck “Cute”",
+          "date_raw": "Oct. 11, 2024",
+          "href_raw": [
+            "/cards/searchresults?expansion=CSD02A",
+            "https://en.shadowverse-evolve.com/products/csd02/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=CSD02A",
+            "https://en.shadowverse-evolve.com/products/csd02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/csd02/",
+              "expansion_code": "CSD02A"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-deb78f0e016aef98": [
+        {
+          "stable_source_key": "Q896",
+          "official_number": "Q896",
+          "locator": "qa-block:0",
+          "published_on": "2024-10-08",
+          "date_raw": "Oct. 8, 2024"
+        },
+        {
+          "stable_source_key": "Q895",
+          "official_number": "Q895",
+          "locator": "qa-block:1",
+          "published_on": "2024-10-08",
+          "date_raw": "Oct. 8, 2024"
+        },
+        {
+          "stable_source_key": "Q894",
+          "official_number": "Q894",
+          "locator": "qa-block:2",
+          "published_on": "2024-10-08",
+          "date_raw": "Oct. 8, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-a4684a3481613b40": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=CP02-T02EN"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cards/?cardno=CP02-T03EN"
+        },
+        {
+          "locator": "related-link:2",
+          "href_raw": "/cards/?cardno=CP02-T04EN"
+        },
+        {
+          "locator": "related-link:3",
+          "href_raw": "/cards/?cardno=CP02-T05EN"
+        },
+        {
+          "locator": "related-link:4",
+          "href_raw": "/cards/?cardno=CP02-T06EN"
+        },
+        {
+          "locator": "related-link:5",
+          "href_raw": "/cards/?cardno=CP02-T07EN"
+        },
+        {
+          "locator": "related-link:6",
+          "href_raw": "/cards/?cardno=CP02-T08EN"
+        },
+        {
+          "locator": "related-link:7",
+          "href_raw": "/cards/?cardno=CP02-T09EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:95e24153569532dc4ca85e0fe35fb954fdd80409afdd6d913fccb17c9fd3eefd": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:d54e62c192ff52ef7612fadf4f4c1aff1fa2263247b7dacdf871342940f24ba8",
+        "raw_bytes": 39427,
+        "first_receipt_id": "sha256:414da679fbe34c7e0c3735c418fd5138bbf9f492de79432a19e9f85f1f6d2e8f",
+        "descriptor_sha256": "sha256:d393052218de35e26239509fccc2b1bdfeb96e0e18141916a8ee21908348dafa",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:6c4a8b4273283702cb8ebef5fc291072a046e725d42e5dc41c4e71816564df4f"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-8bd10ed02df12bd1",
+        "qa": "qa-deb78f0e016aef98",
+        "related": "related-a4684a3481613b40",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:6525527f87aaa9390eea98c158c2feedb00d2803ca35d1528e27e3dae11361ad"
+    }
+  }
+}

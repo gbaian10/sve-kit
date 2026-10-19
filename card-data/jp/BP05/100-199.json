@@ -1,0 +1,1123 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP05",
+  "range": "100-199",
+  "products": {
+    "products-b516a25281053e00": [
+      {
+        "name": "ブースターパック第5弾「永劫なる絶傑」",
+        "date": "2023-04-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP05",
+          "https://shadowverse-evolve.com/products/bp05/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP05-100",
+      "documents": {
+        "documents-e667cb88d7652d65": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-100",
+            "faces": [
+              {
+                "name": "救世主",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "絶傑",
+                  "狂信"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】自分のデッキから『安息の絶傑・マーウィン』1枚を探し、手札に加える。【2】体力2以下の相手の場のフォロワー1体を選ぶ。それを消滅させる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-100.png",
+                "trait_raw": "絶傑・狂信"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-086"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9cbafbd8b27469d147c7811d9a9b862d5c589f20c4da9005b405ec5706afbeb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-100",
+            "fetched_at": "2026-09-24T22:38:44.063219Z"
+          },
+          "document_ref": "documents-e667cb88d7652d65"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-101",
+      "documents": {
+        "documents-82a5f5fa86e5b86e": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-101",
+            "faces": [
+              {
+                "name": "安息の領域",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "絶傑",
+                  "狂信"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{Q}{起動}これを{アクト}墓場に置く：このターン、自分のリーダーが受ける5以上のダメージを4にする。",
+                "sections": [],
+                "flavor": "安息の最中で、己が心と対峙せよ。\n我が力は試練であり慈悲である。さぁ、眠れ。",
+                "illustrator": "AOGIRI",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-101.png",
+                "trait_raw": "絶傑・狂信"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q760",
+                "date": "2023-04-21",
+                "question": "このアミュレットの能力は、そのターン、自分のリーダーは累計で5以上のダメージを受けることはなく、受けるダメージが4になるということですか？（そのターン、累計で5以上のダメージを受けないということですか？）",
+                "answer": "いいえ。そのターンに与えられる5以上のダメージがそれぞれ4ダメージになるということです。\n以下、例です。\n・5以上のダメージを2回受ける場合、4ダメージを2回受けます。\n・6ダメージと3ダメージをそれぞれ受ける場合、4ダメージと3ダメージを受けます。"
+              }
+            ],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ca147abbdc010ea8d32b0fd0b0f35f4713a4ea9c4f0281cf8e12436a86f5d12",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-101",
+            "fetched_at": "2026-09-24T22:38:46.634630Z"
+          },
+          "document_ref": "documents-82a5f5fa86e5b86e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-102",
+      "documents": {
+        "documents-894f70195c1169a1": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-102",
+            "faces": [
+              {
+                "name": "古代の増幅器",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "偶像",
+                  "超克"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}『ミスティックアーティファクト』1体を出す。\n{起動}{コスト1}これを{アクト}墓場に置く：自分の場のトークン・フォロワー1体を選ぶ。それは{攻撃力}+2/{体力}+1する。",
+                "sections": [
+                  "『ミスティックアーティファクト』{ニュートラル}超克・フォロワー{コスト3}{攻撃力}2/{体力}3【守護】{ファンファーレ}1枚引く。"
+                ],
+                "flavor": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-102.png",
+                "trait_raw": "偶像・超克"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d00b7120bb0fb74a4f0e3cb3540779d0e53758febdb9580f1b7829b5aa28a1e5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-102",
+            "fetched_at": "2026-09-24T22:38:49.154429Z"
+          },
+          "document_ref": "documents-894f70195c1169a1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-103",
+      "documents": {
+        "documents-90cd2b5d1d6eb74c": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-103",
+            "faces": [
+              {
+                "name": "唯我の絶傑・マゼルベイン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n【突進】\n自分のエンドフェイズが来たとき、自分の手札が2枚以下なら、相手のリーダーすべてに3ダメージ。自分の手札が0枚なら、相手の場のフォロワーすべてに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "宮﨑章",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-103.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q761",
+                "date": "2023-04-21",
+                "question": "自分のエンドフェイズが来たときに自分の手札が0枚だった場合、「相手のリーダーすべてに3ダメージ。」と「相手の場のフォロワーすべてに3ダメージ。」は両方とも処理を行いますか？",
+                "answer": "はい。両方とも処理を行います。"
+              }
+            ],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-104"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8a0b4eb48d2149f76eba3c07311c3b6ce5001bb14ae19920318b24eff996a657",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-103",
+            "fetched_at": "2026-09-24T22:38:51.772964Z"
+          },
+          "document_ref": "documents-90cd2b5d1d6eb74c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-104",
+      "documents": {
+        "documents-c683e261fb82ff8c": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-104",
+            "faces": [
+              {
+                "name": "唯我の絶傑・マゼルベイン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "自分のエンドフェイズが来たとき、これをスタンドする。自分の手札が2枚以下なら、相手のリーダーすべてに5ダメージ。自分の手札が0枚なら、相手の場のフォロワーすべてに5ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "宮﨑章",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-104.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q762",
+                "date": "2023-04-21",
+                "question": "自分のエンドフェイズが来たときに自分の手札が0枚だった場合、「相手のリーダーすべてに5ダメージ。」と「相手の場のフォロワーすべてに5ダメージ。」は両方とも処理を行いますか？",
+                "answer": "はい。両方とも処理を行います。"
+              }
+            ],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-103"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c41cca4dbf83ec00a9243999226240bbb3ce2fbaf09aef291a2921f075e1fb30",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-104",
+            "fetched_at": "2026-09-24T22:38:54.564814Z"
+          },
+          "document_ref": "documents-c683e261fb82ff8c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-105",
+      "documents": {
+        "documents-4e55b4930a993a01": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-105",
+            "faces": [
+              {
+                "name": "飢餓の絶傑・ギルネリーゼ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "LG",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "【ドレイン】\n自分が{ニュートラル}カードをプレイしたとき、相手のリーダーすべてに1ダメージ。\n{ファンファーレ}{コスト3}：自分のデッキから『飢餓の使徒』1枚と『飢餓の輝き』1枚を探し、EXエリアに置く。\n{ファンファーレ}自分と相手のPP最大値が10なら、3枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "香川太郎",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-105.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q768",
+                "date": "2023-04-21",
+                "question": "EXエリアから『飢餓の使徒』をプレイした場合、『飢餓の絶傑・ギルネリーゼ』の「自分が《ニュートラル》カードをプレイしたとき、～」は誘発しますか？",
+                "answer": "はい。誘発します。\n手札やEXエリアや墓場など、あらゆる領域からのカードのプレイであれば、それがトークンであるか否かに関係なく、カードのプレイを満たします。\nただし、『飢餓の使徒』の進化など、フォロワーの進化はカードのプレイに含みません。"
+              },
+              {
+                "id": "Q767",
+                "date": "2023-04-21",
+                "question": "『飢餓の絶傑・ギルネリーゼ』の「自分が《ニュートラル》カードをプレイしたとき、～」という能力は、この能力を持つ『飢餓の絶傑・ギルネリーゼ』自身をプレイした場合でも誘発しますか？",
+                "answer": "いいえ。誘発しません。『飢餓の絶傑・ギルネリーゼ』をプレイしたとき、その『飢餓の絶傑・ギルネリーゼ』は場におらず、その能力は有効ではありません。"
+              },
+              {
+                "id": "Q766",
+                "date": "2023-04-21",
+                "question": "『飢餓の絶傑・ギルネリーゼ』のような《ファンファーレ》能力を2つ持つフォロワーを場に出した場合、誘発した2つの《ファンファーレ》能力はどちらから解決しますか？",
+                "answer": "好きな順で解決することができます。"
+              },
+              {
+                "id": "Q765",
+                "date": "2023-04-21",
+                "question": "自分の場に『飢餓の絶傑・ギルネリーゼ』がいる状態で『死の祝福』をプレイし『ルシフェル』を場に出した場合、このフォロワーの「自分が《ニュートラル》カードをプレイしたとき」の能力は誘発しますか？",
+                "answer": "いいえ。《ニュートラル》カードをプレイしていないため、能力は誘発しません。『死の祝福』のような、能力によって場に出るものは、カードのプレイではありません。"
+              },
+              {
+                "id": "Q764",
+                "date": "2023-04-21",
+                "question": "自分のデッキに『飢餓の輝き』がない場合、『飢餓の絶傑・ギルネリーゼ』の《ファンファーレ》能力でデッキから『飢餓の使徒』のみを探し、EXエリアに置くことはできますか？",
+                "answer": "はい。可能です。また、『飢餓の輝き』がデッキの中にある場合でも見つけない選択をすることができます。"
+              },
+              {
+                "id": "Q763",
+                "date": "2023-04-21",
+                "question": "『飢餓の絶傑・ギルネリーゼ』の「自分が《ニュートラル》カードをプレイしたとき」の能力で相手のリーダーに1ダメージを与えたとき、【ドレイン】の効果で自分のリーダーは体力+1しますか？",
+                "answer": "いいえ。自分のリーダーの体力を+1しません。【ドレイン】は、攻撃によるダメージを与えたときに、自分のリーダーの体力をそのダメージ数と同じ値増加する能力です。"
+              }
+            ],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-106"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-113"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a210452dc03e857f0a769c6d896d3d53c9c414443b9eec9203d27c7bbcbdd4be",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-105",
+            "fetched_at": "2026-09-24T22:38:57.538764Z"
+          },
+          "document_ref": "documents-4e55b4930a993a01"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-106",
+      "documents": {
+        "documents-4fab97b91882b5dd": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-106",
+            "faces": [
+              {
+                "name": "飢餓の使徒",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "これをEXエリアからプレイする際、自分の場に『飢餓の絶傑・ギルネリーゼ』がいるなら、コストを-3する。\n{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の場の他のフォロワー1体を選ぶ。それは【突進】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-106.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-105"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-107"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3ec297cb18dac6c51b12961a2bd432885d7812d3162c19cecefd50e548dcfea9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-106",
+            "fetched_at": "2026-09-24T22:39:00.893625Z"
+          },
+          "document_ref": "documents-4fab97b91882b5dd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-107",
+      "documents": {
+        "documents-ba47dd50fd16dd1d": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-107",
+            "faces": [
+              {
+                "name": "飢餓の使徒",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】場の他のフォロワー1体を選ぶ。それに3ダメージ。それは{攻撃力}+3する。",
+                "sections": [],
+                "flavor": "必死になって、追い立てられて、身を捩るほどに苦悩して。\n無垢なままでは終わってしまうわよ。",
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-107.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q769",
+                "date": "2023-04-21",
+                "question": "このフォロワーの【進化時】能力は、相手の場のフォロワーだけでなく自分の場の他のフォロワーを選ぶこともできますか？",
+                "answer": "はい。自分の場の他のフォロワーも選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-106"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cbdcac3268e3075be35fa47bf42edd5b0ea749f8cd1489d3e46903d61ab2ef09",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-107",
+            "fetched_at": "2026-09-24T22:39:03.331540Z"
+          },
+          "document_ref": "documents-ba47dd50fd16dd1d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-108",
+      "documents": {
+        "documents-56aba88b498355c9": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-108",
+            "faces": [
+              {
+                "name": "神弓の座天使・リリエル",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "5",
+                "text": "これがいる限り、自分のリーダーは能力によるダメージを受けない。\n{Q}{起動}これを{アクト}：相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-108.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q782",
+                "date": "2023-05-11",
+                "question": "自分の場に『死の祝福』や『守護の陽光』によって【守護】を得た『神弓の座天使・リリエル』がいる状態で、相手のフォロワーが自分のリーダーへ攻撃しました。\nこのとき、クイックタイミングで『神弓の座天使・リリエル』の起動能力をプレイし、『神弓の座天使・リリエル』がアクト状態になった場合、相手のフォロワーの攻撃目標は、自分のリーダーではなく、アクト状態の【守護】を持つ『神弓の座天使・リリエル』に変更されますか？",
+                "answer": "いいえ。クイックタイミングでアクト状態の【守護】を持つフォロワーが場にいる状態になった場合でも、既に攻撃しているフォロワーの攻撃目標が変更されることはなく、相手のフォロワーは自分のリーダーに攻撃します。"
+              },
+              {
+                "id": "Q781",
+                "date": "2023-05-11",
+                "question": "体力5以下の『神弓の座天使・リリエル』に対して、『死の舞踏』と【スペルチェイン_10】の条件を満たした『炎の握撃』をプレイする場合、『死の舞踏』はリーダーにダメージを与えず、『炎の握撃』はリーダーにダメージを与える、というようにリーダーにダメージを与えるか否かの結果が異なるのは何故ですか？",
+                "answer": "『神弓の座天使・リリエル』の破壊処理を行うタイミングが異なるためです。また『神弓の座天使・リリエル』の能力が有効である期間が異なるため、と言い換えることもできます。\n以下、詳細な説明です。\n前提として、能力の解決を行う場合、能力に示された効果を表記の順に従って実行します。\n『死の舞踏』について考えます。まず、体力が0以下になったフォロワーの破壊処理は、チェックタイミングにおけるルール処理において行われます。このチェックタイミングは、ある能力が解決した後、すなわち『死の舞踏』の能力の処理がすべて行われた後に訪れます。ゆえに、『死の舞踏』がリーダーに2ダメージ与えるタイミングで、『死の舞踏』の5ダメージにより『神弓の座天使・リリエル』の体力は0以下ですが、場にいる状態です。つまり、『神弓の座天使・リリエル』の能力が有効なため、リーダーに2ダメージ与えません。\n【スペルチェイン_10】の条件を満たした『炎の握撃』について考えます。『炎の握撃』の能力に示された効果を表記の順に従って実行するため、「それを破壊する。」が適用されたタイミングで『神弓の座天使・リリエル』を破壊します。すなわち、『炎の握撃』がリーダーに3ダメージ与えるタイミングで、『神弓の座天使・リリエル』は場にいない状態です。つまり、『神弓の座天使・リリエル』の能力が有効ではないため、リーダーに3ダメージ与えます。"
+              },
+              {
+                "id": "Q780",
+                "date": "2023-05-11",
+                "question": "自分の場に『神弓の座天使・リリエル』がいる状態で、「自分のリーダーに1ダメージ。」のような自分のリーダーにダメージを与える効果が適用された場合、『神弓の座天使・リリエル』の能力により、能力によるダメージを受けないので、自分のリーダーはダメージを受けませんが、【真紅】状態や「このターン中に自分のリーダーの体力が減少した」を満たしますか？",
+                "answer": "いいえ。【真紅】状態も「このターン中に自分のリーダーの体力が減少した」も満たしません。\n【真紅】状態とは、現在が自分のターンで、その自分のターン中に自分のリーダーの体力が減少したことがあったことを満たす状態です。"
+              },
+              {
+                "id": "Q779",
+                "date": "2023-05-11",
+                "question": "相手のリーダーの体力が11以上であり、相手の場に『神弓の座天使・リリエル』がいる状態で、自分の『アザゼル』が進化した場合、『アザゼル（EVOLVE）』の【進化時】能力によって、相手のリーダーの体力は10になりますか？",
+                "answer": "はい。相手のリーダーの体力は10になります。「相手のリーダーすべての体力を10にする。」は能力によるダメージではないので、『神弓の座天使・リリエル』の能力が適用されません。"
+              },
+              {
+                "id": "Q778",
+                "date": "2023-05-11",
+                "question": "自分の場に『神弓の座天使・リリエル』がいる状態で自分の『パンクデビル・デモニア』の起動能力のコストにある「リーダーの体力-2」が適用された場合、自分のリーダーの体力を-2しますか？",
+                "answer": "はい。自分のリーダーの体力を-2します。「体力-2」は能力によるダメージではないので、『神弓の座天使・リリエル』の能力が適用されません。"
+              },
+              {
+                "id": "Q777",
+                "date": "2023-05-11",
+                "question": "相手の場に体力5以下の『神弓の座天使・リリエル』がいる状態で、自分の『ハンプティダンプティ』が進化した場合、『ハンプティダンプティ（EVOLVE）』の【進化時】能力によって相手のリーダーに3ダメージ与えることができますか？",
+                "answer": "いいえ。相手のリーダーに3ダメージ与えることができません。\n『ハンプティダンプティ（EVOLVE）』の【進化時】能力による5ダメージで『神弓の座天使・リリエル』の体力は0以下になりますが、『神弓の座天使・リリエル』の破壊処理は【進化時】能力の解決後であるため、相手のリーダーに3ダメージ与えるタイミングで『神弓の座天使・リリエル』の能力が有効です。"
+              },
+              {
+                "id": "Q772",
+                "date": "2023-04-21",
+                "question": "「能力によるダメージ」とは何ですか？",
+                "answer": "例えば、スペル『鋭利な一裂き』によるリーダーへのダメージや、フォロワー『不殺の絶傑・エズディア（EVOLVE）』の能力によるリーダーへのダメージなどが「能力によるダメージ」に該当します。\n「能力によるダメージ」とは、フォロワー同士の交戦によってお互いに与える交戦ダメージや攻撃ダメージを除くあらゆるダメージです。"
+              },
+              {
+                "id": "Q771",
+                "date": "2023-04-21",
+                "question": "自分が【スペルチェイン_10】の条件を満たした『炎の握撃』をプレイして、相手の場にいる『神弓の座天使・リリエル』を選んだ場合、相手のリーダーに3ダメージ与えることができますか？",
+                "answer": "はい。相手のリーダーに3ダメージ与えることができます。\n『炎の握撃』の効果によって『神弓の座天使・リリエル』が破壊されて場にいないため、相手のリーダーに3ダメージ与えるタイミングで『神弓の座天使・リリエル』の能力が有効ではありません。"
+              },
+              {
+                "id": "Q770",
+                "date": "2023-04-21",
+                "question": "自分が『死の舞踏』をプレイして、相手の場にいる体力5以下の『神弓の座天使・リリエル』を選んだ場合、相手のリーダーに2ダメージ与えることができますか？",
+                "answer": "いいえ。相手のリーダーに2ダメージ与えることができません。\n『死の舞踏』の効果による5ダメージで『神弓の座天使・リリエル』の体力は0以下になりますが、『神弓の座天使・リリエル』の破壊処理は『死の舞踏』の能力の解決後であるため、『神弓の座天使・リリエル』の能力が有効です。"
+              }
+            ],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:73dde271e0d7f5b1d8f83947bcf3c85beea136e7b1c2576bc515f80414010fac",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-108",
+            "fetched_at": "2026-09-24T22:39:06.066154Z"
+          },
+          "document_ref": "documents-56aba88b498355c9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-109",
+      "documents": {
+        "documents-0218d3cea20d8d9b": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-109",
+            "faces": [
+              {
+                "name": "爆砕の傭兵・フィーナ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "傭兵"
+                ],
+                "rarity": "GR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】自分のデッキの上5枚を見る。その中から、元のコスト1のフォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。【2】元のコスト1の相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-109.png",
+                "trait_raw": "傭兵"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q879",
+                "date": "2024-08-20",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【2】をチョイスすることができず、【1】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2d00b8f75fd7f90dd3676571e72d8fa4846e00845b1420517457c35dc5fc751c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-109",
+            "fetched_at": "2026-09-24T22:39:08.703976Z"
+          },
+          "document_ref": "documents-0218d3cea20d8d9b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-110",
+      "documents": {
+        "documents-ad005e687dbcc61b": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-110",
+            "faces": [
+              {
+                "name": "機構翼の少女・ローザ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使",
+                  "超克"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】",
+                "sections": [],
+                "flavor": "相応なんでしょう、私には、この鳥籠の世界が。\n飛べるだけで幸せなんです。だから、きっとこれでいい。",
+                "illustrator": "u介",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-110.png",
+                "trait_raw": "天使・超克"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-111"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:09cccccb8421b6214dc5265ae583ac9433f89c3047d45d1eb9f8184f8734dae4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-110",
+            "fetched_at": "2026-09-24T22:39:11.266286Z"
+          },
+          "document_ref": "documents-ad005e687dbcc61b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-111",
+      "documents": {
+        "documents-9ce9e70bb791ab82": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-111",
+            "faces": [
+              {
+                "name": "機構翼の少女・ローザ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "天使",
+                  "超克"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "4",
+                "text": "【守護】\n【進化時】1枚引く。",
+                "sections": [],
+                "flavor": "壮観なんでしょう、本当の空から見下ろす景色は。\n桃源郷はここなんです。だけど、いつかはきっと――。",
+                "illustrator": "u介",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-111.png",
+                "trait_raw": "天使・超克"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-110"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8a88147dc6789bed774628869c23fed807c0ad90fe6cfa5116ffe0bcd77f72e3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-111",
+            "fetched_at": "2026-09-24T22:39:14.030418Z"
+          },
+          "document_ref": "documents-9ce9e70bb791ab82"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-112",
+      "documents": {
+        "documents-c44288d122426e3b": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-112",
+            "faces": [
+              {
+                "name": "ミヒライテ",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場のフォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。それが『唯我の絶傑・マゼルベイン』なら、代わりに{攻撃力}+3/{体力}+3して、【指定攻撃】とこのターン、「これはダメージを受けない」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-112.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-103"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:107b89552edd73eff53f4ab18339a314e6e3063fd5108fcdd1320356b1c80e1e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-112",
+            "fetched_at": "2026-09-24T22:39:16.573625Z"
+          },
+          "document_ref": "documents-c44288d122426e3b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-113",
+      "documents": {
+        "documents-73228e5e59d17cce": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-113",
+            "faces": [
+              {
+                "name": "飢餓の輝き",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "SR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\nこれをEXエリアからプレイする際、自分の場に『飢餓の絶傑・ギルネリーゼ』がいるなら、コストを-3する。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-113.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-105"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bc9f3f182a040a4a720e3395dfbea90f3def9c9b77c91c402693aa79611e1aa4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-113",
+            "fetched_at": "2026-09-24T22:39:19.294710Z"
+          },
+          "document_ref": "documents-73228e5e59d17cce"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-114",
+      "documents": {
+        "documents-352110b6ab70c4bf": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-114",
+            "faces": [
+              {
+                "name": "肉球砲の撃ち手",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "傭兵",
+                  "超克"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "そりゃそりゃそりゃー！肉球砲のお通りニャー！\nとにかくぶっぱなすニャー！話はそれからニャー！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-114.png",
+                "trait_raw": "傭兵・超克"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-115"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5a65221f6e96ea01a84aa3a292a5578b0c6da5789c8aefcaaac5f3452a9198cb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-114",
+            "fetched_at": "2026-09-24T22:39:21.861398Z"
+          },
+          "document_ref": "documents-352110b6ab70c4bf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-115",
+      "documents": {
+        "documents-865c90bb7fc87ef6": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-115",
+            "faces": [
+              {
+                "name": "肉球砲の撃ち手",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "傭兵",
+                  "超克"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】『エンシェントアーティファクト』1体を出す。",
+                "sections": [
+                  "『エンシェントアーティファクト』{ニュートラル}超克・フォロワー{コスト1}{攻撃力}3/{体力}1【突進】"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-115.png",
+                "trait_raw": "傭兵・超克"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-114"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9b70b2a1e0429a8d79bd55f64a6918f9e4d518140bd72d96d83181fd229031ae",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-115",
+            "fetched_at": "2026-09-24T22:39:24.801701Z"
+          },
+          "document_ref": "documents-865c90bb7fc87ef6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-116",
+      "documents": {
+        "documents-b1d3bcefe2b67e41": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-116",
+            "faces": [
+              {
+                "name": "鋼鉄の壊し屋",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "傭兵",
+                  "超克"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}EXエリアのカード1枚を消滅：相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "そうかい、抵抗するってのかい！だったら容赦はナシだ！\n投降したくなっちまうまで、手当たり次第にぶっ壊す！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-116.png",
+                "trait_raw": "傭兵・超克"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3bec6712f6aef4c49baf1e04b90b7ec49345fbadd2355f58ae901420543bc849",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-116",
+            "fetched_at": "2026-09-24T22:39:27.618858Z"
+          },
+          "document_ref": "documents-b1d3bcefe2b67e41"
+        }
+      ]
+    },
+    {
+      "card_no": "BP05-117",
+      "documents": {
+        "documents-235f4a18249026c0": {
+          "region": "jp",
+          "record": {
+            "number": "BP05-117",
+            "faces": [
+              {
+                "name": "グリザレイ",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "絶傑"
+                ],
+                "rarity": "BR",
+                "product": "ブースターパック第5弾「永劫なる絶傑」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それに2ダメージ。自分の場に『飢餓の絶傑・ギルネリーゼ』がいるなら、代わりに消滅させる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP05/bp05-117.png",
+                "trait_raw": "絶傑"
+              }
+            ],
+            "release_date": "2023-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b516a25281053e00",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-105"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4c98739b076f36db3cfa12849d2bab3285b53a2d57fd8f1e2e96f34f8fd88c0f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP05-117",
+            "fetched_at": "2026-09-24T22:39:30.225071Z"
+          },
+          "document_ref": "documents-235f4a18249026c0"
+        }
+      ]
+    }
+  ]
+}

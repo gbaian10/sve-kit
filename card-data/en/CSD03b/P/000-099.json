@@ -1,0 +1,600 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD03b",
+  "range": "P/000-099",
+  "products": {
+    "products-6ff2470ff9df22a4": [
+      {
+        "name": "Crossover Starter Deck \"Apocalyptic Fire\"",
+        "date": "Aug. 15, 2025",
+        "links": [
+          "/cards/searchresults?expansion=CSD03B",
+          "https://en.shadowverse-evolve.com/products/csd03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CSD03b-P01EN",
+      "documents": {
+        "documents-607b664b6c928803": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P01EN",
+            "faces": [
+              {
+                "name": "Dragon Knight, Aleph",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower into an Embodiment of Victory, Aleph.\n{icon_fanfare|[fanfare]} If there's an Embodiment of Armor, Bahr and Embodiment of Spear, Tahr in your cemetery, evolve this follower into an Embodiment of Victory, Aleph.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower into an Embodiment of Victory, Aleph.\n{icon_fanfare|[fanfare]} If there's an Embodiment of Armor, Bahr and Embodiment of Spear, Tahr in your cemetery, evolve this follower into an Embodiment of Victory, Aleph.",
+                "speech": null,
+                "illustrator": "増田幹生",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P01EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1470 (Aug. 8, 2025)",
+                "question": "If I evolve this follower with its Fanfare ability, can I evolve another follower using its evolve ability in the same turn?",
+                "answer": "Yes. Although you can only activate one evolve ability per turn, other abilities that evolve followers do not count towards this limit."
+              }
+            ],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": [
+              {
+                "label": "{CSD03b-P02EN|Embodiment of Victory, Aleph}",
+                "href": "/cards/?cardno=CSD03b-P02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9003be220e4ed32e8653d107bb952c008369b83546280e8bd5e0f6360b69686",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P01EN",
+            "fetched_at": "2026-09-27T15:47:00.736456Z"
+          },
+          "document_ref": "documents-607b664b6c928803"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P02EN",
+      "documents": {
+        "documents-c159085a598be694": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P02EN",
+            "faces": [
+              {
+                "name": "Embodiment of Victory, Aleph",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "Twin Drive. (Whenever a follower with Twin Drive attacks, it performs 2 drive checks.)\nOn Evolve - Look at the top 3 cards of your deck. You may put a Kagero follower not named Dragon Knight, Aleph from among them into your EX area. It costs 3 less to play this turn. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "Twin Drive. (Whenever a follower with Twin Drive attacks, it performs 2 drive checks.)\nOn Evolve - Look at the top 3 cards of your deck. You may put a Kagero follower not named Dragon Knight, Aleph from among them into your EX area. It costs 3 less to play this turn. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "増田幹生",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P02EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1458 (Aug. 8, 2025)",
+                "question": "Do I resolve Twin Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1456 (Aug. 8, 2025)",
+                "question": "When attacking using a follower with Twin Drive, if I reveal a Trigger with the first drive check, do I resolve the Trigger before or after performing the second drive check?",
+                "answer": "You resolve the Trigger first. For example, if you reveal and resolve a Draw Trigger with the first drive check, you will draw a card, put the resolved Trigger into your cemetery, then perform the second drive check. If you choose not to resolve the Trigger, you will put it on the bottom of your deck, then perform the second drive check."
+              }
+            ],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": [
+              {
+                "label": "{CSD03b-P01EN|Dragon Knight, Aleph}",
+                "href": "/cards/?cardno=CSD03b-P01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae1f00a3b587d9c33c91e85fa4ae2a0285e59110db03a726d3024c96356ebbbf",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P02EN",
+            "fetched_at": "2026-09-27T15:47:03.243422Z"
+          },
+          "document_ref": "documents-c159085a598be694"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P03EN",
+      "documents": {
+        "documents-e7c96edd1a4102f0": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P03EN",
+            "faces": [
+              {
+                "name": "Berserk Dragon",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Select up to 1 enemy follower on the field. Deal it 3 damage and give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\n{icon_fanfare|[fanfare]} Discard a Kagero card: Select an enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Select up to 1 enemy follower on the field. Deal it 3 damage and give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\n{icon_fanfare|[fanfare]} Discard a Kagero card: Select an enemy follower on the field and deal it 2 damage.",
+                "speech": null,
+                "illustrator": "コガラツ",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P03EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              }
+            ],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": [
+              {
+                "label": "{CSD03b-017EN|Drive Point}",
+                "href": "/cards/?cardno=CSD03b-017EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:98677c6149ca2270379fd4fc59407f06b9bbb4d2a8ddd8ab649ea8ea57c74e81",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P03EN",
+            "fetched_at": "2026-09-27T15:47:06.020130Z"
+          },
+          "document_ref": "documents-e7c96edd1a4102f0"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P04EN",
+      "documents": {
+        "documents-5c3f07e994d1699c": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P04EN",
+            "faces": [
+              {
+                "name": "Wyvern Guard, Barri",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nChoose one. (1) Select an enemy follower on the field and deal it 2 damage. (2) Discard a Kagero card: Select an enemy follower on the field. Deal 3 damage to it and 1 damage to its leader.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nChoose one. (1) Select an enemy follower on the field and deal it 2 damage. (2) Discard a Kagero card: Select an enemy follower on the field. Deal 3 damage to it and 1 damage to its leader.",
+                "speech": null,
+                "illustrator": "Toshiaki Takayama",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P04EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:842481df07691eeda32234f0706f02a5ce95cfa433d41357f8b2f2b303345f49",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P04EN",
+            "fetched_at": "2026-09-27T15:47:08.437139Z"
+          },
+          "document_ref": "documents-5c3f07e994d1699c"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P05EN",
+      "documents": {
+        "documents-7916ea8f54d89afb": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P05EN",
+            "faces": [
+              {
+                "name": "Dragon Knight, Nehalem",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Select up to 1 enemy follower on the field. Deal it 2 damage and give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\nStrike - Deal 1 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "{icon_ride|[ride]} {icon_cost01|[cost01]}: Give this follower Drive.\nOn Drive - Select up to 1 enemy follower on the field. Deal it 2 damage and give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\nStrike - Deal 1 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "辻野芳輝",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P05EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1467 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive and this follower's Strike abilities before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              },
+              {
+                "title": "Q1466 (Aug. 8, 2025)",
+                "question": "Can I choose the order in which I resolve Single Drive and this follower's Strike abilities?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": [
+              {
+                "label": "{CSD03b-017EN|Drive Point}",
+                "href": "/cards/?cardno=CSD03b-017EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cf4e17c6b548667affe83f9bb18d05f73612a73b1f391c8fcd4512072d02612a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P05EN",
+            "fetched_at": "2026-09-27T15:47:11.121229Z"
+          },
+          "document_ref": "documents-7916ea8f54d89afb"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P06EN",
+      "documents": {
+        "documents-543dc41c97eb2c04": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P06EN",
+            "faces": [
+              {
+                "name": "Embodiment of Armor, Bahr",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Draw a card.",
+                "sections": [],
+                "raw_text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this follower when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Draw a card.",
+                "speech": null,
+                "illustrator": "Hirokorin",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P06EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:abf292cf33a6fb9d8521970adadc021ca7ada9a24d8312a13cddb755e5b8b84c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P06EN",
+            "fetched_at": "2026-09-27T15:47:13.954323Z"
+          },
+          "document_ref": "documents-543dc41c97eb2c04"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P07EN",
+      "documents": {
+        "documents-c4e44da70d5bb13c": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P07EN",
+            "faces": [
+              {
+                "name": "Chain-Attack Sutherland",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} Select a Vanguard follower on your field and give it {icon_power|[attack]}+3.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select an enemy follower on the field and deal it damage equal to this follower's attack.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Select a Vanguard follower on your field and give it {icon_power|[attack]}+3.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select an enemy follower on the field and deal it damage equal to this follower's attack.",
+                "speech": null,
+                "illustrator": "百瀬寿",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P07EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4d5cfac074ac07f527434c0f23fd229b2b2cfb1c3ffdebb623bf2114bf469164",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P07EN",
+            "fetched_at": "2026-09-27T15:47:16.459625Z"
+          },
+          "document_ref": "documents-c4e44da70d5bb13c"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P08EN",
+      "documents": {
+        "documents-b8bd6a3f08f4abf5": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P08EN",
+            "faces": [
+              {
+                "name": "Follower, Reas",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_ride|[ride]} {icon_cost02|[cost02]}: Give this follower Drive.\nOn Drive - Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1. Search your deck for a Kagero follower, reveal it, add it to your hand, then shuffle.",
+                "sections": [],
+                "raw_text": "{icon_ride|[ride]} {icon_cost02|[cost02]}: Give this follower Drive.\nOn Drive - Give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1. Search your deck for a Kagero follower, reveal it, add it to your hand, then shuffle.",
+                "speech": null,
+                "illustrator": "百瀬寿",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P08EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1463 (Aug. 8, 2025)",
+                "question": "Do I resolve Single Drive before an opponent can play cards and abilities with Quick?",
+                "answer": "Yes. When attacking, all abilities that are triggered must be resolved before non-active players can play cards and abilities with Quick."
+              }
+            ],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": [
+              {
+                "label": "{CSD03b-017EN|Drive Point}",
+                "href": "/cards/?cardno=CSD03b-017EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ffdd7d1319c09506f6bb08970cd486d18b8ad6a6607604a1fd45a8631d85eb31",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P08EN",
+            "fetched_at": "2026-09-27T15:47:19.443352Z"
+          },
+          "document_ref": "documents-b8bd6a3f08f4abf5"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03b-P09EN",
+      "documents": {
+        "documents-c8939dee777b04bd": {
+          "region": "en",
+          "record": {
+            "number": "CSD03b-P09EN",
+            "faces": [
+              {
+                "name": "Lizard Runner, Undeux",
+                "info": {
+                  "Card Set": "Crossover Starter Deck \"Apocalyptic Fire\"",
+                  "Card Type": "Amulet",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze / Premium",
+                  "Trait": "Vanguard / Kagero",
+                  "Universe": "Cardfight!! Vanguard"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Starting Amulet.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select a Vanguard follower on your field and give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [
+                  "(At the start of the game, if your deck is based on the Cardfight!! Vanguard universe, put a card with Starting Amulet from your deck onto your field.)"
+                ],
+                "raw_text": "Starting Amulet.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Select a Vanguard follower on your field and give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\n----------\n(At the start of the game, if your deck is based on the Cardfight!! Vanguard universe, put a card with Starting Amulet from your deck onto your field.)",
+                "speech": null,
+                "illustrator": "安達洋介",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03b/CSD03b-P09EN.png",
+                "trait_raw": "Vanguard / Kagero",
+                "traits": [
+                  "Vanguard",
+                  "Kagero"
+                ]
+              }
+            ],
+            "release_date": "Aug. 15, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-6ff2470ff9df22a4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1c59b8f458502d78b3f0e48168ab3b942ec319b0499a5323f643cc0c19faf9e4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=CSD03b-P09EN",
+            "fetched_at": "2026-09-27T15:47:22.127938Z"
+          },
+          "document_ref": "documents-c8939dee777b04bd"
+        }
+      ]
+    }
+  ]
+}

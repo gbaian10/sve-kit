@@ -1,0 +1,625 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP11",
+  "range": "T/000-099",
+  "products": {
+    "products-831c31c61323f193": [
+      {
+        "name": "ブースターパック第11弾「宿命の弾丸」",
+        "date": "2024-08-23",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP11",
+          "https://shadowverse-evolve.com/products/bp11/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP11-T01",
+      "documents": {
+        "documents-bd78b4b888437571": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T01",
+            "faces": [
+              {
+                "name": "魔導四輪車・V",
+                "card_class": "ロイヤル",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "荒野",
+                  "乗物"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "3",
+                "text": "{起動}場の『ファントムデュオ・バニー＆バロン』1体を{アクト}：これを操縦する。（このターン、これを{攻撃力}3/{体力}3のフォロワーにする）\n{起動}{コスト1}場のフォロワー2体を{アクト}：これを操縦する。\n【疾走】\n【攻撃時】自分の場に他の荒野・フォロワーがいるなら、1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "オーベン道玄坂",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t01.png",
+                "trait_raw": "荒野・乗物"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1583",
+                "date": "2024-08-20",
+                "question": "操縦し、フォロワーになっている状況で、何らかの能力により攻撃力や体力を+、もしくは-した場合、次の自分のターンに再度操縦した際、攻撃力と体力はどうなりますか？",
+                "answer": "再度操縦した際はカードに記載されている攻撃力と体力になるため、直前に操縦した際に攻撃力や体力を増減していたとしても引き継がれません。"
+              },
+              {
+                "id": "Q1582",
+                "date": "2024-08-20",
+                "question": "操縦し、フォロワーになっている状況で、何らかの能力により【オーラ】を付与した場合、ターン終了時にアミュレットに戻った際にその【オーラ】はどうなりますか？",
+                "answer": "【オーラ】が残り続けます。次の自分のターンに再度操縦した際も【オーラ】を持ったままフォロワーになります。"
+              },
+              {
+                "id": "Q1581",
+                "date": "2024-08-20",
+                "question": "「これを操縦する。」とは何ですか？",
+                "answer": "「これを操縦する。」とは、そのターン、それをカードに記載されている攻撃力と体力を持つフォロワーにすることを意味します。\n「これは操縦する。」を持つカードが場に出たターンに操縦してフォロワーになった場合、通常のフォロワーと同様に、そのターンは相手を攻撃することができません。（【疾走】を持っている場合、相手のリーダーと相手のアクト状態のフォロワーに、【突進】を持っている場合、相手のアクト状態のフォロワーに攻撃できます。）\n場に出たターンの次のターン以降に操縦してフォロワーになった場合は、相手を攻撃することができます。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-019"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP11-020"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e4c2bdcee01242ed783f3780970ecae53cc87cb2637252c314a754a310bcbcc6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T01",
+            "fetched_at": "2026-09-24T21:04:27.368864Z"
+          },
+          "document_ref": "documents-bd78b4b888437571"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T02",
+      "documents": {
+        "documents-a9be971c47692efe": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T02",
+            "faces": [
+              {
+                "name": "魔導列車",
+                "card_class": "ナイトメア",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "荒野",
+                  "乗物"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "5",
+                "text": "{起動}{コスト1}場のフォロワーを元のコストの合計が5以上になるように好きな枚数{アクト}：これを操縦する。（このターン、これを{攻撃力}4/{体力}5のフォロワーにする）\n【突進】\n【攻撃時】アクト状態の相手の場のフォロワー1体を選ぶ。それを破壊する。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t02.png",
+                "trait_raw": "荒野・乗物"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1584",
+                "date": "2024-08-20",
+                "question": "相手の場のアクト状態のフォロワーを選ぶことができない場合、このフォロワーの【攻撃時】能力をプレイして自分のリーダーの体力を+2することができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【攻撃時】能力をプレイすることができず、自分のリーダーの体力を+2することができません。"
+              },
+              {
+                "id": "Q1583",
+                "date": "2024-08-20",
+                "question": "操縦し、フォロワーになっている状況で、何らかの能力により攻撃力や体力を+、もしくは-した場合、次の自分のターンに再度操縦した際、攻撃力と体力はどうなりますか？",
+                "answer": "再度操縦した際はカードに記載されている攻撃力と体力になるため、直前に操縦した際に攻撃力や体力を増減していたとしても引き継がれません。"
+              },
+              {
+                "id": "Q1582",
+                "date": "2024-08-20",
+                "question": "操縦し、フォロワーになっている状況で、何らかの能力により【オーラ】を付与した場合、ターン終了時にアミュレットに戻った際にその【オーラ】はどうなりますか？",
+                "answer": "【オーラ】が残り続けます。次の自分のターンに再度操縦した際も【オーラ】を持ったままフォロワーになります。"
+              },
+              {
+                "id": "Q1581",
+                "date": "2024-08-20",
+                "question": "「これを操縦する。」とは何ですか？",
+                "answer": "「これを操縦する。」とは、そのターン、それをカードに記載されている攻撃力と体力を持つフォロワーにすることを意味します。\n「これは操縦する。」を持つカードが場に出たターンに操縦してフォロワーになった場合、通常のフォロワーと同様に、そのターンは相手を攻撃することができません。（【疾走】を持っている場合、相手のリーダーと相手のアクト状態のフォロワーに、【突進】を持っている場合、相手のアクト状態のフォロワーに攻撃できます。）\n場に出たターンの次のターン以降に操縦してフォロワーになった場合は、相手を攻撃することができます。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:27fdb27e7053b83011fb80f74da764327494773ac01e36db407e428166592c48",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T02",
+            "fetched_at": "2026-09-24T21:04:30.444860Z"
+          },
+          "document_ref": "documents-a9be971c47692efe"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T03",
+      "documents": {
+        "documents-9da28623104a366a": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T03",
+            "faces": [
+              {
+                "name": "従順な駿馬",
+                "card_class": "ニュートラル",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "荒野",
+                  "乗物",
+                  "獣"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}これを墓場に置く：自分の場のフォロワー1体を選ぶ。それが荒野・フォロワーなら、それは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "anchobi",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t03.png",
+                "trait_raw": "荒野・乗物・獣"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1585",
+                "date": "2024-08-20",
+                "question": "自分の場の荒野・タイプではないフォロワーを目標に選び、このアミュレットの《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイできます。\nその場合、コストとしてこのアミュレットを墓場に置きますが、「それが荒野・フォロワーなら、」の条件を満たさないため、選んだフォロワーの攻撃力と体力を+1することができません。"
+              }
+            ],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f4c1bf846c0a25a56b320636d37a870ae241b4b0c9904cb6343f1487f713c0b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T03",
+            "fetched_at": "2026-09-24T21:04:33.220672Z"
+          },
+          "document_ref": "documents-9da28623104a366a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T04",
+      "documents": {
+        "documents-3b77c65ccd1e71dc": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T04",
+            "faces": [
+              {
+                "name": "機動二輪車",
+                "card_class": "ニュートラル",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "荒野",
+                  "乗物"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}これを墓場に置く：自分の場のフォロワー1体を選ぶ。それは【突進】を持つ。それが荒野・フォロワーなら、それは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t04.png",
+                "trait_raw": "荒野・乗物"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:24bd7b2d0f3962c98664970d23f7b389df8a221382775eaa980e815e3d6adfde",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T04",
+            "fetched_at": "2026-09-24T21:04:35.783616Z"
+          },
+          "document_ref": "documents-3b77c65ccd1e71dc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T05",
+      "documents": {
+        "documents-55b3636070e7aa9f": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T05",
+            "faces": [
+              {
+                "name": "魔導装甲車",
+                "card_class": "ニュートラル",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "荒野",
+                  "乗物"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}これを墓場に置く：自分の場のフォロワー1体を選ぶ。それは【守護】を持つ。それが荒野・フォロワーなら、それは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t05.png",
+                "trait_raw": "荒野・乗物"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dabaa4d557bc3fcf45ab300cfb7c30c447482cd92ea02420b4810fbf59072385",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T05",
+            "fetched_at": "2026-09-24T21:04:38.455322Z"
+          },
+          "document_ref": "documents-55b3636070e7aa9f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T06",
+      "documents": {
+        "documents-f0c61b2363e998ce": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T06",
+            "faces": [
+              {
+                "name": "フェアリー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": "カイエダヒロシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t06.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:753f2833e42f7d16aaf7876bbac07a6e250a9aa01150e984be32001b51c6620d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T06",
+            "fetched_at": "2026-09-24T21:04:41.355703Z"
+          },
+          "document_ref": "documents-f0c61b2363e998ce"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T07",
+      "documents": {
+        "documents-c65b7bfae46b96a7": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T07",
+            "faces": [
+              {
+                "name": "スティールナイト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t07.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c20a9ff43b14c0a9d770514217cc4ea90fe6b7094943927a037a199fa35e8fc9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T07",
+            "fetched_at": "2026-09-24T21:04:44.153937Z"
+          },
+          "document_ref": "documents-c65b7bfae46b96a7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T08",
+      "documents": {
+        "documents-15175dccead90b02": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T08",
+            "faces": [
+              {
+                "name": "大地の魔片",
+                "card_class": "ウィッチ",
+                "card_type": "アミュレット・トークン",
+                "traits": [
+                  "土の印"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "【スタック】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t08.png",
+                "trait_raw": "土の印"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:064d908214fc9df661eeeb3d92e72aa51d20ed06fabb8c8648fc0e1e23a39535",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T08",
+            "fetched_at": "2026-09-24T21:04:47.017749Z"
+          },
+          "document_ref": "documents-15175dccead90b02"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T09",
+      "documents": {
+        "documents-eef5a661a6545528": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T09",
+            "faces": [
+              {
+                "name": "ホーリーファルコン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "鳥族"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "【疾走】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t09.png",
+                "trait_raw": "鳥族"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:66bb51d4bde0a36b6f801f5232881f3ca75231466f3ebbaaf595910c7897bc3c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T09",
+            "fetched_at": "2026-09-24T21:04:49.698528Z"
+          },
+          "document_ref": "documents-eef5a661a6545528"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T10",
+      "documents": {
+        "documents-b30ddc2d9e5a7036": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T10",
+            "faces": [
+              {
+                "name": "ホーリータイガー",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "獣"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "【突進】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t10.png",
+                "trait_raw": "獣"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1cf05a86c9eb7e7eeca71f82362c9a60ea897e71ddf8073415350bb947dc0624",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T10",
+            "fetched_at": "2026-09-24T21:04:52.436687Z"
+          },
+          "document_ref": "documents-b30ddc2d9e5a7036"
+        }
+      ]
+    },
+    {
+      "card_no": "BP11-T11",
+      "documents": {
+        "documents-0605b76f96072f00": {
+          "region": "jp",
+          "record": {
+            "number": "BP11-T11",
+            "faces": [
+              {
+                "name": "操り人形",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "人形"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第11弾「宿命の弾丸」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【突進】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP11/bp11-t11.png",
+                "trait_raw": "人形"
+              }
+            ],
+            "release_date": "2024-08-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-831c31c61323f193",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d180a85511cb91a599e39de73f6a4b4f6d07bd3bf23dd32b23ba8b2963a2f229",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP11-T11",
+            "fetched_at": "2026-09-24T21:04:55.208529Z"
+          },
+          "document_ref": "documents-0605b76f96072f00"
+        }
+      ]
+    }
+  ]
+}

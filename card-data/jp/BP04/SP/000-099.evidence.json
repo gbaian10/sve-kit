@@ -1,0 +1,141 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP04",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-ce21c03676bfb7f8": [
+        {
+          "ordinal": 0,
+          "name": "ブースターパック第4弾「天星神話」",
+          "date_raw": "2023-02-24",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=BP04",
+            "https://shadowverse-evolve.com/products/bp04/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=BP04",
+            "https://shadowverse-evolve.com/products/bp04/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://shadowverse-evolve.com/products/bp04/",
+              "expansion_code": "BP04"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-824bfac3750fde31": [
+        {
+          "stable_source_key": "Q655",
+          "official_number": "Q655",
+          "locator": "qa-block:0",
+          "published_on": "2023-03-08",
+          "date_raw": "2023-03-08"
+        },
+        {
+          "stable_source_key": "Q614",
+          "official_number": "Q614",
+          "locator": "qa-block:1",
+          "published_on": "2023-02-20",
+          "date_raw": "2023-02-20"
+        },
+        {
+          "stable_source_key": "Q613",
+          "official_number": "Q613",
+          "locator": "qa-block:2",
+          "published_on": "2023-02-20",
+          "date_raw": "2023-02-20"
+        },
+        {
+          "stable_source_key": "Q612",
+          "official_number": "Q612",
+          "locator": "qa-block:3",
+          "published_on": "2023-02-20",
+          "date_raw": "2023-02-20"
+        },
+        {
+          "stable_source_key": "Q611",
+          "official_number": "Q611",
+          "locator": "qa-block:4",
+          "published_on": "2023-02-20",
+          "date_raw": "2023-02-20"
+        }
+      ]
+    },
+    "related": {
+      "related-8f3181516826ce06": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=BP04-082"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:04420241552e6f840e2fbb2037caf44edc224df535cacbe6e1ca50b06cdeb844": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:84249d4faa99115fa34eb21e1f1687fdb301d4d6bfb0f4d0f20224339b4157db",
+        "raw_bytes": 41271,
+        "first_receipt_id": "sha256:465f07ef8b90349f51d91fd727f45d39f42efffc94991d1c79b37979ea704a5a",
+        "descriptor_sha256": "sha256:f7ca99b1fee178764f669ba7faf7ccaa86f012820940e42fbabb030eddbe5657",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:61e16ca1760f572f9bb73a189e239a9127193f85f09ec815401b1a6391551e99"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-ce21c03676bfb7f8",
+        "qa": "qa-824bfac3750fde31",
+        "related": "related-8f3181516826ce06",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:f3cdc234d40d765d972e951fa04ab3be80b2551b84f54dd7cf73dc4813c19ea7"
+    }
+  }
+}

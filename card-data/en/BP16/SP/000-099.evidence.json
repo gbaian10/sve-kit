@@ -1,0 +1,120 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP16",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-3adc0e8de807d7f0": [
+        {
+          "ordinal": 0,
+          "name": "Booster Set \"New World Genesis\"",
+          "date_raw": "Mar. 27, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP16",
+            "https://en.shadowverse-evolve.com/products/bp16"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP16",
+            "https://en.shadowverse-evolve.com/products/bp16"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp16",
+              "expansion_code": "BP16"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-eb06089aa5a32efc": [
+        {
+          "stable_source_key": "Q1974",
+          "official_number": "Q1974",
+          "locator": "qa-block:0",
+          "published_on": "2026-03-20",
+          "date_raw": "Mar. 20, 2026"
+        },
+        {
+          "stable_source_key": "Q1973",
+          "official_number": "Q1973",
+          "locator": "qa-block:1",
+          "published_on": "2026-03-20",
+          "date_raw": "Mar. 20, 2026"
+        }
+      ]
+    },
+    "related": {
+      "related-2c74997fcbe188b6": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP16-113EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:fb3184a57f58fdc4a55ad3a6ba2334557824ebdd30ed9cb20fd6908a816784e9": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:d095d642991192533070498226469c2abbac65181b7ae6aa46cc860a0acb8478",
+        "raw_bytes": 36968,
+        "first_receipt_id": "sha256:ec81bdac7227b4af4292cb16897ee5c9d2c7e9ac0b26bd2646eae266b9edb8f2",
+        "descriptor_sha256": "sha256:73a0f0ae7f7b2b9f6ffcbd05fbf31916ad3a3ce7d5fcf598664bc50f5887924c",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:3948b7f5df2307cb154aeb20d56ff53c4fbec34dac7bd7cc0260f689d1477b78"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-3adc0e8de807d7f0",
+        "qa": "qa-eb06089aa5a32efc",
+        "related": "related-2c74997fcbe188b6",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:f66b79f1b70ba099c4ecda12cbbfd7b2544b3ae9add5f11f0184349cbf1b0313"
+    }
+  }
+}

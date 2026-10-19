@@ -1,0 +1,91 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP16",
+  "range": "SP/000-099",
+  "products": {
+    "products-e7adc218c99b7e2d": [
+      {
+        "name": "Booster Set \"New World Genesis\"",
+        "date": "Mar. 27, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP16",
+          "https://en.shadowverse-evolve.com/products/bp16"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP16-SP01EN",
+      "documents": {
+        "documents-8435fcac712a1aa5": {
+          "region": "en",
+          "record": {
+            "number": "BP16-SP01EN",
+            "faces": [
+              {
+                "name": "Olivia, Heroic Dark Angel",
+                "info": {
+                  "Card Set": "Booster Set \"New World Genesis\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Special",
+                  "Trait": "Fallen Angel"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "Ward.\nOn Evolve - Select an enemy follower on the field and deal it 5 damage.\nOn Super-Evolve - Give your leader {icon_hp|[defense]}+3. Recover 3 play points.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Select an enemy follower on the field and deal it 5 damage.\nOn Super-Evolve - Give your leader {icon_hp|[defense]}+3. Recover 3 play points.",
+                "speech": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/BP16/BP16-SP01EN.png",
+                "trait_raw": "Fallen Angel",
+                "traits": [
+                  "Fallen Angel"
+                ]
+              }
+            ],
+            "release_date": "Mar. 27, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1974 (Mar. 20, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve ability, does it trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1973 (Mar. 20, 2026)",
+                "question": "If I super-evolve a follower with an On Evolve and On Super-Evolve ability, can I choose the order in which I resolve them?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-e7adc218c99b7e2d",
+            "related_cards": [
+              {
+                "label": "{BP16-113EN|Olivia, Heroic Dark Angel}",
+                "href": "/cards/?cardno=BP16-113EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fb3184a57f58fdc4a55ad3a6ba2334557824ebdd30ed9cb20fd6908a816784e9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP16-SP01EN",
+            "fetched_at": "2026-09-27T14:29:30.563519Z"
+          },
+          "document_ref": "documents-8435fcac712a1aa5"
+        }
+      ]
+    }
+  ]
+}

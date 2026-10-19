@@ -1,0 +1,1029 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CSD03a",
+  "range": "000-099",
+  "products": {
+    "products-92abc729268cd82d": [
+      {
+        "name": "コラボスターターデッキ「聖域の騎士団」",
+        "date": "2024-06-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=CSD03A",
+          "https://shadowverse-evolve.com/products/csd03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CSD03a-001",
+      "documents": {
+        "documents-cbf5a5ee07820b86": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-001",
+            "faces": [
+              {
+                "name": "アルフレッド・アーリー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "LG",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは『騎士王 アルフレッド』に進化する。\n【疾走】【ツインドライブ】（【疾走】を持つフォロワーは、場に出たターンから攻撃できる）",
+                "sections": [],
+                "flavor": "民の微笑みを守るために、若き王は騎士を率いて戦う。",
+                "illustrator": "デザイン：伊藤彰　／　イラスト：三好載克",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-001.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1455",
+                "date": "2024-05-02",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-002"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1d3efbc1de221de0da7acf64847cc98b0eb2bf7a04fb0376be745742f5affab7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-001",
+            "fetched_at": "2026-09-24T21:10:47.491882Z"
+          },
+          "document_ref": "documents-cbf5a5ee07820b86"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-002",
+      "documents": {
+        "documents-565d9e267a66b55b": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-002",
+            "faces": [
+              {
+                "name": "騎士王 アルフレッド",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "LG",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【疾走】【ツインドライブ】（【ツインドライブ】を持つフォロワーは、攻撃したとき、ドライブチェックを2回する）\n【進化時】自分のデッキから元のコスト3以下のロイヤルパラディン・フォロワー1枚を探し、場に出す。自分の墓場のロイヤルパラディン・カードが15枚以上なら、それとこれは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-002.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1481",
+                "date": "2024-07-08",
+                "question": "【ツインドライブ】を持つフォロワーが攻撃し、1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、このトリガーの処理と2回目のドライブチェックはどちらを先に行いますか？",
+                "answer": "トリガーの処理を先に行います。\n1回目のドライブチェックでトリガーを持つカードをトリガー領域に置いた場合、そのトリガーの処理を含むドライブチェックの処理がすべて終了した後に2回目のドライブチェックを行います。\n\n例えば、【ツインドライブ】による1回目のドライブチェックでドロートリガーをトリガー領域に置き、そのトリガーの処理を実行した場合、1枚引き、トリガー領域のカードを墓場に置いた後に2回目のドライブチェックを行います。\nトリガーの処理を実行しなかった場合やトリガーを持たないカードをトリガー領域に置いた場合は、そのカードをデッキの下に置いた後に2回目のドライブチェックを行います。"
+              },
+              {
+                "id": "Q1456",
+                "date": "2024-05-02",
+                "question": "このフォロワーの【進化時】能力をプレイし、自分のデッキの元のコスト3以下のロイヤルパラディン・フォロワーを見つけない選択をした場合、自分の墓場のロイヤルパラディン・フォロワーが15枚以上なら、このフォロワーの攻撃力と体力を+1することができますか？",
+                "answer": "はい。攻撃力と体力を+1することができます。"
+              },
+              {
+                "id": "Q1455",
+                "date": "2024-05-02",
+                "question": "【ツインドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【ツインドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-001"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bdcb47c275beea7eeb2f9a4734d5c4f9a381a5a4c6a2f3bb467299987ff237b2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-002",
+            "fetched_at": "2026-09-24T21:10:50.564178Z"
+          },
+          "document_ref": "documents-565d9e267a66b55b"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-003",
+      "documents": {
+        "documents-1bd98993d9776df6": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-003",
+            "faces": [
+              {
+                "name": "ブラスター・ブレード",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "LG",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【シングルドライブ】（【シングルドライブ】を持つフォロワーは、攻撃したとき、ドライブチェックを1回する）\n{ファンファーレ}これが能力によって場に出ていたなら、これは進化する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "デザイン：伊藤彰　イラスト：TMS",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-003.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1460",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1459",
+                "date": "2024-05-02",
+                "question": "『ブラスター・ブレード』が相手のターン中に何らかの能力によって場に出た場合でも、《ファンファーレ》能力によって進化しますか？",
+                "answer": "はい。相手のターン中であっても、能力によって場に出ているので進化します。"
+              },
+              {
+                "id": "Q1458",
+                "date": "2024-05-02",
+                "question": "『騎士王 アルフレッド』の【進化時】能力や『ういんがる』の《起動》能力によって、『ブラスター・ブレード』を場に出した場合、『ブラスター・ブレード』は《ファンファーレ》能力によって進化しますか？",
+                "answer": "はい。能力によって場に出ているので進化します。"
+              },
+              {
+                "id": "Q1457",
+                "date": "2024-05-02",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d56290d76d3ae910d3b1235f6e3cba4f38258649290446af9ed16f4002131c19",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-003",
+            "fetched_at": "2026-09-24T21:10:53.531039Z"
+          },
+          "document_ref": "documents-1bd98993d9776df6"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-004",
+      "documents": {
+        "documents-16c6db47a99cbee3": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-004",
+            "faces": [
+              {
+                "name": "ブラスター・ブレード",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "LG",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【シングルドライブ】\n【進化時】相手の場のフォロワー1体を選ぶ。それに「自分の場のロイヤルパラディン・フォロワーの数」の2倍のダメージ。",
+                "sections": [],
+                "flavor": "それは勇気という名の光の剣。\n輝け、ブラスター・ブレード！",
+                "illustrator": "伊藤彰",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-004.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1460",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8bcc45d843301fb740fb8f20d19655cf66f40c151be46e61d79598153b506c09",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-004",
+            "fetched_at": "2026-09-24T21:10:56.533723Z"
+          },
+          "document_ref": "documents-16c6db47a99cbee3"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-005",
+      "documents": {
+        "documents-ce35ffdd7cb43fd0": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-005",
+            "faces": [
+              {
+                "name": "ういんがる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "GR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{起動}{コスト3}これを{アクト}：自分の墓場の『ブラスター・ブレード』1枚を選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": "信じてくれる友がいるから……少年は勇者になる。",
+                "illustrator": "TMS",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-005.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ca17f1ae04194a038a799c54b405c9b459dae37d93c53496547e785e41f13c9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-005",
+            "fetched_at": "2026-09-24T21:10:59.434835Z"
+          },
+          "document_ref": "documents-ce35ffdd7cb43fd0"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-006",
+      "documents": {
+        "documents-bd7cf07469fe7a4d": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-006",
+            "faces": [
+              {
+                "name": "断罪の騎士 ボールス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "GR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【指定攻撃】（【指定攻撃】を持つフォロワーは、スタンド状態のフォロワーを攻撃できる）\n【ドライブ獲得時】これは{攻撃力}+2/{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "wolfina",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-006.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1460",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bd91464e53d7403d24996ad5be9560882f42d42d3683f6c97cac517148dda82c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-006",
+            "fetched_at": "2026-09-24T21:11:02.030395Z"
+          },
+          "document_ref": "documents-bd7cf07469fe7a4d"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-007",
+      "documents": {
+        "documents-816671d17e1309b5": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-007",
+            "faces": [
+              {
+                "name": "閃光の盾 イゾルデ",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "GR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに2ダメージ。【2】手札のロイヤルパラディン・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タイキ",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-007.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1461",
+                "date": "2024-05-02",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルの【2】をチョイスし、コストを支払うことで自分のリーダーの体力を+2することができますか？",
+                "answer": "いいえ。【2】をチョイスして相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、コストを支払うこともできないため、自分のリーダーの体力を+2することができません。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f5f187451eb685844b17f239dabaf2b1ce888773daaacc0fa2c0622ee4e6c987",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-007",
+            "fetched_at": "2026-09-24T21:11:04.824246Z"
+          },
+          "document_ref": "documents-816671d17e1309b5"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-008",
+      "documents": {
+        "documents-3e3a22dcc0baa34b": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-008",
+            "faces": [
+              {
+                "name": "沈黙の騎士 ギャラティン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "5",
+                "power": "5",
+                "hp": "4",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】これは{攻撃力}+1/{体力}+1する。相手のリーダーすべてに3ダメージ。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに5ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "村枝賢一",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-008.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1460",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9840286f1984313166f2a593e0dfe85e9d39921536f65020432bed2dad1a15b9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-008",
+            "fetched_at": "2026-09-24T21:11:07.486936Z"
+          },
+          "document_ref": "documents-3e3a22dcc0baa34b"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-009",
+      "documents": {
+        "documents-a5ea8cc163ec9709": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-009",
+            "faces": [
+              {
+                "name": "小さな賢者 マロン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "【守護】\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、ロイヤルパラディン・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "山﨑奈苗",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-009.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:93f0c42774a0ab979828640327d19642d046fe58696f8b11dee210295e287896",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-009",
+            "fetched_at": "2026-09-24T21:11:10.551972Z"
+          },
+          "document_ref": "documents-a5ea8cc163ec9709"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-010",
+      "documents": {
+        "documents-8ea05d7f259421e9": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-010",
+            "faces": [
+              {
+                "name": "湖の巫女 リアン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】（これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない）\n{ファンファーレ}手札のロイヤルパラディン・カード1枚を捨てる：自分の墓場のロイヤルパラディン・フォロワー1枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "三好載克",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-010.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1462",
+                "date": "2024-05-02",
+                "question": "このフォロワーの《ファンファーレ》能力で墓場のロイヤルパラディン・フォロワー1枚を選ぶ際、《ファンファーレ》能力のコストとして捨てたカードを選ぶことはできますか？",
+                "answer": "いいえ。コストを支払う前に目標を選ぶ必要があるため、選ぶことはできません。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2be676d86651b79d77c9b1bdad883ab542933456f9600630441d8b634e483da5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-010",
+            "fetched_at": "2026-09-24T21:11:13.270772Z"
+          },
+          "document_ref": "documents-8ea05d7f259421e9"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-011",
+      "documents": {
+        "documents-09dcf87fb5657f19": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-011",
+            "faces": [
+              {
+                "name": "薔薇の騎士 モルガーナ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "SR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{憑依}{コスト1}：これはドライブを持つ。\n【ドライブ獲得時】相手の場のフォロワー1体まで選ぶ。それに2ダメージ。これは{攻撃力}+1/{体力}+1する。\n【攻撃時】手札のロイヤルパラディン・カード1枚を捨てる：これは{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Ryo-ta.H",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-011.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1464",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】や【攻撃時】能力が誘発し解決するタイミングとクイックタイミングはどちらが先ですか？",
+                "answer": "【シングルドライブ】や【攻撃時】能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。"
+              },
+              {
+                "id": "Q1463",
+                "date": "2024-05-02",
+                "question": "【シングルドライブ】と【攻撃時】能力は、任意の順番で解決することができますか？",
+                "answer": "はい。任意の順番で解決できます。"
+              }
+            ],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b7ca5eb781d410229fa406e80cb309932013ab764d84a5133fad883b06946f48",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-011",
+            "fetched_at": "2026-09-24T21:11:15.981326Z"
+          },
+          "document_ref": "documents-09dcf87fb5657f19"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-012",
+      "documents": {
+        "documents-1d2cec88187d66cb": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-012",
+            "faces": [
+              {
+                "name": "未来の騎士 リュー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}手札のヴァンガード・カード1枚を捨てる：自分のデッキから『ブラスター・ブレード』1枚を探し、手札に加える。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体は{攻撃力}+2する）"
+                ],
+                "flavor": null,
+                "illustrator": "山崎太郎",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-012.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CSD03a-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a7b6e01f60a3734513fe443444a9e87f136864076c55cfafe0adc159db4b2554",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-012",
+            "fetched_at": "2026-09-24T21:11:18.756961Z"
+          },
+          "document_ref": "documents-1d2cec88187d66cb"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-013",
+      "documents": {
+        "documents-611c95f7b7658b21": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-013",
+            "faces": [
+              {
+                "name": "まぁるがる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "{ファンファーレ}手札のロイヤルパラディン・カード1枚を捨てる：1枚引く。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、1枚引く）"
+                ],
+                "flavor": "ハイドッグの武器は、牙だけじゃない。",
+                "illustrator": "田所哲平",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-013.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:137c48d394e15f5a50f75ac105c191cd1b36ca41dfb541ca7981b730c5385317",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-013",
+            "fetched_at": "2026-09-24T21:11:21.503301Z"
+          },
+          "document_ref": "documents-611c95f7b7658b21"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-014",
+      "documents": {
+        "documents-28878ba0e6b296c9": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-014",
+            "faces": [
+              {
+                "name": "ふろうがる",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "自分のエンドフェイズが来たとき、これをスタンドする。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分の場のフォロワー1体をスタンドする。このターン、それは相手のリーダーを攻撃できない）"
+                ],
+                "flavor": null,
+                "illustrator": "松島一夫",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-014.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7c0ac1db8535ce651a1cabed1c1ec2299dd0ffd3f6142dc4d07a7b104e17584d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-014",
+            "fetched_at": "2026-09-24T21:11:24.132847Z"
+          },
+          "document_ref": "documents-28878ba0e6b296c9"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-015",
+      "documents": {
+        "documents-56c080cf65b28290": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-015",
+            "faces": [
+              {
+                "name": "世界樹の巫女 エレイン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のリーダーは{体力}+2する。",
+                "sections": [
+                  "（ドライブチェックによってこれが捲れたなら、自分のリーダーは{体力}+3する）"
+                ],
+                "flavor": null,
+                "illustrator": "武井宏之",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-015.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:64d75537dc7001571dc2d0dd16c3bb675d45ab718b152160683cc45f567dddca",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-015",
+            "fetched_at": "2026-09-24T21:11:27.139092Z"
+          },
+          "document_ref": "documents-56c080cf65b28290"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-016",
+      "documents": {
+        "documents-47e5114f5785239f": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-016",
+            "faces": [
+              {
+                "name": "スターダスト・トランペッター",
+                "card_class": "ロイヤル",
+                "card_type": "アミュレット",
+                "traits": [
+                  "ヴァンガード",
+                  "ロイヤルパラディン"
+                ],
+                "rarity": "BR",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "【スタートアミュレット】\n{起動}これを{アクト}墓場に置く：自分の場のヴァンガード・フォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。",
+                "sections": [
+                  "（※自分のデッキ構築が「カードファイト!! ヴァンガード」タイトル構築なら、自分のデッキから【スタートアミュレット】を持つカード1枚を場に出した状態でバトルを開始する）"
+                ],
+                "flavor": null,
+                "illustrator": "竜徹",
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-016.png",
+                "trait_raw": "ヴァンガード・ロイヤルパラディン"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:053d48e5910e875d1971f1778a04a35055b225023f7abf7a60520dbbff8b3692",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-016",
+            "fetched_at": "2026-09-24T21:11:29.937102Z"
+          },
+          "document_ref": "documents-47e5114f5785239f"
+        }
+      ]
+    },
+    {
+      "card_no": "CSD03a-017",
+      "documents": {
+        "documents-bdf067b0d378acc3": {
+          "region": "jp",
+          "record": {
+            "number": "CSD03a-017",
+            "faces": [
+              {
+                "name": "ドライブポイント",
+                "card_class": "ニュートラル",
+                "card_type": "スペル・エボルヴ",
+                "traits": [],
+                "rarity": "-",
+                "product": "コラボスターターデッキ「聖域の騎士団」",
+                "title": "カードファイト!! ヴァンガード",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": "これはエボルヴデッキに10枚まで入れることができる。",
+                "sections": [
+                  "（ドライブを持ったフォロワーは、【突進】【シングルドライブ】を持つ。【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CSD03a/csd03a-017.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": "2024-06-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-92abc729268cd82d",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ea6e5837a72088b66726bf2ec9d23aced4b87928cf0c6eeeba402715dd085941",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CSD03a-017",
+            "fetched_at": "2026-09-24T21:11:32.323601Z"
+          },
+          "document_ref": "documents-bdf067b0d378acc3"
+        }
+      ]
+    }
+  ]
+}

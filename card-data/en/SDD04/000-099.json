@@ -1,0 +1,1195 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD04",
+  "range": "000-099",
+  "products": {
+    "products-27295d78cc74f2b3": [
+      {
+        "name": "Showdown Deck: Dragoncraft",
+        "date": "Mar. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=SDD04",
+          "https://en.shadowverse-evolve.com/products/sdd/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SDD04-001EN",
+      "documents": {
+        "documents-05516a0b1012e72e": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-001EN",
+            "faces": [
+              {
+                "name": "Filene, Whitefrost Dragonewt",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Dragonewt"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "{icon_fanfare|[fanfare]} Select an enemy follower on the field and engage it. It doesn't refresh during its controller's next start phase.\n{icon_fanfare|[fanfare]} If Overflow is active for you, search your deck for a Whitefrost Whisper, put it into your EX area, then shuffle.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Select an enemy follower on the field and engage it. It doesn't refresh during its controller's next start phase.\n{icon_fanfare|[fanfare]} If Overflow is active for you, search your deck for a Whitefrost Whisper, put it into your EX area, then shuffle.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-001EN.png",
+                "trait_raw": "Dragonewt",
+                "traits": [
+                  "Dragonewt"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q820 (Aug. 8, 2024)",
+                "question": "If this follower's second Fanfare ability triggers, and I have no copies of Whitefrost Whisper in my deck, do I still have to search my deck?",
+                "answer": "Yes. After looking through your deck, you would shuffle it without adding a Whitefrost Whisper to your EX area."
+              },
+              {
+                "title": "Q819 (Aug. 8, 2024)",
+                "question": "I select an enemy follower with this follower's first Fanfare ability, and then steal that enemy follower with an Angel of Chaos's activated ability. If it's engaged at the start of my next turn, does \"It doesn't refresh during its controller's next start phase\" apply to me?",
+                "answer": "No. It applies to the controller at the time the ability was played. In this case, because this follower's Fanfare ability was played before you became the stolen follower's controller, it refreshes as normal during your next start phase."
+              },
+              {
+                "title": "Q818 (Aug. 8, 2024)",
+                "question": "If I select an engaged enemy follower with this follower's first Fanfare ability, will it refresh at the start of its controller's next turn?",
+                "answer": "No. Although the Fanfare ability's \"engage it\" effect will not apply to a follower that is already engaged, the \"It doesn't refresh during its controller's next start phase\" will still apply."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-010EN|Whitefrost Whisper}",
+                "href": "/cards/?cardno=SDD04-010EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:78e1a5e8af2fb51f8dbc8cec287ab53c4bd21b4690e5d1c59cbe5d4bd3b377f9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-001EN",
+            "fetched_at": "2026-09-27T14:40:06.273484Z"
+          },
+          "document_ref": "documents-05516a0b1012e72e"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-002EN",
+      "documents": {
+        "documents-2c894e7cf7714bd9": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-002EN",
+            "faces": [
+              {
+                "name": "XI. Erntz, Justice",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Arcana / Wyrmkin"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "8",
+                  "power": "8"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Put the top card of your deck into your EX area. If you put a card that costs 5 or more into your EX area, evolve this or return it to its owner's hand.\nWhen this leaves the field, give your leader {icon_hp|[defense]}+8.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Put the top card of your deck into your EX area. If you put a card that costs 5 or more into your EX area, evolve this or return it to its owner's hand.\nWhen this leaves the field, give your leader {icon_hp|[defense]}+8.",
+                "speech": null,
+                "illustrator": "Kazashino",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-002EN.png",
+                "trait_raw": "Arcana / Wyrmkin",
+                "traits": [
+                  "Arcana",
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1286 (Jun. 13, 2025)",
+                "question": "If I evolve this follower with its Fanfare ability, can I evolve another follower using its evolve ability in the same turn?",
+                "answer": "Yes. Although you can only activate one evolve ability per turn, other abilities that evolve followers do not count towards this limit."
+              },
+              {
+                "title": "Q1285 (Jun. 13, 2025)",
+                "question": "If an opponent steals this follower from my field with a card such as Angel of Chaos, does its \"When this card leaves the field\" ability trigger?",
+                "answer": "No, it doesn't."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-003EN|XI. Erntz, Justice}",
+                "href": "/cards/?cardno=SDD04-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1c7ab5bf004db918c9340fb2068f6cec6313bece6af40d6c4579f500528c9ee2",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-002EN",
+            "fetched_at": "2026-09-27T14:40:09.050438Z"
+          },
+          "document_ref": "documents-2c894e7cf7714bd9"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-003EN",
+      "documents": {
+        "documents-55c315648cbad066": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-003EN",
+            "faces": [
+              {
+                "name": "XI. Erntz, Justice",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Arcana / Wyrmkin"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "11",
+                  "power": "11"
+                },
+                "text": "Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)\nThis ignores Ward.",
+                "sections": [],
+                "raw_text": "Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)\nThis ignores Ward.",
+                "speech": null,
+                "illustrator": "Kazashino",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-003EN.png",
+                "trait_raw": "Arcana / Wyrmkin",
+                "traits": [
+                  "Arcana",
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-002EN|XI. Erntz, Justice}",
+                "href": "/cards/?cardno=SDD04-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:818d2883d9f954534f0e8f43e5449265b8c86444c1f313da232c3824ac45daff",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-003EN",
+            "fetched_at": "2026-09-27T14:40:11.565223Z"
+          },
+          "document_ref": "documents-55c315648cbad066"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-004EN",
+      "documents": {
+        "documents-bff3c34491274132": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-004EN",
+            "faces": [
+              {
+                "name": "Jerva, Wyrm Transcendent",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Dragonheart"
+                },
+                "stats": {
+                  "cost": "9",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "When this is discarded, you may put it into your EX area.",
+                "sections": [
+                  "Ward.\n{icon_fanfare|[fanfare]} Deal 6 damage to each other follower on the field and each enemy leader.\n{icon_act|[act]} {icon_cost03|[cost03]}, bury this from your EX area: Select an enemy follower on the field and deal it 6 damage. Activate only if Overflow is active for you."
+                ],
+                "raw_text": "When this is discarded, you may put it into your EX area.\n----------\nWard.\n{icon_fanfare|[fanfare]} Deal 6 damage to each other follower on the field and each enemy leader.\n{icon_act|[act]} {icon_cost03|[cost03]}, bury this from your EX area: Select an enemy follower on the field and deal it 6 damage. Activate only if Overflow is active for you.",
+                "speech": null,
+                "illustrator": "Yoko Tsukamoto",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-004EN.png",
+                "trait_raw": "Dragonheart",
+                "traits": [
+                  "Dragonheart"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1629 (Nov. 14, 2025)",
+                "question": "Can this follower's activated ability only be played while it's in my EX area?",
+                "answer": "Yes, that's correct."
+              },
+              {
+                "title": "Q1628 (Nov. 14, 2025)",
+                "question": "If I discard this follower during my end phase due having too many cards in my hand, can I still put it into my EX area?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bab76b18cadb3d3ebd723eb90c4c4e412e457ce5553dcc53036826f786329936",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-004EN",
+            "fetched_at": "2026-09-27T14:40:14.589556Z"
+          },
+          "document_ref": "documents-bff3c34491274132"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-005EN",
+      "documents": {
+        "documents-a615bb83224459e4": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-005EN",
+            "faces": [
+              {
+                "name": "Wildfire Tyrannosaur",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Natura / Wyrmkin"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "When this is discarded, {icon_cost01|[cost01]}: Select an enemy follower on the field and deal it 3 damage.",
+                "sections": [
+                  "{icon_act|[act]} Banish a Naterran Great Tree from your field: Deal 3 damage to each enemy follower on the field."
+                ],
+                "raw_text": "When this is discarded, {icon_cost01|[cost01]}: Select an enemy follower on the field and deal it 3 damage.\n----------\n{icon_act|[act]} Banish a Naterran Great Tree from your field: Deal 3 damage to each enemy follower on the field.",
+                "speech": null,
+                "illustrator": "Tatsuyaki",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-005EN.png",
+                "trait_raw": "Natura / Wyrmkin",
+                "traits": [
+                  "Natura",
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1004 (Nov. 15, 2024)",
+                "question": "If I discard this follower, can I choose not to use its ability?",
+                "answer": "Yes. In that case, nothing will happen."
+              },
+              {
+                "title": "Q1003 (Nov. 15, 2024)",
+                "question": "If I discard this follower during my end phase because I have too many cards in my hand, can I pay 1 play point to deal 3 damage to an enemy follower on the field?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{BP07-T03EN|Naterran Great Tree}",
+                "href": "/cards/?cardno=BP07-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:23017b743e0c673d40fb21650d2e249a617c75433853f19ccd1d8f13d7be41d8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-005EN",
+            "fetched_at": "2026-09-27T14:40:16.944573Z"
+          },
+          "document_ref": "documents-a615bb83224459e4"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-006EN",
+      "documents": {
+        "documents-472e66df636c31f1": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-006EN",
+            "faces": [
+              {
+                "name": "Dragon-Devouring Dread",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wyrmkin / Cutthroat"
+                },
+                "stats": {
+                  "cost": "9",
+                  "hp": "8",
+                  "power": "8"
+                },
+                "text": "{icon_fanfare|[fanfare]} For every {icon_dragon|[dragoncraft]} card in your cemetery that costs 7 or more, select up to 1 enemy follower on the field and banish it.\n{icon_act|[act]} {icon_cost03|[cost03]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Draw a card. Increase your max play points by 1.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} For every {icon_dragon|[dragoncraft]} card in your cemetery that costs 7 or more, select up to 1 enemy follower on the field and banish it.\n{icon_act|[act]} {icon_cost03|[cost03]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Draw a card. Increase your max play points by 1.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-006EN.png",
+                "trait_raw": "Wyrmkin / Cutthroat",
+                "traits": [
+                  "Wyrmkin",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1520 (Sep. 19, 2025)",
+                "question": "Can this follower's activated ability only be played while it's in hand?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6023c11fa7020f6582e7845e1a337d970c84a814a9c9e834300769818e8a5ef5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-006EN",
+            "fetched_at": "2026-09-27T14:40:19.942864Z"
+          },
+          "document_ref": "documents-472e66df636c31f1"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-007EN",
+      "documents": {
+        "documents-d837d6f32ae93749": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-007EN",
+            "faces": [
+              {
+                "name": "Frostbite Dragon",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Select up to 2 enemy followers on the field and engage them.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Select up to 2 enemy followers on the field and engage them.",
+                "speech": null,
+                "illustrator": "Mstk",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-007EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-008EN|Frostbite Dragon}",
+                "href": "/cards/?cardno=SDD04-008EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:55454058233a003171f655dbba4fbf987c3d595bb2ec84a3836eefd4003a6d6c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-007EN",
+            "fetched_at": "2026-09-27T14:40:22.595517Z"
+          },
+          "document_ref": "documents-d837d6f32ae93749"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-008EN",
+      "documents": {
+        "documents-1214f7fb0db4fbad": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-008EN",
+            "faces": [
+              {
+                "name": "Frostbite Dragon",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "On Evolve - Each enemy follower on the field doesn't refresh during its controller's next start phase.\n{icon_lastword|[lastwords]} Destroy each engaged enemy follower on the field.",
+                "sections": [],
+                "raw_text": "On Evolve - Each enemy follower on the field doesn't refresh during its controller's next start phase.\n{icon_lastword|[lastwords]} Destroy each engaged enemy follower on the field.",
+                "speech": null,
+                "illustrator": "Mstk",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-008EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1847 (Jan. 16, 2026)",
+                "question": "Do enemy followers put onto the field after I play this follower's On Evolve ability refresh during their controller's next start phase?",
+                "answer": "Yes, they do."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-007EN|Frostbite Dragon}",
+                "href": "/cards/?cardno=SDD04-007EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9ccc42009f85d2e35cb8c97019ed2cc1819334a32039ccfb425c8cb920dc913b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-008EN",
+            "fetched_at": "2026-09-27T14:40:25.294194Z"
+          },
+          "document_ref": "documents-1214f7fb0db4fbad"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-009EN",
+      "documents": {
+        "documents-8dd76bcc3c09db76": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-009EN",
+            "faces": [
+              {
+                "name": "Dragon Oracle",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Choose 1. (1) Increase your max play points by 1. (2) Draw a card.",
+                "sections": [],
+                "raw_text": "Choose 1. (1) Increase your max play points by 1. (2) Draw a card.",
+                "speech": null,
+                "illustrator": "Mstk",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-009EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q276 (Jun. 30, 2023)",
+                "question": "When I increase my maximum play points by 1, do I also increase my remaining play points by 1?",
+                "answer": "No. Your remaining play points do not change."
+              },
+              {
+                "title": "Q102 (Jun. 30, 2023)",
+                "question": "Can I play this spell with option 1 and raise my maximum number of play points to 11?",
+                "answer": "No. Your maximum play points cannot be greater than 10."
+              },
+              {
+                "title": "Q101 (Jun. 30, 2023)",
+                "question": "If my maximum number of play points is 10, can I still play this spell with option 1?",
+                "answer": "Yes, you can. However, your maximum play points would remain at 10."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c7d8fea9cf94140979a9f0617b9dbedbcab731e3e66970ff988fc3d568604b1f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-009EN",
+            "fetched_at": "2026-09-27T14:40:28.161028Z"
+          },
+          "document_ref": "documents-8dd76bcc3c09db76"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-010EN",
+      "documents": {
+        "documents-634769b861cdd9f2": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-010EN",
+            "faces": [
+              {
+                "name": "Whitefrost Whisper",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Dragonewt"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "This costs 1 less to play if Overflow is active for you. (Overflow is active if you have at least 7 max play points.)",
+                "sections": [
+                  "Select an engaged enemy follower on the field and destroy it. If there's a Filene, Whitefrost Dragonewt on your field, deal 2 damage to the selected follower's leader."
+                ],
+                "raw_text": "This costs 1 less to play if Overflow is active for you. (Overflow is active if you have at least 7 max play points.)\n----------\nSelect an engaged enemy follower on the field and destroy it. If there's a Filene, Whitefrost Dragonewt on your field, deal 2 damage to the selected follower's leader.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-010EN.png",
+                "trait_raw": "Dragonewt",
+                "traits": [
+                  "Dragonewt"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q826 (Aug. 8, 2024)",
+                "question": "If I can't select an enemy follower on the field, but I have a Filene, Whitefrost Dragonewt on my field, can I still deal 2 damage to an enemy leader?",
+                "answer": "No. If you can't select an enemy follower on the field, you can't play this spell."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-001EN|Filene, Whitefrost Dragonewt}",
+                "href": "/cards/?cardno=SDD04-001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:659630354e9ab9c5af1140b081dfccc35c5c1f3744752aeceb1e8da3e418af9d",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-010EN",
+            "fetched_at": "2026-09-27T14:40:30.735587Z"
+          },
+          "document_ref": "documents-634769b861cdd9f2"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-011EN",
+      "documents": {
+        "documents-0ba1dbfb015a4655": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-011EN",
+            "faces": [
+              {
+                "name": "Whitefrost Blizzard",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Dragonewt"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "This costs 2 less to play if there's a follower on your field with \"Filene\" in its name.",
+                "sections": [
+                  "Select any number of enemy followers on the field and deal X damage divided between them. X equals your max play points."
+                ],
+                "raw_text": "This costs 2 less to play if there's a follower on your field with \"Filene\" in its name.\n----------\nSelect any number of enemy followers on the field and deal X damage divided between them. X equals your max play points.",
+                "speech": null,
+                "illustrator": "Rwael",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-011EN.png",
+                "trait_raw": "Dragonewt",
+                "traits": [
+                  "Dragonewt"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{BP15-058EN|Filene, Blizzardous Heart}",
+                "href": "/cards/?cardno=BP15-058EN"
+              },
+              {
+                "label": "{BP15-059EN|Filene, Blizzardous Heart}",
+                "href": "/cards/?cardno=BP15-059EN"
+              },
+              {
+                "label": "{SDD04-001EN|Filene, Whitefrost Dragonewt}",
+                "href": "/cards/?cardno=SDD04-001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6c968a36f4d94ac07602799a20021d70149bb1d94141984189beb56e99bf1582",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-011EN",
+            "fetched_at": "2026-09-27T14:40:33.728971Z"
+          },
+          "document_ref": "documents-0ba1dbfb015a4655"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-012EN",
+      "documents": {
+        "documents-9e5116058eda76e2": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-012EN",
+            "faces": [
+              {
+                "name": "Roy, Dragoncleaver",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Draconic Duelist / Cutthroat"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Search your deck for a 2-cost {icon_dragon|[dragoncraft]} spell, reveal it, add it to your hand, then shuffle.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Search your deck for a 2-cost {icon_dragon|[dragoncraft]} spell, reveal it, add it to your hand, then shuffle.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-012EN.png",
+                "trait_raw": "Draconic Duelist / Cutthroat",
+                "traits": [
+                  "Draconic Duelist",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-013EN|Roy, Dragoncleaver}",
+                "href": "/cards/?cardno=SDD04-013EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:66651248bcdc36e8c25f7c44be291891badbdf6b7cdf5449d7e56c3480d820cd",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-012EN",
+            "fetched_at": "2026-09-27T14:40:36.551288Z"
+          },
+          "document_ref": "documents-9e5116058eda76e2"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-013EN",
+      "documents": {
+        "documents-21176d2def67814c": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-013EN",
+            "faces": [
+              {
+                "name": "Roy, Dragoncleaver",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Draconic Duelist / Cutthroat"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and deal it 2 damage. If it's a Wyrmkin follower, deal 5 damage instead.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and deal it 2 damage. If it's a Wyrmkin follower, deal 5 damage instead.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-013EN.png",
+                "trait_raw": "Draconic Duelist / Cutthroat",
+                "traits": [
+                  "Draconic Duelist",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-012EN|Roy, Dragoncleaver}",
+                "href": "/cards/?cardno=SDD04-012EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:46fa05397be20a174a72ebfdc7a0b176462954c4e908042d9643e1b90e79ab3c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-013EN",
+            "fetched_at": "2026-09-27T14:40:38.791760Z"
+          },
+          "document_ref": "documents-21176d2def67814c"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-014EN",
+      "documents": {
+        "documents-96cd91618b339c52": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-014EN",
+            "faces": [
+              {
+                "name": "Azureflame Dragonewt",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Dragonewt"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 6 damage.\n{icon_act|[act]} {icon_cost01|[cost01]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Select an enemy follower on the field and deal it 4 damage.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 6 damage.\n{icon_act|[act]} {icon_cost01|[cost01]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Select an enemy follower on the field and deal it 4 damage.",
+                "speech": null,
+                "illustrator": "Tabaroki",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-014EN.png",
+                "trait_raw": "Dragonewt",
+                "traits": [
+                  "Dragonewt"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1521 (Sep. 19, 2025)",
+                "question": "Can this follower's activated ability only be played while it's in hand?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-015EN|Azureflame Dragonewt}",
+                "href": "/cards/?cardno=SDD04-015EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed9908a4949dd0be1257152bbd084076223ae14119443d15a5107a11b045a2fd",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-014EN",
+            "fetched_at": "2026-09-27T14:40:41.644280Z"
+          },
+          "document_ref": "documents-96cd91618b339c52"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-015EN",
+      "documents": {
+        "documents-d8083e6b5f4db73a": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-015EN",
+            "faces": [
+              {
+                "name": "Azureflame Dragonewt",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Dragonewt"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "7",
+                  "power": "7"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and deal it 6 damage.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and deal it 6 damage.",
+                "speech": null,
+                "illustrator": "Tabaroki",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-015EN.png",
+                "trait_raw": "Dragonewt",
+                "traits": [
+                  "Dragonewt"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": [
+              {
+                "label": "{SDD04-014EN|Azureflame Dragonewt}",
+                "href": "/cards/?cardno=SDD04-014EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:20f2081f077824b53df80ff78bd60b33c2f9e33bb02e273748496c4e01b97898",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-015EN",
+            "fetched_at": "2026-09-27T14:40:44.196326Z"
+          },
+          "document_ref": "documents-d8083e6b5f4db73a"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-016EN",
+      "documents": {
+        "documents-95888fc1e1ccb5db": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-016EN",
+            "faces": [
+              {
+                "name": "Pumpkin Dragon",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "6",
+                  "power": "6"
+                },
+                "text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+5. Draw 2 cards.\n{icon_act|[act]} {icon_cost02|[cost02]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Give your leader {icon_hp|[defense]}+5.",
+                "sections": [],
+                "raw_text": "Ward. (While you have engaged followers with Ward, opponents can't attack your other followers or leader. You may engage this when it's put onto your field or during your end phase.)\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+5. Draw 2 cards.\n{icon_act|[act]} {icon_cost02|[cost02]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Give your leader {icon_hp|[defense]}+5.",
+                "speech": null,
+                "illustrator": "InHyuk Lee",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-016EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1522 (Sep. 19, 2025)",
+                "question": "Can this follower's activated ability only be played while it's in hand?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:edf0652326ced37e6fff18e5425b58033a530e3864d1f14662bf3bd8c7f2a0e3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-016EN",
+            "fetched_at": "2026-09-27T14:40:46.978076Z"
+          },
+          "document_ref": "documents-95888fc1e1ccb5db"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-017EN",
+      "documents": {
+        "documents-e97986e4b19c39d8": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-017EN",
+            "faces": [
+              {
+                "name": "Orbed Cancer",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Marine"
+                },
+                "stats": {
+                  "cost": "7",
+                  "hp": "7",
+                  "power": "6"
+                },
+                "text": "{icon_fanfare|[fanfare]} Draw 3 cards.\n{icon_act|[act]} {icon_cost01|[cost01]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Draw 2 cards.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Draw 3 cards.\n{icon_act|[act]} {icon_cost01|[cost01]}, discard this and a {icon_dragon|[dragoncraft]} card that costs 7 or more: Draw 2 cards.",
+                "speech": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-017EN.png",
+                "trait_raw": "Marine",
+                "traits": [
+                  "Marine"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1933 (Jan. 16, 2026)",
+                "question": "Can this follower's activated ability only be played while in hand?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d0cd471ce0774c6a72f5cacb5c1467d60d6d523b3e2f100e86e163517cc2a808",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-017EN",
+            "fetched_at": "2026-09-27T14:40:50.226355Z"
+          },
+          "document_ref": "documents-e97986e4b19c39d8"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD04-018EN",
+      "documents": {
+        "documents-6cc3b70b1995ef05": {
+          "region": "en",
+          "record": {
+            "number": "SDD04-018EN",
+            "faces": [
+              {
+                "name": "Thunderous Roar",
+                "info": {
+                  "Card Set": "Showdown Deck: Dragoncraft",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nAs an additional cost to play this, you may discard a {icon_dragon|[dragoncraft]} card that costs 7 or more.",
+                "sections": [
+                  "Select an enemy follower on the field and deal it 3 damage. If you paid this card's additional cost, deal 4 damage instead and draw a card."
+                ],
+                "raw_text": "{icon_quick|[quick]}\nAs an additional cost to play this, you may discard a {icon_dragon|[dragoncraft]} card that costs 7 or more.\n----------\nSelect an enemy follower on the field and deal it 3 damage. If you paid this card's additional cost, deal 4 damage instead and draw a card.",
+                "speech": null,
+                "illustrator": "Kenta Ishikawa",
+                "image": "/wordpress/wp-content/images/cardlist/SDD04/SDD04-018EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-27295d78cc74f2b3",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dfe8f36051cf14b35cffbe6d52c0b0bb77d5b91667736d9e74b4cfa63d2d2676",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD04-018EN",
+            "fetched_at": "2026-09-27T14:40:52.593289Z"
+          },
+          "document_ref": "documents-6cc3b70b1995ef05"
+        }
+      ]
+    }
+  ]
+}

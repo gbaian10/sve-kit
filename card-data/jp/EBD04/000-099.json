@@ -1,0 +1,1272 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "EBD04",
+  "range": "000-099",
+  "products": {
+    "products-087f3d1aa162c8d9": [
+      {
+        "name": "EXビギナーデッキ「ビショップ」",
+        "date": "2025-11-21",
+        "links": [
+          "/cardlist/cardsearch?expansion=EBD04",
+          "https://shadowverse-evolve.com/products/ebd01_04/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "EBD04-001",
+      "documents": {
+        "documents-cb44ebb31dfea6cb": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-001",
+            "faces": [
+              {
+                "name": "大いなる熾天使・ラピス",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "先導",
+                  "光輝"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "3",
+                "power": "5",
+                "hp": "5",
+                "text": "これの祈りカウンターが4個以上である限り、これはフォロワーである。\n自分のメインフェイズが来たとき、自分の場の他のカードを好きな枚数選ぶ。それとこれに祈りカウンター1個を置く。\n【攻撃時】自分のデッキから『封じられし熾天使』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-001.png",
+                "trait_raw": "信仰・先導・光輝"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2136",
+                "date": "2025-07-07",
+                "question": "自分の場に『大いなる熾天使・ラピス』1枚のみある状況で自分のターンを迎えました。その後自分のメインフェイズが来たとき、『大いなる熾天使・ラピス』の能力によって、他のカードを0枚選び、このカードにだけ祈りカウンターを置くことができますか？",
+                "answer": "はい。できます。"
+              },
+              {
+                "id": "Q2135",
+                "date": "2025-07-07",
+                "question": "自分の場に祈りカウンターが3個の『大いなる熾天使・ラピス』がいる状況で自分のターンを迎えました。その後自分のメインフェイズが来たとき、『大いなる熾天使・ラピス』の能力によって、祈りカウンターが置かれて4個になり、フォロワーになりました。この場合『大いなる熾天使・ラピス』は相手のリーダーに攻撃することができますか？",
+                "answer": "はい。相手のリーダーに攻撃することができます。"
+              },
+              {
+                "id": "Q2134",
+                "date": "2025-07-07",
+                "question": "自分の場に何らかの能力により【守護】を付与した、祈りカウンターが4個以上の『大いなる熾天使・ラピス』がいる状況です。この状況で自分の場の『大いなる熾天使・ラピス』が相手の『カースドクイーン・ナハト・ナハト』の能力によって【箱詰め】状態になりました。その後、自分のターンが終了し【箱詰め】状態が解除された場合、この『大いなる熾天使・ラピス』の【守護】はどうなりますか？",
+                "answer": "【守護】が残り続けます。自分のターンが終了し【箱詰め】状態が解除された場合、その『大いなる熾天使・ラピス』は祈りカウンターが4個以上である限り、【守護】を持ったままフォロワーとして扱います。"
+              },
+              {
+                "id": "Q2133",
+                "date": "2025-07-07",
+                "question": "自分の場に何らかの効果により攻撃力や体力を+、もしくは-した、祈りカウンターが4個以上の『大いなる熾天使・ラピス』がいる状況です。この状況で自分の場の『大いなる熾天使・ラピス』が相手の『カースドクイーン・ナハト・ナハト』の能力によって【箱詰め】状態になりました。その後、自分のターンが終了し【箱詰め】状態が解除された場合、この『大いなる熾天使・ラピス』の攻撃力と体力はどうなりますか？",
+                "answer": "自分のターンが終了し【箱詰め】状態が解除された場合、攻撃力や体力は+もしくは-された状態のフォロワーになります。\nフォロワーからアミュレットになり、その後フォロワーに戻るような場合でも攻撃力や体力の数値は保持し続けます。アミュレットになっている状態において、攻撃力や体力は単に参照することができません。"
+              },
+              {
+                "id": "Q2132",
+                "date": "2025-07-07",
+                "question": "自分の場に祈りカウンターが4個以上の『大いなる熾天使・ラピス』がいる状況です。この状況で自分の場の『大いなる熾天使・ラピス』が相手の『カースドクイーン・ナハト・ナハト』の能力によって【箱詰め】状態になった場合、この『大いなる熾天使・ラピス』はフォロワーとして扱いますか？",
+                "answer": "いいえ。「これの祈りカウンターが4個以上である限り、これはフォロワーである。」という能力を失っているため、『大いなる熾天使・ラピス』はフォロワーとして扱われず、アミュレットとして扱います。\nまた、【箱詰め】状態が解除された場合、『大いなる熾天使・ラピス』の祈りカウンターが4個以上である限り、その『大いなる熾天使・ラピス』はフォロワーとして扱います。"
+              },
+              {
+                "id": "Q2131",
+                "date": "2025-07-07",
+                "question": "『大いなる熾天使・ラピス』の祈りカウンターが3個以下である場合、この『大いなる熾天使・ラピス』は攻撃することができますか？",
+                "answer": "いいえ。アミュレットなので攻撃することができません。また、攻撃されることもなく、ダメージを受けることもありません。"
+              },
+              {
+                "id": "Q2130",
+                "date": "2025-07-07",
+                "question": "『大いなる熾天使・ラピス』の祈りカウンターが3個以下である場合、この『大いなる熾天使・ラピス』の攻撃力と体力を参照することができますか？",
+                "answer": "いいえ。攻撃力と体力は、その値自体を保持しますが持っていないものとして扱い、その数値を参照する効果の影響を受けません。"
+              },
+              {
+                "id": "Q2129",
+                "date": "2025-07-07",
+                "question": "『大いなる熾天使・ラピス』の祈りカウンターが4個以上である場合、アミュレットを対象とした効果を受けますか？",
+                "answer": "いいえ。『大いなる熾天使・ラピス』の祈りカウンターが4個以上である限り、その『大いなる熾天使・ラピス』はアミュレットを対象とした効果を受けず、フォロワーを対象とした効果のみを受けます。"
+              },
+              {
+                "id": "Q2128",
+                "date": "2025-07-07",
+                "question": "『白牙の神殿』の祈りカウンターが2個の状況で自分のメインフェイズが来たとき、『大いなる熾天使・ラピス』の「自分のメインフェイズが来たとき、～」という能力でこの『白牙の神殿』を選んだ場合、『白牙の神殿』の「自分のメインフェイズが来たとき、～」という能力で『白牙の神殿』を墓場に置き、自分のデッキから元のコスト4以下の信仰・フォロワー1枚を探し、場に出すことができますか？",
+                "answer": "はい。この場合、『大いなる熾天使・ラピス』の「自分のメインフェイズが来たとき、～」という能力で『白牙の神殿』に祈りカウンター1個を置いた後、『白牙の神殿』の「自分のメインフェイズが来たとき、～」という能力を解決し、『白牙の神殿』を墓場に置き、自分のデッキから元のコスト4以下の信仰・フォロワー1枚を探し、場に出すことができます。"
+              },
+              {
+                "id": "Q2127",
+                "date": "2025-07-07",
+                "question": "『大いなる熾天使・ラピス』の祈りカウンターが4個以上である場合、この『大いなる熾天使・ラピス』はアミュレットとして扱いますか？",
+                "answer": "いいえ。『大いなる熾天使・ラピス』の祈りカウンターが4個以上である限り、『大いなる熾天使・ラピス』はアミュレットとして扱われず、フォロワーとして扱います。"
+              },
+              {
+                "id": "Q2126",
+                "date": "2025-07-07",
+                "question": "『裁決のアナテマ・ロデオ』の【進化時】能力でデッキから『大いなる熾天使・ラピス』を探し、場に出すことができますか？",
+                "answer": "はい。『大いなる熾天使・ラピス』を場に出すことができます。"
+              },
+              {
+                "id": "Q2125",
+                "date": "2025-07-07",
+                "question": "『大いなる熾天使・ラピス』の「これの祈りカウンターが4個以上である限り、これはフォロワーである。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。『大いなる熾天使・ラピス』の祈りカウンターが4個以上である限り、『大いなる熾天使・ラピス』はフォロワーとして扱います。\n『大いなる熾天使・ラピス』を場に出した後に『大いなる熾天使・ラピス』の祈りカウンターが3個以下から4個以上になった場合、フォロワーとして扱います。\n『大いなる熾天使・ラピス』を場に出した後に『大いなる熾天使・ラピス』の祈りカウンターが4個以上から3個以下になった場合、アミュレットとして扱います。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-008"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1fbeb37742f2d09d5403aa2dd6d0fd99968888bc20feb4d56737480ce11d0ef9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-001",
+            "fetched_at": "2026-09-24T19:24:58.022172Z"
+          },
+          "document_ref": "documents-cb44ebb31dfea6cb"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-002",
+      "documents": {
+        "documents-3e76d9e3451b8278": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-002",
+            "faces": [
+              {
+                "name": "裁決のアナテマ・ロデオ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "アナテマ",
+                  "先導"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n自分のエンドフェイズが来たとき、自分の場のアミュレットが2つ以上なら、自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-002.png",
+                "trait_raw": "アナテマ・先導"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7d66a15ec2d56da27fe0f7aad807ec0c91e856f085414103c98541f904c91f57",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-002",
+            "fetched_at": "2026-09-24T19:25:01.384793Z"
+          },
+          "document_ref": "documents-3e76d9e3451b8278"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-003",
+      "documents": {
+        "documents-04ffc6b86d1b6640": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-003",
+            "faces": [
+              {
+                "name": "裁決のアナテマ・ロデオ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "アナテマ",
+                  "先導"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "自分のエンドフェイズが来たとき、自分の場のアミュレットが2つ以上なら、自分のリーダーは{体力}+2する。\n【進化時】自分のデッキから元のコスト3以下のアミュレット1枚を探し、場に出す。\n【超進化時】自分のデッキから元のコスト5以下のアミュレット1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-003.png",
+                "trait_raw": "アナテマ・先導"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2079",
+                "date": "2025-07-07",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2078",
+                "date": "2025-07-07",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-002"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6a5930861018f1c56a016f8f3bcf25d9f20a0fde0db4450f5395e9554d4529d1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-003",
+            "fetched_at": "2026-09-24T19:25:03.752272Z"
+          },
+          "document_ref": "documents-04ffc6b86d1b6640"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-004",
+      "documents": {
+        "documents-b8a1989db1160bfa": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-004",
+            "faces": [
+              {
+                "name": "絶望の安息・マーウィン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "狂信"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト3}：これは進化する。\n【守護】\n相手のメインフェイズが来たとき、自分のリーダーは{体力}+2する。\n{ファンファーレ}相手プレイヤー1人の場のフォロワーが3体以上なら、『絶望の奔流』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "シュイトン",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-004.png",
+                "trait_raw": "絶傑・狂信"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2035",
+                "date": "2025-04-07",
+                "question": "自分の場に『黒き破壊のアーティファクト』が1つあり、相手のリーダーの体力が2で、相手の場に『絶望の安息・マーウィン』が1体いる状況で、自分のメインフェイズが来た場合、相手はバトルに敗北しますか？",
+                "answer": "はい。相手はバトルに敗北します。\n詳細な処理順は以下の通りです。\n自分のメインフェイズが来たとき、自分の場の『黒き破壊のアーティファクト』の能力と、相手の場の『絶望の安息・マーウィン』の能力がそれぞれ誘発します。\n自分と相手を含む複数の能力が誘発し待機状態になっている場合、ターンプレイヤーの待機状態になっている能力から優先的に解決するため、自分の『黒き破壊のアーティファクト』の能力を先に解決します。相手のリーダーに2ダメージを与え、相手のリーダーの体力が0になります。\nその後、ルール処理により、自身のリーダーの体力が0以下のプレイヤーはゲームに敗北します。"
+              },
+              {
+                "id": "Q2034",
+                "date": "2025-04-07",
+                "question": "「相手のメインフェイズが来たとき、～」という能力を持つカードが自分の場に複数ある状況で、相手のメインフェイズを迎えた場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\n相手のメインフェイズを迎えた場合、「相手のメインフェイズが来たとき、」という能力がすべて誘発し、待機状態になります。その後、待機状態になった能力を任意の順で1つずつ解決します。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-005"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:45ea533d974ecb79f4f1d9f490415cb3b22e7cfcaa77b9046fde0d9ad03efd18",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-004",
+            "fetched_at": "2026-09-24T19:25:06.719014Z"
+          },
+          "document_ref": "documents-b8a1989db1160bfa"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-005",
+      "documents": {
+        "documents-9ff02d042743bc70": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-005",
+            "faces": [
+              {
+                "name": "絶望の安息・マーウィン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "狂信"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n相手のメインフェイズが来たとき、自分のリーダーは{体力}+2する。\n【進化時】場の他のフォロワーすべてを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "シュイトン",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-005.png",
+                "trait_raw": "絶傑・狂信"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2036",
+                "date": "2025-04-07",
+                "question": "このフォロワーの【進化時】能力は自分の場の他のフォロワーも破壊しますか？",
+                "answer": "はい。相手の場と自分の場の他のフォロワーすべてを破壊します。"
+              },
+              {
+                "id": "Q2035",
+                "date": "2025-04-07",
+                "question": "自分の場に『黒き破壊のアーティファクト』が1つあり、相手のリーダーの体力が2で、相手の場に『絶望の安息・マーウィン』が1体いる状況で、自分のメインフェイズが来た場合、相手はバトルに敗北しますか？",
+                "answer": "はい。相手はバトルに敗北します。\n詳細な処理順は以下の通りです。\n自分のメインフェイズが来たとき、自分の場の『黒き破壊のアーティファクト』の能力と、相手の場の『絶望の安息・マーウィン』の能力がそれぞれ誘発します。\n自分と相手を含む複数の能力が誘発し待機状態になっている場合、ターンプレイヤーの待機状態になっている能力から優先的に解決するため、自分の『黒き破壊のアーティファクト』の能力を先に解決します。相手のリーダーに2ダメージを与え、相手のリーダーの体力が0になります。\nその後、ルール処理により、自身のリーダーの体力が0以下のプレイヤーはゲームに敗北します。"
+              },
+              {
+                "id": "Q2034",
+                "date": "2025-04-07",
+                "question": "「相手のメインフェイズが来たとき、～」という能力を持つカードが自分の場に複数ある状況で、相手のメインフェイズを迎えた場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\n相手のメインフェイズを迎えた場合、「相手のメインフェイズが来たとき、」という能力がすべて誘発し、待機状態になります。その後、待機状態になった能力を任意の順で1つずつ解決します。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d38de50113a5a5f60b1670fe60386cf8a64d52de97f89a8c47d3d0eb5fed17be",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-005",
+            "fetched_at": "2026-09-24T19:25:09.456279Z"
+          },
+          "document_ref": "documents-9ff02d042743bc70"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-006",
+      "documents": {
+        "documents-8fe8af98eeca618b": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-006",
+            "faces": [
+              {
+                "name": "神の盾・ブローディア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "光輝"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "7",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}自分のリーダーは{体力}+Xする。Xは「自分の場のアミュレットの数の2倍」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-006.png",
+                "trait_raw": "信仰・光輝"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-007"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d96dc1b63b5dfffc95a737f14e04d744165f9dca2674af9ffbc05e0409afa522",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-006",
+            "fetched_at": "2026-09-24T19:25:12.267827Z"
+          },
+          "document_ref": "documents-8fe8af98eeca618b"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-007",
+      "documents": {
+        "documents-bff1bbaecb8542ad": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-007",
+            "faces": [
+              {
+                "name": "神の盾・ブローディア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "光輝"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】（これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない）\n【進化時】相手の場のフォロワー1体を選ぶ。それとそれのリーダーに「自分の場のアミュレットの数」の2倍のダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-007.png",
+                "trait_raw": "信仰・光輝"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1120",
+                "date": "2023-12-15",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力によって、相手のリーダーにダメージを与えることができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができないので、この能力をプレイすることができず、相手のリーダーにダメージを与えることができません。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-006"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4f6eb21916a89b399bf50032537e950aa2eb8053ef45a49d839af395c55f21a8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-007",
+            "fetched_at": "2026-09-24T19:25:14.856872Z"
+          },
+          "document_ref": "documents-bff1bbaecb8542ad"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-008",
+      "documents": {
+        "documents-e35dbe9ce951a7d5": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-008",
+            "faces": [
+              {
+                "name": "封じられし熾天使",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "偶像"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "6",
+                "power": "-",
+                "hp": "-",
+                "text": "これは能力によって破壊されない。\n自分のエンドフェイズが来たとき、これに祈りカウンター1個を置く。その後、これの祈りカウンターが4個以上なら、これを墓場に置く。自分のリーダーは{体力}+10する。自分のデッキからカード2枚まで探し、EXエリアに置く。それをプレイする際、コストを0にする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-008.png",
+                "trait_raw": "信仰・偶像"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q316",
+                "date": "2022-06-24",
+                "question": "『ダークオファリング』で自分の場のこのアミュレットを選んだとき、効果でこのアミュレットは破壊されますか？",
+                "answer": "いいえ。破壊されません。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6edd26cfd0022fffb72d38b3a793d55c198bc3ce46a2e90fcd5ce167cfe9429d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-008",
+            "fetched_at": "2026-09-24T19:25:17.364520Z"
+          },
+          "document_ref": "documents-e35dbe9ce951a7d5"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-009",
+      "documents": {
+        "documents-e1acaceede00a10d": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-009",
+            "faces": [
+              {
+                "name": "最果ての罪・サタン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔王"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "{ファンファーレ}自分のリーダーに6ダメージ。『沈黙の魔将』『サタンズサーヴァント』『辺獄の悪鬼』『アスタロトの宣告』1枚ずつEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "相場良祐（CyDesignation）",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-009.png",
+                "trait_raw": "魔王"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2146",
+                "date": "2025-07-07",
+                "question": "自分のEXエリアにカードが4枚ある状態で《ファンファーレ》能力を解決する場合、『沈黙の魔将』『サタンズサーヴァント』『辺獄の悪鬼』『アスタロトの宣告』の中から1枚を選択してEXエリアに置くことができますか？",
+                "answer": "はい。1枚を選択してEXエリアに置くことができます。\nまた自分のEXエリアのカードが3枚の場合は、2枚を選択してEXエリアに置くことができます。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-T02"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-T03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-T04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a1e5959333ea29328d4e212dd01da51a9ccee3157a3e002cc6b3613862c6b6c5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-009",
+            "fetched_at": "2026-09-24T19:25:26.063410Z"
+          },
+          "document_ref": "documents-e1acaceede00a10d"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-010",
+      "documents": {
+        "documents-a3544e1fc15a04ec": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-010",
+            "faces": [
+              {
+                "name": "射殺す輝き",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "狂信",
+                  "キラー"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\nこれは自分のターン中、プレイできない。\n相手の場のフォロワー2体まで選ぶ。それに4ダメージを割りふる。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "donfoo",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-010.png",
+                "trait_raw": "狂信・キラー"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0b0e608d4e47798db47f2ca456f88ae36d5a54f4b015a1683ee245de9f7b7972",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-010",
+            "fetched_at": "2026-09-24T19:25:29.003307Z"
+          },
+          "document_ref": "documents-a3544e1fc15a04ec"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-011",
+      "documents": {
+        "documents-26098c84ac705a8f": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-011",
+            "faces": [
+              {
+                "name": "テミスの審判",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "5",
+                "power": "-",
+                "hp": "-",
+                "text": "場のフォロワーすべてを破壊する。",
+                "sections": [],
+                "flavor": "天上へ続く階段は、光となって訪れる。\n善悪区別なく、昇れ、昇れ、天まで昇れ。",
+                "illustrator": "sime",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-011.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q229",
+                "date": "2022-04-26",
+                "question": "このスペルの能力で、相手の場の【オーラ】を持つフォロワーを破壊することはできますか？",
+                "answer": "はい。破壊することができます。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:67544ba5c900851b718eeeb4f3923fc1e71046fd0430e862587df049bab34872",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-011",
+            "fetched_at": "2026-09-24T19:25:31.728863Z"
+          },
+          "document_ref": "documents-26098c84ac705a8f"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-012",
+      "documents": {
+        "documents-05f87419b293fe47": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-012",
+            "faces": [
+              {
+                "name": "悠久の絶望",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "絶傑",
+                  "狂信"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の場に「カード名に『マーウィン』を含むフォロワー」が出たとき、自分の墓場のこれをEXエリアに置いてよい。そうしたなら、自分のリーダーは{体力}+1する。\n{起動}これを{アクト}墓場に置く：1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "オーベン道玄坂",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-012.png",
+                "trait_raw": "絶傑・狂信"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2040",
+                "date": "2025-04-07",
+                "question": "『悠久の絶望』の「自分の場に「カード名に『マーウィン』を含むフォロワー」が出たとき、～」という能力は、『悠久の絶望』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『悠久の絶望』が墓場にある場合に有効となる能力です。『悠久の絶望』が墓場にある状況で、自分の場に「カード名に『マーウィン』を含むフォロワー」が出たときに、墓場の『悠久の絶望』をEXエリアに置くことで自分のリーダーの体力を+1することができます。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-086"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-093"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:157e8619fd90173fe86d4d55490403c6218b290f9c106c888c3ab00e77aa672a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-012",
+            "fetched_at": "2026-09-24T19:25:34.893445Z"
+          },
+          "document_ref": "documents-05f87419b293fe47"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-013",
+      "documents": {
+        "documents-1d41f31b9caac8df": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-013",
+            "faces": [
+              {
+                "name": "星導の天球儀",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "星神"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキからアミュレット1枚を探し、手札に加える。\n{Q}{起動}{コスト2}これを{アクト}墓場に置く：自分のリーダーは{体力}+1する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "電蝶",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-013.png",
+                "trait_raw": "信仰・星神"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-105"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0fb4d688fd7f646fc1b21eeca129b7881e4fa196ca74ca165d7b56bfb0ea3333",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-013",
+            "fetched_at": "2026-09-24T19:25:37.364714Z"
+          },
+          "document_ref": "documents-1d41f31b9caac8df"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-014",
+      "documents": {
+        "documents-82343dae38b79d2e": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-014",
+            "faces": [
+              {
+                "name": "聖なる願い",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}これを{アクト}墓場に置く：1枚引く。\n{起動}{コスト2}これを{アクト}墓場に置く：2枚引く。",
+                "sections": [],
+                "flavor": "儀礼済みの水で身を清め、皇銀糖を口に含んで溶かす。\n後は唾液が枯れるまで、ただ只管に祈るのみ。",
+                "illustrator": "須田彩加",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-014.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1d3f39fd37edc3cd42fa8e8aaef5a4479d04ce33fbef424622594b0bd3ca5c45",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-014",
+            "fetched_at": "2026-09-24T19:25:40.334986Z"
+          },
+          "document_ref": "documents-82343dae38b79d2e"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-015",
+      "documents": {
+        "documents-ebebb520b93715a8": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-015",
+            "faces": [
+              {
+                "name": "聖心のプリズムプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導",
+                  "鳥族"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、アミュレット1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-015.png",
+                "trait_raw": "先導・鳥族"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-016"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e2f1911313722864e20cfc4653640d3be46b82188b7e5041966ffc8a81af750a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-015",
+            "fetched_at": "2026-09-24T19:25:43.736255Z"
+          },
+          "document_ref": "documents-ebebb520b93715a8"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-016",
+      "documents": {
+        "documents-4ba2bd0b52305751": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-016",
+            "faces": [
+              {
+                "name": "聖心のプリズムプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "先導",
+                  "鳥族"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】自分の手札の元のコスト2以下のアミュレット1枚を場に出してよい。",
+                "sections": [],
+                "flavor": "聖なるは正なり、疑なきは義なり。彼女は正義を迷わない。\n「オーケー！脳天にセーギを叩き込みマース！」",
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-016.png",
+                "trait_raw": "先導・鳥族"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD04-015"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1cda6ac5d33323e57f725f92a96ff2646d9f01a644491d288b76234c21749d47",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-016",
+            "fetched_at": "2026-09-24T19:25:46.040754Z"
+          },
+          "document_ref": "documents-4ba2bd0b52305751"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-017",
+      "documents": {
+        "documents-2364bf28a0acff90": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-017",
+            "faces": [
+              {
+                "name": "ダークオファリング",
+                "card_class": "ビショップ",
+                "card_type": "スペル",
+                "traits": [
+                  "狂信"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n自分の場のカード1枚を選ぶ。それを破壊する。自分のリーダーは{体力}+3する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-017.png",
+                "trait_raw": "狂信"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q268",
+                "date": "2022-05-19",
+                "question": "自分の場のフォロワーが相手のフォロワーに攻撃され、『アルカード』の【攻撃時】能力や『ダークオファリング』や『ソウルコンバージョン』で攻撃目標のフォロワーが破壊されたとき、攻撃フォロワーの攻撃はどうなりますか？",
+                "answer": "フォロワーへの攻撃中に攻撃目標が場を離れた場合、新たな攻撃目標を決めることはできず、攻撃によってアクトしたままとなり、ダメージはどこにも与えません。また、攻撃中のフォロワーや攻撃目標のフォロワーが場を離れていても、引き続き《Quick》を持つカードをプレイすることができます。"
+              },
+              {
+                "id": "Q235",
+                "date": "2022-04-26",
+                "question": "このスペルで《ラストワード》能力を持つフォロワーを破壊したとき、そのフォロワーの《ラストワード》能力はプレイしますか？",
+                "answer": "はい。プレイします。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dcd02814a9dc07e99149bcb991302430156e2e26a1673f9b8bb1968dbf948526",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-017",
+            "fetched_at": "2026-09-24T19:25:48.826429Z"
+          },
+          "document_ref": "documents-2364bf28a0acff90"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-018",
+      "documents": {
+        "documents-045a0f5be90e0a6f": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-018",
+            "faces": [
+              {
+                "name": "穏やかなる教会",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキから先導・アミュレット1枚を探し、手札に加える。\n{ラストワード}自分のリーダーは{体力}+1する。\n{起動}これを{アクト}：これを墓場に置く。この能力はこれに祈りカウンターが置かれているなら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-018.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f498693ae1bbf0dbe8c47ad49bc69c92291e9d00b870cdcaf16f427705917a35",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-018",
+            "fetched_at": "2026-09-24T19:25:52.140520Z"
+          },
+          "document_ref": "documents-045a0f5be90e0a6f"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-019",
+      "documents": {
+        "documents-4644d4fc949ff48b": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-019",
+            "faces": [
+              {
+                "name": "禁密の聖地",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "先導"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それを破壊する。\n{起動}これを{アクト}墓場に置く：相手のリーダーすべてに2ダメージ。1枚引く。この能力はこのターン、自分の場のフォロワーが進化していたなら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ni02",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-019.png",
+                "trait_raw": "信仰・先導"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2084",
+                "date": "2025-07-07",
+                "question": "自分の場のフォロワーが超進化していた場合、「自分の場のフォロワーが進化していたなら、」を満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:29b3d08c57e9890437516c2d8e3d9fd83d87aaa2883255a8a4dc5199ff43ba09",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-019",
+            "fetched_at": "2026-09-24T19:25:54.610835Z"
+          },
+          "document_ref": "documents-4644d4fc949ff48b"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD04-020",
+      "documents": {
+        "documents-81d3ca00b100d304": {
+          "region": "jp",
+          "record": {
+            "number": "EBD04-020",
+            "faces": [
+              {
+                "name": "聖なるジャッジガベル",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ビショップ」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n{ラストワード}自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": "被告人に、判決を申し渡す！\n――神魔裁判長・ヴァルナ",
+                "illustrator": "AOGIRI",
+                "image": "/wordpress/wp-content/images/cardlist/EBD04/ebd04-020.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-087f3d1aa162c8d9",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7bd1f34fa940f1cf94f6241c8044ae9eb9464b87a611187fb74b317ba02a0e23",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD04-020",
+            "fetched_at": "2026-09-24T19:25:57.453287Z"
+          },
+          "document_ref": "documents-81d3ca00b100d304"
+        }
+      ]
+    }
+  ]
+}

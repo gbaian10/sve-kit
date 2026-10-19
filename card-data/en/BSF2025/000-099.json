@@ -1,0 +1,81 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BSF2025",
+  "range": "000-099",
+  "products": {
+    "products-a13a5483ff5dbc17": [
+      {
+        "name": "Promo Cards",
+        "date": null,
+        "links": [
+          "/cards/searchresults?expansion=PR"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BSF2025-001EN",
+      "documents": {
+        "documents-b880751fd77a575b": {
+          "region": "en",
+          "record": {
+            "number": "BSF2025-001EN",
+            "faces": [
+              {
+                "name": "Kagemitsu, Matchless Blade",
+                "info": {
+                  "Card Set": "Promo Cards",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Promo",
+                  "Trait": "Arena / Officer"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "Rush.\n{icon_fanfare|[fanfare]} Give this follower {icon_power|[attack]}+X/{icon_hp|[defense]}+X, where X equals the number of faceup evolved followers in your evolve deck. If X is at least 3, give it Assail. If X is at least 7, give it \"Strike - Refresh this follower. Perform only once per turn.\"",
+                "sections": [],
+                "raw_text": "Rush.\n{icon_fanfare|[fanfare]} Give this follower {icon_power|[attack]}+X/{icon_hp|[defense]}+X, where X equals the number of faceup evolved followers in your evolve deck. If X is at least 3, give it Assail. If X is at least 7, give it \"Strike - Refresh this follower. Perform only once per turn.\"",
+                "speech": null,
+                "illustrator": "Ryosuke Aiba (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/PR/BSF2025-001EN.png",
+                "trait_raw": "Arena / Officer",
+                "traits": [
+                  "Arena",
+                  "Officer"
+                ]
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q801 (Aug. 8, 2024)",
+                "question": "Does a Carrot count as an evolved follower?",
+                "answer": "No, it doesn't."
+              }
+            ],
+            "products_ref": "products-a13a5483ff5dbc17",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cc9a2c530dc5d5428b3576ced77e8f3ca32f266d075437965f60e028c2160072",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BSF2025-001EN",
+            "fetched_at": "2026-09-27T18:49:03.061718Z"
+          },
+          "document_ref": "documents-b880751fd77a575b"
+        }
+      ]
+    }
+  ]
+}

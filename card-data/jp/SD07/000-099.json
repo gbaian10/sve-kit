@@ -1,0 +1,1336 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD07",
+  "range": "000-099",
+  "products": {
+    "products-2705e9fbcc5279c1": [
+      {
+        "name": "スターターデッキ「新たなる戦場」",
+        "date": "2025-06-27",
+        "links": [
+          "/cardlist/cardsearch?expansion=SD07",
+          "https://shadowverse-evolve.com/products/sd07_08/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SD07-001",
+      "documents": {
+        "documents-d9bafe3ee6e1c5c2": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-001",
+            "faces": [
+              {
+                "name": "レヴィオンの迅雷・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "5",
+                "text": "【疾走】\n{ファンファーレ}自分の場の他のレヴィオン・フォロワー1体を選ぶ。それは{攻撃力}+1する。\n{起動}{コスト3}：これをスタンドする。この能力は自分の墓場の{ロイヤル}フォロワーが10枚以上なら、1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-001.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d560273882fbd04666b701eaca0fafd8174b73a10cc22b2be2ae7c3c9a4309e1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-001",
+            "fetched_at": "2026-09-24T20:06:30.994880Z"
+          },
+          "document_ref": "documents-d9bafe3ee6e1c5c2"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-002",
+      "documents": {
+        "documents-ece0ffc035692174": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-002",
+            "faces": [
+              {
+                "name": "雷滅卿・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン",
+                  "キラー"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "6",
+                "power": "3",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n【疾走】\n{ファンファーレ}場の他のレヴィオン・フォロワー1体を墓場に置く：相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-002.png",
+                "trait_raw": "指揮官・レヴィオン・キラー"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-003"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cda5ad7b8f6817073732e935f8b696b5d50529d55e1adecf05b64be32a02be0d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-002",
+            "fetched_at": "2026-09-24T20:06:33.958332Z"
+          },
+          "document_ref": "documents-ece0ffc035692174"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-003",
+      "documents": {
+        "documents-df7abef1c6b984d1": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-003",
+            "faces": [
+              {
+                "name": "雷滅卿・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン",
+                  "キラー"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "6",
+                "text": "【疾走】\n【攻撃時】相手の場のフォロワー1体まで選ぶ。それを破壊する。これは{攻撃力}+X/{体力}+Xする。Xは「このターン、場から墓場に置かれたフォロワーの数」である。\n{起動}{コスト2}：これをスタンドする。この能力は自分の墓場のレヴィオン・カードが10枚以上なら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-003.png",
+                "trait_raw": "指揮官・レヴィオン・キラー"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1734",
+                "date": "2024-12-13",
+                "question": "このターン、フォロワーが2体破壊されている状況で、相手の場にフォロワーがいない場合、『雷滅卿・アルベール』の【攻撃時】能力をプレイして、『雷滅卿・アルベール』は《攻撃力》+2/《体力》+2することができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、『雷滅卿・アルベール』の【攻撃時】能力をプレイすることができます。そのため、このターン、フォロワーが2体破壊されている状況で、相手の場にフォロワーがいない場合でも、『雷滅卿・アルベール』の【攻撃時】能力をプレイして、『雷滅卿・アルベール』は《攻撃力》+2/《体力》+2することができます。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-002"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cd67efd9f48e8353db50965f7ec4e6cebd77c6e931248fa5bd8a9e13a87e3a93",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-003",
+            "fetched_at": "2026-09-24T20:06:36.494251Z"
+          },
+          "document_ref": "documents-df7abef1c6b984d1"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-004",
+      "documents": {
+        "documents-ee0095ce5ee4c490": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-004",
+            "faces": [
+              {
+                "name": "カースドクイーン・ナハト・ナハト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "指揮官"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のデッキから元のコスト1の{ロイヤル}カード1枚を探し、EXエリアに置く。\n{起動}{コスト0}：相手の場のフォロワー1体を選ぶ。それをアクトする。次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にする。この能力は1ターンに1回使える。（【箱詰め】状態のフォロワーは、能力すべてを失い、スタートフェイズにスタンドしない）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-004.png",
+                "trait_raw": "荒野・指揮官"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1718",
+                "date": "2024-11-08",
+                "question": "《憑依》し、ドライブを持った相手の場のフォロワーを【箱詰め】状態にしました。その後、相手のターンが終了し【箱詰め】状態が解除された場合、そのフォロワーの【突進】や【シングルドライブ】はどうなりますか？",
+                "answer": "【箱詰め】状態の間は【突進】や【シングルドライブ】を失いますが、【箱詰め】状態が解除された場合、持っていた【突進】や【シングルドライブ】などの能力は元に戻り有効となります。"
+              },
+              {
+                "id": "Q1717",
+                "date": "2024-11-08",
+                "question": "『死の祝福』によって、【守護】を持った相手の場のフォロワーを【箱詰め】状態にしました。その後、相手のターンが終了し【箱詰め】状態が解除された場合、『死の祝福』によって持った【守護】はどうなりますか？",
+                "answer": "【箱詰め】状態の間は【守護】を失いますが、【箱詰め】状態が解除された場合、持っていた【守護】などの能力は元に戻り有効となります。"
+              },
+              {
+                "id": "Q1502",
+                "date": "2024-08-20",
+                "question": "『カースドクイーン・ナハト・ナハト』の《起動》能力によって、相手の場の『カオスルーラー・アイシィレンドリング』を選んだ場合、『カオスルーラー・アイシィレンドリング』の「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、チェックタイミングで解決します。"
+              },
+              {
+                "id": "Q1501",
+                "date": "2024-08-20",
+                "question": "《起動》能力によって、アクト状態の相手の場のフォロワーを選んだ場合でも、次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にすることができますか？",
+                "answer": "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にすることができます。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にする。」が適用されます。"
+              },
+              {
+                "id": "Q1500",
+                "date": "2024-08-20",
+                "question": "『ドラゴウェポン』の効果によって武装・タイプを持ったフォロワーが【箱詰め】状態になった場合、そのフォロワーは武装・タイプを失いますか？",
+                "answer": "いいえ。失いません。"
+              },
+              {
+                "id": "Q1499",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーに『守護の陽光』の《ファンファーレ》能力で【守護】を付与することはできますか？",
+                "answer": "はい。【箱詰め】状態のフォロワーに対して【守護】などの能力を付与することができます。"
+              },
+              {
+                "id": "Q1498",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーが場から手札に戻った場合、そのフォロワーの「これが場から手札に戻ったとき、」という能力は誘発しますか？",
+                "answer": "いいえ。能力を失っているので誘発しません。"
+              },
+              {
+                "id": "Q1497",
+                "date": "2024-08-20",
+                "question": "【箱詰め】状態のフォロワーが墓場に置かれた場合、そのフォロワーの《ラストワード》能力は誘発しますか？",
+                "answer": "いいえ。能力を失っているので《ラストワード》能力は誘発しません。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8a2244a9e28206716306b1f9418c7bcd214ee4b0cb7c8252b1bf57138ad27715",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-004",
+            "fetched_at": "2026-09-24T20:06:39.224320Z"
+          },
+          "document_ref": "documents-ee0095ce5ee4c490"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-005",
+      "documents": {
+        "documents-001cb036bf5b5608": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-005",
+            "faces": [
+              {
+                "name": "白翼の戦神・アイテール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "光輝"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "自分のエンドフェイズが来たとき、自分の墓場の{ロイヤル}フォロワーが7枚以上なら、自分の場のフォロワーすべては{攻撃力}+1/{体力}+1する。\n{ファンファーレ}自分のデッキから指揮官・カードか兵士・カード1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-005.png",
+                "trait_raw": "指揮官・光輝"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c1cc094624757ead08fbc2f5a84dd9c3114df6ec1f0115c3dcfa55c9d31a0ff3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-005",
+            "fetched_at": "2026-09-24T20:06:42.314097Z"
+          },
+          "document_ref": "documents-001cb036bf5b5608"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-006",
+      "documents": {
+        "documents-8c4283697e81e202": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-006",
+            "faces": [
+              {
+                "name": "レヴィオンセイバー・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "{進化}{コスト3}：これは進化する。\n【疾走】（【疾走】を持つフォロワーは、場に出たターンから攻撃できる）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-006.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-007"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5087ae195d35857df23884fd52f78e10eb6699faa928f184a2aa477812cd2f05",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-006",
+            "fetched_at": "2026-09-24T20:06:44.991087Z"
+          },
+          "document_ref": "documents-8c4283697e81e202"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-007",
+      "documents": {
+        "documents-a530de9786a01d17": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-007",
+            "faces": [
+              {
+                "name": "レヴィオンセイバー・アルベール",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "【疾走】\n【攻撃時】これをスタンドする。この能力は1ターンに1回働く。\n【進化時】このターン、これは交戦ダメージを受けない。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-007.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q281",
+                "date": "2022-06-24",
+                "question": "交戦ダメージとは何ですか？",
+                "answer": "交戦ダメージとは、攻撃フォロワーと攻撃目標のフォロワーが交戦状態のときに、それらのフォロワーが互いに与える攻撃力に等しいダメージのことを指します。"
+              },
+              {
+                "id": "Q280",
+                "date": "2022-06-24",
+                "question": "このフォロワーが自分の場に2体あり、それらが攻撃したとき、【攻撃時】能力はそれぞれ1回ずつ誘発しますか？",
+                "answer": "はい。【攻撃時】能力はそれぞれ1ターンに1回ずつ誘発します。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-006"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:43c50d6b773919f857acb8ed7acc51f11be805c3fa732b53b53d6705f210886f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-007",
+            "fetched_at": "2026-09-24T20:06:47.632531Z"
+          },
+          "document_ref": "documents-a530de9786a01d17"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-008",
+      "documents": {
+        "documents-4e0f0fc1b5e11b6c": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-008",
+            "faces": [
+              {
+                "name": "王断の天宮・スタチウム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "貴族"
+                ],
+                "rarity": "GR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "仮面をつけしは、己がケンで戦う騎士にして果断なる王。\nその本性は、仮面の下に隠されたまま。",
+                "illustrator": "ねつき",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-008.png",
+                "trait_raw": "指揮官・貴族"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-009"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3b39df298d67d17d2439674b735161522772456f2db0aedbf0877abde46e4d8a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-008",
+            "fetched_at": "2026-09-24T20:06:50.152516Z"
+          },
+          "document_ref": "documents-4e0f0fc1b5e11b6c"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-009",
+      "documents": {
+        "documents-14ae8532fe682b18": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-009",
+            "faces": [
+              {
+                "name": "王断の天宮・スタチウム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "貴族"
+                ],
+                "rarity": "GR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】『スティールナイト』1体と『シールドガーディアン』1体を場に出す。\n【超進化時】自分の場の兵士・トークン・フォロワー2体まで選ぶ。それは{攻撃力}+1/{体力}+1して、【疾走】を持つ。",
+                "sections": [
+                  "『スティールナイト』{ロイヤル}兵士・フォロワー{コスト2}{攻撃力}2/{体力}2\n『シールドガーディアン』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}1【守護】"
+                ],
+                "flavor": null,
+                "illustrator": "ねつき",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-009.png",
+                "trait_raw": "指揮官・貴族"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2058",
+                "date": "2025-06-23",
+                "question": "自分の場のカードが『王断の天宮・スタチウム』を含めて4枚の状況で、【進化時】能力をプレイした場合、『スティールナイト』と『シールドガーディアン』のどちらを場に出すか選択することができますか？",
+                "answer": "はい。どちらを場に出すかを選択することができます。"
+              },
+              {
+                "id": "Q2057",
+                "date": "2025-06-23",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2056",
+                "date": "2025-06-23",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-008"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:61360c7e164a37cbad0a65f97d0cbfab5870f5a78a419a13a412fd6dc0fce948",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-009",
+            "fetched_at": "2026-09-24T20:06:53.120102Z"
+          },
+          "document_ref": "documents-14ae8532fe682b18"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-010",
+      "documents": {
+        "documents-371a34087d62244f": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-010",
+            "faces": [
+              {
+                "name": "妖刀の鬼・ツバキ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "暗殺者",
+                  "忍者"
+                ],
+                "rarity": "GR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "3",
+                "text": "自分の墓場に{ロイヤル}フォロワーが10枚以上ある限り、これは【疾走】を持つ。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の墓場の{ロイヤル}フォロワーが5枚以上なら、それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-010.png",
+                "trait_raw": "暗殺者・忍者"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q994",
+                "date": "2023-10-20",
+                "question": "『妖刀の鬼・ツバキ』の「自分の墓場に《ロイヤル》フォロワーが10枚以上ある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場に《ロイヤル》フォロワーが10枚以上ある限り、『妖刀の鬼・ツバキ』は【疾走】を持ちます。\n『妖刀の鬼・ツバキ』を場に出した後に自分の墓場の《ロイヤル》フォロワーが9枚以下から10枚以上になった場合、【疾走】を持ちます。\n『妖刀の鬼・ツバキ』を場に出した後に自分の墓場の《ロイヤル》フォロワーが10枚以上から9枚以下になった場合、【疾走】を失います。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1502091f40e8d1cc915852ae8733539b01bbc9129964358f996b4f666d68be04",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-010",
+            "fetched_at": "2026-09-24T20:06:55.673889Z"
+          },
+          "document_ref": "documents-371a34087d62244f"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-011",
+      "documents": {
+        "documents-fd4f342a403d2c36": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-011",
+            "faces": [
+              {
+                "name": "レヴィオンの正義",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "GR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、コストを+2してよい。\n相手の場のフォロワー1体を選ぶ。それに3ダメージ。自分のデッキから『レヴィオンデューク・ユリウス』1枚を探し、場に出す。コストを+2したなら、自分のデッキから『レヴィオンセイバー・アルベール』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-011.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1740",
+                "date": "2024-12-13",
+                "question": "『レヴィオンの正義』をプレイする際、コストを+2した場合、相手の場のフォロワー1体に3ダメージを与えた後、自分のデッキから『レヴィオンデューク・ユリウス』を見つけずに、『レヴィオンセイバー・アルベール』1枚を探し、場に出すことができますか？",
+                "answer": "はい。『レヴィオンの正義』をプレイする際、コストを+2した場合、相手の場のフォロワー1体に3ダメージを与えた後、自分のデッキから『レヴィオンセイバー・アルベール』1枚のみを探し、場に出すことができます。"
+              },
+              {
+                "id": "Q1739",
+                "date": "2024-12-13",
+                "question": "相手の場のフォロワーを選ぶことができない場合、コストを+2してこのスペルをプレイすることで自分のデッキから『レヴィオンデューク・ユリウス』や『レヴィオンセイバー・アルベール』を探し、場に出すことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、自分のデッキから『レヴィオンデューク・ユリウス』や『レヴィオンセイバー・アルベール』を探し、場に出すことができません。"
+              },
+              {
+                "id": "Q1738",
+                "date": "2024-12-13",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このスペルをプレイして自分のデッキから『レヴィオンデューク・ユリウス』を探し、場に出すことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができず、自分のデッキから『レヴィオンデューク・ユリウス』1枚を探し、場に出すことができません。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-006"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-016"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:67923622e4e6a2e1f5f49f0a4dd345ba64d9869990f54cb08b1c2905ad32a18d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-011",
+            "fetched_at": "2026-09-24T20:06:58.565869Z"
+          },
+          "document_ref": "documents-fd4f342a403d2c36"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-012",
+      "documents": {
+        "documents-cdb695b386708b4e": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-012",
+            "faces": [
+              {
+                "name": "レヴィオンアックス・ジェノ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "獣",
+                  "レヴィオン"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "これを自分の手札から捨てたとき、自分のデッキの上1枚を見る。その中から、レヴィオン・カード1枚を公開して手札に加えてよい。\n自分の墓場にレヴィオン・カードが5枚以上ある限り、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-012.png",
+                "trait_raw": "兵士・獣・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2060",
+                "date": "2025-06-23",
+                "question": "『レヴィオンアックス・ジェノ』の「自分の墓場にレヴィオン・カードが5枚以上ある限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。墓場にレヴィオン・カードが5枚以上ある限り、『レヴィオンアックス・ジェノ』は【疾走】を持ちます。\n『レヴィオンアックス・ジェノ』を場に出した後に自分の墓場のレヴィオン・カードが4枚以下から5枚以上になった場合、【疾走】を持ちます。\n『レヴィオンアックス・ジェノ』を場に出した後に自分の墓場のレヴィオン・カードが5枚以上から4枚以下になった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q2059",
+                "date": "2025-06-23",
+                "question": "このフォロワーの「これを自分の手札から捨てたとき、～」という能力で自分のデッキから見たカードの中にレヴィオン・カードがあるとき、それを手札に加えないことを選択できますか？",
+                "answer": "はい。選択できます。\nその場合カードは公開せず、デッキの上に戻します。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f2af5cd6c92e919198f06d7b01a343166e2f3529bc011d067a0a0594826d6207",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-012",
+            "fetched_at": "2026-09-24T20:07:01.109865Z"
+          },
+          "document_ref": "documents-cdb695b386708b4e"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-013",
+      "documents": {
+        "documents-1abbfa97ea45b59f": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-013",
+            "faces": [
+              {
+                "name": "レヴィオンの見習い・ルネス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "レヴィオン"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト3}：これは進化する。\n{ファンファーレ}手札のレヴィオン・カード1枚を捨てる：自分のデッキから「カード名に『アルベール』を含む{ロイヤル}フォロワー」1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-013.png",
+                "trait_raw": "兵士・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-001"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-002"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-006"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-014"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f8eee6fb04c7ce7f55d00af0f12101c4960c0cb8cd4823c288a175b6572109ce",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-013",
+            "fetched_at": "2026-09-24T20:07:03.887229Z"
+          },
+          "document_ref": "documents-1abbfa97ea45b59f"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-014",
+      "documents": {
+        "documents-a59182502f9881e4": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-014",
+            "faces": [
+              {
+                "name": "レヴィオンの見習い・ルネス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士",
+                  "レヴィオン"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "自分のターン中、自分の場に「カード名に『アルベール』を含む{ロイヤル}フォロワー」が出たとき、{コスト1}：相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n【進化時】自分の手札の元のコストX以下の「カード名に『アルベール』を含む{ロイヤル}フォロワー」1枚を場に出してよい。Xは「自分のPP最大値」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-014.png",
+                "trait_raw": "兵士・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-001"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-002"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-006"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-013"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eb7e3558025887fbb9aba1b018ee6b410ec53ac412b978db7b27593446755924",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-014",
+            "fetched_at": "2026-09-24T20:07:06.625905Z"
+          },
+          "document_ref": "documents-a59182502f9881e4"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-015",
+      "documents": {
+        "documents-c6717e091d9dc8c4": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-015",
+            "faces": [
+              {
+                "name": "暴威の武人・ジェノ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "レヴィオン",
+                  "獣",
+                  "キラー"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "3",
+                "text": "これをプレイする際、元のコスト3以下の場のレヴィオン・フォロワー1体を墓場に置く：コストを-3する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-015.png",
+                "trait_raw": "兵士・レヴィオン・獣・キラー"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bf9aed2eecf426fda9f0f0894570fc43833cfd320cc3490c95dd385cd75166a8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-015",
+            "fetched_at": "2026-09-24T20:07:09.500346Z"
+          },
+          "document_ref": "documents-c6717e091d9dc8c4"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-016",
+      "documents": {
+        "documents-2a31718002883537": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-016",
+            "faces": [
+              {
+                "name": "レヴィオンデューク・ユリウス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "貴族",
+                  "レヴィオン"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "2",
+                "power": "0",
+                "hp": "4",
+                "text": "{Q}{起動}これを{アクト}：相手の場のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": "悲劇より芽生えし野心。己が存在証明のため悲劇を繰り返す。\n「信頼や絆など不要。精々踊ってみせてくれ、団長殿！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-016.png",
+                "trait_raw": "貴族・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q288",
+                "date": "2022-06-24",
+                "question": "《Q》の能力を持つフォロワーやアミュレットは、自分のターンのメインフェイズに加え、相手のターンに相手のフォロワーが攻撃してきたときや、相手のエンドフェイズにプレイし、場に出すことはできますか？",
+                "answer": "いいえ。《Q》は能力が持つアイコンであり、カード自体が《Quick》を持っているわけではないため、フォロワーやアミュレット自体は《Quick》と同様のタイミングではプレイできません。\n《Q》を持つ能力は、その能力がプレイできる領域で《Quick》と同様のタイミングで起動することができます。"
+              },
+              {
+                "id": "Q287",
+                "date": "2022-06-24",
+                "question": "《Q》とはなんですか？",
+                "answer": "《Q》とは、特定の能力が《Quick》と同様のタイミングでプレイできることを示すアイコンです。\n《Q》を持つ能力は、《Quick》を持つカードと同様に自分のターンのメインフェイズに加え、相手のターンに相手のフォロワーが攻撃してきたときや、相手のエンドフェイズにプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:680cd68ee781b1d26be63190a07bfd0fe68e7177b539eb34e4c81a5127886d6c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-016",
+            "fetched_at": "2026-09-24T20:07:12.374764Z"
+          },
+          "document_ref": "documents-2a31718002883537"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-017",
+      "documents": {
+        "documents-9d378de5ebf689b2": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-017",
+            "faces": [
+              {
+                "name": "レヴィオンの副団長・マイム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の墓場のレヴィオン・カードが5枚以上なら、それに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-017.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-018"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6061edb8e6b721d768cbd94d6fd071f041fd6ede5a29ebdcba898df5721770e4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-017",
+            "fetched_at": "2026-09-24T20:07:15.134202Z"
+          },
+          "document_ref": "documents-9d378de5ebf689b2"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-018",
+      "documents": {
+        "documents-61ec9f0825a150ee": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-018",
+            "faces": [
+              {
+                "name": "レヴィオンの副団長・マイム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "レヴィオン"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上4枚を見る。その中から、レヴィオン・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-018.png",
+                "trait_raw": "指揮官・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e9a59e574fe1c6da1adc19f4353c6eb4787bd9265680750f5cb2d8f3739f8dc2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-018",
+            "fetched_at": "2026-09-24T20:07:17.859329Z"
+          },
+          "document_ref": "documents-61ec9f0825a150ee"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-019",
+      "documents": {
+        "documents-90c2f095de4e6710": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-019",
+            "faces": [
+              {
+                "name": "レヴィオンの魔術師・ミイム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "レヴィオン"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "2",
+                "text": "【守護】（これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない）\n自分のエンドフェイズが来たとき、自分の墓場のレヴィオン・カードが5枚以上なら、自分のリーダーは{体力}+1する。\n{ファンファーレ}手札のレヴィオン・カード1枚を捨てる：1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-019.png",
+                "trait_raw": "兵士・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8dfa8ddf4b60fff014a729350f9feda393310be662f1f2afff11efde70fbccd6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-019",
+            "fetched_at": "2026-09-24T20:07:20.453529Z"
+          },
+          "document_ref": "documents-90c2f095de4e6710"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-020",
+      "documents": {
+        "documents-fd3305c609e372a9": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-020",
+            "faces": [
+              {
+                "name": "レヴィオンの武闘家・メイム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "レヴィオン"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "【突進】（【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）\n自分の墓場にレヴィオン・カードが5枚以上ある限り、これは【指定攻撃】と「【攻撃時】これは{攻撃力}+2/{体力}+1する」を持つ。（【指定攻撃】を持つフォロワーは、スタンド状態のフォロワーを攻撃できる）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-020.png",
+                "trait_raw": "兵士・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1742",
+                "date": "2024-12-13",
+                "question": "『レヴィオンの武闘家・メイム』の「自分の墓場にレヴィオン・カードが5枚以上ある限り、これは【指定攻撃】と「【攻撃時】これは《攻撃力》+2/《体力》+1する」を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場にレヴィオン・カードが5枚以上ある限り、『レヴィオンの武闘家・メイム』は【指定攻撃】と「【攻撃時】これは《攻撃力》+2/《体力》+1する」を持ちます。\n『レヴィオンの武闘家・メイム』を場に出した後に自分の墓場のレヴィオン・カードが4枚以下から5枚以上になった場合、【指定攻撃】と「【攻撃時】これは《攻撃力》+2/《体力》+1する」を持ちます。\n『レヴィオンの武闘家・メイム』を場に出した後に自分の墓場のレヴィオン・カードが5枚以上から4枚以下になった場合、【指定攻撃】と「【攻撃時】これは《攻撃力》+2/《体力》+1する」を失います。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8196f38d95f1e3389592670e82ecb25b582dd215c8e073073beabd45f49b071a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-020",
+            "fetched_at": "2026-09-24T20:07:23.016417Z"
+          },
+          "document_ref": "documents-fd3305c609e372a9"
+        }
+      ]
+    },
+    {
+      "card_no": "SD07-021",
+      "documents": {
+        "documents-d64a97fabbc9b983": {
+          "region": "jp",
+          "record": {
+            "number": "SD07-021",
+            "faces": [
+              {
+                "name": "レヴィオンシスターズ登場！",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "指揮官",
+                  "兵士",
+                  "レヴィオン"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ「新たなる戦場」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、コストを+4してよい。\n自分のデッキから『レヴィオンの副団長・マイム』か『レヴィオンの魔術師・ミイム』か『レヴィオンの武闘家・メイム』1枚を探し、手札に加える。コストを+4したなら、代わりにそれぞれ1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/SD07/sd07-021.png",
+                "trait_raw": "指揮官・兵士・レヴィオン"
+              }
+            ],
+            "release_date": "2025-06-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1743",
+                "date": "2024-12-13",
+                "question": "『レヴィオンシスターズ登場！』をプレイした場合、『レヴィオンの副団長・マイム』か『レヴィオンの魔術師・ミイム』か『レヴィオンの武闘家・メイム』のいずれか1枚を場に出さないという選択をすることは可能ですか？",
+                "answer": "はい。可能です。デッキからカードを探す際に、『レヴィオンの副団長・マイム』や『レヴィオンの魔術師・ミイム』、『レヴィオンの武闘家・メイム』を見つけない選択をすることで場に出さないことができます。"
+              }
+            ],
+            "products_ref": "products-2705e9fbcc5279c1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-017"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-019"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD07-020"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:642aa330528198d45cf8a56eac9e2cf4782bc5ed5c9527a7bee2c0c8e83e7c22",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD07-021",
+            "fetched_at": "2026-09-24T20:07:25.849406Z"
+          },
+          "document_ref": "documents-d64a97fabbc9b983"
+        }
+      ]
+    }
+  ]
+}

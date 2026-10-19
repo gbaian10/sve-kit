@@ -1,0 +1,204 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "PCS01",
+  "range": "000-099",
+  "products": {
+    "products-698618cdc73fbf93": [
+      {
+        "name": "Premium Card Set \"Summer Edition Vol. 1\"",
+        "date": "Sep. 4, 2026",
+        "links": [
+          "/cards/searchresults?expansion=PCS01",
+          "https://en.shadowverse-evolve.com/products/pcs01/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "PCS01-001EN",
+      "documents": {
+        "documents-5f25ce4ac124be63": {
+          "region": "en",
+          "record": {
+            "number": "PCS01-001EN",
+            "faces": [
+              {
+                "name": "Lilanthim, Anathema of Edacity",
+                "info": {
+                  "Card Set": "Premium Card Set \"Summer Edition Vol. 1\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Anathema / Mage"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 2 damage.\n{icon_act|[act]} Earth Rite: Give this Assail.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 2 damage.\n{icon_act|[act]} Earth Rite: Give this Assail.",
+                "speech": null,
+                "illustrator": "HSN",
+                "image": "/wordpress/wp-content/images/cardlist/PCS01/PCS01-001EN.png",
+                "trait_raw": "Anathema / Mage",
+                "traits": [
+                  "Anathema",
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Sep. 4, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-698618cdc73fbf93",
+            "related_cards": [
+              {
+                "label": "{BP16-040EN|Lilanthim, Anathema of Edacity}",
+                "href": "/cards/?cardno=BP16-040EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1f9917af7518343f54d12651654440b42c79930f05999d95e974e42e0e1a690f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=PCS01-001EN",
+            "fetched_at": "2026-09-27T13:41:24.365545Z"
+          },
+          "document_ref": "documents-5f25ce4ac124be63"
+        }
+      ]
+    },
+    {
+      "card_no": "PCS01-002EN",
+      "documents": {
+        "documents-1a1de866e894da9f": {
+          "region": "en",
+          "record": {
+            "number": "PCS01-002EN",
+            "faces": [
+              {
+                "name": "Ginger, Accursed Word",
+                "info": {
+                  "Card Set": "Premium Card Set \"Summer Edition Vol. 1\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Mage"
+                },
+                "stats": {
+                  "cost": "10",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "This costs X less to play. X equals the number of cards in your banished zone.",
+                "sections": [
+                  "{icon_fanfare|[fanfare]} Put a Ginger's Curse token into your EX area."
+                ],
+                "raw_text": "This costs X less to play. X equals the number of cards in your banished zone.\n----------\n{icon_fanfare|[fanfare]} Put a Ginger's Curse token into your EX area.",
+                "speech": null,
+                "illustrator": "Soichi",
+                "image": "/wordpress/wp-content/images/cardlist/PCS01/PCS01-002EN.png",
+                "trait_raw": "Mage",
+                "traits": [
+                  "Mage"
+                ]
+              }
+            ],
+            "release_date": "Sep. 4, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-698618cdc73fbf93",
+            "related_cards": [
+              {
+                "label": "{BP18-T04EN|Ginger's Curse}",
+                "href": "/cards/?cardno=BP18-T04EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a7b326933dd63a479785532c6b9cf766453a9f925d4892893597e5c257a356e4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=PCS01-002EN",
+            "fetched_at": "2026-09-27T13:41:27.321943Z"
+          },
+          "document_ref": "documents-1a1de866e894da9f"
+        }
+      ]
+    },
+    {
+      "card_no": "PCS01-003EN",
+      "documents": {
+        "documents-42f092dc211b7025": {
+          "region": "en",
+          "record": {
+            "number": "PCS01-003EN",
+            "faces": [
+              {
+                "name": "Eudie, Maiden Reborn",
+                "info": {
+                  "Card Set": "Premium Card Set \"Summer Edition Vol. 1\"",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Ultimate",
+                  "Trait": "Supreme"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Draw a card. If you have 0 Super-Evolution Points, give this {icon_power|[attack]}+2/{icon_hp|[defense]}+2 and your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Draw a card. If you have 0 Super-Evolution Points, give this {icon_power|[attack]}+2/{icon_hp|[defense]}+2 and your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/PCS01/PCS01-003EN.png",
+                "trait_raw": "Supreme",
+                "traits": [
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Sep. 4, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2352 (Sep. 4, 2026)",
+                "question": "If I play this follower's Fanfare ability before turn 5, will that fulfill its \"If you have 0 Super-Evolution Points\" condition?",
+                "answer": "No. Each player starts the game with 1 Super-Evolution Point."
+              }
+            ],
+            "products_ref": "products-698618cdc73fbf93",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3acb99da4d066107515ba9fe5c09fc639ae1d2fd4447f000c7126149ff799eaf",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=PCS01-003EN",
+            "fetched_at": "2026-09-27T13:41:30.212786Z"
+          },
+          "document_ref": "documents-42f092dc211b7025"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1363 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SDD02",
+  "range": "000-099",
+  "products": {
+    "products-31e424f1e8c066a4": [
+      {
+        "name": "Showdown Deck: Swordcraft",
+        "date": "Mar. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=SDD02",
+          "https://en.shadowverse-evolve.com/products/sdd/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SDD02-001EN",
+      "documents": {
+        "documents-9e7f9d4d7a1ba496": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-001EN",
+            "faces": [
+              {
+                "name": "Ralmia, Sonic Racer",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Officer / Supreme"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost03|[cost03]}: Evolve this.\nThis card's {icon_evolve|[evolve]} costs 1 less for every other follower on your field.\nRush.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost03|[cost03]}: Evolve this.\nThis card's {icon_evolve|[evolve]} costs 1 less for every other follower on your field.\nRush.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-001EN.png",
+                "trait_raw": "Officer / Supreme",
+                "traits": [
+                  "Officer",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q802 (Aug. 8, 2024)",
+                "question": "Can I evolve this follower for 0 play points if there are 4 other followers on my field?",
+                "answer": "Yes. Her evolve ability would cost -1 (a negative value), but would be treated as costing 0."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-002EN|Ralmia, Sonic Racer}",
+                "href": "/cards/?cardno=SDD02-002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6a82400b1f7e787f7bc66e536f3ddee58d496922b2e1574d5398d639b59a22bd",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-001EN",
+            "fetched_at": "2026-09-27T14:37:30.937040Z"
+          },
+          "document_ref": "documents-9e7f9d4d7a1ba496"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-002EN",
+      "documents": {
+        "documents-84bec431924958be": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-002EN",
+            "faces": [
+              {
+                "name": "Ralmia, Sonic Racer",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Officer / Supreme"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "4"
+                },
+                "text": "Storm.\nOn Evolve - {icon_cost03|[cost03]}: Give this {icon_power|[attack]}+1/{icon_hp|[defense]}+1 for every other follower on your field.",
+                "sections": [],
+                "raw_text": "Storm.\nOn Evolve - {icon_cost03|[cost03]}: Give this {icon_power|[attack]}+1/{icon_hp|[defense]}+1 for every other follower on your field.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-002EN.png",
+                "trait_raw": "Officer / Supreme",
+                "traits": [
+                  "Officer",
+                  "Supreme"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-001EN|Ralmia, Sonic Racer}",
+                "href": "/cards/?cardno=SDD02-001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1ac80b04403f4b40dfd5c8b7a9478ef90756bc7f84582ffeb65dc38331befbb6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-002EN",
+            "fetched_at": "2026-09-27T14:37:33.363956Z"
+          },
+          "document_ref": "documents-84bec431924958be"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-003EN",
+      "documents": {
+        "documents-d3e64d1a92126e78": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-003EN",
+            "faces": [
+              {
+                "name": "Nahtnaught, Cursed Queen",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Commander"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for a 1-cost {icon_royal|[swordcraft]} card, put it into your EX area, then shuffle.\n{icon_act|[act]} {icon_cost00|[cost00]}: Select an enemy follower on the field and engage it. It becomes Boxed until the end of its controller's next turn. Activate only once per turn. (Boxed followers lose all abilities and don't refresh during the start phase.)",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for a 1-cost {icon_royal|[swordcraft]} card, put it into your EX area, then shuffle.\n{icon_act|[act]} {icon_cost00|[cost00]}: Select an enemy follower on the field and engage it. It becomes Boxed until the end of its controller's next turn. Activate only once per turn. (Boxed followers lose all abilities and don't refresh during the start phase.)",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-003EN.png",
+                "trait_raw": "Wasteland / Commander",
+                "traits": [
+                  "Wasteland",
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1565 (Sep. 19, 2025)",
+                "question": "My opponent has a follower on the field that was given Drive by its Ride ability. If that follower becomes Boxed, does it regain Rush and Single Drive when it is no longer Boxed?",
+                "answer": "Yes, that's correct. Boxed followers will regain their abilities once they are no longer Boxed."
+              },
+              {
+                "title": "Q1564 (Sep. 19, 2025)",
+                "question": "My opponent has a follower on the field that was given Ward by Death's Breath. If that follower becomes Boxed, does it regain Ward when it is no longer Boxed?",
+                "answer": "Yes, that's correct. Boxed followers will regain their abilities once they are no longer Boxed."
+              },
+              {
+                "title": "Q1490 (Sep. 19, 2025)",
+                "question": "If I select Iceschillendrig, Gilded Autocrat with Nahtnaught, Cursed Queen's activated ability, does Iceschillendrig, Gilded Autocrat's automatic ability trigger?",
+                "answer": "Yes, it does. You would then resolve it at the next confirmation timing."
+              },
+              {
+                "title": "Q1489 (Sep. 19, 2025)",
+                "question": "If I select an engaged enemy follower with this follower's activated ability, will it still become Boxed until the end of its controller's next turn?",
+                "answer": "Yes, it will. Although the activated ability's \"engage it\" effect will not apply to a follower that is already engaged, the following effects will still apply."
+              },
+              {
+                "title": "Q1488 (Sep. 19, 2025)",
+                "question": "If a follower given the Armed trait by Draconic Weapon's effect becomes Boxed, does it lose the Armed trait?",
+                "answer": "No, it doesn't."
+              },
+              {
+                "title": "Q1487 (Sep. 19, 2025)",
+                "question": "Can a Boxed follower be given Ward by an ability such as Guardian Sun's Fanfare?",
+                "answer": "Yes, it can."
+              },
+              {
+                "title": "Q1486 (Sep. 19, 2025)",
+                "question": "If a Boxed follower with a \"When this card is returned to hand from your field\" ability is returned to its owner's hand from the field, does the ability trigger?",
+                "answer": "No, it doesn't."
+              },
+              {
+                "title": "Q1485 (Sep. 19, 2025)",
+                "question": "If a Boxed follower with a Last Words ability is put into the cemetery, does the ability trigger?",
+                "answer": "No, it doesn't."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a024eda53ac45a0bf0dfec765a5370ae46a41450b0d797fea157152551930d93",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-003EN",
+            "fetched_at": "2026-09-27T14:37:36.481218Z"
+          },
+          "document_ref": "documents-d3e64d1a92126e78"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-004EN",
+      "documents": {
+        "documents-ddbc590cb634f828": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-004EN",
+            "faces": [
+              {
+                "name": "Bunny & Baron, Specter Duo",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Thief"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-004EN.png",
+                "trait_raw": "Wasteland / Thief",
+                "traits": [
+                  "Wasteland",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-005EN|Bunny & Baron, Specter Duo}",
+                "href": "/cards/?cardno=SDD02-005EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e05d9faf4cf3a7a838b565cdab4b770bb7523bb8f9063531d9545a1a3a413aa6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-004EN",
+            "fetched_at": "2026-09-27T14:37:39.305223Z"
+          },
+          "document_ref": "documents-ddbc590cb634f828"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-005EN",
+      "documents": {
+        "documents-d484ad81664fa463": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-005EN",
+            "faces": [
+              {
+                "name": "Bunny & Baron, Specter Duo",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Thief"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "On Evolve - Choose 1. (1) Summon a Val, Trusty Getaway Car token. (2) Search your deck for a Desperados' Shot, reveal it, add it to your hand, then shuffle.",
+                "sections": [],
+                "raw_text": "On Evolve - Choose 1. (1) Summon a Val, Trusty Getaway Car token. (2) Search your deck for a Desperados' Shot, reveal it, add it to your hand, then shuffle.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-005EN.png",
+                "trait_raw": "Wasteland / Thief",
+                "traits": [
+                  "Wasteland",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-004EN|Bunny & Baron, Specter Duo}",
+                "href": "/cards/?cardno=SDD02-004EN"
+              },
+              {
+                "label": "{SDD02-013EN|Desperados' Shot}",
+                "href": "/cards/?cardno=SDD02-013EN"
+              },
+              {
+                "label": "{SDD02-T02EN|Val, Trusty Getaway Car}",
+                "href": "/cards/?cardno=SDD02-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a11133ce86987f35ad209e8c58af409919115649f755f47f98e60ecc63c5b294",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-005EN",
+            "fetched_at": "2026-09-27T14:37:42.286727Z"
+          },
+          "document_ref": "documents-d484ad81664fa463"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-006EN",
+      "documents": {
+        "documents-c59a34875067c4ef": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-006EN",
+            "faces": [
+              {
+                "name": "Leod, the Crescent Blade",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Assassin"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\nWhile this is reserved on your field, it has Intimidate and Aura. (Followers with Intimidate can't be attacked.)\nAt the start of your end phase, select an enemy follower on the field and deal it 1 damage.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\nWhile this is reserved on your field, it has Intimidate and Aura. (Followers with Intimidate can't be attacked.)\nAt the start of your end phase, select an enemy follower on the field and deal it 1 damage.",
+                "speech": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-006EN.png",
+                "trait_raw": "Assassin",
+                "traits": [
+                  "Assassin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q982 (Nov. 15, 2024)",
+                "question": "If an opponent attacks me with this follower, can I select and destroy it with a Quick card such as Execution?",
+                "answer": "Yes. In order to attack with this follower, your opponent has to engage it. Therefore, this follower will lose its Intimidate and Aura, allowing you to target it with a Quick card."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-007EN|Leod, the Crescent Blade}",
+                "href": "/cards/?cardno=SDD02-007EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:19bee364ca2331c461157f8508e05ce90ea25b80e4c958e04915e270f1da3502",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-006EN",
+            "fetched_at": "2026-09-27T14:37:44.761223Z"
+          },
+          "document_ref": "documents-c59a34875067c4ef"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-007EN",
+      "documents": {
+        "documents-66632af28551b171": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-007EN",
+            "faces": [
+              {
+                "name": "Leod, the Crescent Blade",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Assassin"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "2"
+                },
+                "text": "While this is reserved on your field, it has Intimidate and Aura. (Cards with Aura can't be selected for enemy spells or abilities.)\nOn Evolve - Select an enemy leader or enemy follower on the field and deal it 2 damage.\nAt the start of your end phase, select an enemy follower on the field and deal it 1 damage.",
+                "sections": [],
+                "raw_text": "While this is reserved on your field, it has Intimidate and Aura. (Cards with Aura can't be selected for enemy spells or abilities.)\nOn Evolve - Select an enemy leader or enemy follower on the field and deal it 2 damage.\nAt the start of your end phase, select an enemy follower on the field and deal it 1 damage.",
+                "speech": null,
+                "illustrator": "Budi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-007EN.png",
+                "trait_raw": "Assassin",
+                "traits": [
+                  "Assassin"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q982 (Nov. 15, 2024)",
+                "question": "If an opponent attacks me with this follower, can I select and destroy it with a Quick card such as Execution?",
+                "answer": "Yes. In order to attack with this follower, your opponent has to engage it. Therefore, this follower will lose its Intimidate and Aura, allowing you to target it with a Quick card."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-006EN|Leod, the Crescent Blade}",
+                "href": "/cards/?cardno=SDD02-006EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:78f92c357c47768c4c9fde14583e5769a4404613753b4055487ef25b6f95e443",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-007EN",
+            "fetched_at": "2026-09-27T14:37:47.289275Z"
+          },
+          "document_ref": "documents-66632af28551b171"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-008EN",
+      "documents": {
+        "documents-9aba898d557bf983": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-008EN",
+            "faces": [
+              {
+                "name": "Prudent General",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Arcana / Commander"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nEach {icon_royal|[swordcraft]} token on your field has Rush.\n{icon_fanfare|[fanfare]} Summon a Steelclad Knight token.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nEach {icon_royal|[swordcraft]} token on your field has Rush.\n{icon_fanfare|[fanfare]} Summon a Steelclad Knight token.",
+                "speech": "{icon_royal|[swordcraft]}{icon_cost02|[cost02]} Steelclad Knight (Follower - Officer) {icon_power|[attack]}2/{icon_hp|[defense]}2",
+                "illustrator": "Yamamoto Shikaku",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-008EN.png",
+                "trait_raw": "Arcana / Commander",
+                "traits": [
+                  "Arcana",
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1262 (Jun. 13, 2025)",
+                "question": "I have a Steelclad Knight with Rush on the field due to this follower's passive ability. If I use the Steelclad Knight to attack an engaged enemy follower, and an opponent destroys this follower with a Quick ability, such as Execution, will my attack still go through?",
+                "answer": "Yes, it will."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-009EN|Prudent General}",
+                "href": "/cards/?cardno=SDD02-009EN"
+              },
+              {
+                "label": "{SDD02-T01EN|Steelclad Knight}",
+                "href": "/cards/?cardno=SDD02-T01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:24b99a98c46ccd59b2903da28d1d321e9501263e9092da6231ba7fd6389ec103",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-008EN",
+            "fetched_at": "2026-09-27T14:37:50.057763Z"
+          },
+          "document_ref": "documents-9aba898d557bf983"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-009EN",
+      "documents": {
+        "documents-07a3f24d974bf345": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-009EN",
+            "faces": [
+              {
+                "name": "Prudent General",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Arcana / Commander"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "Each {icon_royal|[swordcraft]} token on your field has Rush.\nOn Evolve - Summon a Steelclad Knight token. Give each Steelclad Knight on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "Each {icon_royal|[swordcraft]} token on your field has Rush.\nOn Evolve - Summon a Steelclad Knight token. Give each Steelclad Knight on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Yamamoto Shikaku",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-009EN.png",
+                "trait_raw": "Arcana / Commander",
+                "traits": [
+                  "Arcana",
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1263 (Jun. 13, 2025)",
+                "question": "If I fail to summon the Steelclad Knight token with this follower's On Evolve ability because my field is full, do I still give each Steelclad Knight on my field +1/+1?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1262 (Jun. 13, 2025)",
+                "question": "I have a Steelclad Knight with Rush on the field due to this follower's passive ability. If I use the Steelclad Knight to attack an engaged enemy follower, and an opponent destroys this follower with a Quick ability, such as Execution, will my attack still go through?",
+                "answer": "Yes, it will."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-008EN|Prudent General}",
+                "href": "/cards/?cardno=SDD02-008EN"
+              },
+              {
+                "label": "{SDD02-T01EN|Steelclad Knight}",
+                "href": "/cards/?cardno=SDD02-T01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f53532e2fb2451b923a20730f41fcf390215b75e3fb656b142de2fd19b94ac9e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-009EN",
+            "fetched_at": "2026-09-27T14:37:52.884812Z"
+          },
+          "document_ref": "documents-07a3f24d974bf345"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-010EN",
+      "documents": {
+        "documents-4660db907efa9ccc": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-010EN",
+            "faces": [
+              {
+                "name": "Radical Gunslinger",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wasteland / Officer"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "0"
+                },
+                "text": "{icon_fanfare|[fanfare]} Summon a Dutiful Steed token.\n{icon_act|[act]} {icon_stand|[engage]} this and 2 Mount cards on your field: Select an enemy leader or enemy follower on the field and deal it 2 damage.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Summon a Dutiful Steed token.\n{icon_act|[act]} {icon_stand|[engage]} this and 2 Mount cards on your field: Select an enemy leader or enemy follower on the field and deal it 2 damage.",
+                "speech": "{icon_neutral|[neutral]}{icon_cost01|[cost01]} Dutiful Steed (Amulet - Wasteland/Mount/Beast) | {icon_act|[act]} Bury this: Select a follower on your field and, if it's a Wasteland follower, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-010EN.png",
+                "trait_raw": "Wasteland / Officer",
+                "traits": [
+                  "Wasteland",
+                  "Officer"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-T03EN|Dutiful Steed}",
+                "href": "/cards/?cardno=SDD02-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cb2a521e57d501d72bbd71e863f832d077923d5e63a7348c1a903ec9fb4854e7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-010EN",
+            "fetched_at": "2026-09-27T14:37:55.891173Z"
+          },
+          "document_ref": "documents-4660db907efa9ccc"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-011EN",
+      "documents": {
+        "documents-3a1432752f42bd08": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-011EN",
+            "faces": [
+              {
+                "name": "Tyrant's Order",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Spell",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wasteland / Commander"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select up to 1 Boxed enemy follower on the field and destroy it. Search your deck for a Wasteland follower, reveal it, add it to your hand, then shuffle.",
+                "sections": [],
+                "raw_text": "Select up to 1 Boxed enemy follower on the field and destroy it. Search your deck for a Wasteland follower, reveal it, add it to your hand, then shuffle.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-011EN.png",
+                "trait_raw": "Wasteland / Commander",
+                "traits": [
+                  "Wasteland",
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1493 (Sep. 19, 2025)",
+                "question": "If there are no Boxed enemy followers on the field, can I still play this spell to search my deck for a Wasteland follower and add it to my hand?",
+                "answer": "Yes, you can. \"Select up to 1\" means you can select 0."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b690d9e608ae411f9d06116c6b4097aadd8c45b7478f8a9219bd26c74415a54c",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-011EN",
+            "fetched_at": "2026-09-27T14:37:58.756323Z"
+          },
+          "document_ref": "documents-3a1432752f42bd08"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-012EN",
+      "documents": {
+        "documents-b9f1ce0343b44026": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-012EN",
+            "faces": [
+              {
+                "name": "Outlaw Gunner",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Officer / Thief"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} Summon a Bullet Bike token.\n{icon_lastword|[lastwords]} Deal 2 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Summon a Bullet Bike token.\n{icon_lastword|[lastwords]} Deal 2 damage to each enemy leader.",
+                "speech": "{icon_neutral|[neutral]}{icon_cost01|[cost01]} Bullet Bike (Amulet - Wasteland/Mount) | {icon_act|[act]} Bury this: Select a follower on your field. Give it Rush and, if it's a Wasteland follower, {icon_power|[attack]}+1.",
+                "illustrator": "u-suke",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-012EN.png",
+                "trait_raw": "Wasteland / Officer / Thief",
+                "traits": [
+                  "Wasteland",
+                  "Officer",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-T04EN|Bullet Bike}",
+                "href": "/cards/?cardno=SDD02-T04EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fd4c639a04422bdd9c379f4ada485cb130187c98d491a0e0fbbdf87ee41007de",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-012EN",
+            "fetched_at": "2026-09-27T14:38:01.761589Z"
+          },
+          "document_ref": "documents-b9f1ce0343b44026"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-013EN",
+      "documents": {
+        "documents-b00df59c71fc39cc": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-013EN",
+            "faces": [
+              {
+                "name": "Desperados' Shot",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Spell",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver",
+                  "Trait": "Wasteland / Thief"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select an enemy follower on the field and deal it 4 damage. If there's a Bunny & Baron, Specter Duo and Val, Trusty Getaway Car on your field, deal 6 damage instead and deal 2 damage to the selected follower's leader.",
+                "sections": [],
+                "raw_text": "Select an enemy follower on the field and deal it 4 damage. If there's a Bunny & Baron, Specter Duo and Val, Trusty Getaway Car on your field, deal 6 damage instead and deal 2 damage to the selected follower's leader.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-013EN.png",
+                "trait_raw": "Wasteland / Thief",
+                "traits": [
+                  "Wasteland",
+                  "Thief"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-004EN|Bunny & Baron, Specter Duo}",
+                "href": "/cards/?cardno=SDD02-004EN"
+              },
+              {
+                "label": "{SDD02-005EN|Bunny & Baron, Specter Duo}",
+                "href": "/cards/?cardno=SDD02-005EN"
+              },
+              {
+                "label": "{SDD02-T02EN|Val, Trusty Getaway Car}",
+                "href": "/cards/?cardno=SDD02-T02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:71128e93a0b24c44f939f7211c59fda8b9e5dbcad8eeecdee1b2e3d2541f79f4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-013EN",
+            "fetched_at": "2026-09-27T14:38:04.640744Z"
+          },
+          "document_ref": "documents-b00df59c71fc39cc"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-014EN",
+      "documents": {
+        "documents-a780c2a37e132d8d": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-014EN",
+            "faces": [
+              {
+                "name": "Naht's Henchman",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wasteland / Officer"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "This costs 1 less to play from the EX area if there's a Nahtnaught, Cursed Queen on your field.",
+                "sections": [
+                  "{icon_fanfare|[fanfare]} If there's a Nahtnaught, Cursed Queen on your field, draw a card."
+                ],
+                "raw_text": "This costs 1 less to play from the EX area if there's a Nahtnaught, Cursed Queen on your field.\n----------\n{icon_fanfare|[fanfare]} If there's a Nahtnaught, Cursed Queen on your field, draw a card.",
+                "speech": null,
+                "illustrator": "Chiaki Negishi",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-014EN.png",
+                "trait_raw": "Wasteland / Officer",
+                "traits": [
+                  "Wasteland",
+                  "Officer"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-003EN|Nahtnaught, Cursed Queen}",
+                "href": "/cards/?cardno=SDD02-003EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:624b6802b05ed9c134b8037fd3a4ccca17a46aaecb4d8c677240ea3d56c74399",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-014EN",
+            "fetched_at": "2026-09-27T14:38:07.457843Z"
+          },
+          "document_ref": "documents-a780c2a37e132d8d"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-015EN",
+      "documents": {
+        "documents-d2bd415dd1b6e9fa": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-015EN",
+            "faces": [
+              {
+                "name": "Godsent Stride",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Spell",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Officer"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select a follower on your field. Give it {icon_power|[attack]}+3/{icon_hp|[defense]}+2 and Rush. (Followers with Rush can attack enemy followers on the turn they're put onto your field.)",
+                "sections": [],
+                "raw_text": "Select a follower on your field. Give it {icon_power|[attack]}+3/{icon_hp|[defense]}+2 and Rush. (Followers with Rush can attack enemy followers on the turn they're put onto your field.)",
+                "speech": null,
+                "illustrator": "NAVAR",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-015EN.png",
+                "trait_raw": "Officer",
+                "traits": [
+                  "Officer"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4537b5defdddd1c77076396a336fcd9cf8d0386ea7ac3982bf1c069ca77595bc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-015EN",
+            "fetched_at": "2026-09-27T14:38:10.295038Z"
+          },
+          "document_ref": "documents-d2bd415dd1b6e9fa"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-016EN",
+      "documents": {
+        "documents-b31a6443550da014": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-016EN",
+            "faces": [
+              {
+                "name": "Quixotic Adventurer",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wasteland / Mercenary"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost04|[cost04]}: Evolve this.\n{icon_fanfare|[fanfare]} Put a Dutiful Steed token into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost04|[cost04]}: Evolve this.\n{icon_fanfare|[fanfare]} Put a Dutiful Steed token into your EX area.",
+                "speech": "{icon_neutral|[neutral]}{icon_cost01|[cost01]} Dutiful Steed (Amulet - Wasteland/Mount/Beast) | {icon_act|[act]} Bury this: Select a follower on your field and, if it's a Wasteland follower, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-016EN.png",
+                "trait_raw": "Wasteland / Mercenary",
+                "traits": [
+                  "Wasteland",
+                  "Mercenary"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-017EN|Quixotic Adventurer}",
+                "href": "/cards/?cardno=SDD02-017EN"
+              },
+              {
+                "label": "{SDD02-T03EN|Dutiful Steed}",
+                "href": "/cards/?cardno=SDD02-T03EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:272c1d7e18ccf28027043ad7a24139fdbcc6d15d6c607dd8ef85527ff6b66f27",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-016EN",
+            "fetched_at": "2026-09-27T14:38:12.861938Z"
+          },
+          "document_ref": "documents-b31a6443550da014"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-017EN",
+      "documents": {
+        "documents-707c1320bbf753ba": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-017EN",
+            "faces": [
+              {
+                "name": "Quixotic Adventurer",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Wasteland / Mercenary"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "5"
+                },
+                "text": "{icon_lastword|[lastwords]} You may put a Dutiful Steed, Bullet Bike, and Arcane Personnel Carrier token onto your field or into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_lastword|[lastwords]} You may put a Dutiful Steed, Bullet Bike, and Arcane Personnel Carrier token onto your field or into your EX area.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-017EN.png",
+                "trait_raw": "Wasteland / Mercenary",
+                "traits": [
+                  "Wasteland",
+                  "Mercenary"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1554 (Sep. 19, 2025)",
+                "question": "Can I choose for each token whether I put it into my EX area or onto my field?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-016EN|Quixotic Adventurer}",
+                "href": "/cards/?cardno=SDD02-016EN"
+              },
+              {
+                "label": "{SDD02-T03EN|Dutiful Steed}",
+                "href": "/cards/?cardno=SDD02-T03EN"
+              },
+              {
+                "label": "{SDD02-T04EN|Bullet Bike}",
+                "href": "/cards/?cardno=SDD02-T04EN"
+              },
+              {
+                "label": "{SDD02-T05EN|Arcane Personnel Carrier}",
+                "href": "/cards/?cardno=SDD02-T05EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3f61d4343fe30ef7e73820c42162d5198409b3e2ae6c9d3b18661ccf53d97d78",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-017EN",
+            "fetched_at": "2026-09-27T14:38:15.832039Z"
+          },
+          "document_ref": "documents-707c1320bbf753ba"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-018EN",
+      "documents": {
+        "documents-0b1ac27a177d5328": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-018EN",
+            "faces": [
+              {
+                "name": "Rivaylian Bandit",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wasteland / Mercenary"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nWhenever this gains attack or defense, give it Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nWhenever this gains attack or defense, give it Storm. (Followers with Storm can attack enemy followers and leaders on the turn they're put onto your field.)",
+                "speech": null,
+                "illustrator": "YaoLiang",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-018EN.png",
+                "trait_raw": "Wasteland / Mercenary",
+                "traits": [
+                  "Wasteland",
+                  "Mercenary"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-019EN|Rivaylian Bandit}",
+                "href": "/cards/?cardno=SDD02-019EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9c59fc6bedb3b01a4be490a9da9dcbc30f72ab795b64872e29ace67217a5d53f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-018EN",
+            "fetched_at": "2026-09-27T14:38:18.335553Z"
+          },
+          "document_ref": "documents-0b1ac27a177d5328"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-019EN",
+      "documents": {
+        "documents-55cf0b6553bfc14b": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-019EN",
+            "faces": [
+              {
+                "name": "Rivaylian Bandit",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wasteland / Mercenary"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and, if there are at least 2 Mount cards on your field and/or in your EX area, deal it 2 damage.\nWhenever this gains attack or defense, give it Storm.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and, if there are at least 2 Mount cards on your field and/or in your EX area, deal it 2 damage.\nWhenever this gains attack or defense, give it Storm.",
+                "speech": null,
+                "illustrator": "YaoLiang",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-019EN.png",
+                "trait_raw": "Wasteland / Mercenary",
+                "traits": [
+                  "Wasteland",
+                  "Mercenary"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-018EN|Rivaylian Bandit}",
+                "href": "/cards/?cardno=SDD02-018EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:351b0156f4a3a970af9a27f5c8b642148e92ae2d85c4de234e79cfbcd35643ea",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-019EN",
+            "fetched_at": "2026-09-27T14:38:21.472180Z"
+          },
+          "document_ref": "documents-55cf0b6553bfc14b"
+        }
+      ]
+    },
+    {
+      "card_no": "SDD02-020EN",
+      "documents": {
+        "documents-7929d0dd405771b8": {
+          "region": "en",
+          "record": {
+            "number": "SDD02-020EN",
+            "faces": [
+              {
+                "name": "Vagabond Lizard",
+                "info": {
+                  "Card Set": "Showdown Deck: Swordcraft",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Bronze",
+                  "Trait": "Wasteland / Mercenary"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} You may put a Bullet Bike token onto your field or into your EX area.\n{icon_lastword|[lastwords]} Put a Dutiful Steed token into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} You may put a Bullet Bike token onto your field or into your EX area.\n{icon_lastword|[lastwords]} Put a Dutiful Steed token into your EX area.",
+                "speech": "{icon_neutral|[neutral]}{icon_cost01|[cost01]} Bullet Bike (Amulet - Wasteland/Mount) | {icon_act|[act]} Bury this: Select a follower on your field. Give it Rush and, if it's a Wasteland follower, {icon_power|[attack]}+1.\n{icon_neutral|[neutral]}{icon_cost01|[cost01]} Dutiful Steed (Amulet - Wasteland/Mount/Beast) | {icon_act|[act]} Bury this: Select a follower on your field and, if it's a Wasteland follower, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/SDD02/SDD02-020EN.png",
+                "trait_raw": "Wasteland / Mercenary",
+                "traits": [
+                  "Wasteland",
+                  "Mercenary"
+                ]
+              }
+            ],
+            "release_date": "Mar. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1558 (Sep. 19, 2025)",
+                "question": "If my field is full, do I have to put the Bullet Bike token into my EX area instead, and vice versa?",
+                "answer": "No. You may choose neither."
+              }
+            ],
+            "products_ref": "products-31e424f1e8c066a4",
+            "related_cards": [
+              {
+                "label": "{SDD02-T03EN|Dutiful Steed}",
+                "href": "/cards/?cardno=SDD02-T03EN"
+              },
+              {
+                "label": "{SDD02-T04EN|Bullet Bike}",
+                "href": "/cards/?cardno=SDD02-T04EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7aa1e50a1abaa7b24246a64bd5b4c7aa6c9617ad4f7e0331080297c0ac2c473a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=SDD02-020EN",
+            "fetched_at": "2026-09-27T14:38:24.416916Z"
+          },
+          "document_ref": "documents-7929d0dd405771b8"
+        }
+      ]
+    }
+  ]
+}

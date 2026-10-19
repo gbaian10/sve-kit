@@ -1,0 +1,3436 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP09",
+  "range": "P/000-099",
+  "products": {
+    "products-8899aab5d23ecaa7": [
+      {
+        "name": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+        "date": "Apr. 11, 2025",
+        "links": [
+          "/cards/searchresults?expansion=BP09",
+          "https://en.shadowverse-evolve.com/products/bp09/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP09-P01EN",
+      "documents": {
+        "documents-b02482402a97a6ac": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P01EN",
+            "faces": [
+              {
+                "name": "Paula, Icy Warmth",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Pixie"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower into a Paula, Gentle Warmth or Paula, Passionate Warmth.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower into a Paula, Gentle Warmth or Paula, Passionate Warmth.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P01EN.png",
+                "trait_raw": "Pixie",
+                "traits": [
+                  "Pixie"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1137 (Apr. 4, 2025)",
+                "question": "Do I choose whether to evolve this follower into Paula, Gentle Warmth or Paula, Passionate Warmth?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P02EN|Paula, Gentle Warmth}",
+                "href": "/cards/?cardno=BP09-P02EN"
+              },
+              {
+                "label": "{BP09-P02EN_URA|Paula, Passionate Warmth}",
+                "href": "/cards/?cardno=BP09-P02EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ceb5c51a3c72dcb7298605dedab1148366fcca7c5f85a3a80bcc07fbc1984164",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P01EN",
+            "fetched_at": "2026-09-27T16:20:03.074457Z"
+          },
+          "document_ref": "documents-b02482402a97a6ac"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P02EN",
+      "documents": {
+        "documents-6bff1c30b8dacbfb": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P02EN",
+            "faces": [
+              {
+                "name": "Paula, Gentle Warmth",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Pixie"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Look at the top 5 cards of your deck. You may reveal a {icon_elf|[forestcraft]} spell from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "On Evolve - Look at the top 5 cards of your deck. You may reveal a {icon_elf|[forestcraft]} spell from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P02EN.png",
+                "trait_raw": "Pixie",
+                "traits": [
+                  "Pixie"
+                ]
+              },
+              {
+                "name": "Paula, Passionate Warmth",
+                "info": {
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Pixie"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select up to 2 other cards on your field and put them into their owners' EX areas.\nStrike, Combo (3) - Select an enemy follower on the field and deal it 3 damage.",
+                "sections": [],
+                "raw_text": "On Evolve - Select up to 2 other cards on your field and put them into their owners' EX areas.\nStrike, Combo (3) - Select an enemy follower on the field and deal it 3 damage.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P02EN_URA.png",
+                "trait_raw": "Pixie",
+                "traits": [
+                  "Pixie"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1236 (Apr. 4, 2025)",
+                "question": "I have 4 cards in my EX area. If I select 2 cards on my field to put into my EX area with Paula, Passionate Warmth's On Evolve ability, what happens to them?",
+                "answer": "You choose one to put into your EX area, and the other stays on the field."
+              },
+              {
+                "title": "Q1234 (Apr. 4, 2025)",
+                "question": "If I put a Puppet and Orchis, Resolute Puppet into my EX area with Paula, Passionate Warmth's On Evolve ability, does Orchis's \"when a Puppet leaves your field\" ability trigger?",
+                "answer": "Yes, it triggers even if Orchis itself leaves the field at the same time as a Puppet."
+              },
+              {
+                "title": "Q1140 (Apr. 4, 2025)",
+                "question": "If I select a token for Paula, Passionate Warmth's On Evolve ability, does it get removed from the game?",
+                "answer": "No. It remains in its owner's EX area after you put it there. Follower and amulet tokens may exist in the EX area, field, and resolution zone. They are only removed from the game immediately after movement when moved to other zones."
+              },
+              {
+                "title": "Q1139 (Apr. 4, 2025)",
+                "question": "Do cards I put into my EX area with Paula, Passionate Warmth's On Evolve ability lose all effects, changes to attack/defense, and counters?",
+                "answer": "Yes, they do."
+              },
+              {
+                "title": "Q1138 (Apr. 4, 2025)",
+                "question": "I begin my turn by playing Paula, Icy Warmth from hand and a Fairy from my EX area. If I then evolve Paula, Icy Warmth into Paula, Passionate Warmth and attack with it, do I fulfill the Combo (3) condition in its Strike ability?",
+                "answer": "No. Evolving a follower doesn't count as playing a card, so it doesn't count toward your Combo."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P01EN|Paula, Icy Warmth}",
+                "href": "/cards/?cardno=BP09-P01EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:84083500a0aa8bb8966602a0d5129a7238d61e8ae8a23383109eb6dfc3424254",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P02EN",
+            "fetched_at": "2026-09-27T16:20:05.545585Z"
+          },
+          "document_ref": "documents-6bff1c30b8dacbfb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P03EN",
+      "documents": {
+        "documents-108a2eb7067a4045": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P03EN",
+            "faces": [
+              {
+                "name": "Wrath of Nature",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Fae-Touched / Verdant / Cutthroat"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Deal 3 damage to each enemy follower on the field. If there are at least 5 {icon_elf|[forestcraft]} spells with different names in your cemetery, deal 5 damage instead and deal 2 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "Deal 3 damage to each enemy follower on the field. If there are at least 5 {icon_elf|[forestcraft]} spells with different names in your cemetery, deal 5 damage instead and deal 2 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P03EN.png",
+                "trait_raw": "Fae-Touched / Verdant / Cutthroat",
+                "traits": [
+                  "Fae-Touched",
+                  "Verdant",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1141 (Apr. 4, 2025)",
+                "question": "There are 4 Forestcraft spells with different names in my cemetery, none of which share a name with this spell. If I play this spell, do I fulfill the condition \"if there are at least 5 Forestcraft spells with different names in your cemetery\"?",
+                "answer": "No. While you're resolving this spell's effects, it isn't in the cemetery yet."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a4b00bec3b619dd008787e04983a2827df261083080a79bc12667d894c87c7ca",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P03EN",
+            "fetched_at": "2026-09-27T16:20:07.926094Z"
+          },
+          "document_ref": "documents-108a2eb7067a4045"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P04EN",
+      "documents": {
+        "documents-840ee525ce03ebbf": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P04EN",
+            "faces": [
+              {
+                "name": "Blessings of Creation",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Fae-Touched / Verdant / Lightborne"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nDraw a card. If there are at least 5 {icon_elf|[forestcraft]} spells with different names in your cemetery, give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nDraw a card. If there are at least 5 {icon_elf|[forestcraft]} spells with different names in your cemetery, give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P04EN.png",
+                "trait_raw": "Fae-Touched / Verdant / Lightborne",
+                "traits": [
+                  "Fae-Touched",
+                  "Verdant",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1141 (Apr. 4, 2025)",
+                "question": "There are 4 Forestcraft spells with different names in my cemetery, none of which share a name with this spell. If I play this spell, do I fulfill the condition \"if there are at least 5 Forestcraft spells with different names in your cemetery\"?",
+                "answer": "No. While you're resolving this spell's effects, it isn't in the cemetery yet."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bbfff7e573bb2a87bfaa418d36136cb6a3a84d687774e6408cb0c5f1d7d2fcc9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P04EN",
+            "fetched_at": "2026-09-27T16:20:11.121969Z"
+          },
+          "document_ref": "documents-840ee525ce03ebbf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P05EN",
+      "documents": {
+        "documents-cc51db77d295b460": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P05EN",
+            "faces": [
+              {
+                "name": "Flower of Fairies",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Amulet",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze / Premium",
+                  "Trait": "Pixie / Verdant"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_fanfare|[fanfare]} Put a Fairy Wisp token into your EX area.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Summon a Fairy token.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Put a Fairy Wisp token into your EX area.\n{icon_act|[act]} {icon_stand|[engage]}, bury this card: Summon a Fairy token.",
+                "speech": "{icon_elf|[forestcraft]}{icon_cost00|[cost00]} Fairy Wisp (Follower - Pixie) {icon_power|[attack]}1/{icon_hp|[defense]}1\n{icon_elf|[forestcraft]}{icon_cost01|[cost01]} Fairy (Follower - Pixie) {icon_power|[attack]}1/{icon_hp|[defense]}1",
+                "illustrator": "Dencho (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P05EN.png",
+                "trait_raw": "Pixie / Verdant",
+                "traits": [
+                  "Pixie",
+                  "Verdant"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-T05EN|Fairy Wisp}",
+                "href": "/cards/?cardno=BP09-T05EN"
+              },
+              {
+                "label": "{BP09-T06EN|Fairy}",
+                "href": "/cards/?cardno=BP09-T06EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2950c10c0882062117a1a7662df0fb1b58eff27178a2a62233125bfc1d91c34e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P05EN",
+            "fetched_at": "2026-09-27T16:20:14.058974Z"
+          },
+          "document_ref": "documents-cc51db77d295b460"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P06EN",
+      "documents": {
+        "documents-dd052281a83ec66f": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P06EN",
+            "faces": [
+              {
+                "name": "Prim, Innocent Princess",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Commander / Princess"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Summon a Knight token.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Summon a Knight token.",
+                "speech": "{icon_royal|[swordcraft]}{icon_cost01|[cost01]} Knight (Follower - Officer) {icon_power|[attack]}1/{icon_hp|[defense]}1",
+                "illustrator": "Enarain",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P06EN.png",
+                "trait_raw": "Commander / Princess",
+                "traits": [
+                  "Commander",
+                  "Princess"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P07EN|Prim, Innocent Princess}",
+                "href": "/cards/?cardno=BP09-P07EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d9c503fd021eaedd27a4c90d4c8a89c480b955eaed2a568f16213d500c01e848",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P06EN",
+            "fetched_at": "2026-09-27T16:20:16.840582Z"
+          },
+          "document_ref": "documents-dd052281a83ec66f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P07EN",
+      "documents": {
+        "documents-baf4ecdf3f72ff16": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P07EN",
+            "faces": [
+              {
+                "name": "Prim, Innocent Princess",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Commander / Princess"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "On Evolve - Search your deck for a Nonja, Silent Maid, reveal it, add it to your hand, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "On Evolve - Search your deck for a Nonja, Silent Maid, reveal it, add it to your hand, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "Enarain",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P07EN.png",
+                "trait_raw": "Commander / Princess",
+                "traits": [
+                  "Commander",
+                  "Princess"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-023EN|Nonja, Silent Maid}",
+                "href": "/cards/?cardno=BP09-023EN"
+              },
+              {
+                "label": "{BP09-P06EN|Prim, Innocent Princess}",
+                "href": "/cards/?cardno=BP09-P06EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:18e404c7a6c53cab653e25260088d0c579050691c7de604895ea1a6e0cd72fe3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P07EN",
+            "fetched_at": "2026-09-27T16:20:19.639861Z"
+          },
+          "document_ref": "documents-baf4ecdf3f72ff16"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P08EN",
+      "documents": {
+        "documents-23c2a8830caf0b64": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P08EN",
+            "faces": [
+              {
+                "name": "Monochrome Duel",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Commander / Fable"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_act|[act]} {icon_cost02|[cost02]}, banish this card from your cemetery: Give each Knight on your field {icon_power|[attack]}+1 and Storm.",
+                "sections": [
+                  "Search your deck for a Queen Hemera the White and Queen Magnus the Black, summon them, then shuffle your deck. Give them {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+                ],
+                "raw_text": "{icon_act|[act]} {icon_cost02|[cost02]}, banish this card from your cemetery: Give each Knight on your field {icon_power|[attack]}+1 and Storm.\n----------\nSearch your deck for a Queen Hemera the White and Queen Magnus the Black, summon them, then shuffle your deck. Give them {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Kouta Nagamori",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P08EN.png",
+                "trait_raw": "Commander / Fable",
+                "traits": [
+                  "Commander",
+                  "Fable"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1149 (Apr. 4, 2025)",
+                "question": "Can I choose to summon Queen Hemera the White but not Queen Magnus the Black, or vice versa?",
+                "answer": "Yes. Even if both are in your deck, you can choose to \"not find\" either or both of them."
+              },
+              {
+                "title": "Q1148 (Apr. 4, 2025)",
+                "question": "Can I only play this spell's activated ability when it's in my cemetery?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P09EN|Queen Hemera the White}",
+                "href": "/cards/?cardno=BP09-P09EN"
+              },
+              {
+                "label": "{BP09-P10EN|Queen Magnus the Black}",
+                "href": "/cards/?cardno=BP09-P10EN"
+              },
+              {
+                "label": "{BP09-T07EN|Knight}",
+                "href": "/cards/?cardno=BP09-T07EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:56f4d50812e6011991bb91f56d69e641a76d569bcf321d77cbca238aa4e4fc80",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P08EN",
+            "fetched_at": "2026-09-27T16:20:22.332373Z"
+          },
+          "document_ref": "documents-23c2a8830caf0b64"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P09EN",
+      "documents": {
+        "documents-dd8c32cacddaad1a": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P09EN",
+            "faces": [
+              {
+                "name": "Queen Hemera the White",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Commander / Fable / Lightborne"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "4"
+                },
+                "text": "Rush.\n{icon_fanfare|[fanfare]} Summon a Knight token. If there's a Queen Magnus the Black on your field, summon 2 instead.\nStrike - Put a Knight token into your EX area.",
+                "sections": [],
+                "raw_text": "Rush.\n{icon_fanfare|[fanfare]} Summon a Knight token. If there's a Queen Magnus the Black on your field, summon 2 instead.\nStrike - Put a Knight token into your EX area.",
+                "speech": "{icon_royal|[swordcraft]}{icon_cost01|[cost01]} Knight (Follower - Officer) {icon_power|[attack]}1/{icon_hp|[defense]}1",
+                "illustrator": "Onineko",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P09EN.png",
+                "trait_raw": "Commander / Fable / Lightborne",
+                "traits": [
+                  "Commander",
+                  "Fable",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P10EN|Queen Magnus the Black}",
+                "href": "/cards/?cardno=BP09-P10EN"
+              },
+              {
+                "label": "{BP09-T07EN|Knight}",
+                "href": "/cards/?cardno=BP09-T07EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b5198697751cc1aa91204ba2e7c0bec6b26390d77377ceb486130ca3c08f36bf",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P09EN",
+            "fetched_at": "2026-09-27T16:20:24.813830Z"
+          },
+          "document_ref": "documents-dd8c32cacddaad1a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P10EN",
+      "documents": {
+        "documents-0089b77aae683e4d": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P10EN",
+            "faces": [
+              {
+                "name": "Queen Magnus the Black",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Commander / Fable / Cutthroat"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "While this card is on your field, each Queen Hemera the White on your field has Assail.\n{icon_act|[act]} {icon_stand|[engage]}: Select up to 2 other {icon_royal|[swordcraft]} followers on your field and give them {icon_power|[attack]}+1.",
+                "sections": [],
+                "raw_text": "While this card is on your field, each Queen Hemera the White on your field has Assail.\n{icon_act|[act]} {icon_stand|[engage]}: Select up to 2 other {icon_royal|[swordcraft]} followers on your field and give them {icon_power|[attack]}+1.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P10EN.png",
+                "trait_raw": "Commander / Fable / Cutthroat",
+                "traits": [
+                  "Commander",
+                  "Fable",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P09EN|Queen Hemera the White}",
+                "href": "/cards/?cardno=BP09-P09EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4c2bb379691253233a809e0757b5ae01c3695f4405e07aaad155b1f298e23177",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P10EN",
+            "fetched_at": "2026-09-27T16:20:27.827580Z"
+          },
+          "document_ref": "documents-0089b77aae683e4d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P11EN",
+      "documents": {
+        "documents-f118477e1e5d47b6": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P11EN",
+            "faces": [
+              {
+                "name": "Mysterian Wyrmist",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Academic"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower into a Mysterian Whitewyrm or Mysterian Blackwyrm. Activate only if there are at least 5 Academic cards in your cemetery.\n{icon_fanfare|[fanfare]} You may discard an Academic card. If you do, draw a card. If you don't, bury this card.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this follower into a Mysterian Whitewyrm or Mysterian Blackwyrm. Activate only if there are at least 5 Academic cards in your cemetery.\n{icon_fanfare|[fanfare]} You may discard an Academic card. If you do, draw a card. If you don't, bury this card.",
+                "speech": null,
+                "illustrator": "Justice Wong",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P11EN.png",
+                "trait_raw": "Academic",
+                "traits": [
+                  "Academic"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1155 (Apr. 4, 2025)",
+                "question": "Do I choose whether to evolve this follower into Mysterian Whitewyrm or Mysterian Blackwyrm?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P12EN|Mysterian Whitewyrm}",
+                "href": "/cards/?cardno=BP09-P12EN"
+              },
+              {
+                "label": "{BP09-P12EN_URA|Mysterian Blackwyrm}",
+                "href": "/cards/?cardno=BP09-P12EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dd85f7708345b385b4a33a044ce3566fa2af1e552e16cf0b4365509f9f78b0bc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P11EN",
+            "fetched_at": "2026-09-27T16:20:30.696945Z"
+          },
+          "document_ref": "documents-f118477e1e5d47b6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P12EN",
+      "documents": {
+        "documents-4820e07b32e9063f": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P12EN",
+            "faces": [
+              {
+                "name": "Mysterian Whitewyrm",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Academic / Lightborne"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "Ward.\nOn Evolve - Give your leader {icon_hp|[defense]}+3.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Give your leader {icon_hp|[defense]}+3.",
+                "speech": null,
+                "illustrator": "Akira Miyazaki",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P12EN.png",
+                "trait_raw": "Academic / Lightborne",
+                "traits": [
+                  "Academic",
+                  "Lightborne"
+                ]
+              },
+              {
+                "name": "Mysterian Blackwyrm",
+                "info": {
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Academic / Cutthroat"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "Assail.\nOn Evolve - Deal 3 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "Assail.\nOn Evolve - Deal 3 damage to each enemy leader.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P12EN_URA.png",
+                "trait_raw": "Academic / Cutthroat",
+                "traits": [
+                  "Academic",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P11EN|Mysterian Wyrmist}",
+                "href": "/cards/?cardno=BP09-P11EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3db6b52242279552344492471c1725431dbd94781b137c9e5985f32c21dc749b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P12EN",
+            "fetched_at": "2026-09-27T16:20:33.484408Z"
+          },
+          "document_ref": "documents-4820e07b32e9063f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P13EN",
+      "documents": {
+        "documents-1219e6162efb1efb": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P13EN",
+            "faces": [
+              {
+                "name": "Owen, Knight of Mysteria",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Mage / Academic"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "Rush.\n{icon_fanfare|[fanfare]} If there are at least 5 Academic cards in your cemetery, give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and Assail.\nStrike - Put a Mysterian Missile token into your EX area.",
+                "sections": [],
+                "raw_text": "Rush.\n{icon_fanfare|[fanfare]} If there are at least 5 Academic cards in your cemetery, give this follower {icon_power|[attack]}+1/{icon_hp|[defense]}+1 and Assail.\nStrike - Put a Mysterian Missile token into your EX area.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost02|[cost02]} Mysterian Missile (Spell - Mage/Academic) | Select an enemy follower on the field and deal it 3 damage. If there are at least 10 Academic cards in your cemetery, deal 2 damage to its leader.",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P13EN.png",
+                "trait_raw": "Mage / Academic",
+                "traits": [
+                  "Mage",
+                  "Academic"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P49EN|Mysterian Missile}",
+                "href": "/cards/?cardno=BP09-P49EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:baa22e2760b623fd98ee3de4b4a1b851db197c1b2d95533239b69253825ecfb7",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P13EN",
+            "fetched_at": "2026-09-27T16:20:35.919895Z"
+          },
+          "document_ref": "documents-1219e6162efb1efb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P14EN",
+      "documents": {
+        "documents-03fdfb0127b76723": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P14EN",
+            "faces": [
+              {
+                "name": "Anne's Sorcery",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Mage / Academic / Princess"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Choose one of the following. (1) Select an enemy leader or enemy follower on the field. Deal it 4 damage and draw a card. (2) {icon_cost03|[cost03]}: Select an enemy leader or enemy follower on the field. If there are at least 10 Academic cards in your cemetery, deal it 8 damage and draw 2 cards.",
+                "sections": [],
+                "raw_text": "Choose one of the following. (1) Select an enemy leader or enemy follower on the field. Deal it 4 damage and draw a card. (2) {icon_cost03|[cost03]}: Select an enemy leader or enemy follower on the field. If there are at least 10 Academic cards in your cemetery, deal it 8 damage and draw 2 cards.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P14EN.png",
+                "trait_raw": "Mage / Academic / Princess",
+                "traits": [
+                  "Mage",
+                  "Academic",
+                  "Princess"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1237 (Apr. 4, 2025)",
+                "question": "If there are fewer than 10 Academic cards in my cemetery, can I still choose (2) and draw 2 cards?",
+                "answer": "No. You can still choose (2) as long as you can select an enemy leader or enemy follower on the field and pay 3 play points, but nothing will happen."
+              },
+              {
+                "title": "Q1222 (Apr. 4, 2025)",
+                "question": "When resolving this spell's (2) effect, does the spell itself count toward the condition \"if there are at least 10 Academic cards in your cemetery\"?",
+                "answer": "No. While you're resolving this spell's effects, it isn't in the cemetery yet."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:98ff4dad388ae4ad5164606dbff456c66a09f9e35dd7dcfc25b99b386f9e0a77",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P14EN",
+            "fetched_at": "2026-09-27T16:20:39.178580Z"
+          },
+          "document_ref": "documents-03fdfb0127b76723"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P15EN",
+      "documents": {
+        "documents-1a13fbf7a715c512": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P15EN",
+            "faces": [
+              {
+                "name": "Grea's Ember",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Mage / Academic / Princess"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "{icon_quick|[quick]}\nSelect an enemy follower on the field and deal it 2 damage. If there are at least 5 Academic cards in your cemetery, deal 3 damage instead.",
+                "sections": [],
+                "raw_text": "{icon_quick|[quick]}\nSelect an enemy follower on the field and deal it 2 damage. If there are at least 5 Academic cards in your cemetery, deal 3 damage instead.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P15EN.png",
+                "trait_raw": "Mage / Academic / Princess",
+                "traits": [
+                  "Mage",
+                  "Academic",
+                  "Princess"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1223 (Apr. 4, 2025)",
+                "question": "When playing this spell, does the spell itself count toward the condition \"if there are at least 5 Academic cards in your cemetery\"?",
+                "answer": "No. While you're resolving this spell's effects, it isn't in the cemetery yet."
+              },
+              {
+                "title": "Q1220 (Apr. 4, 2025)",
+                "question": "If I have at least 5 Academic cards in my cemetery and an evolved Grea, Mysterian Dragoness on my field, does Grea's Ember deal 4 damage?",
+                "answer": "Yes. Its damage first becomes 3 from its own replacement effect, then gets increased by 1 by Grea's ability."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f29ded506c483593e4b974f95d4ed119b56aefd26018ae7bc689d03052cfd2c5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P15EN",
+            "fetched_at": "2026-09-27T16:20:41.804984Z"
+          },
+          "document_ref": "documents-1a13fbf7a715c512"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P16EN",
+      "documents": {
+        "documents-ddd25cc7ea06815b": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P16EN",
+            "faces": [
+              {
+                "name": "Bergent, Onion Patchmaster",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Mage / Arcanaform"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Look at the top 5 cards of your deck. You may summon up to 2 cards named Onion Patch from among them. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Look at the top 5 cards of your deck. You may summon up to 2 cards named Onion Patch from among them. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P16EN.png",
+                "trait_raw": "Mage / Arcanaform",
+                "traits": [
+                  "Mage",
+                  "Arcanaform"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P17EN|Bergent, Onion Patchmaster}",
+                "href": "/cards/?cardno=BP09-P17EN"
+              },
+              {
+                "label": "{BP09-P21EN|Onion Patch}",
+                "href": "/cards/?cardno=BP09-P21EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5759f8639350fb09ee6a88e6692acee965b87f3dea5b300efa7c8e538b10a925",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P16EN",
+            "fetched_at": "2026-09-27T16:20:44.235029Z"
+          },
+          "document_ref": "documents-ddd25cc7ea06815b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P17EN",
+      "documents": {
+        "documents-c837047f951845f3": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P17EN",
+            "faces": [
+              {
+                "name": "Bergent, Onion Patchmaster",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Mage / Arcanaform"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "While this card is on your field, if an Onion Patch on your field would deal damage, it deals that much plus 1 instead.\n{icon_act|[act]} {icon_cost01|[cost01]}, {icon_stand|[engage]}: Search your deck for up to 2 cards named Onion Patch, summon them, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "While this card is on your field, if an Onion Patch on your field would deal damage, it deals that much plus 1 instead.\n{icon_act|[act]} {icon_cost01|[cost01]}, {icon_stand|[engage]}: Search your deck for up to 2 cards named Onion Patch, summon them, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P17EN.png",
+                "trait_raw": "Mage / Arcanaform",
+                "traits": [
+                  "Mage",
+                  "Arcanaform"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1164 (Apr. 4, 2025)",
+                "question": "If this follower is on my field, and I attack an enemy Lævateinn Dragon, Defense Form with a 1-attack Onion Patch, how much damage does Lævateinn Dragon, Defense Form take?",
+                "answer": "It takes either 0 damage or 1 damage. When there are multiple abilities modifying damage dealt, the player receiving the damage decides the order the abilities are applied. In this case, depending on the order, the final damage taken can be calculated as follows:\n\nLævateinn Dragon, Defense Form takes 1 damage because its controller decides to apply this follower's ability to increase the damage dealt by 1 first, so the Onion Patch will deal 2 damage before Lævateinn Dragon, Defense Form's ability reduces the damage dealt by 1.\n\nLævateinn Dragon, Defense Form takes 0 damage because its controller decides to apply Lævateinn Dragon, Defense Form's ability to reduce damage dealt by 1 first, so the Onion Patch will deal 0 damage before this follower's ability increases the damage dealt by 1. However, this follower's ability only takes effect when damage is dealt, and 0 damage doesn't count as dealing damage, so the ability doesn't take effect and the damage taken by Lævateinn Dragon, Defense Form remains 0."
+              },
+              {
+                "title": "Q1163 (Apr. 4, 2025)",
+                "question": "If this follower is on my field, and I attack an enemy leader with a 0-attack Onion Patch, does it deal 1 damage?",
+                "answer": "No. When a 0-attack follower attacks, it doesn't count as dealing damage, and this follower's \"if an Onion Patch on your field would deal damage, it deals that much plus 1 instead\" only takes effect when damage is dealt."
+              },
+              {
+                "title": "Q1162 (Apr. 4, 2025)",
+                "question": "When does this follower's \"if an Onion Patch on your field would deal damage, it deals that much plus 1 instead\" ability take effect?",
+                "answer": "It takes effect when an Onion Patch on your field deals combat or ability damage. Note that when a follower with 0 or less attack deals attack or combat damage, no damage is dealt at all (it doesn't count as dealing damage)."
+              },
+              {
+                "title": "Q1161 (Apr. 4, 2025)",
+                "question": "Does Bergent, Onion Patchmaster's \"if an Onion Patch on your field would deal damage, it deals that much plus 1 instead\" ability increase damage dealt by Onion Patch's \"Strike - Select an enemy follower on the field and deal it 1 damage\" ability as well?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P16EN|Bergent, Onion Patchmaster}",
+                "href": "/cards/?cardno=BP09-P16EN"
+              },
+              {
+                "label": "{BP09-P21EN|Onion Patch}",
+                "href": "/cards/?cardno=BP09-P21EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e7283888cc8340e1231de1c02929f2df8366636d37482eff6dee2a4ef2c79a60",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P17EN",
+            "fetched_at": "2026-09-27T16:20:47.306913Z"
+          },
+          "document_ref": "documents-c837047f951845f3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P18EN",
+      "documents": {
+        "documents-710e4da946ef3397": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P18EN",
+            "faces": [
+              {
+                "name": "Vayle, Mysterian Summoner",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Mage / Arcanaform / Academic"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P18EN.png",
+                "trait_raw": "Mage / Arcanaform / Academic",
+                "traits": [
+                  "Mage",
+                  "Arcanaform",
+                  "Academic"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P19EN|Vayle, Mysterian Summoner}",
+                "href": "/cards/?cardno=BP09-P19EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d0669b0c8eb41e7a76a5bb97dca2dc031625c3d69cd94ffeb43e1996025145ff",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P18EN",
+            "fetched_at": "2026-09-27T16:20:50.327948Z"
+          },
+          "document_ref": "documents-710e4da946ef3397"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P19EN",
+      "documents": {
+        "documents-8afedcaa37b68114": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P19EN",
+            "faces": [
+              {
+                "name": "Vayle, Mysterian Summoner",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Mage / Arcanaform / Academic"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Look at the top 5 cards of your deck. You may put up to 2 Academic cards that cost 2 or less from among them into your EX area. They cost 2 less to play this turn. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "On Evolve - Look at the top 5 cards of your deck. You may put up to 2 Academic cards that cost 2 or less from among them into your EX area. They cost 2 less to play this turn. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P19EN.png",
+                "trait_raw": "Mage / Arcanaform / Academic",
+                "traits": [
+                  "Mage",
+                  "Arcanaform",
+                  "Academic"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P18EN|Vayle, Mysterian Summoner}",
+                "href": "/cards/?cardno=BP09-P18EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8ba2772edf4296397e345cebd18ddc3b8c9643e57faa6612292c14d15531be19",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P19EN",
+            "fetched_at": "2026-09-27T16:20:52.592768Z"
+          },
+          "document_ref": "documents-8afedcaa37b68114"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P20EN",
+      "documents": {
+        "documents-11a942d9d8b946a4": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P20EN",
+            "faces": [
+              {
+                "name": "Mysterian Knowledge",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Mage / Academic"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "As an additional cost to play this card, reveal 2 Academic cards from your hand.",
+                "sections": [
+                  "Draw a card. Put a Mysterian Missile token into your EX area."
+                ],
+                "raw_text": "As an additional cost to play this card, reveal 2 Academic cards from your hand.\n----------\nDraw a card. Put a Mysterian Missile token into your EX area.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost02|[cost02]} Mysterian Missile (Spell - Mage/Academic) | Select an enemy follower on the field and deal it 3 damage. If there are at least 10 Academic cards in your cemetery, deal 2 damage to its leader.",
+                "illustrator": "ZOUNOSE",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P20EN.png",
+                "trait_raw": "Mage / Academic",
+                "traits": [
+                  "Mage",
+                  "Academic"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1225 (Apr. 4, 2025)",
+                "question": "If I only have one Academic card in my hand, can I play a Mysterian Knowledge in my cemetery with Merlin's On Evolve ability?",
+                "answer": "No. If you can't pay the additional cost, you can't play this spell, so nothing would happen if you select it for Merlin's On Evolve ability."
+              },
+              {
+                "title": "Q1224 (Apr. 4, 2025)",
+                "question": "Can I reveal this card itself as part of the additional cost to play it?",
+                "answer": "No. While you're paying this spell's costs, it's in the resolution zone, not your hand."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P49EN|Mysterian Missile}",
+                "href": "/cards/?cardno=BP09-P49EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:62f14e8b42c73375121deae85f1f697399a906e7afc65f258c04b3be204d258b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P20EN",
+            "fetched_at": "2026-09-27T16:20:55.118570Z"
+          },
+          "document_ref": "documents-11a942d9d8b946a4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P21EN",
+      "documents": {
+        "documents-3837ae6b8e72bc24": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P21EN",
+            "faces": [
+              {
+                "name": "Onion Patch",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze / Premium",
+                  "Trait": "Arcanaform"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "Rush.\nWhile there are at least 5 cards named Onion Patch in your cemetery, this follower has Storm and \"Strike - Select an enemy follower on the field and deal it 1 damage.\"",
+                "sections": [
+                  "You can put up to 50 of this card into your deck."
+                ],
+                "raw_text": "Rush.\nWhile there are at least 5 cards named Onion Patch in your cemetery, this follower has Storm and \"Strike - Select an enemy follower on the field and deal it 1 damage.\"\n----------\nYou can put up to 50 of this card into your deck.",
+                "speech": null,
+                "illustrator": "Onineko",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P21EN.png",
+                "trait_raw": "Arcanaform",
+                "traits": [
+                  "Arcanaform"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1168 (Apr. 4, 2025)",
+                "question": "What does \"you can put up to 50 of this card into your deck\" mean?",
+                "answer": "Normally, you can have at most 3 copies of the same card in your main deck, but this rule doesn't apply to Onion Patch. You can put up to 50 copies of it into your main deck. Note that you can't put Onion Patch into your evolve deck, because it isn't an evolved card."
+              },
+              {
+                "title": "Q1161 (Apr. 4, 2025)",
+                "question": "Does Bergent, Onion Patchmaster's \"if an Onion Patch on your field would deal damage, it deals that much plus 1 instead\" ability increase damage dealt by Onion Patch's \"Strike - Select an enemy follower on the field and deal it 1 damage\" ability as well?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6b2a16b72c6b16ea6c0ea8f8a184ac20db24bd0c9ffacb6e82bef7c6ccf92b04",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P21EN",
+            "fetched_at": "2026-09-27T16:20:57.669005Z"
+          },
+          "document_ref": "documents-3837ae6b8e72bc24"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P22EN",
+      "documents": {
+        "documents-c2a5e02a62785635": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P22EN",
+            "faces": [
+              {
+                "name": "Mr. Bertrand, Magic Mentor",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze / Premium",
+                  "Trait": "Mage / Academic"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "2",
+                  "power": "1"
+                },
+                "text": "{icon_fanfare|[fanfare]} Choose one of the following. (1) Put a Mysterian Missile token into your EX area. (2) Select an Academic spell in your cemetery and, if there are at least 5 Academic cards in your cemetery, add it to your hand.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Choose one of the following. (1) Put a Mysterian Missile token into your EX area. (2) Select an Academic spell in your cemetery and, if there are at least 5 Academic cards in your cemetery, add it to your hand.",
+                "speech": "{icon_witch|[runecraft]}{icon_cost02|[cost02]} Mysterian Missile (Spell - Mage/Academic) | Select an enemy follower on the field and deal it 3 damage. If there are at least 10 Academic cards in your cemetery, deal 2 damage to its leader.",
+                "illustrator": "Chatalaw",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P22EN.png",
+                "trait_raw": "Mage / Academic",
+                "traits": [
+                  "Mage",
+                  "Academic"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1238 (Apr. 4, 2025)",
+                "question": "When playing this follower's Fanfare ability, if I can't select an Academic spell in my cemetery, can I still choose option 2 to have nothing happen?",
+                "answer": "No. If you can't select an Academic spell, you would be required to choose option 1."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P49EN|Mysterian Missile}",
+                "href": "/cards/?cardno=BP09-P49EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9beeaa8a8be6d31dac0bc759842e756f6c5148832045c134855457fbefdbf7e3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P22EN",
+            "fetched_at": "2026-09-27T16:21:00.893421Z"
+          },
+          "document_ref": "documents-c2a5e02a62785635"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P23EN",
+      "documents": {
+        "documents-98d901ac5cc85a5d": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P23EN",
+            "faces": [
+              {
+                "name": "Lindworm",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Wyrmkin"
+                },
+                "stats": {
+                  "cost": "10",
+                  "hp": "10",
+                  "power": "10"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost05|[cost05]}: Evolve this follower into a Virtuous Lindworm or Iniquitous Lindworm.\n{icon_fanfare|[fanfare]} Recover play points equal to the number of {icon_dragon|[dragoncraft]} spells in your cemetery.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost05|[cost05]}: Evolve this follower into a Virtuous Lindworm or Iniquitous Lindworm.\n{icon_fanfare|[fanfare]} Recover play points equal to the number of {icon_dragon|[dragoncraft]} spells in your cemetery.",
+                "speech": null,
+                "illustrator": "Ryosuke Aiba（CyDesignation）",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P23EN.png",
+                "trait_raw": "Wyrmkin",
+                "traits": [
+                  "Wyrmkin"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1171 (Apr. 4, 2025)",
+                "question": "Do I choose whether to evolve this follower into Virtuous Lindworm or Iniquitous Lindworm?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P24EN|Virtuous Lindworm}",
+                "href": "/cards/?cardno=BP09-P24EN"
+              },
+              {
+                "label": "{BP09-P24EN_URA|Iniquitous Lindworm}",
+                "href": "/cards/?cardno=BP09-P24EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c2894331ec59f84ef616e9c218cff257ff359e21e4c26b115a932aea6b8e4b3e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P23EN",
+            "fetched_at": "2026-09-27T16:21:03.371541Z"
+          },
+          "document_ref": "documents-98d901ac5cc85a5d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P24EN",
+      "documents": {
+        "documents-de3b11836f89a86c": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P24EN",
+            "faces": [
+              {
+                "name": "Virtuous Lindworm",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Wyrmkin / Lightborne"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "10",
+                  "power": "10"
+                },
+                "text": "Ward.\nAt the start of your end phase, give your leader {icon_hp|[defense]}+6 and draw 3 cards.",
+                "sections": [],
+                "raw_text": "Ward.\nAt the start of your end phase, give your leader {icon_hp|[defense]}+6 and draw 3 cards.",
+                "speech": null,
+                "illustrator": "Akira Miyazaki",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P24EN.png",
+                "trait_raw": "Wyrmkin / Lightborne",
+                "traits": [
+                  "Wyrmkin",
+                  "Lightborne"
+                ]
+              },
+              {
+                "name": "Iniquitous Lindworm",
+                "info": {
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Wyrmkin / Cutthroat"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "10",
+                  "power": "10"
+                },
+                "text": "Storm.\nThis follower ignores Ward.",
+                "sections": [],
+                "raw_text": "Storm.\nThis follower ignores Ward.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P24EN_URA.png",
+                "trait_raw": "Wyrmkin / Cutthroat",
+                "traits": [
+                  "Wyrmkin",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P23EN|Lindworm}",
+                "href": "/cards/?cardno=BP09-P23EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cd3c340acfad63bb3ce888865ba2dc1b5a2d00603753d0745e514d1e499f16dd",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P24EN",
+            "fetched_at": "2026-09-27T16:21:05.999629Z"
+          },
+          "document_ref": "documents-de3b11836f89a86c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P25EN",
+      "documents": {
+        "documents-76727fecda7f5f85": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P25EN",
+            "faces": [
+              {
+                "name": "Poseidon",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Marine / Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "8",
+                  "hp": "7",
+                  "power": "4"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Search your deck for up to 2 Draconic Duelist followers with different names that cost 2 or less, summon them, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Search your deck for up to 2 Draconic Duelist followers with different names that cost 2 or less, summon them, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "Minaba Hideo (CyDesignation)",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P25EN.png",
+                "trait_raw": "Marine / Draconic Duelist",
+                "traits": [
+                  "Marine",
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:87ea91e3adfbc05622afe2daeafb4826dbae4b91726cf13fc40665961a108037",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P25EN",
+            "fetched_at": "2026-09-27T16:21:08.811162Z"
+          },
+          "document_ref": "documents-76727fecda7f5f85"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P26EN",
+      "documents": {
+        "documents-bda50db478db42ca": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P26EN",
+            "faces": [
+              {
+                "name": "Pure-Voiced Dragoon",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Dragonheart / Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "5",
+                  "hp": "4",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Search your deck for a Draconic Duelist follower that costs 4 or less, summon it, then shuffle your deck. If Overflow is active for you, give your leader {icon_hp|[defense]}+3.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Search your deck for a Draconic Duelist follower that costs 4 or less, summon it, then shuffle your deck. If Overflow is active for you, give your leader {icon_hp|[defense]}+3.",
+                "speech": null,
+                "illustrator": "Xui Ton",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P26EN.png",
+                "trait_raw": "Dragonheart / Draconic Duelist",
+                "traits": [
+                  "Dragonheart",
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7486217d658e602695cd685c635651224bf52421c07fdea31d0c9299aa03b473",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P26EN",
+            "fetched_at": "2026-09-27T16:21:11.517010Z"
+          },
+          "document_ref": "documents-bda50db478db42ca"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P27EN",
+      "documents": {
+        "documents-fdd0ae790bc9192b": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P27EN",
+            "faces": [
+              {
+                "name": "Roy, Dragoncleaver",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Draconic Duelist / Cutthroat"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Search your deck for a 2-cost {icon_dragon|[dragoncraft]} spell, reveal it, add it to your hand, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Search your deck for a 2-cost {icon_dragon|[dragoncraft]} spell, reveal it, add it to your hand, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P27EN.png",
+                "trait_raw": "Draconic Duelist / Cutthroat",
+                "traits": [
+                  "Draconic Duelist",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P28EN|Roy, Dragoncleaver}",
+                "href": "/cards/?cardno=BP09-P28EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:afb1a176ea964202ab2d421229b334bede4bc742e7cdb02530f3bcf5c1cca5e9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P27EN",
+            "fetched_at": "2026-09-27T16:21:14.241803Z"
+          },
+          "document_ref": "documents-fdd0ae790bc9192b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P28EN",
+      "documents": {
+        "documents-3b61621f3fc6e97d": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P28EN",
+            "faces": [
+              {
+                "name": "Roy, Dragoncleaver",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Draconic Duelist / Cutthroat"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Select an enemy follower on the field and deal it 2 damage. If it's a Wyrmkin follower, deal 5 damage instead.",
+                "sections": [],
+                "raw_text": "On Evolve - Select an enemy follower on the field and deal it 2 damage. If it's a Wyrmkin follower, deal 5 damage instead.",
+                "speech": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P28EN.png",
+                "trait_raw": "Draconic Duelist / Cutthroat",
+                "traits": [
+                  "Draconic Duelist",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P27EN|Roy, Dragoncleaver}",
+                "href": "/cards/?cardno=BP09-P27EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fb505920ac857c67f10b1c2e5ec376c53d130d42184fd5ca06abc4cf4dc2c7ea",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P28EN",
+            "fetched_at": "2026-09-27T16:21:16.987449Z"
+          },
+          "document_ref": "documents-3b61621f3fc6e97d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P29EN",
+      "documents": {
+        "documents-c347e9c5053bbd9c": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P29EN",
+            "faces": [
+              {
+                "name": "Katakura Kojuro",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Select another Draconic Duelist follower on your field and, if Overflow is active for you, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Select another Draconic Duelist follower on your field and, if Overflow is active for you, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "tetsuo ameno",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P29EN.png",
+                "trait_raw": "Draconic Duelist",
+                "traits": [
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P30EN|Katakura Kojuro}",
+                "href": "/cards/?cardno=BP09-P30EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5eb7a0d8f0048ce2b351e7f0fe1b3d01df0c496713e544d64c8cd5e385225909",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P29EN",
+            "fetched_at": "2026-09-27T16:21:19.903991Z"
+          },
+          "document_ref": "documents-c347e9c5053bbd9c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P30EN",
+      "documents": {
+        "documents-45238b163a0e599d": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P30EN",
+            "faces": [
+              {
+                "name": "Katakura Kojuro",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Look at the top 4 cards of your deck. You may reveal a Draconic Duelist follower from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "On Evolve - Look at the top 4 cards of your deck. You may reveal a Draconic Duelist follower from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "tetsuo ameno",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P30EN.png",
+                "trait_raw": "Draconic Duelist",
+                "traits": [
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P29EN|Katakura Kojuro}",
+                "href": "/cards/?cardno=BP09-P29EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8f741a09c85b328cfdfeebc045059209f8f452a0e107ab642d82daa0f08a0324",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P30EN",
+            "fetched_at": "2026-09-27T16:21:22.504113Z"
+          },
+          "document_ref": "documents-45238b163a0e599d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P31EN",
+      "documents": {
+        "documents-ed6520c5d0ade487": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P31EN",
+            "faces": [
+              {
+                "name": "Dragoon Scyther",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Dragonheart / Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "Bane.\nWhile there's another Draconic Duelist card on your field, this follower has Storm.",
+                "sections": [],
+                "raw_text": "Bane.\nWhile there's another Draconic Duelist card on your field, this follower has Storm.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P31EN.png",
+                "trait_raw": "Dragonheart / Draconic Duelist",
+                "traits": [
+                  "Dragonheart",
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1229 (Apr. 4, 2025)",
+                "question": "If I have an Aftershock on my field, does it count toward conditions such as \"while there is another Draconic Duelist card on your field\" and \"if there are at least 3 Draconic Duelist cards on your field\"?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:79b5fad32e09041611aaa858fd8551905bab9b1bb551ccfe8519db235dc4bdbb",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P31EN",
+            "fetched_at": "2026-09-27T16:21:25.089152Z"
+          },
+          "document_ref": "documents-ed6520c5d0ade487"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P32EN",
+      "documents": {
+        "documents-20141c3067b8fa28": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P32EN",
+            "faces": [
+              {
+                "name": "Gargouille",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Draconic Duelist / Dragonewt / Cutthroat"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "5",
+                  "power": "4"
+                },
+                "text": "Rush. Ward.\n{icon_fanfare|[fanfare]} If there are at least 3 Draconic Duelist cards on your field, draw 2 cards.",
+                "sections": [],
+                "raw_text": "Rush. Ward.\n{icon_fanfare|[fanfare]} If there are at least 3 Draconic Duelist cards on your field, draw 2 cards.",
+                "speech": null,
+                "illustrator": "Tricky Agura",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P32EN.png",
+                "trait_raw": "Draconic Duelist / Dragonewt / Cutthroat",
+                "traits": [
+                  "Draconic Duelist",
+                  "Dragonewt",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1229 (Apr. 4, 2025)",
+                "question": "If I have an Aftershock on my field, does it count toward conditions such as \"while there is another Draconic Duelist card on your field\" and \"if there are at least 3 Draconic Duelist cards on your field\"?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3dbfcb3003b15cecab425e0ece1c1ca47d40044f1a4c34cfeae0432fd2c9c70b",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P32EN",
+            "fetched_at": "2026-09-27T16:21:27.909987Z"
+          },
+          "document_ref": "documents-20141c3067b8fa28"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P33EN",
+      "documents": {
+        "documents-998138ce1b824482": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P33EN",
+            "faces": [
+              {
+                "name": "Waters of the Megalorca",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Marine"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Summon a Megalorca token. If Overflow is active for you, summon 2 instead.",
+                "sections": [],
+                "raw_text": "Summon a Megalorca token. If Overflow is active for you, summon 2 instead.",
+                "speech": "{icon_dragon|[dragoncraft]}{icon_cost02|[cost02]} Megalorca (Follower - Marine) {icon_power|[attack]}2/{icon_hp|[defense]}2",
+                "illustrator": "Onineko",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P33EN.png",
+                "trait_raw": "Marine",
+                "traits": [
+                  "Marine"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1176 (Apr. 4, 2025)",
+                "question": "I have a Prime Dragon Keeper on my field. If I summon 2 Megalorca tokens with this spell, how many times does Prime Dragon Keeper's \"whenever another Dragoncraft follower that costs 3 play points or less is put onto your field\" ability trigger?",
+                "answer": "It triggers 2 times."
+              },
+              {
+                "title": "Q1175 (Apr. 4, 2025)",
+                "question": "If I play this spell when Overflow is active for me, but I already have 4 cards on my field, do I just summon one Megalorca token?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP06-T08EN|Megalorca}",
+                "href": "/cards/?cardno=BP06-T08EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eb2d2af121c6743a7758045ad06949808215740324ac57466b3e977ca6a5d9f9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P33EN",
+            "fetched_at": "2026-09-27T16:21:30.890622Z"
+          },
+          "document_ref": "documents-998138ce1b824482"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P34EN",
+      "documents": {
+        "documents-33c216ccfc628d88": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P34EN",
+            "faces": [
+              {
+                "name": "Hypersonic Dragonewt",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze / Premium",
+                  "Trait": "Dragonewt / Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "2"
+                },
+                "text": "While there's another Draconic Duelist card on your field, this follower has Rush and Assail.\n{icon_fanfare|[fanfare]} {icon_cost01|[cost01]}: If Overflow is active for you, search your deck for a Hypersonic Dragonewt, summon it, then shuffle your deck.",
+                "sections": [],
+                "raw_text": "While there's another Draconic Duelist card on your field, this follower has Rush and Assail.\n{icon_fanfare|[fanfare]} {icon_cost01|[cost01]}: If Overflow is active for you, search your deck for a Hypersonic Dragonewt, summon it, then shuffle your deck.",
+                "speech": null,
+                "illustrator": "Chiaki Negishi",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P34EN.png",
+                "trait_raw": "Dragonewt / Draconic Duelist",
+                "traits": [
+                  "Dragonewt",
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1230 (Apr. 4, 2025)",
+                "question": "I have this follower and one other Draconic Duelist card on my field. Since this follower has Assail from its passive ability, I declare an attack with it on a reserved enemy follower. If my opponent destroys the other Draconic Duelist card on my field at Quick timing, causing this follower to lose Assail, does the attack still go through?",
+                "answer": "Yes, the attack goes through on the original target."
+              },
+              {
+                "title": "Q1229 (Apr. 4, 2025)",
+                "question": "If I have an Aftershock on my field, does it count toward conditions such as \"while there is another Draconic Duelist card on your field\" and \"if there are at least 3 Draconic Duelist cards on your field\"?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:12dcc4538d10122d1ab73706d26a089e3b4540a62589c92e094f60376ca3b44d",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P34EN",
+            "fetched_at": "2026-09-27T16:21:33.159237Z"
+          },
+          "document_ref": "documents-33c216ccfc628d88"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P35EN",
+      "documents": {
+        "documents-98e910193faa8cfe": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P35EN",
+            "faces": [
+              {
+                "name": "Oldblood King",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Vampire"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Summon 2 Forest Bat tokens.\nWhile this card is on your field, each Forest Bat on your field has Rush and Assail.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.\n{icon_fanfare|[fanfare]} Summon 2 Forest Bat tokens.\nWhile this card is on your field, each Forest Bat on your field has Rush and Assail.",
+                "speech": "{icon_nightmare|[abysscraft]}{icon_cost01|[cost01]} Forest Bat (Follower - Vampire) {icon_power|[attack]}1/{icon_hp|[defense]}1",
+                "illustrator": "Toshiaki Takayama",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P35EN.png",
+                "trait_raw": "Vampire",
+                "traits": [
+                  "Vampire"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1184 (Apr. 4, 2025)",
+                "question": "I declare an attack on a reserved enemy follower with a Forest Bat that has Rush and Assail from this follower's passive ability. If my opponent destroys this follower at Quick timing, causing my Forest Bat to lose Assail, does the attack still go through?",
+                "answer": "Yes, the attack goes through on the original target."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P36EN|Oldblood King}",
+                "href": "/cards/?cardno=BP09-P36EN"
+              },
+              {
+                "label": "{BP09-T16EN|Forest Bat}",
+                "href": "/cards/?cardno=BP09-T16EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e4aa994a01693776ea4d931c4c272ed0b20b7ca09be09a251ca18e7c5377c004",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P35EN",
+            "fetched_at": "2026-09-27T16:21:36.144315Z"
+          },
+          "document_ref": "documents-98e910193faa8cfe"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P36EN",
+      "documents": {
+        "documents-3f6bbc113c34831f": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P36EN",
+            "faces": [
+              {
+                "name": "Oldblood King",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Vampire"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "3"
+                },
+                "text": "On Evolve - Give each Forest Bat on your field {icon_power|[attack]}+1.\nWhile this card is on your field, each Forest Bat on your field has Rush and Assail.",
+                "sections": [],
+                "raw_text": "On Evolve - Give each Forest Bat on your field {icon_power|[attack]}+1.\nWhile this card is on your field, each Forest Bat on your field has Rush and Assail.",
+                "speech": null,
+                "illustrator": "Toshiaki Takayama",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P36EN.png",
+                "trait_raw": "Vampire",
+                "traits": [
+                  "Vampire"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1184 (Apr. 4, 2025)",
+                "question": "I declare an attack on a reserved enemy follower with a Forest Bat that has Rush and Assail from this follower's passive ability. If my opponent destroys this follower at Quick timing, causing my Forest Bat to lose Assail, does the attack still go through?",
+                "answer": "Yes, the attack goes through on the original target."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P35EN|Oldblood King}",
+                "href": "/cards/?cardno=BP09-P35EN"
+              },
+              {
+                "label": "{BP09-T16EN|Forest Bat}",
+                "href": "/cards/?cardno=BP09-T16EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:185a0a815bad7960c719f49f808508243cb63b132c31c24884c4b4f3a8c42714",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P36EN",
+            "fetched_at": "2026-09-27T16:21:39.139588Z"
+          },
+          "document_ref": "documents-3f6bbc113c34831f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P37EN",
+      "documents": {
+        "documents-cf21d531006e1b2d": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P37EN",
+            "faces": [
+              {
+                "name": "Raven, Eventide Vampire",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Vampire"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_act|[act]} {icon_stand|[engage]}, bury a Forest Bat: Choose one of the following. (1) Select an enemy follower on the field. Deal it 4 damage and draw a card. (2) Deal 2 damage to each enemy leader. Give your leader {icon_hp|[defense]}+2. Draw a card.",
+                "sections": [],
+                "raw_text": "{icon_act|[act]} {icon_stand|[engage]}, bury a Forest Bat: Choose one of the following. (1) Select an enemy follower on the field. Deal it 4 damage and draw a card. (2) Deal 2 damage to each enemy leader. Give your leader {icon_hp|[defense]}+2. Draw a card.",
+                "speech": null,
+                "illustrator": "Maki",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P37EN.png",
+                "trait_raw": "Vampire",
+                "traits": [
+                  "Vampire"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-T16EN|Forest Bat}",
+                "href": "/cards/?cardno=BP09-T16EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bc3519a39ae67dd976427fa820b5b80cc898fd0c5b755c3199143eb605d230f8",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P37EN",
+            "fetched_at": "2026-09-27T16:21:42.057784Z"
+          },
+          "document_ref": "documents-cf21d531006e1b2d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P38EN",
+      "documents": {
+        "documents-2ea33e08097c313d": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P38EN",
+            "faces": [
+              {
+                "name": "Raven, Noontide Vampire",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze / Premium",
+                  "Trait": "Vampire / Lightborne"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "2",
+                  "power": "1"
+                },
+                "text": "{icon_fanfare|[fanfare]} Put a Forest Bat token into your EX area.\nOnce on each of your turns, when a Forest Bat is put onto your field, give your leader {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Put a Forest Bat token into your EX area.\nOnce on each of your turns, when a Forest Bat is put onto your field, give your leader {icon_hp|[defense]}+1.",
+                "speech": "{icon_nightmare|[abysscraft]}{icon_cost01|[cost01]} Forest Bat (Follower - Vampire) {icon_power|[attack]}1/{icon_hp|[defense]}1",
+                "illustrator": "Maki",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P38EN.png",
+                "trait_raw": "Vampire / Lightborne",
+                "traits": [
+                  "Vampire",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1189 (Apr. 4, 2025)",
+                "question": "I have 2 copies of this follower on my field. If a Forest Bat is put onto my field, do the \"when a Forest Bat is put onto your field\" abilities of both copies trigger?",
+                "answer": "Yes, they do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-T16EN|Forest Bat}",
+                "href": "/cards/?cardno=BP09-T16EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:39d4e143551774ca8ea7f84b370421146243e101c5f89a8417a7e02b063dd67a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P38EN",
+            "fetched_at": "2026-09-27T16:21:44.316383Z"
+          },
+          "document_ref": "documents-2ea33e08097c313d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P39EN",
+      "documents": {
+        "documents-9adc5ca617cb833d": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P39EN",
+            "faces": [
+              {
+                "name": "Raven, Midnight Vampire",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Bronze / Premium",
+                  "Trait": "Vampire / Cutthroat"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} Put a Forest Bat token into your EX area.\nOnce on each of your turns, when a Forest Bat is put onto your field, deal 1 damage to each enemy leader.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Put a Forest Bat token into your EX area.\nOnce on each of your turns, when a Forest Bat is put onto your field, deal 1 damage to each enemy leader.",
+                "speech": "{icon_nightmare|[abysscraft]}{icon_cost01|[cost01]} Forest Bat (Follower - Vampire) {icon_power|[attack]}1/{icon_hp|[defense]}1",
+                "illustrator": "Maki",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P39EN.png",
+                "trait_raw": "Vampire / Cutthroat",
+                "traits": [
+                  "Vampire",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1189 (Apr. 4, 2025)",
+                "question": "I have 2 copies of this follower on my field. If a Forest Bat is put onto my field, do the \"when a Forest Bat is put onto your field\" abilities of both copies trigger?",
+                "answer": "Yes, they do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-T16EN|Forest Bat}",
+                "href": "/cards/?cardno=BP09-T16EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5040d0d9935d958ed85dac7bbbb778eedc91c0ebb4bd75bf8cf1917cfdceb264",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P39EN",
+            "fetched_at": "2026-09-27T16:21:46.902667Z"
+          },
+          "document_ref": "documents-9adc5ca617cb833d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P40EN",
+      "documents": {
+        "documents-3838c642495ffb68": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P40EN",
+            "faces": [
+              {
+                "name": "Ceryneian Hind",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower into a Ceryneian Lighthind or Ceryneian Darkhind.\n{icon_fanfare|[fanfare]} Look at the top 5 cards of your deck. You may reveal an amulet from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower into a Ceryneian Lighthind or Ceryneian Darkhind.\n{icon_fanfare|[fanfare]} Look at the top 5 cards of your deck. You may reveal an amulet from among them and add it to your hand. Put the rest on the bottom of your deck in any order.",
+                "speech": null,
+                "illustrator": "Nejita",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P40EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1190 (Apr. 4, 2025)",
+                "question": "Do I choose whether to evolve this follower into Ceryneian Lighthind or Ceryneian Darkhind?",
+                "answer": "Yes, you do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P41EN|Ceryneian Lighthind}",
+                "href": "/cards/?cardno=BP09-P41EN"
+              },
+              {
+                "label": "{BP09-P41EN_URA|Ceryneian Darkhind}",
+                "href": "/cards/?cardno=BP09-P41EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:28cf5a6f2f38a5e234e8597ca252209592e269622ff8330073a0473b4711c521",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P40EN",
+            "fetched_at": "2026-09-27T16:21:49.672170Z"
+          },
+          "document_ref": "documents-3838c642495ffb68"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P41EN",
+      "documents": {
+        "documents-e6acb4f973cc9cfd": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P41EN",
+            "faces": [
+              {
+                "name": "Ceryneian Lighthind",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Faith / Beast / Lightborne"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "Ward.\nOn Evolve - Bury an amulet: Give your leader {icon_hp|[defense]}+4.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Bury an amulet: Give your leader {icon_hp|[defense]}+4.",
+                "speech": null,
+                "illustrator": "Nejita",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P41EN.png",
+                "trait_raw": "Faith / Beast / Lightborne",
+                "traits": [
+                  "Faith",
+                  "Beast",
+                  "Lightborne"
+                ]
+              },
+              {
+                "name": "Ceryneian Darkhind",
+                "info": {
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Faith / Beast / Cutthroat"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "5"
+                },
+                "text": "Bane.\nOn Evolve - Bury an amulet: Select an enemy leader or enemy follower on the field and deal it 4 damage.",
+                "sections": [],
+                "raw_text": "Bane.\nOn Evolve - Bury an amulet: Select an enemy leader or enemy follower on the field and deal it 4 damage.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P41EN_URA.png",
+                "trait_raw": "Faith / Beast / Cutthroat",
+                "traits": [
+                  "Faith",
+                  "Beast",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1191 (Apr. 4, 2025)",
+                "question": "Can I bury an evolved Eidolon of Madness on my field to pay the cost of this follower's On Evolve ability?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P40EN|Ceryneian Hind}",
+                "href": "/cards/?cardno=BP09-P40EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2241c638d0fa9609a387732ac9bc56ff3e02ad8aead508e77709ba29c21adb7e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P41EN",
+            "fetched_at": "2026-09-27T16:21:52.788964Z"
+          },
+          "document_ref": "documents-e6acb4f973cc9cfd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P42EN",
+      "documents": {
+        "documents-ec20aa34b4f47f71": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P42EN",
+            "faces": [
+              {
+                "name": "Jeweled Priestess",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Faith / Lightborne"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this follower.",
+                "speech": null,
+                "illustrator": "yuhi",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P42EN.png",
+                "trait_raw": "Faith / Lightborne",
+                "traits": [
+                  "Faith",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P43EN|Jeweled Priestess}",
+                "href": "/cards/?cardno=BP09-P43EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:66201f755ebfe3513e7d9357fa76aa305399c3fc0fcc3a0bf69137f3ea957ef3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P42EN",
+            "fetched_at": "2026-09-27T16:21:55.614430Z"
+          },
+          "document_ref": "documents-ec20aa34b4f47f71"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P43EN",
+      "documents": {
+        "documents-054ea9533c8c140f": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P43EN",
+            "faces": [
+              {
+                "name": "Jeweled Priestess",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Faith / Lightborne"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - You may summon an amulet that costs 2 or less from your hand.\nOnce per turn, when an amulet is put onto your field, give your leader {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "On Evolve - You may summon an amulet that costs 2 or less from your hand.\nOnce per turn, when an amulet is put onto your field, give your leader {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "yuhi",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P43EN.png",
+                "trait_raw": "Faith / Lightborne",
+                "traits": [
+                  "Faith",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1195 (Apr. 4, 2025)",
+                "question": "If I evolve an Eidolon of Madness on my field, does this follower's \"when an amulet is put onto your field\" ability trigger?",
+                "answer": "No, it doesn't."
+              },
+              {
+                "title": "Q1194 (Apr. 4, 2025)",
+                "question": "If an amulet is put onto my field during my opponent's turn, does this follower's \"once per turn, when an amulet is put onto your field\" ability still trigger?",
+                "answer": "Yes, it triggers regardless of whose turn it is."
+              },
+              {
+                "title": "Q1193 (Apr. 4, 2025)",
+                "question": "I have 2 copies of this follower on my field. If an amulet is put onto my field, do the \"when an amulet is put onto your field\" abilities of both copies trigger?",
+                "answer": "Yes, they do."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P42EN|Jeweled Priestess}",
+                "href": "/cards/?cardno=BP09-P42EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:984964de00fe516a1de66fc064af3e8837820879130e1f2a71cfe79531bc62fa",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P43EN",
+            "fetched_at": "2026-09-27T16:21:58.124912Z"
+          },
+          "document_ref": "documents-054ea9533c8c140f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P44EN",
+      "documents": {
+        "documents-4bfc4be204bda2c1": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P44EN",
+            "faces": [
+              {
+                "name": "Whitefang Temple",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Amulet",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Silver / Premium",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "At the start of your end phase, place a prayer counter on this card and give your leader {icon_hp|[defense]}+1.\nAt the start of your main phase, if this card has at least 3 prayer counters, bury it, then search your deck for a Faith follower that costs 4 or less, summon it, and shuffle your deck.",
+                "sections": [],
+                "raw_text": "At the start of your end phase, place a prayer counter on this card and give your leader {icon_hp|[defense]}+1.\nAt the start of your main phase, if this card has at least 3 prayer counters, bury it, then search your deck for a Faith follower that costs 4 or less, summon it, and shuffle your deck.",
+                "speech": null,
+                "illustrator": "Xavier Lozano Ribeiro",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P44EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:10ef152142f7133f1a0dab1a3ae3233f38360c74e545938ba6023664e2d05a49",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P44EN",
+            "fetched_at": "2026-09-27T16:22:01.305120Z"
+          },
+          "document_ref": "documents-4bfc4be204bda2c1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P45EN",
+      "documents": {
+        "documents-7861a8bd85be2e19": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P45EN",
+            "faces": [
+              {
+                "name": "Amaterasu",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Deity / Lightborne"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "Ward.\nWhenever this card becomes engaged, give your leader {icon_hp|[defense]}+1. If there's a Tsukuyomi on your field, give {icon_hp|[defense]}+2 instead.",
+                "sections": [],
+                "raw_text": "Ward.\nWhenever this card becomes engaged, give your leader {icon_hp|[defense]}+1. If there's a Tsukuyomi on your field, give {icon_hp|[defense]}+2 instead.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P45EN.png",
+                "trait_raw": "Deity / Lightborne",
+                "traits": [
+                  "Deity",
+                  "Lightborne"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1206 (Apr. 4, 2025)",
+                "question": "I declare an attack with this follower and engage it accordingly. Does its \"whenever this card becomes engaged\" ability trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1205 (Apr. 4, 2025)",
+                "question": "If I engage this follower when it's put onto the field or during my end phase to activate its Ward, does its \"whenever this card becomes engaged\" ability trigger?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P46EN|Tsukuyomi}",
+                "href": "/cards/?cardno=BP09-P46EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8e6b47703465a1dc75bf591db7a1159a378e690e9880b7a855bbb589ec739b2d",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P45EN",
+            "fetched_at": "2026-09-27T16:22:03.901688Z"
+          },
+          "document_ref": "documents-7861a8bd85be2e19"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P46EN",
+      "documents": {
+        "documents-cd5553e6b6246577": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P46EN",
+            "faces": [
+              {
+                "name": "Tsukuyomi",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Follower",
+                  "Class": "Neutral",
+                  "Format": "Any",
+                  "Rarity": "Gold / Premium",
+                  "Trait": "Deity / Cutthroat"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "Rush.\nWhenever this card becomes engaged, deal 1 damage to each enemy leader. If there's an Amaterasu on your field, deal 2 damage instead.",
+                "sections": [],
+                "raw_text": "Rush.\nWhenever this card becomes engaged, deal 1 damage to each enemy leader. If there's an Amaterasu on your field, deal 2 damage instead.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P46EN.png",
+                "trait_raw": "Deity / Cutthroat",
+                "traits": [
+                  "Deity",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1206 (Apr. 4, 2025)",
+                "question": "I declare an attack with this follower and engage it accordingly. Does its \"whenever this card becomes engaged\" ability trigger?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": [
+              {
+                "label": "{BP09-P45EN|Amaterasu}",
+                "href": "/cards/?cardno=BP09-P45EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:022c40d3360309703d7a9f200c29cdd6da5044c084493bc12b44f7dbcd3aec18",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P46EN",
+            "fetched_at": "2026-09-27T16:22:06.739070Z"
+          },
+          "document_ref": "documents-cd5553e6b6246577"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P47EN",
+      "documents": {
+        "documents-7f49bab39283dacf": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P47EN",
+            "faces": [
+              {
+                "name": "Instant Poison",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Premium",
+                  "Trait": "Alchemist / Forbidden"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select an enemy follower on the field. Deal 4 damage to it and 2 damage to its leader.",
+                "sections": [],
+                "raw_text": "Select an enemy follower on the field. Deal 4 damage to it and 2 damage to its leader.",
+                "speech": null,
+                "illustrator": "Nadare",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P47EN.png",
+                "trait_raw": "Alchemist / Forbidden",
+                "traits": [
+                  "Alchemist",
+                  "Forbidden"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1212 (Apr. 4, 2025)",
+                "question": "If I can't select an enemy follower on the field, can I still play this spell to deal 2 damage to the enemy leader?",
+                "answer": "No, you can't."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:da6975578ec8dfad5dc05f6ddb0dca6a86cc46545d34d3422c6df737cee8c74f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P47EN",
+            "fetched_at": "2026-09-27T16:22:09.013944Z"
+          },
+          "document_ref": "documents-7f49bab39283dacf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P48EN",
+      "documents": {
+        "documents-b447333de0d5f0e4": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P48EN",
+            "faces": [
+              {
+                "name": "Eternal Potion",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Premium",
+                  "Trait": "Alchemist / Forbidden"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select a {icon_witch|[runecraft]} follower that costs 3 or less in your cemetery and summon it. Give it Rush and \"At the start of your end phase, destroy this card.\"",
+                "sections": [],
+                "raw_text": "Select a {icon_witch|[runecraft]} follower that costs 3 or less in your cemetery and summon it. Give it Rush and \"At the start of your end phase, destroy this card.\"",
+                "speech": null,
+                "illustrator": "Nadare",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P48EN.png",
+                "trait_raw": "Alchemist / Forbidden",
+                "traits": [
+                  "Alchemist",
+                  "Forbidden"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1214 (Apr. 4, 2025)",
+                "question": "If I summon a Riley, Hydroshaman from my cemetery with this spell, is the condition \"if this card was put onto the field from the cemetery\" in its Fanfare ability fulfilled?",
+                "answer": "Yes, it is."
+              },
+              {
+                "title": "Q1213 (Apr. 4, 2025)",
+                "question": "If I select a Sarina Matsumoto in my cemetery to summon with this spell, does its \"whenever you play a spell\" ability trigger?",
+                "answer": "No. When you play this spell, Sarina Matsumoto is still in your cemetery, so its ability doesn't trigger."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d5a2665bf9fbb4c0e222c87dbad8132cc3b269ff5501e36dd6692b5aa02c0564",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P48EN",
+            "fetched_at": "2026-09-27T16:22:11.813484Z"
+          },
+          "document_ref": "documents-b447333de0d5f0e4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P49EN",
+      "documents": {
+        "documents-1c566731b0bf0b34": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P49EN",
+            "faces": [
+              {
+                "name": "Mysterian Missile",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Spell / Token",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Premium",
+                  "Trait": "Mage / Academic"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Select an enemy follower on the field and deal it 3 damage. If there are at least 10 Academic cards in your cemetery, deal 2 damage to its leader.",
+                "sections": [],
+                "raw_text": "Select an enemy follower on the field and deal it 3 damage. If there are at least 10 Academic cards in your cemetery, deal 2 damage to its leader.",
+                "speech": null,
+                "illustrator": "Oben Dogenzaka",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P49EN.png",
+                "trait_raw": "Mage / Academic",
+                "traits": [
+                  "Mage",
+                  "Academic"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1226 (Apr. 4, 2025)",
+                "question": "When playing this spell, does the spell itself count toward the condition \"if there are at least 10 Academic cards in your cemetery\"?",
+                "answer": "No. While you're resolving this spell's effects, it isn't in the cemetery yet."
+              },
+              {
+                "title": "Q1221 (Apr. 4, 2025)",
+                "question": "If I have at least 10 Academic cards in my cemetery and an evolved Grea, Mysterian Dragoness on my field, does Mysterian Missile deal 1 more damage to both the selected follower and that follower's leader?",
+                "answer": "Yes. It deals 4 damage to the selected follower and 3 damage to that follower's leader."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f497d9c7bcef2a574afdfe1348b73f039e1bc864f0084121c6140a0a9e23dcf0",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P49EN",
+            "fetched_at": "2026-09-27T16:22:14.667425Z"
+          },
+          "document_ref": "documents-1c566731b0bf0b34"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P50EN",
+      "documents": {
+        "documents-2fbc285fe1fda2e7": {
+          "region": "en",
+          "record": {
+            "number": "BP09-P50EN",
+            "faces": [
+              {
+                "name": "Aftershock",
+                "info": {
+                  "Card Set": "Booster Set #9 \"Duet of Dawn and Dusk\"",
+                  "Card Type": "Amulet / Token",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Premium",
+                  "Trait": "Dragonewt / Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "-",
+                  "power": "-"
+                },
+                "text": "Whenever a Draconic Duelist follower is put onto your field, place a lightning counter on this card.\n{icon_act|[act]} {icon_stand|[engage]}: Select a {icon_dragon|[dragoncraft]} follower on your field and give it {icon_power|[attack]}+2. Activate only if this card has at least 5 lightning counters.\n{icon_act|[act]} {icon_stand|[engage]}: Select an enemy follower on the field. Destroy it and deal 3 damage to its leader. Activate only if this card has at least 10 lightning counters.",
+                "sections": [],
+                "raw_text": "Whenever a Draconic Duelist follower is put onto your field, place a lightning counter on this card.\n{icon_act|[act]} {icon_stand|[engage]}: Select a {icon_dragon|[dragoncraft]} follower on your field and give it {icon_power|[attack]}+2. Activate only if this card has at least 5 lightning counters.\n{icon_act|[act]} {icon_stand|[engage]}: Select an enemy follower on the field. Destroy it and deal 3 damage to its leader. Activate only if this card has at least 10 lightning counters.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/BP09-P50EN.png",
+                "trait_raw": "Dragonewt / Draconic Duelist",
+                "traits": [
+                  "Dragonewt",
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Apr. 11, 2025",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1232 (Apr. 4, 2025)",
+                "question": "If 2 Draconic Duelist followers are put onto my field at the same time, does this amulet's \"whenever a Draconic Duelist follower is put onto your field\" ability trigger 2 times?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1231 (Apr. 4, 2025)",
+                "question": "If a Draconic Duelist follower is put onto my field during my opponent's turn, does this amulet's \"whenever a Draconic Duelist follower is put onto your field\" ability still trigger?",
+                "answer": "Yes, it triggers regardless of whose turn it is."
+              }
+            ],
+            "products_ref": "products-8899aab5d23ecaa7",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3a2864919407b4cb9ac383bfb7854105f46d829ac7016dabeecf3dfdf018ff89",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP09-P50EN",
+            "fetched_at": "2026-09-27T16:22:17.063022Z"
+          },
+          "document_ref": "documents-2fbc285fe1fda2e7"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "SD06",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-110a22af5fc58095": [
+        {
+          "ordinal": 0,
+          "name": "Starter Deck #6 “Maculate Ablution”",
+          "date_raw": "Jun. 30, 2023",
+          "href_raw": [
+            "/cards/searchresults?expansion=SD06",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=SD06",
+            "https://en.shadowverse-evolve.com/products/sd0106/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/sd0106/",
+              "expansion_code": "SD06"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:cab090a1627be80715803ec6c754e0c57782a3a75861be856f94d72a537656a9": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:45b21b93cec1fe23b508a036cc24031b163c4d013212f5d78fb0fdd4c7e2301b",
+        "raw_bytes": 35463,
+        "first_receipt_id": "sha256:7c5170311bf68c5cde9dc86396fbc55cbcf91d150bd4c612d254117f562c170b",
+        "descriptor_sha256": "sha256:0c9dae64b0f6c544c8317d2c17f53a8f6aef5c06670a966b2570730dcaf7f1a8",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:683e9513072acb78abb4769471c21d5d2c9e2734ae382d2adcc54ff93893c594"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-110a22af5fc58095",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:e49e61da3844186528f700816fe0b356e4a02055fc8baf439dad7e4097a2ab97"
+    },
+    "src:v1:f00e4662c477bc6033c11af7afe51f7a38cc997b18f1794bb54ad5dd83e45f69": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:fd5179e0a2044530bdc20dfc47c2aeecc00a74baabdf5fc93f363c16affa0817",
+        "raw_bytes": 35453,
+        "first_receipt_id": "sha256:e3629a5078b055d921f3e44306a71c83c45cac7122cb1d7ac79bb765dcdced96",
+        "descriptor_sha256": "sha256:f6d0d6ab56fa669e90400dc3a0c5f9fa0292f8f92f48a0e365075c94819489a9",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:a8ec5721a3ad79d7377f01012362e08b36c9655d0e6b9c4b651ec8e4b9e16158"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-110a22af5fc58095",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:215c9ed6419676f52c88c4893fc4b8d0319dd300387e0be256950a0afc875def"
+    }
+  }
+}

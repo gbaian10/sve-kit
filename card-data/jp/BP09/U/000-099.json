@@ -1,0 +1,445 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP09",
+  "range": "U/000-099",
+  "products": {
+    "products-5147ab049b2681a1": [
+      {
+        "name": "ブースターパック第9弾「光影の二重奏」",
+        "date": "2024-02-23",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP09",
+          "https://shadowverse-evolve.com/products/bp09/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP09-U01",
+      "documents": {
+        "documents-fbd57f7c992ac300": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-U01",
+            "faces": [
+              {
+                "name": "ユグドラシル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊",
+                  "植物族"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のデッキから{エルフ}スペル1枚を探し、手札に加える。\n{起動}{コスト1}：自分の墓場の元のコストX以下の{エルフ}スペル1枚を選ぶ。それをEXエリアに置く。Xは「自分の墓場にある{エルフ}スペルのカード名の種類数」である。このターン、それをプレイする際、コストを0にする。この能力は1ターンに1回使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-u01.png",
+                "trait_raw": "精霊・植物族"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:789fce9cc96569e8fd85ef285802d5d7cf476127fce5152d3565a03a610efed3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-U01",
+            "fetched_at": "2026-09-24T21:41:12.375358Z"
+          },
+          "document_ref": "documents-fbd57f7c992ac300"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U02",
+      "documents": {
+        "documents-9d3eadea76f49454": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-U02",
+            "faces": [
+              {
+                "name": "スパルタクス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "6",
+                "text": "【守護】\n自分のエンドフェイズが来たとき、自分の手札を好きな枚数捨てる。X枚引く。Xは「これによって捨てた手札の枚数+1」である。その後、自分のデッキが1枚以下なら、自分はこのバトルに勝利する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "相場良祐（CyDesignation）",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-u02.png",
+                "trait_raw": "指揮官"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1480",
+                "date": "2024-07-08",
+                "question": "自分のデッキが5枚の状況で、『スパルタクス』の「自分のエンドフェイズが来たとき、～」という能力をプレイし『光の道筋』を含めた手札2枚を捨てた場合、『スパルタクス』の能力と『光の道筋』の能力によって合計4枚引き、自分のデッキが残り1枚となるため、自分はバトルに勝利しますか？",
+                "answer": "いいえ。『スパルタクス』の能力がすべて処理された後のチェックタイミングで『光の道筋』の能力を解決するため、バトルに勝利しません。\n\n以下、詳細な処理順になります。\n①自分のエンドフェイズが来たとき、『スパルタクス』の能力が誘発して待機状態になります。\n②チェックタイミングに『スパルタクス』の能力を解決します。\n③『スパルタクス』の能力により、自分の手札2枚を捨てます。この時点で『光の道筋』の能力が誘発して待機状態になります。自分の手札2枚を捨てたため、3枚引きます。この時点で自分のデッキが2枚のため、バトルに勝利しません。\n④チェックタイミングに『光の道筋』の能力を解決します。\n⑤『光の道筋』の能力により、1枚引きます。\n⑥この時点で自分のデッキは1枚になりますが、すでに『スパルタクス』の能力処理が終わっているため、バトルに勝利しません。"
+              },
+              {
+                "id": "Q1163",
+                "date": "2024-02-16",
+                "question": "相手の場に『古き護り手』があり、自分の場に『スパルタクス』がいる状況で、自分の場の『スパルタクス』の「自分のエンドフェイズが来たとき、～」という能力によって、自分のデッキが1枚になりました。この場合、『スパルタクス』の「自分のデッキが1枚以下なら、自分はこのバトルに勝利する。」によって、自分はバトルに勝利しますか？",
+                "answer": "いいえ。バトルに勝利せず、ゲームが続きます。\n自分の場の『スパルタクス』の「自分のデッキが1枚以下なら、自分はこのバトルに勝利する。」という効果と相手の場の『古き護り手』の「自分はバトルに敗北せず、相手はバトルに勝利できない。」という効果が同時に適用される場合、禁止する効果である「自分はバトルに敗北せず、相手はバトルに勝利できない。」が優先されます。\nあるカードの効果によりプレイヤーがなんらかの行動を行うよう指示された場合に、同時にその行動を禁止する効果が発生している場合、常に禁止する効果が優先されます。"
+              },
+              {
+                "id": "Q1162",
+                "date": "2024-02-16",
+                "question": "自分のデッキが0枚の状況で、『スパルタクス』の「自分のエンドフェイズが来たとき、～」という能力をプレイした場合、自分はバトルに敗北しますか？",
+                "answer": "いいえ。自分はバトルに勝利します。\n自分のデッキが0枚の状況で『スパルタクス』の能力をプレイした場合、「X枚引く。」によってカードを引くため、次のチェックタイミングで自分はバトルに敗北しますが、「自分のデッキが1枚以下なら、自分はこのバトルに勝利する。」の条件を満たすため、この効果の処理中に自分はバトルに勝利します。（チェックタイミングにおける敗北処理の前に勝利します。）"
+              },
+              {
+                "id": "Q1161",
+                "date": "2024-02-16",
+                "question": "このフォロワーの「自分のエンドフェイズが来たとき、～」という能力は、自分の手札を捨てないことを選択できますか？",
+                "answer": "はい。自分の手札を好きな枚数捨てる場合、0枚捨てる、つまり捨てないことを選択できます。\nその場合でも「X枚引く。Xは「これによって捨てた手札の枚数+1」である。」によって1枚引きます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:49f47d68b79cb8c918edfec7f02319d1a7b0e8c2ebdc32c54fd7a5b21d4908da",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-U02",
+            "fetched_at": "2026-09-24T21:41:15.318197Z"
+          },
+          "document_ref": "documents-9d3eadea76f49454"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U03",
+      "documents": {
+        "documents-552933392dea97a9": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-U03",
+            "faces": [
+              {
+                "name": "真実の究明者・ファウスト",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "錬金術師"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、【土の秘術】自分の場のフォロワー1体を選ぶ。それは{攻撃力}+1/{体力}+1する。相手のリーダーすべてに2ダメージ。\n{ファンファーレ}自分のデッキから土の印・アミュレットを元のコストの合計が4以下になるように2枚まで探し、EXエリアに置く。このターン、それをプレイする際、コストを0にする。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ヒダヤーマン",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-u03.png",
+                "trait_raw": "錬金術師"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1172",
+                "date": "2024-02-16",
+                "question": "自分のEXエリアにカードが4枚ある状況で、このフォロワーの《ファンファーレ》能力をプレイした場合の処理について教えてください。",
+                "answer": "自分のEXエリアにカードが4枚ある状況で、このフォロワーの《ファンファーレ》能力をプレイした場合、以下の処理を行います。\n\n①自分のデッキから土の印・アミュレット2枚を見つける選択をした場合\n見つけた2枚の中から任意の1枚をEXエリアに置きます。もう1枚はデッキから移動せず、デッキをシャッフルします。\n\n②自分のデッキから土の印・アミュレット1枚を見つける選択をした場合\n見つけた1枚をEXエリアに置き、デッキをシャッフルします。\n\nどちらの場合でも「このターン、それをプレイする際、コストを0にする。」によって、EXエリアに置いた土の印・アミュレットはこのターン、0コストでプレイすることができます。\nまた1枚も見つけないことでEXエリアに土の印・アミュレットを置かない選択もできます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4c17eda3a9a010c3042d27e031aa7720d38fedf2317050361df107f548bd4f18",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-U03",
+            "fetched_at": "2026-09-24T21:41:18.037229Z"
+          },
+          "document_ref": "documents-552933392dea97a9"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U04",
+      "documents": {
+        "documents-27a58c9a35456b12": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-U04",
+            "faces": [
+              {
+                "name": "ドラゴニックメイル・ギルヴァ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "自分のエンドフェイズが来たとき、場の他のフォロワーすべてと相手のリーダーすべてに5ダメージ。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "みけぼし",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-u04.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1187",
+                "date": "2024-02-16",
+                "question": "「自分のエンドフェイズが来たとき、～」という能力を持つカードが自分の場に複数枚ある状況で、エンドフェイズを迎えた場合、その誘発した能力はどのような順番で解決しますか？",
+                "answer": "任意の順番で解決することができます。\n自分のエンドフェイズを迎えた場合、「自分のエンドフェイズが来たとき、～」という能力がすべて誘発し、待機状態になります。その後、待機状態になった能力を任意の順で1つずつ解決します。"
+              },
+              {
+                "id": "Q1186",
+                "date": "2024-02-16",
+                "question": "体力が5の『ドラゴニックメイル・ギルヴァ』が自分の場に2体いる状況で、自分のエンドフェイズを迎えました。誘発したそれぞれの能力を解決する場合、どのようになりますか？",
+                "answer": "「自分のエンドフェイズが来たとき、～」の能力がそれぞれ処理され、自分の場の『ドラゴニックメイル・ギルヴァ』は2体とも墓場に置かれます。\n処理順は以下になります。\n\n①エンドフェイズが来たとき、それぞれの『ドラゴニックメイル・ギルヴァ』の能力が誘発し、待機状態になります。\n②待機状態になったそれぞれの能力を順に解決します。\n③1つ目の『ドラゴニックメイル・ギルヴァ』の能力を解決します。\n④「場の他のフォロワーすべてに5ダメージ。」により、まだ能力を解決していない『ドラゴニックメイル・ギルヴァ』の体力が0となり、墓場に置かれます。\n⑤2つ目の『ドラゴニックメイル・ギルヴァ』の能力を解決します。この時点で、この『ドラゴニックメイル・ギルヴァ』は墓場に置かれていますが、誘発した能力は問題なく解決されます。\n⑥「場の他のフォロワーすべてに5ダメージ。」により、場に残っている『ドラゴニックメイル・ギルヴァ』の体力が0となり、墓場に置かれます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-052"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fec0c81ec2bafa9fb47c000799c5a742679548d22ada9e43b347b0b3f75b0c40",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-U04",
+            "fetched_at": "2026-09-24T21:41:20.990015Z"
+          },
+          "document_ref": "documents-27a58c9a35456b12"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U05",
+      "documents": {
+        "documents-4e043fb57b55e187": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-U05",
+            "faces": [
+              {
+                "name": "幽霊支配人・アーカス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者",
+                  "死霊術師"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "5",
+                "hp": "5",
+                "text": "これは相手を攻撃できない。\n自分のメインフェイズが来たとき、【ネクロチャージ_10】『ゴースト』1体を出す。\n{起動}場の他のフォロワー1体を墓場に置く：下記から1つチョイスする。この能力は1ターンに1回使える。【1】1枚引く。【2】『ゴースト』2体を出す。【3】自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ニジハヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-u05.png",
+                "trait_raw": "死者・死霊術師"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1200",
+                "date": "2024-02-16",
+                "question": "このフォロワーは、相手の場のアクトしているフォロワーを攻撃することはできますか？",
+                "answer": "いいえ。相手のリーダーや相手のフォロワーを攻撃することはできません。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-T13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5f867fa0ce8d9562e35e9113fdab27fb795149cc45e350e53b814fa9b47c2979",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-U05",
+            "fetched_at": "2026-09-24T21:41:23.776771Z"
+          },
+          "document_ref": "documents-4e043fb57b55e187"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U06",
+      "documents": {
+        "documents-d1e0770ace8d9b7b": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-U06",
+            "faces": [
+              {
+                "name": "希望導く聖乙女・ジャンヌ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "先導"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "4",
+                "text": "【攻撃時】自分の場の元のコスト2以下の{ビショップ}フォロワー1体を選ぶ。それは{攻撃力}+1する。\n【進化時】自分の手札の元のコスト2以下の{ビショップ}フォロワー1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-u06.png",
+                "trait_raw": "信仰・先導"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-086"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4e43061afc6a5918cc9f544b74395b34f2d3608284e2283d32bcf962d9d169a3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-U06",
+            "fetched_at": "2026-09-24T21:41:26.297783Z"
+          },
+          "document_ref": "documents-d1e0770ace8d9b7b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-U07",
+      "documents": {
+        "documents-c63b4af0bbb603db": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-U07",
+            "faces": [
+              {
+                "name": "マルドゥーク",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "大神"
+                ],
+                "rarity": "UR",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "【進化時】自分の墓場のスペルが5枚以上なら、自分のリーダーは{体力}+5する。1枚引く。\n【進化時】自分の墓場のアミュレットが5枚以上なら、相手の場のフォロワーすべてに5ダメージ。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "皆葉英夫（CyDesignation）",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-u07.png",
+                "trait_raw": "大神"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1217",
+                "date": "2024-02-16",
+                "question": "『マルドゥーク（EVOLVE）』のような【進化時】能力を2つ持つフォロワーに進化した場合、誘発した2つの【進化時】能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-103"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3a537a87084fc41fe60a62c480105916555521c2e06b9c38550c195530950cd3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-U07",
+            "fetched_at": "2026-09-24T21:41:28.855079Z"
+          },
+          "document_ref": "documents-c63b4af0bbb603db"
+        }
+      ]
+    }
+  ]
+}

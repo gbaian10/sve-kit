@@ -1,0 +1,1216 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SD05",
+  "range": "000-099",
+  "products": {
+    "products-df4b4ae9104cc476": [
+      {
+        "name": "スターターデッキ第5弾「永久なる定め」",
+        "date": "2022-04-28",
+        "links": [
+          "/cardlist/cardsearch?expansion=SD05",
+          "https://shadowverse-evolve.com/products/sd01_06/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SD05-001",
+      "documents": {
+        "documents-9ae20243cb353d17": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-001",
+            "faces": [
+              {
+                "name": "クイーンヴァンパイア",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "LG",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "6",
+                "power": "5",
+                "hp": "5",
+                "text": "自分の場に『フォレストバット』が出たとき、それは{攻撃力}+1して、【守護】を持つ。\n{ファンファーレ}『フォレストバット』2体を出す。\n{起動}これを{アクト}リーダーの{体力}-1：『フォレストバット』2体を出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虫麻呂",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-001.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q111",
+                "date": "2022-04-26",
+                "question": "このフォロワーの《起動》能力は、このフォロワーがアクトしているとき、コストを支払うことはできますか？",
+                "answer": "いいえ。能力のコストに、このフォロワーをアクトすることが求められているため、アクト状態ではコストを支払うことはできません。"
+              },
+              {
+                "id": "Q110",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーが2体あり、『フォレストバット』が出たとき、その『フォレストバット』は《攻撃力》+2され【守護】を持ちますか？",
+                "answer": "はい。《攻撃力》+2され【守護】を持ちます。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3a689b7beb0ca7f50f0067ac1cda625bf8a16697994ce40ea93241be26eb39f8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-001",
+            "fetched_at": "2026-09-24T23:41:53.039232Z"
+          },
+          "document_ref": "documents-9ae20243cb353d17"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-002",
+      "documents": {
+        "documents-69092ae56733f6ea": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-002",
+            "faces": [
+              {
+                "name": "アルカード",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "GR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "7",
+                "power": "4",
+                "hp": "4",
+                "text": "【疾走】\n【攻撃時】相手のフォロワー1体を選ぶ。それに4ダメージ。自分のリーダーは{体力}+4する。\n{ファンファーレ}【ネクロチャージ_10】これは{攻撃力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-002.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q268",
+                "date": "2022-05-19",
+                "question": "自分の場のフォロワーが相手のフォロワーに攻撃され、『アルカード』の【攻撃時】能力や『ダークオファリング』や『ソウルコンバージョン』で攻撃目標のフォロワーが破壊されたとき、攻撃フォロワーの攻撃はどうなりますか？",
+                "answer": "フォロワーへの攻撃中に攻撃目標が場を離れた場合、新たな攻撃目標を決めることはできず、攻撃によってアクトしたままとなり、ダメージはどこにも与えません。また、攻撃中のフォロワーや攻撃目標のフォロワーが場を離れていても、引き続き《Quick》を持つカードをプレイすることができます。"
+              },
+              {
+                "id": "Q112",
+                "date": "2022-04-26",
+                "question": "このフォロワーの【攻撃時】は、相手のフォロワーが場にないとき、自分のリーダーは《体力》+4されますか？",
+                "answer": "いいえ。このフォロワーの【攻撃時】で選ぶ相手のフォロワーがないため、能力をプレイすることができず、リーダーの《体力》+4することはできません。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7d3c2d4d19a73bad61c71219636c37fd4341b05f25cb165fde10cddfd0f57a0b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-002",
+            "fetched_at": "2026-09-24T23:41:55.592400Z"
+          },
+          "document_ref": "documents-69092ae56733f6ea"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-003",
+      "documents": {
+        "documents-6977e28b0f9a2141": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-003",
+            "faces": [
+              {
+                "name": "悪戯なネクロマンサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死霊術師"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "おばあちゃんにならった降霊術……うまく出来るかな！？\nよーっし、いっくよー！",
+                "illustrator": "TEDDY",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-003.png",
+                "trait_raw": "死霊術師"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-004"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:73112d5775529c71a225ab641a0e4696cb5a7c0e7f0624850f5bfd7b83b504cc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-003",
+            "fetched_at": "2026-09-24T23:41:58.440425Z"
+          },
+          "document_ref": "documents-6977e28b0f9a2141"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-004",
+      "documents": {
+        "documents-67e3ca1524adbd23": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-004",
+            "faces": [
+              {
+                "name": "悪戯なネクロマンサー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "死霊術師"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】『ゴースト』3体を出す。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "TEDDY",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-004.png",
+                "trait_raw": "死霊術師"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q113",
+                "date": "2022-04-26",
+                "question": "自分の場が上限まで残り1枚のとき、このフォロワーの能力で『ゴースト』1体を場に出すことはできますか？",
+                "answer": "はい。『ゴースト』1体を場に出すことができます。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-003"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8673cd6b56400ae5ad036d7946db2c787a48665acd5803367c1720aa486963a4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-004",
+            "fetched_at": "2026-09-24T23:42:01.444818Z"
+          },
+          "document_ref": "documents-67e3ca1524adbd23"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-005",
+      "documents": {
+        "documents-c8dad40c9ea867c9": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-005",
+            "faces": [
+              {
+                "name": "ミッドナイトヴァンパイア",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "これがいる限り、自分の『フォレストバット』すべては【ドレイン】を持つ。(【ドレイン】を持つフォロワーが攻撃して与えたダメージと同じだけ、自分のリーダーは体力を+する)\n{ファンファーレ}『フォレストバット』1体を出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "麻谷知世",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-005.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q114",
+                "date": "2022-04-26",
+                "question": "自分の場にこのフォロワーが2体あり、『フォレストバット』が攻撃したとき、【ドレイン】は2回プレイしますか？",
+                "answer": "いいえ。【ドレイン】は1回のみプレイします。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:38f39ea9cb5e4638670bc93a33b1ead108c5537c9eaa2ca2bd882ccee107dace",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-005",
+            "fetched_at": "2026-09-24T23:42:04.049172Z"
+          },
+          "document_ref": "documents-c8dad40c9ea867c9"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-006",
+      "documents": {
+        "documents-738fd2cf28a59110": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-006",
+            "faces": [
+              {
+                "name": "夜の群れ",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "SR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "『フォレストバット』2体を出す。\n相手のフォロワー1体を選ぶ。それに「自分の場の『フォレストバット』の数」と同じダメージ。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-006.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q266",
+                "date": "2022-05-19",
+                "question": "『夜の群れ』や『炎の握撃』などのスペルは、相手の場にフォロワーがない場合や【オーラ】を持つフォロワーしかない場合、目標を選ばずにプレイすることはできますか？",
+                "answer": "いいえ。スペルのテキストに「選ぶ」という指示がある場合、目標に選ぶことができるカードがなければ、そのカードをプレイすることはできず、コストを支払うこともできません。"
+              },
+              {
+                "id": "Q115",
+                "date": "2022-04-26",
+                "question": "自分の場が上限かつ、相手の場に選ぶことができるフォロワーがあるとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:011fc24effa50aae0b58845b086e85caedf90a9eae3ad23e20b90e9c3f3411cb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-006",
+            "fetched_at": "2026-09-24T23:42:06.896230Z"
+          },
+          "document_ref": "documents-738fd2cf28a59110"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-007",
+      "documents": {
+        "documents-b15feb18023c70ce": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-007",
+            "faces": [
+              {
+                "name": "スペクター",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "1",
+                "text": "【必殺】(【必殺】を持つフォロワーと交戦した相手のフォロワーは、ダメージを与え合ったあと破壊される)\n{ファンファーレ}リーダーの{体力}-2：これは【突進】を持つ。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "hippo",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-007.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q263",
+                "date": "2022-05-19",
+                "question": "『スペクター』の《ファンファーレ》能力にある「リーダーの《体力》-2」というコストは、必ず支払わなければいけませんか？",
+                "answer": "いいえ。《ファンファーレ》や《ラストワード》といった自動能力にコストがある場合、そのコストを支払わないことで、誘発した能力をプレイしないことが選択できます。また、自動能力にコストがない場合、その能力は可能な限りプレイする必要があります。"
+              },
+              {
+                "id": "Q116",
+                "date": "2022-04-26",
+                "question": "自分のリーダーの《体力》が1のとき、このフォロワーの《ファンファーレ》能力のコストを支払うことはできますか？",
+                "answer": "いいえ。《体力》が-1以下になるようにコストで《体力》を支払うことはできません。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cec77dc5794da88b1b28a4270bab4397ea64d9f7af7602c90c2f1548729012d7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-007",
+            "fetched_at": "2026-09-24T23:42:09.743608Z"
+          },
+          "document_ref": "documents-b15feb18023c70ce"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-008",
+      "documents": {
+        "documents-dd984875f043bace": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-008",
+            "faces": [
+              {
+                "name": "スパルトイサージェント",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "{ファンファーレ}自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": "その胸に宿る意志は、ただ一つ。\n血と、死を、主に捧げよ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-008.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q117",
+                "date": "2022-04-26",
+                "question": "自分のデッキが1枚以下のとき、このフォロワーの能力をプレイすることはできませんか？",
+                "answer": "いいえ。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c38366f3e44b06ceefcd8d2f883c5f6ae3fe8fbfb0cb4d63c9231304bc25dd29",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-008",
+            "fetched_at": "2026-09-24T23:42:12.549477Z"
+          },
+          "document_ref": "documents-dd984875f043bace"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-009",
+      "documents": {
+        "documents-390631fb1d0fc25e": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-009",
+            "faces": [
+              {
+                "name": "アンデッドキング",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "6",
+                "power": "6",
+                "hp": "6",
+                "text": "{ファンファーレ}自分の墓場のフォロワー2枚まで選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": "国は亡び、宮殿は崩れ、民は全て死に絶えた。\nだが……王たる我とその家臣は、未だ健在なり。",
+                "illustrator": "Scott Murphy",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-009.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q119",
+                "date": "2022-04-26",
+                "question": "このフォロワーが場に出て、なんらかの理由によりこのフォロワーが墓場に置かれたとき、このフォロワーの能力で墓場のこのカードを選び、手札に加えることはできますか？",
+                "answer": "はい。選ぶ墓場のカードはプレイを処理するタイミングで選ぶため、墓場のこのカードを手札に加えることができます。"
+              },
+              {
+                "id": "Q118",
+                "date": "2022-04-26",
+                "question": "このフォロワーの能力で、墓場のフォロワーを手札に加えないことを選択することはできますか？",
+                "answer": "はい。選択することができます。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:27ad68984c74b8700d900cc26702ed18508f3e1ea783cee5b82eacc2e995120f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-009",
+            "fetched_at": "2026-09-24T23:42:15.406145Z"
+          },
+          "document_ref": "documents-390631fb1d0fc25e"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-010",
+      "documents": {
+        "documents-c8510c30f1344186": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-010",
+            "faces": [
+              {
+                "name": "レッサーマミー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}【ネクロチャージ_10】これは【疾走】を持つ。(自分の墓場が10枚以上なら、【ネクロチャージ_10】の後の能力が働く)",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ZoeZong",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-010.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-011"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:961378c904a11a4f9aeca9008417e95f86c14f32b67739592457408b45f013ab",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-010",
+            "fetched_at": "2026-09-24T23:42:17.949756Z"
+          },
+          "document_ref": "documents-c8510c30f1344186"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-011",
+      "documents": {
+        "documents-e298d4cf464582a6": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-011",
+            "faces": [
+              {
+                "name": "レッサーマミー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【攻撃時】『ゴースト』1体を出す。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "ZoeZong",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-011.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q120",
+                "date": "2022-04-26",
+                "question": "自分の場が上限のとき、このフォロワーの能力で『ゴースト』1体を場に出すことはできますか？",
+                "answer": "いいえ。場に出すことはできません。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-010"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-T01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cae641f5f284c6181f5dedaf0b114f5f5378abcf97e1eb75874a3b5560a6167b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-011",
+            "fetched_at": "2026-09-24T23:42:20.540721Z"
+          },
+          "document_ref": "documents-e298d4cf464582a6"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-012",
+      "documents": {
+        "documents-e0b607a3869ea5f1": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-012",
+            "faces": [
+              {
+                "name": "リリム",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『フォレストバット』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-012.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q121",
+                "date": "2022-04-26",
+                "question": "自分のEXエリアが上限のとき、このフォロワーの《ファンファーレ》能力で『フォレストバット』をEXエリアに置くことはできますか？",
+                "answer": "いいえ。置くことはできません。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-013"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f2662e4a8902ad1f802149df141a4a2fbdfbc5030ced43abae75feb494f07ccb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-012",
+            "fetched_at": "2026-09-24T23:42:23.582872Z"
+          },
+          "document_ref": "documents-e0b607a3869ea5f1"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-013",
+      "documents": {
+        "documents-0c115f4c5aad76ff": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-013",
+            "faces": [
+              {
+                "name": "リリム",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【攻撃時】自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "ねぇ、アナタちょっといいカンジだねっ。\nそのまま目を閉じてくれる？動いちゃダーメ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-013.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q122",
+                "date": "2022-04-26",
+                "question": "自分のリーダーの《体力》が20のとき、このフォロワーの能力で自分のリーダーを《体力》+2することはできますか？",
+                "answer": "はい。《体力》+2することができます。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-012"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7dc90b8ec93e253d8b527dab137c7c25ad3d1d3785c2a2f7ea569ec54534311e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-013",
+            "fetched_at": "2026-09-24T23:42:26.425274Z"
+          },
+          "document_ref": "documents-0c115f4c5aad76ff"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-014",
+      "documents": {
+        "documents-2e31fccff3bb6b66": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-014",
+            "faces": [
+              {
+                "name": "鋭利な一裂き",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n自分のリーダーに2ダメージ。\n相手のリーダー1人か相手のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "羽山晃平",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-014.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q123",
+                "date": "2022-04-26",
+                "question": "お互いのリーダーの《体力》が1で、このスペルを相手のリーダーを選んでプレイしたとき、お互いのリーダーの《体力》は0になりゲームは引き分けになりますか？",
+                "answer": "はい。引き分けになります。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:71410994d33d9f51c2d6b6c2bb233c06a6f8155a5863df9ba1049268d7220530",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-014",
+            "fetched_at": "2026-09-24T23:42:29.146812Z"
+          },
+          "document_ref": "documents-2e31fccff3bb6b66"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-015",
+      "documents": {
+        "documents-c4c94f2e1b3f383c": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-015",
+            "faces": [
+              {
+                "name": "消えぬ怨恨",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手のフォロワー1体を選ぶ。それに3ダメージ。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-015.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q125",
+                "date": "2022-04-26",
+                "question": "相手の場にフォロワーがないとき、このスペルをプレイして、自分のデッキの上1枚を墓場に置くことはできますか？",
+                "answer": "いいえ。このスペルで選ぶフォロワーがないため、プレイをすることができず、自分のデッキの上を墓場に置くことはできません。"
+              },
+              {
+                "id": "Q124",
+                "date": "2022-04-26",
+                "question": "相手の場に選ぶことができるフォロワーがあり、自分のデッキが0枚のとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4bb2e5fed5088e10198d08e21bfee57f15cb15e0ed5d8d1a0c36bc69365c04e7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-015",
+            "fetched_at": "2026-09-24T23:42:32.058281Z"
+          },
+          "document_ref": "documents-c4c94f2e1b3f383c"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-016",
+      "documents": {
+        "documents-650b53fca165da49": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-016",
+            "faces": [
+              {
+                "name": "眷属の召喚",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "『フォレストバット』1体を出す。『フォレストバット』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-016.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q126",
+                "date": "2022-04-26",
+                "question": "自分の場とEXエリア両方またはどちらかが上限のとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。プレイすることができます。その場合、上限の領域に『フォレストバット』は出すまたは置くことはできません。"
+              }
+            ],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b07edd16ddb65098a0cfbc186ce0f1c877ef22b6bf61928291e7e235a44d207",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-016",
+            "fetched_at": "2026-09-24T23:42:34.633781Z"
+          },
+          "document_ref": "documents-650b53fca165da49"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-017",
+      "documents": {
+        "documents-23361f3883236eea": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-017",
+            "faces": [
+              {
+                "name": "ファイター",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "傭兵"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": null,
+                "sections": [],
+                "flavor": "この争いだらけの世界で頼れるものは、自分の力だけだ。\nだから俺は勝ち続ける。絶対にな。",
+                "illustrator": "tricky胡坐",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-017.png",
+                "trait_raw": "傭兵"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9c3401f5e18f2f5c7ae45378ea80853f273e2df5e1f43cca25a2a36b21e10a5d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-017",
+            "fetched_at": "2026-09-24T23:42:37.458572Z"
+          },
+          "document_ref": "documents-23361f3883236eea"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-018",
+      "documents": {
+        "documents-88c692bd70f2cc80": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-018",
+            "faces": [
+              {
+                "name": "ゴリアテ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "巨人"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト2}：これは進化する。",
+                "sections": [],
+                "flavor": "足踏み一つで、大地が震える。\n巨兵が一歩、一歩と進む度、街は軋み、悲鳴を上げた。",
+                "illustrator": "hippo",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-018.png",
+                "trait_raw": "巨人"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-019"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b1a500b09115786540ba7775897c9d7b3607b4003e49461b146ef00d87f3f8e1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-018",
+            "fetched_at": "2026-09-24T23:42:40.264310Z"
+          },
+          "document_ref": "documents-88c692bd70f2cc80"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-019",
+      "documents": {
+        "documents-77414364e47b8f68": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-019",
+            "faces": [
+              {
+                "name": "ゴリアテ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "巨人"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "6",
+                "text": null,
+                "sections": [],
+                "flavor": "嵐の如き猛威の前には、何もかもが無力だった。\n瞬く間に街は壊滅し、物言わぬ瓦礫の山となった。",
+                "illustrator": "hippo",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-019.png",
+                "trait_raw": "巨人"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD05-018"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cc5dc374496e3be90d93b42feee02e46aabe7225ee82f82d4f83efc7e6ef2808",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-019",
+            "fetched_at": "2026-09-24T23:42:42.899300Z"
+          },
+          "document_ref": "documents-77414364e47b8f68"
+        }
+      ]
+    },
+    {
+      "card_no": "SD05-020",
+      "documents": {
+        "documents-817f27a80aff0aef": {
+          "region": "jp",
+          "record": {
+            "number": "SD05-020",
+            "faces": [
+              {
+                "name": "天剣の乙女",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "天使"
+                ],
+                "rarity": "BR",
+                "product": "スターターデッキ第5弾「永久なる定め」",
+                "title": null,
+                "cost": "5",
+                "power": "4",
+                "hp": "6",
+                "text": "【守護】(これが場に出たときか、自分のエンドフェイズにこれをアクトできる。相手は、アクト状態の【守護】を持つフォロワー以外を攻撃できない)",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Melodyoflost",
+                "image": "/wordpress/wp-content/images/cardlist/SD05/SD05-020.png",
+                "trait_raw": "天使"
+              }
+            ],
+            "release_date": "2022-04-28",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-df4b4ae9104cc476",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4ae57288005582dce31555322d9a6270c7d9c96fe4abfa07a1520e5c71a13cd6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SD05-020",
+            "fetched_at": "2026-09-24T23:42:45.716510Z"
+          },
+          "document_ref": "documents-817f27a80aff0aef"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "CSD01",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-3437c2b60d06a505": [
+        {
+          "ordinal": 0,
+          "name": "Crossover Starter Deck “Ready, Set, Umamusume!”",
+          "date_raw": "Dec. 8, 2023",
+          "href_raw": [
+            "/cards/searchresults?expansion=CSD01",
+            "https://en.shadowverse-evolve.com/products/csd01/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=CSD01",
+            "https://en.shadowverse-evolve.com/products/csd01/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/csd01/",
+              "expansion_code": "CSD01"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:cb7532c4e96f3cb4d96730c0e061e8e8a5611622678b2b8372975c337590094d": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:3e494852bbed4fad1143d8730a1a22b7550be3a282ab6c8402a37e8ce226da7c",
+        "raw_bytes": 36203,
+        "first_receipt_id": "sha256:eb0576c07761757139cd66f4c95cba16a1eecbc053ceff955ed1880e04ef8198",
+        "descriptor_sha256": "sha256:d39fdde48ed5590f55a9a8d6e8e8ecbd1aaeabea02d578beaebfc1fd418f36a1",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:2995ae26948767e8e4ae5c5f58887c1af47abc3e0e766e2d234ff502c6ebfbd4"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-3437c2b60d06a505",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:b18330e61f10ba44ff2e9e5879404ca3fd28951596f36ece38e9d52a100f100c"
+    }
+  }
+}

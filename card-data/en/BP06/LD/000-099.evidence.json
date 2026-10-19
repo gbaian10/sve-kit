@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP06",
+  "range": "LD/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-4d70e4c7e38f05de": [
+        {
+          "ordinal": 0,
+          "name": "Booster Set #6 “Paragons of the Colosseum”",
+          "date_raw": "Aug. 16, 2024",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP06",
+            "https://en.shadowverse-evolve.com/products/bp06/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP06",
+            "https://en.shadowverse-evolve.com/products/bp06/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp06/",
+              "expansion_code": "BP06"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": []
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:26aae3ac3fcd183a031b1c7ea366173b9e08595e032c78d3609e367c6e830716": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:815f999231334d5bba5bf6472e568d2e2e79ea7437aa9597088568a3cdf0ca1b",
+        "raw_bytes": 35370,
+        "first_receipt_id": "sha256:f1dd25009011ef03de1655e36f567ebdcd350281b31c20a22c344a968834a81c",
+        "descriptor_sha256": "sha256:db664b8f2ab07e7ccdeb0ebcf55dfc180f8c80ae9382d2eb9aff76a8829ec5b2",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:a6cd4b6a8ddd29da6dcd3b0db37a7beed28f3e2fca3e3dca92ba8f0881282784"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-4d70e4c7e38f05de",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:52c7e37fa2c8fd062fc8c72f526e8382bd5746893fe9cdd481f23d3611676853"
+    },
+    "src:v1:b1c458c9dd9c554037ed27888ec10672e425734345486f1cffae33ef2465cdbd": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:120edc09890f44195d6338fbc92b453bec9409af69aea58959834d2b23e5166a",
+        "raw_bytes": 35364,
+        "first_receipt_id": "sha256:e693729b9bd62f1b5e5d3c4d85e7a5d8f66d48cb8b84abee89b3a830f5291323",
+        "descriptor_sha256": "sha256:2e7c646250cfd24bac4c01b2cb4728e38e4ee9f3fdf454d3f6e2fbf954b49136",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:f45971c13120710b8e30622987c91a3a750f44796abe8f2d353ab9fc2a92d10d"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-4d70e4c7e38f05de",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:a83966402583250ab5edf8836d5847becc06ce5a30019b77b7bae1dafb9b902e"
+    }
+  }
+}

@@ -19,7 +19,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 
 | 路徑         | 職責                                                                              | 技術        |
 | ------------ | --------------------------------------------------------------------------------- | ----------- |
-| `card-data/` | 規劃存放已審查的日英解析卡片輸入與來源證據                                        | JSON        |
+| `card-data/` | 已審查的日英解析卡片輸入與來源證據                                                | JSON        |
 | `carddb/`    | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
 | `publish/`   | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；獨立 uv 專案                             | Python、uv  |
 | `authored/`  | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
@@ -33,7 +33,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 `docs/` 只放完成後仍成立的規格與決定；進度、排程、交付點與待決事項放 GitHub issue／milestone。
 
 依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`；規劃新增 `card-data/` → `carddb/`。
-`card-data/` 的格式與驗證器已實作，基線資料匯入與建置接線另行實作；`carddb` 匯出的有版號快照仍是使用者與模擬器的**唯一卡片資料權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
+`card-data/` 已匯入日英基線，格式與驗證器已實作，建置接線另行實作；`carddb` 匯出的有版號快照仍是使用者與模擬器的**唯一卡片資料權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
 但**不要維護另一份獨立的卡表**。
 
 `carddb/src/sve_carddb/` 依階段分層：基礎 `core/`、`contracts/`；來源 `ingest/`（`crawl/`、`http/`、`archive/`）、`parse/`；

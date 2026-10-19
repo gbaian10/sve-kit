@@ -1,0 +1,88 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP03",
+  "range": "SP/000-099",
+  "products": {
+    "products-506ae043c034d76f": [
+      {
+        "name": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+        "date": "2022-12-16",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP03",
+          "https://shadowverse-evolve.com/products/bp03/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP03-SP01",
+      "documents": {
+        "documents-f9914b4b9e0e630a": {
+          "region": "jp",
+          "record": {
+            "number": "BP03-SP01",
+            "faces": [
+              {
+                "name": "目指せお嬢様・サロメ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "プリンセス",
+                  "童話"
+                ],
+                "rarity": "SP",
+                "product": "ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」",
+                "title": null,
+                "cost": "7",
+                "power": "5",
+                "hp": "5",
+                "text": "【疾走】\n【攻撃時】これの童話カウンター1つを取る：自分のデッキの上4枚を見る。その中から、コスト5以下のフォロワー1枚を場に出してよい。残りを墓場に置く。\n{ファンファーレ}自分の場に他の童話・フォロワーがいるなら、これに童話カウンター1つを置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP03/bp03-sp01.png",
+                "trait_raw": "プリンセス・童話"
+              }
+            ],
+            "release_date": "2022-12-16",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q454",
+                "date": "2022-12-09",
+                "question": "このフォロワーに童話カウンターが2つ置かれている状態で攻撃したとき、童話カウンターを2つ取り【攻撃時】能力を2回プレイすることはできますか？",
+                "answer": "いいえ。このフォロワーが攻撃したときに誘発する【攻撃時】能力は1回のみであるため、【攻撃時】能力を2回プレイすることはできません。"
+              },
+              {
+                "id": "Q453",
+                "date": "2022-12-09",
+                "question": "このフォロワーの【攻撃時】能力でデッキが0枚になったとき、自分はバトルに敗北しますか？",
+                "answer": "いいえ。その時点ではバトルに敗北せず、その状態でカードを引くとき、自分はバトルに敗北します。敗北条件はデッキが0枚のときにカードを引くことであり、この【攻撃時】能力の処理ではデッキが0枚のときカードを引いていません。"
+              }
+            ],
+            "products_ref": "products-506ae043c034d76f",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP03-018"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2ee4db15168935f532eb971c8cb86980ee24f9e367e8f704fc641499b1606f20",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP03-SP01",
+            "fetched_at": "2026-09-24T22:53:14.739198Z"
+          },
+          "document_ref": "documents-f9914b4b9e0e630a"
+        }
+      ]
+    }
+  ]
+}

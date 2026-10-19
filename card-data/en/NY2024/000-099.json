@@ -1,0 +1,77 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "NY2024",
+  "range": "000-099",
+  "products": {
+    "products-a13a5483ff5dbc17": [
+      {
+        "name": "Promo Cards",
+        "date": null,
+        "links": [
+          "/cards/searchresults?expansion=PR"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "NY2024-001EN",
+      "documents": {
+        "documents-a55aed1bf4dfabb5": {
+          "region": "en",
+          "record": {
+            "number": "NY2024-001EN",
+            "faces": [
+              {
+                "name": "New Year's Soul Devil",
+                "info": {
+                  "Card Set": "Promo Cards",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Promo",
+                  "Trait": "Demon / New Year"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "4",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} The coming year will be filled with happiness.",
+                "sections": [
+                  "This card can't be used in official events."
+                ],
+                "raw_text": "{icon_fanfare|[fanfare]} The coming year will be filled with happiness.\n----------\nThis card can't be used in official events.",
+                "speech": "Thank you for all your support this past year!",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/NY2024-001EN.png",
+                "trait_raw": "Demon / New Year",
+                "traits": [
+                  "Demon",
+                  "New Year"
+                ]
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a13a5483ff5dbc17",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ccbdd681e9e358555c8855f962ced09473015e650c4e734f8eaf03669946a75a",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=NY2024-001EN",
+            "fetched_at": "2026-09-27T18:49:05.846338Z"
+          },
+          "document_ref": "documents-a55aed1bf4dfabb5"
+        }
+      ]
+    }
+  ]
+}

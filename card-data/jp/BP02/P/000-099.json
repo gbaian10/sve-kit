@@ -1,0 +1,2032 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP02",
+  "range": "P/000-099",
+  "products": {
+    "products-c98f96bb4055c3e4": [
+      {
+        "name": "ブースターパック第2弾「黒銀のバハムート」",
+        "date": "2022-06-30",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP02",
+          "https://shadowverse-evolve.com/products/bp02/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP02-P01",
+      "documents": {
+        "documents-954c322251167729": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P01",
+            "faces": [
+              {
+                "name": "エルフナイト・シンシア",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "【突進】\n【攻撃時】EXエリアのカード1枚を消滅：相手のリーダー1人か相手のフォロワー1体を選ぶ。それに2ダメージ。『フェアリー』2体を出す。",
+                "sections": [
+                  "『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p01.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q278",
+                "date": "2022-06-24",
+                "question": "このフォロワーの【攻撃時】能力のコストでEXエリアのカードを消滅するとき、相手のEXエリアのカードを消滅させることはできますか？",
+                "answer": "いいえ。コストは自分の領域のカードやPPなどでしか支払うことができないため、消滅させることはできません。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7a214998d88aa5bd2350ff058023043f1d67d6cc97c20f424f36db2f806df950",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P01",
+            "fetched_at": "2026-09-24T23:24:31.843961Z"
+          },
+          "document_ref": "documents-954c322251167729"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P02",
+      "documents": {
+        "documents-795c82f681f0d5be": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P02",
+            "faces": [
+              {
+                "name": "クリスタリア・リリィ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "クリスタリア"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "3",
+                "text": "{進化}{コスト2}：これは進化する。\n{ファンファーレ}自分のデッキの上2枚を見る。その中から、クリスタリア・フォロワーか妖精・フォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p02.png",
+                "trait_raw": "クリスタリア"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:376c07fb97c33907e2213dccfcdb6e66b5d584c9e3e162f9df8cbeb691951935",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P02",
+            "fetched_at": "2026-09-24T23:24:34.847175Z"
+          },
+          "document_ref": "documents-795c82f681f0d5be"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P03",
+      "documents": {
+        "documents-ba436d4889112972": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P03",
+            "faces": [
+              {
+                "name": "クリスタリア・リリィ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "クリスタリア"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "4",
+                "text": "【進化時】相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの下に置く。（デッキに置いたトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p03.png",
+                "trait_raw": "クリスタリア"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:948c85236424146667ebe6b8719c12d9d1f0cc43de3beb92dcba649d7c2c7863",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P03",
+            "fetched_at": "2026-09-24T23:24:37.371322Z"
+          },
+          "document_ref": "documents-ba436d4889112972"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P04",
+      "documents": {
+        "documents-65c33e0f0aade5cb": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P04",
+            "faces": [
+              {
+                "name": "エルフの弓術",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "エルフ族"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "相手のフォロワー2体まで選ぶ。それに1ダメージ。【コンボ_3】代わりに2ダメージ。",
+                "sections": [],
+                "flavor": "よく耳を澄ませ、森の機微に傾聴すれば危険に遭わずに済む。\nよく耳を澄ませ、鋭い音に気付けなければ無事では済まない。",
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p04.png",
+                "trait_raw": "エルフ族"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q279",
+                "date": "2022-06-24",
+                "question": "相手の場にフォロワーがないとき、このスペルをプレイすることはできますか？",
+                "answer": "はい。2体まで選ぶとき、0体を選ぶことができるため、プレイすることができます。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4d490aa27a8578e19278536c1e2fb1ac00807cb73ca5da24a43dfd101bd8bc06",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P04",
+            "fetched_at": "2026-09-24T23:24:40.147718Z"
+          },
+          "document_ref": "documents-65c33e0f0aade5cb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P05",
+      "documents": {
+        "documents-60a6d5f7427f0b4b": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P05",
+            "faces": [
+              {
+                "name": "ローズディアー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "精霊",
+                  "植物族"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "3",
+                "text": "【突進】\n{ファンファーレ}『薔薇の一撃』1枚をEXエリアに置く。",
+                "sections": [
+                  "『薔薇の一撃』{エルフ}植物族・スペル{コスト2}相手のリーダー1人か相手のフォロワー1体を選ぶ。それに3ダメージ。1枚引く。"
+                ],
+                "flavor": null,
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p05.png",
+                "trait_raw": "精霊・植物族"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1e883d8e78be6cd2900c8a9a25fc28591c25689316985ba775ba44be54ae7ae4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P05",
+            "fetched_at": "2026-09-24T23:24:42.889747Z"
+          },
+          "document_ref": "documents-60a6d5f7427f0b4b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P06",
+      "documents": {
+        "documents-7ed3bc6f6076ffde": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P06",
+            "faces": [
+              {
+                "name": "ホワイトパラディン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "【守護】\n{起動}{コスト2}これを{アクト}：『シールドガーディアン』2体を出す。",
+                "sections": [
+                  "『シールドガーディアン』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}1【守護】"
+                ],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p06.png",
+                "trait_raw": "指揮官"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a087ff53f2c1d7591ef14a02774f38ce258210d9e2afc0f74af233d2e96bca59",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P06",
+            "fetched_at": "2026-09-24T23:24:45.767993Z"
+          },
+          "document_ref": "documents-7ed3bc6f6076ffde"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P07",
+      "documents": {
+        "documents-de0db57727935b5b": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P07",
+            "faces": [
+              {
+                "name": "レヴィオンヴァンガード・ジェノ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "レヴィオン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "「牙は老いれども、次に続く者の手本くらいにはなろう。\n準備はいいか？さぁ構えろ、若造よ！」",
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p07.png",
+                "trait_raw": "兵士・レヴィオン"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:83902fab03effe11b1d964d8f5f498cf9b8a903b8125c40f9223c65ce3325553",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P07",
+            "fetched_at": "2026-09-24T23:24:48.397513Z"
+          },
+          "document_ref": "documents-de0db57727935b5b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P08",
+      "documents": {
+        "documents-0484c2a63e7cfd89": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P08",
+            "faces": [
+              {
+                "name": "レヴィオンヴァンガード・ジェノ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "兵士",
+                  "レヴィオン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【指定攻撃】\n【進化時】自分のデッキの上4枚を見る。その中から「これと同名を除くレヴィオン・フォロワー」1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p08.png",
+                "trait_raw": "兵士・レヴィオン"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:931277059d54cdd009a2d0649347021115b4744dd52f21fe5e914b84f03b6b1c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P08",
+            "fetched_at": "2026-09-24T23:24:51.345128Z"
+          },
+          "document_ref": "documents-0484c2a63e7cfd89"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P09",
+      "documents": {
+        "documents-59a71ac289022781": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P09",
+            "faces": [
+              {
+                "name": "レヴィオンデューク・ユリウス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "貴族",
+                  "レヴィオン"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "2",
+                "power": "0",
+                "hp": "4",
+                "text": "{Q}{起動}これを{アクト}：相手のフォロワー1体を選ぶ。それに1ダメージ。",
+                "sections": [],
+                "flavor": "悲劇より芽生えし野心。己が存在証明のため悲劇を繰り返す。\n「信頼や絆など不要。精々踊ってみせてくれ、団長殿！」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p09.png",
+                "trait_raw": "貴族・レヴィオン"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q288",
+                "date": "2022-06-24",
+                "question": "《Q》の能力を持つフォロワーやアミュレットは、自分のターンのメインフェイズに加え、相手のターンに相手のフォロワーが攻撃してきたときや、相手のエンドフェイズにプレイし、場に出すことはできますか？",
+                "answer": "いいえ。《Q》は能力が持つアイコンであり、カード自体が《Quick》を持っているわけではないため、フォロワーやアミュレット自体は《Quick》と同様のタイミングではプレイできません。\n《Q》を持つ能力は、その能力がプレイできる領域で《Quick》と同様のタイミングで起動することができます。"
+              },
+              {
+                "id": "Q287",
+                "date": "2022-06-24",
+                "question": "《Q》とはなんですか？",
+                "answer": "《Q》とは、特定の能力が《Quick》と同様のタイミングでプレイできることを示すアイコンです。\n《Q》を持つ能力は、《Quick》を持つカードと同様に自分のターンのメインフェイズに加え、相手のターンに相手のフォロワーが攻撃してきたときや、相手のエンドフェイズにプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:385c5f2742cb5831f609364b9a3c0e4efa11a51da143000c4ffdb808db869f80",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P09",
+            "fetched_at": "2026-09-24T23:24:53.879136Z"
+          },
+          "document_ref": "documents-59a71ac289022781"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P10",
+      "documents": {
+        "documents-f72e7b62bd4fdea2": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P10",
+            "faces": [
+              {
+                "name": "フレイムソルジャー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "兵士",
+                  "ヒーロー"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}相手のフォロワー1体を選ぶ。それに1ダメージ。このターン中に自分のフォロワーが破壊されていたなら、代わりに4ダメージ。",
+                "sections": [],
+                "flavor": "悩んでも迷っても、でも大好きなら、きっとそれでいいんです！\n――風祭レン",
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p10.png",
+                "trait_raw": "兵士・ヒーロー"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9405cc36a62348659019a87f1dbd5032029311562720756b6fdf8f1b2627dd9f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P10",
+            "fetched_at": "2026-09-24T23:24:56.719986Z"
+          },
+          "document_ref": "documents-f72e7b62bd4fdea2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P11",
+      "documents": {
+        "documents-4104337a2da8018b": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P11",
+            "faces": [
+              {
+                "name": "白霜の風",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n相手の進化していないフォロワー1体を選ぶ。それを手札に戻す。【スペルチェイン_10】代わりにデッキの上に置く。（手札かデッキに戻ったトークンはゲームから取り除く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "TEDDY",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p11.png",
+                "trait_raw": "魔法使い"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q555",
+                "date": "2023-01-04",
+                "question": "相手の場に進化後の『ダイヤモンドマスター（EVOLVE）』と、『ダイヤモンドマスター』を除く進化前のフォロワーがいるとき、『白霜の風』で『ダイヤモンドマスター（EVOLVE）』以外の進化前のフォロワーを選び、プレイすることはできますか？",
+                "answer": "はい。『ダイヤモンドマスター（EVOLVE）』以外の進化前のフォロワーを選び、プレイすることができます。『白霜の風』は相手の『ダイヤモンドマスター（EVOLVE）』を選ぶことができないため、「相手プレイヤーは能力でこれを選べるとき、これを選ぶ。」という能力の要求を満たしません。"
+              },
+              {
+                "id": "Q554",
+                "date": "2023-01-04",
+                "question": "相手の場に進化前の『ダイヤモンドマスター』と、『ダイヤモンドマスター』を除く進化前のフォロワーがいるとき、『白霜の風』で『ダイヤモンドマスター』以外の進化前のフォロワーを選び、プレイすることはできますか？",
+                "answer": "いいえ。『ダイヤモンドマスター』以外の進化前のフォロワーを選び、プレイすることはできません。『白霜の風』は相手の進化前の『ダイヤモンドマスター』を選ぶことができるため、『ダイヤモンドマスター』を選ぶ必要があります。"
+              },
+              {
+                "id": "Q291",
+                "date": "2022-06-24",
+                "question": "このスペルで相手のフォロワーを選ぶ際、【スペルチェイン_10】の条件を満たしているとき、このスペルは相手のエボルヴフォロワーを選ぶことはできますか？",
+                "answer": "いいえ。【スペルチェイン_10】の条件を満たしているかどうかに関わらず、相手の進化していないフォロワーのみを選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2db465f6d8f7de2b2a93f31da2252be0c925f9cf854711259086be1670610348",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P11",
+            "fetched_at": "2026-09-24T23:24:59.546403Z"
+          },
+          "document_ref": "documents-4104337a2da8018b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P12",
+      "documents": {
+        "documents-dc6aff0bc9f8e57b": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P12",
+            "faces": [
+              {
+                "name": "デュアルウィッチ・レミラミ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "錬金術師"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "表は裏で、裏は表。無垢と邪悪は二律背反。\n「お願い、ラミ……もう勝手に誰かを傷付けたりしないで」",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p12.png",
+                "trait_raw": "魔法使い・錬金術師"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:43a8e9ad353a7e03489ce62de4ba6d220774d98f7d4e1cac2e835e74b3025af9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P12",
+            "fetched_at": "2026-09-24T23:25:02.125176Z"
+          },
+          "document_ref": "documents-dc6aff0bc9f8e57b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P13",
+      "documents": {
+        "documents-739dc793debcaf0b": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P13",
+            "faces": [
+              {
+                "name": "デュアルウィッチ・レミラミ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "錬金術師"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】『攻撃型ゴーレム』1体を出す。【土の秘術】それは{攻撃力}+2する。",
+                "sections": [
+                  "『攻撃型ゴーレム』{ウィッチ}ゴーレム・フォロワー{コスト2}{攻撃力}3/{体力}2【突進】"
+                ],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p13.png",
+                "trait_raw": "魔法使い・錬金術師"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q292",
+                "date": "2022-06-24",
+                "question": "【スタック】を持ち、スタックカウンターが1つ置かれたアミュレット1枚を含めたカードが自分の場に5枚あり、このフォロワーの【進化時】能力をプレイしたとき、『攻撃型ゴーレム』は場に出ますか？",
+                "answer": "はい。能力をプレイするより先にコストが支払われ、かつスタックカウンターが0となったアミュレットが墓場に置かれるため、自分の場は上限ではなくなり『攻撃型ゴーレム』は場に出ます。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dd606971d8ff621ffb4d0c779797681855fdd8b88ff7d164c862dc7e0b5d0284",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P13",
+            "fetched_at": "2026-09-24T23:15:57.704535Z"
+          },
+          "document_ref": "documents-739dc793debcaf0b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P14",
+      "documents": {
+        "documents-e62465cad89823bd": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P14",
+            "faces": [
+              {
+                "name": "連続実験",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "ゴーレム"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から2つまでチョイスする。【スペルチェイン_10】代わりに3つまで。\n【1】相手のフォロワー1体を選ぶ。それに3ダメージ。【2】『防御型ゴーレム』1体を出す。【3】1枚引く。",
+                "sections": [
+                  "『防御型ゴーレム』{ウィッチ}ゴーレム・フォロワー{コスト2}{攻撃力}2/{体力}3【守護】"
+                ],
+                "flavor": null,
+                "illustrator": "原田いすか",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p14.png",
+                "trait_raw": "ゴーレム"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q294",
+                "date": "2022-06-24",
+                "question": "2つ以上の選択肢をチョイスするとき、１つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              },
+              {
+                "id": "Q293",
+                "date": "2022-06-24",
+                "question": "2つ以上の選択肢をチョイスするとき、1つもチョイスしないことを選択することはできますか？",
+                "answer": "いいえ。必ず1つ以上チョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T14"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:883c5c57950c57fba4cbedb8cf5d30ff04dae58e0857d5cf94dd89a558c2bdad",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P14",
+            "fetched_at": "2026-09-24T23:16:00.880687Z"
+          },
+          "document_ref": "documents-e62465cad89823bd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P15",
+      "documents": {
+        "documents-97ba657485f2ef5d": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P15",
+            "faces": [
+              {
+                "name": "マジカルストラテジー",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "魔法使い",
+                  "チェス"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "『マジカルポーン』1体を出す。",
+                "sections": [
+                  "『マジカルポーン』{ウィッチ}チェス・フォロワー{コスト1}{攻撃力}2/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "Akefumi",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p15.png",
+                "trait_raw": "魔法使い・チェス"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:af02f918c15eb7db46f68452c0a05841fd8d25d067cfa8d181eb494952f11a6f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P15",
+            "fetched_at": "2026-09-24T23:16:03.433027Z"
+          },
+          "document_ref": "documents-97ba657485f2ef5d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P16",
+      "documents": {
+        "documents-7c1e2300c49dc417": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P16",
+            "faces": [
+              {
+                "name": "竜の闘気",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "5",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のPP最大値を+1する。自分のリーダーは{体力}+3する。1枚引く。",
+                "sections": [],
+                "flavor": "竜を討つべく、野を駆け、闘争を積み、気運と実力を得た。\n万感込め放つ斬撃――嗚呼無情。鱗に触れることさえ叶わず。",
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p16.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q298",
+                "date": "2022-06-24",
+                "question": "自分のPP最大値を+1したとき、自分の残りPPは+1しますか？",
+                "answer": "いいえ。自分の残りPPは+1しません。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:10b777c1552d1211b8131d31241cea98c22e6a29b88e2313028269afe4c6c964",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P16",
+            "fetched_at": "2026-09-24T23:16:06.090091Z"
+          },
+          "document_ref": "documents-7c1e2300c49dc417"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P17",
+      "documents": {
+        "documents-6ae44d018a90d5d2": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P17",
+            "faces": [
+              {
+                "name": "ジークフリート",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族",
+                  "キラー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "かの歌が紡ぐは、万夫不当の英傑。\nニーベルンゲン族の聖剣携え、大いなる邪竜へ挑む。",
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p17.png",
+                "trait_raw": "竜族・キラー"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:572c2f15ab0194b799ebf4dfe89bdae5b938f4cd5f641a503b53c394a3e8bf25",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P17",
+            "fetched_at": "2026-09-24T23:16:09.006988Z"
+          },
+          "document_ref": "documents-6ae44d018a90d5d2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P18",
+      "documents": {
+        "documents-2b40274a6841c208": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P18",
+            "faces": [
+              {
+                "name": "ジークフリート",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜族",
+                  "キラー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】体力3以下の相手のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": "かの歌が讃えるは、竜殺しの英雄。\n死闘の末に邪竜を打ち倒し、武功を世に知らしめた。",
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p18.png",
+                "trait_raw": "竜族・キラー"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q300",
+                "date": "2022-06-24",
+                "question": "このフォロワーの能力は、元々の《体力》の数値が4以上かつ、ダメージなどにより現状の《体力》が3以下のフォロワーを選ぶことができますか？",
+                "answer": "はい。現状の《体力》を参照するため、選ぶことができます。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a2e1226353918c2e00b03b5362d1c27fa027b9df04650250b217633c09ce01f9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P18",
+            "fetched_at": "2026-09-24T23:16:11.867221Z"
+          },
+          "document_ref": "documents-2b40274a6841c208"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P19",
+      "documents": {
+        "documents-c7c79e34c050ffea": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P19",
+            "faces": [
+              {
+                "name": "竜巫女の儀式",
+                "card_class": "ドラゴン",
+                "card_type": "アミュレット",
+                "traits": [
+                  "竜使い"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のエンドフェイズが来たとき、このターン中に自分の手札を捨てていたなら、相手のリーダー1人か相手のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}手札1枚を捨てる：自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "麻谷知世",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p19.png",
+                "trait_raw": "竜使い"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q302",
+                "date": "2022-06-24",
+                "question": "自分のエンドフェイズに手札の上限枚数となるようにカードを捨てたとき、このアミュレットの「自分のエンドフェイズが来たとき～」の能力はプレイしますか？",
+                "answer": "いいえ。手札の上限枚数となるようにカードを捨てる行為は、「自分のエンドフェイズが来たとき～」の誘発のタイミングよりも後に行うため、条件を満たすことはできず、プレイしません。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c6153add5d8dca7a38ba132db32dfd2bd616c95f9aa0a0528a5731f793334524",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P19",
+            "fetched_at": "2026-09-24T23:16:14.534319Z"
+          },
+          "document_ref": "documents-c7c79e34c050ffea"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P20",
+      "documents": {
+        "documents-d935cce15289d1bc": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P20",
+            "faces": [
+              {
+                "name": "ドラゴニックアーマー",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "竜族",
+                  "武装"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "『ドラゴウェポン』1つを出す。【覚醒】状態なら、代わりに2つ。",
+                "sections": [
+                  "『ドラゴウェポン』{ドラゴン}武装・アミュレット{コスト1}{起動}これを{アクト}墓場に置く：自分の{ドラゴン}フォロワー1体を選ぶ。それは{体力}+1して、武装・タイプを持つ。"
+                ],
+                "flavor": null,
+                "illustrator": "あかかがち",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p20.png",
+                "trait_raw": "竜族・武装"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:51606702d35894fd1d47b5276b5249b805ebbcebc54ccc3f95083476186d0e31",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P20",
+            "fetched_at": "2026-09-24T23:16:17.467109Z"
+          },
+          "document_ref": "documents-d935cce15289d1bc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P21",
+      "documents": {
+        "documents-ccbb5d343c1ce71f": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P21",
+            "faces": [
+              {
+                "name": "冥守の戦士・カムラ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死霊術師"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n{ラストワード}相手のフォロワー1体を選ぶ。それを破壊する。自分のリーダーは{体力}+Xする。Xは「選んだフォロワーの攻撃力」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ニジハヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p21.png",
+                "trait_raw": "死霊術師"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q307",
+                "date": "2022-06-24",
+                "question": "このフォロワーの《ラストワード》能力で破壊した相手のフォロワーの《攻撃力》が増減していたとき、Xは増減後の《攻撃力》の数値ですか？",
+                "answer": "はい。その通りです。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:99ea1a9993186aaa142ae804fb018eac96d0ff7903c563d8fc8cf411c9b7db4e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P21",
+            "fetched_at": "2026-09-24T23:16:20.321849Z"
+          },
+          "document_ref": "documents-ccbb5d343c1ce71f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P22",
+      "documents": {
+        "documents-402d7d11e90bfb93": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P22",
+            "faces": [
+              {
+                "name": "吸血貴・ヴァイト",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n【攻撃時】『フォレストバット』1体を出す。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p22.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P23"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:69236fa84c70647f889b1bf86b1357bbb285bf33bea7b57dd3ce164c952823d3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P22",
+            "fetched_at": "2026-09-24T23:16:23.010070Z"
+          },
+          "document_ref": "documents-402d7d11e90bfb93"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P23",
+      "documents": {
+        "documents-df17553741d4d30a": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P23",
+            "faces": [
+              {
+                "name": "吸血貴・ヴァイト",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【攻撃時】『フォレストバット』1体を出す。\n【進化時】『フォレストバット』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "「どうしたんだい？フフ、随分と苦しそうじゃないか。\n許してほしいっていうならそうだね……跪いて口付けしなよ」",
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p23.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P22"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e071cfd12428de3cd01443f9c693c62deee7888b5bf3a9cce7b5d1ffa5c70c6e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P23",
+            "fetched_at": "2026-09-24T23:16:25.626888Z"
+          },
+          "document_ref": "documents-df17553741d4d30a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P24",
+      "documents": {
+        "documents-9992d017b6b0e3db": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P24",
+            "faces": [
+              {
+                "name": "トリックデュラハン",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "{ファンファーレ}『ゴースト』1枚をEXエリアに置く。【ネクロチャージ_10】代わりに3枚。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p24.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:264c3369930e3e6b387f150754d9d6d550499070666e98fbf2e04b8c7df79ad2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P24",
+            "fetched_at": "2026-09-24T23:16:28.424321Z"
+          },
+          "document_ref": "documents-9992d017b6b0e3db"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P25",
+      "documents": {
+        "documents-d4f74b22fba81dff": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P25",
+            "faces": [
+              {
+                "name": "ネクロカーニバル",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【ネクロチャージ_10】代わりに2つまで。\n【1】自分の墓場のコスト2以下のフォロワー1枚を選ぶ。それを場に出す。【2】『ゴースト』2体を出す。",
+                "sections": [
+                  "『ゴースト』{ナイトメア}死者・フォロワー{コスト1}{攻撃力}1/{体力}1【疾走】自分のエンドフェイズが来たとき、これは消滅する。"
+                ],
+                "flavor": null,
+                "illustrator": "ラエル",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p25.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-T17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0b8db006058bbf022c7dda7e008d7fbc9df6ba4141ba7609df115449b8f278a4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P25",
+            "fetched_at": "2026-09-24T23:16:31.150459Z"
+          },
+          "document_ref": "documents-d4f74b22fba81dff"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P26",
+      "documents": {
+        "documents-24271dfd5100be95": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P26",
+            "faces": [
+              {
+                "name": "エイラの祈祷",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "ターンごとに1回、自分のリーダーの{体力}を+したとき、自分のフォロワーすべては{攻撃力}+1/{体力}+1する。",
+                "sections": [],
+                "flavor": "「ちっぽけで役立たずな私にできるのは、祈ることくらい。\nそれでも小さな希望になれるのなら……聖なる祝福を」",
+                "illustrator": "香川太郎",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p26.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q335",
+                "date": "2022-07-07",
+                "question": "『ダークオファリング』の能力で『エイラの祈祷』を選択し、そのカードを破壊して、リーダーの《体力》を+した場合、『エイラの祈祷』の能力はプレイできますか？",
+                "answer": "いいえ。『ダークオファリング』で自分のリーダーを《体力》+3したとき、『エイラの祈祷』が場にないため「リーダーの《体力》を+したとき」の能力はプレイできません。"
+              },
+              {
+                "id": "Q333",
+                "date": "2022-07-07",
+                "question": "このアミュレットの能力は相手のターンでもプレイできますか？",
+                "answer": "はい。相手のターンでも条件を満たせば、能力はプレイできます。"
+              },
+              {
+                "id": "Q318",
+                "date": "2022-06-24",
+                "question": "このアミュレットが自分の場に2枚あり、自分のリーダーの《体力》を＋したとき、このアミュレットの能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ1ターンに1度ずつ能力が誘発します。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:91cced6afa2a880283ae63f2b79e8f4b5092a2cf5607468c8bb67680f2cf5249",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P26",
+            "fetched_at": "2026-09-24T23:16:33.904146Z"
+          },
+          "document_ref": "documents-24271dfd5100be95"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P27",
+      "documents": {
+        "documents-943f6eab78a4b1f1": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P27",
+            "faces": [
+              {
+                "name": "レディアンスエンジェル",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}1枚引く。",
+                "sections": [],
+                "flavor": "「人は迷う。迷うがゆえに、弱く、儚く、頼りない。\n僅かな光が掻き消えてしまわぬよう、私が標を与えよう」",
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p27.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P28"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a51fd95b8ad0b2aac99ef3e8b87af7b9ef269373e951440c866bc01f0d4e4585",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P27",
+            "fetched_at": "2026-09-24T23:16:36.732028Z"
+          },
+          "document_ref": "documents-943f6eab78a4b1f1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P28",
+      "documents": {
+        "documents-b57e2a1a9c793a3a": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P28",
+            "faces": [
+              {
+                "name": "レディアンスエンジェル",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "5",
+                "text": "【守護】\n【進化時】自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "「人は迷う。迷うからこそ、強く、尊く、愛おしい。\n答えを与えることは出来ずとも、私が光への標となろう」",
+                "illustrator": "JNAME",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p28.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:44adc9a08c74907808ad603a8bf451ab6d6719841fd4416cfb8516afc6ed954a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P28",
+            "fetched_at": "2026-09-24T23:16:39.551187Z"
+          },
+          "document_ref": "documents-b57e2a1a9c793a3a"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P29",
+      "documents": {
+        "documents-d8acf80531d31729": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P29",
+            "faces": [
+              {
+                "name": "サファイアプリースト",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "5",
+                "text": "自分のエンドフェイズが来たとき、このターン中に自分のフォロワーが3回以上攻撃したなら、3枚引く。",
+                "sections": [],
+                "flavor": "違うんだよ。背負ってるもんも抱えているもんも、重さが違う。\n――小鳥遊ツバサ",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p29.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q319",
+                "date": "2022-06-24",
+                "question": "自分のフォロワーが攻撃し、その攻撃フォロワーが《Quick》を持つカードや能力によって場を離れたとき、その攻撃はこのフォロワーの能力の条件に数えることはできますか？",
+                "answer": "はい。攻撃している間にその攻撃フォロワーが場を離れても、その攻撃を数えることができます。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:95d994edc19b4a562c3d6496cca0af1fcbfae0eb9b1b3cb96dc158a4affb92b4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P29",
+            "fetched_at": "2026-09-24T23:16:42.367978Z"
+          },
+          "document_ref": "documents-d8acf80531d31729"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P30",
+      "documents": {
+        "documents-f772fd70aaa732c0": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P30",
+            "faces": [
+              {
+                "name": "エメラルドメイデン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "4",
+                "text": "【守護】\n{ファンファーレ}これは{体力}+Xする。Xは「【守護】を持つ自分の他のフォロワーの数」である。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p30.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q321",
+                "date": "2022-06-24",
+                "question": "このフォロワーの《ファンファーレ》能力で【守護】を持つ自分のフォロワーを数えるとき、このフォロワーを数えることはできますか？",
+                "answer": "いいえ。このフォロワー以外の【守護】を持つフォロワーのみを数えます。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed11d392d6b68190d0296a85436f71df2d14db775ce72855f862eed6ba12a5a0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P30",
+            "fetched_at": "2026-09-24T23:16:44.911999Z"
+          },
+          "document_ref": "documents-f772fd70aaa732c0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P31",
+      "documents": {
+        "documents-7120b3f401c448e7": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P31",
+            "faces": [
+              {
+                "name": "忌むべき悪魔の像",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "悪魔"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "6",
+                "hp": "5",
+                "text": "{ファンファーレ}自分のリーダーに3ダメージ。自分の手札をランダムに1枚捨てる。",
+                "sections": [],
+                "flavor": "それを忌むものからすれば、それは異様に外ならず。\nそれを祝すものからすれば、それは威容に他ならない。",
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p31.png",
+                "trait_raw": "悪魔"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q308",
+                "date": "2022-06-24",
+                "question": "プレイヤーが自身のカードを捨てるとき、どのような方法で捨てるカードをランダムに選択しますか？",
+                "answer": "ダイスロールなど、無作為な方法で選択します。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:484f1154e423c729394ff367c409e258811f92f779f0351afba53cfcc4936b5e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P31",
+            "fetched_at": "2026-09-24T23:16:47.812181Z"
+          },
+          "document_ref": "documents-7120b3f401c448e7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P32",
+      "documents": {
+        "documents-d39304e80c4c85d0": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P32",
+            "faces": [
+              {
+                "name": "ユニコーンの踊り手・ユニコ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "光輝"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n【攻撃時】自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "一角の少女は人々を元気づけるため踊る。たとえ下手っぴでも。\n「ユ、ユニコ、頑張りますっ！」",
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p32.png",
+                "trait_raw": "光輝"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P33"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:55914ceb9b249e714f4465dd68252f89d4d4f5dae3a752234a655756a5b906ec",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P32",
+            "fetched_at": "2026-09-24T23:16:50.697230Z"
+          },
+          "document_ref": "documents-d39304e80c4c85d0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P33",
+      "documents": {
+        "documents-a53cdd69991c193e": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P33",
+            "faces": [
+              {
+                "name": "ユニコーンの踊り手・ユニコ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "光輝"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【攻撃時】自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "一角の少女は人々の笑顔のため踊る。暗黒舞踊と呼ばれようと。\n「ユ、ユニコだって、やればできるんですっ！」",
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p33.png",
+                "trait_raw": "光輝"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP02-P32"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:22fb5277275f20d3be5dd64709581393d8840e1b1b87135a5d0d432ad848a768",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P33",
+            "fetched_at": "2026-09-24T23:16:53.228647Z"
+          },
+          "document_ref": "documents-a53cdd69991c193e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P34",
+      "documents": {
+        "documents-72ffa804ddd3063c": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P34",
+            "faces": [
+              {
+                "name": "覇食帝・カイザ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "悪魔",
+                  "コック"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}元のコスト2以下の相手の場のフォロワー1体を選ぶ。それを破壊する。それのリーダーは{体力}+3する。",
+                "sections": [],
+                "flavor": "覇を唱え、食を極めし者故に。立ち止まることなく、巾広の道行く。\n人呼んで覇食帝、味覚の支配者であり、未だ挑戦者。",
+                "illustrator": "風篠",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p34.png",
+                "trait_raw": "悪魔・コック"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": "https://shadowverse-evolve.com/errata/bp02-115/",
+            "notes": [
+              "能力テキストにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q773",
+                "date": "2023-04-21",
+                "question": "何らかの理由によってプレイする際にコストが増減されて場に出たカードのコストを参照する場合、その増減された値のコストを参照しますか？",
+                "answer": "いいえ。増減された値のコストではなく、カード記載のコストの値を参照します。\n（例：プレイする際にコストを-9して場に出た『フレイムデストロイヤー』のコストを参照する場合、参照するコストの値は9です。）\n\nカードをプレイする際のコストの値を変更する効果は、そのカードのコストの情報を変更するのではなく、そのコストを支払うために必要なPPの値を変更します。\n能力テキストにおいて「コスト」や「元のコスト」などでカードのコストの情報を参照する場合、常にそのカードに記載されているコストの値を参照します。\nまた、エボルヴフォロワーのコストの値を参照する場合、進化前のフォロワーのコストの値を参照します。"
+              }
+            ],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3ca63b82ca197cb0fc40c8e1e62760bd10d7fdfca61f9c713ca905cee3fd522a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P34",
+            "fetched_at": "2026-09-24T23:16:55.886328Z"
+          },
+          "document_ref": "documents-72ffa804ddd3063c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP02-P35",
+      "documents": {
+        "documents-62ca1713778e46b2": {
+          "region": "jp",
+          "record": {
+            "number": "BP02-P35",
+            "faces": [
+              {
+                "name": "死の舞踏",
+                "card_class": "ニュートラル",
+                "card_type": "スペル",
+                "traits": [
+                  "ダンサー"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第2弾「黒銀のバハムート」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "相手のフォロワー1体を選ぶ。それに5ダメージ。それのリーダーに2ダメージ。",
+                "sections": [],
+                "flavor": "その舞踏が始まり、幕は上がった。彩るのは激情の調べ。\nその舞踏の終わりに喝采は上がらない。残るのは鮮烈な赤。",
+                "illustrator": "N.A",
+                "image": "/wordpress/wp-content/images/cardlist/BP02/bp02_p35.png",
+                "trait_raw": "ダンサー"
+              }
+            ],
+            "release_date": "2022-06-30",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c98f96bb4055c3e4",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1ef859c52177990454bdbca21cc62a336917ca441f234d54bafa28a25b6ef43b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP02-P35",
+            "fetched_at": "2026-09-24T23:16:58.406310Z"
+          },
+          "document_ref": "documents-62ca1713778e46b2"
+        }
+      ]
+    }
+  ]
+}

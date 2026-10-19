@@ -1,0 +1,1284 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "EBD03",
+  "range": "000-099",
+  "products": {
+    "products-b3eaf219c905ac85": [
+      {
+        "name": "EXビギナーデッキ「ナイトメア」",
+        "date": "2025-11-21",
+        "links": [
+          "/cardlist/cardsearch?expansion=EBD03",
+          "https://shadowverse-evolve.com/products/ebd01_04/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "EBD03-001",
+      "documents": {
+        "documents-723bc32fbbd851a9": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-001",
+            "faces": [
+              {
+                "name": "奔放なる獄炎・ケルベロス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}『番犬の右腕・ミミ』1体と『番犬の左腕・ココ』1体を場に出す。【ネクロチャージ_10】それは【疾走】を持つ。\n{起動}これを{アクト}場の他のフォロワー1体を墓場に置く：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ShuLa",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-001.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2118",
+                "date": "2025-07-07",
+                "question": "「《ファンファーレ》『番犬の右腕・ミミ』1体と『番犬の左腕・ココ』1体を場に出す。【ネクロチャージ_10】それは【疾走】を持つ。」という能力によって【疾走】を持つフォロワーは『番犬の右腕・ミミ』1体と『番犬の左腕・ココ』1体の両方ですか？",
+                "answer": "はい。どちらも【疾走】を持ちます。"
+              },
+              {
+                "id": "Q2117",
+                "date": "2025-07-07",
+                "question": "自分の場のカードが『奔放なる獄炎・ケルベロス』を含めて4枚の状況で、《ファンファーレ》能力をプレイした場合、『番犬の右腕・ミミ』と『番犬の左腕・ココ』のどちらを場に出すか選択することができますか？",
+                "answer": "はい。どちらを場に出すかを選択することができます。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T01"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7ea067102b3d7b1171f362e6f62c8a72d97be5ff8f5a2fde7d38b8ff055afdf4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-001",
+            "fetched_at": "2026-09-24T19:23:40.545916Z"
+          },
+          "document_ref": "documents-723bc32fbbd851a9"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-002",
+      "documents": {
+        "documents-3d639e386ab6983d": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-002",
+            "faces": [
+              {
+                "name": "ゴールドラッシュゴースト",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "死者"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【疾走】\n相手のエンドフェイズが来たとき、これを墓場に置く。\n{ファンファーレ}下記から1つチョイスする。これが墓場から場に出ていたなら、代わりに2つまで。\n【1】『魔導装甲車』1つを場に出す。自分のリーダーは{体力}+1する。【2】自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "SEMSEI",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-002.png",
+                "trait_raw": "荒野・死者"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2083",
+                "date": "2025-07-07",
+                "question": "2つ以上の選択肢をチョイスするとき、1つの選択肢を2回以上チョイスすることはできますか？",
+                "answer": "いいえ。1つの選択肢を2回以上チョイスすることはできません。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:93ec1d61d14897f16a0a86f829e679543bf3106f171eb26b2ceb8db7f5d7630c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-002",
+            "fetched_at": "2026-09-24T19:23:43.404679Z"
+          },
+          "document_ref": "documents-3d639e386ab6983d"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-003",
+      "documents": {
+        "documents-40be7b6a666e6b27": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-003",
+            "faces": [
+              {
+                "name": "絶叫の沈黙・ルルナイ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "死霊術師"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "1",
+                "text": "【突進】【指定攻撃】\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の場の『絶叫の残響・ルルナイ』が3体以上なら、それを破壊する。それのリーダーに3ダメージ。\n{ラストワード}『絶叫の拡散』1枚をEXエリアに置く。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "薄雲ねず",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-003.png",
+                "trait_raw": "絶傑・死霊術師"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e65edaeff701d09cfb9d8039ba889d4ca8bd41bf75a2186ab23147565b6a8cbd",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-003",
+            "fetched_at": "2026-09-24T19:23:46.020711Z"
+          },
+          "document_ref": "documents-40be7b6a666e6b27"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-004",
+      "documents": {
+        "documents-483438565f31ee6a": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-004",
+            "faces": [
+              {
+                "name": "死期を視るもの・グレモリー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のデッキの上2枚を墓場に置く。\n{起動}{コスト1}：自分の墓場のこれを場に出す。これは「{ラストワード}これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "虹原",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-004.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1680",
+                "date": "2024-10-15",
+                "question": "自分の墓場が『死期を視るもの・グレモリー』を含めて10枚の状況で、自分の場に『死期を視るもの・グレモリー』がいない場合、「《起動》《コスト1》：自分の墓場のこれを場に出す。これは「《ラストワード》これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。」という《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。"
+              },
+              {
+                "id": "Q1679",
+                "date": "2024-10-15",
+                "question": "「《起動》《コスト1》：自分の墓場のこれを場に出す。これは「《ラストワード》これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。」という《起動》能力は、『死期を視るもの・グレモリー』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『死期を視るもの・グレモリー』が墓場にある場合に有効となる能力です。\n『死期を視るもの・グレモリー』が墓場にある状況で、かつ自分の墓場が10枚以上あり、自分の場に他の『死期を視るもの・グレモリー』がいない場合に、この《起動》能力をプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b8f2d72a6b8af49a40bfe785c2351e9b2d60d140086abd759f7034516cf76740",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-004",
+            "fetched_at": "2026-09-24T19:23:48.733849Z"
+          },
+          "document_ref": "documents-483438565f31ee6a"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-005",
+      "documents": {
+        "documents-91b5164cc32d8be9": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-005",
+            "faces": [
+              {
+                "name": "カオスルーラー・アイシィレンドリング",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\nこれがアクトしたとき、相手プレイヤーすべては、自身の手札1枚を捨てる。\n{ファンファーレ}自分の場に『魔導列車』がないなら、『魔導列車』1つを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-005.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1502",
+                "date": "2024-08-20",
+                "question": "『カースドクイーン・ナハト・ナハト』の《起動》能力によって、相手の場の『カオスルーラー・アイシィレンドリング』を選んだ場合、『カオスルーラー・アイシィレンドリング』の「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、チェックタイミングで解決します。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-006"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b219530ff1f6528fd5bc5869f76fdfe524466e7383f82ca15ca3e9074fc3a37c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-005",
+            "fetched_at": "2026-09-24T19:23:51.286058Z"
+          },
+          "document_ref": "documents-91b5164cc32d8be9"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-006",
+      "documents": {
+        "documents-99fec928ffc0a43e": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-006",
+            "faces": [
+              {
+                "name": "カオスルーラー・アイシィレンドリング",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "-",
+                "power": "6",
+                "hp": "6",
+                "text": "これがアクトしたとき、相手プレイヤーすべては、自身の手札1枚を捨てる。\n自分のターン中、いずれかのプレイヤーが自身の手札1枚を捨てたとき、相手の場のフォロワー1体を選ぶ。それをアクトする。\n【進化時】手札1枚を捨てる：自分の墓場のフォロワー2枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-006.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1544",
+                "date": "2024-08-20",
+                "question": "自分のターン中に、相手プレイヤーが自身の手札2枚を捨てた場合、このフォロワーの「自分のターン中、いずれかのプレイヤーが自身の手札1枚を捨てたとき、相手の場のフォロワー1体を選ぶ。それをアクトする。」は2回誘発しますか？",
+                "answer": "はい。2回誘発します。"
+              },
+              {
+                "id": "Q1543",
+                "date": "2024-08-20",
+                "question": "このフォロワーの【進化時】能力で墓場のカードを選ぶとき、このフォロワーの【進化時】能力のコストで捨てたカードを選ぶことはできますか？",
+                "answer": "いいえ。コストを支払う前に目標を選ぶ必要があるため、選ぶことはできません。"
+              },
+              {
+                "id": "Q1542",
+                "date": "2024-08-20",
+                "question": "自分の墓場のフォロワーが1枚以下の場合、『カオスルーラー・アイシィレンドリング（EVOLVE）』の【進化時】能力をプレイすることができますか？",
+                "answer": "いいえ。自分の墓場のフォロワー2枚を選ぶことができない場合、『カオスルーラー・アイシィレンドリング（EVOLVE）』の【進化時】能力をプレイすることができません。"
+              },
+              {
+                "id": "Q1502",
+                "date": "2024-08-20",
+                "question": "『カースドクイーン・ナハト・ナハト』の《起動》能力によって、相手の場の『カオスルーラー・アイシィレンドリング』を選んだ場合、『カオスルーラー・アイシィレンドリング』の「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、チェックタイミングで解決します。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-005"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5a73af9dba6a5423a952d0bb931dc09b4fd58daa9e9a8b77d365328dbb51f2c9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-006",
+            "fetched_at": "2026-09-24T19:23:54.192868Z"
+          },
+          "document_ref": "documents-99fec928ffc0a43e"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-007",
+      "documents": {
+        "documents-f15a9ff30861fc67": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-007",
+            "faces": [
+              {
+                "name": "ストレイホロウ・イルガンノ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "LG",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}自分の墓場の元のコスト3以下の荒野・フォロワー1枚を選ぶ。【ネクロチャージ_10】それを場に出してよい。そうしたなら、これは消滅する。\n{ラストワード}これをEXエリアに置く。自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-007.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1548",
+                "date": "2024-08-20",
+                "question": "自分の墓場が10枚以上の状況で、『ネフティス』の《ファンファーレ》能力をプレイし、『ストレイホロウ・イルガンノ』を場に出して破壊しました。この場合、『ストレイホロウ・イルガンノ』の《ファンファーレ》能力で、墓場に置かれたこの『ストレイホロウ・イルガンノ』自身を選び、場に出すことができますか？",
+                "answer": "はい。《ファンファーレ》能力を解決する際に、その『ストレイホロウ・イルガンノ』は墓場に置かれているため、場に出すことができます。その場合、墓場から場に出た『ストレイホロウ・イルガンノ』は消滅しません。\nまた、《ファンファーレ》能力によって、その『ストレイホロウ・イルガンノ』を選び場に出した後、《ラストワード》能力を解決した場合、場の『ストレイホロウ・イルガンノ』はEXエリアに置かれません。"
+              },
+              {
+                "id": "Q1547",
+                "date": "2024-08-20",
+                "question": "自分の墓場が10枚以上の状況で、『ネフティス』の《ファンファーレ》能力をプレイし、『ストレイホロウ・イルガンノ』を場に出して破壊しました。この状況で『ストレイホロウ・イルガンノ』の《ファンファーレ》能力を解決し、自分の墓場の元のコスト3以下の荒野・フォロワーを場に出した場合、この『ストレイホロウ・イルガンノ』は消滅しますか？",
+                "answer": "いいえ。《ファンファーレ》能力を解決する際に、すでに場にいないため、その『ストレイホロウ・イルガンノ』は消滅しません。"
+              },
+              {
+                "id": "Q1546",
+                "date": "2024-08-20",
+                "question": "『ネフティス』の《ファンファーレ》能力によって、『ストレイホロウ・イルガンノ』を場に出して破壊した場合、《ラストワード》能力を先に解決することができますか？",
+                "answer": "はい。誘発して待機状態になっている《ファンファーレ》能力と《ラストワード》能力は任意の順番で解決できます。"
+              },
+              {
+                "id": "Q1545",
+                "date": "2024-08-20",
+                "question": "自分のEXエリアが上限枚数の状況で、このフォロワーが場から墓場に置かれた場合、《ラストワード》能力の処理はどうなりますか？",
+                "answer": "EXエリアに置くことができないので、墓場から移動しません。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0f58a2d9d1ba803ce2a1637edde09706a5296f8bac52f891a7bc2e3841f39fca",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-007",
+            "fetched_at": "2026-09-24T19:23:57.160755Z"
+          },
+          "document_ref": "documents-f15a9ff30861fc67"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-008",
+      "documents": {
+        "documents-2869c448e8a9133a": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-008",
+            "faces": [
+              {
+                "name": "一刀の幽鬼・カゲロウ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "死者"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "【ネクロチャージ_10】これは【突進】【必殺】を持つ。（【必殺】を持つフォロワーと交戦した相手のフォロワーは、ダメージを与え合ったあと破壊される）\n{ファンファーレ}下記から1つチョイスする。【1】自分の墓場の『魂の一刀』1枚を選ぶ。それをEXエリアに置く。【NC_20】このターン、それをプレイする際、コストを-2する。【2】自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-008.png",
+                "trait_raw": "荒野・死者"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1780",
+                "date": "2024-12-13",
+                "question": "『一刀の幽鬼・カゲロウ』の「【ネクロチャージ_10】これは【突進】【必殺】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場が10枚以上ある限り、『一刀の幽鬼・カゲロウ』は【突進】【必殺】を持ちます。\n『一刀の幽鬼・カゲロウ』が場にいる状況で自分の墓場が9枚以下から10枚以上になった場合、【突進】【必殺】を持ちます。\n『一刀の幽鬼・カゲロウ』が場にいる状況で自分の墓場が10枚以上から9枚以下になった場合、【突進】【必殺】を失います。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-014"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:509076697953c85dbd22ddaa95387af839e1f782da16ab5cb32a000f662cd401",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-008",
+            "fetched_at": "2026-09-24T19:24:00.132931Z"
+          },
+          "document_ref": "documents-2869c448e8a9133a"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-009",
+      "documents": {
+        "documents-463072ceaf5241e5": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-009",
+            "faces": [
+              {
+                "name": "人外魔境・クリストフ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "死者",
+                  "キラー"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{ファンファーレ}自分の墓場の「これと同名を除く元のコスト5以下の{ナイトメア}フォロワー」1枚を選ぶ。【ネクロチャージ_10】それを場に出す。それは【守護】を持つ。（自分の墓場が10枚以上なら、【ネクロチャージ_10】の後の能力が働く）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-009.png",
+                "trait_raw": "死者・キラー"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1781",
+                "date": "2024-12-13",
+                "question": "自分の墓場が10枚の状況で、このフォロワーの《ファンファーレ》能力をプレイした場合、【ネクロチャージ_10】の効果は適用されますか？",
+                "answer": "はい。適用されます。自分の墓場の「これと同名を除く元のコスト5以下の《ナイトメア》フォロワー」1枚を場に出し、それは【守護】を持ちます。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5614d6abc2b75dd43106c98507c42981329a2d75b34e5e0a9833b5f780e79d6c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-009",
+            "fetched_at": "2026-09-24T19:24:02.770931Z"
+          },
+          "document_ref": "documents-463072ceaf5241e5"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-010",
+      "documents": {
+        "documents-985e67175b00c8d7": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-010",
+            "faces": [
+              {
+                "name": "ブラックスワン・オディール",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "童話"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "5",
+                "power": "6",
+                "hp": "4",
+                "text": "【攻撃時】相手のリーダーすべてと相手の場のフォロワーすべてに2ダメージ。\n{ファンファーレ}相手のリーダーすべてと相手の場のフォロワーすべてに2ダメージ。【ネクロチャージ_20】これは【疾走】を持つ。（【疾走】を持つフォロワーは、場に出たターンから攻撃できる）",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-010.png",
+                "trait_raw": "童話"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:42fb6831a146b83602deefa9edc9c98af196f2432b9def0cbc258dd3e07b892e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-010",
+            "fetched_at": "2026-09-24T19:24:05.652256Z"
+          },
+          "document_ref": "documents-985e67175b00c8d7"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-011",
+      "documents": {
+        "documents-cefed6553c1afe5a": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-011",
+            "faces": [
+              {
+                "name": "デッドペナルティ",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "GR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}墓場のこれと『カオスルーラー・アイシィレンドリング』1枚を消滅：相手の場のフォロワー1体を選ぶ。それをアクトする。",
+                "sections": [
+                  "{クイック}\n相手の場のフォロワー1体を選ぶ。それは{攻撃力}-2/{体力}-2する。"
+                ],
+                "flavor": null,
+                "illustrator": "南保あたる",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-011.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1556",
+                "date": "2024-08-20",
+                "question": "相手の場に『大妖狐・ギンセツ（EVOLVE）』と『酒呑童子（EVOLVE）』がいる状況で、『酒呑童子（EVOLVE）』が攻撃し、攻撃目標に自分のリーダーを選択しました。その後のクイックタイミングにおいて、攻撃している『酒呑童子（EVOLVE）』を目標に『デッドペナルティ』をプレイし、攻撃力と体力を-2しました。この場合、『大妖狐・ギンセツ（EVOLVE）』の能力によって、相手の妖怪・フォロワーが与えるダメージは+1されるため、自分のリーダーが受けるダメージは1ですか？",
+                "answer": "いいえ。自分のリーダーはダメージを受けません。\n『デッドペナルティ』によって、攻撃している『酒吞童子（EVOLVE）』の攻撃力が0になり、ダメージを与えるという行動が起こりません。すなわち『大妖狐・ギンセツ（EVOLVE）』の「自分の場の妖怪・フォロワーが与えるダメージを+1する。」を適用する際に、ダメージを与えるという行動自体が存在しないため、何も適用されず、最終的に「ダメージを与えない」となります。"
+              },
+              {
+                "id": "Q1555",
+                "date": "2024-08-20",
+                "question": "フォロワーの攻撃力がマイナスの値になることがありますか？",
+                "answer": "はい。何らかの効果によって攻撃力はマイナスの値になることがあります。攻撃力がマイナスの値になったフォロワーによる攻撃や交戦のダメージは、ダメージ自体を与えません。"
+              },
+              {
+                "id": "Q1554",
+                "date": "2024-08-20",
+                "question": "「《起動》墓場のこれと『カオスルーラー・アイシィレンドリング』1枚を消滅：相手の場のフォロワー1体を選ぶ。それをアクトする。」という能力は、『デッドペナルティ』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『デッドペナルティ』が墓場にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-005"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:77d6a7ee5550aec69a553d6bee4a678831e86c81610add73f7d6272a43484433",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-011",
+            "fetched_at": "2026-09-24T19:24:08.603601Z"
+          },
+          "document_ref": "documents-cefed6553c1afe5a"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-012",
+      "documents": {
+        "documents-b10f441cca423fa7": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-012",
+            "faces": [
+              {
+                "name": "異形",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。この能力はこれが墓場から場に出ていたなら使える。\n【突進】（【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）\n{ラストワード}『機動二輪車』1つを場に出す。自分のデッキの上2枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-012.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-013"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fee01cb9384778a3c8257969f4a15f75d1ee9c2e14b8be350cef60356434a07d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-012",
+            "fetched_at": "2026-09-24T19:24:11.214590Z"
+          },
+          "document_ref": "documents-b10f441cca423fa7"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-013",
+      "documents": {
+        "documents-1d77e4ac2890410e": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-013",
+            "faces": [
+              {
+                "name": "異形",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "3",
+                "text": "【疾走】\n【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。\n{ラストワード}『機動二輪車』1つを場に出す。自分のデッキの上2枚を墓場に置く。",
+                "sections": [
+                  "『機動二輪車』{ニュートラル}荒野・乗物・アミュレット{コスト1}{起動}これを墓場に置く：自分の場のフォロワー1体を選ぶ。それは【突進】を持つ。それが荒野・フォロワーなら、それは{攻撃力}+1する。"
+                ],
+                "flavor": null,
+                "illustrator": "77gl",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-013.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-012"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-T06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d13b5c8e2f0062711def862f5807456d911592058fba6729b43a417a151f5c08",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-013",
+            "fetched_at": "2026-09-24T19:24:14.142649Z"
+          },
+          "document_ref": "documents-1d77e4ac2890410e"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-014",
+      "documents": {
+        "documents-6a4fc7d989c97f15": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-014",
+            "faces": [
+              {
+                "name": "魂の一刀",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "荒野",
+                  "死者"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワー1体を選ぶ。それに4ダメージ。【ネクロチャージ_20】それのリーダーに4ダメージ。",
+                "sections": [],
+                "flavor": "――いくさの折。彼は常、脳内に唱える文言がある。\n致し方無し。退路無し。斬り結ぶより他無し――。",
+                "illustrator": "まよこ",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-014.png",
+                "trait_raw": "荒野・死者"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5146dbe9ebb69367b12688bf9d7d1831023570fdeb224f01b9991955777b3b26",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-014",
+            "fetched_at": "2026-09-24T19:24:16.739240Z"
+          },
+          "document_ref": "documents-6a4fc7d989c97f15"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-015",
+      "documents": {
+        "documents-847543e145459793": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-015",
+            "faces": [
+              {
+                "name": "ヴォイドリアライズ",
+                "card_class": "ナイトメア",
+                "card_type": "スペル",
+                "traits": [
+                  "荒野",
+                  "死者",
+                  "魔界"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "自分の墓場の元のコスト3以下の荒野・フォロワー2枚を選ぶ。【ネクロチャージ_10】それを場に出す。",
+                "sections": [],
+                "flavor": "これは怒り？アナタは敵？\n……あぁ、何もかも、分からない。",
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-015.png",
+                "trait_raw": "荒野・死者・魔界"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1559",
+                "date": "2024-08-20",
+                "question": "自分の墓場が9枚以下の状況でこのスペルをプレイすることができますか？",
+                "answer": "はい。自分の墓場の元のコスト3以下の荒野・フォロワー2枚を選ぶことができる場合、このスペルをプレイすることができます。その場合、【ネクロチャージ_10】を満たしていないため、選んだフォロワーを場に出すことができません。"
+              },
+              {
+                "id": "Q1558",
+                "date": "2024-08-20",
+                "question": "自分の墓場の元のコスト3以下の荒野・フォロワーが1枚以下の場合、このスペルをプレイすることができますか？",
+                "answer": "いいえ。自分の墓場の元のコスト3以下の荒野・フォロワー2枚を選ぶことができない場合、このスペルをプレイすることができません。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5160161162b26675b998652dfe84dfdef3abe91e36836370df4885c3b31cfa5f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-015",
+            "fetched_at": "2026-09-24T19:24:19.209026Z"
+          },
+          "document_ref": "documents-847543e145459793"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-016",
+      "documents": {
+        "documents-24bf57b817bae705": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-016",
+            "faces": [
+              {
+                "name": "冒涜の墓場",
+                "card_class": "ナイトメア",
+                "card_type": "アミュレット",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}自分のデッキの上2枚を墓場に置く。\n{起動}{コスト2}これを{アクト}墓場に置く：自分の墓場の死者・フォロワー1枚を選ぶ。それを手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "NAVAR",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-016.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP04-091"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b592aa31ef4a5d9b2e2ae97d3d6b8ca548cda622c9bc2efe743f4e509ebc8559",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-016",
+            "fetched_at": "2026-09-24T19:24:21.821333Z"
+          },
+          "document_ref": "documents-24bf57b817bae705"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-017",
+      "documents": {
+        "documents-5e6a78c794746b73": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-017",
+            "faces": [
+              {
+                "name": "放浪する料理人",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "荒野",
+                  "コック"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の場か自分のEXエリアに乗物・カードがあるなら、自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "山本しかく",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-017.png",
+                "trait_raw": "荒野・コック"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-018"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:39ff8c085ed0d668f1d26c81ebb941b47c17a1c8c4a9c9cb93c5512f472659d5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-017",
+            "fetched_at": "2026-09-24T19:24:24.836497Z"
+          },
+          "document_ref": "documents-5e6a78c794746b73"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-018",
+      "documents": {
+        "documents-12efb3f96655925c": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-018",
+            "faces": [
+              {
+                "name": "放浪する料理人",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "荒野",
+                  "コック"
+                ],
+                "rarity": "SR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上4枚を見る。その中から、荒野・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "山本しかく",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-018.png",
+                "trait_raw": "荒野・コック"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-017"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7dd8024d1cfb325b5b0ca069b5105eaf662e0c07c5c8f63e78fb8c19920e32b2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-018",
+            "fetched_at": "2026-09-24T19:24:27.719929Z"
+          },
+          "document_ref": "documents-12efb3f96655925c"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-019",
+      "documents": {
+        "documents-07c9327681583a36": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-019",
+            "faces": [
+              {
+                "name": "絶叫の崇拝者",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "死霊術師"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ラストワード}自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": "世界が新たに授かったのは、青き石板。その右方。\n黙する者たちは記録を掲げて、地上へと戻り絶叫を為す。",
+                "illustrator": "SEMSEI",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-019.png",
+                "trait_raw": "絶傑・死霊術師"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-020"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:109cbbec976455c607f0a9160dd764bc7a2f901525c366339f1cb539a6f5b5cf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-019",
+            "fetched_at": "2026-09-24T19:24:30.600898Z"
+          },
+          "document_ref": "documents-07c9327681583a36"
+        }
+      ]
+    },
+    {
+      "card_no": "EBD03-020",
+      "documents": {
+        "documents-b960b27c7dd65efa": {
+          "region": "jp",
+          "record": {
+            "number": "EBD03-020",
+            "faces": [
+              {
+                "name": "絶叫の崇拝者",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "絶傑",
+                  "死霊術師"
+                ],
+                "rarity": "BR",
+                "product": "EXビギナーデッキ「ナイトメア」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】下記から1つチョイスする。【1】自分の墓場の「カード名に『ルルナイ』を含むフォロワー」1枚を選ぶ。それを場に出す。【2】相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ラストワード}自分のデッキの上1枚を墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "SEMSEI",
+                "image": "/wordpress/wp-content/images/cardlist/EBD03/ebd03-020.png",
+                "trait_raw": "絶傑・死霊術師"
+              }
+            ],
+            "release_date": "2025-11-21",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2030",
+                "date": "2025-04-07",
+                "question": "自分の墓場に選ぶことのできるフォロワーがなく、相手の場のフォロワーを選ぶこともできない場合、このフォロワーの【進化時】能力をプレイすることができますか？",
+                "answer": "いいえ。その場合、適切な目標を選ぶことができないため、このフォロワーの【進化時】能力をプレイすることができず、何も起こりません。"
+              },
+              {
+                "id": "Q2029",
+                "date": "2025-04-07",
+                "question": "自分の墓場に選ぶことのできるフォロワーがない場合、このフォロワーの【進化時】能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。"
+              },
+              {
+                "id": "Q2028",
+                "date": "2025-04-07",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力で【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【2】をチョイスすることができず、【1】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-b3eaf219c905ac85",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-070"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-074"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-003"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=EBD03-019"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5ffe3c4c4706153d5c70d724eed68c1ed526c07d73bddf95ba9d057bb970221f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=EBD03-020",
+            "fetched_at": "2026-09-24T19:24:33.435132Z"
+          },
+          "document_ref": "documents-b960b27c7dd65efa"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,644 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP13",
+  "range": "T/000-099",
+  "products": {
+    "products-c15cb00f9e27c3da": [
+      {
+        "name": "ブースターパック第13弾「暗黒降誕」",
+        "date": "2024-12-13",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP13",
+          "https://shadowverse-evolve.com/products/bp13/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP13-T01",
+      "documents": {
+        "documents-2aec30ac18efaf83": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T01",
+            "faces": [
+              {
+                "name": "アンの大英霊",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "ゴーレム",
+                  "魔法生物",
+                  "学院"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "2",
+                "power": "4",
+                "hp": "4",
+                "text": "【突進】【守護】\n自分のメインフェイズが来たとき、これは消滅する。\n{ファンファーレ}自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t01.png",
+                "trait_raw": "ゴーレム・魔法生物・学院"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6519354fbbc2ca381f76dfd2d2133a205284003a95986456ac56148bd5b03bf6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T01",
+            "fetched_at": "2026-09-24T20:38:58.006030Z"
+          },
+          "document_ref": "documents-2aec30ac18efaf83"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T02",
+      "documents": {
+        "documents-b21a808c172eecd7": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T02",
+            "faces": [
+              {
+                "name": "フェイタルバーン",
+                "card_class": "ウィッチ",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "魔法使い",
+                  "学院",
+                  "プリンセス",
+                  "キラー"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに4ダメージ。【2】相手の場のフォロワー2体を選ぶ。自分の墓場の学院・カードが15枚以上なら、それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t02.png",
+                "trait_raw": "魔法使い・学院・プリンセス・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1811",
+                "date": "2024-12-13",
+                "question": "自分の墓場の学院・カードが14枚以下の場合、【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "はい。【2】をチョイスすることができます。\nその場合、「自分の墓場の学院・カードが15枚以上なら、」を満たさないため、何も起こりません。"
+              },
+              {
+                "id": "Q1810",
+                "date": "2024-12-13",
+                "question": "相手の場のフォロワーが1体のみの場合、【2】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【2】をチョイスすることができず、【1】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0806489f42d6838fd06a0c92324664c1a0f3ee5a838f03eb8569115fab7a084a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T02",
+            "fetched_at": "2026-09-24T20:39:00.777728Z"
+          },
+          "document_ref": "documents-b21a808c172eecd7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T03",
+      "documents": {
+        "documents-c7c559eb9b5e1225": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T03",
+            "faces": [
+              {
+                "name": "紅の牙",
+                "card_class": "ナイトメア",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "荒野",
+                  "吸血鬼"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のリーダーに1ダメージ。相手の場のフォロワーすべてに1ダメージ。自分の場の『永劫の吸血鬼・アルザード』すべては{攻撃力}+1して、【ドレイン】を持つ。自分のエボルヴデッキの表向きの『永劫の吸血鬼・アルザード』が3枚なら、さらに{攻撃力}+3/{体力}+3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t03.png",
+                "trait_raw": "荒野・吸血鬼"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-071"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP13-072"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:068623900b53b0641dff9e115151050eeaffb022051af8f672d5c8a5c92dd8c1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T03",
+            "fetched_at": "2026-09-24T20:39:03.596791Z"
+          },
+          "document_ref": "documents-c7c559eb9b5e1225"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T04",
+      "documents": {
+        "documents-7999e56e21070ae0": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T04",
+            "faces": [
+              {
+                "name": "インモラルディザイア",
+                "card_class": "ナイトメア",
+                "card_type": "スペル・トークン",
+                "traits": [
+                  "死者",
+                  "キラー"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、追加コストとして場のフォロワー2体を墓場に置く。（追加コストを支払わなければプレイできない）\n相手のリーダーすべてに2ダメージ。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "岡田学彌",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t04.png",
+                "trait_raw": "死者・キラー"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1812",
+                "date": "2024-12-13",
+                "question": "追加コストとして場のフォロワー2体を墓場に置くことなく、このスペルをプレイすることはできますか？",
+                "answer": "いいえ。追加コストを支払わなければ『インモラルディザイア』をプレイすることはできません。"
+              }
+            ],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9145621d5ff0ace311871a53258df57f521d104e77ea50d1421c2336fb4678c5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T04",
+            "fetched_at": "2026-09-24T20:39:06.569674Z"
+          },
+          "document_ref": "documents-7999e56e21070ae0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T05",
+      "documents": {
+        "documents-ce80f79ba8dc09fc": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T05",
+            "faces": [
+              {
+                "name": "エッジアーティファクト",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "5",
+                "power": "3",
+                "hp": "4",
+                "text": "【突進】【ドレイン】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Shukei",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t05.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:945121ff91576ea6bf3ea1470149d5e9b0487132bed4254d9e03dea920229e94",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T05",
+            "fetched_at": "2026-09-24T20:39:09.198807Z"
+          },
+          "document_ref": "documents-ce80f79ba8dc09fc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T06",
+      "documents": {
+        "documents-b581aecef43e39eb": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T06",
+            "faces": [
+              {
+                "name": "フェアリーウィスプ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "0",
+                "power": "1",
+                "hp": "1",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t06.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3439234a0037cad4b7ece8d4e3892f4f27493e4a270a8007c304aeacb95518f7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T06",
+            "fetched_at": "2026-09-24T20:39:11.816763Z"
+          },
+          "document_ref": "documents-b581aecef43e39eb"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T07",
+      "documents": {
+        "documents-97849a570e44d4d6": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T07",
+            "faces": [
+              {
+                "name": "フェアリー",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": "カイエダヒロシ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t07.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fe85f575394759ece3059b4e23d6fb973c830bd683db91010acccc9bdfb40325",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T07",
+            "fetched_at": "2026-09-24T20:39:14.473842Z"
+          },
+          "document_ref": "documents-97849a570e44d4d6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T08",
+      "documents": {
+        "documents-c54a1b78ae6b598f": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T08",
+            "faces": [
+              {
+                "name": "スティールナイト",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t08.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d16c22a0cf16dff38066c77399fac198e4abe2535ea9813234ece4cf387f0078",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T08",
+            "fetched_at": "2026-09-24T20:39:17.348260Z"
+          },
+          "document_ref": "documents-c54a1b78ae6b598f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T09",
+      "documents": {
+        "documents-beadbdc52430f842": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T09",
+            "faces": [
+              {
+                "name": "シールドガーディアン",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "兵士"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【守護】",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "LQH",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t09.png",
+                "trait_raw": "兵士"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4f3327ca860edd3de65227dd38cb774507fbcfcd39eb797166865ec4e389c754",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T09",
+            "fetched_at": "2026-09-24T20:39:19.851171Z"
+          },
+          "document_ref": "documents-beadbdc52430f842"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T10",
+      "documents": {
+        "documents-d2bd195128e97340": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T10",
+            "faces": [
+              {
+                "name": "ドラゴン",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "4",
+                "power": "5",
+                "hp": "5",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t10.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:51513cd319ac454da1cec01de67db82858fdce1f4ecf67e67f0a0d4596aee7ce",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T10",
+            "fetched_at": "2026-09-24T20:39:22.818959Z"
+          },
+          "document_ref": "documents-d2bd195128e97340"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T11",
+      "documents": {
+        "documents-fc36cbdfe5dc8d04": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T11",
+            "faces": [
+              {
+                "name": "ゴースト",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "死者"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【疾走】\n自分のエンドフェイズが来たとき、これは消滅する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "銀",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t11.png",
+                "trait_raw": "死者"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:88cf41c50e91f67ace90974499fecc626a4de29f9fd70e08a8a4d635f583ccfa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T11",
+            "fetched_at": "2026-09-24T20:39:25.524362Z"
+          },
+          "document_ref": "documents-fc36cbdfe5dc8d04"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-T12",
+      "documents": {
+        "documents-422fd8cd0a429131": {
+          "region": "jp",
+          "record": {
+            "number": "BP13-T12",
+            "faces": [
+              {
+                "name": "ミスティックアーティファクト",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・トークン",
+                "traits": [
+                  "超克"
+                ],
+                "rarity": "-",
+                "product": "ブースターパック第13弾「暗黒降誕」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ゾウノセ",
+                "image": "/wordpress/wp-content/images/cardlist/BP13/bp13-t12.png",
+                "trait_raw": "超克"
+              }
+            ],
+            "release_date": "2024-12-13",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-c15cb00f9e27c3da",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:be8d676daaf920b6cbfef86ba9a4c3e9f644dd5b21148736ed946c19a346c902",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP13-T12",
+            "fetched_at": "2026-09-24T20:39:28.299866Z"
+          },
+          "document_ref": "documents-422fd8cd0a429131"
+        }
+      ]
+    }
+  ]
+}

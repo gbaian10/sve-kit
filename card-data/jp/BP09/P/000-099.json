@@ -1,0 +1,2133 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "BP09",
+  "range": "P/000-099",
+  "products": {
+    "products-5147ab049b2681a1": [
+      {
+        "name": "ブースターパック第9弾「光影の二重奏」",
+        "date": "2024-02-23",
+        "links": [
+          "/cardlist/cardsearch?expansion=BP09",
+          "https://shadowverse-evolve.com/products/bp09/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP09-P01",
+      "documents": {
+        "documents-10665be47e595356": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P01",
+            "faces": [
+              {
+                "name": "愛の妖精・ポーラ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは『深緑の純心・ポーラ』か『真紅の絆・ポーラ』に進化する。",
+                "sections": [],
+                "flavor": "私が担うべき愛のカタチ……。\nそれは奉仕の愛、尽くす愛。精一杯、貴方にご奉仕いたします。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p01.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1152",
+                "date": "2024-02-16",
+                "question": "このフォロワーは『深緑の純心・ポーラ』か『真紅の絆・ポーラ』のどちらかの面を選択して進化することができますか？",
+                "answer": "はい。『深緑の純心・ポーラ』か『真紅の絆・ポーラ』のどちらかの面を選択し、そのエボルヴフォロワーに進化することができます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P02"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ffbb7ecaa9e85ff493be1962ab0183cb6881b9b1e481b54695c6fce6e7addf50",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P01",
+            "fetched_at": "2026-09-24T21:46:20.742125Z"
+          },
+          "document_ref": "documents-10665be47e595356"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P02",
+      "documents": {
+        "documents-1088a608e31feab7": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P02",
+            "faces": [
+              {
+                "name": "深緑の純心・ポーラ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上5枚を見る。その中から、{エルフ}スペル1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p02.png",
+                "trait_raw": "妖精"
+              },
+              {
+                "name": "真紅の絆・ポーラ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "妖精"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": null,
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【攻撃時】【コンボ_3】相手の場のフォロワー1体を選ぶ。それに3ダメージ。\n【進化時】自分の場の他のカード2枚まで選ぶ。それをEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p02_ura.png",
+                "trait_raw": "妖精"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1361",
+                "date": "2024-04-15",
+                "question": "自分のEXエリアにカードが4枚ある状況で、『真紅の絆・ポーラ』の【進化時】能力によって自分の場のカード2枚を選んだ場合、その選んだカードはどうなりますか？",
+                "answer": "選んだカード2枚のうち1枚を選択してEXエリアに置きます。もう1枚は場から移動しません。"
+              },
+              {
+                "id": "Q1254",
+                "date": "2024-03-08",
+                "question": "『真紅の絆・ポーラ』の【進化時】能力によって、自分の場の『決意の人形・オーキス』と『操り人形』をEXエリアに置いた場合、『決意の人形・オーキス』の「自分のターンごとに1回、自分の『操り人形』が場を離れたとき、『ロイド』1枚をEXエリアに置く。」という能力は誘発しますか？",
+                "answer": "はい。自分の場の『決意の人形・オーキス』と『操り人形』が同時に場を離れた場合も、自分のターンごとに1回誘発します。"
+              },
+              {
+                "id": "Q1155",
+                "date": "2024-02-16",
+                "question": "『真紅の絆・ポーラ』の【進化時】能力でトークンを目標に選んでプレイしたとき、選ばれたトークンはゲームから取り除かれますか？",
+                "answer": "いいえ。ゲームからは取り除かれず、EXエリアに置かれます。\nトークンであるフォロワーやアミュレットは場とEXエリアと解決領域でのみ存在できます。それ以外の領域に移動した場合、移動した直後に取り除きます。"
+              },
+              {
+                "id": "Q1154",
+                "date": "2024-02-16",
+                "question": "『真紅の絆・ポーラ』の【進化時】能力によってEXエリアに置かれたカードに付与された効果や増減されていた攻撃力や体力、置かれていたカウンターはすべて失われますか？",
+                "answer": "はい。そのカードに付与されていた効果や増減されていた攻撃力や体力、置かれていたカウンターはすべて失われ、リセットされます。"
+              },
+              {
+                "id": "Q1153",
+                "date": "2024-02-16",
+                "question": "自分のターン中、手札から『愛の妖精・ポーラ』をプレイし、次にEXエリアから『フェアリー』をプレイしました。その後、場に出した『愛の妖精・ポーラ』を『真紅の絆・ポーラ』に進化して攻撃した場合、『真紅の絆・ポーラ』の【攻撃時】能力にある【コンボ_3】の条件を満たしていますか？",
+                "answer": "いいえ。フォロワーの進化はカードのプレイには含まず、このターンにプレイしたカードは『愛の妖精・ポーラ』と『フェアリー』の2枚のみのため、【コンボ_3】の条件を満たしていません。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P01"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:01a183670586b1d8c6ec90e25e0bc9bb834d1cf129775b1ab488892267312f05",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P02",
+            "fetched_at": "2026-09-24T21:46:23.680507Z"
+          },
+          "document_ref": "documents-1088a608e31feab7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P03",
+      "documents": {
+        "documents-7d187fef15768e86": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P03",
+            "faces": [
+              {
+                "name": "森羅の怒り",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "精霊",
+                  "植物族",
+                  "キラー"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "4",
+                "power": "-",
+                "hp": "-",
+                "text": "相手の場のフォロワーすべてに3ダメージ。自分の墓場にある{エルフ}スペルのカード名の種類数が5種類以上なら、代わりに5ダメージ。相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p03.png",
+                "trait_raw": "精霊・植物族・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1156",
+                "date": "2024-02-16",
+                "question": "自分の墓場にある《エルフ》スペルのカード名の種類数が4種類かつ、このスペルと同名のスペルが墓場にない状況で、このスペルをプレイした場合、「自分の墓場にある《エルフ》スペルのカード名の種類数が5種類以上なら、」の条件を満たすことはできますか？",
+                "answer": "いいえ。効果の解決中にこのスペルは墓場に置かれていないので、「自分の墓場にある《エルフ》スペルのカード名の種類数が5種類以上なら、」の条件を満たすことはできません。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c55c8ed8957d6f5b5348af6783ea4d52c0acc93c170df555d0a46ea43e9ff0e4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P03",
+            "fetched_at": "2026-09-24T21:46:26.593646Z"
+          },
+          "document_ref": "documents-7d187fef15768e86"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P04",
+      "documents": {
+        "documents-56b75c693ab6fd9e": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P04",
+            "faces": [
+              {
+                "name": "万象の加護",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "精霊",
+                  "植物族",
+                  "光輝"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "{クイック}\n1枚引く。自分の墓場にある{エルフ}スペルのカード名の種類数が5種類以上なら、自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p04.png",
+                "trait_raw": "精霊・植物族・光輝"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1156",
+                "date": "2024-02-16",
+                "question": "自分の墓場にある《エルフ》スペルのカード名の種類数が4種類かつ、このスペルと同名のスペルが墓場にない状況で、このスペルをプレイした場合、「自分の墓場にある《エルフ》スペルのカード名の種類数が5種類以上なら、」の条件を満たすことはできますか？",
+                "answer": "いいえ。効果の解決中にこのスペルは墓場に置かれていないので、「自分の墓場にある《エルフ》スペルのカード名の種類数が5種類以上なら、」の条件を満たすことはできません。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0d710889d75c1541f80cb3b938cdd26b653bd967d9c33ab5575563ed62bffe7c",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P04",
+            "fetched_at": "2026-09-24T21:46:29.112390Z"
+          },
+          "document_ref": "documents-56b75c693ab6fd9e"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P05",
+      "documents": {
+        "documents-dc8460668715ede3": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P05",
+            "faces": [
+              {
+                "name": "妖精花",
+                "card_class": "エルフ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "妖精",
+                  "植物族"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "{ファンファーレ}『フェアリーウィスプ』1枚をEXエリアに置く。\n{起動}これを{アクト}墓場に置く：『フェアリー』1体を出す。",
+                "sections": [
+                  "『フェアリーウィスプ』{エルフ}妖精・フォロワー{コスト0}{攻撃力}1/{体力}1\n『フェアリー』{エルフ}妖精・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "電蝶（CyDesignation）",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p05.png",
+                "trait_raw": "妖精・植物族"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-T03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-T04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:4c26e97460d4f2e9ced7da3d547db28c93de95c389fe08f075d695608d51deb5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P05",
+            "fetched_at": "2026-09-24T21:46:32.076883Z"
+          },
+          "document_ref": "documents-dc8460668715ede3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P06",
+      "documents": {
+        "documents-d010d30a52b1cbbd": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P06",
+            "faces": [
+              {
+                "name": "イノセントプリンセス・プリム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "プリンセス"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『ナイト』1体を出す。",
+                "sections": [
+                  "『ナイト』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p06.png",
+                "trait_raw": "指揮官・プリンセス"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:02bc75f9d0319d7556ed83cc980d674e3f9dca11058ba2be5a443cf05e099eeb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P06",
+            "fetched_at": "2026-09-24T21:46:34.912645Z"
+          },
+          "document_ref": "documents-d010d30a52b1cbbd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P07",
+      "documents": {
+        "documents-9079769cad717df7": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P07",
+            "faces": [
+              {
+                "name": "イノセントプリンセス・プリム",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "指揮官",
+                  "プリンセス"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】自分のデッキから『静かなるメイド・ノーニャ』1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": "えっと、あなたは悪い方ですか？それとも良い方？\n悪かったら、ごめんなさい。お尻をぺんぺんしちゃいますね！",
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p07.png",
+                "trait_raw": "指揮官・プリンセス"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-023"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P06"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c12e54ef1fc8656e64c8ac0ee0cf7b9cf070cd97076a782250c4448594883847",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P07",
+            "fetched_at": "2026-09-24T21:46:37.769008Z"
+          },
+          "document_ref": "documents-9079769cad717df7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P08",
+      "documents": {
+        "documents-bed7f0ed99f352bc": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P08",
+            "faces": [
+              {
+                "name": "白と黒の決闘",
+                "card_class": "ロイヤル",
+                "card_type": "スペル",
+                "traits": [
+                  "指揮官",
+                  "童話"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "5",
+                "power": "-",
+                "hp": "-",
+                "text": "{起動}{コスト2}墓場のこれを消滅：自分の場の『ナイト』すべては{攻撃力}+1して、【疾走】を持つ。",
+                "sections": [
+                  "自分のデッキから『白の王・イメラ』1枚と『黒の女王・マグナス』1枚を探し、場に出す。それは{攻撃力}+1/{体力}+1する。"
+                ],
+                "flavor": null,
+                "illustrator": "永守浩太",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p08.png",
+                "trait_raw": "指揮官・童話"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1165",
+                "date": "2024-02-16",
+                "question": "『白と黒の決闘』をプレイした場合、『白の王・イメラ』か『黒の女王・マグナス』のどちらか1枚を場に出さないという選択をすることは可能ですか？",
+                "answer": "はい。可能です。デッキからカードを探す際に、『白の王・イメラ』や『黒の女王・マグナス』を見つけない選択をすることで場に出さないことができます。"
+              },
+              {
+                "id": "Q1164",
+                "date": "2024-02-16",
+                "question": "「《起動》《コスト2》墓場のこれを消滅：自分の場の『ナイト』すべては《攻撃力》+1して、【疾走】を持つ。」という能力は、『白と黒の決闘』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。墓場にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P09"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P10"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ae6b6db2049536334360741b4f652e83b6fae876e4187c28f2083703ef941049",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P08",
+            "fetched_at": "2026-09-24T21:46:41.360077Z"
+          },
+          "document_ref": "documents-bed7f0ed99f352bc"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P09",
+      "documents": {
+        "documents-023952421429fe4b": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P09",
+            "faces": [
+              {
+                "name": "白の王・イメラ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "童話",
+                  "光輝"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "3",
+                "power": "4",
+                "hp": "3",
+                "text": "【突進】\n【攻撃時】『ナイト』1枚をEXエリアに置く。\n{ファンファーレ}『ナイト』1体を出す。自分の場に『黒の女王・マグナス』がいるなら、代わりに2体。",
+                "sections": [
+                  "『ナイト』{ロイヤル}兵士・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p09.png",
+                "trait_raw": "指揮官・童話・光輝"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P10"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f5302e2031f3304f78018a2c8e0224a9cd8bea74259402e50acd061f59fe4aaa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P09",
+            "fetched_at": "2026-09-24T21:46:43.225551Z"
+          },
+          "document_ref": "documents-023952421429fe4b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P10",
+      "documents": {
+        "documents-13f6160b9ccd2426": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P10",
+            "faces": [
+              {
+                "name": "黒の女王・マグナス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "童話",
+                  "キラー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "これがいる限り、自分の場の『白の王・イメラ』すべては【指定攻撃】を持つ。\n{起動}これを{アクト}：自分の場の他の{ロイヤル}フォロワー2体まで選ぶ。それは{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p10.png",
+                "trait_raw": "指揮官・童話・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:046cbc761866c62515053069a8eaf9e298cd696c1ab0b391346928f22d2b04a1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P10",
+            "fetched_at": "2026-09-24T21:46:46.042812Z"
+          },
+          "document_ref": "documents-13f6160b9ccd2426"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P11",
+      "documents": {
+        "documents-0e2bb7d5f8e117b2": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P11",
+            "faces": [
+              {
+                "name": "マナリアの竜術士",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "学院"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト2}：これは『マナリアの白竜』か『マナリアの黒竜』に進化する。この能力は自分の墓場の学院・カードが5枚以上なら使える。\n{ファンファーレ}自分の手札の学院・カード1枚を捨ててよい。捨てたなら、1枚引く。捨てなかったなら、これを墓場に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Justice Wong",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p11.png",
+                "trait_raw": "学院"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1171",
+                "date": "2024-02-16",
+                "question": "このフォロワーは『マナリアの白竜』か『マナリアの黒竜』のどちらかの面を選択して進化することができますか？",
+                "answer": "はい。自分の墓場の学院・カードが5枚以上なら、『マナリアの白竜』か『マナリアの黒竜』のどちらかの面を選択し、そのエボルヴフォロワーに進化することができます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P12"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:db4679881bc8ed701bd0494497214611192fab7180a04c5fee3767265a6c04a8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P11",
+            "fetched_at": "2026-09-24T21:46:48.832786Z"
+          },
+          "document_ref": "documents-0e2bb7d5f8e117b2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P12",
+      "documents": {
+        "documents-9826a7ab0edcbaf3": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P12",
+            "faces": [
+              {
+                "name": "マナリアの白竜",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "学院",
+                  "光輝"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】自分のリーダーは{体力}+3する",
+                "sections": [],
+                "flavor": "我が身よ、白き竜と化せ。\n学び舎に踏み入りし者どもに……浄化の光を齎さん！",
+                "illustrator": "宮﨑章",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p12.png",
+                "trait_raw": "学院・光輝"
+              },
+              {
+                "name": "マナリアの黒竜",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "学院",
+                  "キラー"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": null,
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【指定攻撃】\n【進化時】相手のリーダーすべてに3ダメージ。",
+                "sections": [],
+                "flavor": "我が身よ、黒き竜と化せ。\n学び舎を穢せし者どもに……滅びの闇をくれてやろう！",
+                "illustrator": "InHyuk Lee",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p12_ura.png",
+                "trait_raw": "学院・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:22c2a8bf437006c280b1ed4a822dfe05e94ac9bf83f420c949fde874c007eec8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P12",
+            "fetched_at": "2026-09-24T21:46:51.851905Z"
+          },
+          "document_ref": "documents-9826a7ab0edcbaf3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P13",
+      "documents": {
+        "documents-3af16cc8bc9925e7": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P13",
+            "faces": [
+              {
+                "name": "オニオン軍団の長・バーゼント",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法使い",
+                  "魔法生物"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、『オニオン軍団』2枚まで場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p13.png",
+                "trait_raw": "魔法使い・魔法生物"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P14"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P15"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c4b13e790523a463e6ce068f467c0eedfe06bd8e02dc17be75eae4ec19526fa9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P13",
+            "fetched_at": "2026-09-24T21:46:54.677836Z"
+          },
+          "document_ref": "documents-3af16cc8bc9925e7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P14",
+      "documents": {
+        "documents-b0a9a7bfd9d71cfd": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P14",
+            "faces": [
+              {
+                "name": "オニオン軍団の長・バーゼント",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔法使い",
+                  "魔法生物"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "これがいる限り、自分の場の『オニオン軍団』が与えるダメージを+1する。\n{起動}{コスト1}これを{アクト}：自分のデッキから『オニオン軍団』2枚まで探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "liiko",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p14.png",
+                "trait_raw": "魔法使い・魔法生物"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2776",
+                "date": "2026-07-27",
+                "question": "自分の場に『オニオン軍団の長・バーゼント（EVOLVE）』2体がいる場合、自分の場の『オニオン軍団』が与えるダメージを+2しますか？",
+                "answer": "はい。自分の場の『オニオン軍団』が与えるダメージを+2します。"
+              },
+              {
+                "id": "Q1180",
+                "date": "2024-02-16",
+                "question": "自分の場に『オニオン軍団の長・バーゼント（EVOLVE）』と攻撃力が1の『オニオン軍団』がいて、相手の場に『レーヴァテインドラゴン・ディフェンスモード』がいる状況です。\nこの状況で、「自分の場の『オニオン軍団』が与えるダメージを+1する。」が適用されている自分の場の『オニオン軍団』の攻撃によって、相手の『レーヴァテインドラゴン・ディフェンスモード』と交戦しました。\nこの場合、自分の『オニオン軍団』は、相手の『レーヴァテインドラゴン・ディフェンスモード』に何ダメージ与えますか？",
+                "answer": "『レーヴァテインドラゴン・ディフェンスモード』が場にいる方のプレイヤー（相手）の選択により、「ダメージを与えない」もしくは「1ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるフォロワーは『レーヴァテインドラゴン・ディフェンスモード』なので、相手が適用順を選択します。（『レーヴァテインドラゴン・ディフェンスモード』のマスターが適用順を選択します。）\n『オニオン軍団』に適用されている「与えるダメージを+1」と『レーヴァテインドラゴン・ディフェンスモード』の「受けるダメージを-1」を任意の順で適用することができます。\n\n①「受けるダメージを-1」→「与えるダメージを+1」の順で適用する場合\n「受けるダメージを-1」を適用し、『オニオン軍団』が与えるダメージが0ダメージになります。この時点で、0ダメージ与える行動は全く行われなくなるため、ダメージを与えるという行動自体が存在しなくなります。その後、「与えるダメージを+1」を適用しますが、ダメージを与えるという行動自体がすでに存在しないため、何も適用されません。よって、最終的に「ダメージを与えない」となります。\n\n②「与えるダメージを+1」→「受けるダメージを-1」の順で適用する場合\n「与えるダメージを+1」を適用し、『オニオン軍団』が与えるダメージが2ダメージになります。その後、「受けるダメージを-1」を適用し、『オニオン軍団』が与えるダメージが1ダメージになります。"
+              },
+              {
+                "id": "Q1179",
+                "date": "2024-02-16",
+                "question": "自分の場に『オニオン軍団の長・バーゼント（EVOLVE）』と、何らかの理由によって攻撃力が0になった『オニオン軍団』がいる状況です。\nこの状況で、「自分の場の『オニオン軍団』が与えるダメージを+1する。」が適用されている自分の場の『オニオン軍団』が相手のリーダーに攻撃した場合、相手のリーダーに1ダメージ与えますか？",
+                "answer": "いいえ。相手のリーダーにダメージは与えません。\n攻撃力が0の『オニオン軍団』が相手のリーダーに攻撃した場合、『オニオン軍団』の攻撃力が0であるため、ダメージを与えるという行動が起こりません。すなわち、「自分の場の『オニオン軍団』が与えるダメージを+1する。」を適用する際に、ダメージを与えるという行動自体が存在しないため、何も適用されず、最終的に「ダメージを与えない」となります。"
+              },
+              {
+                "id": "Q1178",
+                "date": "2024-02-16",
+                "question": "「これがいる限り、自分の場の『オニオン軍団』が与えるダメージを+1する。」とは、具体的にどのようなダメージを+1しますか？",
+                "answer": "自分の場の『オニオン軍団』が相手のリーダーや相手のフォロワーに対して攻撃して与えるダメージや、自分の場の『オニオン軍団』の能力によって与えるダメージが+1されます。"
+              },
+              {
+                "id": "Q1177",
+                "date": "2024-02-16",
+                "question": "『オニオン軍団の長・バーゼント（EVOLVE）』の「これがいる限り、自分の場の『オニオン軍団』が与えるダメージを+1する。」という能力は、『オニオン軍団』の「【攻撃時】相手の場のフォロワー1体を選ぶ。それに1ダメージ」によるダメージも+1しますか？",
+                "answer": "はい。『オニオン軍団』の【攻撃時】能力によって与えるダメージも+1します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P15"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7c012cf681e7c5f014960d0edaf4d95b17be9e50d0c909d479f42e32d75c11b1",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P14",
+            "fetched_at": "2026-09-24T21:46:57.320015Z"
+          },
+          "document_ref": "documents-b0a9a7bfd9d71cfd"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P15",
+      "documents": {
+        "documents-c37347028806237b": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P15",
+            "faces": [
+              {
+                "name": "オニオン軍団",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔法生物"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【突進】\n自分の墓場に『オニオン軍団』が5枚以上ある限り、これは【疾走】と「【攻撃時】相手の場のフォロワー1体を選ぶ。それに1ダメージ」を持つ。",
+                "sections": [
+                  "『オニオン軍団』は自分のデッキに50枚まで入れることができる。"
+                ],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p15.png",
+                "trait_raw": "魔法生物"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1185",
+                "date": "2024-02-16",
+                "question": "『オニオン軍団』の「自分の墓場に『オニオン軍団』が5枚以上ある限り、これは【疾走】と「【攻撃時】相手の場のフォロワー1体を選ぶ。それに1ダメージ」を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。自分の墓場に『オニオン軍団』が5枚以上ある限り、自分の場の『オニオン軍団』は【疾走】と【攻撃時】能力を持ちます。"
+              },
+              {
+                "id": "Q1184",
+                "date": "2024-02-16",
+                "question": "「『オニオン軍団』は自分のデッキに50枚まで入れることができる。」について教えてください。",
+                "answer": "『オニオン軍団』は同一のカード名のカードはメインデッキに3枚ずつ入れることができるというルールで制限されることがなく、50枚まで入れることができます。\nまた、『オニオン軍団』はエボルヴカードではないので、エボルヴデッキに入れることはできません。"
+              },
+              {
+                "id": "Q1177",
+                "date": "2024-02-16",
+                "question": "『オニオン軍団の長・バーゼント（EVOLVE）』の「これがいる限り、自分の場の『オニオン軍団』が与えるダメージを+1する。」という能力は、『オニオン軍団』の「【攻撃時】相手の場のフォロワー1体を選ぶ。それに1ダメージ」によるダメージも+1しますか？",
+                "answer": "はい。『オニオン軍団』の【攻撃時】能力によって与えるダメージも+1します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b569fc83ef054cfdb2d7c316c30b803c8140aebb95af15357880edc1b398b9f2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P15",
+            "fetched_at": "2026-09-24T21:47:00.425438Z"
+          },
+          "document_ref": "documents-c37347028806237b"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P16",
+      "documents": {
+        "documents-9dae3459ff0f99b4": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P16",
+            "faces": [
+              {
+                "name": "リントヴルム",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜族"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "10",
+                "power": "10",
+                "hp": "10",
+                "text": "{進化}{コスト5}：これは『聖竜・リントヴルム』か『邪竜・リントヴルム』に進化する。\n{ファンファーレ}自分のPPを「自分の墓場の{ドラゴン}スペルの枚数」と同じだけ回復する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "相場良祐（CyDesignation）",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p16.png",
+                "trait_raw": "竜族"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1188",
+                "date": "2024-02-16",
+                "question": "このフォロワーは『聖竜・リントヴルム』か『邪竜・リントヴルム』のどちらかの面を選択して進化することができますか？",
+                "answer": "はい。『聖竜・リントヴルム』か『邪竜・リントヴルム』のどちらかの面を選択し、そのエボルヴフォロワーに進化することができます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P17"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P17"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f8bda6a63fe954a0ae874417747355d41041533b01ef3b4d0b5666922a376bbe",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P16",
+            "fetched_at": "2026-09-24T21:38:45.165410Z"
+          },
+          "document_ref": "documents-9dae3459ff0f99b4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P17",
+      "documents": {
+        "documents-6de8c1fa09ecdab2": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P17",
+            "faces": [
+              {
+                "name": "聖竜・リントヴルム",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜族",
+                  "光輝"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "10",
+                "hp": "10",
+                "text": "【守護】\n自分のエンドフェイズが来たとき、自分のリーダーは{体力}+6する。3枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "宮﨑章",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p17.png",
+                "trait_raw": "竜族・光輝"
+              },
+              {
+                "name": "邪竜・リントヴルム",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "竜族",
+                  "キラー"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": null,
+                "title": null,
+                "cost": "-",
+                "power": "10",
+                "hp": "10",
+                "text": "【疾走】\nこれは【守護】を無視して攻撃できる。",
+                "sections": [],
+                "flavor": "天の底より、暗雲満ちる。\n降臨するは闇の暴虐。下されるは無慈悲なる裁き。",
+                "illustrator": "宮﨑章",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p17_ura.png",
+                "trait_raw": "竜族・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P16"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:193425219e88083d18b648bb9a615618ed47928798c717f4b807c3965c8d8859",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P17",
+            "fetched_at": "2026-09-24T21:38:48.107013Z"
+          },
+          "document_ref": "documents-6de8c1fa09ecdab2"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P18",
+      "documents": {
+        "documents-12a842adf708215f": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P18",
+            "faces": [
+              {
+                "name": "斬竜剣士・ロイ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "3",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキから元のコスト2の{ドラゴン}スペル1枚を探し、手札に加える。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p18.png",
+                "trait_raw": "武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:219679dcb6e0ed47bf34988e61d3b7696d453c593f3e14775c6360f3e9dca04a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P18",
+            "fetched_at": "2026-09-24T21:38:50.939483Z"
+          },
+          "document_ref": "documents-12a842adf708215f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P19",
+      "documents": {
+        "documents-de326c4984eb8ec4": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P19",
+            "faces": [
+              {
+                "name": "斬竜剣士・ロイ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "武闘竜人",
+                  "キラー"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに2ダメージ。それが竜族・フォロワーなら、代わりに5ダメージ。",
+                "sections": [],
+                "flavor": "正義は数多。ならば、私は己が正義を貫きます。\nその果てにこそ――生の意味があると信じて。",
+                "illustrator": "hikaru",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p19.png",
+                "trait_raw": "武闘竜人・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P18"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c6612f89ee3bea7ba39912437a55c0784119fafe31b10cd36a9eb0b6779c5c1e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P19",
+            "fetched_at": "2026-09-24T21:38:53.521774Z"
+          },
+          "document_ref": "documents-de326c4984eb8ec4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P20",
+      "documents": {
+        "documents-c3458fe4df61681c": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P20",
+            "faces": [
+              {
+                "name": "オルカの大渦",
+                "card_class": "ドラゴン",
+                "card_type": "スペル",
+                "traits": [
+                  "海洋"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "『オルカ』1体を出す。【覚醒】状態なら、代わりに2体。",
+                "sections": [
+                  "『オルカ』{ドラゴン}海洋・フォロワー{コスト2}{攻撃力}2/{体力}2"
+                ],
+                "flavor": null,
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p20.png",
+                "trait_raw": "海洋"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1193",
+                "date": "2024-02-16",
+                "question": "自分の場に『原初の竜使い』がいる状況で、このスペルをプレイして『オルカ』2体を場に出した場合、『原初の竜使い』の「自分の場に他のコスト3以下の《ドラゴン》フォロワーが出たとき、～」という能力は2回誘発しますか？",
+                "answer": "はい。2回誘発します。"
+              },
+              {
+                "id": "Q1192",
+                "date": "2024-02-16",
+                "question": "【覚醒】状態を満たしており自分の場にカードが4枚ある状況で、このスペルをプレイした場合、『オルカ』1体を場に出しますか？",
+                "answer": "はい。『オルカ』1体を場に出します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d2076b58509816b27d6b66ce4eb1dcb3ea80179bc23d064de561511af4277bd4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P20",
+            "fetched_at": "2026-09-24T21:38:56.241968Z"
+          },
+          "document_ref": "documents-c3458fe4df61681c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P21",
+      "documents": {
+        "documents-e25d4faddcc8b16d": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P21",
+            "faces": [
+              {
+                "name": "血統の王",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\nこれがいる限り、自分の場の『フォレストバット』すべては【突進】【指定攻撃】を持つ。\n{ファンファーレ}『フォレストバット』2体を出す。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p21.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1201",
+                "date": "2024-02-16",
+                "question": "『血統の王』の能力によって【突進】【指定攻撃】を持った自分の場の『フォレストバット』が攻撃し、攻撃目標に相手の場のスタンド状態のフォロワーを選択しました。その後のクイックタイミングにおいて『エクスキューション』などで自分の場の『血統の王』が破壊され、攻撃している『フォレストバット』が【突進】【指定攻撃】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【突進】や【指定攻撃】を失っていても、攻撃目標の変更は行われず、その攻撃は行われます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T09"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P22"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c0ca04df564b6032bca5f4bdd0af3475ff562a5b52660146e1d2f894c1ecc50a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P21",
+            "fetched_at": "2026-09-24T21:38:59.114457Z"
+          },
+          "document_ref": "documents-e25d4faddcc8b16d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P22",
+      "documents": {
+        "documents-c90224b1c0ed0e66": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P22",
+            "faces": [
+              {
+                "name": "血統の王",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "5",
+                "text": "これがいる限り、自分の場の『フォレストバット』すべては【突進】【指定攻撃】を持つ。\n【進化時】自分の場の『フォレストバット』すべては{攻撃力}+1する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "タカヤマトシアキ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p22.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1201",
+                "date": "2024-02-16",
+                "question": "『血統の王』の能力によって【突進】【指定攻撃】を持った自分の場の『フォレストバット』が攻撃し、攻撃目標に相手の場のスタンド状態のフォロワーを選択しました。その後のクイックタイミングにおいて『エクスキューション』などで自分の場の『血統の王』が破壊され、攻撃している『フォレストバット』が【突進】【指定攻撃】を失った場合、その攻撃は行われますか？",
+                "answer": "はい。攻撃している途中で【突進】や【指定攻撃】を失っていても、攻撃目標の変更は行われず、その攻撃は行われます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T09"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P21"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c628e451c5dedeada13d9cb5ce433ab9ff68e778f7ebacc111ce8a2525ba0ca6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P22",
+            "fetched_at": "2026-09-24T21:39:02.074391Z"
+          },
+          "document_ref": "documents-c90224b1c0ed0e66"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P23",
+      "documents": {
+        "documents-cfcda00172bb6f4c": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P23",
+            "faces": [
+              {
+                "name": "宵の吸血鬼・ヴァーニア",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{起動}これを{アクト}場の『フォレストバット』1体を墓場に置く：下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに4ダメージ。1枚引く。【2】相手のリーダーすべてに2ダメージ。自分のリーダーは{体力}+2する。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p23.png",
+                "trait_raw": "吸血鬼"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e1c9e3152dd063360a8378a5e9943770291790495000d3b11fcf60aec61896bc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P23",
+            "fetched_at": "2026-09-24T21:39:04.805775Z"
+          },
+          "document_ref": "documents-cfcda00172bb6f4c"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P24",
+      "documents": {
+        "documents-6e4fea8481db74e4": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P24",
+            "faces": [
+              {
+                "name": "白夜の吸血鬼・ヴァーニア",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼",
+                  "光輝"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "自分のターンごとに1回、自分の場に『フォレストバット』が出たとき、自分のリーダーは{体力}+1する。\n{ファンファーレ}『フォレストバット』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p24.png",
+                "trait_raw": "吸血鬼・光輝"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1206",
+                "date": "2024-02-16",
+                "question": "このフォロワーが自分の場に2体いる状況で、自分の場に『フォレストバット』が出た場合、「自分のターンごとに1回、自分の場に『フォレストバット』が出たとき、～」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:74fcb36f04d86d90772b9d8bda10b608ba7360eb8786c5d9761e0acb8e8f9fd9",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P24",
+            "fetched_at": "2026-09-24T21:39:07.478585Z"
+          },
+          "document_ref": "documents-6e4fea8481db74e4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P25",
+      "documents": {
+        "documents-0e0e6b8ad999b4e3": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P25",
+            "faces": [
+              {
+                "name": "真夜中の吸血鬼・ヴァーニア",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "吸血鬼",
+                  "キラー"
+                ],
+                "rarity": "BR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "1",
+                "power": "2",
+                "hp": "1",
+                "text": "自分のターンごとに1回、自分の場に『フォレストバット』が出たとき、相手のリーダーすべてに1ダメージ。\n{ファンファーレ}『フォレストバット』1枚をEXエリアに置く。",
+                "sections": [
+                  "『フォレストバット』{ナイトメア}吸血鬼・フォロワー{コスト1}{攻撃力}1/{体力}1"
+                ],
+                "flavor": null,
+                "illustrator": "巻",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p25.png",
+                "trait_raw": "吸血鬼・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1206",
+                "date": "2024-02-16",
+                "question": "このフォロワーが自分の場に2体いる状況で、自分の場に『フォレストバット』が出た場合、「自分のターンごとに1回、自分の場に『フォレストバット』が出たとき、～」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP06-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:187cf59ae76774c362fdf0dc6337d2185a4f477dcc79af5aa39806ec8a3a1034",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P25",
+            "fetched_at": "2026-09-24T21:39:10.070910Z"
+          },
+          "document_ref": "documents-0e0e6b8ad999b4e3"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P26",
+      "documents": {
+        "documents-cba42ff07741f8f7": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P26",
+            "faces": [
+              {
+                "name": "ケリュネイア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは『明転の牝鹿・ケリュネイア』か『暗転の牝鹿・ケリュネイア』に進化する。\n{ファンファーレ}自分のデッキの上5枚を見る。その中から、アミュレット1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p26.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1207",
+                "date": "2024-02-16",
+                "question": "このフォロワーは『明転の牝鹿・ケリュネイア』か『暗転の牝鹿・ケリュネイア』のどちらかの面を選択して進化することができますか？",
+                "answer": "はい。『明転の牝鹿・ケリュネイア』か『暗転の牝鹿・ケリュネイア』のどちらかの面を選択し、そのエボルヴフォロワーに進化することができます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P27"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P27"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:eb0046604dc914d1e1075478e3ce2db781148223704c58429f2f8dbe0dee8055",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P26",
+            "fetched_at": "2026-09-24T21:39:12.840163Z"
+          },
+          "document_ref": "documents-cba42ff07741f8f7"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P27",
+      "documents": {
+        "documents-4d44a6ad3879c6fe": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P27",
+            "faces": [
+              {
+                "name": "明転の牝鹿・ケリュネイア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "獣",
+                  "光輝"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】場のアミュレット1つを墓場に置く：自分のリーダーは{体力}+4する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p27.png",
+                "trait_raw": "信仰・獣・光輝"
+              },
+              {
+                "name": "暗転の牝鹿・ケリュネイア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "獣",
+                  "キラー"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": null,
+                "title": null,
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【必殺】\n【進化時】場のアミュレット1つを墓場に置く：相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ねじ太",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p27_ura.png",
+                "trait_raw": "信仰・獣・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1208",
+                "date": "2024-02-16",
+                "question": "このフォロワーの【進化時】能力のコストとして、自分の場の『狂信の偶像（EVOLVE）』を墓場に置くことができますか？",
+                "answer": "はい。『狂信の偶像（EVOLVE）』はアミュレットなので、【進化時】能力のコストとして墓場に置くことができます。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P26"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7aa1f4709846bafd57e398b81da0d2a5ec0789e97bb22910c655223c9e85548a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P27",
+            "fetched_at": "2026-09-24T21:39:15.727700Z"
+          },
+          "document_ref": "documents-4d44a6ad3879c6fe"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P28",
+      "documents": {
+        "documents-571832d31b8996ed": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P28",
+            "faces": [
+              {
+                "name": "宝石の巫女",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "光輝"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "どんなジュエリーがお好みですの？\nよりどりみどりに、取り揃えてますわっ！",
+                "illustrator": "ユウヒ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p28.png",
+                "trait_raw": "信仰・光輝"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P29"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7ab0f0e7a904beb883fd054ce213362fb7a714408fc75a67ab47e9b16f891591",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P28",
+            "fetched_at": "2026-09-24T21:39:18.899755Z"
+          },
+          "document_ref": "documents-571832d31b8996ed"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P29",
+      "documents": {
+        "documents-ae17775854cf4eaf": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P29",
+            "faces": [
+              {
+                "name": "宝石の巫女",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "信仰",
+                  "光輝"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "ターンごとに1回、自分の場にアミュレットが出たとき、自分のリーダーは{体力}+1する。\n【進化時】自分の手札の元のコスト2以下のアミュレット1枚を場に出してよい。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ユウヒ",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p29.png",
+                "trait_raw": "信仰・光輝"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1212",
+                "date": "2024-02-16",
+                "question": "自分の場の『狂信の偶像』が進化した場合、このフォロワーの「ターンごとに1回、自分の場にアミュレットが出たとき、～」という能力は誘発しますか？",
+                "answer": "いいえ。誘発しません。"
+              },
+              {
+                "id": "Q1211",
+                "date": "2024-02-16",
+                "question": "何らかの能力によって、相手のターン中に自分の場にアミュレットが出た場合、このフォロワーの「ターンごとに1回、自分の場にアミュレットが出たとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q1210",
+                "date": "2024-02-16",
+                "question": "このフォロワーが自分の場に2体いる状況で、自分の場にアミュレットが出た場合、このフォロワーの「ターンごとに1回、自分の場にアミュレットが出たとき、～」という能力はそれぞれ誘発しますか？",
+                "answer": "はい。それぞれ誘発します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P28"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3180ce4bf30a8c30981cc28d92c0a1eb248d715978cab7072df3b2d8184d3dba",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P29",
+            "fetched_at": "2026-09-24T21:39:21.452666Z"
+          },
+          "document_ref": "documents-ae17775854cf4eaf"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P30",
+      "documents": {
+        "documents-7895c8dd75ad54d6": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P30",
+            "faces": [
+              {
+                "name": "白牙の神殿",
+                "card_class": "ビショップ",
+                "card_type": "アミュレット",
+                "traits": [
+                  "信仰",
+                  "獣"
+                ],
+                "rarity": "SR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のエンドフェイズが来たとき、これに祈りカウンター1つを置く。自分のリーダーは{体力}+1する。\n自分のメインフェイズが来たとき、これの祈りカウンターが3つ以上なら、これを墓場に置く。自分のデッキから元のコスト4以下の信仰・フォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Xavier Lozano Ribeiro",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p30.png",
+                "trait_raw": "信仰・獣"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:38bf5dd1b2577e6268bee40965f388fe9ef618f0c7a392ac883c372aba15e927",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P30",
+            "fetched_at": "2026-09-24T21:39:24.332548Z"
+          },
+          "document_ref": "documents-7895c8dd75ad54d6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P31",
+      "documents": {
+        "documents-7886a09bb5dcdde4": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P31",
+            "faces": [
+              {
+                "name": "アマテラス",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "大神",
+                  "光輝"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\nこれがアクトしたとき、自分のリーダーは{体力}+1する。自分の場に『ツクヨミ』がいるなら、代わりに{体力}+2する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p31.png",
+                "trait_raw": "大神・光輝"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1223",
+                "date": "2024-02-16",
+                "question": "このフォロワーが相手のリーダーや相手の場のフォロワーに攻撃することによってアクトした場合、「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              },
+              {
+                "id": "Q1222",
+                "date": "2024-02-16",
+                "question": "このフォロワーが場に出たときや、自分のエンドフェイズが来たときに【守護】の能力でこのフォロワーをアクトした場合、「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P32"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5dea5b0238bea4b9aea71f2e9504b39d8df58b8ae84dd06bc3c91993f0dc9f2d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P31",
+            "fetched_at": "2026-09-24T21:39:27.023418Z"
+          },
+          "document_ref": "documents-7886a09bb5dcdde4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP09-P32",
+      "documents": {
+        "documents-21d13a1382f40905": {
+          "region": "jp",
+          "record": {
+            "number": "BP09-P32",
+            "faces": [
+              {
+                "name": "ツクヨミ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "大神",
+                  "キラー"
+                ],
+                "rarity": "GR・プレミアム",
+                "product": "ブースターパック第9弾「光影の二重奏」",
+                "title": null,
+                "cost": "2",
+                "power": "3",
+                "hp": "2",
+                "text": "【突進】\nこれがアクトしたとき、相手のリーダーすべてに1ダメージ。自分の場に『アマテラス』がいるなら、代わりに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "久方綜司",
+                "image": "/wordpress/wp-content/images/cardlist/BP09/bp09-p32.png",
+                "trait_raw": "大神・キラー"
+              }
+            ],
+            "release_date": "2024-02-23",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1223",
+                "date": "2024-02-16",
+                "question": "このフォロワーが相手のリーダーや相手の場のフォロワーに攻撃することによってアクトした場合、「これがアクトしたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。"
+              }
+            ],
+            "products_ref": "products-5147ab049b2681a1",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP09-P31"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:64644ebfa6efb156e53eba21d77d1e544b708a094670e7d44142a0397ef0ab69",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=BP09-P32",
+            "fetched_at": "2026-09-24T21:39:30.097050Z"
+          },
+          "document_ref": "documents-21d13a1382f40905"
+        }
+      ]
+    }
+  ]
+}

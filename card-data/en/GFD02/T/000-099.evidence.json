@@ -1,0 +1,170 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "GFD02",
+  "range": "T/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-566f1e2bccfb6c4d": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "f32160d1de0367ef5ccb6520613a40b5b0a9d7f4"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      },
+      "presence-a86171cdc286ca36": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "absent",
+        "reason_code": "template_omits_empty_effect"
+      }
+    },
+    "products": {
+      "products-2bbf66e56a53aa1b": [
+        {
+          "ordinal": 0,
+          "name": "Gloryfinder Starter Deck \"Treacherous Ambitions\"",
+          "date_raw": "Jul. 25, 2025",
+          "href_raw": [
+            "/cards/searchresults?expansion=GFD02",
+            "https://en.shadowverse-evolve.com/products/gfd01_02/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFD02",
+            "https://en.shadowverse-evolve.com/products/gfd01_02/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/gfd01_02/",
+              "expansion_code": "GFD02"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-9cf14a5cb183cd86": [
+        {
+          "stable_source_key": "Q599",
+          "official_number": "Q599",
+          "locator": "qa-block:0",
+          "published_on": "2024-04-12",
+          "date_raw": "Apr. 12, 2024"
+        }
+      ]
+    },
+    "related": {
+      "related-4f53cda18c2baa0c": []
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:6cb21a639a04ef328c0f162e47e5d789266e5d8090c832f39eba7064acadf30d": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:9db6a7bf34de2d5499c604c630c204746312b83249649ce8c1d0760cbb937841",
+        "raw_bytes": 35294,
+        "first_receipt_id": "sha256:b7fb628d59574c7c29aafa68aa49844a2573b00843156bf13c6e7a2813f1ce87",
+        "descriptor_sha256": "sha256:5aa83c9be4f1640f8ba75380d63e7446b9126f5a3851ecc5eaee8315b47e59b2",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-a86171cdc286ca36",
+            "result_hash": "sha256:6ead95dbadb1b276d269aaab4bc714b09d2eb00d9e7e9fdd30dd26e8ffdbd581"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-2bbf66e56a53aa1b",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:45358b1a5b94d6f9c5b5eb9b58d68b85bf04c5d830f525644ab3eecf5efab683"
+    },
+    "src:v1:a4af19ca9f8d078702e690d93fe959bd5cb8a5fb16c6029ef88aaa792d939940": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:d735b541b4bdf417ff0ab118c69bbc1ad781ee9c2a0f124b7bd13d0594f6c338",
+        "raw_bytes": 35367,
+        "first_receipt_id": "sha256:a94d538847731615ad82650eb125dac905fa7895e19fbd08c9b8f37bc78e8a33",
+        "descriptor_sha256": "sha256:4774dc10caf9df11f928191f4b5ad62f07f7415410916eb792bb485730f6103d",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:3fdc4cf85bef8133b5b778de7ea94f0147784177a2389453018757ea06eda88d"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-2bbf66e56a53aa1b",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:788af34f691c923f9f94a98fabc0d05f71d31d84a941e7d0924d2490e3e6a41f"
+    },
+    "src:v1:eca0ee6b55a8136bb267380531400bdf62a7fd0efb5c1725ab0b04c39a27e651": {
+      "recipe": "recipes-566f1e2bccfb6c4d",
+      "raw": {
+        "raw_sha256": "sha256:116b4c752a1cf25eef029ffae0ef06a6f35089573c9c6d3d58bf92f4f306987d",
+        "raw_bytes": 36008,
+        "first_receipt_id": "sha256:cffefd165ebac124723a4f58900bc89b907e367d04b0a6a742aa3c9b3a3dbbe9",
+        "descriptor_sha256": "sha256:abe6eaafe3fa8c39ed44641cacee102ba8bd8b210b46e9e41e1096d4d9ceee16",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:2b4f4b835da97d9666f055387f5e4c6be4e1be5a5353f962fd5a690d9505dff4"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-2bbf66e56a53aa1b",
+        "qa": "qa-9cf14a5cb183cd86",
+        "related": "related-4f53cda18c2baa0c",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:4353c69bfec11ad4a65ba0c8be7a88bf909b32074e4415e44dbdc4316c8f7b1f"
+    }
+  }
+}
