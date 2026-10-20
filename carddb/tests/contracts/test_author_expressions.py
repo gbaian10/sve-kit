@@ -54,6 +54,7 @@ def test_expression_variants(
 ) -> None:
     _accept(schema, name, value)
     _accept(schema, E, value)
+    _accept(schema, "A.expr.numeric-operation", value)
     _reject(schema, C, value)
 
 
@@ -79,6 +80,7 @@ def test_cases_cover_every_numeric_definition() -> None:
     assert {name for name, _ in EXPRESSIONS + CONDITIONS + PAYLOADS} | {
         E,
         C,
+        "A.expr.numeric-operation",
     } == NUMERIC.keys()
 
 

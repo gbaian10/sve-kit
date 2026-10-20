@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Leaf, reference-atom, target-role, numeric, receipt, object-query and recipient fragment library. Object selectors include object unions and exclude leaders; RecipientSel adds leaders and unions containing a leader limb. Count queries retain distinct counted roles. Operands and filters have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
+  "$comment": "Leaf, reference-atom, target-role, numeric, receipt, object-query and recipient fragment library. Object selectors include object unions and exclude leaders; RecipientSel adds leaders and unions containing a leader limb. Count queries retain distinct counted roles. Operands and filters have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented. Quantity positions share numeric-operation with signed expressions. Single-group Target, choose, search and counter costs are closed fragments; DeckSlice has only documented action-level top consumers. Full action parents, source-role and scope admission remain separate.",
   "not": {},
   "$defs": {
     "Int": {
@@ -993,55 +993,7 @@
           "$ref": "#/$defs/Int"
         },
         {
-          "$ref": "#/$defs/BindingName"
-        },
-        {
-          "$ref": "#/$defs/A.expr.plus"
-        },
-        {
-          "$ref": "#/$defs/A.expr.minus"
-        },
-        {
-          "$ref": "#/$defs/A.expr.times"
-        },
-        {
-          "$ref": "#/$defs/A.expr.half-up"
-        },
-        {
-          "$ref": "#/$defs/A.expr.per"
-        },
-        {
-          "$ref": "#/$defs/A.expr.min"
-        },
-        {
-          "$ref": "#/$defs/A.expr.max"
-        },
-        {
-          "$ref": "#/$defs/A.expr.bound"
-        },
-        {
-          "$ref": "#/$defs/A.expr.power-of"
-        },
-        {
-          "$ref": "#/$defs/A.expr.hp-of"
-        },
-        {
-          "$ref": "#/$defs/A.expr.cost-of"
-        },
-        {
-          "$ref": "#/$defs/A.expr.resource"
-        },
-        {
-          "$ref": "#/$defs/A.expr.turn-number"
-        },
-        {
-          "$ref": "#/$defs/A.expr.zone-free"
-        },
-        {
-          "$ref": "#/$defs/A.expr.count-of"
-        },
-        {
-          "$ref": "#/$defs/A.expr.count"
+          "$ref": "#/$defs/A.expr.numeric-operation"
         }
       ]
     },
@@ -1972,6 +1924,669 @@
         },
         {
           "$ref": "#/$defs/A.sel.recipient-union"
+        }
+      ]
+    },
+    "A.expr.numeric-operation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BindingName"
+        },
+        {
+          "$ref": "#/$defs/A.expr.plus"
+        },
+        {
+          "$ref": "#/$defs/A.expr.minus"
+        },
+        {
+          "$ref": "#/$defs/A.expr.times"
+        },
+        {
+          "$ref": "#/$defs/A.expr.half-up"
+        },
+        {
+          "$ref": "#/$defs/A.expr.per"
+        },
+        {
+          "$ref": "#/$defs/A.expr.min"
+        },
+        {
+          "$ref": "#/$defs/A.expr.max"
+        },
+        {
+          "$ref": "#/$defs/A.expr.bound"
+        },
+        {
+          "$ref": "#/$defs/A.expr.power-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.hp-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.cost-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.resource"
+        },
+        {
+          "$ref": "#/$defs/A.expr.turn-number"
+        },
+        {
+          "$ref": "#/$defs/A.expr.zone-free"
+        },
+        {
+          "$ref": "#/$defs/A.expr.count-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.count"
+        }
+      ]
+    },
+    "A.quantity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Nat"
+        },
+        {
+          "$ref": "#/$defs/A.expr.numeric-operation"
+        }
+      ]
+    },
+    "A.selection-quantity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.quantity"
+        },
+        {
+          "$ref": "#/$defs/A.param"
+        }
+      ]
+    },
+    "A.deck-slice": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.player-ref"
+            },
+            {
+              "$ref": "#/$defs/A.player-set"
+            }
+          ]
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "who",
+        "n"
+      ],
+      "additionalProperties": false
+    },
+    "CounterName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DistinctBy": {
+      "type": "string",
+      "enum": [
+        "orig_cost",
+        "class",
+        "name"
+      ]
+    },
+    "A.target.exact": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.recipient"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "roles": {
+          "$ref": "#/$defs/A.target.roles"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "distinct_names": {
+          "type": "boolean",
+          "const": true
+        },
+        "n": {
+          "$ref": "#/$defs/A.selection-quantity"
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "n"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "distinct_by",
+          "distinct_names"
+        ]
+      }
+    },
+    "A.target.up-to": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.recipient"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "roles": {
+          "$ref": "#/$defs/A.target.roles"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "distinct_names": {
+          "type": "boolean",
+          "const": true
+        },
+        "upto": {
+          "$ref": "#/$defs/A.selection-quantity"
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "upto"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "distinct_by",
+          "distinct_names"
+        ]
+      }
+    },
+    "A.target.any": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.recipient"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "roles": {
+          "$ref": "#/$defs/A.target.roles"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "distinct_names": {
+          "type": "boolean",
+          "const": true
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "any"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "distinct_by",
+          "distinct_names"
+        ]
+      }
+    },
+    "A.target": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.target.exact"
+        },
+        {
+          "$ref": "#/$defs/A.target.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.target.any"
+        }
+      ]
+    },
+    "A.act.choose.exact": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "may": {
+          "type": "boolean"
+        },
+        "reveal": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "boolean"
+        },
+        "n": {
+          "$ref": "#/$defs/A.selection-quantity"
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "n"
+      ],
+      "additionalProperties": false
+    },
+    "A.act.choose.up-to": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "may": {
+          "type": "boolean"
+        },
+        "reveal": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "boolean"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.selection-quantity"
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "upto"
+      ],
+      "additionalProperties": false
+    },
+    "A.act.choose.any": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "may": {
+          "type": "boolean"
+        },
+        "reveal": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "boolean"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "any"
+      ],
+      "additionalProperties": false
+    },
+    "A.act.choose": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.choose.exact"
+        },
+        {
+          "$ref": "#/$defs/A.act.choose.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.act.choose.any"
+        }
+      ]
+    },
+    "A.act.search.exact": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "n": {
+          "$ref": "#/$defs/A.selection-quantity"
+        }
+      },
+      "required": [
+        "sel",
+        "to",
+        "n"
+      ],
+      "additionalProperties": false
+    },
+    "A.act.search.up-to": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.selection-quantity"
+        }
+      },
+      "required": [
+        "sel",
+        "to",
+        "upto"
+      ],
+      "additionalProperties": false
+    },
+    "A.act.search": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.search.exact"
+        },
+        {
+          "$ref": "#/$defs/A.act.search.up-to"
+        }
+      ]
+    },
+    "A.cost.counter.self.exact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "on": {
+          "type": "string",
+          "const": "this"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "on",
+        "name",
+        "n"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.counter.self.up-to": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "on": {
+          "type": "string",
+          "const": "this"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "on",
+        "name",
+        "upto"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.counter.self.any": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "on": {
+          "type": "string",
+          "const": "this"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "on",
+        "name",
+        "any"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.counter.self": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cost.counter.self.exact"
+        },
+        {
+          "$ref": "#/$defs/A.cost.counter.self.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.cost.counter.self.any"
+        }
+      ]
+    },
+    "A.cost.counter.selected.exact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "on": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "holders": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "on",
+        "name",
+        "holders",
+        "n"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.counter.selected.up-to": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "on": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "holders": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "on",
+        "name",
+        "holders",
+        "upto"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.counter.selected.any": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "on": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "holders": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "on",
+        "name",
+        "holders",
+        "any"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.counter.selected": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cost.counter.selected.exact"
+        },
+        {
+          "$ref": "#/$defs/A.cost.counter.selected.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.cost.counter.selected.any"
+        }
+      ]
+    },
+    "A.cost.counter": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cost.counter.self"
+        },
+        {
+          "$ref": "#/$defs/A.cost.counter.selected"
         }
       ]
     }

@@ -43,7 +43,17 @@ A reference atom is not a complete action-position type: positions such as
 The leader union shares `A.single-leader`, `A.multiple-leaders` and `A.leader-of`
 without duplicate branches. The [selection shape matrix](../docs/dsl/author-selection-shapes-1.0.md)
 defines Target role declarations and the named `RecipientSel` sum, and distinguishes quantity
-rules for each position; those quantity positions have no complete schemas yet.
+rules for each position. The [quantity matrix](../docs/dsl/author-quantity-shapes-1.0.md)
+defines closed single-group Target/choose/search quantity variants and counter costs.
+Their source and binding/destination fields are present; groups and other documented
+extensions remain outside these fragments. Counter holder quantities are separate
+from counter amounts, and only selection n/upto accept direct selection parameters.
+DeckSlice accepts a player or player set and shares the same nonnegative-literal
+Quantity as cost bounds and counter quantities. NumericExpr and Quantity reference
+one shared NumericOperation union. CounterName has no parameter permission.
+DeckSlice consumers are documented at action-level top; the complete move/banish/look/reveal
+parents and cost.banish are not implemented. ObjectSel and Ref reject top/bottom aliases.
+Selector-level slices remain registered in prose pending independent consumer evidence.
 Event object references currently admit
 only `holder`; other typed event projections are outside this subset.
 The [numeric shape matrix](../docs/dsl/author-expression-shapes-1.0.md) covers

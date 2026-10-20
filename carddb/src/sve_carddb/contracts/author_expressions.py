@@ -94,9 +94,8 @@ class ExprZoneFree(RecordData):
     zone_free: ExprZoneFreePayload
 
 
-type NumericExpr = (
-    Int
-    | BindingName
+type NumericOperation = (
+    BindingName
     | ExprPlus
     | ExprMinus
     | ExprTimes
@@ -114,6 +113,8 @@ type NumericExpr = (
     | ExprCountOf
     | ExprCount
 )
+
+type NumericExpr = Annotated[Int, Field(strict=True)] | NumericOperation
 
 
 class CondCmpPayload(RecordData):

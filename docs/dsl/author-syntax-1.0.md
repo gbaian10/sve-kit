@@ -102,7 +102,8 @@ evolve:
 `A.target`：`targets: [{bind, from: Sel, n|upto|any, groups?, cost_sum_le?, distinct_by?, distinct_names?, option?, roles?}]`。選ぶ依語義規則收集為 D.play-param Targets，順序按卡文；本文普通 choose 永遠結算時。公開與否不能獨自決定選擇時點。`option` 僅在被選的チョイス模式有效。**刪除 `targets[].if`**：R-0004 普通條件不阻止選目標，R-0005 未支付土の秘術也不能免除目標要求。必要目標不足不能打出／選該模式；一般條件在本文查，SC／NC 另按捕捉規則。
 
 roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
-數量規則不表示完整 Target／Sel／動作 schema 已實作。
+單組 Target／choose／search 與 counter 的數量父變體見[要求量矩陣](author-quantity-shapes-1.0.md)；
+groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實作。
 
 `A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。**標準長形為 `steps: [{<費用鍵>: payload}, …]`**，依文字順序付款；v0 短形鍵順序需由保序解析器保存，重複同鍵用 steps，不能默默覆寫。
 
@@ -162,6 +163,8 @@ ObjectSel 與 CountObjects 分別保留 source 與 counted 角色；
 具名 RecipientSel 另納入領袖與至少含一個領袖 limb 的接受者聯集；
 逐型與選用規則見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
 等義聯集與集合形欄位不推定相同 body hash。這些片段不代表完整 Sel 或父動作已完成。
+頂底切片的 Sel 登錄保留，但目前沒有獨立消費位置與卡例，尚不加入 ObjectSel；
+「看過的牌之中」使用 in:looked，不重新查詢牌庫頂。動作同層 top 另共用 DeckSlice。
 
 ## 6. 玩家、引用、結果
 
@@ -181,6 +184,10 @@ ObjectSel 與 CountObjects 分別保留 source 與 counted 角色；
 ## 7. 動作原子
 
 共通欄位 `result? / precondition?`；`by` 為執行者（預設 self），`who` 為接受資源／抽捨牌的玩家，`to` 的區域持有者是目的地角色。不可互相取代。具體新增欄位見 §13；下表保留 v0 全部動作族。
+
+move／banish／look／reveal 的 top 一律在動作同層使用
+[DeckSlice](author-quantity-shapes-1.0.md#牌庫切片的消費位置)，不另收 ref:{top:…} 別名。
+DeckSlice 的型別已定，四個完整父動作仍待接入；費用 banish.top 同樣共用它，待完整 Cost。
 
 | 鍵                                     | payload                                                                              | 降低成                                                                               |
 | -------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
@@ -883,7 +890,7 @@ play:
   optional_cost:
     counter:
       {
-        on: { who: self, zone: field, name: 竜山温泉 },
+        on: { who: each, zone: field, name: 竜山温泉 },
         name: 神湯,
         n: 2,
         holders: 1,
