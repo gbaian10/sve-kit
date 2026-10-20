@@ -3,7 +3,7 @@ use super::{
     IterationCheck, Program, ReceiptExport, ReceiptList, ReceiptLocation, ReceiptReference,
     RepeatBody, ScopeId, Termination, TypeId, WellFormedReason,
 };
-use crate::ir::{IterationOrder, StageMode};
+use crate::ir::{DecisionKind, IterationOrder, StageMode};
 
 impl Checker {
     pub(super) fn control(&mut self, control: &Control) -> Checked {
@@ -74,21 +74,28 @@ impl Checker {
                     checker.define(*player, BindingKind::Value)?;
                     for (index, stage) in stages.iter().enumerate() {
                         checker.at(&format!("stages/{index}/body"), |checker| {
-                            checker.isolated(|checker| {
-                                checker.env.choices &=
-                                    stage.mode != StageMode::NonChoiceSimultaneous {};
-                                checker.program(&stage.body)
-                            })
+                            let choices = checker.env.choices;
+                            checker.env.choices &=
+                                stage.mode != StageMode::NonChoiceSimultaneous {};
+                            checker.program(&stage.body)?;
+                            checker.env.choices = choices;
+                            Ok(())
                         })?;
                     }
                     Ok(())
                 })
             }
+            Control::Pay {
+                at,
+                costs,
+                optional,
+                on_paid,
+                receipt,
+            } => self.payment(*at, costs, *optional, on_paid, *receipt),
             Control::Match { .. }
             | Control::May { .. }
             | Control::Mode { .. }
-            | Control::Repeat { .. }
-            | Control::Pay { .. } => self.reject(),
+            | Control::Repeat { .. } => self.reject(),
         }
     }
 
@@ -96,18 +103,46 @@ impl Checker {
         if batch.members.is_empty() {
             return Err(self.error(WellFormedReason::EmptyBatch));
         }
-        if !batch.choice_stages.is_empty() {
-            return self.reject();
+        let mut committed = self.env.clone();
+        for (index, stage) in batch.choice_stages.iter().enumerate() {
+            let start = self.env.clone();
+            let mut after = start.clone();
+            for (decision_index, decision) in stage.decisions.iter().enumerate() {
+                self.env = start.clone();
+                self.at(
+                    &format!("choice_stages/{index}/decisions/{decision_index}"),
+                    |checker| {
+                        if matches!(
+                            decision.kind,
+                            DecisionKind::ResolutionChoice {
+                                precondition: Some(_),
+                                ..
+                            }
+                        ) {
+                            return checker.reject();
+                        }
+                        checker.decision(decision)
+                    },
+                )?;
+                after.bindings.extend(self.env.bindings.clone());
+                after.public_scalars.extend(self.env.public_scalars.clone());
+            }
+            self.env = after;
         }
         let start = self.env.clone();
-        let mut committed = start.clone();
         for (index, member) in batch.members.iter().enumerate() {
             self.env = start.clone();
             self.env.choices = false;
             self.at(&format!("members/{index}"), |checker| {
                 checker.located(member, Self::instruction)
             })?;
-            committed.bindings.extend(self.env.bindings.clone());
+            committed.bindings.extend(
+                self.env
+                    .bindings
+                    .iter()
+                    .filter(|(key, _)| !start.bindings.contains_key(key))
+                    .map(|(key, slot)| (*key, *slot)),
+            );
             committed.receipts.extend(self.env.receipts.clone());
         }
         self.env = committed;

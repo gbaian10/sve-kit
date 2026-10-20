@@ -4,6 +4,7 @@ use super::{
     NatOperation, NatRead, ObjectOperand, ObjectReceipt, ObjectReceiptList, ObjectRef, ObjectView,
     PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView, Selector, WellFormedReason,
 };
+use crate::ir::{BoolFrozen, PaymentReference};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -11,9 +12,12 @@ use super::{
 )]
 impl Checker {
     pub(super) fn integer(&mut self, expression: &Expr<Int>) -> Checked {
+        if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
+            return self.reject();
+        }
         match expression {
             Expr::Literal(_) => Ok(()),
-            Expr::Bound(binding) => self.reference(*binding, BindingKind::Value),
+            Expr::Bound(binding) => self.scalar(*binding),
             Expr::Captured(reference) => self.reference(reference.binding, BindingKind::Capture),
             Expr::Live(read) => match read.as_ref() {
                 IntRead::PlayerResource { player, .. } => self.player(player),
@@ -78,9 +82,12 @@ impl Checker {
     }
 
     pub(super) fn natural(&mut self, expression: &Expr<Nat>) -> Checked {
+        if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
+            return self.reject();
+        }
         match expression {
             Expr::Literal(_) => Ok(()),
-            Expr::Bound(binding) => self.reference(*binding, BindingKind::Value),
+            Expr::Bound(binding) => self.scalar(*binding),
             Expr::Captured(reference) => self.reference(reference.binding, BindingKind::Capture),
             Expr::Frozen(read) => match read.as_ref() {
                 NatFrozen::ReceiptActual { receipt } => self.measured(receipt),
@@ -134,9 +141,12 @@ impl Checker {
     }
 
     pub(super) fn boolean(&mut self, expression: &Expr<Bool>) -> Checked {
+        if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
+            return self.reject();
+        }
         match expression {
             Expr::Literal(_) => Ok(()),
-            Expr::Bound(binding) => self.reference(*binding, BindingKind::Value),
+            Expr::Bound(binding) => self.scalar(*binding),
             Expr::Captured(reference) => self.reference(reference.binding, BindingKind::Capture),
             Expr::Live(read) => match read.as_ref() {
                 BoolRead::Awakening { player } | BoolRead::OwnTurn { player } => {
@@ -145,7 +155,19 @@ impl Checker {
                 BoolRead::State { object, .. } => self.view(object),
                 BoolRead::HistoryExists { .. } | BoolRead::LegalAttack { .. } => self.reject(),
             },
-            Expr::Frozen(_) => self.reject(),
+            Expr::Frozen(read) => match read.as_ref() {
+                BoolFrozen::PaymentComplete {
+                    receipt: PaymentReference::Local { receipt },
+                } => self.receipt(receipt),
+                BoolFrozen::PaymentsComplete { receipts, .. } => {
+                    self.reference(*receipts, BindingKind::Value)
+                }
+                BoolFrozen::PaymentZero { .. }
+                | BoolFrozen::PaymentReplaced { .. }
+                | BoolFrozen::DriveGainedFirstGain { .. }
+                | BoolFrozen::DriveCheckedTriggerAccepted { .. }
+                | BoolFrozen::PaymentComplete { .. } => self.reject(),
+            },
             Expr::Compute(predicate) => self.predicate(predicate),
         }
     }
@@ -218,6 +240,17 @@ impl Checker {
         }
     }
 
+    fn scalar<T>(&self, binding: Binding<T>) -> Checked
+    where
+        T: 'static,
+    {
+        self.reference(binding, BindingKind::Value)?;
+        if self.env.chooser.is_some() && !self.env.public_scalars.contains(&binding.key()) {
+            return self.reject();
+        }
+        Ok(())
+    }
+
     pub(super) fn player(&mut self, player: &PlayerRef) -> Checked {
         match player {
             PlayerRef::Controller {} | PlayerRef::Owner {} | PlayerRef::Active {} => Ok(()),
@@ -235,7 +268,7 @@ impl Checker {
         self.player(&players.relative_to)
     }
 
-    fn cardinality(&self, cardinality: Cardinality) -> Checked {
+    pub(super) fn cardinality(&self, cardinality: Cardinality) -> Checked {
         if cardinality
             .maximum
             .is_some_and(|maximum| maximum.0 < cardinality.minimum.0)
@@ -256,7 +289,15 @@ impl Checker {
     pub(super) fn object(&self, object: &ObjectOperand) -> Checked {
         match object {
             ObjectOperand::SourceHolder {} => Ok(()),
-            ObjectOperand::Bound { binding } => self.reference(*binding, BindingKind::Value),
+            ObjectOperand::Bound { binding } => {
+                self.reference(*binding, BindingKind::Value)?;
+                if self.env.chooser.is_some()
+                    && !self.env.choice_candidates.contains(&binding.key())
+                {
+                    return self.reject();
+                }
+                Ok(())
+            }
             ObjectOperand::FollowEventMove { .. }
             | ObjectOperand::FromExpression { .. }
             | ObjectOperand::Target { .. }
@@ -274,6 +315,7 @@ impl Checker {
     }
 
     pub(super) fn selector(&mut self, selector: &Selector) -> Checked {
+        self.selection_visibility(selector)?;
         match selector {
             Selector::Bound { reference } => self.reference(*reference, BindingKind::Value),
             Selector::Captured { reference } => {
@@ -359,6 +401,9 @@ impl Checker {
             }
             checker.env.scope = scope;
             checker.define(binding, BindingKind::Value)?;
+            if checker.env.chooser.is_some() {
+                checker.env.choice_candidates.insert(binding.key());
+            }
             checker.boolean(predicate)
         })
     }

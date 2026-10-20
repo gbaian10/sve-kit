@@ -17,6 +17,7 @@ use core::error::Error;
 use core::fmt;
 
 mod control;
+mod decisions;
 mod values;
 
 /// An owned program body whose supported shapes passed structural validation.
@@ -62,6 +63,16 @@ pub enum WellFormedReason {
     DuplicateScope,
     /// An instruction identity was declared twice, even on disjoint paths.
     DuplicateInstruction,
+    /// A decision point was declared twice.
+    DuplicateDecision,
+    /// A decision is not in a supported input region.
+    DecisionTiming,
+    /// A payment step is not marked as a cost.
+    ExpectedCost,
+    /// A discard domain is not restricted to the payer's hand.
+    InvalidDiscardDomain,
+    /// An answer has inconsistent selection cardinalities.
+    DecisionCardinality,
     /// A receipt identity was declared twice.
     DuplicateReceipt,
     /// A binding slot was declared twice, regardless of its Rust type.
@@ -98,6 +109,11 @@ impl WellFormedReason {
             Self::UnsupportedShape => "UnsupportedShape",
             Self::DuplicateScope => "DuplicateScope",
             Self::DuplicateInstruction => "DuplicateInstruction",
+            Self::DuplicateDecision => "DuplicateDecision",
+            Self::DecisionTiming => "DecisionTiming",
+            Self::ExpectedCost => "ExpectedCost",
+            Self::InvalidDiscardDomain => "InvalidDiscardDomain",
+            Self::DecisionCardinality => "DecisionCardinality",
             Self::DuplicateReceipt => "DuplicateReceipt",
             Self::DuplicateBinding => "DuplicateBinding",
             Self::WrongScope => "WrongScope",
@@ -159,6 +175,10 @@ struct Slot {
 struct Environment {
     scope: ScopeId,
     choices: bool,
+    chooser: Option<PlayerRef>,
+    private_choice: bool,
+    choice_candidates: BTreeSet<Key>,
+    public_scalars: BTreeSet<Key>,
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
 }
@@ -169,6 +189,7 @@ struct Checker {
     scopes: BTreeSet<ScopeId>,
     bindings: BTreeSet<Key>,
     instructions: BTreeSet<InstructionId>,
+    decisions: BTreeSet<super::DecisionId>,
     receipts: BTreeSet<ReceiptId>,
     source: Option<Box<SourceSpan>>,
     path: String,
@@ -183,6 +204,10 @@ impl Checker {
             env: Environment {
                 scope,
                 choices: true,
+                chooser: None,
+                private_choice: false,
+                choice_candidates: BTreeSet::new(),
+                public_scalars: BTreeSet::new(),
                 bindings: BTreeMap::new(),
                 receipts: BTreeMap::new(),
             },
@@ -191,6 +216,7 @@ impl Checker {
             scopes: BTreeSet::new(),
             bindings: BTreeSet::new(),
             instructions: BTreeSet::new(),
+            decisions: BTreeSet::new(),
             receipts: BTreeSet::new(),
             source: None,
             path: String::new(),
@@ -308,14 +334,7 @@ impl Checker {
             return Err(self.error(WellFormedReason::DuplicateScope));
         }
         self.env.scope = program.scope;
-        self.at("steps", |checker| {
-            for (index, step) in program.steps.iter().enumerate() {
-                checker.at(&index.to_string(), |checker| {
-                    checker.located(step, Self::node)
-                })?;
-            }
-            Ok(())
-        })
+        self.at("steps", |checker| checker.program_steps(program))
     }
 
     fn node(&mut self, node: &Node) -> Checked {
@@ -328,16 +347,30 @@ impl Checker {
             }
             Node::Control { control } => self.at("control", |checker| checker.control(control)),
             Node::Capture { capture } => self.at("capture", |checker| checker.capture(capture)),
-            Node::Decision { .. } => self.reject(),
+            Node::Decision { decision } => {
+                self.at("decision", |checker| checker.decision(decision))
+            }
         }
     }
 
     fn instruction(&mut self, instruction: &Instruction) -> Checked {
+        self.instruction_in(instruction, InstructionContext::Effect)
+    }
+
+    fn instruction_in(
+        &mut self,
+        instruction: &Instruction,
+        context: InstructionContext,
+    ) -> Checked {
         if !self.instructions.insert(instruction.id) {
             return Err(self.error(WellFormedReason::DuplicateInstruction));
         }
-        if instruction.context != InstructionContext::Effect {
-            return Err(self.error(WellFormedReason::CostOutsidePayment));
+        if instruction.context != context {
+            return Err(self.error(if context == InstructionContext::Cost {
+                WellFormedReason::ExpectedCost
+            } else {
+                WellFormedReason::CostOutsidePayment
+            }));
         }
         self.at("actor", |checker| checker.player(&instruction.actor))?;
         self.at("source", |checker| {
@@ -350,6 +383,11 @@ impl Checker {
                 }
                 checker.boolean(&precondition.predicate)
             })?;
+        }
+        if let Action::Discard { player, .. } = &instruction.action
+            && instruction.actor != *player
+        {
+            return self.reject();
         }
         // The action publishes its output only after all of its inputs were checked.
         self.at("action", |checker| checker.action(&instruction.action))?;
@@ -433,11 +471,11 @@ impl Checker {
                     Declaration::CardNames { .. } => self.reject(),
                 }
             }
+            Action::Discard { player, mode } => self.discard(player, mode),
             Action::InstallEffect { .. }
             | Action::Move { .. }
             | Action::Destroy { .. }
             | Action::Banish { .. }
-            | Action::Discard { .. }
             | Action::Transfer { .. }
             | Action::Damage { .. }
             | Action::Life { .. }
@@ -545,6 +583,7 @@ impl Checker {
 struct OpaqueOutcome;
 const fn outcome(action: &Action) -> TypeId {
     match action {
+        Action::Discard { .. } => TypeId::of::<super::DiscardOutcome>(),
         Action::Draw { .. } => TypeId::of::<CardQuantityOutcome>(),
         Action::Look { .. } => TypeId::of::<LookOutcome>(),
         Action::Counter { .. } => TypeId::of::<CounterQuantityOutcome>(),
@@ -553,7 +592,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::Move { .. }
         | Action::Destroy { .. }
         | Action::Banish { .. }
-        | Action::Discard { .. }
         | Action::Transfer { .. }
         | Action::Damage { .. }
         | Action::Life { .. }
