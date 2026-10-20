@@ -54,7 +54,7 @@ fn changes(progress: &Progress) -> Vec<&StatChangeFact> {
         .iter()
         .filter_map(|fact| match fact {
             Fact::StatChange(fact) => Some(fact),
-            Fact::Draw(_) | Fact::Damage(_) | Fact::Movement(_) => None,
+            Fact::Draw(_) | Fact::Damage(_) | Fact::Movement(_) | Fact::Shuffled { .. } => None,
         })
         .collect()
 }

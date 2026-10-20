@@ -15,7 +15,8 @@ pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<
         .iter()
         .filter(|requirement| {
             requirement.capability.version != NonZeroU32::MIN
-                || !supported(requirement.capability.code)
+                || !(supported(requirement.capability.code)
+                    || super::search::private_requirement(requirement.capability.code))
         })
         .collect::<Vec<_>>();
     if !missing.is_empty() {
@@ -45,6 +46,7 @@ fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
                 }
             }
             Node::Instruction { instruction } => {
+                super::search::check_action(&instruction.action)?;
                 super::movement::check_action(&instruction.action)?;
                 super::numeric::check_action(&instruction.action)?;
                 if instruction.precondition.is_some()

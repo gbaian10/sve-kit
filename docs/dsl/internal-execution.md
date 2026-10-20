@@ -117,11 +117,40 @@ DecisionView 的 Order domain 只向 chooser／Referee 給出本次 token 範圍
 順序也一樣；需要再次排列時先取得新的 Look 證據。
 
 BP07-SL09、BP06-024 僅驗「看五張、已決定零張入場、餘牌放底」片段；沒有實作中間的
-選牌、總費用、入場、觸發及整卡其他能力。Search、其 groups／目的地程序、成功移動
-remainder、減費安裝與 Token 共享容量仍未准入；不能以此片段宣稱整能力已執行。
+選牌、總費用、入場、觸發及整卡其他能力。成功移動 remainder、減費安裝與 Token
+共享容量仍未准入；不能以此片段宣稱整能力已執行。
 
-Search 的靜態輸入點與三種回答型別已在 IR 定義，契約依
-[執行語義 §6](runtime-semantics.md#6-search-的輸入點回答與觀察)；本入口仍未執行它們。
+## 搜尋本體與單次分組回答
+
+Search 先准入搜尋者自己的 Deck、Single 目的地與同一次回答的 groups。
+依[執行語義 §6](runtime-semantics.md#6-search-的輸入點回答與觀察)，開始後固定全域 filter、
+各組交集、世代、有效基數與 snapshot；空牌庫或空候選仍給搜尋者一次問答。
+對手的 awaiting 與物件投影不因候選是否存在而改變。
+
+條件語法限 candidate 的 NamesIntersect、HasTrait、KindEquals 與其非空 And／Or、Not；
+名稱清單須為非空常值，特徵視圖限 Original／Effective。只有無 groups 的常值 true filter
+視為張數限定，minimum／maximum 截限到來源張數且須找足；可分類的條件搜尋 minimum
+為零。groups 全部在同一 snapshot 回答，包含空組；驗全域與各組域、總量與各組上限、
+跨組不重複及可選的 Names distinct_by。aggregate_bounds 非空、混合而無法分類的組及
+其他私有述詞仍在開始前依 IR 形狀整棵拒絕。私有 evaluator 不擴充一般 If／capture／Move。
+
+每題只提供 token 範圍的 handle 與印刷卡號／卡名；回答轉為 SearchSelectionAnswer 後
+另驗基數與屬性，不以 local membership helper 通過代替完整驗證。選牌 Vec 不提供
+目的地排序。找到後，條件搜尋先公開證據，再經共同 move_objects 提交，最後完整來源
+牌庫洗一次；Fact::Shuffled 亦記零張／一張的 performed。洗牌撤銷先前位置與 Look 排列授權。
+SearchOutcome 的 found／revealed 保留舊世代，moved 只記真正的 MoveResult；滿 EX 的
+found 不變，after／actual_to 為空。手牌新 slot 不提供對手持續定位。
+
+目的地限 Owners(Hand／Cemetery) 與搜尋者自己的 Shared(Field／Ex)。尚無容量複選
+輸入，因此可找到的最大張數可能超過正數空位時，在讀取隱藏候選前拒絕情境；零空位
+可記零成功移動。スペル置於場的結果尚未准入：張數限定搜尋進場在開始前整棵拒絕，
+條件搜尋的回答若選到スペル即拒絕並維持待答。position／order、entry_effects、
+Partition、OptionalSelfReplacement、成功投影與減費安裝仍拒絕。完整 CardProgram、lowering 與公開 capability 沒有擴充。
+
+CP04-060 僅驗排除同名的ドラゴンズネスト搜尋、公開、進 EX 與洗牌，未接 UB、進化程序、
+成功 after 減費及其他能力；BP13-035 僅驗已支付追加費用後的三組各一張搜尋、進場與
+收尾，不涵蓋付款、入場觸發或整卡准入。兩者印刷資料由公開輸入產生器提供。
+
 Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等待執行驗收。
 
 ## 加法數值修正

@@ -21,6 +21,9 @@ mod numeric;
 #[path = "internal_ir/ordering.rs"]
 mod ordering;
 
+#[path = "internal_ir/search.rs"]
+mod search;
+
 fn source(card: &str) -> SourceSpan {
     SourceSpan {
         card_id: card.into(),

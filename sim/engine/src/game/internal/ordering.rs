@@ -4,11 +4,11 @@ use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
 use crate::ir::{
-    Action, Binding, Capture, CaptureRef, CaptureTime, Control, Instruction, Located, LookOutcome,
-    MemberProjection, MoveDestination, Node, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome,
-    OwnerZone, PlayerId, PlayerRelation, Position, Program, ReceiptLocation, Requirements,
-    ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan,
-    StepwiseMode, Visibility, ZoneKind,
+    Action, Binding, Capture, CaptureRef, CaptureTime, Control, Expr, Instruction, Int, Located,
+    LookOutcome, MemberProjection, MoveDestination, Node, ObjectReceipt, ObjectRef, OrderAnswer,
+    OrderOutcome, OwnerZone, PlayerId, PlayerRelation, Position, Program, ReceiptLocation,
+    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId,
+    SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -31,6 +31,10 @@ pub(super) struct OrderWait {
     deck: Vec<String>,
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "The contextual private-read guard checks the complete local node."
+)]
 pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     let is_order = matches!(node, Node::Instruction { instruction } if matches!(instruction.action, Action::Order { .. }));
     // Control bodies are checked individually; their guards still need the same restriction.
@@ -74,6 +78,17 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     }
     let mut inspected = node.clone();
     if let Node::Instruction { instruction } = &mut inspected
+        && let Action::Search { player, .. } = &instruction.action
+    {
+        super::search::check_action(&instruction.action)?;
+        // The private grammar covers only Search's action, never its source or instruction metadata.
+        instruction.action = Action::Draw {
+            player: player.clone(),
+            count: Expr::Literal(Int(0)),
+            mode: StepwiseMode::Exact,
+        };
+    }
+    if let Node::Instruction { instruction } = &mut inspected
         && let Action::Look { zone, .. } = &mut instruction.action
     {
         // Only the declared Look zone is authorized, never another Deck read in its count.
@@ -97,6 +112,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
                 "shape.Selector.ReceiptMembers" | "shape.Selector.Difference"
             ))
             || code == "internal.ZoneKind.Deck"
+            || super::search::private_requirement(code)
         {
             return Err(unsupported("private observation outside ordering"));
         }
@@ -371,7 +387,7 @@ impl Game {
         Ok(())
     }
 
-    fn internal_known_deck(&self, seat: &str) -> Result<Vec<String>> {
+    pub(super) fn internal_known_deck(&self, seat: &str) -> Result<Vec<String>> {
         self.zone(seat, "deck")
             .into_iter()
             .map(|value| {
