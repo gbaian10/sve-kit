@@ -1,10 +1,12 @@
-"""Numeric author fragments, not complete Expr/Cond or execution admission."""
+"""Numeric and receipt fragments, not complete Expr/Cond or execution admission."""
 
 from typing import Annotated, Literal
 
 from pydantic import ConfigDict, Field
 
+from sve_carddb.contracts.author_counts import ExprCount
 from sve_carddb.contracts.author_leaves import Int, ParamRef
+from sve_carddb.contracts.author_receipts import CondDid, ExprCountOf
 from sve_carddb.contracts.author_references import BindingName, PlayerRef, Ref
 from sve_carddb.core.models import RecordData
 
@@ -109,6 +111,8 @@ type NumericExpr = (
     | ExprResource
     | ExprTurnNumber
     | ExprZoneFree
+    | ExprCountOf
+    | ExprCount
 )
 
 
@@ -140,7 +144,7 @@ class CondNot(RecordData):
     not_: NumericCondition = Field(alias="not")
 
 
-type NumericCondition = CondCmp | CondAll | CondAny | CondNot
+type NumericCondition = CondCmp | CondAll | CondAny | CondNot | CondDid
 
 # Resolve cycles under each model's regex configuration before standalone adapters.
 for _model in (

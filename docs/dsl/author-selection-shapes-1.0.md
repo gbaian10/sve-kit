@@ -2,7 +2,8 @@
 
 本表細化[撰寫語法 §3／§5／§14](author-syntax-1.0.md#3-費用目標與打出程序)的角色與數量位置。
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
-目前只有下列角色宣告及[領袖引用](author-reference-shapes-1.0.md#變體矩陣)有節點定義；
+節點定義包含下列角色宣告、[領袖引用](author-reference-shapes-1.0.md#變體矩陣)
+及獨立的[物件來源／計數片段](author-object-query-shapes-1.0.md)；
 本表的數量位置規則尚未由完整 Target／Sel／動作 schema 強制。
 這些片段不提供作者文件入口、作用域驗證或執行准入。
 

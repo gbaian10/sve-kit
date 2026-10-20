@@ -5,12 +5,15 @@ from typing import TYPE_CHECKING
 from pydantic import ConfigDict, TypeAdapter
 
 from sve_carddb.contracts import author_expressions as author
+from sve_carddb.contracts import author_receipts as receipts
+from sve_carddb.contracts.author_counts import ExprCount
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
 CONFIG = ConfigDict(regex_engine="python-re")
 NUMERIC: dict[str, TypeAdapter[object]] = {
+    "A.expr.count": TypeAdapter(ExprCount),
     "A.expr.plus": TypeAdapter(author.ExprPlus),
     "A.expr.minus": TypeAdapter(author.ExprMinus),
     "A.expr.times": TypeAdapter(author.ExprTimes),
@@ -29,15 +32,18 @@ NUMERIC: dict[str, TypeAdapter[object]] = {
     "A.expr.turn-number": TypeAdapter(author.ExprTurnNumber),
     "A.expr.zone-free-payload": TypeAdapter(author.ExprZoneFreePayload),
     "A.expr.zone-free": TypeAdapter(author.ExprZoneFree),
+    "A.expr.count-of": TypeAdapter(receipts.ExprCountOf),
     "A.expr.numeric-core": TypeAdapter(author.NumericExpr, config=CONFIG),
     "A.cond.cmp-payload": TypeAdapter(author.CondCmpPayload),
     "A.cond.cmp": TypeAdapter(author.CondCmp),
     "A.cond.all": TypeAdapter(author.CondAll),
     "A.cond.any": TypeAdapter(author.CondAny),
     "A.cond.not": TypeAdapter(author.CondNot),
+    "A.cond.did": TypeAdapter(receipts.CondDid),
     "A.cond.numeric-core": TypeAdapter(author.NumericCondition, config=CONFIG),
 }
 NUMERIC_NAMES = {
+    "A.expr.count": "ExprCount",
     "A.expr.plus": "ExprPlus",
     "A.expr.minus": "ExprMinus",
     "A.expr.times": "ExprTimes",
@@ -56,12 +62,14 @@ NUMERIC_NAMES = {
     "A.expr.turn-number": "ExprTurnNumber",
     "A.expr.zone-free-payload": "ExprZoneFreePayload",
     "A.expr.zone-free": "ExprZoneFree",
+    "A.expr.count-of": "ExprCountOf",
     "A.expr.numeric-core": "NumericExpr",
     "A.cond.cmp-payload": "CondCmpPayload",
     "A.cond.cmp": "CondCmp",
     "A.cond.all": "CondAll",
     "A.cond.any": "CondAny",
     "A.cond.not": "CondNot",
+    "A.cond.did": "CondDid",
     "A.cond.numeric-core": "NumericCondition",
 }
 NUMERIC_DEPENDENCIES = {
@@ -73,6 +81,7 @@ E = "A.expr.numeric-core"
 C = "A.cond.numeric-core"
 CMP: dict[str, JsonValue] = {"cmp": {"left": -1, "op": "lt", "right": 0}}
 EXPRESSIONS: list[tuple[str, dict[str, JsonValue]]] = [
+    ("A.expr.count", {"count": {"who": "each", "zone": "field"}}),
     ("A.expr.plus", {"plus": [-2, 3]}),
     ("A.expr.plus", {"plus": [{"param": "offset"}, "X"]}),
     ("A.expr.plus", {"plus": ["X", {"param": "offset"}]}),
@@ -92,6 +101,7 @@ EXPRESSIONS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.expr.resource", {"resource": {"who": "self", "kind": "sep"}}),
     ("A.expr.turn-number", {"turn_number": {"who": "self"}}),
     ("A.expr.zone-free", {"zone_free": {"who": "opp", "zone": "ex"}}),
+    ("A.expr.count-of", {"count_of": "returned"}),
 ]
 CONDITIONS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.cond.cmp", CMP),
@@ -100,6 +110,7 @@ CONDITIONS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.cond.any", {"any": [CMP]}),
     ("A.cond.any", {"any": [CMP, {"not": CMP}]}),
     ("A.cond.not", {"not": CMP}),
+    ("A.cond.did", {"did": "evolved_now"}),
 ]
 PAYLOADS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.expr.per-payload", {"of": "X", "unit": 2}),

@@ -2,9 +2,10 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field
 
 from sve_carddb.contracts.four_layer import Code
+from sve_carddb.core.json import integer
 from sve_carddb.core.models import RecordData, Text, UInt
 
 Int = Annotated[int, Field(ge=-9007199254740991, le=9007199254740991)]
@@ -114,6 +115,6 @@ type IndexRecord = PrototypeIndexRecord | AuthorIndexRecord
 
 
 class EffectsIndex(RecordData):
-    format: Literal[1]
+    format: Annotated[Literal[1], BeforeValidator(integer)]
     kind: Literal["effects_index"]
     records: tuple[IndexRecord, ...]
