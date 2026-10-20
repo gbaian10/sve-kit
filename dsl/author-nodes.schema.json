@@ -2525,6 +2525,15 @@
         },
         {
           "$ref": "#/$defs/A.target.any"
+        },
+        {
+          "$ref": "#/$defs/A.target.grouped.exact"
+        },
+        {
+          "$ref": "#/$defs/A.target.grouped.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.target.grouped.any"
         }
       ]
     },
@@ -10527,6 +10536,2204 @@
           "$ref": "#/$defs/A.capture.selection"
         }
       ]
+    },
+    "A.cost.material-group.exact": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "sel",
+        "n"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.material.exact": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "sel",
+        "n"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.material-group.up-to": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "sel",
+        "upto"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.material.up-to": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "sel",
+        "upto"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.material-group.any": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "sel",
+        "any"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.material.any": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "sel",
+        "any"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.material-group": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cost.material-group.exact"
+        },
+        {
+          "$ref": "#/$defs/A.cost.material-group.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.cost.material-group.any"
+        }
+      ]
+    },
+    "A.cost.material.groups": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.material-group"
+          },
+          "minItems": 2
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "required": [
+        "groups"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.material": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cost.material.exact"
+        },
+        {
+          "$ref": "#/$defs/A.cost.material.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.cost.material.any"
+        },
+        {
+          "$ref": "#/$defs/A.cost.material.groups"
+        }
+      ]
+    },
+    "A.cost.discard-random": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "random": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "sel",
+        "n",
+        "random"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.discard-ref": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.banish-top": {
+      "type": "object",
+      "properties": {
+        "top": {
+          "$ref": "#/$defs/A.deck-slice"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "top"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.shuffle-material.exact": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "shuffle": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "sel",
+        "n",
+        "shuffle"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.shuffle-material.up-to": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "shuffle": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "sel",
+        "upto",
+        "shuffle"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.shuffle-material.any": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "shuffle": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "sel",
+        "any",
+        "shuffle"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.shuffle-material.groups": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.material-group"
+          },
+          "minItems": 2
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "cost_sum_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "shuffle": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "groups",
+        "shuffle"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.shuffle-material": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cost.shuffle-material.exact"
+        },
+        {
+          "$ref": "#/$defs/A.cost.shuffle-material.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.cost.shuffle-material.any"
+        },
+        {
+          "$ref": "#/$defs/A.cost.shuffle-material.groups"
+        }
+      ]
+    },
+    "A.cost.skip-turn": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "who"
+      ],
+      "additionalProperties": false
+    },
+    "A.cost.step": {
+      "type": "object",
+      "properties": {
+        "pp": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "leader_life": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "lesson": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "earth_rite": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "act_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "banish_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "act": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_cemetery": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "return_to_hand": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_ex": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_deck_bottom": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "discard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-random"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-ref"
+            }
+          ]
+        },
+        "banish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.banish-top"
+            }
+          ]
+        },
+        "to_deck": {
+          "$ref": "#/$defs/A.cost.shuffle-material"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.cost.counter"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.cost.skip-turn"
+        },
+        "one_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.alternative"
+          },
+          "minItems": 2
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "pp"
+          ]
+        },
+        {
+          "required": [
+            "ep"
+          ]
+        },
+        {
+          "required": [
+            "leader_life"
+          ]
+        },
+        {
+          "required": [
+            "lesson"
+          ]
+        },
+        {
+          "required": [
+            "earth_rite"
+          ]
+        },
+        {
+          "required": [
+            "pp_max"
+          ]
+        },
+        {
+          "required": [
+            "act_self"
+          ]
+        },
+        {
+          "required": [
+            "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "banish_self"
+          ]
+        },
+        {
+          "required": [
+            "act"
+          ]
+        },
+        {
+          "required": [
+            "to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "return_to_hand"
+          ]
+        },
+        {
+          "required": [
+            "reveal"
+          ]
+        },
+        {
+          "required": [
+            "flip_down"
+          ]
+        },
+        {
+          "required": [
+            "flip_up"
+          ]
+        },
+        {
+          "required": [
+            "to_ex"
+          ]
+        },
+        {
+          "required": [
+            "to_deck_bottom"
+          ]
+        },
+        {
+          "required": [
+            "discard"
+          ]
+        },
+        {
+          "required": [
+            "banish"
+          ]
+        },
+        {
+          "required": [
+            "to_deck"
+          ]
+        },
+        {
+          "required": [
+            "counter"
+          ]
+        },
+        {
+          "required": [
+            "skip_turn"
+          ]
+        },
+        {
+          "required": [
+            "one_of"
+          ]
+        }
+      ]
+    },
+    "A.cost": {
+      "type": "object",
+      "properties": {
+        "pp": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "leader_life": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "lesson": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "earth_rite": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "act_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "banish_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "act": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_cemetery": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "return_to_hand": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_ex": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_deck_bottom": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "discard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-random"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-ref"
+            }
+          ]
+        },
+        "banish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.banish-top"
+            }
+          ]
+        },
+        "to_deck": {
+          "$ref": "#/$defs/A.cost.shuffle-material"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.cost.counter"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.cost.skip-turn"
+        },
+        "one_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.alternative"
+          },
+          "minItems": 2
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.step"
+          },
+          "minItems": 2
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "pp"
+          ]
+        },
+        {
+          "required": [
+            "ep"
+          ]
+        },
+        {
+          "required": [
+            "leader_life"
+          ]
+        },
+        {
+          "required": [
+            "lesson"
+          ]
+        },
+        {
+          "required": [
+            "earth_rite"
+          ]
+        },
+        {
+          "required": [
+            "pp_max"
+          ]
+        },
+        {
+          "required": [
+            "act_self"
+          ]
+        },
+        {
+          "required": [
+            "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "banish_self"
+          ]
+        },
+        {
+          "required": [
+            "act"
+          ]
+        },
+        {
+          "required": [
+            "to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "return_to_hand"
+          ]
+        },
+        {
+          "required": [
+            "reveal"
+          ]
+        },
+        {
+          "required": [
+            "flip_down"
+          ]
+        },
+        {
+          "required": [
+            "flip_up"
+          ]
+        },
+        {
+          "required": [
+            "to_ex"
+          ]
+        },
+        {
+          "required": [
+            "to_deck_bottom"
+          ]
+        },
+        {
+          "required": [
+            "discard"
+          ]
+        },
+        {
+          "required": [
+            "banish"
+          ]
+        },
+        {
+          "required": [
+            "to_deck"
+          ]
+        },
+        {
+          "required": [
+            "counter"
+          ]
+        },
+        {
+          "required": [
+            "skip_turn"
+          ]
+        },
+        {
+          "required": [
+            "one_of"
+          ]
+        },
+        {
+          "required": [
+            "steps"
+          ]
+        }
+      ]
+    },
+    "A.cost.alternative": {
+      "type": "object",
+      "properties": {
+        "pp": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "leader_life": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "lesson": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "earth_rite": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "act_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "banish_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "act": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_cemetery": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "return_to_hand": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_ex": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_deck_bottom": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "discard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-random"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-ref"
+            }
+          ]
+        },
+        "banish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.banish-top"
+            }
+          ]
+        },
+        "to_deck": {
+          "$ref": "#/$defs/A.cost.shuffle-material"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.cost.counter"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.cost.skip-turn"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.step"
+          },
+          "minItems": 2
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "pp"
+          ]
+        },
+        {
+          "required": [
+            "ep"
+          ]
+        },
+        {
+          "required": [
+            "leader_life"
+          ]
+        },
+        {
+          "required": [
+            "lesson"
+          ]
+        },
+        {
+          "required": [
+            "earth_rite"
+          ]
+        },
+        {
+          "required": [
+            "pp_max"
+          ]
+        },
+        {
+          "required": [
+            "act_self"
+          ]
+        },
+        {
+          "required": [
+            "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "banish_self"
+          ]
+        },
+        {
+          "required": [
+            "act"
+          ]
+        },
+        {
+          "required": [
+            "to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "return_to_hand"
+          ]
+        },
+        {
+          "required": [
+            "reveal"
+          ]
+        },
+        {
+          "required": [
+            "flip_down"
+          ]
+        },
+        {
+          "required": [
+            "flip_up"
+          ]
+        },
+        {
+          "required": [
+            "to_ex"
+          ]
+        },
+        {
+          "required": [
+            "to_deck_bottom"
+          ]
+        },
+        {
+          "required": [
+            "discard"
+          ]
+        },
+        {
+          "required": [
+            "banish"
+          ]
+        },
+        {
+          "required": [
+            "to_deck"
+          ]
+        },
+        {
+          "required": [
+            "counter"
+          ]
+        },
+        {
+          "required": [
+            "skip_turn"
+          ]
+        },
+        {
+          "required": [
+            "steps"
+          ]
+        }
+      ]
+    },
+    "A.cost.additional": {
+      "type": "object",
+      "properties": {
+        "pp": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "leader_life": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "lesson": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "earth_rite": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "act_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "banish_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "act": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_cemetery": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "return_to_hand": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_ex": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_deck_bottom": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "discard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-random"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-ref"
+            }
+          ]
+        },
+        "banish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.banish-top"
+            }
+          ]
+        },
+        "to_deck": {
+          "$ref": "#/$defs/A.cost.shuffle-material"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.cost.counter"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.cost.skip-turn"
+        },
+        "one_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.alternative"
+          },
+          "minItems": 2
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.step"
+          },
+          "minItems": 2
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "pp"
+          ]
+        },
+        {
+          "required": [
+            "ep"
+          ]
+        },
+        {
+          "required": [
+            "leader_life"
+          ]
+        },
+        {
+          "required": [
+            "lesson"
+          ]
+        },
+        {
+          "required": [
+            "earth_rite"
+          ]
+        },
+        {
+          "required": [
+            "pp_max"
+          ]
+        },
+        {
+          "required": [
+            "act_self"
+          ]
+        },
+        {
+          "required": [
+            "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "banish_self"
+          ]
+        },
+        {
+          "required": [
+            "act"
+          ]
+        },
+        {
+          "required": [
+            "to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "return_to_hand"
+          ]
+        },
+        {
+          "required": [
+            "reveal"
+          ]
+        },
+        {
+          "required": [
+            "flip_down"
+          ]
+        },
+        {
+          "required": [
+            "flip_up"
+          ]
+        },
+        {
+          "required": [
+            "to_ex"
+          ]
+        },
+        {
+          "required": [
+            "to_deck_bottom"
+          ]
+        },
+        {
+          "required": [
+            "discard"
+          ]
+        },
+        {
+          "required": [
+            "banish"
+          ]
+        },
+        {
+          "required": [
+            "to_deck"
+          ]
+        },
+        {
+          "required": [
+            "counter"
+          ]
+        },
+        {
+          "required": [
+            "skip_turn"
+          ]
+        },
+        {
+          "required": [
+            "one_of"
+          ]
+        },
+        {
+          "required": [
+            "steps"
+          ]
+        }
+      ]
+    },
+    "A.cost.optional": {
+      "type": "object",
+      "properties": {
+        "pp": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "leader_life": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "lesson": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "earth_rite": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "act_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "banish_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "act": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_cemetery": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "return_to_hand": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_ex": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_deck_bottom": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "discard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-random"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-ref"
+            }
+          ]
+        },
+        "banish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.banish-top"
+            }
+          ]
+        },
+        "to_deck": {
+          "$ref": "#/$defs/A.cost.shuffle-material"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.cost.counter"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.cost.skip-turn"
+        },
+        "one_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.alternative"
+          },
+          "minItems": 2
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.step"
+          },
+          "minItems": 2
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "pp"
+          ]
+        },
+        {
+          "required": [
+            "ep"
+          ]
+        },
+        {
+          "required": [
+            "leader_life"
+          ]
+        },
+        {
+          "required": [
+            "lesson"
+          ]
+        },
+        {
+          "required": [
+            "earth_rite"
+          ]
+        },
+        {
+          "required": [
+            "pp_max"
+          ]
+        },
+        {
+          "required": [
+            "act_self"
+          ]
+        },
+        {
+          "required": [
+            "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "banish_self"
+          ]
+        },
+        {
+          "required": [
+            "act"
+          ]
+        },
+        {
+          "required": [
+            "to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "return_to_hand"
+          ]
+        },
+        {
+          "required": [
+            "reveal"
+          ]
+        },
+        {
+          "required": [
+            "flip_down"
+          ]
+        },
+        {
+          "required": [
+            "flip_up"
+          ]
+        },
+        {
+          "required": [
+            "to_ex"
+          ]
+        },
+        {
+          "required": [
+            "to_deck_bottom"
+          ]
+        },
+        {
+          "required": [
+            "discard"
+          ]
+        },
+        {
+          "required": [
+            "banish"
+          ]
+        },
+        {
+          "required": [
+            "to_deck"
+          ]
+        },
+        {
+          "required": [
+            "counter"
+          ]
+        },
+        {
+          "required": [
+            "skip_turn"
+          ]
+        },
+        {
+          "required": [
+            "one_of"
+          ]
+        },
+        {
+          "required": [
+            "steps"
+          ]
+        }
+      ]
+    },
+    "A.cost.optional-mode": {
+      "type": "object",
+      "properties": {
+        "pp": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "leader_life": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "lesson": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "earth_rite": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "act_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "banish_self": {
+          "type": "boolean",
+          "const": true
+        },
+        "act": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_cemetery": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "return_to_hand": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_ex": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "to_deck_bottom": {
+          "$ref": "#/$defs/A.cost.material"
+        },
+        "discard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-random"
+            },
+            {
+              "$ref": "#/$defs/A.cost.discard-ref"
+            }
+          ]
+        },
+        "banish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.cost.material"
+            },
+            {
+              "$ref": "#/$defs/A.cost.banish-top"
+            }
+          ]
+        },
+        "to_deck": {
+          "$ref": "#/$defs/A.cost.shuffle-material"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.cost.counter"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.cost.skip-turn"
+        },
+        "one_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.alternative"
+          },
+          "minItems": 2
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.step"
+          },
+          "minItems": 2
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "option"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "pp"
+          ]
+        },
+        {
+          "required": [
+            "ep"
+          ]
+        },
+        {
+          "required": [
+            "leader_life"
+          ]
+        },
+        {
+          "required": [
+            "lesson"
+          ]
+        },
+        {
+          "required": [
+            "earth_rite"
+          ]
+        },
+        {
+          "required": [
+            "pp_max"
+          ]
+        },
+        {
+          "required": [
+            "act_self"
+          ]
+        },
+        {
+          "required": [
+            "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "banish_self"
+          ]
+        },
+        {
+          "required": [
+            "act"
+          ]
+        },
+        {
+          "required": [
+            "to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "return_to_hand"
+          ]
+        },
+        {
+          "required": [
+            "reveal"
+          ]
+        },
+        {
+          "required": [
+            "flip_down"
+          ]
+        },
+        {
+          "required": [
+            "flip_up"
+          ]
+        },
+        {
+          "required": [
+            "to_ex"
+          ]
+        },
+        {
+          "required": [
+            "to_deck_bottom"
+          ]
+        },
+        {
+          "required": [
+            "discard"
+          ]
+        },
+        {
+          "required": [
+            "banish"
+          ]
+        },
+        {
+          "required": [
+            "to_deck"
+          ]
+        },
+        {
+          "required": [
+            "counter"
+          ]
+        },
+        {
+          "required": [
+            "skip_turn"
+          ]
+        },
+        {
+          "required": [
+            "one_of"
+          ]
+        },
+        {
+          "required": [
+            "steps"
+          ]
+        }
+      ]
+    },
+    "A.cost.optionals": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cost.optional"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cost.optional-mode"
+          },
+          "minItems": 2
+        }
+      ]
+    },
+    "A.cost.alt": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        },
+        "may": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "if",
+        "cost"
+      ],
+      "additionalProperties": false
+    },
+    "A.x.free": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "max": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false
+    },
+    "A.x.payment": {
+      "type": "object",
+      "properties": {
+        "from_payment": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "from_payment"
+      ],
+      "additionalProperties": false
+    },
+    "A.x": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.x.free"
+        },
+        {
+          "$ref": "#/$defs/A.x.payment"
+        }
+      ]
+    },
+    "A.play.costs": {
+      "type": "object",
+      "properties": {
+        "cost_delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "cost_set": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "additional_cost": {
+          "$ref": "#/$defs/A.cost.additional"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "optional_cost_delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "optional_cost_set": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "alt_cost": {
+          "$ref": "#/$defs/A.cost.alt"
+        }
+      },
+      "additionalProperties": false,
+      "dependentRequired": {
+        "optional_cost_delta": [
+          "optional_cost"
+        ],
+        "optional_cost_set": [
+          "optional_cost"
+        ]
+      },
+      "if": {
+        "anyOf": [
+          {
+            "required": [
+              "optional_cost_delta"
+            ]
+          },
+          {
+            "required": [
+              "optional_cost_set"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "optional_cost": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "A.target.group-filter": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardKind"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_all": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1
+        },
+        "name": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        "name_contains": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "other": {
+          "type": "boolean",
+          "const": true
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "boolean",
+          "const": true
+        },
+        "not_token": {
+          "type": "boolean",
+          "const": true
+        },
+        "not_class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "not_trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_any": {
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "not_same_name_as_this": {
+          "const": true,
+          "type": "boolean"
+        },
+        "cost_eq": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "cost_ge": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "keyword": {
+          "$ref": "#/$defs/Concept"
+        },
+        "has_trigger": {
+          "const": true,
+          "type": "boolean"
+        },
+        "has_evolve": {
+          "const": true,
+          "type": "boolean"
+        },
+        "face_up": {
+          "type": "boolean"
+        },
+        "boxed": {
+          "type": "boolean"
+        },
+        "evolved": {
+          "type": "boolean"
+        },
+        "entered_this_turn": {
+          "const": true,
+          "type": "boolean"
+        },
+        "advance_follower": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "minProperties": 1
+    },
+    "A.target.grouped.exact": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "roles": {
+          "$ref": "#/$defs/A.target.roles"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "distinct_names": {
+          "type": "boolean",
+          "const": true
+        },
+        "n": {
+          "$ref": "#/$defs/A.selection-quantity"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.target.group-filter"
+          },
+          "minItems": 2
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "n",
+        "groups"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "distinct_by",
+          "distinct_names"
+        ]
+      }
+    },
+    "A.target.grouped.up-to": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "roles": {
+          "$ref": "#/$defs/A.target.roles"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "distinct_names": {
+          "type": "boolean",
+          "const": true
+        },
+        "upto": {
+          "$ref": "#/$defs/A.selection-quantity"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.target.group-filter"
+          },
+          "minItems": 2
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "upto",
+        "groups"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "distinct_by",
+          "distinct_names"
+        ]
+      }
+    },
+    "A.target.grouped.any": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "from": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "roles": {
+          "$ref": "#/$defs/A.target.roles"
+        },
+        "option": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "distinct_names": {
+          "type": "boolean",
+          "const": true
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.target.group-filter"
+          },
+          "minItems": 2
+        }
+      },
+      "required": [
+        "bind",
+        "from",
+        "any",
+        "groups"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "distinct_by",
+          "distinct_names"
+        ]
+      }
+    },
+    "A.targets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/A.target"
+      },
+      "minItems": 1
     }
   }
 }
