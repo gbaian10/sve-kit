@@ -81,6 +81,10 @@ impl<T> Clone for Binding<T> {
     }
 }
 impl<T> Binding<T> {
+    pub(super) const fn key(self) -> (ScopeId, u64) {
+        (self.scope, self.id)
+    }
+
     /// Construct an internal scoped reference; lowering validates dominance.
     #[must_use]
     pub const fn new(id: u64, scope: ScopeId) -> Self {
