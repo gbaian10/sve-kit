@@ -1,7 +1,7 @@
 format: 2
 kind: ruling
 id: R-0013
-revision: 1
+revision: 2
 question: BP08-011「それはそれぞれ『ロイド』と『ヴィクトリア』に変身する」只有一張成功消滅時，要建立哪一種 token？
 decision: 依實際消滅數決定建立總量：兩張都成功就各一張（Q1061）；只成功一張時由執行玩家從兩種模板中選一種，每種至多一張；零張則不建立、不詢問。
 evidence:
@@ -11,7 +11,20 @@ evidence:
   - {ref: project, kind: project, reason: 以 CR 1.3.2 的「可能な限り」為推論依據決定部分成功的處理；由誰選模板沒有直接 Q&A。, date: '2026-09-27'}
 strength: inferred
 decided_on: 2026-09-27
-applies_to: [Ta1bd9d2ec5]
+applies_to:
+  - legacy: Ta1bd9d2ec5
+    namespace: classification-v0
+    uses:
+      - cards: [BP08-011, PR-198]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:5ea7d5116976dcbacd9eee83c2cdd965ec7167da9e095a3e36462ef189ec6663}
+          field: effect
+          ordinal:
+          source_hash: a114e12d1b1f1a1685673b8d53ebce8746a4f3cfae6b3e393038f9bd3e363720
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 48}]
 hint:
   zh-TW: 本專案解讀：兩張都消滅成功時各變成一種（依 Q1061）；只有一張成功時，由執行玩家選要建立哪一種。
   ja: 本プロジェクトの解釈：2枚とも消滅した場合はそれぞれ1枚ずつ変身します（Q1061）。1枚だけ消滅した場合は、プレイヤーがどちらのトークンを作成するか選びます。
+note: revision 2 只把 applies_to 改成明示舊適用域，裁定內容不變；沒有提升證據強度或授予可執行資格。

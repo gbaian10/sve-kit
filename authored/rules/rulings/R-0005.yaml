@@ -1,7 +1,7 @@
 format: 2
 kind: ruling
 id: R-0005
-revision: 1
+revision: 2
 question: 「【土の秘術】相手の場のフォロワー1体を選ぶ。それに3ダメージ。」沒付【土の秘術】時，還要不要選目標？
 decision: '目標照選（選項 B）：目標在打出時照常選（選不到就不能選這一項或不能打出）；付費只決定效果有沒有。撤銷先前補的 targets[].if: {paid} 自指 branch。'
 evidence:
@@ -9,8 +9,93 @@ evidence:
   - {ref: CR 13.3.3.2, kind: supporting, quote: "13.3.3.2. ‘【土の秘術 （数値）】（テキスト）’は‘この\nカードまたは能力をプレイする際に、追加コス\nトとして、【スタック】を持つあなたのいずれか\nのアミュレットに置かれているスタックカウン\nターを（数値）個取り除いてよい。これによりそ\nのアミュレットにスタックカウンターが置かれて\nいない状態になった場合、そのアミュレットを\n墓場に置く。追加コストとしてスタックカウン\nターを取り除いていたら、（テキスト）’を意味し\nます。", version: 1.27.0}
 strength: official
 decided_on: 2026-09-27
-applies_to: [Tb0dfc669a0, T51b706db8f, T43fa67d13f, Tbf26a2e083, Ta8da8b705f, T12f5d4d6ce, Tf74444ac05]
+applies_to:
+  - legacy: Tb0dfc669a0
+    namespace: classification-v0
+    uses:
+      - cards: [BP15-043, PR-396]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:c5787e2b5cff519eef47fc807dc55c209b6db087b85c92dde688e065e94a7d04}
+          field: effect
+          ordinal:
+          source_hash: a5bafb118727cd6a85d1f7718f89643d3dbb4e54be0b6b3da5789587a0c941b8
+          line_ordinal: 1
+          role: body
+          segments: [{start: 20, end: 70}]
+  - legacy: T51b706db8f
+    namespace: classification-v0
+    uses:
+      - cards: [BP09-037, BP09-SL09, BP09-U03]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:4eeaff2882839cd743600cd18bb2f8d1e104e8b86c1a31756ea5421450db3351}
+          field: effect
+          ordinal:
+          source_hash: 5d9af04a8d86163abc82ea9c9476232975b29e4a2fe3bfe3f18f9476f9075363
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 75}]
+  - legacy: T43fa67d13f
+    namespace: classification-v0
+    uses:
+      - cards: [BP02-044]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:473b555c626d1d6a676809871b53891862437553cfcbaa8aab97e31310a9c629}
+          field: effect
+          ordinal:
+          source_hash: 1a4623ce8986ac125e15fd9431963c03050f0d485a2a8ab9b1171ca221d44052
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 38}]
+  - legacy: Tbf26a2e083
+    namespace: classification-v0
+    uses:
+      - cards: [BP01-051, BP01-SL07]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:7fd913eb2dc6a2f6a3625ea11b63e85434f10ad1451a450754379f639702712a}
+          field: effect
+          ordinal:
+          source_hash: e74602c22427e04ddcb01398d169b6e557efa7d95f5334927303b43243caeace
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 52}]
+  - legacy: Ta8da8b705f
+    namespace: classification-v0
+    uses:
+      - cards: [BP16-052]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:90dd8c85190c83f29afdc9a2505165833fe90374884dbfd24a6e2933d00353b3}
+          field: effect
+          ordinal:
+          source_hash: d1381371ef3a43c7ee4e199fcf5960338acad37bee2254b5ce1e6356be6f5e23
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 74}]
+  - legacy: T12f5d4d6ce
+    namespace: classification-v0
+    uses:
+      - cards: [BP07-049]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:44733d2bb7f2874e68e395cc3c1dcddbfb11304ee9a8a1ac1492d48942a544b0}
+          field: effect
+          ordinal:
+          source_hash: 3c4122b6afc5bd2ce2c3f0470d8f1a981490083a1724eadfedbe7f926df06d2f
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 74}]
+  - legacy: Tf74444ac05
+    namespace: classification-v0
+    uses:
+      - cards: [BP06-041, PR-138]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:ee73edc0168663f4b46ac5fa0c63381dd11824bb2ebff9ca3e3def559894c27e}
+          field: effect
+          ordinal:
+          source_hash: 4a2650e0c0d62516739c6392c52b74924aa712b75d70f5e8c1025f5f8672c698
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 40}]
 hint:
   zh-TW: 依 Q2108，不管付不付【土の秘術】都要照常選目標；選不到目標就不能選這一項。付了才有效果。
   ja: Q2108より、【土の秘術】を行うかどうかに関わらず、目標は通常どおり選びます。適切な目標を選べない場合、その選択肢は選べません。
 # CR 13.3.3.2 字面的（テキスト）含「選ぶ」，這是舊寫法的依據；Q2108 已處理具體情況。
+note: revision 2 只把 applies_to 改成明示舊適用域，裁定內容不變；沒有提升證據強度或授予可執行資格。

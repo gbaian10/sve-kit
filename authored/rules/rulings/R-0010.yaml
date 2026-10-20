@@ -1,7 +1,7 @@
 format: 2
 kind: ruling
 id: R-0010
-revision: 1
+revision: 2
 question: BP14-046「このターン、次に自分が「これによってEXエリアに置いたカード」をプレイする際、コストを0にする。」的免費是這批每張各一次，還是玩家共用一次？
 decision: 玩家共用一次：安裝時捕捉這次實際放到 EX 的新物件集合，整組共用玩家層一個使用額度；本回合第一張符合的卡打出後即耗盡，之後的卡回到正常費用。
 evidence:
@@ -10,8 +10,21 @@ evidence:
   - {ref: project, kind: project, reason: 依日文語法與 CP04-003 同句型推論；沒有直接 Q&A。, date: '2026-09-27'}
 strength: inferred
 decided_on: 2026-09-27
-applies_to: [T7e52650e64]
+applies_to:
+  - legacy: T7e52650e64
+    namespace: classification-v0
+    uses:
+      - cards: [BP14-046]
+        occurrence:
+          owner: {kind: face_revision, revision_id: rev:v1:37f5900dcedbd9a862cbc64fd5c56f4f660d52d18da91d5497d2a4031082c05e}
+          field: effect
+          ordinal:
+          source_hash: 31554f57cf42b04151508b590cf18542f1a21f316bda16a30cde6f9fd8539a2c
+          line_ordinal: 0
+          role: body
+          segments: [{start: 0, end: 89}]
 hint:
   zh-TW: 本專案解讀：這張卡放到 EX 的卡共用一次免費，不是每張各一次；本回合打出第一張後，其餘照原費用。
   ja: 本プロジェクトの解釈：これによってEXエリアに置いたカードは、まとめて1回だけコストが0になります。1枚ずつではありません。このターン最初にプレイした1枚で使い切り、残りは通常のコストです。
 # DSL: player_effect.cost_mod.next_only uses UsageScope SharedPlayer (IR §14, ADR-0005).
+note: revision 2 只把 applies_to 改成明示舊適用域，裁定內容不變；沒有提升證據強度或授予可執行資格。
