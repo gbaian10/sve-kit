@@ -38,7 +38,7 @@ pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
 pub use ordering::OrderCard;
-pub use search::{SearchAnswer, SearchDomain, SearchGroup};
+pub use search::{SearchAnswer, SearchDomain, SearchGroup, SearchPartitionDomain};
 
 /// Internal context pinned to the game's immutable catalogue and one source generation.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -99,6 +99,8 @@ pub enum InputDomain {
     Order(Vec<OrderCard>),
     /// One complete search selection, including all printed groups.
     Search(SearchDomain),
+    /// One printed destination allocation from the frozen remaining found set.
+    SearchPartition(SearchPartitionDomain),
 }
 
 /// Internal answer, checked against actor and the entire decision token.
@@ -112,6 +114,8 @@ pub enum Answer {
     Order(Vec<u64>),
     /// Token-scoped handles; never physical object references.
     Search(SearchAnswer),
+    /// Fresh handles for the current destination allocation only.
+    SearchPartition(Vec<u64>),
 }
 
 /// Typed instruction outcomes retained only by the authority.
@@ -186,6 +190,7 @@ enum Slot {
 enum Wait {
     Order(ordering::OrderWait),
     Search(search::SearchWait),
+    SearchPartition(search::PartitionWait),
     Integer {
         binding: Binding<Nat>,
         bounds: Cardinality,
@@ -394,6 +399,9 @@ impl Game {
                 (Wait::Search(wait), Answer::Search(answer)) => {
                     self.internal_search_answer(&mut execution, &wait, answer)?;
                 }
+                (Wait::SearchPartition(wait), Answer::SearchPartition(handles)) => {
+                    self.internal_search_partition_answer(&mut execution, &wait, &handles)?;
+                }
                 (Wait::Integer { binding, bounds }, Answer::Integer(number))
                     if contains(bounds, number) =>
                 {
@@ -475,6 +483,7 @@ impl Game {
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
                 InputDomain::Search(domain) => search::packet(&domain),
+                InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
             };
             json!({"by":seat_name(question.actor).unwrap_or_default(),"execution":question.token.execution.0,"decision":question.token.decision.0,"epoch":question.token.epoch,"domain":domain})
         })
