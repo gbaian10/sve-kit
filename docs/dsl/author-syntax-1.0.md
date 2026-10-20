@@ -130,6 +130,10 @@ evolve:
 
 ## 5. 表達式、捕捉與選擇器
 
+已定形的數值核心片段見[數值表達式形狀矩陣](author-expression-shapes-1.0.md)。
+它逐 variant 區分必填、互斥與葉參數位置；每個 variant 的 operand 也仍是片段值域，
+不能當作本節完整 Expr／Cond／Sel 或 expanded profile。
+
 沿用 `count: Sel / count_of / objects_of / bound / power_of / hp_of / cost_of / hand / leader_life / counter / distinct_names / distinct_orig_costs / dice / paid / x_paid / history_count / lki_of`；算術為 `plus / minus / times / half_up / per: {of, unit}`，二元運算用二元素陣列。增加 `resource / agg / min / max / event / turn_number` 與 `define`，見 §13。`cmp: {left, op: eq|ne|lt|le|gt|ge, right}` 比較同型值；`all / any / not` 組合條件。保留 `exists / on_field / in_zone / leader_life / hand / zone_free / my_turn / opp_turn / construction / standing / acted / evolved / chosen / did / entered_from / played_from` 與 combo、spellchain、necro、awakened、crimson。
 
 `define: {X: Expr, …}` 是同一能力內的**純表達式別名**，在每個使用點展開、依該 read 的時點讀；不是 entry 時偷偷 freeze。一般卡文定義 X 為 Live（已同意第 18 族），事件／receipt 值本身固定。自定義 X 與頭的自由 x 不可同名；無限循環定義、型別不明定義載入拒絕。同一步使用 X 多次從同一指示開始視圖讀，跨步驟則重新求值。
