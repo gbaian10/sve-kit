@@ -1,4 +1,4 @@
-//! Frozen additive layers. Noncommutative and dynamic layers remain unadmitted.
+//! Frozen numeric layers ordered by authority proper-play facts.
 
 #![expect(
     clippy::indexing_slicing,
@@ -7,9 +7,9 @@
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, CharacteristicPatch, CommitId, DurationEnd, EffectId, EffectReference, ExecutionId,
-    Instruction, Int, NonEmpty, NumericChange, RuntimeHolder, Stat, StatChangeEvent,
-    StatChangeReason, StatDelta, StatOperation, TimeAnchor,
+    Action, CharacteristicPatch, CommitId, Control, DurationEnd, EffectId, EffectReference,
+    ExecutionId, Expr, Instruction, Int, Node, NonEmpty, NumericChange, Program, RuntimeHolder,
+    Stat, StatChangeEvent, StatChangeReason, StatDelta, StatOperation, TimeAnchor,
 };
 use core::iter::once;
 use serde::{Deserialize, Serialize};
@@ -31,25 +31,51 @@ pub(in crate::game) struct NumericState {
     generation: u64,
     attack: i64,
     life: i64,
-    effects: Vec<Addition>,
+    effects: Vec<Modifier>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+enum Change {
+    Add(i64),
+    Set(i64),
+}
+
+impl Change {
+    fn apply(self, before: i64) -> Result<i64> {
+        match self {
+            Self::Add(amount) => add(before, amount),
+            Self::Set(amount) => Ok(amount),
+        }
+    }
+
+    const fn operation(self) -> StatOperation {
+        match self {
+            Self::Add(_) => StatOperation::Add,
+            Self::Set(_) => StatOperation::Set,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct Addition {
+struct Modifier {
     effect: u64,
-    attack: i64,
-    life: i64,
+    timestamp: u64,
+    attack: Option<Change>,
+    life: Option<Change>,
 }
 
 impl NumericState {
     fn effective(&self, damage: i64) -> Result<(i64, i64, i64)> {
+        let mut effects = self.effects.iter().collect::<Vec<_>>();
+        // Frozen subjects and operands cannot change another layer's applicability or operation.
+        effects.sort_by_key(|effect| effect.timestamp);
         let (attack, life) =
-            self.effects
-                .iter()
+            effects
+                .into_iter()
                 .try_fold((self.attack, self.life), |(attack, life), effect| {
                     Ok::<_, crate::EngineFailure>((
-                        add(attack, effect.attack)?,
-                        add(life, effect.life)?,
+                        apply(effect.attack, attack)?,
+                        apply(effect.life, life)?,
                     ))
                 })?;
         Ok((
@@ -61,6 +87,106 @@ impl NumericState {
     }
 }
 
+fn apply(change: Option<Change>, value: i64) -> Result<i64> {
+    change.map_or(Ok(value), |change| change.apply(value))
+}
+
+// Every possible instruction shares the execution's timestamp, including dead branches.
+pub(super) fn check_program(program: &Program) -> Result<()> {
+    let mut patches = Vec::new();
+    collect_patches(program, &mut patches);
+    let shapes = patches.into_iter().map(shape).collect::<Result<Vec<_>>>()?;
+    for (index, first) in shapes.iter().enumerate() {
+        for second in shapes.iter().skip(index.saturating_add(1)) {
+            merge(first.0, second.0)?;
+            if matches!(
+                (first.1, second.1),
+                (Some(Change::Set(_)), Some(Change::Set(_)))
+            ) {
+                return Err(unsupported(
+                    "same-timestamp SetLife may capture different damage",
+                ));
+            }
+            merge(first.1, second.1)?;
+        }
+    }
+    Ok(())
+}
+
+fn collect_patches<'program>(
+    program: &'program Program,
+    patches: &mut Vec<&'program CharacteristicPatch>,
+) {
+    for step in &program.steps {
+        match &step.node {
+            Node::Instruction { instruction } => {
+                if let Action::Modify { patch, .. } = &instruction.action {
+                    patches.push(patch);
+                }
+            }
+            Node::Control {
+                control: Control::Sequence { body },
+            } => collect_patches(body, patches),
+            Node::Control {
+                control:
+                    Control::If {
+                        then_body,
+                        else_body,
+                        ..
+                    },
+            } => {
+                collect_patches(then_body, patches);
+                if let Some(body) = else_body {
+                    collect_patches(body, patches);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn shape(patch: &CharacteristicPatch) -> Result<(Option<Change>, Option<Change>)> {
+    match patch {
+        CharacteristicPatch::Numeric { stat, change } => {
+            let change = match change {
+                NumericChange::Add { .. } => Change::Add(0),
+                NumericChange::Set {
+                    amount: Expr::Literal(Int(value)),
+                } if *value >= 0 => Change::Set(*value),
+                NumericChange::Set { .. } => {
+                    return Err(unsupported("Set requires a nonnegative literal"));
+                }
+            };
+            Ok(match stat {
+                Stat::Attack => (Some(change), None),
+                Stat::Life => (None, Some(change)),
+            })
+        }
+        CharacteristicPatch::Combined { patches } if !patches.is_empty() => patches
+            .iter()
+            .try_fold((None, None), |(attack, life), child| {
+                let next = shape(child)?;
+                Ok((merge(attack, next.0)?, merge(life, next.1)?))
+            }),
+        _ => Err(unsupported("non-numeric patch")),
+    }
+}
+
+fn merge(left: Option<Change>, right: Option<Change>) -> Result<Option<Change>> {
+    match (left, right) {
+        (None, value) | (value, None) => Ok(value),
+        (Some(Change::Add(left)), Some(Change::Add(right))) => {
+            Ok(Some(Change::Add(add(left, right)?)))
+        }
+        (Some(Change::Set(left)), Some(Change::Set(right))) if left == right => {
+            Ok(Some(Change::Set(left)))
+        }
+        _ => Err(unsupported(
+            "noncommutative numeric patches at one timestamp",
+        )),
+    }
+}
+
 pub(super) fn check_action(action: &Action) -> Result<()> {
     if let Action::Modify {
         patch,
@@ -69,8 +195,6 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         ..
     } = action
     {
-        // EndResolution expiry and rule-check order lack a formal contract; only the
-        // permission install keeps that lifetime.
         if !matches!(expires.end, DurationEnd::NoTemporalExpiry {})
             || !matches!(expires.anchor, TimeAnchor::Installation {})
             || expires.usage.is_some()
@@ -85,16 +209,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 }
 
 fn check_patch(patch: &CharacteristicPatch) -> Result<()> {
-    match patch {
-        CharacteristicPatch::Numeric {
-            change: NumericChange::Add { .. },
-            ..
-        } => Ok(()),
-        CharacteristicPatch::Combined { patches } if !patches.is_empty() => {
-            patches.iter().try_for_each(check_patch)
-        }
-        _ => Err(unsupported("non-additive numeric patch")),
-    }
+    shape(patch).map(|_| ())
 }
 
 #[expect(
@@ -103,12 +218,13 @@ fn check_patch(patch: &CharacteristicPatch) -> Result<()> {
 )]
 impl Game {
     pub(in crate::game) fn internal_numeric_active(&self) -> bool {
-        self.state.ir_numeric.iter().any(|(id, state)| {
-            self.state
-                .objects
-                .get(id)
-                .is_some_and(|object| object.generation == state.generation)
-        })
+        !self.prepared.is_empty()
+            || self.state.ir_numeric.iter().any(|(id, state)| {
+                self.state
+                    .objects
+                    .get(id)
+                    .is_some_and(|object| object.generation == state.generation)
+            })
     }
 
     pub(super) fn internal_numeric_stat(&self, id: &str, stat: Stat) -> Result<i64> {
@@ -154,7 +270,7 @@ impl Game {
             return Err(unsupported("numeric action"));
         };
         let subjects = execution.objects(self, subjects)?;
-        let (attack, life) = additions(execution, self, patch)?;
+        let (attack, life) = changes(execution, self, patch)?;
         let effect = EffectId(self.state.next_ir_effect);
         let mut plans = Vec::new();
         for subject in subjects {
@@ -184,19 +300,24 @@ impl Game {
                     life: maximum,
                     effects: Vec::new(),
                 });
-            state.effects.push(Addition {
+            let adjusted_life = match life {
+                Some(Change::Set(value)) => Some(Change::Set(add(value, damage)?)),
+                value => value,
+            };
+            state.effects.push(Modifier {
                 effect: effect.0,
+                timestamp: execution.timestamp,
                 attack,
-                life,
+                life: adjusted_life,
             });
             let after = state.effective(damage)?;
             let facets = [
-                (Stat::Attack, before_attack, after.0),
-                (Stat::Life, before_life, after.1),
+                (Stat::Attack, before_attack, after.0, attack),
+                (Stat::Life, before_life, after.1, life),
             ]
             .into_iter()
-            .filter(|(_, before, after)| before != after)
-            .map(|(property, before, after)| {
+            .filter(|(_, before, after, _)| before != after)
+            .map(|(property, before, after, change)| {
                 Ok(StatDelta {
                     property,
                     before: Int(before),
@@ -204,7 +325,9 @@ impl Game {
                     delta: Int(after
                         .checked_sub(before)
                         .ok_or_else(|| invalid("numeric delta overflow"))?),
-                    operation: StatOperation::Add,
+                    operation: change
+                        .ok_or_else(|| invalid("missing numeric operation"))?
+                        .operation(),
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -285,29 +408,31 @@ impl Game {
     }
 }
 
-fn additions(
+fn changes(
     execution: &Execution,
     game: &Game,
     patch: &CharacteristicPatch,
-) -> Result<(i64, i64)> {
+) -> Result<(Option<Change>, Option<Change>)> {
     match patch {
-        CharacteristicPatch::Numeric {
-            stat,
-            change: NumericChange::Add { amount },
-        } => {
-            let amount = execution.integer(game, amount)?.0;
+        CharacteristicPatch::Numeric { stat, change } => {
+            let change = match change {
+                NumericChange::Add { amount } => Change::Add(execution.integer(game, amount)?.0),
+                NumericChange::Set { amount } => Change::Set(execution.integer(game, amount)?.0),
+            };
             Ok(match stat {
-                Stat::Attack => (amount, 0),
-                Stat::Life => (0, amount),
+                Stat::Attack => (Some(change), None),
+                Stat::Life => (None, Some(change)),
             })
         }
         CharacteristicPatch::Combined { patches } => {
-            patches.iter().try_fold((0, 0), |(attack, life), child| {
-                let delta = additions(execution, game, child)?;
-                Ok((add(attack, delta.0)?, add(life, delta.1)?))
-            })
+            patches
+                .iter()
+                .try_fold((None, None), |(attack, life), child| {
+                    let next = changes(execution, game, child)?;
+                    Ok((merge(attack, next.0)?, merge(life, next.1)?))
+                })
         }
-        _ => Err(unsupported("non-additive numeric patch")),
+        _ => Err(unsupported("non-numeric patch")),
     }
 }
 

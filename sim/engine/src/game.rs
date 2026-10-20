@@ -220,6 +220,8 @@ struct State {
     ir_numeric: BTreeMap<String, internal::NumericState>,
     #[serde(default)]
     next_ir_effect: u64,
+    #[serde(default)]
+    ir_play_clock: u64,
 }
 
 /// A cloneable game. Only this type resolves effects, creates prompts and hides private state.
@@ -238,6 +240,13 @@ pub struct Game {
         serialize_with = "internal::serialize_idle"
     )]
     typed: Option<internal::Execution>,
+    #[serde(
+        default,
+        skip_deserializing,
+        skip_serializing_if = "BTreeMap::is_empty",
+        serialize_with = "internal::serialize_prepared"
+    )]
+    prepared: BTreeMap<u64, internal::PreparedPlay>,
 }
 
 const ZONES: [&str; 14] = [
@@ -425,6 +434,7 @@ impl Game {
             next_ir_object: 0,
             ir_numeric: BTreeMap::new(),
             next_ir_effect: 0,
+            ir_play_clock: 0,
         };
         for seat in ["P1", "P2"] {
             state.knowledge.insert(seat.into(), Knowledge::default());
@@ -463,6 +473,7 @@ impl Game {
             emitted: Vec::new(),
             node: "opening".into(),
             typed: None,
+            prepared: BTreeMap::new(),
         };
         game.initialize_evolved(&position)?;
         game.initialize_history(&position)?;

@@ -22,6 +22,7 @@ pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<
     if !missing.is_empty() {
         return Err(unsupported(&format!("requirements {missing:?}")));
     }
+    super::numeric::check_program(program.program())?;
     check_program(program.program(), source)
 }
 
@@ -142,6 +143,8 @@ fn supported(code: &str) -> bool {
             | "shape.CharacteristicPatch.Combined"
             | "shape.NumericChange.Add"
             | "numeric.add"
+            | "shape.NumericChange.Set"
+            | "numeric.set"
             | "internal.Stat.Attack"
             | "internal.Stat.Life"
             | "shape.DurationEnd.NoTemporalExpiry"

@@ -159,38 +159,52 @@ CP04-060 僅驗排除同名的ドラゴンズネスト搜尋、公開、進 EX �
 
 Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等待執行驗收。
 
-## 加法數值修正
+## 固定數值修正
 
-Modify 准入 Numeric Add 與非空、遞迴純 Add Combined；期限只接受 Installation anchor
+Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combined；期限只接受 Installation anchor
 的 NoTemporalExpiry，沒有 usage 或 interval。對象限目前場上從者，
 已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
-同指示先固定去重對象，求完所有有號操作數，再規劃與提交。重複同 stat 的 Add 合計，
+同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
 
-型別化數值層與基礎值保存在 State；純求值器從基礎及固定加數計算有效攻體，傷害另行扣除。
+型別化數值層與基礎值保存在 State；純求值器按 ProperPlay 時間套用固定 Add／Set，傷害另行扣除。
+SetLife 安裝時逐目標固定 D_set，指定無傷基準為 S＋D_set；之後不重新捕捉。
+基礎 2／3、已受傷 1 的 Set 1／1 結果為 hp=1、max_hp=2、D=1；再受傷 1 不會因重讀恢復。
 提交時物化到原有物件的有效狀態，因此合法性、事件主體、view 與後續傷害共讀同一有效值；
 Catalog 印刷值不變。Effective Current 的 Stats read 經同一求值器，限仍有效的 SourceHolder
 場上從者。唯讀投影與讀值不分配效果 ID，也不發事件。
 
 成功登記時 authority 分配 EffectId；沒有有效主體就不分配。同主體同指示只有一個
-`Fact::StatChange`，內含非零 Attack／Life facets、實際 before／after／delta、Add 操作、
+`Fact::StatChange`，內含非零 Attack／Life facets、實際 before／after／delta、Add／Set 操作、
 instruction、execution、effect 與 commit 身分。兩個指示保持兩個事實；零差值不造 facet。
 此為 authority 結果，尚未接完整 EventHeader、觸發及歷史查詢管線，不能當玩家 wire payload。
 
-來源離場不移除非 static 加數；目標換區後原世代加數失效，不追蹤新世代。
+來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
 NoTemporalExpiry 沒有額外時間截止。解算完成時只清除目標已換世代的數值層，再執行
 既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
-閒置 Game 的基礎與加數可存檔；待答仍不可存檔。
+閒置 Game 的基礎、固定操作與 ProperPlay 時間可存檔；待答與尚未解算的預備 play 不可存檔。
 數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
 executor 尚未接入；Modify 帶此期限時仍整棵拒絕，
 包括未執行分支；InstallEffect 的 Permission EndResolution 不受影響。
 持久數值層有效期間拒絕原型 decide，避免未遷移的 set／進化等寫入繞過求值器。
-同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
+尚有預備 play 時也拒絕原型 decide；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
 布林摘要，不含 effect、execution 或加數明細；belief 入口見到它即拒絕，
 不把有效值當成原型基礎值重建另一份可 decide 的局面。
 
-此子集只有可交換的固定 Add，不宣稱 ProperPlay timestamp／依存排序已接。
-Set、Continuous 安裝、EndResolution／CurrentTurnEnd／NextTurnEnd、interval、SetKind、Grant／RemoveAbility
-及其他未准入形狀，包括未執行分支，仍整棵拒絕。
+`prepare_internal_play` 是合成 closed Program 的可信適正 play 提交入口：先驗整棵樹及 context，
+再保存封閉的 Program／來源／execution 關聯與單調 ProperPlay 時間，回傳不可由玩家構造的 handle。
+`execute_internal_play` 只能解算該 handle 所綁定的本文及 context；缺關聯、重播或來源世代失效拒絕。
+一般 `execute_internal` 將這兩步包為同一次交易；不代替真實卡的目標、付款或 play 合法性程序。
+EffectId 仍在成功安裝才分配；反序安裝、唯讀查詢及存檔恢復都不改 ProperPlay 時間。
+
+已准入的 Modify 全部固定對象及操作數，彼此不改變對方的適用對象或操作，故沒有動態依存。
+跨指示同 timestamp 的 Set／Add 或不同 Set 會保守拒絕整棵樹，包含死分支，即使 selector 可能互斥；
+不同 stat、純 Add 與相同 Attack Set 可交換。多次 Life Set 可能捕捉不同 D_set，亦整棵拒絕。
+沒有以安裝次序、EffectId 或陣列次序補出非交換 tie；ContinuousTieOrder 的規則輸入仍待後片。
+
+Continuous 安裝及其動態依存、EndResolution／CurrentTurnEnd／NextTurnEnd、interval、SetKind、
+Grant／RemoveAbility、Modify usage、負 Set 與非常值 Set，包括未執行分支，仍整棵拒絕。
+Set 層有效時的進化／基礎替換由既有原型 decide guard 保持拒絕，未宣稱差額換算完成。
 CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
-觸發或整卡准入。BP16-049 的 Set 1/1 尚未執行。
+觸發或整卡准入。BP16-049 只驗受傷對象的 Set 1／1，未承載 SpellChain capture、
+RemoveAbility 或整能力；期限與 Set 到期還原的局面仍待後片驗收。

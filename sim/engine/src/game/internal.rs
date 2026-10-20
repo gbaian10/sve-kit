@@ -21,6 +21,7 @@ use crate::ir::{
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
+use alloc::sync::Arc;
 use core::{num::NonZeroU64, result};
 use serde::ser::Error as _;
 use serde::{Serialize as _, Serializer};
@@ -48,6 +49,21 @@ pub struct Context {
     pub generation: Generation,
     /// Controller fixed for this execution, seat 1 or 2.
     pub controller: PlayerId,
+}
+
+/// Opaque handle to a successful synthetic proper play, issued only by the authority.
+#[derive(Clone, Debug)]
+pub struct ProperPlay {
+    execution: u64,
+    association: Arc<()>,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct PreparedPlay {
+    association: Arc<()>,
+    context: Context,
+    program: WellFormedProgram,
+    timestamp: u64,
 }
 
 /// Unforgeable-through-wire input coordinate. Every new question advances its epoch.
@@ -115,7 +131,7 @@ pub enum InstructionOutcome {
     Look(LookOutcome),
     /// Successful same-deck ordering; never a cross-zone movement.
     Order(OrderOutcome),
-    /// Frozen generations receiving one additive numeric effect instance.
+    /// Frozen generations receiving one numeric effect instance.
     Modified {
         /// Allocated only when at least one current subject receives the effect.
         effect: Option<EffectId>,
@@ -187,6 +203,7 @@ enum Wait {
 pub(super) struct Execution {
     context: Context,
     id: ExecutionId,
+    timestamp: u64,
     ids: BTreeMap<ObjectId, String>,
     todo: VecDeque<Node>,
     slots: BTreeMap<(ScopeId, u64), Slot>,
@@ -216,6 +233,21 @@ where
     Option::<()>::None.serialize(serializer)
 }
 
+pub(super) fn serialize_prepared<S>(
+    value: &BTreeMap<u64, PreparedPlay>,
+    serializer: S,
+) -> result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    if !value.is_empty() {
+        return Err(S::Error::custom(
+            "unresolved proper plays have no save format",
+        ));
+    }
+    serializer.serialize_none()
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Internal execution shares the authoritative game and its rule primitives."
@@ -231,20 +263,82 @@ impl Game {
         source: &SourceSpan,
         context: Context,
     ) -> Result<Progress> {
+        let before = self.clone();
+        let result = self
+            .prepare_internal_play(program, source, context)
+            .and_then(|play| self.execute_internal_play(&play));
+        if result.is_err() {
+            *self = before;
+        }
+        result
+    }
+
+    /// Commit the proper-play fact for an admitted synthetic closed body.
+    /// This authority-only harness does not perform a card's targets or payment procedure.
+    ///
+    /// # Errors
+    /// Rejects unsupported trees and contexts without issuing an execution or timestamp.
+    pub fn prepare_internal_play(
+        &mut self,
+        program: &WellFormedProgram,
+        source: &SourceSpan,
+        context: Context,
+    ) -> Result<ProperPlay> {
         admission::check(program, source)?;
         self.internal_context(&context)?;
+        let execution = self
+            .state
+            .ir_epoch
+            .checked_add(1)
+            .ok_or_else(|| invalid("IR epoch exhausted"))?;
+        let timestamp = self
+            .state
+            .ir_play_clock
+            .checked_add(1)
+            .ok_or_else(|| invalid("proper play time exhausted"))?;
+        self.state.ir_epoch = execution;
+        self.state.ir_play_clock = timestamp;
+        let association = Arc::new(());
+        self.prepared.insert(
+            execution,
+            PreparedPlay {
+                association: Arc::clone(&association),
+                context,
+                program: program.clone(),
+                timestamp,
+            },
+        );
+        Ok(ProperPlay {
+            execution,
+            association,
+        })
+    }
+
+    /// Resolve the exact body/context bound to a previously committed proper play.
+    ///
+    /// # Errors
+    /// Rejects missing or consumed play handles and restores all authority on failure.
+    pub fn execute_internal_play(&mut self, play: &ProperPlay) -> Result<Progress> {
+        let prepared = self
+            .prepared
+            .get(&play.execution)
+            .cloned()
+            .ok_or_else(|| invalid("missing proper play association"))?;
+        if !Arc::ptr_eq(&play.association, &prepared.association) {
+            return Err(invalid("foreign proper play association"));
+        }
+        // Admission is pure over the immutable checked body; only the context can go stale.
+        self.internal_context(&prepared.context)?;
         let before = self.clone();
         let result = (|| {
-            self.state.ir_epoch = self
-                .state
-                .ir_epoch
-                .checked_add(1)
-                .ok_or_else(|| invalid("IR epoch exhausted"))?;
+            self.prepared.remove(&play.execution);
             let mut execution = Execution {
-                context,
-                id: ExecutionId(self.state.ir_epoch),
+                context: prepared.context,
+                id: ExecutionId(play.execution),
+                timestamp: prepared.timestamp,
                 ids: self.internal_identities()?,
-                todo: program
+                todo: prepared
+                    .program
                     .program()
                     .steps
                     .iter()
