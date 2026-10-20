@@ -71,7 +71,7 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | --- | --- | --- |
 | A.define | binding → Expr | 純 Live 別名；不取代步驟、不在能力入口凍結 |
 | A.expr 算術 | plus、minus、times、half_up、per、min、max | 二元運算恰兩元素；min/max 為非空 Expr 陣列；per={of,unit}（§5、§13 GAP-A-028） |
-| A.expr 集合／物件讀值 | count、count_of、objects_of、bound、power_of、hp_of、cost_of、hand、leader_life、counter、distinct_names、distinct_orig_costs、lki_of | count_of 是 actual；objects_of 是快照，與 follow 不同 |
+| A.expr 集合／物件讀值 | count、count_of、objects_of、bound、power_of、hp_of、cost_of、hand、leader_life、counter、distinct_names、distinct_orig_costs、lki_of | count_of 短形是 actual；objects_of 是明示 view 的快照，與 follow 不同；已定片段見[讀值矩陣](author-expression-shapes-1.0.md#快照與收據讀值矩陣) |
 | A.expr 程序／歷史 | dice、paid、x_paid、history_count、history_sum、resource、agg、event、turn_number | resource={who,kind}；agg={of,attr,fn}；history_sum 先窄化欄位 |
 | A.expr.zone_free | {who,zone} | 回 Nat；初版容量讀值為 field/ex |
 | A.cond 組合 | cmp:{left,op,right}、all、any、not | cmp.op=eq/ne/lt/le/gt/ge；左右同型 |
@@ -84,8 +84,8 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | PlayerRef／PlayerSet | self、turn、non_turn、current、owner_of、master_of、opp／opponents、each、other_players | owner 與 controller 不互換；集合不因二席而降單人 |
 | Ref／Recipient | this、it、binding、first:binding、second:binding、rest:binding、attack_target、host、cost1；leader、leaders、role、follow、event | first/second 須有順序；by_kind 的 item 按分支窄化 |
 | ReceiptRef | binding；{event:move_receipt}；{entry_payment:additional} | 只有有移動授權的 receipt 可 follow；不存在的合法 entry_payment 不等於拼錯引用 |
-| count_of 長形 | receipt、where、view=before/after | 材料快照篩選，不查現在卡片 |
-| did 長形 | result、where | 依指示 receipt 的成功定義，不統一 actual>0 |
+| count_of 長形 | receipt、where、view=before/after | 三鍵必填；成功材料快照篩選，不查現在卡片；receipt 材料型別另驗 |
+| did 長形 | result、where | 兩鍵必填；預設成功判準且存在匹配的成功材料；已登錄 before 視角限付款／捨牌，型別另驗 |
 | 捕捉 | at=live/play/resolution/selection/event | 只在已登錄位置；apply.capture=play 另為集合捕捉 |
 
 ## 動作與內層選項

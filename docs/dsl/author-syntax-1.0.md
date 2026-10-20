@@ -133,7 +133,7 @@ roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣]
 
 ## 5. 表達式、捕捉與選擇器
 
-已定形的數值核心片段見[數值表達式形狀矩陣](author-expression-shapes-1.0.md)。
+已定形的數值與收據片段見[讀值形狀矩陣](author-expression-shapes-1.0.md)。
 它逐 variant 區分必填、互斥與葉參數位置；每個 variant 的 operand 也仍是片段值域，
 不能當作本節完整 Expr／Cond／Sel 或 expanded profile。
 
@@ -164,6 +164,11 @@ roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣]
 `this / it / bind / first:bind / second:bind / rest:bind / attack_target / host / cost1` 保留 R.object 世代或事件快照。first/second 必須來自有角色或明示順序的 binding，無序集合不可任取第一張。目標引用 R.target 在結算驗合法；LKI 可讀不代表能對離場物件執行。`follow: receipt` 只接具合法移動授權的實際 after refs（R.follow-move），失敗或消去成員不回傳可操作物件。合法 follow 若沒有成功成員，後續對該集合的動作依 CR 1.3.2 不做，不是載入錯誤；未綁定或無授權的 follow 仍應拒絕。
 
 `result` 可掛所有動作、費用、simultaneous。`count_of` 是指定單位 actual；`objects_of` 預設成功成員的快照，`follow` 才取得可執行的新區引用。`count_of: {receipt, where, view: before|after}` 用有型別材料快照，無資訊按 CR 1.3.6。`did`：卡片移動／建立／公開／抽／找須至少一個實際成功成員；傷害須實際正量；姿態／翻面／counter 需所要求全數實變；pay 是 PaymentComplete；evolve 是 receipt.evolved=true。非預設語意必須使用明示 predicate 並附依據，不通用地用 actual>0。
+
+已定形的長短讀值、快照 view、材料 filter 與降低時的成功判準責任見
+[收據讀值矩陣](author-expression-shapes-1.0.md#快照與收據讀值矩陣)。
+其中 objects_of 須明示 before／after；「預設成功成員」不授予省略 view 的語義。
+這些仍是片段，不代表完整 Sel、作者入口或收據接線已完成。
 
 ## 7. 動作原子
 
