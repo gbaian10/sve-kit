@@ -1,5 +1,3 @@
-import { useTranslation } from "react-i18next"
-
 import amulet from "../../assets/card-labels/amulet.svg"
 import follower from "../../assets/card-labels/follower.svg"
 import spell from "../../assets/card-labels/spell.svg"
@@ -13,19 +11,17 @@ export function CardTypeBadge({
   fallback = false,
 }: {
   readonly code: string | null | undefined
-  readonly label?: string | undefined
+  readonly label: string
   readonly decorative?: boolean
   readonly fallback?: boolean
 }) {
-  const { t } = useTranslation()
   if (code !== "follower" && code !== "spell" && code !== "amulet")
-    return fallback && code ? <span>{label ?? code}</span> : null
-  const name = label ?? t(`cardType.${code}`)
+    return fallback && code ? <span>{label}</span> : null
   return (
     <img
       src={ASSETS[code]}
-      alt={decorative ? "" : name}
-      title={decorative ? undefined : name}
+      alt={decorative ? "" : label}
+      title={decorative ? undefined : label}
       aria-hidden={decorative || undefined}
       className={
         decorative ? "h-5 w-auto shrink-0 align-middle" : "h-4 w-auto shrink-0 align-middle"

@@ -44,6 +44,7 @@ import { useVisible } from "./useVisible"
 export interface CardRowsProps extends CardGridProps {
   /** The 4:3 illustration crop of a cell's face, once its image metadata is known. */
   readonly artOf: (cell: GridCell) => ImageSource | undefined
+  readonly typeLabel: (code: string) => string
 }
 
 function RowLink({
@@ -207,6 +208,7 @@ const TableRow = memo(function TableRow({
   selected,
   artOf,
   labels,
+  typeLabel,
 }: {
   readonly cell: GridCell
   readonly images: CardRowsProps["images"]
@@ -215,6 +217,7 @@ const TableRow = memo(function TableRow({
   readonly selected: boolean
   readonly artOf: CardRowsProps["artOf"]
   readonly labels: ResultLabels
+  readonly typeLabel: string
 }) {
   const ref = useRef<HTMLLIElement>(null)
   const seen = useVisible(ref)
@@ -260,6 +263,7 @@ const TableRow = memo(function TableRow({
               <DeckLocationBadges locations={cell.summary.deckLocations} />
               <CardTypeBadge
                 code={cell.summary.typeCode}
+                label={typeLabel}
                 fallback={cell.summary.typeCode !== "leader"}
               />
             </span>
@@ -294,7 +298,15 @@ const TableRow = memo(function TableRow({
   )
 })
 
-export function CardTable({ cells, images, onOpen, anchor, selected, artOf }: CardRowsProps) {
+export function CardTable({
+  cells,
+  images,
+  onOpen,
+  anchor,
+  selected,
+  artOf,
+  typeLabel,
+}: CardRowsProps) {
   const labels = useResultLabels()
   return (
     <ul data-view="table" className="flex flex-col">
@@ -308,6 +320,7 @@ export function CardTable({ cells, images, onOpen, anchor, selected, artOf }: Ca
           selected={selected === cell.key}
           artOf={artOf}
           labels={labels}
+          typeLabel={cell.summary.typeCode ? typeLabel(cell.summary.typeCode) : ""}
         />
       ))}
     </ul>
@@ -338,6 +351,7 @@ const ListRow = memo(function ListRow({
   visibility,
   columns,
   classLabel,
+  typeLabel,
 }: {
   readonly cell: GridCell
   readonly onOpen: CardRowsProps["onOpen"]
@@ -348,6 +362,7 @@ const ListRow = memo(function ListRow({
   readonly visibility: ListVisibility
   readonly columns: readonly ListColumn[]
   readonly classLabel: string
+  readonly typeLabel: string
 }) {
   const row = useRef<HTMLTableRowElement>(null)
   const link = useRef<HTMLAnchorElement>(null)
@@ -431,6 +446,7 @@ const ListRow = memo(function ListRow({
               <td key={column} data-list-type="">
                 <CardTypeBadge
                   code={cell.summary.typeCode}
+                  label={typeLabel}
                   fallback={cell.summary.typeCode !== "leader"}
                 />
               </td>
@@ -510,6 +526,7 @@ export function CardList({
   scrollPositionRef,
   footer,
   classLabel,
+  typeLabel,
 }: CardListProps) {
   const labels = useResultLabels()
   const scroll = useRef<HTMLDivElement>(null)
@@ -706,6 +723,7 @@ export function CardList({
               visibility={listVisibility}
               columns={columns}
               classLabel={classLabel(cell.summary.classCode)}
+              typeLabel={cell.summary.typeCode ? typeLabel(cell.summary.typeCode) : ""}
             />
           ))}
           {windowed.after > 0 && (

@@ -174,7 +174,6 @@ const zhTW = {
     subChip: "{{parent}}・{{child}}",
   },
   quickSet: { latest: "最新：{{code}}", latestAccessible: "最新卡包：{{name}}" },
-  cardType: { follower: "從者", spell: "法術", amulet: "護符" },
   typeFilter: { label: "種類" },
   locationFilter: {
     label: "牌組位置",

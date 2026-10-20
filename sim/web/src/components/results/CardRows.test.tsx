@@ -35,6 +35,14 @@ afterEach(() => {
 })
 
 const classLabel = () => "中立"
+const typeNames: Readonly<Record<string, string>> = {
+  follower: "從者",
+  spell: "法術",
+  amulet: "護符",
+  crest: "紋章",
+  equipment: "裝備",
+}
+const typeLabel = (code: string) => typeNames[code] ?? code
 
 const cell: GridCell = {
   key: "c:synthetic",
@@ -58,12 +66,16 @@ const cell: GridCell = {
 describe("row costs", () => {
   it("shows a plain numeric list cost and the table stat line", async () => {
     const props = { cells: [cell], onOpen: vi.fn() }
-    const { unmount } = await renderInRouter(<CardList classLabel={classLabel} {...props} />)
+    const { unmount } = await renderInRouter(
+      <CardList typeLabel={typeLabel} classLabel={classLabel} {...props} />,
+    )
     expect(screen.getByText("15")).toBeVisible()
     expect(document.querySelector("[data-image-printing], [data-image-state]")).toBeNull()
     expect(screen.getByRole("link")).toHaveAttribute("href", "/cards/BP-SYNTHETIC")
     unmount()
-    await renderInRouter(<CardTable {...props} images={undefined} artOf={() => undefined} />)
+    await renderInRouter(
+      <CardTable typeLabel={typeLabel} {...props} images={undefined} artOf={() => undefined} />,
+    )
     expect(screen.getByText("消費")).toBeVisible()
     expect(screen.getByText("15")).toBeVisible()
     expect(screen.getByText("攻擊力")).toBeVisible()
@@ -75,7 +87,13 @@ describe("table thumbnails", () => {
   const art = { src: "/cdn/images/art_m/1.webp", srcSet: "", width: 384, height: 288 }
   it("shows the 4:3 illustration crop and falls back to the card thumbnail when it fails", async () => {
     await renderInRouter(
-      <CardTable cells={[cell]} onOpen={vi.fn()} images={undefined} artOf={() => art} />,
+      <CardTable
+        typeLabel={typeLabel}
+        cells={[cell]}
+        onOpen={vi.fn()}
+        images={undefined}
+        artOf={() => art}
+      />,
     )
     const image = document.querySelector("[data-art-thumb] img")
     expect(image).toHaveAttribute("src", art.src)
@@ -88,7 +106,13 @@ describe("table thumbnails", () => {
   })
   it("uses the card thumbnail when no crop exists", async () => {
     await renderInRouter(
-      <CardTable cells={[cell]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />,
+      <CardTable
+        typeLabel={typeLabel}
+        cells={[cell]}
+        onOpen={vi.fn()}
+        images={undefined}
+        artOf={() => undefined}
+      />,
     )
     expect(document.querySelector("[data-art-thumb]")).toBeNull()
     expect(document.querySelector("[data-image-state]")).toHaveAttribute(
@@ -108,7 +132,13 @@ it("updates table labels and fallback thumbnails on language changes while retai
     {
       path: "*",
       element: (
-        <CardTable cells={cells} images={undefined} artOf={() => undefined} onOpen={vi.fn()} />
+        <CardTable
+          typeLabel={typeLabel}
+          cells={cells}
+          images={undefined}
+          artOf={() => undefined}
+          onOpen={vi.fn()}
+        />
       ),
     },
   ])
@@ -162,7 +192,9 @@ describe("spreadsheet list", () => {
           ? { phase: "error", error: { kind: "query-failed", message: "synthetic failure" } }
           : { phase: "pending" },
     )
-    await renderInRouter(<CardList classLabel={classLabel} cells={cells} onOpen={vi.fn()} />)
+    await renderInRouter(
+      <CardList typeLabel={typeLabel} classLabel={classLabel} cells={cells} onOpen={vi.fn()} />,
+    )
     expect(
       screen.getAllByRole("columnheader").map((column) => column.getAttribute("aria-label")),
     ).toEqual([
@@ -189,7 +221,9 @@ describe("spreadsheet list", () => {
   })
 
   it("waits until rows enter the viewport before requesting ability previews", async () => {
-    await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
+    await renderInRouter(
+      <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+    )
     expect(useAbilityPreview).not.toHaveBeenCalled()
     expect(document.querySelector('[data-preview="waiting"]')).not.toBeNull()
   })
@@ -202,7 +236,14 @@ describe("spreadsheet list", () => {
       to: "/cards/next",
       name: { ...cell.name, primary: { lang: "en", text: "Next synthetic" } },
     }
-    await renderInRouter(<CardList classLabel={classLabel} cells={[cell, next]} onOpen={onOpen} />)
+    await renderInRouter(
+      <CardList
+        typeLabel={typeLabel}
+        classLabel={classLabel}
+        cells={[cell, next]}
+        onOpen={onOpen}
+      />,
+    )
     const user = userEvent.setup()
     const links = screen.getAllByRole("link")
     links[0]?.focus()
@@ -239,9 +280,15 @@ it.each(["list", "table"] as const)(
       const prefs = usePrefs()
       const named = { ...cell, name: displayName(source, "zh-TW", prefs.nameDisplay) }
       return view === "list" ? (
-        <CardList classLabel={classLabel} cells={[named]} onOpen={vi.fn()} />
+        <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[named]} onOpen={vi.fn()} />
       ) : (
-        <CardTable cells={[named]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />
+        <CardTable
+          typeLabel={typeLabel}
+          cells={[named]}
+          onOpen={vi.fn()}
+          images={undefined}
+          artOf={() => undefined}
+        />
       )
     }
     prefsStore.set({ effectLanguage: "both", nameDisplay: "both" })
@@ -275,7 +322,9 @@ it("keeps a large loaded list bounded and replaces its visible rows when the pag
     key: `window-${String(index)}`,
     to: `/cards/window-${String(index)}`,
   }))
-  await renderInRouter(<CardList classLabel={classLabel} cells={cells} onOpen={vi.fn()} />)
+  await renderInRouter(
+    <CardList typeLabel={typeLabel} classLabel={classLabel} cells={cells} onOpen={vi.fn()} />,
+  )
   const table = screen.getByRole("table")
   expect(table).toHaveAttribute("data-loaded-count", "600")
   expect(table).toHaveAttribute("aria-rowcount", "601")
@@ -312,6 +361,7 @@ it("preserves a text selection instead of opening a row without translation noti
   const onOpen = vi.fn()
   await renderInRouter(
     <CardList
+      typeLabel={typeLabel}
       classLabel={classLabel}
       cells={[{ ...cell, name: { ...cell.name, missingTranslation: true } }]}
       onOpen={onOpen}
@@ -335,9 +385,20 @@ it.each(["list", "table"] as const)(
     const premium = { ...cell, summary: { ...cell.summary, rarityCode: "sr", premium: true } }
     await renderInRouter(
       view === "list" ? (
-        <CardList classLabel={classLabel} cells={[premium]} onOpen={vi.fn()} />
+        <CardList
+          typeLabel={typeLabel}
+          classLabel={classLabel}
+          cells={[premium]}
+          onOpen={vi.fn()}
+        />
       ) : (
-        <CardTable cells={[premium]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />
+        <CardTable
+          typeLabel={typeLabel}
+          cells={[premium]}
+          onOpen={vi.fn()}
+          images={undefined}
+          artOf={() => undefined}
+        />
       ),
     )
     expect(screen.getByRole("img", { name: "官方稀有度：SR" })).toBeVisible()
@@ -356,7 +417,7 @@ it("hides matching headers and cells, keeps an identity column, and preserves ro
   await renderInRouter(
     <>
       <ListColumnPicker />
-      <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />
+      <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />
     </>,
   )
   const user = userEvent.setup()
@@ -379,7 +440,7 @@ it("hides matching headers and cells, keeps an identity column, and preserves ro
 
 it("resizes a column by keyboard, persists it on reload, and restores the default", async () => {
   const { unmount } = await renderInRouter(
-    <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+    <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
   )
   const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
   const heading = handle.parentElement
@@ -390,7 +451,9 @@ it("resizes a column by keyboard, persists it on reload, and restores the defaul
   expect(prefsStore.get().listWidths.name).toBe(202)
   unmount()
   prefsStore.reload()
-  await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
+  await renderInRouter(
+    <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+  )
   expect(screen.getByRole("table").style.getPropertyValue("--list-user-name")).toBe("202px")
   act(() => {
     prefsStore.set(DEFAULT_PREFS)
@@ -399,7 +462,9 @@ it("resizes a column by keyboard, persists it on reload, and restores the defaul
 })
 
 it("previews a drag locally and persists once when released", async () => {
-  await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
+  await renderInRouter(
+    <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+  )
   const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
   const heading = handle.parentElement
   if (!heading) throw new Error("missing heading")
@@ -433,7 +498,7 @@ it("keeps touch resize drafts separate from desktop widths and restores both def
     prefsStore.set({ listWidths: { name: 280 } })
   })
   const { unmount } = await renderInRouter(
-    <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+    <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
   )
   const handle = screen.getByRole("separator", { name: "調整「名稱」欄寬" })
   const heading = handle.parentElement
@@ -461,7 +526,9 @@ it("keeps touch resize drafts separate from desktop widths and restores both def
   }
   unmount()
   prefsStore.reload()
-  await renderInRouter(<CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />)
+  await renderInRouter(
+    <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />,
+  )
   expect(screen.getByRole("table").style.getPropertyValue("--list-mobile-user-name")).toBe("204px")
   act(() => {
     prefsStore.set(DEFAULT_PREFS)
@@ -476,7 +543,12 @@ it("shows only class icons with localized accessible names including neutral, an
     return (
       <>
         <ListColumnPicker />
-        <CardList classLabel={() => t("search.neutral")} cells={[cell]} onOpen={vi.fn()} />
+        <CardList
+          typeLabel={typeLabel}
+          classLabel={() => t("search.neutral")}
+          cells={[cell]}
+          onOpen={vi.fn()}
+        />
       </>
     )
   }
@@ -510,7 +582,7 @@ it("reorders from the picker keyboard and keeps focus and cells in the same orde
   await renderInRouter(
     <>
       <ListColumnPicker />
-      <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />
+      <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />
     </>,
   )
   await userEvent.click(screen.getByText("顯示欄位", { selector: "summary" }))
@@ -534,7 +606,13 @@ it("reorders from the picker keyboard and keeps focus and cells in the same orde
 it("keeps short header clicks sortable and commits a header drag only on release", async () => {
   const onSort = vi.fn()
   await renderInRouter(
-    <CardList classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} onSort={onSort} />,
+    <CardList
+      typeLabel={typeLabel}
+      classLabel={classLabel}
+      cells={[cell]}
+      onOpen={vi.fn()}
+      onSort={onSort}
+    />,
   )
   vi.stubGlobal("matchMedia", () => ({ matches: true }))
   const headings = screen.getAllByRole("columnheader")
@@ -594,9 +672,9 @@ it.each(["list", "table"] as const)("shows EVOLVE only for evolve cards in %s", 
   const props = { cells: [cell, evolved], onOpen: vi.fn() }
   await renderInRouter(
     view === "list" ? (
-      <CardList classLabel={classLabel} {...props} />
+      <CardList typeLabel={typeLabel} classLabel={classLabel} {...props} />
     ) : (
-      <CardTable {...props} images={undefined} artOf={() => undefined} />
+      <CardTable typeLabel={typeLabel} {...props} images={undefined} artOf={() => undefined} />
     ),
   )
   expect(screen.getAllByRole("img", { name: "進化" })).toHaveLength(1)
@@ -616,7 +694,7 @@ it.each(["list", "table"] as const)("shows EVOLVE only for evolve cards in %s", 
 })
 
 it.each(["list", "table"] as const)(
-  "shows text for crest and equipment types in %s",
+  "shows vocabulary labels for crest and equipment types in %s",
   async (view) => {
     const props = {
       cells: ["crest", "equipment", "leader"].map((typeCode) => ({
@@ -632,15 +710,38 @@ it.each(["list", "table"] as const)(
     }
     await renderInRouter(
       view === "list" ? (
+        <CardList typeLabel={typeLabel} classLabel={classLabel} {...props} />
+      ) : (
+        <CardTable typeLabel={typeLabel} {...props} images={undefined} artOf={() => undefined} />
+      ),
+    )
+    expect(screen.getByText("紋章")).toBeVisible()
+    expect(screen.getByText("裝備")).toBeVisible()
+    expect(screen.queryByText("crest")).not.toBeInTheDocument()
+    expect(screen.queryByText("equipment")).not.toBeInTheDocument()
+    expect(screen.queryByText("leader")).not.toBeInTheDocument()
+    expect(screen.getAllByRole("img", { name: "Token" })).toHaveLength(2)
+  },
+)
+
+it.each(["list", "table"] as const)(
+  "uses the supplied vocabulary label for the type icon in %s regardless of UI language",
+  async (view) => {
+    const props = {
+      cells: [{ ...cell, summary: { ...cell.summary, typeCode: "follower" } }],
+      onOpen: vi.fn(),
+      typeLabel: () => "詞彙從者",
+    }
+    await renderInRouter(
+      view === "list" ? (
         <CardList classLabel={classLabel} {...props} />
       ) : (
         <CardTable {...props} images={undefined} artOf={() => undefined} />
       ),
+      { language: "en" },
     )
-    expect(screen.getByText("crest")).toBeVisible()
-    expect(screen.getByText("equipment")).toBeVisible()
-    expect(screen.queryByText("leader")).not.toBeInTheDocument()
-    expect(screen.getAllByRole("img", { name: "Token" })).toHaveLength(2)
+    expect(screen.getByRole("img", { name: "詞彙從者" })).toHaveAttribute("title", "詞彙從者")
+    expect(screen.queryByRole("img", { name: "Follower" })).not.toBeInTheDocument()
   },
 )
 
@@ -649,6 +750,7 @@ it("toggles type and location columns independently of rarity", async () => {
     <>
       <ListColumnPicker />
       <CardList
+        typeLabel={typeLabel}
         classLabel={classLabel}
         cells={[
           {
@@ -694,7 +796,13 @@ it.each(["zh-TW", "ja", "en"] as const)(
         {
           path: "*",
           element: (
-            <CardTable cells={[cell]} onOpen={vi.fn()} images={undefined} artOf={() => undefined} />
+            <CardTable
+              typeLabel={typeLabel}
+              cells={[cell]}
+              onOpen={vi.fn()}
+              images={undefined}
+              artOf={() => undefined}
+            />
           ),
         },
       ],
@@ -720,9 +828,9 @@ it.each(["list", "table"] as const)(
     const props = { cells: [classified], onOpen: vi.fn() }
     await renderInRouter(
       view === "list" ? (
-        <CardList classLabel={classLabel} {...props} />
+        <CardList typeLabel={typeLabel} classLabel={classLabel} {...props} />
       ) : (
-        <CardTable {...props} images={undefined} artOf={() => undefined} />
+        <CardTable typeLabel={typeLabel} {...props} images={undefined} artOf={() => undefined} />
       ),
     )
     const positions = document.querySelector("[data-location-badges]") as HTMLElement

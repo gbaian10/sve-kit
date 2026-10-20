@@ -186,7 +186,6 @@ export default {
     subChip: "{{parent}}・{{child}}",
   },
   quickSet: { latest: "最新：{{code}}", latestAccessible: "最新カードセット：{{name}}" },
-  cardType: { follower: "フォロワー", spell: "スペル", amulet: "アミュレット" },
   typeFilter: { label: "カード種類" },
   locationFilter: {
     label: "デッキ区分",

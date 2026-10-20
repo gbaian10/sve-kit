@@ -22,15 +22,9 @@ export function TypeFilter({
   const { t } = useTranslation()
   const items = TYPE_ORDER.flatMap((code): FacetChip[] => {
     const type = options?.types.find((item) => item.code === code)
-    return type
-      ? [
-          {
-            code,
-            label: vocabularyOptionLabel(type.name, textLang),
-            content: <CardTypeBadge code={code} decorative />,
-          },
-        ]
-      : []
+    if (!type) return []
+    const label = vocabularyOptionLabel(type.name, textLang)
+    return [{ code, label, content: <CardTypeBadge code={code} label={label} decorative /> }]
   })
   return (
     <FacetChips

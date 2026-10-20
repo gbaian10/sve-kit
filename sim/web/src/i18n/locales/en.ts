@@ -182,7 +182,6 @@ export default {
     subChip: "{{parent}} · {{child}}",
   },
   quickSet: { latest: "Latest: {{code}}", latestAccessible: "Latest set: {{name}}" },
-  cardType: { follower: "Follower", spell: "Spell", amulet: "Amulet" },
   typeFilter: { label: "Card Type" },
   locationFilter: {
     label: "Deck location",

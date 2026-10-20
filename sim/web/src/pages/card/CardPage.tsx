@@ -807,7 +807,7 @@ export function CardView({
                       {typeCode !== "leader" && (
                         <CardTypeBadge
                           code={typeCode}
-                          label={typeCode ? label("type", typeCode) : undefined}
+                          label={typeCode ? label("type", typeCode) : ""}
                           fallback
                         />
                       )}
