@@ -2,9 +2,9 @@ use super::{
     AbilityKind, AbilityOrigin, AbilitySource, Binding, Bool, CaptureRef, CardKind, CardName,
     Cardinality, CausePattern, CharacteristicView, CounterKind, DamageRecipient, Edge,
     EffectDefinitionId, EffectReference, EventPattern, ExecutionRef, Expr, GrantedAbility, Holder,
-    Int, KeywordId, Nat, NumericChange, ObjectOperand, ObjectRef, Phase, PlayerRef, PlayerSet,
-    Position, PositiveInt, Posture, RecipientSet, RuleId, RuleProcedure, Selector, Stat,
-    TimeAnchor, TitleId, TraitId, Visibility, ZoneKind, ZoneRef,
+    Int, KeywordId, MoveDestination, Nat, NumericChange, ObjectOperand, ObjectRef, Phase,
+    PlayerRef, PlayerSet, Position, PositiveInt, Posture, RecipientSet, RuleId, RuleProcedure,
+    Selector, Stat, TimeAnchor, TitleId, TraitId, Visibility, ZoneKind,
 };
 
 variants!(Effect {
@@ -63,7 +63,7 @@ tags!(DamageKind {
     Ability
 });
 variants!(EventRewrite {
-    RedirectMove { to: ZoneRef, position: Option<Position> } => ["replacement.move.redirect"],
+    RedirectMove { to: MoveDestination, position: Option<Position> } => ["replacement.move.redirect"],
     PreventDamage { recipient: Option<RecipientPredicate>, source: Option<SourcePredicate>, kind: DamageKind } => ["replacement.damage.prevent"],
     AddDamage { amount: Expr<Int> } => ["replacement.damage.add"],
     MultiplyDamage { numerator: Nat, denominator: PositiveInt, rounding: Rounding } => ["replacement.damage.multiply"],

@@ -117,7 +117,7 @@ runtime_record!(
 
 runtime_record!(#[derive(Copy)] ResultMember { id: ResultMemberId, before: Option<RuntimeObjectView>, after: Option<RuntimeObjectView> });
 
-runtime_record!(MoveResult { before: ObjectRef, after: Option<ObjectRef>, requested_to: RuntimeZoneRef, actual_to: Option<RuntimeZoneRef>, replacements: Vec<EffectId> });
+runtime_record!(MoveResult { before: ObjectRef, after: Option<ObjectRef>, requested_to: RuntimeZoneRef, requested_position: Option<Position>, actual_to: Option<RuntimeZoneRef>, actual_position: Option<Position>, replacements: Vec<EffectId> });
 
 runtime_record!(PaymentResult { complete: Bool, steps: Vec<RuntimeReceiptId> });
 

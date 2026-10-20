@@ -7,7 +7,7 @@ use super::{
 use crate::ir::{
     BoolFrozen, CaptureTime, CharacteristicView, ExecutionRef, NumberRead, PaymentReference,
 };
-use crate::ir::{CardKind, KindRead};
+use crate::ir::{CardKind, CardName, KindRead, MemberProjection, NamesRead, TraitsRead};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -110,6 +110,10 @@ impl Checker {
             }
             Expr::Frozen(read) => match read.as_ref() {
                 NatFrozen::ReceiptActual { receipt } => self.measured(receipt),
+                NatFrozen::SearchFoundCount { found } => self.reference(*found, BindingKind::Value),
+                NatFrozen::SearchRevealedCount { revealed } => {
+                    self.reference(*revealed, BindingKind::Value)
+                }
                 NatFrozen::SpellChain {
                     player,
                     execution,
@@ -249,6 +253,28 @@ impl Checker {
                 self.selector(objects)?;
                 self.candidate(*binding, predicate)
             }
+            Predicate::HasTrait { traits, .. } => match traits {
+                Expr::Literal(_) => Ok(()),
+                Expr::Live(read) if !self.event_capture() => {
+                    let TraitsRead::Traits { object, view } = read.as_ref();
+                    if !matches!(
+                        view,
+                        CharacteristicView::Original | CharacteristicView::Effective
+                    ) {
+                        return self.reject();
+                    }
+                    self.view(object)
+                }
+                Expr::Frozen(_)
+                | Expr::Live(_)
+                | Expr::Captured(_)
+                | Expr::Bound(_)
+                | Expr::Compute(_) => self.reject(),
+            },
+            Predicate::NamesIntersect { left, right } => {
+                self.names(left)?;
+                self.names(right)
+            }
             Predicate::EventCause { .. }
             | Predicate::Equal { .. }
             | Predicate::PlayerEquals { .. }
@@ -272,12 +298,25 @@ impl Checker {
             | Predicate::PhaseEquals { .. }
             | Predicate::TitleEquals { .. }
             | Predicate::HasAbility { .. }
-            | Predicate::HasTrait { .. }
-            | Predicate::NamesIntersect { .. }
             | Predicate::ClassEquals { .. }
             | Predicate::HasInfo { .. }
             | Predicate::NameEquals { .. }
             | Predicate::NameContains { .. } => self.reject(),
+        }
+    }
+
+    fn names(&self, expression: &Expr<Vec<CardName>>) -> Checked {
+        match expression {
+            Expr::Literal(_) => Ok(()),
+            Expr::Live(read) if !self.event_capture() => {
+                let NamesRead::Names { object } = read.as_ref();
+                self.view(object)
+            }
+            Expr::Frozen(_)
+            | Expr::Live(_)
+            | Expr::Captured(_)
+            | Expr::Bound(_)
+            | Expr::Compute(_) => self.reject(),
         }
     }
 
@@ -439,14 +478,22 @@ impl Checker {
                 self.natural(count)
             }
             Selector::Created { receipt } => self.receipt(receipt),
-            Selector::ReceiptMembers { receipt, .. } => match receipt {
+            Selector::ReceiptMembers {
+                receipt,
+                projection,
+            } => match receipt {
                 ObjectReceipt::Look { receipt } => self.receipt(receipt),
                 ObjectReceipt::Flip { receipt } => self.receipt(receipt),
                 ObjectReceipt::Token { receipt } => self.receipt(receipt),
                 ObjectReceipt::Batch { receipt } => self.receipt(receipt),
+                ObjectReceipt::Movement { receipt } => {
+                    if *projection != MemberProjection::Before {
+                        return self.reject();
+                    }
+                    self.movement_receipt(receipt)
+                }
                 ObjectReceipt::TransformBanished { .. }
-                | ObjectReceipt::TransformCreated { .. }
-                | ObjectReceipt::Movement { .. } => self.reject(),
+                | ObjectReceipt::TransformCreated { .. } => self.reject(),
             },
             Selector::CollectedMembers { receipts, .. } => match receipts {
                 ObjectReceiptList::Look { receipts } => {
@@ -462,10 +509,22 @@ impl Checker {
                     self.reference(*receipts, BindingKind::Value)
                 }
             },
-            Selector::MoveAfterAll { .. }
-            | Selector::MoveAfter { .. }
-            | Selector::Zone { .. }
-            | Selector::Relation { .. } => self.reject(),
+            Selector::MoveAfter {
+                receipt,
+                permission,
+            } => {
+                self.follow_permission(*permission)?;
+                self.movement_receipt(receipt)
+            }
+            Selector::MoveAfterAll {
+                receipts,
+                permission,
+                ..
+            } => {
+                self.follow_permission(*permission)?;
+                self.movement_receipts(*receipts)
+            }
+            Selector::Zone { .. } | Selector::Relation { .. } => self.reject(),
         }
     }
 
@@ -473,7 +532,11 @@ impl Checker {
         matches!(self.capture_time, Some(CaptureTime::AtEvent { .. }))
     }
 
-    fn candidate(&mut self, binding: Binding<ObjectRef>, predicate: &Expr<Bool>) -> Checked {
+    pub(super) fn candidate(
+        &mut self,
+        binding: Binding<ObjectRef>,
+        predicate: &Expr<Bool>,
+    ) -> Checked {
         self.isolated(|checker| {
             let scope = binding.key().0;
             if scope != checker.env.scope && !checker.scopes.insert(scope) {

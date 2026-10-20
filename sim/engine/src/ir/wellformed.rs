@@ -21,6 +21,7 @@ mod decisions;
 mod entries;
 mod evolution;
 mod modes;
+mod movement;
 mod producers;
 mod values;
 mod visibility;
@@ -117,6 +118,8 @@ pub enum WellFormedReason {
     InvalidModes,
     /// An allocation does not belong to the damage instruction's recipient domain.
     DistributionRecipients,
+    /// A movement has inconsistent destination, position, posture, or reason.
+    InvalidMovement,
 }
 
 impl WellFormedReason {
@@ -149,6 +152,7 @@ impl WellFormedReason {
             Self::InvalidRoles => "InvalidRoles",
             Self::InvalidModes => "InvalidModes",
             Self::DistributionRecipients => "DistributionRecipients",
+            Self::InvalidMovement => "InvalidMovement",
         }
     }
 }
@@ -494,7 +498,9 @@ impl Checker {
             .map(|_| (self.env.bindings.clone(), self.env.access.clone()));
         // The action publishes its output only after all of its inputs were checked.
         self.at("action", |checker| checker.action(&instruction.action))?;
-        if let Action::Discard { player, .. } | Action::Draw { player, .. } = &instruction.action
+        if let Action::Discard { player, .. }
+        | Action::Draw { player, .. }
+        | Action::Search { player, .. } = &instruction.action
             && instruction.actor != *player
         {
             return self.reject();
@@ -568,7 +574,9 @@ impl Checker {
                 }
                 self.natural(amount)
             }
-            Action::Reveal { objects }
+            Action::Destroy { objects }
+            | Action::Banish { objects }
+            | Action::Reveal { objects }
             | Action::FlipDown { objects }
             | Action::Posture { objects, .. } => self.selector(objects),
             Action::Dice {
@@ -636,12 +644,40 @@ impl Checker {
                 self.object(&form.object)?;
                 self.define(*link, BindingKind::Value)
             }
-            Action::InstallEffect { .. }
-            | Action::Move { .. }
-            | Action::Destroy { .. }
-            | Action::Banish { .. }
-            | Action::Search { .. }
-            | Action::RevealUntil { .. }
+            Action::Move {
+                objects,
+                movement,
+                reason,
+            } => {
+                self.selector(objects)?;
+                self.movement(movement, Some(*reason))
+            }
+            Action::Search {
+                player,
+                deck,
+                candidate,
+                filter,
+                cardinality,
+                groups,
+                destination,
+                continuation,
+            } => self.search(
+                player,
+                deck,
+                *candidate,
+                filter,
+                *cardinality,
+                groups.as_ref(),
+                destination.as_ref(),
+                *continuation,
+            ),
+            Action::InstallEffect {
+                subjects,
+                capture,
+                effect,
+                duration,
+            } => self.install(subjects, *capture, effect, duration),
+            Action::RevealUntil { .. }
             | Action::Shuffle { .. }
             | Action::Order { .. }
             | Action::Evolve { .. }
@@ -803,13 +839,13 @@ const fn outcome(action: &Action) -> TypeId {
         Action::FlipDown { .. } => TypeId::of::<FlipOutcome>(),
         Action::Damage { .. } => TypeId::of::<super::DamageQuantityOutcome>(),
         Action::Token { .. } => TypeId::of::<super::TokenOutcome>(),
+        Action::Move { .. } => TypeId::of::<super::MoveOutcome>(),
+        Action::Destroy { .. } => TypeId::of::<super::DestroyOutcome>(),
+        Action::Banish { .. } => TypeId::of::<super::BanishOutcome>(),
+        Action::Search { .. } => TypeId::of::<super::SearchOutcome>(),
         Action::InstallEffect { .. }
-        | Action::Move { .. }
-        | Action::Destroy { .. }
-        | Action::Banish { .. }
         | Action::Transfer { .. }
         | Action::Life { .. }
-        | Action::Search { .. }
         | Action::Reveal { .. }
         | Action::RevealUntil { .. }
         | Action::Shuffle { .. }

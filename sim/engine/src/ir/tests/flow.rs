@@ -22,9 +22,11 @@ fn move_to_ex() -> Located<Node> {
                 direction: SliceDirection::Forward,
             },
             movement: MoveSpec {
-                to: ZoneRef {
-                    player: PlayerRef::Controller {},
-                    kind: ZoneKind::Ex,
+                to: MoveDestination::Shared {
+                    zone: ZoneRef {
+                        player: PlayerRef::Controller {},
+                        kind: ZoneKind::Ex,
+                    },
                 },
                 initial_posture: None,
                 entry_effects: vec![],

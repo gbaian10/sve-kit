@@ -186,9 +186,11 @@ fn cp04(follow_moved: bool, set: bool) -> Located<CardProgram> {
             groups: None,
             destination: Some(SearchDestination::Single {
                 movement: MoveSpec {
-                    to: ZoneRef {
-                        player: PlayerRef::Controller {},
-                        kind: ZoneKind::Ex,
+                    to: MoveDestination::Shared {
+                        zone: ZoneRef {
+                            player: PlayerRef::Controller {},
+                            kind: ZoneKind::Ex,
+                        },
                     },
                     initial_posture: None,
                     entry_effects: vec![],
@@ -212,7 +214,7 @@ fn cp04(follow_moved: bool, set: bool) -> Located<CardProgram> {
             permission: FollowPermission::SameEffectExplicitReference {},
         }
     } else {
-        // An arbitrary bound object set is not evidence of a successful search move.
+        // This binding has no producer in the search continuation or outer body.
         Selector::Bound {
             reference: Binding::new(2, ScopeId(1)),
         }

@@ -75,9 +75,11 @@ fn simultaneous_move_and_token_share_capacity_and_release_receipts_together() {
             Action::Move {
                 objects: source_objects(),
                 movement: MoveSpec {
-                    to: ZoneRef {
-                        player: PlayerRef::Controller {},
-                        kind: ZoneKind::Ex,
+                    to: MoveDestination::Shared {
+                        zone: ZoneRef {
+                            player: PlayerRef::Controller {},
+                            kind: ZoneKind::Ex,
+                        },
                     },
                     initial_posture: None,
                     entry_effects: vec![],
@@ -174,9 +176,8 @@ fn event_header_and_subject_follow_keep_the_triggering_move_correlated() {
                     objects: vec![ObjectOperand::FollowEventMove { event: movement }],
                 },
                 movement: MoveSpec {
-                    to: ZoneRef {
-                        player: PlayerRef::Controller {},
-                        kind: ZoneKind::Hand,
+                    to: MoveDestination::Owners {
+                        zone: OwnerZone::Hand,
                     },
                     initial_posture: None,
                     entry_effects: vec![],
@@ -448,7 +449,7 @@ fn primary_and_remainder_target_roles_feed_distinct_damage_instructions() {
         assert_missing(&seed, code, "synthetic");
     }
 }
-fn redirect(to: ZoneKind, position: Option<Position>) -> Located<CardProgram> {
+fn redirect(to: OwnerZone, position: Option<Position>) -> Located<CardProgram> {
     declaration(Effect::Replacement {
         id: EffectDefinitionId(1),
         source: ability_source(),
@@ -458,10 +459,7 @@ fn redirect(to: ZoneKind, position: Option<Position>) -> Located<CardProgram> {
         },
         condition: Expr::Literal(Bool(true)),
         rewrite: EventRewrite::RedirectMove {
-            to: ZoneRef {
-                player: PlayerRef::Controller {},
-                kind: to,
-            },
+            to: MoveDestination::Owners { zone: to },
             position,
         },
         scope: ReplacementScope::SelfOnly,
@@ -474,8 +472,8 @@ fn redirect(to: ZoneKind, position: Option<Position>) -> Located<CardProgram> {
 }
 #[test]
 fn leave_field_replacement_can_redirect_any_destination_to_deck_top_or_banish() {
-    let banish = redirect(ZoneKind::Banish, None);
-    let deck = redirect(ZoneKind::Deck, Some(Position::Top {}));
+    let banish = redirect(OwnerZone::Banish, None);
+    let deck = redirect(OwnerZone::Deck, Some(Position::Top {}));
     for seed in [&banish, &deck] {
         assert_missing(seed, "replacement.move.redirect", "synthetic");
         assert_missing(seed, "shape.ProposedEventPattern.LeavesZone", "synthetic");

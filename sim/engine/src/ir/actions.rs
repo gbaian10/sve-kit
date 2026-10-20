@@ -51,7 +51,19 @@ variants!(Action {
     GameResult { players: PlayerSet, result: Outcome, source: AbilitySource } => ["action.game-result"],
     BoxPilot { subject: ObjectOperand, mode: BoxPilotMode } => ["action.box-pilot"]
 });
-record!(MoveSpec { to: ZoneRef, initial_posture: Option<Posture>, entry_effects: Vec<Effect>, position: Option<Position>, order: Option<Decision> });
+record!(MoveSpec { to: MoveDestination, initial_posture: Option<Posture>, entry_effects: Vec<Effect>, position: Option<Position>, order: Option<Decision> });
+variants!(
+    /// R4-1 resolves these destinations separately for every moved object's owner.
+    MoveDestination {
+    Owners { zone: OwnerZone } => [],
+    Shared { zone: ZoneRef } => []
+});
+tags!(OwnerZone {
+    Hand,
+    Deck,
+    Cemetery,
+    Banish
+});
 tags!(MoveReason { Put, Return, Mill });
 /// Exact quantity or an explicit per-card continue/stop decision.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -182,7 +194,7 @@ variants!(SearchDestination {
     OptionalSelfReplacement { predicate: Expr<Bool>, movement: MoveSpec } => []
 });
 record!(SearchPartition {
-    zone: ZoneRef,
+    zone: MoveDestination,
     cardinality: Cardinality
 });
 variants!(DestinationAllocation { Batch { domain: Vec<ZoneRef> } => [], PerItem { domain: Vec<ZoneRef> } => [] });
