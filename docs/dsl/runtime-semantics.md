@@ -342,6 +342,10 @@ entry_effects 與 Move＋Token 共享容量仍依各自契約驗收。
 
 ## 5. Numeric、usage 與 timestamp 的首批範圍
 
+受傷 Set 的具體計算、authority ProperPlay、同層排序及 occurrence／check timing
+依[數值修正、排序與期限](numeric-timing.md)。該文件的局面為 executor 驗收義務，
+不表示本節所列片段已全部實作。
+
 CR 1.3.2.4 允許無特定上下限的數值資訊為負；這不表示所有動作都可要求負數。
 首批 Numeric Add 保留有號差值；Attack／Life 的 Set 先只准入可證明非負的結果。
 [BP16-049 スノーアウェイク](https://shadowverse-evolve.com/cardlist/?cardno=BP16-049)
