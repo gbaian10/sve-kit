@@ -8,8 +8,10 @@
 
 `load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整的手寫整卡，
 不接作者 YAML。此入口目前只承載以卡號識別卡片、以十進位 ordinal 識別 face 的內部輸入。
-所有能力都必須是 Field 的 Printed Activated，PlaySpec 的 captures、parameters 與 Ordered
-costs 必須為空；Spell、Triggered、Static、成本替代、模式、其他 play metadata 與介入能力整棵拒絕。
+所有能力都必須是 Field 的 Printed Activated，PlaySpec 的 captures、parameters 必須為空。
+Ordered costs 僅准入 controller 的非負常值 PpCurrent Pay，以及恰好 SourceHolder 的 Acted
+Posture；成本 actor 必須為 controller，instruction source 須與能力相符。不接受 materials binding。
+Spell、Triggered、Static、其他成本、成本替代、模式、其他 play metadata 與介入能力整棵拒絕。
 載入逐能力驗證 card／face／line 座標一致、印刷座標唯一、instruction source 相符，以及完整本文的
 封閉 requirement 集合（含未執行分支）。另以正向集合限定同步 Draw Exact、Look Exact、Uniform Damage、
 已支援的 Modify／InstallEffect、capture、Sequence／If；互動與可能移動來源的 Move／Destroy 亦整棵拒絕，
@@ -21,7 +23,12 @@ costs 必須為空；Spell、Triggered、Static、成本替代、模式、其他
 動態准入限主動玩家 main 時點、目前場上未失能的從者、當前 face 與 controller。
 同 holder 世代與定義重複起動沿用 AbilityInstanceId；新世代的鍵不同，每次起動另配 ExecutionId。
 
-空成本已完整付款後形成 authority 的 AbilityPlayed fact，接著執行完整本文、EndResolution 收尾，
+成本依序在同一 authority 交易提交，不另用一套 can_pay 預估。PP 必須足額扣除，Act 成本必須
+實際把站立來源改為 Acted；後項不足、重複 Act 或本文失敗皆回復整次起動。
+成功的每項成本以 `InstructionOutcome::Payment` 保存完整 quantity 與改變姿態的來源世代，
+其中 quantity 為 requested 與 actual 相等的成功量；成本 receipt 的程式讀取仍未准入。
+姿態成本走共同 change_posture 原語並先形成 Posture fact。
+所有成本完整付款後才形成 authority 的 AbilityPlayed fact，接著執行完整本文、EndResolution 收尾，
 最後形成同 producer 的 AbilityResolved fact，回傳完整 receipts 與 facts。
 這些型別沒有 wire 編碼，也不宣稱已接正式事件訂閱者。執行錯誤回復整次起動前的 Game，包含
 instance／execution 配發、RNG、事件、觀察與額度；本子集不會外發可撤銷的待答 token。
@@ -31,7 +38,7 @@ instance／execution 配發、RNG、事件、觀察與額度；本子集不會�
 checkpoint 期間玩家 projection 的 awaiting 為 null。resume 才交既有規則檢查管線，
 回傳該階段產生的規則事件，不重送本文事件；不自動推到 end／discard，本文中不插入致死或抽空檢查。
 載入整卡的 Game 尚無儲存與 digest 格式，序列化與 digest 都明確失敗，不靜默遺失整卡或 instance。
-本子集尚未承載正式卡片打出、PlayParameter Distribution、目標選取、付款、互動續體或真實卡准入。
+本子集尚未承載正式卡片打出、PlayParameter Distribution、目標選取、其他成本、互動續體或真實卡准入。
 
 ## 准入與原子性
 

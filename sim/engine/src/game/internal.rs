@@ -8,16 +8,16 @@
 use super::{Frame, Game, View, int, string};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
-    ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
+    ChoiceDomain, Comparison, Control, CostSpec, DamageEvent, DamageFlags, DamageQuantityOutcome,
     DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, EffectId,
     ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext, Int,
     IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, MoveOutcome, Nat,
     NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
     ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet,
-    PositiveInt, Predicate, Program, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
-    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, RuntimeObjectView, ScopeId,
-    SearchOutcome, SearchReplacementAnswer, Selector, SnapshotId, SourceSpan, StepwiseAnswer,
-    StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
+    PositiveInt, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
+    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
+    RuntimeObjectView, ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SnapshotId,
+    SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -134,6 +134,13 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// One completely paid cost step; incomplete payment aborts the entire activation.
+    Payment {
+        /// Equal requested and actual quantity for a successful step.
+        quantity: Quantity,
+        /// Generations whose posture changed, empty for resource payments.
+        subjects: Vec<ObjectRef>,
+    },
     /// One outcome for the whole draw instruction.
     Cards(CardQuantityOutcome),
     /// Sum of positive damage actually applied to still-valid recipients.
@@ -173,7 +180,7 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
-    /// A fully paid (empty-cost subset) activation, before its body.
+    /// A fully paid activation, before its body.
     AbilityPlayed {
         /// Authority execution producer.
         execution: ExecutionId,
@@ -187,6 +194,8 @@ pub enum Fact {
         /// The same producer as the play fact.
         source: RuntimeAbilitySource,
     },
+    /// A successful posture cost, before the play fact.
+    Posture(PostureEvent),
     /// A performed full-source shuffle, even when the deck has zero or one member.
     Shuffled {
         /// Owner of the complete source deck.
@@ -363,13 +372,14 @@ impl Game {
     /// # Errors
     /// Rejects missing or consumed play handles and restores all authority on failure.
     pub fn execute_internal_play(&mut self, play: &ProperPlay) -> Result<Progress> {
-        self.resolve_internal_play(play, None)
+        self.resolve_internal_play(play, None, None)
     }
 
     fn resolve_internal_play(
         &mut self,
         play: &ProperPlay,
         ability: Option<RuntimeAbilitySource>,
+        costs: Option<&CostSpec>,
     ) -> Result<Progress> {
         let prepared = self
             .prepared
@@ -407,6 +417,9 @@ impl Game {
                 distribution_started: false,
                 ability,
             };
+            if let Some(costs) = costs {
+                self.internal_card_payment(&mut execution, costs)?;
+            }
             if let Some(source) = ability {
                 execution.facts.push(Fact::AbilityPlayed {
                     execution: execution.id,

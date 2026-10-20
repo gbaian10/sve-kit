@@ -1,6 +1,9 @@
 use super::*;
 use sve_engine::game::internal::{Activation, ResumeStage};
 
+#[path = "card/payment.rs"]
+mod payment;
+
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
     for step in steps {
         step.source = span.clone();
@@ -458,7 +461,8 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     | Fact::Shuffled { .. }
                     | Fact::Draw(_)
                     | Fact::Damage(_)
-                    | Fact::Movement(_) => None,
+                    | Fact::Movement(_)
+                    | Fact::Posture(_) => None,
                 })
                 .collect::<Vec<_>>()
         };
@@ -478,62 +482,6 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
         assert_ne!(third.execution, first.execution);
         assert_ne!(effects(&third), first_effects);
         game.resume_internal_card().unwrap();
-    }
-}
-
-#[test]
-fn ordered_payment_never_pays_a_partial_prefix() {
-    for seat in [1, 2] {
-        let mut a = ability(1, vec![draw(3, 1)]);
-        a.node.play.as_mut().unwrap().costs = CostSpec::Ordered {
-            steps: vec![
-                CostStep {
-                    instruction: Box::new(Instruction {
-                        id: InstructionId(1),
-                        actor: PlayerRef::Controller {},
-                        source: a.node.source.clone(),
-                        precondition: None,
-                        context: InstructionContext::Cost,
-                        receipt: ReceiptId(1),
-                        action: Action::Resource {
-                            player: PlayerRef::Controller {},
-                            resource: Resource::PpCurrent,
-                            operation: ResourceOperation::Pay,
-                            amount: Expr::Literal(Int(1)),
-                        },
-                    }),
-                    materials: None,
-                },
-                CostStep {
-                    instruction: Box::new(Instruction {
-                        id: InstructionId(2),
-                        actor: PlayerRef::Controller {},
-                        source: a.node.source.clone(),
-                        precondition: None,
-                        context: InstructionContext::Cost,
-                        receipt: ReceiptId(2),
-                        action: Action::Posture {
-                            objects: Selector::Objects {
-                                objects: vec![ObjectOperand::SourceHolder {}],
-                            },
-                            posture: Posture::Acted,
-                        },
-                    }),
-                    materials: None,
-                },
-            ],
-        };
-        let mut game = game(seat, 1);
-        let before = exact_authority(&game);
-        let error = game
-            .load_internal_card("unit-follower", &card(vec![a]))
-            .unwrap_err();
-        assert!(
-            error
-                .to_string()
-                .contains("whole-card captures, parameters or costs")
-        );
-        assert_eq!(before, exact_authority(&game));
     }
 }
 

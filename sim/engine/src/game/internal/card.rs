@@ -1,16 +1,21 @@
 use super::super::{Step, list};
-use super::{Context, Game, Progress, admission, int, player_id, seat_name, unsupported};
+use super::{
+    Context, Execution, Fact, Game, InstructionOutcome, Progress, admission, int, player_id,
+    seat_name, unsupported,
+};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
-    Control, CostSpec, DamageAmount, ExecutionId, Generation, Located, Node, ObjectOperand,
-    ObjectRef, PlayerId, PlayerRef, RuntimeAbilitySource, SourceSpan, StepwiseMode,
-    WellFormedCardProgram, WellFormedProgram, ZoneKind,
+    Control, CostSpec, DamageAmount, ExecutionId, Expr, Generation, InstructionContext, Int,
+    Located, Node, ObjectOperand, ObjectRef, PlayerId, PlayerRef, Posture, PostureEvent, Quantity,
+    QuantityUnit, Resource, ResourceOperation, RuntimeAbilitySource, Selector, SourceSpan,
+    StepwiseMode, WellFormedCardProgram, WellFormedProgram, ZoneKind,
 };
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
-use core::{mem::take, result};
+use core::{mem::take, result, slice};
 use serde::Serializer;
 use serde::ser::Error as _;
+use serde_json::json;
 
 /// Explicit authority boundary after a complete ability resolution.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -64,7 +69,7 @@ impl Game {
     /// This internal boundary uses card numbers and numeric face ordinals only.
     ///
     /// # Errors
-    /// Rejects unsupported abilities, any nonempty play metadata, foreign provenance,
+    /// Rejects unsupported abilities, play parameters or captures, foreign provenance,
     /// prototype abilities and duplicate registrations without changing the game.
     pub fn load_internal_card(
         &mut self,
@@ -95,6 +100,7 @@ impl Game {
             }
             self.catalog.face(card_no, ordinal)?;
             check_source(&located.source, card_no, &face.0, line.0)?;
+            check_costs(ability)?;
             let body = ability
                 .body
                 .as_ref()
@@ -238,6 +244,12 @@ impl Game {
             controller: actor,
             definition,
         };
+        let costs = &ability
+            .node
+            .play
+            .as_ref()
+            .ok_or_else(|| invalid("missing play"))?
+            .costs;
         let body = ability
             .node
             .body
@@ -245,7 +257,7 @@ impl Game {
         let program = WellFormedProgram::check(body).map_err(invalid)?;
         let play = self.prepare_internal_play(&program, &ability.source, context)?;
         let execution = ExecutionId(play.execution);
-        let progress = self.resolve_internal_play(&play, Some(source))?;
+        let progress = self.resolve_internal_play(&play, Some(source), Some(costs))?;
         self.card_runtime.checkpoint = Some(execution);
         Ok(Activation {
             execution,
@@ -253,6 +265,77 @@ impl Game {
             progress,
             resume: ResumeStage::CheckTiming,
         })
+    }
+
+    pub(super) fn internal_card_payment(
+        &mut self,
+        execution: &mut Execution,
+        costs: &CostSpec,
+    ) -> Result<()> {
+        let CostSpec::Ordered { steps } = costs else {
+            return Err(unsupported("whole-card cost alternatives"));
+        };
+        for step in steps {
+            let (quantity, subjects) = match &step.instruction.action {
+                Action::Resource {
+                    amount: Expr::Literal(amount),
+                    ..
+                } => {
+                    let seat = seat_name(execution.context.controller)?;
+                    let player = self.player_mut(seat)?;
+                    let current = int(&player.pp["current"]);
+                    if current < amount.0 {
+                        return Err(invalid("insufficient PP for whole-card payment"));
+                    }
+                    let remaining = current
+                        .checked_sub(amount.0)
+                        .ok_or_else(|| invalid("PP payment overflow"))?;
+                    player.pp["current"] = json!(remaining);
+                    (
+                        Quantity {
+                            amount: *amount,
+                            unit: QuantityUnit::Pp,
+                        },
+                        Vec::new(),
+                    )
+                }
+                Action::Posture { .. } => {
+                    let holder = execution.context.source.clone();
+                    if self.object(&holder)?.state["acted"] != false {
+                        return Err(invalid(
+                            "whole-card posture cost requires a standing source",
+                        ));
+                    }
+                    let object = execution.object(self, &ObjectOperand::SourceHolder {})?;
+                    let changed = self.change_posture(
+                        slice::from_ref(&holder),
+                        true,
+                        &execution.frame().cause,
+                    )?;
+                    if changed != [holder] {
+                        return Err(invalid("incomplete posture payment"));
+                    }
+                    execution.facts.push(Fact::Posture(PostureEvent {
+                        object,
+                        before: Posture::Standing,
+                        after: Posture::Acted,
+                    }));
+                    (
+                        Quantity {
+                            amount: Int(1),
+                            unit: QuantityUnit::Cards,
+                        },
+                        vec![object],
+                    )
+                }
+                _ => return Err(unsupported("whole-card cost step")),
+            };
+            execution.receipts.insert(
+                step.instruction.receipt,
+                InstructionOutcome::Payment { quantity, subjects },
+            );
+        }
+        Ok(())
     }
 }
 
@@ -271,11 +354,46 @@ fn check_header(ability: &Ability) -> Result<()> {
     let Some(play) = &ability.play else {
         return Err(unsupported("missing whole-card PlaySpec"));
     };
-    if !play.captures.is_empty()
-        || !play.parameters.is_empty()
-        || !matches!(&play.costs, CostSpec::Ordered { steps } if steps.is_empty())
-    {
-        return Err(unsupported("whole-card captures, parameters or costs"));
+    if !play.captures.is_empty() || !play.parameters.is_empty() {
+        return Err(unsupported("whole-card captures or parameters"));
+    }
+    Ok(())
+}
+
+fn check_costs(ability: &Ability) -> Result<()> {
+    let play = ability
+        .play
+        .as_ref()
+        .ok_or_else(|| invalid("missing play"))?;
+    let CostSpec::Ordered { steps } = &play.costs else {
+        return Err(unsupported("whole-card cost alternatives"));
+    };
+    for step in steps {
+        let instruction = &step.instruction;
+        if step.materials.is_some()
+            || instruction.context != InstructionContext::Cost
+            || instruction.precondition.is_some()
+            || instruction.source != ability.source
+            || instruction.actor != (PlayerRef::Controller {})
+        {
+            return Err(unsupported("whole-card cost metadata or source"));
+        }
+        let supported = match &instruction.action {
+            Action::Resource {
+                player: PlayerRef::Controller {},
+                resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay,
+                amount: Expr::Literal(Int(amount)),
+            } => *amount >= 0,
+            Action::Posture {
+                objects: Selector::Objects { objects },
+                posture: Posture::Acted,
+            } => objects == &[ObjectOperand::SourceHolder {}],
+            _ => false,
+        };
+        if !supported {
+            return Err(unsupported("whole-card cost step"));
+        }
     }
     Ok(())
 }
