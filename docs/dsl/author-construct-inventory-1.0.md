@@ -44,8 +44,8 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | spell | targets?、optional_cost?、x?、define?、do | 空 do 合法；仍須打出程序 |
 | static | while?、zone?、effects | 動態 selector、來源有效區；需範圍的 on 不省略 |
 | play | cost_delta?、cost_set?、additional_cost?、optional_cost?、optional_cost_delta?、optional_cost_set?、alt_cost?、cannot_if?、playable_from?、define? | set／delta／替代費用不等價；alt_cost={if,may?,cost} |
-| A.cost 短形 | pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from、act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of | §3 要求保留付款鍵序；與承載 §4.1／§6 的排序及鍵序不改版存在差異，本表不裁決；to_deck 可含 shuffle:true（§13 GAP-A-012） |
-| A.cost 長形 | steps:[{單一費用鍵:payload}…] | 同鍵重複用 steps；§3 未明定長短形混填規則 |
+| A.cost 短形 | pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from、act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of 中恰一個操作鍵 | 拒絕多操作鍵；所在 wrapper 已登錄的 result 不算操作鍵，不授予其他位置 metadata；to_deck 可含 shuffle:true（§13 GAP-A-012） |
+| A.cost 長形 | steps:[{單一費用鍵:payload}…]，至少兩項 | 按卡文陣列順序付款，保留重複步驟；拒絕 steps 混操作鍵、多鍵 step、step 層級 metadata；payload 已登錄 result 不受影響；短／長形互斥，詳 §3 |
 | 費用材料 | sel、n\|upto\|any、groups?、distinct_by?、result?；banish 另 top:{who,n}（§13 GAP-A-010） | groups 共用 disjoint／整體限制；discard 的 ref/include_self/random 見 §7、§13 GAP-A-042 |
 | 費用 counter | on、name、n\|upto\|any、holders?、result? | on:this 固定唯一 holder；selector 須明示 holders |
 | optional_cost／additional_cost | 費用＋result? | result 是付款 receipt；付款前不可讀 paid |

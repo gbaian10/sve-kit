@@ -159,7 +159,7 @@ ECP01-038 的 DeckSlice 為 `{who:opponents,n:20}`；
 | choose | groups、position |
 | search | groups 變體、entry_effects、instead、to.partition、precondition |
 | move／banish／look／reveal | 整個父動作及其附加欄位；本片只定 top 的 DeckSlice |
-| Cost | 除本表 counter 外的費用變體、付款鍵序及整體結構 |
+| Cost | 除本表 counter 外的費用變體、metadata 位置與整體結構；付款順序已由語法 §3 的 steps 陣列定形 |
 
 例如 CP03-SL07 的 to.partition、CP04-P68 的分組與 entry_effects 仍是已定語法，
 本片單組 search 尚不能接受；不以任意 JSON 子樹補洞。

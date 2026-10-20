@@ -11,6 +11,8 @@
 
 `Expr` 是純表達式，`Cond` 是布林表達式，`Sel` 是有型別集合或保序視圖，`Ref` 是物件／目標引用，`Steps` 是有序步驟列表。`n` 精確數量、`upto` 0..N、`any: true` 0..候選上限，三者互斥；只有チョイス的 `upto` 依 CR 5.18.2.1 為 1..N。`may` 表示可以拒絕整項，與選零個分開。
 
+任何構造的 mapping 鍵序都沒有語義；需要順序的語義一律用陣列承載。陣列是否具有語義順序由各構造定義，不能只因使用陣列就推定逐項執行。
+
 每個 `bind` 的型別由構造決定：選取為物件集、宣告為數值／卡名、骰子為骰值；`result` 永遠是 ReceiptId。作用域內不可重名、不可向前引用、分支局部綁定不可流出，除非每個分支輸出相同型別。未登錄或執行能力尚不具備的欄位在載入時附卡號、面、行、子句、預期／實際型別報錯。
 
 ## 1. 檔案、卡片與 meta
@@ -105,7 +107,16 @@ roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣]
 單組 Target／choose／search 與 counter 的數量父變體見[要求量矩陣](author-quantity-shapes-1.0.md)；
 groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實作。
 
-`A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。**標準長形為 `steps: [{<費用鍵>: payload}, …]`**，依文字順序付款；v0 短形鍵順序需由保序解析器保存，重複同鍵用 steps，不能默默覆寫。
+`A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。外層有兩種互斥形狀：
+
+| 形狀 | 費用操作與順序 | 拒絕 |
+| --- | --- | --- |
+| 短形 `{<費用鍵>: payload}` | 恰一個費用操作 | 多個費用操作鍵 |
+| 長形 `{steps: [{<費用鍵>: payload}, …]}` | 至少兩項，依卡文排列並按陣列順序付款；重複操作也逐項保留 | 空或單元素 steps、steps 混其他費用操作鍵、每項多個操作鍵或 step 層級 metadata |
+
+「費用操作鍵」不含所在 wrapper 已登錄的 metadata：`optional_cost`／`additional_cost` 的整次付款 `result` 不算操作鍵，不能據此讓其他位置任填 metadata。step 本身恰有一個操作鍵；操作 payload 內已登錄的 `result`（例如 counter）仍在 payload 內。metadata 的位置與可用鍵集合須按完整 Cost 父型別封閉列舉，不能接受任意 mapping。單一操作一律用短形；空 steps 不能表示零費用。作者樹保留這些明示形狀，不在計算 body hash 前將短形轉成 steps。
+
+`targets` 陣列保持卡文順序，不能排序；`roles` 的 mapping 鍵序不建立選取順序，`groups` 的陣列位置不把同時選取改成逐組貪婪。`play` 的 additional_cost／optional_cost／alt_cost 等不同欄位，以及能力頭的 cost／optional_cost，依各自規則合併與付款，不能從 mapping 鍵序推導跨欄位順序。若需表達卡文要求的跨欄位特定順序，須先登錄明示陣列構造，不得借鍵序補上。
 
 選材料格式 `{sel, n|upto|any, groups?, distinct_by?, result?}`，top 切片不額外選身份。材料組 groups 共用 disjoint=true 與整體限制；不是逐組貪婪選。K.pay 全付或全不付；合法零費用、合法取代依 CR 10.6.2.5.2–.3 可算完整付款，但不製造原動作事件。
 
