@@ -4,7 +4,7 @@
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 節點定義包含下列角色宣告、[領袖引用](author-reference-shapes-1.0.md#變體矩陣)
 及獨立的[物件來源／計數片段](author-object-query-shapes-1.0.md)；
-本表的數量位置規則尚未由完整 Target／Sel／動作 schema 強制。
+本表另定義具名 `RecipientSel`；數量位置規則尚未由完整 Target／Sel／動作 schema 強制。
 這些片段不提供作者文件入口、作用域驗證或執行准入。
 
 ## 角色宣告矩陣
@@ -68,8 +68,64 @@ A.leader-recipient 只各引用一次，另含 A.multiple-leaders。
 `leader_of` 讀物件的 Live controller，離場依法讀 LKI，不是 owner。
 既有 single-leader 不因此擴成任意 PlayerRef。
 
-節點聯集採 anyOf；這些領袖葉分支的接受集合仍互不重疊。
-漂移與正反例檢查會遞迴攤平聯集，查重複葉分支並驗證每個正例恰命中一個葉分支，
-不只依賴 anyOf／oneOf 的結構正規化。
-完整 Sel 與動作位置也必須避免把相同領袖形狀透過多條分支重複納入；
-本片段的驗證不宣稱那些組合位置已實作。
+`RecipientSel` 是物件與領袖的具名 sum type；`ObjectSel` 始終只含物件。
+下表 mapping 封閉，未列欄位拒絕；選填省略不補 null。
+
+| 定義／Python | 必填 | 選填 | 互斥／值域 |
+| --- | --- | --- | --- |
+| A.sel.leader-or／LeaderOr | who:PlayerRef、kind:follower、leader_or:嚴格 true | zone:field | who 不收 PlayerSet／param；不收 F、except、where、as，zone 不收列表 |
+| A.sel.recipient-atom／RecipientAtom | ObjectAtom／LeaderRecipient／LeaderOr | 依各型 | 不收頂層 any_of；三種領袖原子經 A.leader-recipient 各納入一次 |
+| A.sel.recipient-union／RecipientUnion | any_of: 非空 RecipientAtom 列表，至少一個領袖類 limb | 無 | 純物件列表不屬本型；不收巢狀 any_of 或 wrapper 的 filter |
+| A.sel.recipient／RecipientSel | ObjectSel／LeaderRecipient／LeaderOr／RecipientUnion | 依各型 | 各 shape 只命中一個葉分支 |
+
+領袖類 limb 指 SingleLeader、MultipleLeaders、LeaderOf、LeaderOr。
+RecipientUnion 在 any_of 陣列層以 `contains` 要求至少一個領袖類；
+純物件列表交給 ObjectUnion，因此兩種 any_of 不會重複命中。
+單 limb、重複 limb 均允許；limb 本身仍須通過完整封閉型別。
+節點聯集採 anyOf，測試遞迴攤平 root 聯集，查重複葉分支並驗每個正例恰命中一支。
+
+### 語義與作者選用規則
+
+`leader_or` 表示單一 PlayerRef 的領袖與該玩家場上的從者；zone 省略也只表示 field。
+BP01-125 鋭利な一裂き、BP02-062 竜巫女の儀式對應省略形，
+BP05-057 ゴッドバレットゴーレム對應明示 field；數量由父 Target 等節點指定。
+SingleLeader 的 self／opp 不因這個新型別擴為任意 PlayerRef。
+
+單一玩家領袖加上同玩家、無 filter 的場上從者，作者寫 leader_or：
+包含 BP03-093 ホワイトスワン・オデット的 Last Words 與 BP04-103 アンドロメダ。
+領袖集合、跨玩家或從者 limb 帶 filter 時寫 RecipientUnion，從者 limb 明寫 zone:field，
+不能把 ZoneObjects 的省略 zone 當成固定 field。
+
+| 卡例 | 接受者來源 |
+| --- | --- |
+| BP02-052 インペリアルドラグーン、BP03-076 ブラックスワン・オディール、BP04-012 忌刃鬼 | 相手領袖全體及相手從者全體；保留 opponents 的集合基數 |
+| BP03-093 ホワイトスワン・オデット的 Fanfare | 自己領袖及自己其他從者；從者 limb 的 other:true 不可加在 leader_or |
+| BP21-037 的 token 段『痛苦』 | 跨玩家、含名稱 filter 的接受者聯集 |
+
+例如相手全體的來源：
+
+```yaml
+any_of:
+  - { leaders: opponents }
+  - { who: opponents, zone: field, kind: follower }
+```
+
+any_of 按相同身分去重後供整個父節點使用，不是每個 limb 各執行一次。
+領袖與物件的身分須保留種類標記，不能因字串 ID 相同合併。
+聯集不從 limb 次序產生物件順序；世代與視角不相容時拒絕。
+全體傷害仍是同一批次，不能改成每 limb 一個傷害動作。
+
+Schema 仍接受與 leader_or 等義的 any_of，作者選用偏好尚未由 C0 lint 強制。
+**不推定等義拼法有相同 body hash**：包括 leader_or 與聯集、
+省略與明示 zone:field、limb 排列或重複，以及物件／計數聯集與
+[集合形欄位](author-object-query-shapes-1.0.md#選取位置的物件聯集)的等義拼法。
+canonical JSON 不重寫上述結構；執行成員去重不表示作者 bytes 去重。
+
+### 消費位置與接線邊界
+
+物件來源位置只能使用 ObjectSel，例如 move／search／choose 的物件來源與費用材料；
+count 使用獨立 CountSource，in 使用 Ref／SnapshotRead。
+接受領袖的 Target、damage.to、cannot.attack.target 等位置的選擇器分支才使用 RecipientSel，
+不得再另加同形領袖支線。這是父節點後續實作的義務，本片未新增完整父動作 Schema。
+來源角色、binding 基數、Live／快照可用性、世代、去重與批次仍由接線與 lowering 驗證；
+形狀驗證不授予操作能力，也不等於完整 Sel 或執行准入。

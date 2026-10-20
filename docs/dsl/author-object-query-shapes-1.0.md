@@ -2,7 +2,7 @@
 
 本表細化[撰寫語法 §5](author-syntax-1.0.md#5-表達式捕捉與選擇器)的物件來源與計數，
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
-`ObjectSel` 表 A.sel.object-core，只含區域物件與 binding／快照物件；
+`ObjectSel` 表 A.sel.object-core，含區域物件、binding／快照物件與這些來源的物件聯集；
 它不接受領袖 recipient，未涵蓋完整 Sel，也不提供完整作者 reader 或執行准入。
 
 ## 逐 variant 矩陣
@@ -14,7 +14,9 @@
 | --- | --- | --- | --- |
 | A.sel.zone-objects | who: PlayerRef／PlayerSet／ParamRef | zone: Zone／非空 Zone 列表／ParamRef、F、except、where、as | 不接受 in、any_of、領袖或切片 |
 | A.sel.in-objects | in: Ref／SnapshotRead | F、except、where、as | 不接受 who、zone、any_of、領袖或切片 |
-| A.sel.object-core | 上兩型的聯集 | 依各型 | 不是 Ref、數值或 Cond |
+| A.sel.object-atom | 上兩型的聯集 | 依各型 | 不收頂層 any_of 或領袖 |
+| A.sel.object-union | any_of: 非空 ObjectAtom 列表 | 無 | 不收巢狀 any_of、領袖或 wrapper 的 F／except／where／as |
+| A.sel.object-core | ObjectAtom／ObjectUnion | 依各型 | 不是 Ref、數值或 Cond；except 可遞迴接 ObjectUnion |
 | A.expr.count-objects | who: PlayerRef／PlayerSet／ParamRef、zone: Zone／非空 Zone 列表／ParamRef | F | 不接受 in、except、where、as |
 | A.expr.count-union | any_of: 非空 CountObjects 列表 | 無 | limb 只收 A.expr.count-objects，不接受 ObjectSel 或巢狀聯集 |
 | A.expr.count-source | CountObjects／CountUnion | 依各型 | 保留各 limb 的 counted 角色 |
@@ -39,8 +41,47 @@ same_as 也仍只接快照，不解成 Ref／follow。
 
 count 聯集的案例為 BP06-035：自己墓場的陰陽師卡與法術之聯集。
 先依物件身分去重再數張數，一張符合兩個 limb 的牌只算一次，不能降低成兩個 count 相加。
-此例只建立計數位置的聯集形狀，不表示選取位置的 any_of 已定形。
+此例只支持計數位置的聯集；選取位置另以以下卡例定形。
 區域列表與多玩家來源也依集合身分去重；計數查詢不選取、不產生有序 binding。
+
+### 選取位置的物件聯集
+
+`ObjectUnion.any_of` 的每個 limb 是區域或 in 來源，各自保留 source 角色與 F。
+父節點的選取數量作用於整個聯集，不是每個 limb 各選一次。
+先按相同物件身分去重；世代或快照視角不相容時拒絕。
+limb 的排列不建立物件順序，也不授予 first／second；本片不接巢狀 any_of。
+原有 atom 的 except 可遞迴接受物件聯集，差集仍保留左側已有順序。
+
+| 卡例 | 選取位置與 limb |
+| --- | --- |
+| BP07-050 1,2,マジック！ | 被選卡的玩家手牌：`{who:{master_of:t},zone:hand,kind:follower}` 或同來源的 kind:amulet |
+| BP07-099 ブラックビショップ | 看過的牌：`{in:looked,kind:follower,trait:童話,orig_cost_le:5}` 或同來源的 kind:amulet |
+| CP01-080 紡がれてゆく想い | 公開的牌：`{in:shown,kind:follower,trait:ウマ娘}` 或同來源的 kind:amulet |
+
+例如 BP07-099 的候選來源：
+
+```yaml
+any_of:
+  - { in: looked, kind: follower, trait: 童話, orig_cost_le: 5 }
+  - { in: looked, kind: amulet, trait: 童話, orig_cost_le: 5 }
+```
+
+以上卡例取自 `card-data/jp/` 遞迴各子目錄的凍結卡文 text／sections，不以 Q&A 作卡例；
+只驗來源片段可表達，沒有宣稱完整父動作已實作。
+BP07-050 的 t 須有合法前序目標宣告，其 controller 捕捉／離場 LKI 沿既有規則另驗。
+CountSource 仍是獨立的區域計數與計數聯集；不因 ObjectUnion 接受 in、except、where
+就擴大 count 的 payload 或葉參數權限。相同 wire 可以在兩個位置各自合法，角色仍不同。
+
+作者在 limb 只一個欄位不同、且該欄已有等義集合形時，優先寫 zone 列表、names 或 PlayerSet；
+kind 不同或多欄不同時寫 any_of。PlayerSet 必須保留原文基數，不以二席假設任意拆解。
+物件聯集與這些集合形、計數聯集與其等義集合形，都**不推定相同 body hash**；
+將來的 traits_any 也適用此原則，但其形狀不由本片授予。
+canonical JSON 保留 limb 次序、重複及欄位有無；不執行排序、代數化簡或語義去重。
+執行時集合成員去重與作者 body bytes 的等值是不同責任。
+接受領袖的聯集另見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)，
+不能從 ObjectSel、except 或 CountSource 進入。
+
+### 來源 predicate 與局部別名
 
 `where` 只在本片接受 C。提供 `as:BindingName` 必須同時有 where，
 該層不再引入 item；省略 as 則綁定 item。禁止巢狀隱式遮蔽、
