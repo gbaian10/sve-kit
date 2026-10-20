@@ -101,10 +101,10 @@ fn hidden_at_respects_view_range_and_carried() {
             to: 9,
         },
     ];
-    assert!(hidden_at(&rules, View::P2, 1, &[]).is_empty());
+    assert_eq!(hidden_at(&rules, View::P2, 1, &[]), Vec::<String>::new());
     assert_eq!(hidden_at(&rules, View::P2, 2, &[]), ["a", "b"]);
     assert_eq!(hidden_at(&rules, View::P2, 4, &["a".into()]), ["b", "c"]);
-    assert!(hidden_at(&rules, View::P2, 5, &[]).is_empty());
+    assert_eq!(hidden_at(&rules, View::P2, 5, &[]), Vec::<String>::new());
     assert_eq!(hidden_at(&rules, View::P1, 5, &[]), ["z"]);
 }
 
@@ -115,7 +115,10 @@ fn leaks_find_ids_unmasked_card_numbers_and_the_seed() {
         .map(|(a, b)| (a.to_owned(), b.to_owned()))
         .collect();
     let hidden = vec!["h1".to_owned(), "h2".to_owned()];
-    assert!(leaks(&json!({"x": "C-2 public copy"}), &hidden, &cards, "abcd").is_empty());
+    assert_eq!(
+        leaks(&json!({"x": "C-2 public copy"}), &hidden, &cards, "abcd"),
+        Vec::<String>::new()
+    );
     assert_eq!(
         leaks(&json!(["h1"]), &hidden, &cards, "abcd"),
         ["hidden object h1"]
@@ -224,10 +227,16 @@ fn check_fixed_reports_each_kind_of_mismatch() {
         "{node: 1, assert: {life: 17}, awaiting_exact: {by: P1, choices: [{do: pass}]}, \
          awaiting_do: {by: P1, do: pass}, contains: {hand: b1}, record_deck: {path: deck, of: [a4, a5]}}",
     );
-    assert!(run(&good, &state, &awaiting, &mut deck).is_empty());
+    assert_eq!(
+        run(&good, &state, &awaiting, &mut deck),
+        Vec::<String>::new()
+    );
     assert_eq!(deck, Some(vec!["a5".into(), "a4".into()]));
     let drew = fixed("{node: 2, drew_recorded: {hand: hand2, deck: deck2}}");
-    assert!(run(&drew, &state, &awaiting, &mut deck).is_empty());
+    assert_eq!(
+        run(&drew, &state, &awaiting, &mut deck),
+        Vec::<String>::new()
+    );
     let bad = fixed(
         "{node: 1, assert: {life: 18}, awaiting_exact: {by: P2}, awaiting_do: {by: P1, do: attack}, \
          contains: {hand: b9}, record_deck: {path: deck, of: [a4, a3]}}",

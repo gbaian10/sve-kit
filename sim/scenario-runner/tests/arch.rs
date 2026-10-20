@@ -13,6 +13,7 @@
     reason = "test code: scripted tables, and a panic is a test failure"
 )]
 
+#[path = "arch_support/engines.rs"]
 mod arch_support;
 
 use std::path::PathBuf;

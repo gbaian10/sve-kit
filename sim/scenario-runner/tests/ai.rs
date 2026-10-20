@@ -13,6 +13,7 @@
     reason = "test code: scripted tables, and a panic is a test failure"
 )]
 
+#[path = "ai_support/engines.rs"]
 mod ai_support;
 
 use std::fs;
@@ -353,7 +354,10 @@ fn the_quick_answer_must_come_from_the_samples_hand() {
     // Without PP the Quick cannot be paid for.
     let mut poor = q("q-b");
     poor.setup["players"]["P2"]["pp"]["current"] = json!(0);
-    assert!(!check_search_log(&good_log(), &report(3), 5000, &poor).is_empty());
+    assert_ne!(
+        check_search_log(&good_log(), &report(3), 5000, &poor),
+        Vec::<String>::new()
+    );
 }
 
 #[test]
