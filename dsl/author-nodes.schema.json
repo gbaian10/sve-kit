@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
-  "title": "SVE author 1.0 shared leaf definitions",
-  "$comment": "Leaf library only. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
+  "title": "SVE author 1.0 shared leaf and reference definitions",
+  "$comment": "Leaf and reference-atom library only. Reference atoms are not complete action-position types. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
   "not": {},
   "$defs": {
     "Int": {
@@ -307,6 +307,367 @@
       "additionalProperties": {
         "$ref": "#/$defs/ParamValue"
       }
+    },
+    "BindingName": {
+      "type": "string",
+      "pattern": "^(?!(?:this|it|item|affected|found|entering|attack_target|host|cost1|self|opp|turn|non_turn|current|opponents|each|other_players)$(?![\\s\\S]))[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
+    },
+    "RoleName": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
+    },
+    "ReservedRefName": {
+      "type": "string",
+      "enum": [
+        "this",
+        "it",
+        "item",
+        "affected",
+        "found",
+        "entering",
+        "attack_target",
+        "host",
+        "cost1"
+      ]
+    },
+    "ReservedPlayerName": {
+      "type": "string",
+      "enum": [
+        "self",
+        "opp",
+        "turn",
+        "non_turn",
+        "current",
+        "item"
+      ]
+    },
+    "PlayerSetName": {
+      "type": "string",
+      "enum": [
+        "opponents",
+        "each",
+        "other_players"
+      ]
+    },
+    "Edge": {
+      "type": "string",
+      "enum": [
+        "begin",
+        "end"
+      ]
+    },
+    "A.event-move-receipt": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "move_receipt"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "additionalProperties": false
+    },
+    "A.entry-payment-ref": {
+      "type": "object",
+      "properties": {
+        "entry_payment": {
+          "type": "string",
+          "const": "additional"
+        }
+      },
+      "required": [
+        "entry_payment"
+      ],
+      "additionalProperties": false
+    },
+    "A.follow-source": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BindingName"
+        },
+        {
+          "$ref": "#/$defs/A.event-move-receipt"
+        }
+      ]
+    },
+    "A.receipt-ref": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.follow-source"
+        },
+        {
+          "$ref": "#/$defs/A.entry-payment-ref"
+        }
+      ]
+    },
+    "A.follow-ref": {
+      "type": "object",
+      "properties": {
+        "follow": {
+          "$ref": "#/$defs/A.follow-source"
+        }
+      },
+      "required": [
+        "follow"
+      ],
+      "additionalProperties": false
+    },
+    "A.role-selection": {
+      "type": "object",
+      "properties": {
+        "of": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "name": {
+          "$ref": "#/$defs/RoleName"
+        }
+      },
+      "required": [
+        "of",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "A.role-ref": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/A.role-selection"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "A.event-object-ref": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "holder"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "additionalProperties": false
+    },
+    "A.ref": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReservedRefName"
+        },
+        {
+          "$ref": "#/$defs/BindingName"
+        },
+        {
+          "$ref": "#/$defs/A.follow-ref"
+        },
+        {
+          "$ref": "#/$defs/A.role-ref"
+        },
+        {
+          "$ref": "#/$defs/A.event-object-ref"
+        }
+      ]
+    },
+    "A.owner-ref": {
+      "type": "object",
+      "properties": {
+        "owner_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "owner_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.master-ref": {
+      "type": "object",
+      "properties": {
+        "master_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "master_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.player-ref": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReservedPlayerName"
+        },
+        {
+          "$ref": "#/$defs/BindingName"
+        },
+        {
+          "$ref": "#/$defs/A.owner-ref"
+        },
+        {
+          "$ref": "#/$defs/A.master-ref"
+        }
+      ]
+    },
+    "A.player-set": {
+      "$ref": "#/$defs/PlayerSetName"
+    },
+    "A.single-leader": {
+      "type": "object",
+      "properties": {
+        "leader": {
+          "type": "string",
+          "enum": [
+            "self",
+            "opp"
+          ]
+        }
+      },
+      "required": [
+        "leader"
+      ],
+      "additionalProperties": false
+    },
+    "A.multiple-leaders": {
+      "type": "object",
+      "properties": {
+        "leaders": {
+          "type": "string",
+          "enum": [
+            "opponents",
+            "all"
+          ]
+        }
+      },
+      "required": [
+        "leaders"
+      ],
+      "additionalProperties": false
+    },
+    "A.leader-recipient": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.single-leader"
+        },
+        {
+          "$ref": "#/$defs/A.multiple-leaders"
+        }
+      ]
+    },
+    "A.phase-edge": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "phase": {
+          "$ref": "#/$defs/Phase"
+        },
+        "edge": {
+          "$ref": "#/$defs/Edge"
+        }
+      },
+      "required": [
+        "who",
+        "phase",
+        "edge"
+      ],
+      "additionalProperties": false
+    },
+    "A.turn-edge": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "edge": {
+          "$ref": "#/$defs/Edge"
+        }
+      },
+      "required": [
+        "who",
+        "edge"
+      ],
+      "additionalProperties": false
+    },
+    "A.phase-interval": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "phase": {
+          "$ref": "#/$defs/Phase"
+        }
+      },
+      "required": [
+        "who",
+        "phase"
+      ],
+      "additionalProperties": false
+    },
+    "A.until-next-phase": {
+      "type": "object",
+      "properties": {
+        "next_phase": {
+          "$ref": "#/$defs/A.phase-edge"
+        }
+      },
+      "required": [
+        "next_phase"
+      ],
+      "additionalProperties": false
+    },
+    "A.until-next-turn": {
+      "type": "object",
+      "properties": {
+        "next_turn": {
+          "$ref": "#/$defs/A.turn-edge"
+        }
+      },
+      "required": [
+        "next_turn"
+      ],
+      "additionalProperties": false
+    },
+    "A.until-during-next-phase": {
+      "type": "object",
+      "properties": {
+        "during_next_phase": {
+          "$ref": "#/$defs/A.phase-interval"
+        }
+      },
+      "required": [
+        "during_next_phase"
+      ],
+      "additionalProperties": false
+    },
+    "A.until": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "turn",
+            "next_opp_turn",
+            "this_and_next_opp_turn",
+            "game"
+          ]
+        },
+        {
+          "$ref": "#/$defs/A.until-next-phase"
+        },
+        {
+          "$ref": "#/$defs/A.until-next-turn"
+        },
+        {
+          "$ref": "#/$defs/A.until-during-next-phase"
+        }
+      ]
     }
   }
 }
