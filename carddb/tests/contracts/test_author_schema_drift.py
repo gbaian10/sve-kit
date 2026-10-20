@@ -13,6 +13,7 @@ from sve_carddb.contracts.four_layer import Code
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
+from .author_ability_types import ABILITIES, ABILITY_NAMES
 from .author_cost_cases import COST_NAMES, COSTS
 from .author_effect_cases import EFFECT_NAMES, EFFECTS
 from .author_history_cases import HISTORY, HISTORY_NAMES
@@ -35,8 +36,8 @@ LEAVES: dict[str, TypeAdapter[object]] = {
     "Code": TypeAdapter(Code, config=CONFIG),
     "ParamName": TypeAdapter(author.ParamName, config=CONFIG),
     "CardNumber": TypeAdapter(Text),
-    "CardName": TypeAdapter(Text),
-    "Concept": TypeAdapter(Text),
+    "CardName": TypeAdapter(author.CardName),
+    "Concept": TypeAdapter(author.Concept),
     "Title": TypeAdapter(author.Title, config=CONFIG),
     "CardKind": TypeAdapter(Code, config=CONFIG),
     "Player": TypeAdapter(author.Player),
@@ -59,6 +60,8 @@ LEAVES: dict[str, TypeAdapter[object]] = {
     "ParamValues": TypeAdapter(author.ParamValues, config=CONFIG),
 }
 REFERENCES: dict[str, TypeAdapter[object]] = {
+    "A.turn-interval": TypeAdapter(references.TurnInterval),
+    "A.until-during-next-turn": TypeAdapter(references.UntilDuringNextTurn),
     "BindingName": TypeAdapter(references.BindingName, config=CONFIG),
     "RoleName": TypeAdapter(references.RoleName, config=CONFIG),
     "ReservedRefName": TypeAdapter(references.ReservedRefName),
@@ -184,6 +187,7 @@ def test_every_implemented_definition_has_a_python_type() -> None:
             | COSTS
             | EFFECTS
             | STEPS
+            | ABILITIES
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -226,6 +230,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | COSTS
         | EFFECTS
         | STEPS
+        | ABILITIES
     )[name].json_schema()
     names = (
         SELECTOR_NAMES
@@ -238,6 +243,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | COST_NAMES
         | EFFECT_NAMES
         | STEP_NAMES
+        | ABILITY_NAMES
     )
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
@@ -1149,4 +1155,9 @@ def test_inlining_named_union_branch_fails_structural_check(
 
 @pytest.mark.parametrize("name", STEPS)
 def test_step_type_drift(name: str) -> None:
+    assert_selector_definition(NODES, name)
+
+
+@pytest.mark.parametrize("name", ABILITIES)
+def test_ability_type_drift(name: str) -> None:
     assert_selector_definition(NODES, name)

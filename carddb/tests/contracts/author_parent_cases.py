@@ -6,10 +6,10 @@ from pydantic import TypeAdapter
 
 from sve_carddb.contracts import author_costs as costs
 from sve_carddb.contracts import author_leaves as leaves
+from sve_carddb.contracts import author_programs as steps
 from sve_carddb.contracts import author_quantities as quantities
 from sve_carddb.contracts import author_queries as queries
 from sve_carddb.contracts import author_selection_parents as parents
-from sve_carddb.contracts import author_steps as steps
 
 from .author_selector_cases import CONFIG
 

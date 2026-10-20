@@ -117,9 +117,18 @@ class UntilDuringNextPhase(RecordData):
     during_next_phase: PhaseInterval
 
 
+class TurnInterval(RecordData):
+    who: PlayerRef
+
+
+class UntilDuringNextTurn(RecordData):
+    during_next_turn: TurnInterval
+
+
 type Until = (
     Literal["turn", "next_opp_turn", "this_and_next_opp_turn", "game"]
     | UntilNextPhase
     | UntilNextTurn
     | UntilDuringNextPhase
+    | UntilDuringNextTurn
 )

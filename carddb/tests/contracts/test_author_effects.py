@@ -78,7 +78,7 @@ def test_effects_are_closed_and_do_not_enter_other_expression_contexts(
         {},
         {"stat": {"power": 1}, "keywords": {"list": ["storm"]}},
         {"grant": {}},
-        {"grant": {"keywords": ["storm"]}},
+        {"grant": {"keywords": []}},
         {"buff": {"power": 1}},
         {"apply": {"on": "this", "effect": {"stat": {"power": 1}}}},
         {"static": {"effect": {"stat": {"power": 1}}}},
