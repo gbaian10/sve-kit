@@ -537,7 +537,10 @@ fn ub_requires_title_capability_and_keeps_controller_and_active_zone_checks() {
             );
             setup["players"]["P1"]["zones"]["field"] = json!([]);
             setup["players"]["P1"]["zones"]["hand"] = json!([{"id":"actor","card":"actor"}]);
-            assert!(choices(&from_catalog(Arc::clone(&catalog), &setup).unwrap(), 4).is_empty());
+            assert_eq!(
+                choices(&from_catalog(Arc::clone(&catalog), &setup).unwrap(), 4),
+                Vec::<Value>::new()
+            );
         }
     }
 }
@@ -611,7 +614,10 @@ fn cost_roles_match_current_aliases_and_keep_zone_controller_and_face_up_filters
     }
     setup["players"]["P1"]["zones"]["ex"] = json!([]);
     setup["players"]["P1"]["zones"]["hand"] = json!([{"id":"alias","card":"alias"}]);
-    assert!(choices(&from_catalog(Arc::clone(&catalog), &setup).unwrap(), 1).is_empty());
+    assert_eq!(
+        choices(&from_catalog(Arc::clone(&catalog), &setup).unwrap(), 1),
+        Vec::<Value>::new()
+    );
 }
 
 #[test]
@@ -1086,5 +1092,8 @@ fn unbound_selectors_reject_before_enumerating_an_empty_candidate_set() {
 fn virtual_leaders_cannot_match_a_physical_resource_name_role() {
     let mut fixture = Fixture::new();
     fixture.programs["cards"]["actor"]["abilities"] = json!([{"kind":"activated","line":1_u8,"targets":[{"key":"1","select":{"side":"self","zone":"leader","resource_role":"lesson_item"},"min":1_u8,"max":1_u8}],"body":{"op":"draw","count":0_u8}}]);
-    assert!(choices(&fixture.game(&position()).unwrap(), 1).is_empty());
+    assert_eq!(
+        choices(&fixture.game(&position()).unwrap(), 1),
+        Vec::<Value>::new()
+    );
 }
