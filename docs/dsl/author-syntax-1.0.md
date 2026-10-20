@@ -57,19 +57,19 @@ DSL 用主版.次版：次版只容許舊資料不必修改且降低語義不變
 
 ## 2. 能力頭與來源
 
-降低成 `B.ability`、`B.source`。持有者、controller、文字提供者與印刷位置分開；授予不是複製來源身分。共通欄位：`targets? / cost? / optional_cost? / x? / define? / do / once_per_turn? / ub? / zone?`；只有適用的頭可填相應欄位。`zone` 接單值或集合（field、hand、ex、cemetery、equipment 等已登錄區域），預設依 CR 10.3：場上從者／護符 field、crest ex、equipment equipment。
+降低成 `B.ability`、`B.source`。持有者、controller、文字提供者與印刷位置分開；授予不是複製來源身分。共通欄位：`targets? / cost? / optional_cost? / x? / define? / do / per_turn? / ub?`；只有適用的頭可填相應欄位。`per_turn` 為正安全整數；`zone` 只適用 auto／activate／static，接單值或非空列表（field、hand、ex、cemetery、equipment 等已登錄區域），預設依 CR 10.3：場上從者／護符 field、crest ex、equipment equipment。
 
-| 構造                                                                                                                                                         | 內容與降低                                                                                                                                                                  |
+| 構造 | 內容與降低 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `keywords: [Keyword…]`                                                                                                                                       | `B.keyword`，保留規則展開來源；ward、storm、rush、assail、bane、drain、intimidate、aura、stack、single_drive、twin_drive、drive、start_amulet。參數型關鍵字依 CR 12–14 登錄 |
-| `quick: true`                                                                                                                                                | 卡的 Quick 許可；不控制引擎是否開窗口                                                                                                                                       |
-| `fanfare / lastword / evolve_time / super_evolve_time / attack_time / race_time / drive_time`                                                                | `B.trigger` 巨集；分別匹配入場／場到墓地／進化／超進化／攻擊／出走／首次獲 Drive，均以 this 為主體                                                                          |
-| `auto: {on, do, …}`                                                                                                                                          | 一般事件能力；`on: {state: Cond}` 是 CR 10.7.6 狀態誘發，保留待機 latch                                                                                                     |
-| `activate: {cost, do, usable_if?, quick?, advance?, fusion?, …}`                                                                                             | 起動；usable_if 在打出時查；fusion 的 sel/result 見 §13                                                                                                                     |
-| `evolve: {cost, into?, usable_if?}`、`ride: {cost}`、`feed: {times?, cost}`                                                                                  | 進化相當能力入口、共用額度與 EP 代付規則；Meal／Ride 不捏造進化事件                                                                                                         |
-| `spell: {targets?, optional_cost?, x?, define?, do}`                                                                                                         | 法術本文；空 do 合法不代表無需打出程序                                                                                                                                      |
-| `static: {while?, zone?, effects}`                                                                                                                           | 宣告動態效果，while 每次求值；來源有效區限制只施於此類                                                                                                                      |
-| `play: {cost_delta?, cost_set?, additional_cost?, optional_cost?, optional_cost_delta?, optional_cost_set?, alt_cost?, cannot_if?, playable_from?, define?}` | 改打出程序；必要追加、可選追加、替代費用與增減／set 分開                                                                                                                    |
+| `keywords: [Keyword…]` | `B.keyword`，保留規則展開來源；ward、storm、rush、assail、bane、drain、intimidate、aura、stack、single_drive、twin_drive、drive、start_amulet。參數型關鍵字依 CR 12–14 登錄 |
+| `quick: true` | 卡的 Quick 許可；不控制引擎是否開窗口 |
+| `fanfare / lastword / evolve_time / super_evolve_time / attack_time / race_time / drive_time` | `B.trigger` 巨集；分別匹配入場／場到墓地／進化／超進化／攻擊／出走／首次獲 Drive，均以 this 為主體 |
+| `auto: {on, do, …}` | 一般事件能力；`on: {state: Cond}` 是 CR 10.7.6 狀態誘發，保留待機 latch |
+| `activate: {cost, do, …}` 或 `{fusion, do, …}` | 一般起動可有 usable_if／quick／advance；fusion 與 cost 互斥且不收 quick／advance；數量與欄位見[能力矩陣](author-ability-shapes-1.0.md) |
+| `evolve: {cost, into?, usable_if?}`、`ride: {cost}`、`feed: {times?, cost}` | 進化相當能力入口、共用額度與 EP 代付規則；Meal／Ride 不捏造進化事件 |
+| `spell: {targets?, optional_cost?, x?, define?, do}` | 法術本文；空 do 合法不代表無需打出程序 |
+| `static: {while?, zone?, effects}` | 宣告動態效果，while 每次求值；有效區由接受者種類與明寫 zone 決定 |
+| `play: {cost_delta?, cost_set?, additional_cost?, optional_cost?, optional_cost_delta?, optional_cost_set?, alt_cost?, cannot_if?, playable_from?, define?}` | 改打出程序；必要追加、可選追加、替代費用與增減／set 分開 |
 
 **裁定修訂**：長寫「〜とき、…なら」也在事件發生時誘發，本文條件寫 `do: [{if: …}]`，不寫 `when`（R-0009 取代舊裁定 #1；R-0002 保留結算時條件範圍；R-0003 同樣適用關鍵字頭）。`when` 從 1.0 撰寫層移除，真正事件限定放 `on` 的型別化 filter，狀態誘發放 state。事件凍結資料可以在本文 if 讀，不代表條件曾在誘發時判一次。
 
@@ -214,7 +214,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 | evolve / transform | `{ref,into?,result?}`；transform 另接 `entry_effects?` | I.evolve Effect / I.transform；變身不是改卡名，into 分配見 §14 A-016j |
 | life / set_life | `{who,delta或n}` | I.life Add / Set；生命改變不等於傷害 |
 | buff / set_stat | `{on,power?,hp?,until?,instead?}` | I.modify＋L.continuous Numeric |
-| grant / lose_abilities | grant:`{on,keywords,until?,instead?}`；lose_abilities:`{on,until?}`；abilities 尚不接受 | I.grant / I.remove-ability；刪除舊 grant.effects，以 apply 安裝效果 |
+| grant / lose_abilities | grant:`{on,keywords?,abilities?,until?,instead?}`（內容至少一項，可並用）；lose_abilities:`{on,until?}` | I.grant / I.remove-ability；刪除舊 grant.effects，以 apply 安裝效果 |
 | counter / move_counters | `{on,name,delta}` / `{from,to,name,all:true}` | I.counter Add/Remove/Move |
 | pp / pp_max / ep / sep | `{who,delta}`；pp 另有 `{who,to_max:true}` | I.resource；不更改印刷費用 |
 | reveal / look | `{ref或top,bind,result?,by?,random?}` | I.reveal / I.look；random 先以 I.random 抽樣，不讓玩家挑 |
@@ -229,7 +229,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 | box / pilot | box:`{ref,until}`；pilot 尚無接受形狀 | I.box-pilot；依 CR 5.31/5.32 的能力及關聯展開 |
 | race / feed / gain_drive / drive_check | race:`{ref,n?}`、gain_drive:`{ref}`；feed/drive_check 尚無接受形狀 | I.meal-race / I.ride-drive / I.drive-check 的對應規則程序 |
 | play_card / play_ability | `{ref}`（cost 尚不接受） / `{of,trigger或ability,cost_policy?}` | I.play-card / I.play-ability；內層獨立 execution |
-| delayed | `{on,do,next_only?,until?,line}` | I.delay；無期限預設只誘發一次 |
+| delayed | `{on,do,targets?,optional_cost?,x?,define?,aggregation?,next_only?,until?,precondition?}` | I.delay；無期限只一次，有期限預設各次；不收 line/result，詳能力矩陣 |
 | player_effect / apply | `{who,effect,until?}` / `{on,effect,until?}` | I.install-effect，分玩家與物件範圍；不是 I.grant |
 | win / skip_turn / extra_turn | `{who}` | I.game-result / I.schedule-turn |
 | make_type | `{on,type,until?}` | I.modify SetKind；不隱式失去能力 |
@@ -246,7 +246,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 ## 9. 效果、取代與期限
 
-各鍵必填／選填、cannot 變體及安裝上下文見[效果形狀](author-effect-shapes-1.0.md)。C0 目前接受 26 鍵片段；EffectSpec.grant 尚待完整能力頭，仍拒絕（動作 grant.keywords 已由動作矩陣承載），不以空 payload 占位。
+各鍵必填／選填、cannot 變體及安裝上下文見[效果形狀](author-effect-shapes-1.0.md)。C0 接受 27 鍵片段，含 EffectSpec.grant 的 keywords／abilities；內容至少一項且非空，授予頭子集合見[能力矩陣](author-ability-shapes-1.0.md)。
 
 `A.effect` 可用於 static.effects、player_effect.effect、apply.effect；apply.on 預設在指示開始捕捉集合，可依明確證據用 capture:play，static selector 隨狀態求值。保留 stat/set_stat、keywords/grant/lose_abilities、also_named/add_trait/remove_trait/make_type、cost_mod、damage_mod、banish_instead、cannot、must_attack、play_permission、no_trigger、unlimited_evolve、rule_override；補 prevent、damage_cap、evolve_cost_mod、enters_acted、reroll、ignore_ward、choice_any、extra_trigger、must_target。各鍵只接受配對 IR 封閉變體；無語義的 boxed 宣告改本文 box。
 
@@ -260,7 +260,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 `instead: [{if, <動作 payload 差異>, after?: Steps}]` 可掛 damage/move/buff/life/grant/create/draw/search/banish/destroy。同型差異保留未改欄位，數量鍵取代整個數量 variant；完整替換用 `replace_with: {<動作>: payload}`，可同種但不可放控制流程。降低為一次自我取代，不是先做原動作；after 是取代成功適用後同條件段落的後續句，R-0007 不允許把它放成無條件下一步。choice.instead 獨立為 `{if,n}` 或 `{if,upto}`，不接受 after/replace_with；只在打出時計算模式數，不裝全域攔截器。search.to.instead 是找到後的目的地取代，與指示開始的 search.instead 分開，詳動作矩陣。
 
-Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形 `{next_phase: {who,phase:start|main|end,edge:begin|end}}`、`{next_turn: {who,edge:begin|end}}`；`{during_next_phase:{who,phase}}` 表示完整下次階段區間（BP05-006），不是到開始即到期。who 在安裝時捕捉（master_of 與 owner_of 不可混淆）。舊無參數 next_start_phase / next_main_phase / next_owner_turn_end 遷移時要求補錨點，不猜。
+Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形 `{next_phase: {who,phase:start|main|end,edge:begin|end}}`、`{next_turn: {who,edge:begin|end}}`；`{during_next_turn:{who}}` 表示完整下次回合區間；`{during_next_phase:{who,phase}}` 表示完整下次階段區間（BP05-006），不是到開始即到期。who 在安裝時捕捉（master_of 與 owner_of 不可混淆）。舊無參數 next_start_phase / next_main_phase / next_owner_turn_end 遷移時要求補錨點，不猜。
 
 省略期限＝NoTemporalExpiry，但目標世代換區即依法失效；EX→解決→場僅 RuleCarry 白名單。本文效果不因來源離場自行失效；static 受來源有效區與 while 限制。依存與事件邊界見 [ADR-0008](../adr/0008-continuous.md)。
 

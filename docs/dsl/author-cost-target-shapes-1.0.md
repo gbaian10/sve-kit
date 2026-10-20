@@ -112,18 +112,17 @@ CounterCost 六個數量分支及 holders 的必要性沿[要求量矩陣](autho
 
 | PlayCosts 欄 | 型別 | 形狀相依 |
 | --- | --- | --- |
-| cost_delta | NumericExpr | 無條件增減，可為負 |
-| cost_set | Q | 與 delta 可共存，先 set 再 delta |
+| cost_delta | NumericExpr／{if:Condition,delta:NumericExpr}，或至少兩項的上述列表 | 增減可為負；false 不安裝修飾 |
+| cost_set | Q／{if:Condition,set:Q}，或至少兩項的上述列表 | 與 delta 可共存，先 set 再 delta |
 | additional_cost | AdditionalCost | 必要追加 |
 | optional_cost | OptionalCosts | 語義仍須符合 enclosing play／choice |
-| optional_cost_delta | NumericExpr | 必有單一 mapping optional_cost，不可配列表 |
-| optional_cost_set | Q | 同上；不是 alt_cost |
+| optional_cost_delta | 同 cost_delta | 必有單一 mapping optional_cost，不可配列表 |
+| optional_cost_set | 同 cost_set | 同上；不是 alt_cost |
 | alt_cost | AltCost | if 必填，替代整份原費用 |
 
 optional_cost_delta 的真例為 CP03-029；optional_cost_set 為 EBD02-007。
 「コストを+Nしてよい」標準形是 optional_cost:{pp:N,result:…}，BP04-066 以整次付款結果分支。
-與固定費用／下限的規則合成不能由形狀推斷。條件式打出修正（BP02-038／BP03-097／BP04-023）
-不在 PlayCosts 片段，不能宣稱已能表示所有 play。
+與固定費用／下限的規則合成不能由形狀推斷。條件式打出修正（BP02-038／BP03-097／BP04-023）與保序修飾列表（BP13-093）沿相同 PlayCosts 型別；多個 set 的適用關係由 C1／D0 驗證。
 
 OptionalCosts 的陣列依印刷選項序保存，不排序／去重。
 C1 須驗 option 嚴格遞增、互異、存在於所屬 choice；這不是節點 schema 的跨元素保證。
@@ -167,7 +166,7 @@ name／names／name_contains 互斥，token／not_token 互斥。內層算式的
 CP03-042 的三組是分組語義的證據；其消滅領域來源尚無作者 Zone 代碼，
 依承載契約的封閉映射，不把 banished／banish 當可用作者來源，不能宣稱整個 Target 已可寫。
 
-各能力頭是否可帶 targets 仍依語法 §3 與規則登錄；完整能力頭與 delayed 的父型別尚未接入。
+各能力頭是否可帶 targets 仍依語法 §3 與規則登錄；完整能力頭與 delayed 的適用欄位見[能力矩陣](author-ability-shapes-1.0.md)。
 本文 choose 是結算時決定，不能代替打出時 Target。roles、option、總量約束的其他交叉格
 未列真例者皆合成，不因此授予任意父節點同名欄位。
 

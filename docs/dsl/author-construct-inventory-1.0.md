@@ -37,9 +37,9 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | 上下文／構造 | 鍵與變體 | 必須區分 |
 | --- | --- | --- |
 | keywords／quick | Keyword 列表／true | 不是動作授予；參數型 Keyword 須按登錄形狀 |
-| fanfare、lastword、evolve_time、super_evolve_time、attack_time、race_time、drive_time | 適用的 targets、cost、optional_cost、x、define、do、once_per_turn、ub、zone | 頭的 cost 只按 §3 允許處出現；lastword／auto 冒號用本文 pay |
+| fanfare、lastword、evolve_time、super_evolve_time、attack_time、race_time、drive_time | 適用的 targets、cost、optional_cost、x、define、do、per_turn、ub | 頭的 cost 只按 §3 允許處出現；lastword／auto 冒號用本文 pay |
 | auto | on、do 及適用共通欄；aggregation?=batch | state 誘發與事件誘發；不用 when |
-| activate | cost、do、usable_if?、quick?、advance?、fusion? 及適用共通欄 | fusion={sel,n,result?}；hand 不改 cost 的時點 |
+| activate | cost、do、usable_if?、quick?、advance?、fusion? 及適用共通欄 | fusion={sel,n\|upto\|any,result?}，與 cost 互斥，不收 quick／advance；hand 不改 cost 的時點 |
 | evolve／ride／feed（能力頭） | {cost,into?,usable_if?}／{cost}／{times?,cost} | 與 A.act.evolve／feed 分開 |
 | spell | targets?、optional_cost?、x?、define?、do | 空 do 合法；仍須打出程序 |
 | static | while?、zone?、effects | 動態 selector、來源有效區；需範圍的 on 不省略 |
@@ -119,7 +119,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | evolve／transform | ref、into?、result?；transform 另 entry_effects? | evolve 能力頭另型別；transform.into 支援 allocate |
 | life／set_life | who、delta／n | delta 與 n 不互換 |
 | buff／set_stat | on、power?、hp?、until?、instead? | effect.stat/set_stat 是持續效果，另型別 |
-| grant／lose_abilities | grant:{on,keywords,until?,instead?}；lose_abilities:{on,until?} | abilities 尚不接受；不接受舊 grant.effects |
+| grant／lose_abilities | grant:{on,keywords?,abilities?,until?,instead?}；lose_abilities:{on,until?} | keywords／abilities 至少一項且非空，可並用；不接受舊 grant.effects |
 | counter／move_counters | {on,name,delta}／{from,to,name,all:true} | cost.counter 使用材料數量，非 delta |
 | pp／pp_max／ep／sep | {who,delta}；pp 另 {who,to_max:true} | delta 與 to_max 互斥 |
 | reveal／look | ref\|top、bind、result?、by?、random? | random={n}，與 cost.discard.random=true 不同 |
@@ -133,7 +133,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | box／pilot | box:{ref,until}；pilot 尚不接受 | box 期限必填，pilot 數值／期限未定 |
 | race／feed／gain_drive／drive_check | race:{ref,n?}、gain_drive:{ref}；feed/drive_check 尚不接受 | 按各規則程序，不是任意動作組合 |
 | play_card／play_ability | {ref}（cost 尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
-| delayed | on、do、next_only?、until?、line | on 是事件；預設一次誘發 |
+| delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until?、precondition? | 無期限僅一次，有期限預設各次；不收 line/result |
 | player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開；apply.capture=play |
 | win／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
 | make_type | on、type、until? | 不隱式失去能力 |
@@ -191,7 +191,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | --- | --- |
 | stat／set_stat | 數值增減／設定分開 |
 | keywords | {on?,list}；不同於 A.ability.keywords 的列表 |
-| grant／lose_abilities | grant 等完整能力頭接線，目前拒絕；lose_abilities={on?}，AllAtTime |
+| grant／lose_abilities | grant={on?,keywords?,abilities?}，內容至少一項且非空；lose_abilities={on?}，AllAtTime |
 | also_named／add_trait／remove_trait／make_type | 名稱／種族／種類變更，各自有型別 |
 | cost_mod | when_playing、delta\|set、next_only?；delta Int、set Nat 葉參數 |
 | damage_mod | on?、source?、kind?、delta\|multiply、next_only? |
@@ -212,7 +212,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | extra_trigger | phase、who、n；附加次數 |
 | must_target | on、by |
 | instead[] | if、同種 payload 差異或 replace_with、after? |
-| until | turn/next_opp_turn/this_and_next_opp_turn/game；{next_phase:{who,phase,edge}}／{next_turn:{who,edge}}／{during_next_phase:{who,phase}} |
+| until | turn/next_opp_turn/this_and_next_opp_turn/game；{next_phase:{who,phase,edge}}／{next_turn:{who,edge}}／{during_next_phase:{who,phase}}／{during_next_turn:{who}} |
 | entry_effects[] | EffectSpec；move/search/create/transform 共用；entering 為本次新世代 |
 
 cannot.what 的 12 種變體為 play_card/play_ability/attack/choose_target/draw/destroy/banish/stand/win/lose/deal_damage/pp_max_increase。

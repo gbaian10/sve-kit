@@ -2,14 +2,13 @@
 
 本文件定義 `A.effect`（EffectSpec）的封閉形狀及安裝位置契約。
 語法唯一權威為 [`author-nodes.schema.json`](../../dsl/author-nodes.schema.json)；
-Python 對應型別在 `contracts/author_effects.py`，與 selector／數值共用同一遞迴圖。
+Python 對應型別在 `contracts/author_programs.py`，與 selector／數值共用同一遞迴圖。
 本片段不是完整能力、Steps、作者入口或 expanded profile，不能據此宣稱可執行。
 
 ## 1. 共通邊界
 
 EffectSpec 是恰含一個效果鍵的物件；下面接受 26 鍵。§9 登錄的第 27 鍵
-EffectSpec 的 `grant` 尚未接入完整能力頭，C0 在 EffectSpec 拒絕它，包括 `{grant:{}}`
-與 `{grant:{keywords:[storm]}}`；不以任意 JSON 代替授予能力。
+EffectSpec.grant 接受 `{on?,keywords?,abilities?}`：內容至少一項且各非空，可並用。keywords 元素為 Concept，不收直接 ParamRef；abilities 沿同一 GrantedAbilityHead 遞迴圖，詳[能力矩陣](author-ability-shapes-1.0.md)。`{grant:{}}` 仍拒絕。
 所有 payload 封閉，未列欄位、null 與錯型別拒絕，不補預設欄位。
 
 型別簡寫如下；未特別允許的位置不接受直接 `{param:…}`。
@@ -103,8 +102,8 @@ no_trigger 抑制誘發；cannot.play_ability 阻止打出，不能互換。
 
 ## 4. 安裝位置與範圍
 
-這張表是完整父節點接線時 C1／D0 必須實施的契約；目前 C0 只驗證效果片段，
-還沒有 static／apply／player_effect／entry_effects 父節點驗證器。
+這張表是 C1／D0 必須實施的上下文契約；C0 已有 static／apply／player_effect／entry_effects
+父節點形狀，但不依安裝位置強制這張表的 scope 規則。
 表中「明寫」不是由片段驗證器依上下文推定；錯父位置的拒絕尚須完整入口。
 
 | scope 角色 | static | apply | player_effect | entry_effects |
@@ -163,7 +162,7 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 | cannot.win／lose | static BP05-092 | win:opp／lose:self |
 | cannot.pp_max_increase | player_effect BP05-006 | 省略 who 交父節點 |
 | cannot.deal_damage | apply BP12-109 | 父 capture:play 與離場後 LKI 仍需接線 |
-| must_attack | CP04-012 的授予內 static | 獨立 EffectSpec 合成，grant 尚未實作 |
+| must_attack | CP04-012 的授予內 static | 能力矩陣含完整巢狀 grant／static 真例 |
 | play_permission | BP18-007 優先用自身 play 頭 | EffectSpec 合成；玩家消滅區來源另待設計 |
 | no_trigger.on／who | entry_effects BP19-074；static ECP01-010 | entering／對手能力控制者 |
 | unlimited_evolve | static BP18-001 | who:self |
@@ -180,4 +179,4 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 直接事件與 history.where 的逐欄矩陣另見[事件矩陣](author-event-matrix-1.0.md)。
 事件角色與本文件的安裝角色不可互借；兩者的正反例都不取代全卡與執行驗收。
 
-動作 grant.keywords 與 EffectSpec 不同，已接受的動作及 Steps 見[動作矩陣](author-step-shapes-1.0.md)；grant.abilities 仍不接受。
+動作 grant 的 on 必填且可含領袖；EffectSpec.grant 的 on 選填但 static 上下文須明寫。動作 keyword 葉可參數化，EffectSpec keyword 葉不可；其餘授予形狀見[能力矩陣](author-ability-shapes-1.0.md)。
