@@ -50,7 +50,7 @@ repos:
         args: [-o, array_auto_collapse=false, -o, 'indent_string=    '] # 4 spaces
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.10
+    rev: v0.17.0
     hooks:
       # tools/schema-er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
       - id: ruff-format
@@ -103,7 +103,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.24
+    rev: 0.13.0
     hooks:
       # Each Python project maintains its own dependency lock.
       - id: uv-lock
