@@ -653,6 +653,54 @@ def test_material_cost_comparisons_accept_numeric_operations(
 
 
 @pytest.mark.parametrize(
+    ("event", "field", "values", "wrong"),
+    [
+        ("damaged", "kind", ["attack", "combat", "ability"], "any"),
+        ("dealt_damage", "kind", ["attack", "combat", "ability"], "effect"),
+        ("enter_field", "entered_by", ["ability", "play"], "rule"),
+        ("life_changed", "direction", ["up", "down"], "set"),
+        ("stat_changed", "direction", ["up", "down"], "change"),
+        ("counter_changed", "direction", ["up", "down"], "set"),
+        ("stat_changed", "stat", ["power", "hp"], "attack"),
+        ("drew", "not_phase", ["start", "main", "end"], "draw"),
+    ],
+)
+def test_event_and_history_filter_enums_match_the_per_event_matrix(
+    event: str, field: str, values: list[str], wrong: str
+) -> None:
+    for value in [*values, wrong]:
+        accepted = value != wrong
+        _check(EVENT, {event: {field: value}}, accepted=accepted)
+        _check(
+            QUERY,
+            {"event": event, "window": "game", "where": {field: value}},
+            accepted=accepted,
+        )
+
+
+@pytest.mark.parametrize(
+    ("event", "payload"),
+    [
+        ("damaged", {"recipient": {"in": "t"}}),
+        ("attacked", {"who": "opponents"}),
+        ("played", {"sel": {"who": "self"}}),
+        ("stat_changed", {"stat": []}),
+        ("moved", {"from": {"zone": "hand"}}),
+        ("moved", {"from": {"who": "self"}}),
+        ("moved", {"from": {"who": "self", "zone": "hand", "unknown": True}}),
+        ("discarded", {"from": "ex"}),
+        ("drive_trigger", {"holder": "this"}),
+        ("equipped", {"equipment": {"leader": "self"}}),
+        ("fused", {"material": {"in": "t"}}),
+    ],
+)
+def test_direct_events_reject_other_roles_and_incomplete_origins(
+    event: str, payload: JsonValue
+) -> None:
+    _check(EVENT, {event: payload}, accepted=False)
+
+
+@pytest.mark.parametrize(
     ("source", "name", "value"),
     CARD_HISTORY_CASES + SYNTAX_HISTORY_CASES,
     ids=[source for source, _, _ in CARD_HISTORY_CASES + SYNTAX_HISTORY_CASES],
