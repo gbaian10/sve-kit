@@ -125,6 +125,7 @@ mod flow;
 mod projections;
 mod runtime;
 mod values;
+mod wellformed;
 
 pub use actions::*;
 pub use capabilities::{
@@ -137,6 +138,7 @@ pub use flow::*;
 pub use projections::*;
 pub use runtime::*;
 pub use values::*;
+pub use wellformed::{WellFormedError, WellFormedProgram, WellFormedReason};
 
 use capabilities::Visitor;
 
