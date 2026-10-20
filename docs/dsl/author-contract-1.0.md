@@ -6,13 +6,15 @@
 
 封套、共用本體承載、內容版本及用途依賴、公開 typed IR 與能力准入是單向門：改變時須重新審查契約與遷移影響。本文的資料欄位是具體可審的 1.0 文稿；尚未發布前可同步修訂。內部資料表、函式、快取、診斷代碼拼字、支援登錄的分檔方式及 adapter 實作是雙向門，可在 1.x 文件修訂，不因此放寬既有語義或來源責任。發布後沿作者語法的主／次版規則，不用文件小版掩蓋不相容變更。
 
-| format／kind | DSL 支援集 | Schema `$id` | 預定資源（尚未實作） |
+| format／kind | DSL 支援集 | Schema `$id` | 資源（實作範圍見下文） |
 | --- | --- | --- | --- |
 | `1 / author_effect_set` | `1.0` | `urn:sve-kit:author:1.0` | `dsl/author.schema.json` |
 | `1 / effect_body_shard` | `1.0` | `urn:sve-kit:effect-bodies:1.0` | `dsl/effect-bodies.schema.json` |
 | `1 / effects_index` | 定位資訊，不選語義 | `urn:sve-kit:effects-index:1` | `dsl/effects-index.schema.json` |
 
-兩個作者資源共用 `urn:sve-kit:author-nodes:1.0`（預定 `dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
+目前 `effects-index.schema.json` 已提供索引語法；`author-nodes.schema.json` 只提供葉參數定義。逐卡／companion 入口及遞迴 authored／expanded profile 尚未實作，不能以葉驗證通過當成完整作者輸入通過。確切可用入口見 [dsl/README](../../dsl/README.md)。
+
+兩個作者資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
 
 `format/kind` 選入口，卡片 `meta.dsl` 與本體 `dsl` 必須在該資源的支援集中；沒有額外頂層 `schema` 選擇器。每個 loader 發行版將 `(format,kind)` 對應到恰好一個現行 Schema 資源；逐卡 meta.dsl 只檢查是否在其支援集中，不另選 Schema。相容次版以新 `$id` 及指紋取代該映射，支援集保留先前相容版本；同檔可含支援集內不同版本，Schema 依 dsl 窄化適用構造。舊 `$id` 只供已釘輸入重現，不原地替換資源內容。沒有登錄的版本拒絕，不選「最新可用」Schema。封套變更另升 format。既有 `effect_set`／`keyword_registry` format 1 與 `urn:sve-kit:effects:astra:1` 維持原型契約。
 
@@ -84,7 +86,7 @@ ability_flag 只填對應宣告、card_field 只填 A.card 欄位、none 不產�
 | `Zone` | ZoneSet/counted_zone/value；ZoneSet/source_zone/value；ZoneSet/destination_zone/value | 依序只配 A.expr.count.zone、Sel.zone、A.act.move.to／A.act.search.to／A.act.create.to；只接受單元素集合並取該成員 |
 | `Phase` | Phase/phase_trigger/value | A.event.phase.which |
 
-來源沒有 Int 葉型別；有號算式由作者 Expr 保留。CardName 解成已採納的日文規則名稱，Concept 按 category 解成已登錄作者代碼；來源引用及映射版本保留在依賴，不由中文譯文推值。Zone 的封閉對照為 battlefield→field、hand→hand、deck→deck、evolve_deck→evolve_deck、graveyard→cemetery、ex→ex；第七種來源 banish 在本版葉參數映射中拒絕，待作者區域代碼明確登錄，不用「同義」猜字串。任何前端已定的構造若不在此表，只是不能參數化，不刪除原作者語法。
+來源沒有 Int 葉型別；有號算式由作者 Expr 保留。CardName 解成已採納的日文規則名稱，Concept 按 category 解成已登錄的作者字串，沿用 inline 的種族／職業名稱及關鍵字拼法，不限於來源 Code 的 ASCII 語法；來源引用及映射版本保留在依賴，不由中文譯文推值。Zone 的封閉對照為 battlefield→field、hand→hand、deck→deck、evolve_deck→evolve_deck、graveyard→cemetery、ex→ex；第七種來源 banish 在本版葉參數映射中拒絕，待作者區域代碼明確登錄，不用「同義」猜字串。任何前端已定的構造若不在此表，只是不能參數化，不刪除原作者語法。
 
 封閉引用節點恰為 `{param: ParamName}`（A.param），實值恰為 `{type:<同宣告>,value:<整數或字串>}`。型別完全匹配，值由上表轉換，禁止缺參數、多參數、bool 冒整數、數字字串。不得取代 do、define 整體、selector 整體、能力頭、運算子、binding 名、scope、ports、result、capture 時點或期限結構。ObjectRef／ReceiptId／CapturedValue 經 ports 接線，不是葉參數。展開後不得殘留 param／generated_by。
 

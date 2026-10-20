@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:author-nodes:1.0",
+  "title": "SVE author 1.0 shared leaf definitions",
+  "$comment": "Leaf library only. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
+  "not": {},
+  "$defs": {
+    "Int": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "Nat": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "Code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]*$(?![\\s\\S])"
+    },
+    "ParamName": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
+    },
+    "CardNumber": {
+      "type": "string",
+      "minLength": 1
+    },
+    "CardName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Concept": {
+      "type": "string",
+      "minLength": 1
+    },
+    "CardKind": {
+      "$ref": "#/$defs/Code"
+    },
+    "Player": {
+      "type": "string",
+      "enum": [
+        "self",
+        "opp"
+      ]
+    },
+    "Zone": {
+      "type": "string",
+      "enum": [
+        "field",
+        "hand",
+        "deck",
+        "evolve_deck",
+        "cemetery",
+        "ex"
+      ]
+    },
+    "Phase": {
+      "type": "string",
+      "enum": [
+        "start",
+        "main",
+        "end"
+      ]
+    },
+    "ParamType": {
+      "type": "string",
+      "enum": [
+        "Int",
+        "Nat",
+        "CardName",
+        "Concept",
+        "CardKind",
+        "Player",
+        "Zone",
+        "Phase"
+      ]
+    },
+    "ParamSource": {
+      "type": "object",
+      "properties": {
+        "slot": {
+          "$ref": "#/$defs/Code"
+        },
+        "component": {
+          "type": "string",
+          "enum": [
+            "value",
+            "constant",
+            "negated_magnitude"
+          ]
+        }
+      },
+      "required": [
+        "slot",
+        "component"
+      ],
+      "additionalProperties": false
+    },
+    "ParamDecl": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/ParamType"
+        },
+        "source": {
+          "$ref": "#/$defs/ParamSource"
+        }
+      },
+      "required": [
+        "type",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "A.param": {
+      "type": "object",
+      "properties": {
+        "param": {
+          "$ref": "#/$defs/ParamName"
+        }
+      },
+      "required": [
+        "param"
+      ],
+      "additionalProperties": false
+    },
+    "IntParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Int"
+        },
+        "value": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "NatParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Nat"
+        },
+        "value": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "CardNameParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "CardName"
+        },
+        "value": {
+          "$ref": "#/$defs/CardName"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "ConceptParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Concept"
+        },
+        "value": {
+          "$ref": "#/$defs/Concept"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "CardKindParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "CardKind"
+        },
+        "value": {
+          "$ref": "#/$defs/CardKind"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "PlayerParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Player"
+        },
+        "value": {
+          "$ref": "#/$defs/Player"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "ZoneParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Zone"
+        },
+        "value": {
+          "$ref": "#/$defs/Zone"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "PhaseParamValue": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Phase"
+        },
+        "value": {
+          "$ref": "#/$defs/Phase"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "ParamValue": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/IntParamValue"
+        },
+        {
+          "$ref": "#/$defs/NatParamValue"
+        },
+        {
+          "$ref": "#/$defs/CardNameParamValue"
+        },
+        {
+          "$ref": "#/$defs/ConceptParamValue"
+        },
+        {
+          "$ref": "#/$defs/CardKindParamValue"
+        },
+        {
+          "$ref": "#/$defs/PlayerParamValue"
+        },
+        {
+          "$ref": "#/$defs/ZoneParamValue"
+        },
+        {
+          "$ref": "#/$defs/PhaseParamValue"
+        }
+      ]
+    },
+    "ParamDeclarations": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/ParamName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/ParamDecl"
+      }
+    },
+    "ParamValues": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/ParamName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/ParamValue"
+      }
+    }
+  }
+}

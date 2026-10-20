@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:effects-index:1",
+  "title": "SVE effects index",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "integer",
+      "const": 1
+    },
+    "kind": {
+      "type": "string",
+      "const": "effects_index"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/IndexRecord"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "kind",
+    "records"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "CardId": {
+      "type": "string",
+      "pattern": "^c:[0-9a-f]{32}$(?![\\s\\S])"
+    },
+    "RelativeFile": {
+      "type": "string",
+      "pattern": "^(?!/)(?![\\s\\S]*\\\\)(?![\\s\\S]*[\\x00-\\x1f\\x7f])(?!(?:[^/]+/)*\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$(?![\\s\\S])"
+    },
+    "Scope": {
+      "type": "string",
+      "enum": [
+        "shared",
+        "en_override"
+      ]
+    },
+    "PrototypeIndexRecord": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "$ref": "#/$defs/CardId"
+        },
+        "scope": {
+          "type": "string",
+          "const": "shared"
+        },
+        "file": {
+          "$ref": "#/$defs/RelativeFile"
+        },
+        "kind": {
+          "type": "string",
+          "const": "effect_set"
+        },
+        "record_key": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/CardNumber"
+        }
+      },
+      "required": [
+        "card_id",
+        "scope",
+        "file",
+        "kind",
+        "record_key"
+      ],
+      "additionalProperties": false
+    },
+    "AuthorIndexRecord": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "$ref": "#/$defs/CardId"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "file": {
+          "$ref": "#/$defs/RelativeFile"
+        },
+        "kind": {
+          "type": "string",
+          "const": "author_effect_set"
+        },
+        "record_key": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/CardNumber"
+        }
+      },
+      "required": [
+        "card_id",
+        "scope",
+        "file",
+        "kind",
+        "record_key"
+      ],
+      "additionalProperties": false
+    },
+    "IndexRecord": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/PrototypeIndexRecord"
+        },
+        {
+          "$ref": "#/$defs/AuthorIndexRecord"
+        }
+      ]
+    }
+  }
+}

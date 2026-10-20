@@ -13,6 +13,16 @@ _OPTIONS = (
 )
 
 
+class YamlSyntaxError(ValueError):
+    """Expose parser coordinates without exposing the source excerpt."""
+
+    def __init__(self, reason: str, line: int | None, column: int | None) -> None:
+        super().__init__("Invalid authored YAML syntax")
+        self.reason = reason
+        self.line = line
+        self.column = column
+
+
 def parse_yaml(data: bytes) -> object:
     """Decode UTF-8; leave value types to the caller's strict JSON boundary."""
     text = data.decode("utf-8")
@@ -20,9 +30,14 @@ def parse_yaml(data: bytes) -> object:
         if yamlrocks.yaml_version(text) not in {None, "1.2"}:
             raise ValueError("Only YAML 1.2 is supported")
         documents = yamlrocks.loads_all(text, option=_OPTIONS)
-    except yamlrocks.YAMLRocksDecodeError:
+    except yamlrocks.YAMLRocksDecodeError as error:
         # Parser diagnostics can include source text; expose only a safe category.
-        raise ValueError("Invalid authored YAML syntax") from None
+        reason = "syntax"
+        if isinstance(error, yamlrocks.YAMLRocksDuplicateKeyError):
+            reason = "duplicate_key"
+        elif isinstance(error, yamlrocks.YAMLRocksComplexKeyError):
+            reason = "complex_key"
+        raise YamlSyntaxError(reason, error.line, error.column) from None
     if len(documents) > 1:
         raise ValueError("Only one YAML document is supported")
     result: object = documents[0] if documents else None
