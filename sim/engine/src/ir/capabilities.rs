@@ -1,4 +1,4 @@
-use super::{CardProgram, Located, SourceSpan, Walk as _};
+use super::{CardProgram, Located, SourceSpan, Walk};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU32;
 use sha2::{Digest as _, Sha256};
@@ -88,9 +88,22 @@ impl Visitor {
     }
 }
 impl Requirements {
+    /// Derive every requirement of a closed internal execution body.
+    #[must_use]
+    pub fn derive_program(program: &Located<super::Program>) -> Self {
+        Self::walked(program)
+    }
+
     /// Visit every nested branch, even one whose runtime condition is false.
     #[must_use]
     pub fn derive(program: &Located<CardProgram>) -> Self {
+        Self::walked(program)
+    }
+
+    fn walked<T>(program: &Located<T>) -> Self
+    where
+        T: Walk,
+    {
         let mut visitor = Visitor {
             source: program.source.clone(),
             required: BTreeMap::new(),
@@ -110,7 +123,7 @@ impl Requirements {
     }
 }
 impl Registry {
-    /// No typed executor is wired yet; the prototype does not prove D0 support.
+    /// Public admission stays disabled; D1 has a separate closed internal body entry.
     #[must_use]
     pub fn current() -> Self {
         let schema = schema_identity();

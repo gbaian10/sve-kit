@@ -81,7 +81,7 @@ impl<T> Clone for Binding<T> {
     }
 }
 impl<T> Binding<T> {
-    pub(super) const fn key(self) -> (ScopeId, u64) {
+    pub(crate) const fn key(self) -> (ScopeId, u64) {
         (self.scope, self.id)
     }
 

@@ -30,6 +30,9 @@ impl Game {
     /// # Errors
     /// Returns unsupported semantics or malformed transport data; legal rejections are outcomes.
     pub fn decide(&mut self, decision: &Value, node: &str) -> Result<Step> {
+        if self.typed.is_some() {
+            return Err(invalid("typed execution owns the input point"));
+        }
         if !decision.is_object() {
             return Err(invalid("decision must be an object"));
         }

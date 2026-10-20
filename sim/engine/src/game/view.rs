@@ -102,6 +102,9 @@ impl Game {
             )
         });
         packet["awaiting"] = self.awaited(view)?;
+        if self.typed.is_some() {
+            packet["awaiting"] = self.internal_decision_packet(view);
+        }
         if seat.is_none_or(|seat| self.input_point()["by"] == seat) {
             packet["legal"] = json!(self.legal()?);
         }
@@ -256,6 +259,11 @@ impl Game {
     /// # Errors
     /// When serialization fails.
     pub fn digest(&self) -> Result<String> {
+        if self.typed.is_some() {
+            return Err(invalid(
+                "active internal IR executions have no digest format",
+            ));
+        }
         let mut value = serde_json::to_value(&self.state).map_err(invalid)?;
         normalize_origins(&mut value);
         if let Some(observers) = value["knowledge"].as_object_mut() {
