@@ -39,8 +39,12 @@ exclusive variants and roles are listed in the
 Its root rejects standalone documents; select a named `$defs` entry.
 A reference atom is not a complete action-position type: positions such as
 `move.ref` also accept selectors, whose schema is not implemented here.
-`first`/`second`/`rest` views and selector `leader`/`leader_of` shapes still need
-their joint selector/target definitions. Event object references currently admit
+`first`/`second`/`rest` views still need their joint selector/target definitions.
+The leader union shares `A.single-leader`, `A.multiple-leaders` and `A.leader-of`
+without duplicate branches. The [selection shape matrix](../docs/dsl/author-selection-shapes-1.0.md)
+defines the implemented Target role declarations and distinguishes the quantity
+rules for each position; those quantity positions have no complete schemas yet.
+Event object references currently admit
 only `holder`; other typed event projections are outside this subset.
 The [numeric shape matrix](../docs/dsl/author-expression-shapes-1.0.md) covers
 `A.expr.numeric-core`, `A.cond.numeric-core` and their variants: signed arithmetic,
@@ -55,13 +59,16 @@ this fragment. Neither numeric union is an expanded profile.
 2020-12. The `AuthorSchemas` reader in
 `carddb/src/sve_carddb/domains/effects/author_inputs.py` takes the explicit schema
 directory and validates leaf and index inputs with local resources only.
-It does not expose a reader for the reference atoms or numeric fragments.
+It does not expose a reader for the reference atoms, target roles or numeric fragments.
 Python types in
 `contracts/author_leaves.py`, `contracts/author_references.py` and
-`contracts/author_expressions.py` are checked
+`contracts/author_expressions.py`, plus target roles in `contracts/author_selections.py`, are checked
 against every implemented definition by structural drift tests. Reference
 acceptance tests also check reserved-name separation, required fields, exclusive
 variants and nested rejection of parameter nodes.
+Leader union checks flatten nested unions, reject duplicate branches and require
+each accepted example to match exactly one leaf. Role declarations reject empty
+maps, invalid names and booleans masquerading as the integer literal 1.
 Numeric drift checks preserve named reference targets and compare every recursive
 definition individually. Numeric acceptance tests check signed bounds, arity,
 exclusive operators, parameter placement and wire-key round trips.
