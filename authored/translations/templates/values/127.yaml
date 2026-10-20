@@ -1465,35 +1465,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:e58a4f3cf6f7f2f1f5f7e561791e78712fcdd9e1a34c55b54c075c3a6e5e3a68
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 選擇
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 。給予其
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 點傷害。
-      expression_targets: {}
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:b1761e4b1b9256249ccf4f1a4f2a04ecbabd0d30303437b5c590eb8a17c15ecb
       lang: zh-Hant
       target:
@@ -5067,37 +5038,6 @@ records:
             text: 張卡片放置到
           - kind: LeafRef
             slot: leaf_7
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:0786e3f6dd5d4055a09a7f2077558c29492841266530f460b6b203f41942266c
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 這張卡片離開戰場時，抽
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 張卡片。捨棄自己的
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張手牌。{
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: '}{消費'
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: '}：將這張卡片放置到'
-          - kind: LeafRef
-            slot: leaf_4
           - kind: Literal
             text: 。
       expression_targets: {}

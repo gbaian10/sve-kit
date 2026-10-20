@@ -114,23 +114,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:8e36955153b71954593ca63eb82c92bd6f3acc690dd81bd975386b16c3d4bde4
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 的
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 到來時，這張卡片消失。
-      expression_targets: {}
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:caefe988617a50e7ded3581ebcceadebdf51b4fb3d634cb9a2d12ae6e8b3b19d
       lang: zh-Hant
       target:

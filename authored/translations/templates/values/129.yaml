@@ -3530,31 +3530,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:bc29db496ac0a7e27668efe613231044a24635af01a5bbd0bdb72320c63976d5
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 使用這張卡片時，若
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 上有『
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 』，則消費-
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:fdd6369404cb3324be81326aa70b3e646d90b647972898d1f7c825523d6c9a83
       lang: zh-Hant
       target:
