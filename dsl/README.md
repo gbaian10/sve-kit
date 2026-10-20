@@ -38,11 +38,11 @@ exclusive variants and roles are listed in the
 [reference shape matrix](../docs/dsl/author-reference-shapes-1.0.md).
 Its root rejects standalone documents; select a named `$defs` entry.
 A reference atom is not a complete action-position type: positions such as
-`move.ref` also accept selectors, whose schema is not implemented here.
+`move.ref` also accept selectors; complete action-position schemas are not implemented here.
 `first`/`second`/`rest` views still need their joint selector/target definitions.
 The leader union shares `A.single-leader`, `A.multiple-leaders` and `A.leader-of`
 without duplicate branches. The [selection shape matrix](../docs/dsl/author-selection-shapes-1.0.md)
-defines the implemented Target role declarations and distinguishes the quantity
+defines Target role declarations and the named `RecipientSel` sum, and distinguishes quantity
 rules for each position; those quantity positions have no complete schemas yet.
 Event object references currently admit
 only `holder`; other typed event projections are outside this subset.
@@ -58,11 +58,16 @@ units, available material projections and typed success predicates require lower
 Only the registered plus/minus arithmetic operand positions accept parameters. Nested
 arithmetic must still be checked against the full source operand path.
 The [object query matrix](../docs/dsl/author-object-query-shapes-1.0.md) defines
-zone and binding/snapshot object sources, `except`, `where`/`as`, and a closed
+zone and binding/snapshot object sources, object `any_of` unions, `except`, `where`/`as`, and a closed
 attribute subset. `count` uses separate counted-owner/zone queries and a deduplicated
 count union. These queries have their own leaf parameter positions; role checks,
 scope, identity and operation authority still require lowering. Object selections
-exclude leader recipients. Full Sel, event/history narrowing and capture placement
+exclude leader recipients. `RecipientSel` adds the existing leader atoms, strict
+`leader_or` and unions containing at least one leader limb. The array-level
+`contains` constraint separates those unions from object-only unions. Unions
+deduplicate membership without creating object order; equivalent author spellings
+do not imply identical body hashes. Consumer role and batch semantics still require
+lowering. Full Sel, event/history narrowing and capture placement
 remain outside this fragment. Neither numeric union is an expanded profile.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
 `format: 1, kind: effects_index` envelope and record syntax. Both use JSON Schema
@@ -84,6 +89,9 @@ definition individually. Numeric acceptance tests check signed bounds, arity,
 exclusive operators, parameter placement and wire-key round trips.
 Receipt shapes in `contracts/author_receipts.py` have matching drift and acceptance
 tests. Material fields remain absent when omitted and reject explicit nulls.
+Object and recipient shapes in `contracts/author_selectors.py` and
+`contracts/author_recipients.py` share recursive drift and acceptance checks,
+including negative mutations of union membership and `contains`.
 The drift checker rejects unsupported constraints beside `$ref` rather than
 silently ignoring them. Index format literals reject booleans and floating points
 in the Python contract as well as at the public reader boundary.
