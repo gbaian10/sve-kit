@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import ConfigDict, Field
 
+from sve_carddb.contracts.author_counts import ExprCount
 from sve_carddb.contracts.author_leaves import Int, ParamRef
 from sve_carddb.contracts.author_receipts import CondDid, ExprCountOf
 from sve_carddb.contracts.author_references import BindingName, PlayerRef, Ref
@@ -111,6 +112,7 @@ type NumericExpr = (
     | ExprTurnNumber
     | ExprZoneFree
     | ExprCountOf
+    | ExprCount
 )
 
 

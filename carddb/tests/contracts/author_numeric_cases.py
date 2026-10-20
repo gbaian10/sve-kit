@@ -6,12 +6,14 @@ from pydantic import ConfigDict, TypeAdapter
 
 from sve_carddb.contracts import author_expressions as author
 from sve_carddb.contracts import author_receipts as receipts
+from sve_carddb.contracts.author_counts import ExprCount
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
 CONFIG = ConfigDict(regex_engine="python-re")
 NUMERIC: dict[str, TypeAdapter[object]] = {
+    "A.expr.count": TypeAdapter(ExprCount),
     "A.expr.plus": TypeAdapter(author.ExprPlus),
     "A.expr.minus": TypeAdapter(author.ExprMinus),
     "A.expr.times": TypeAdapter(author.ExprTimes),
@@ -41,6 +43,7 @@ NUMERIC: dict[str, TypeAdapter[object]] = {
     "A.cond.numeric-core": TypeAdapter(author.NumericCondition, config=CONFIG),
 }
 NUMERIC_NAMES = {
+    "A.expr.count": "ExprCount",
     "A.expr.plus": "ExprPlus",
     "A.expr.minus": "ExprMinus",
     "A.expr.times": "ExprTimes",
@@ -78,6 +81,7 @@ E = "A.expr.numeric-core"
 C = "A.cond.numeric-core"
 CMP: dict[str, JsonValue] = {"cmp": {"left": -1, "op": "lt", "right": 0}}
 EXPRESSIONS: list[tuple[str, dict[str, JsonValue]]] = [
+    ("A.expr.count", {"count": {"who": "each", "zone": "field"}}),
     ("A.expr.plus", {"plus": [-2, 3]}),
     ("A.expr.plus", {"plus": [{"param": "offset"}, "X"]}),
     ("A.expr.plus", {"plus": ["X", {"param": "offset"}]}),
