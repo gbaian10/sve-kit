@@ -32,7 +32,12 @@ if TYPE_CHECKING:
 
 
 def write_frame(
-    db: Database, record: FrameRecord, canonical_source: str, authored_source_id: str
+    db: Database,
+    record: FrameRecord,
+    canonical_source: str,
+    authored_source_id: str,
+    *,
+    authored_record_key: str | None = None,
 ) -> None:
     """Content-addressed source semantics are checked before relational projection."""
     frame = record.data
@@ -44,7 +49,7 @@ def write_frame(
         "canonical_source": canonical_source,
         "interface_key": frame.projection.interface_key(frame.id),
         "authored_source_id": authored_source_id,
-        "record_key": record.record_key,
+        "record_key": authored_record_key or record.record_key,
         "origin": record.origin,
         "low_confidence": record.low_confidence,
     }
@@ -97,6 +102,7 @@ def write_target(
     *,
     frame: Frame,
     forms: Mapping[tuple[str, str], FormDefinition],
+    authored_record_key: str | None = None,
 ) -> None:
     """Validate targets against the frame and forms already checked on their writes."""
     if frame.id != record.data.template_id:
@@ -128,7 +134,7 @@ def write_target(
                 }
             ),
             "authored_source_id": authored_source_id,
-            "record_key": record.record_key,
+            "record_key": authored_record_key or record.record_key,
             "origin": record.origin,
             "low_confidence": record.low_confidence,
         },

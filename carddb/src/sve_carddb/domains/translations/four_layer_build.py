@@ -25,6 +25,7 @@ from sve_carddb.domains.translations.four_layer_authored import (
     TargetVariantRecord,
     shard,
 )
+from sve_carddb.domains.translations.four_layer_corrections import Inherited, inherit
 from sve_carddb.domains.translations.four_layer_fields import render_field
 from sve_carddb.domains.translations.four_layer_labels import labels
 from sve_carddb.domains.translations.four_layer_matching import Frames
@@ -322,10 +323,11 @@ def _compile(
 
 
 def _populate(
-    db: Database, inputs: Inputs, plan: _Plan, settings: Settings
+    db: Database, inherited: Inherited, plan: _Plan, settings: Settings
 ) -> tuple[
     dict[tuple[str, str], Form], dict[tuple[str, str], SelectedTarget], dict[str, str]
 ]:
+    inputs = inherited.inputs
     definitions = {r.data.id: r for r in inputs.records if isinstance(r, FrameRecord)}
     insert_raw_sources(db, (use.source for use in settings.sources.uses))
     audit = _authored(db, inputs, settings.authored_revision)
@@ -336,7 +338,12 @@ def _populate(
             db,
             definition,
             plan.canonical_sources[identifier],
-            audit[definition.record_key],
+            audit[
+                inherited.record_origins.get(
+                    definition.record_key, definition.record_key
+                )
+            ],
+            authored_record_key=inherited.record_origins.get(definition.record_key),
         )
     forms: dict[tuple[str, str], Form] = {}
     selected: dict[tuple[str, str], SelectedTarget] = {}
@@ -354,9 +361,12 @@ def _populate(
             write_target(
                 db,
                 record,
-                audit[record.record_key],
+                audit[
+                    inherited.record_origins.get(record.record_key, record.record_key)
+                ],
                 frame=definitions[record.data.template_id].data,
                 forms=form_definitions,
+                authored_record_key=inherited.record_origins.get(record.record_key),
             )
             if isinstance(record, TargetRecord):
                 selected[record.data.template_id, record.data.lang] = SelectedTarget(
@@ -372,13 +382,23 @@ def apply(
     db: Database, inputs: Inputs, snapshot: Snapshot, settings: Settings
 ) -> Report:
     """Source classification and authored matching finish before targets become active."""
-    frames = Frames(r.data for r in inputs.records if isinstance(r, FrameRecord))
     classifier = prepare_classifier(
         db, snapshot, settings.sources, settings.vocabulary, settings.rules
     )
-    controls = Controls(inputs, settings.reference_names)
-    plan = _compile(db, frames, classifier, settings, controls)
-    forms, selected, audit = _populate(db, inputs, plan, settings)
+    inherited = inherit(db, inputs, classifier, settings.sources, settings.batch_id)
+    controls = Controls(
+        inherited.inputs,
+        settings.reference_names,
+        frame_origins=inherited.frame_origins,
+    )
+    plan = _compile(
+        db,
+        Frames(r.data for r in inherited.inputs.records if isinstance(r, FrameRecord)),
+        classifier,
+        settings,
+        controls,
+    )
+    forms, selected, audit = _populate(db, inherited, plan, settings)
     renderer = Renderer(
         labels(db, settings.lang, settings.reference_names),
         {},
@@ -429,11 +449,17 @@ def apply(
         plan.pending,
         tuple(
             sorted(
-                {r.data.id for r in inputs.records if isinstance(r, FrameRecord)}
+                {
+                    r.data.id
+                    for r in inherited.inputs.records
+                    if isinstance(r, FrameRecord)
+                }
                 - plan.canonical_sources.keys()
             )
         ),
         tuple(value for _, value in sorted(plan.details.items())),
-        apply_english(db, inputs, settings.sources, audit, settings.reference_names),
+        apply_english(
+            db, inherited.inputs, settings.sources, audit, settings.reference_names
+        ),
         plan.fields,
     )

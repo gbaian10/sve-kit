@@ -100,6 +100,15 @@ projection_kind=pending 時 semantic_variant 也必為 pending；分類原因列
 未知角色可以用保守精確 frame 翻譯，但 pending scope 限本 occurrence，不跨來源湊巨集數量。
 新來源能確認變體後重鍵；不以顯示譯文相同推論分類。
 
+此承接只限 JP `source_correction`：來源更正 revision 的 ID 含 `correction_keys`，
+更正計畫改動即會重鍵，且可能恢復較早版本的原文；JP 是四層效果翻譯的來源語言。
+一般 wording／errata 版本及 EN 官方原文不因文字相同而擴大 pending scope 的適用域。
+這類 revision 可承接同卡面、同地區較早版本的譯文：先驗完整欄位原文、
+卡片資料與分類結果相同，再把 pending scope 改為更正版本自身的 occurrence 並重算 frame ID。
+依 revision 編號由近到遠選第一個可完整驗證的來源版本；來源綁定仍各自核對凍結來源與更正證據，
+不共用舊 scope。預設與具名譯文、人工匹配、選用及停用規則沿用原上下文；
+衍生 frame 與譯文保留原 authored 檔案及 record_key 的來源紀錄，不改 current 選擇。
+
 建置才持有 `canonical_source:Text`，由完整 trace 重建，不抄官方字串進 authored。
 ID 使用 build-db §14 的 canonical-json-v1，payload 恰為：
 

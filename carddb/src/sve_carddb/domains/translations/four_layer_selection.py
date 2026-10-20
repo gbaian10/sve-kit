@@ -42,12 +42,20 @@ class Selection:
 
 class Controls:
     def __init__(
-        self, inputs: Inputs, reference_names: Mapping[str, ReferenceName] | None = None
+        self,
+        inputs: Inputs,
+        reference_names: Mapping[str, ReferenceName] | None = None,
+        *,
+        frame_origins: Mapping[str, str] | None = None,
     ) -> None:
+        self.frame_origins = frame_origins or {}
         self.official_card_names = frozenset(reference_names or {})
         self.frames = {
             r.data.id: r.data for r in inputs.records if isinstance(r, FrameRecord)
         }
+        self.frame_ids = {identifier: [identifier] for identifier in self.frames}
+        for derived, original in self.frame_origins.items():
+            self.frame_ids[original].append(derived)
         self.matches = {
             (r.data.context_key.source_unit_id, r.data.context_key.variant): r.data
             for r in inputs.records
@@ -100,8 +108,9 @@ class Controls:
             if manual.matches is None
             else Frames(
                 {
-                    self.frames[m.frame_id].id: self.frames[m.frame_id]
+                    identifier: self.frames[identifier]
                     for m in manual.matches
+                    for identifier in self.frame_ids[m.frame_id]
                 }.values()
             )
         )
@@ -121,7 +130,7 @@ class Controls:
                 authored.source_span,
                 authored.values,
             ) != (
-                matched.frame.id,
+                self.frame_origins.get(matched.frame.id, matched.frame.id),
                 matched.binding.source_span,
                 matched.binding.values,
             ):
@@ -213,11 +222,16 @@ class Controls:
             if isinstance(v, (CardNameReference, GlossaryReference))
         }
         for pin in override.templates:
-            if pin.template_id not in frames:
+            template_candidates = {
+                identifier
+                for identifier in frames
+                if self.frame_origins.get(identifier, identifier) == pin.template_id
+            }
+            if len(template_candidates) != 1:
                 raise ValueError(
                     f"Pinned template is outside the exact source context: frame_id={pin.template_id}, source_unit_id={field.source.descriptor.source_unit_id}"
                 )
-            targets[pin.template_id, lang] = self.targets[
+            targets[template_candidates.pop(), lang] = self.targets[
                 pin.template_id, lang, pin.variant_key
             ]
         for term_pin in override.terms:
