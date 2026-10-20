@@ -69,13 +69,14 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 
 | 上下文 | 構造／鍵 | 限制 |
 | --- | --- | --- |
-| A.define | binding → Expr | 純 Live 別名；不取代步驟、不在能力入口凍結 |
+| A.define | binding → NumericExpr | 純 Live 別名；不取代步驟、不在能力入口凍結 |
 | A.expr 算術 | plus、minus、times、half_up、per、min、max | 二元運算恰兩元素；min/max 為非空 Expr 陣列；per={of,unit}（§5、§13 GAP-A-028） |
-| A.expr 集合／物件讀值 | count、count_of、objects_of、bound、power_of、hp_of、cost_of、hand、leader_life、counter、distinct_names、distinct_orig_costs、lki_of | count_of 短形是 actual；objects_of 是明示 view 的快照，與 follow 不同；已定片段見[讀值矩陣](author-expression-shapes-1.0.md#快照與收據讀值矩陣) |
-| A.expr 程序／歷史 | dice、paid、x_paid、history_count、history_sum、resource、agg、event、turn_number | resource={who,kind}；agg={of,attr,fn}；history_sum 先窄化欄位 |
+| A.expr 集合／物件讀值 | count、count_of、bound、power_of、hp_of、cost_of、orig_cost_of、hand、leader_life、counter、distinct_names、distinct_orig_costs | count_of 短形是 actual；已定片段見[讀值矩陣](author-expression-shapes-1.0.md#快照與收據讀值矩陣) |
+| 非數值 operand | objects_of、lki_of | objects_of 是明示 view 的快照，僅用於已登錄 operand；lki_of 只進 counter.on，均不直接成為 NumericExpr |
+| A.expr 程序／歷史 | dice、x_paid、history_count、history_sum、resource、agg、event、turn_number | resource={who,kind}；agg={of,attr,fn}；history_sum 先窄化欄位 |
 | A.expr.zone_free | {who,zone} | 回 Nat；初版容量讀值為 field/ex |
-| A.cond 組合 | cmp:{left,op,right}、all、any、not | cmp.op=eq/ne/lt/le/gt/ge；左右同型 |
-| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
+| A.cond 組合 | cmp:{left,op,right}、all、any、not | 數值 cmp.op=eq/ne/lt/le/gt/ge；PlayerExpr 只 eq/ne，左右同型 |
+| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
 | Sel 玩家／區域／種類 | who、zone、kind、class、not_class、trait、traits_any、traits_all、not_trait | zone 單值或集合；traits_all 與 traits_any 不合併；kind 可 same_as（§13 GAP-A-057） |
 | Sel 名稱 | name、names、name_contains、not_same_name_as_this | name 可 {same_as:{objects_of,view}}，不是任意字串替換 |
 | Sel 數值 | cost_*、orig_cost_*、hp_le、power_max | 比較 suffix 與數量 Expr 分開 |
@@ -85,8 +86,8 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | Ref／Recipient | this、it、binding、first:binding、second:binding、rest:binding、attack_target、host、cost1；leader、leaders、role、follow、event | first/second 須有順序；by_kind 的 item 按分支窄化 |
 | ReceiptRef | binding；{event:move_receipt}；{entry_payment:additional} | 只有有移動授權的 receipt 可 follow；不存在的合法 entry_payment 不等於拼錯引用 |
 | count_of 長形 | receipt、where、view=before/after | 三鍵必填；成功材料快照篩選，不查現在卡片；receipt 材料型別另驗 |
-| did 長形 | result、where | 兩鍵必填；預設成功判準且存在匹配的成功材料；已登錄 before 視角限付款／捨牌，型別另驗 |
-| 捕捉 | at=live/play/resolution/selection/event | 只在已登錄位置；apply.capture=play 另為集合捕捉 |
+| did 長形 | result、where；view?=before/after | 前兩鍵必填；預設成功判準且存在匹配的成功材料；付款／捨牌省略為 before，其他材料須明示 view，型別另驗 |
+| 捕捉 | `{at:live/play/resolution/event,value}` 或 `{at:selection,selection:BindingName,value}`；history 條件 payload 另可 at:event | value 限 StateNumericRead；apply.capture=play 另為集合捕捉 |
 
 物件來源、差集、where／as 與計數集合的已定片段見[物件查詢矩陣](author-object-query-shapes-1.0.md)。
 計數 any_of 的區域 limb 保留 counted 角色並先去重；
@@ -153,7 +154,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | discarded | ref、from、who；by.ability_of |
 | banished | 消滅主體 |
 | destroyed | 破壞主體 |
-| damaged | ref、recipient、kind；本文 event.amount |
+| damaged | recipient、kind、during、by；本文 event.amount |
 | dealt_damage | ref、recipient、kind=attack/combat/ability；attack 與 combat 可重疊（§13 GAP-A-030）；aggregation=batch 屬 auto 層 |
 | attacked | 攻擊主體 |
 | attack_target | 攻擊目標 |
@@ -176,12 +177,12 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | dice_rolled | who；本文 event.value |
 | drive_checked | holder |
 | drive_trigger | who |
-| moved | from、to、sel、during?；from 可 {who,zone} |
+| moved | ref、from、to、sel、during?；from 可 {who,zone} |
 | drew | who、not_phase；與 played 等事件不同 |
 | equipped | equipment；本文 event.holder |
 | fused_as_material | ref、by.ability_of |
 
-共同 `by:{ability_of:Sel}` 仍須該事件支持直接來源。history／history_count／history_sum 共用 `{event,who?,zone?,from?,to?,sel?,where?,window,distinct?,exclude?}`，history 可 at_least，history_sum 必有 field。window 為 this_turn/game/since 錨；distinct=facts/subjects，exclude=this_execution。where 僅接受所選事件的 filter。history_sum 的 amount/delta/removed_stack 分別需要相應事件／方向／EarthRite 付款窄化，不能由字串欄名就授予任意 payload 存取。§13 GAP-A-029 使用 removed，§14「欄位正規化補充」使用 removed_stack；本表不把兩者默認為已登錄別名。
+共同 `by:{ability_of:EventObjectSel}` 仍須該事件支持直接來源。history／history_count／history_sum 共用 `{event,who?,zone?,from?,to?,sel?,where?,window,distinct?,exclude?}`，history 可 at_least，history_sum 必有 field。window 為 this_turn/game/{since:BindingName} 錨；distinct=facts/subjects，exclude=this_execution。where 僅接受所選事件的 filter。history_sum 的 amount/delta/removed_stack 分別需要相應事件／方向／EarthRite 付款窄化，不能由字串欄名就授予任意 payload 存取。removed_stack 是唯一正式拼法，不接受 removed 別名。完整變體、history 頂層提升與 on/history 差異見[事件與歷史形狀](author-history-shapes-1.0.md)；sum 的 distinct 只收 facts。
 
 ## 效果、取代與期限
 
@@ -284,7 +285,7 @@ instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/dest
 | GAP-A-040 | `$` → `play`；`play` → `optional_cost, optional_cost_set`；`play.optional_cost` → `banish`；`play.optional_cost.banish` → `n, sel`；`play.optional_cost.banish.sel` → `kind, who, zone` |
 | GAP-A-041 | `$` → `fanfare`；`fanfare` → `cost, do`；`fanfare.cost` → `return_to_hand`；`fanfare.cost.return_to_hand` → `any, result, sel`；`fanfare.cost.return_to_hand.sel` → `other, trait, who, zone`；`fanfare.do[]` → `damage`；`fanfare.do[].damage` → `n, to`；`fanfare.do[].damage.to` → `kind, who, zone`；`fanfare.do[].damage.n` → `times`；`fanfare.do[].damage.n.times[]` → `count_of` |
 | GAP-A-042 | `$` → `evolve`；`evolve` → `cost`；`evolve.cost` → `skip_turn`；`evolve.cost.skip_turn` → `who` |
-| GAP-A-043 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `any_of`；`auto.on.any_of[]` → `fused, played`；`auto.on.any_of[].fused` → `material, who`；`auto.on.any_of[].fused.material` → `trait`；`auto.on.any_of[].played` → `trait, who`；`auto.do[]` → `grant`；`auto.do[].grant` → `keywords, on` |
+| GAP-A-043 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `any_of`；`auto.on.any_of[]` → `fused, played`；`auto.on.any_of[].fused` → `material, who`；`auto.on.any_of[].fused.material` → `trait`；`auto.on.any_of[].played` → `sel, who`；`auto.on.any_of[].played.sel` → `trait`；`auto.do[]` → `grant`；`auto.do[].grant` → `keywords, on` |
 | GAP-A-044 | `$` → `evolve_time`；`evolve_time` → `do`；`evolve_time.do[]` → `apply, choose, move`；`evolve_time.do[].choose` → `any, bind, from, may`；`evolve_time.do[].choose.from` → `kind, who, zone`；`evolve_time.do[].move` → `entry_effects, ref, result, to`；`evolve_time.do[].move.entry_effects[]` → `cannot`；`evolve_time.do[].move.entry_effects[].cannot` → `ability, what`；`evolve_time.do[].move.entry_effects[].cannot.ability` → `keyword`；`evolve_time.do[].apply` → `effect, on, until`；`evolve_time.do[].apply.on` → `follow`；`evolve_time.do[].apply.effect` → `cannot`；`evolve_time.do[].apply.effect.cannot` → `target, what`；`evolve_time.do[].apply.effect.cannot.target` → `kind, leader_or, who` |
 | GAP-A-045 | `$` → `activate`；`activate` → `cost, do, targets`；`activate.cost` → `lesson`；`activate.targets[]` → `bind, from, n`；`activate.targets[].from` → `orig_cost_le, other, who, zone`；`activate.do[]` → `apply, move`；`activate.do[].move` → `ref, to`；`activate.do[].apply` → `effect, on, until`；`activate.do[].apply.effect` → `cannot`；`activate.do[].apply.effect.cannot` → `ability, what`；`activate.do[].apply.effect.cannot.ability` → `kind` |
 | GAP-A-046 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `discarded`；`auto.on.discarded` → `by, from, ref, who`；`auto.on.discarded.by` → `ability_of`；`auto.on.discarded.by.ability_of` → `trait, who`；`auto.do[]` → `draw`；`auto.do[].draw` → `n` |
@@ -302,7 +303,7 @@ instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/dest
 | GAP-A-058 | `$` → `auto`；`auto` → `do, on, targets`；`auto.on` → `equipped`；`auto.on.equipped` → `equipment`；`auto.targets[]` → `bind, from, n`；`auto.targets[].from` → `kind, who, zone`；`auto.do[]` → `act, buff`；`auto.do[].buff` → `hp, on, power`；`auto.do[].buff.on` → `event` |
 | GAP-A-059 | `$` → `static`；`static` → `effects, zone`；`static.effects[]` → `keywords`；`static.effects[].keywords` → `list, on`；`static.effects[].keywords.on` → `kind, token, trait, who, zone` |
 | GAP-A-060 | `$` → `lastword`；`lastword` → `do`；`lastword.do[]` → `pay`；`lastword.do[].pay` → `cost, do`；`lastword.do[].pay.cost` → `banish`；`lastword.do[].pay.cost.banish` → `n, sel`；`lastword.do[].pay.cost.banish.sel` → `name, who, zone`；`lastword.do[].pay.do[]` → `evolve, if, move`；`lastword.do[].pay.do[].move` → `acted, ref, result, to`；`lastword.do[].pay.do[].move.ref` → `follow`；`lastword.do[].pay.do[].move.ref.follow` → `event`；`lastword.do[].pay.do[].evolve` → `ref, result`；`lastword.do[].pay.do[].evolve.ref` → `follow`；`lastword.do[].pay.do[].if` → `cond, then`；`lastword.do[].pay.do[].if.cond` → `not`；`lastword.do[].pay.do[].if.cond.not` → `did`；`lastword.do[].pay.do[].if.then[]` → `banish`；`lastword.do[].pay.do[].if.then[].banish` → `ref`；`lastword.do[].pay.do[].if.then[].banish.ref` → `follow` |
-| GAP-A-061 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `damaged`；`auto.on.damaged` → `ref`；`auto.do[]` → `if`；`auto.do[].if` → `cond, then`；`auto.do[].if.cond` → `cmp`；`auto.do[].if.cond.cmp` → `left, op, right`；`auto.do[].if.cond.cmp.left` → `event`；`auto.do[].if.then[]` → `pp_max`；`auto.do[].if.then[].pp_max` → `delta, who` |
+| GAP-A-061 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `damaged`；`auto.on.damaged` → `recipient`；`auto.do[]` → `if`；`auto.do[].if` → `cond, then`；`auto.do[].if.cond` → `cmp`；`auto.do[].if.cond.cmp` → `left, op, right`；`auto.do[].if.cond.cmp.left` → `event`；`auto.do[].if.then[]` → `pp_max`；`auto.do[].if.then[].pp_max` → `delta, who` |
 | GAP-A-062 | `$` → `spell`；`spell` → `do, targets`；`spell.targets[]` → `bind, from, n`；`spell.targets[].from` → `kind, who, zone`；`spell.do[]` → `apply`；`spell.do[].apply` → `effect, on, until`；`spell.do[].apply.effect` → `cannot`；`spell.do[].apply.effect.cannot` → `what` |
 | GAP-A-063 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `phase`；`auto.on.phase` → `which, whose`；`auto.do[]` → `choice`；`auto.do[].choice` → `n, options, who`；`auto.do[].choice.options[][]` → `player_effect`；`auto.do[].choice.options[][].player_effect` → `effect, until, who`；`auto.do[].choice.options[][].player_effect.effect` → `cannot`；`auto.do[].choice.options[][].player_effect.effect.cannot` → `card, during, what`；`auto.do[].choice.options[][].player_effect.effect.cannot.during` → `cause, phase`；`auto.do[].choice.options[][].player_effect.until` → `during_next_phase`；`auto.do[].choice.options[][].player_effect.until.during_next_phase` → `phase, who`；`auto.do[].choice.options[][].player_effect.effect.cannot.card` → `kind` |
 

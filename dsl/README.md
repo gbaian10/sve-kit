@@ -58,12 +58,12 @@ Event object references currently admit
 only `holder`; other typed event projections are outside this subset.
 The [numeric shape matrix](../docs/dsl/author-expression-shapes-1.0.md) covers
 `A.expr.numeric`, `A.cond` and their variants: signed arithmetic,
-object/player and aggregate numeric reads, nonhistory predicates, and `cmp`/`all`/`any`/`not`. Every variant's operand
+object/player and aggregate numeric reads, predicates, and `cmp`/`all`/`any`/`not`. Every variant's operand
 domain is also partial; these definitions are not complete Expr/Cond types.
 The same recursive unions include `count_of` and `did`. Separate `objects_of`
 snapshots require an explicit `before`/`after` view; `same_as` reads those snapshots.
-Material predicates admit a nonempty combination of `name`, `zone` and
-`orig_cost_eq` constants, without selector parameter permissions. Receipt types,
+Material predicates admit nonempty `name`, `zone`, `kind`, `trait`, `not_class`,
+`orig_cost_eq` and `orig_cost_ge` fields, with Quantity comparisons and no direct selector parameter permissions. Receipt types,
 units, available material projections and typed success predicates require lowering.
 Only the registered plus/minus arithmetic operand positions accept parameters. Nested
 arithmetic must still be checked against the full source operand path.
@@ -79,11 +79,12 @@ exclude leader recipients. `RecipientSel` adds the existing leader atoms, strict
 `contains` constraint separates those unions from object-only unions. Unions
 deduplicate membership without creating object order; equivalent author spellings
 do not imply identical body hashes. Consumer role and batch semantics still require
-lowering. Full Sel, event/history narrowing and capture placement
-remain outside this fragment. Unimplemented constructs include history/history_count/history_sum,
-event, lki_of, at, chosen, paid, x_paid, dice, nonnumeric cmp, material filter extensions
-and agg.hp. Snapshot count/exists do not establish coverage of pending material examples or
-hash equivalence with count_of/did. This recursive graph is not an expanded profile;
+lowering. The [event and history matrix](../docs/dsl/author-history-shapes-1.0.md)
+registers event/history narrowing, history_count/history_sum, event numeric reads,
+LKI operands, capture wrappers, chosen, paid, x_paid, dice, PlayerExpr equality,
+material filter extensions and agg.hp. Full Sel, Cost/Target and author entry
+contracts remain incomplete; enclosing-context and capability checks require C1/D0.
+Snapshot count/exists do not establish hash equivalence with count_of/did. This recursive graph is not an expanded profile;
 Rust decoding and execution have not been validated by this fragment.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
 `format: 1, kind: effects_index` envelope and record syntax. Both use JSON Schema
@@ -103,10 +104,10 @@ maps, invalid names and booleans masquerading as the integer literal 1.
 Numeric drift checks preserve named reference targets and compare every recursive
 definition individually. Numeric acceptance tests check signed bounds, arity,
 exclusive operators, parameter placement and wire-key round trips.
-Receipt shapes in `contracts/author_receipts.py` have matching drift and acceptance
-tests. Material fields remain absent when omitted and reject explicit nulls.
-Object and recipient shapes in `contracts/author_queries.py` and
-`contracts/author_recipients.py` share recursive drift and acceptance checks,
+`contracts/author_receipts.py` retains the nonrecursive snapshot and same-as leaves.
+Material filters, count_of, did, object and recipient shapes share the recursive
+graph in `contracts/author_queries.py`. Omitted material fields remain absent and
+explicit nulls are rejected. Drift and acceptance checks cover that graph,
 including negative mutations of union membership and `contains`.
 The drift checker rejects unsupported constraints beside `$ref` rather than
 silently ignoring them. Index format literals reject booleans and floating points

@@ -6,8 +6,7 @@ from pydantic import AfterValidator, ConfigDict, Field, with_config
 
 from sve_carddb.contracts.author_leaves import ParamRef, TrueFlag, Zone  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
 from sve_carddb.contracts.author_quantities import SelectionQuantity  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
-from sve_carddb.contracts.author_queries import ObjectSel, Quantity
-from sve_carddb.contracts.author_recipients import RecipientSel
+from sve_carddb.contracts.author_queries import ObjectSel, Quantity, RecipientSel
 from sve_carddb.contracts.author_references import BindingName, PlayerRef
 from sve_carddb.contracts.author_selections import TargetRoles  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
 

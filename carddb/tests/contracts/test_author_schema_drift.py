@@ -13,9 +13,10 @@ from sve_carddb.contracts.four_layer import Code
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
+from .author_history_cases import HISTORY, HISTORY_NAMES
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
 from .author_parent_cases import PARENT_NAMES, PARENTS
-from .author_receipt_cases import RECEIPTS
+from .author_receipt_cases import RECEIPT_NAMES, RECEIPTS
 from .author_recipient_cases import RECIPIENT_NAMES, RECIPIENTS
 from .author_selection_cases import SELECTIONS
 from .author_selector_cases import COUNTS, SELECTOR_NAMES, SELECTORS
@@ -151,8 +152,13 @@ def _shape(
 def _assert_definition(
     schema: dict[str, JsonValue], name: str, adapter: TypeAdapter[object]
 ) -> None:
-    if name in COUNTS:
-        _assert_selector_definition(schema, name)
+    if (
+        name in COUNTS
+        or name in HISTORY
+        or name
+        in {"A.material-filter", "A.expr.count-of-filtered", "A.cond.did-filtered"}
+    ):
+        assert_selector_definition(schema, name)
         return
     python = adapter.json_schema()
     assert _shape(object_value(schema["$defs"])[name], schema) == _shape(python, python)
@@ -171,6 +177,7 @@ def test_every_implemented_definition_has_a_python_type() -> None:
             | SELECTORS
             | RECIPIENTS
             | PARENTS
+            | HISTORY
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -201,14 +208,18 @@ def test_count_query_type_drift(name: str) -> None:
     _assert_definition(NODES, name, COUNTS[name])
 
 
-def _assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
-    python = (SELECTORS | RECIPIENTS | PARENTS | COUNTS | NUMERIC)[name].json_schema()
+def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
+    python = (SELECTORS | RECIPIENTS | PARENTS | COUNTS | NUMERIC | RECEIPTS | HISTORY)[
+        name
+    ].json_schema()
     names = (
         SELECTOR_NAMES
         | RECIPIENT_NAMES
         | NUMERIC_NAMES
         | NUMERIC_DEPENDENCIES
         | PARENT_NAMES
+        | HISTORY_NAMES
+        | RECEIPT_NAMES
     )
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
@@ -223,9 +234,9 @@ def _assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None
     ) == _shape(body, python, python_names)
 
 
-@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS | PARENTS)
+@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS | PARENTS | HISTORY)
 def test_selector_type_drift(name: str) -> None:
-    _assert_selector_definition(NODES, name)
+    assert_selector_definition(NODES, name)
 
 
 @pytest.mark.parametrize(
@@ -261,7 +272,7 @@ def test_parent_drift_detects_variant_changes(name: str, mutation: str) -> None:
         key = next(key for key in ("n", "upto", "any") if key in props)
         props["wrong_key"] = props.pop(key)
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -289,7 +300,7 @@ def test_parent_drift_detects_union_changes(name: str, mutation: str) -> None:
     else:
         branches[0] = {"$ref": "#/$defs/Int"}
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -329,7 +340,7 @@ def test_parent_drift_detects_position_boundaries(mutation: str) -> None:
         name, key, value = changes[mutation]
         object_value(object_value(definitions[name])["properties"])[key] = value
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -348,7 +359,7 @@ def test_recipient_drift_detects_variant_changes(name: str, mutation: str) -> No
     else:
         node["additionalProperties"] = True
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -380,7 +391,7 @@ def test_recipient_drift_detects_domain_changes(mutation: str) -> None:
             {"type": "boolean"} if mutation == "true" else {"$ref": "#/$defs/Zone"}
         )
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -402,7 +413,7 @@ def test_recipient_drift_detects_sum_branch_changes(name: str, mutation: str) ->
     else:
         branches.pop()
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -432,7 +443,7 @@ def test_query_drift_detects_variant_changes(name: str, mutation: str) -> None:
         props["leader"] = {"type": "string", "const": "self"}
     if name in SELECTORS:
         with pytest.raises(AssertionError):
-            _assert_selector_definition(changed, name)
+            assert_selector_definition(changed, name)
     else:
         with pytest.raises(AssertionError):
             _assert_definition(changed, name, COUNTS[name])
@@ -452,7 +463,7 @@ def test_selector_drift_detects_dependencies(name: str, mutation: str) -> None:
     else:
         object_value(node["properties"])["except"] = {"$ref": "#/$defs/A.ref"}
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize("field", ["kind", "class", "trait", "traits_all", "name"])
@@ -656,7 +667,7 @@ def _assert_numeric_names(schema: dict[str, JsonValue], names: dict[str, str]) -
 
 
 def _assert_numeric_definition(schema: dict[str, JsonValue], name: str) -> None:
-    _assert_selector_definition(schema, name)
+    assert_selector_definition(schema, name)
 
 
 def test_numeric_name_correspondence_is_bijective() -> None:
@@ -779,7 +790,7 @@ def test_drift_catches_counted_rights_in_except(name: str) -> None:
     )
     props["except"] = {"$ref": "#/$defs/A.expr.count-source"}
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize("field", ["who", "zone"])
@@ -791,7 +802,7 @@ def test_drift_catches_collection_parameter_rights(field: str) -> None:
     )
     props[field] = {"anyOf": [props[field], {"$ref": "#/$defs/A.param"}]}
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -852,7 +863,7 @@ def test_new_variant_drift_mutations(name: str, mutation: str) -> None:
         props = object_value(node["properties"])
         props["wrong_key"] = props.pop(next(iter(props)))
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -879,7 +890,7 @@ def test_query_union_drift_detects_changes(name: str, mutation: str) -> None:
     else:
         branches[0] = {"$ref": "#/$defs/A.ref"}
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(
@@ -889,7 +900,7 @@ def test_query_union_drift_detects_changes(name: str, mutation: str) -> None:
         "count_power_max",
         "condition_false",
         "combo_zero",
-        "agg_hp",
+        "agg_unknown",
         "threshold_param",
     ],
 )
@@ -909,10 +920,10 @@ def test_query_drift_detects_value_domain_changes(mutation: str) -> None:
         ),
         "condition_false": ("A.cond.awakened", "awakened", {"type": "boolean"}),
         "combo_zero": ("A.cond.combo", "combo", {"$ref": "#/$defs/Nat"}),
-        "agg_hp": (
+        "agg_unknown": (
             "A.expr.agg-payload",
             "attr",
-            {"enum": ["cost", "orig_cost", "power", "hp"], "type": "string"},
+            {"enum": ["cost", "orig_cost", "power", "hp", "unknown"], "type": "string"},
         ),
         "threshold_param": (
             "A.cond.player-eq-threshold",
@@ -923,7 +934,30 @@ def test_query_drift_detects_value_domain_changes(mutation: str) -> None:
     name, field, value = changes[mutation]
     object_value(object_value(definitions[name])["properties"])[field] = value
     with pytest.raises(AssertionError):
-        _assert_selector_definition(changed, name)
+        assert_selector_definition(changed, name)
+
+
+NAMED_HISTORY_ROLES = [
+    (name, field, leaf, array)
+    for name in ("A.event-subject-filter", "A.event-object-sel", "A.material-filter")
+    for field, leaf, array in (
+        ("name", "CardName", False),
+        ("trait", "Concept", False),
+        ("not_class", "Concept", False),
+        *(
+            (
+                ("class", "Concept", False),
+                ("not_trait", "Concept", False),
+                ("keyword", "Concept", False),
+                ("traits_any", "Concept", True),
+                ("traits_all", "Concept", True),
+                ("names", "CardName", True),
+            )
+            if name != "A.material-filter"
+            else ()
+        ),
+    )
+]
 
 
 def _assert_shared_definitions_are_referenced(schema: dict[str, JsonValue]) -> None:
@@ -931,6 +965,11 @@ def _assert_shared_definitions_are_referenced(schema: dict[str, JsonValue]) -> N
     protected = (
         "Zone",
         "Code",
+        "Nat",
+        "Phase",
+        "A.receipt-ref",
+        "A.entry-payment-ref",
+        "A.leader-recipient",
         "BindingName",
         "PlayerSetName",
         "A.same-as",
@@ -949,6 +988,12 @@ def _assert_shared_definitions_are_referenced(schema: dict[str, JsonValue]) -> N
 
     for owner, node in definitions.items():
         visit(node, owner)
+    for name, field, leaf, array in NAMED_HISTORY_ROLES:
+        properties = object_value(object_value(definitions[name])["properties"])
+        node = object_value(properties[field])
+        if array:
+            node = object_value(node["items"])
+        assert node == {"$ref": "#/$defs/" + leaf}
     construction = object_value(definitions["A.cond.construction"])
     assert object_value(construction["properties"])["construction"] == {
         "$ref": "#/$defs/Title"
@@ -969,6 +1014,9 @@ def test_shared_author_atoms_have_one_definition() -> None:
         ("A.same-as", "A.sel.in-objects", "name"),
         ("A.expr.objects-of", "A.collection.in", "in"),
         ("Title", "A.cond.construction", "construction"),
+        ("Nat", "A.event.counter-reached-payload", "value"),
+        ("Phase", "A.history.phase-where", "which"),
+        ("A.receipt-ref", "A.cond.did-filtered", "result"),
     ],
 )
 def test_inlining_named_atoms_fails_structural_check(
@@ -978,5 +1026,43 @@ def test_inlining_named_atoms_fails_structural_check(
     definitions = object_value(changed["$defs"])
     properties = object_value(object_value(definitions[name])["properties"])
     properties[field] = deepcopy(definitions[leaf])
+    with pytest.raises(AssertionError):
+        _assert_shared_definitions_are_referenced(changed)
+
+
+@pytest.mark.parametrize(("name", "field", "leaf", "array"), NAMED_HISTORY_ROLES)
+def test_inlining_history_role_names_fails_structural_check(
+    name: str, field: str, leaf: str, array: bool
+) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    properties = object_value(object_value(definitions[name])["properties"])
+    if array:
+        object_value(properties[field])["items"] = deepcopy(definitions[leaf])
+    else:
+        properties[field] = deepcopy(definitions[leaf])
+    with pytest.raises(AssertionError):
+        _assert_shared_definitions_are_referenced(changed)
+
+
+@pytest.mark.parametrize(
+    ("name", "field", "leaf"),
+    [
+        ("A.event-recipient-atom", None, "A.leader-recipient"),
+        ("A.paid-receipt", "receipt", "A.entry-payment-ref"),
+    ],
+)
+def test_inlining_named_union_branch_fails_structural_check(
+    name: str, field: str | None, leaf: str
+) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    node = object_value(definitions[name])
+    if field is not None:
+        node = object_value(object_value(node["properties"])[field])
+    variants = node["anyOf"]
+    assert isinstance(variants, list)
+    assert variants[1] == {"$ref": "#/$defs/" + leaf}
+    variants[1] = deepcopy(definitions[leaf])
     with pytest.raises(AssertionError):
         _assert_shared_definitions_are_referenced(changed)
