@@ -210,7 +210,15 @@ const zhTW = {
     visibleColumns: "顯示欄位",
     resizeColumn: "調整「{{column}}」欄寬",
     reorderColumn: "調整「{{column}}」順序（↑／↓ 移動）",
-    columns: { class: "職業", rarity: "稀有度", number: "卡號", name: "名稱", effect: "卡文" },
+    columns: {
+      class: "職業",
+      rarity: "稀有度",
+      location: "位置",
+      type: "種類",
+      number: "卡號",
+      name: "名稱",
+      effect: "卡文",
+    },
     sortBy: {
       date: "發售日",
       no: "卡號",
@@ -221,7 +229,6 @@ const zhTW = {
     },
     descending: "降冪",
     view: "檢視",
-    abilityPreview: "能力預覽・未完整",
     effectPending: "效果載入中",
     effectUnavailable: "效果無法載入",
     conditions: "目前條件",
@@ -372,8 +379,6 @@ const zhTW = {
     linkCopyFailed: "無法複製，請從網址列複製",
     set: "卡包 {{code}}",
     stats: { cost: "消費", attack: "攻擊力", defense: "生命值" },
-    cardType: "種類",
-    trait: "類型",
     separator: "・",
     backFace: "背面",
     related: {

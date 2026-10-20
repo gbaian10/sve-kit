@@ -220,6 +220,8 @@ export default {
     reorderColumn: "Reorder {{column}} (↑/↓ to move)",
     columns: {
       class: "Class",
+      location: "Deck",
+      type: "Type",
       rarity: "Rarity",
       number: "Number",
       name: "Name",
@@ -235,7 +237,6 @@ export default {
     },
     descending: "Descending",
     view: "View",
-    abilityPreview: "Ability preview, incomplete",
     effectPending: "Loading effect",
     effectUnavailable: "Effect unavailable",
     conditions: "Current conditions",
@@ -394,8 +395,6 @@ export default {
     linkCopyFailed: "Could not copy; use the address bar",
     set: "Set {{code}}",
     stats: { cost: "Cost", attack: "Attack", defense: "Defense" },
-    cardType: "Card Type",
-    trait: "Trait",
     separator: " · ",
     backFace: "Back face",
     related: {

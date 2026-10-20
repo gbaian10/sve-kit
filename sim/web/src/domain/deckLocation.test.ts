@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  deckLocationBadges,
   isLocationToken,
   leaderFrameTokens,
   orderLocationTokens,
@@ -55,4 +56,14 @@ describe("deck location tokens", () => {
       "crest",
     ])
   })
+})
+
+it("keeps overlapping positions in filter order and omits main deck, EP and SEP", () => {
+  expect(deckLocationBadges("follower", ["token", "advance", "evolve"])).toEqual([
+    "evolve",
+    "advance",
+    "token",
+  ])
+  expect(deckLocationBadges("leader", [])).toEqual(["leader"])
+  for (const type of ["follower", "ep", "sep"]) expect(deckLocationBadges(type, [])).toEqual([])
 })

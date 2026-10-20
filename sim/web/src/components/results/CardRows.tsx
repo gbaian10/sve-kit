@@ -23,7 +23,9 @@ import {
   prefsStore,
   usePrefs,
 } from "../../settings"
+import { CardTypeBadge } from "../card/CardTypeBadge"
 import { CLASS_ICON } from "../card/classIcons"
+import { DeckLocationBadges } from "../card/DeckLocationBadges"
 import { InlineText } from "../card/InlineText"
 import { RarityBadges } from "../card/RarityBadges"
 import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
@@ -32,7 +34,7 @@ import { ATTACK_ICON, DEFENSE_ICON } from "../card/symbolIcons"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { ArtThumb } from "./ArtThumb"
-import { type CardGridProps, type GridCell, NameNotices } from "./CardGrid"
+import { type CardGridProps, type GridCell } from "./CardGrid"
 import { type ResultLabels, useResultLabels } from "./labels"
 import { activateCell } from "./plain-click"
 import { useColumnReorder } from "./useColumnReorder"
@@ -42,6 +44,7 @@ import { useVisible } from "./useVisible"
 export interface CardRowsProps extends CardGridProps {
   /** The 4:3 illustration crop of a cell's face, once its image metadata is known. */
   readonly artOf: (cell: GridCell) => ImageSource | undefined
+  readonly typeLabel: (code: string) => string
 }
 
 function RowLink({
@@ -192,7 +195,6 @@ const EffectPreview = memo(function EffectPreview({
       ) : (
         <PreviewStatus phase={result.phase} labels={labels} />
       )}
-      {!singleLine && <span className="text-11 text-text-3">{labels.abilityPreview}</span>}
     </span>
   )
 })
@@ -206,6 +208,7 @@ const TableRow = memo(function TableRow({
   selected,
   artOf,
   labels,
+  typeLabel,
 }: {
   readonly cell: GridCell
   readonly images: CardRowsProps["images"]
@@ -214,6 +217,7 @@ const TableRow = memo(function TableRow({
   readonly selected: boolean
   readonly artOf: CardRowsProps["artOf"]
   readonly labels: ResultLabels
+  readonly typeLabel: string
 }) {
   const ref = useRef<HTMLLIElement>(null)
   const seen = useVisible(ref)
@@ -253,12 +257,17 @@ const TableRow = memo(function TableRow({
                 </>
               )}
             </span>
-            <span className="inline-flex shrink-0 items-center gap-2 text-11 text-text-3 tabular-nums">
+            <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-11 text-text-3 tabular-nums">
               {cell.summary.cardNo}
               <RarityBadges {...cell.summary} />
+              <DeckLocationBadges locations={cell.summary.deckLocations} />
+              <CardTypeBadge
+                code={cell.summary.typeCode}
+                label={typeLabel}
+                fallback={cell.summary.typeCode !== "leader"}
+              />
             </span>
           </span>
-          <NameNotices name={cell.name} labels={labels} />
           <StatLine
             labels={labels.stats}
             size="sm"
@@ -281,7 +290,6 @@ const TableRow = memo(function TableRow({
           ) : (
             <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
               <span className="text-13 text-text-3 italic">{labels.effectPending}</span>
-              <span className="text-11 text-text-3">{labels.abilityPreview}</span>
             </span>
           )}
         </span>
@@ -290,7 +298,15 @@ const TableRow = memo(function TableRow({
   )
 })
 
-export function CardTable({ cells, images, onOpen, anchor, selected, artOf }: CardRowsProps) {
+export function CardTable({
+  cells,
+  images,
+  onOpen,
+  anchor,
+  selected,
+  artOf,
+  typeLabel,
+}: CardRowsProps) {
   const labels = useResultLabels()
   return (
     <ul data-view="table" className="flex flex-col">
@@ -304,6 +320,7 @@ export function CardTable({ cells, images, onOpen, anchor, selected, artOf }: Ca
           selected={selected === cell.key}
           artOf={artOf}
           labels={labels}
+          typeLabel={cell.summary.typeCode ? typeLabel(cell.summary.typeCode) : ""}
         />
       ))}
     </ul>
@@ -334,6 +351,7 @@ const ListRow = memo(function ListRow({
   visibility,
   columns,
   classLabel,
+  typeLabel,
 }: {
   readonly cell: GridCell
   readonly onOpen: CardRowsProps["onOpen"]
@@ -344,6 +362,7 @@ const ListRow = memo(function ListRow({
   readonly visibility: ListVisibility
   readonly columns: readonly ListColumn[]
   readonly classLabel: string
+  readonly typeLabel: string
 }) {
   const row = useRef<HTMLTableRowElement>(null)
   const link = useRef<HTMLAnchorElement>(null)
@@ -375,7 +394,6 @@ const ListRow = memo(function ListRow({
         }
       }}
     >
-      {visibility.name && <NameNotices name={cell.name} labels={labels} compact />}
       {visibility.name ? cell.name.primary.text : cell.summary.cardNo}
       {visibility.name && cell.name.secondary && (
         <>
@@ -415,6 +433,22 @@ const ListRow = memo(function ListRow({
             return (
               <td key={column} data-list-rarity="">
                 <RarityBadges {...cell.summary} />
+              </td>
+            )
+          case "location":
+            return (
+              <td key={column} data-list-location="">
+                <DeckLocationBadges locations={cell.summary.deckLocations} />
+              </td>
+            )
+          case "type":
+            return (
+              <td key={column} data-list-type="">
+                <CardTypeBadge
+                  code={cell.summary.typeCode}
+                  label={typeLabel}
+                  fallback={cell.summary.typeCode !== "leader"}
+                />
               </td>
             )
           case "name":
@@ -492,6 +526,7 @@ export function CardList({
   scrollPositionRef,
   footer,
   classLabel,
+  typeLabel,
 }: CardListProps) {
   const labels = useResultLabels()
   const scroll = useRef<HTMLDivElement>(null)
@@ -528,6 +563,8 @@ export function CardList({
   const names = {
     number: labels.t("results.columns.number"),
     rarity: labels.t("results.columns.rarity"),
+    location: labels.t("results.columns.location"),
+    type: labels.t("results.columns.type"),
     name: labels.t("results.columns.name"),
     class: labels.t("results.columns.class"),
     cost: labels.stats.cost,
@@ -539,6 +576,8 @@ export function CardList({
   const style = {
     "--class-column-min-width": `${String(LIST_MIN_WIDTHS.class)}px`,
     "--rarity-column-min-width": `${String(RARITY_COLUMN_MIN_WIDTH)}px`,
+    "--location-column-min-width": `${String(LIST_MIN_WIDTHS.location)}px`,
+    "--type-column-min-width": `${String(LIST_MIN_WIDTHS.type)}px`,
     "--rarity-badge-height": `${String(RARITY_BADGE_HEIGHT)}px`,
     ...Object.fromEntries(
       Object.entries(listWidths).map(([column, width]) => [
@@ -590,7 +629,11 @@ export function CardList({
           <tr aria-rowindex={1} data-column-order="">
             {columns.map((column) => {
               const key =
-                column === "rarity" || column === "effect" || column === "class"
+                column === "rarity" ||
+                column === "location" ||
+                column === "type" ||
+                column === "effect" ||
+                column === "class"
                   ? null
                   : sorts[column]
               const label = names[column]
@@ -680,6 +723,7 @@ export function CardList({
               visibility={listVisibility}
               columns={columns}
               classLabel={classLabel(cell.summary.classCode)}
+              typeLabel={cell.summary.typeCode ? typeLabel(cell.summary.typeCode) : ""}
             />
           ))}
           {windowed.after > 0 && (

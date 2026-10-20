@@ -1,4 +1,5 @@
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
+import { deckLocationBadges } from "../../domain/deckLocation"
 import {
   type MechanicCoverage,
   type MechanicProjection,
@@ -533,9 +534,10 @@ function build(
     const revision = front ? index.displayRevision(stringValue(front["id"]), edition) : undefined
     const type = typeof revision?.["type_code"] === "string" ? revision["type_code"] : ""
     const special = arrayValue(revision?.["special_kinds"] ?? [])
-    const token = special.includes("token")
-    const evolve = special.includes("evolve")
-    const advance = special.includes("advance")
+    const locations = deckLocationBadges(type, special)
+    const token = locations.includes("token")
+    const evolve = locations.includes("evolve")
+    const advance = locations.includes("advance")
     const cardTraits = arrayValue(revision?.["traits"] ?? []).map((value) => stringValue(value))
     cards.kinds.push((evolve ? KIND_EVOLVE : 0) | (advance ? KIND_ADVANCE : 0))
     cards.traitStart.push(traits.length)

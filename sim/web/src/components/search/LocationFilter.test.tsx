@@ -83,6 +83,11 @@ it("orders the row, keeps Token kinds and leader frames behind popovers and read
     "EP",
     "SEP",
   ])
+  for (const label of ["進化", "進階", "主戰者", "Token"]) {
+    const chip = within(row).getByRole("button", { name: label })
+    expect(chip.querySelector("img")).toHaveAttribute("alt", "")
+    expect(chip).toHaveAttribute("title", expect.stringContaining(label))
+  }
   // The older `type=` tokens arrive as locations and keep their sub-value selections.
   expect(url()).toBe("loc=leader:white,token:spell")
   const token = within(row).getByRole("button", { name: "Token" })

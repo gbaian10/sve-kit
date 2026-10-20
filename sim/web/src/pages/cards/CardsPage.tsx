@@ -477,6 +477,10 @@ export function CardsPage() {
     code === null
       ? t("search.neutral")
       : (quickBar.find((item) => item.code === code)?.label ?? code)
+  const typeLabel = (code: string) => {
+    const option = printingOptions?.type.types.find((item) => item.code === code)
+    return option ? vocabularyOptionLabel(option.name, textLang) : code
+  }
   // A set page's own set is the page, not a condition: no chip, no badge count. The chips still
   // edit the full query, so removing another chip never drops the implied set from a multi-select.
   const countedConditions = set
@@ -670,10 +674,7 @@ export function CardsPage() {
             ? (option.name.translations[textLang] ?? option.name.original.text)
             : code.toUpperCase()
         }}
-        typeLabel={(code) => {
-          const option = printingOptions?.type.types.find((item) => item.code === code)
-          return option ? (option.name.translations[textLang] ?? option.name.original.text) : code
-        }}
+        typeLabel={typeLabel}
         traitLabel={(code) => {
           const option = printingOptions?.trait.traits.find((item) => item.code === code)
           return option ? vocabularyOptionLabel(option.name, textLang) : code
@@ -903,6 +904,7 @@ export function CardsPage() {
             )}
             {view === "table" && (
               <CardTable
+                typeLabel={typeLabel}
                 cells={cells}
                 images={images}
                 onOpen={openCell}
@@ -914,6 +916,7 @@ export function CardsPage() {
             {view === "list" && (
               <CardList
                 classLabel={classLabel}
+                typeLabel={typeLabel}
                 footer={pagination}
                 sort={query.sort}
                 descending={query.order === "desc"}

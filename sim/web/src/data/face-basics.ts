@@ -57,7 +57,15 @@ export function faceBasics(
   const ownId = ownIds.size === 1 ? own[0]?.["revision_id"] : undefined
   const revision = typeof ownId === "string" ? index.revision(ownId) : undefined
   const values: Row = {}
-  for (const field of ["class_code", "type_code", "traits", "cost", "attack", "defense"]) {
+  for (const field of [
+    "class_code",
+    "type_code",
+    "special_kinds",
+    "traits",
+    "cost",
+    "attack",
+    "defense",
+  ]) {
     const first = revisions[0]?.[field]
     const common =
       first !== undefined &&

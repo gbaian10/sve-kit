@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { SearchOptions } from "../../data"
 import type { TextLang } from "../../domain/search"
 import { TYPE_ORDER } from "../../domain/typeFilter"
+import { CardTypeBadge } from "../card/CardTypeBadge"
 import { vocabularyOptionLabel } from "./facet-labels"
 import { type FacetChip, FacetChips } from "./FacetChips"
 
@@ -21,7 +22,9 @@ export function TypeFilter({
   const { t } = useTranslation()
   const items = TYPE_ORDER.flatMap((code): FacetChip[] => {
     const type = options?.types.find((item) => item.code === code)
-    return type ? [{ code, label: vocabularyOptionLabel(type.name, textLang) }] : []
+    if (!type) return []
+    const label = vocabularyOptionLabel(type.name, textLang)
+    return [{ code, label, content: <CardTypeBadge code={code} label={label} decorative /> }]
   })
   return (
     <FacetChips

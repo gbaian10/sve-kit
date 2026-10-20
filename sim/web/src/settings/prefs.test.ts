@@ -216,16 +216,29 @@ it("persists list columns and widths, rejecting settings without an identity col
   expect(readPrefs().listVisibility).toEqual(DEFAULT_PREFS.listVisibility)
 })
 
-it("cleans a saved column order and appends missing columns in default order", () => {
+it("preserves eight-column preferences while inserting new columns after rarity", () => {
+  const listOrder = ["number", "name", "rarity", "class", "cost", "attack", "defense", "effect"]
+  const listVisibility = Object.fromEntries(
+    listOrder.map((column) => [column, column !== "rarity"]),
+  )
+  localStorage.setItem(PREFS_KEY, JSON.stringify({ v: 1, listOrder, listVisibility }))
+  const prefs = readPrefs()
+  expect(prefs.listOrder).toEqual(DEFAULT_PREFS.listOrder)
+  expect(prefs.listVisibility).toEqual({ ...DEFAULT_PREFS.listVisibility, rarity: false })
+})
+
+it("cleans a saved column order and fills missing columns after default predecessors", () => {
   localStorage.setItem(
     PREFS_KEY,
     JSON.stringify({ v: 1, listOrder: ["effect", "name", "removed", "effect"] }),
   )
   expect(readPrefs().listOrder).toEqual([
+    "number",
     "effect",
     "name",
-    "number",
     "rarity",
+    "location",
+    "type",
     "class",
     "cost",
     "attack",

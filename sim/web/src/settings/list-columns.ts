@@ -4,6 +4,8 @@ export const LIST_COLUMNS = [
   "number",
   "name",
   "rarity",
+  "location",
+  "type",
   "class",
   "cost",
   "attack",
@@ -17,6 +19,8 @@ export type ListVisibility = Readonly<Record<ListColumn, boolean>>
 export const LIST_MIN_WIDTHS: Readonly<Record<ListColumn, number>> = {
   number: 84,
   rarity: RARITY_COLUMN_MIN_WIDTH,
+  location: 72,
+  type: 64,
   name: 100,
   class: 48,
   cost: 40,
@@ -28,6 +32,8 @@ export const LIST_MIN_WIDTHS: Readonly<Record<ListColumn, number>> = {
 export const DEFAULT_LIST_VISIBILITY: ListVisibility = {
   number: true,
   rarity: true,
+  location: true,
+  type: true,
   name: true,
   class: true,
   cost: true,
@@ -40,7 +46,13 @@ export function sanitizeListOrder(value: unknown): readonly ListColumn[] {
   const known = Array.isArray(value)
     ? value.filter((column): column is ListColumn => LIST_COLUMNS.includes(column as ListColumn))
     : []
-  return [...new Set([...known, ...LIST_COLUMNS])]
+  const order = [...new Set(known)]
+  LIST_COLUMNS.forEach((column, index) => {
+    if (order.includes(column)) return
+    const previous = LIST_COLUMNS[index - 1]
+    order.splice(previous === undefined ? 0 : order.indexOf(previous) + 1, 0, column)
+  })
+  return order
 }
 
 export function moveListColumn(
@@ -74,11 +86,14 @@ export function isListWidths(value: unknown): value is ListWidths {
   )
 }
 
-export function isListVisibility(value: unknown): value is ListVisibility {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) return false
-  const record = value as Record<string, unknown>
-  return (
-    LIST_COLUMNS.every((column) => typeof record[column] === "boolean") &&
-    (record["number"] === true || record["name"] === true)
-  )
+export function sanitizeListVisibility(value: unknown): ListVisibility {
+  const record =
+    typeof value === "object" && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {}
+  const visibility = { ...DEFAULT_LIST_VISIBILITY }
+  for (const column of LIST_COLUMNS) {
+    if (typeof record[column] === "boolean") visibility[column] = record[column]
+  }
+  return visibility.number || visibility.name ? visibility : DEFAULT_LIST_VISIBILITY
 }
