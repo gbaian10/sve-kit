@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Leaf, reference-atom, target-role, numeric, receipt and object-query fragment library. Object selectors exclude leader recipients; count queries retain distinct counted roles. Operands and filters have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
+  "$comment": "Leaf, reference-atom, target-role, numeric, receipt, object-query and recipient fragment library. Object selectors include object unions and exclude leaders; RecipientSel adds leaders and unions containing a leader limb. Count queries retain distinct counted roles. Operands and filters have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
   "not": {},
   "$defs": {
     "Int": {
@@ -1847,10 +1847,131 @@
     "A.sel.object-core": {
       "anyOf": [
         {
+          "$ref": "#/$defs/A.sel.object-atom"
+        },
+        {
+          "$ref": "#/$defs/A.sel.object-union"
+        }
+      ]
+    },
+    "A.sel.object-atom": {
+      "anyOf": [
+        {
           "$ref": "#/$defs/A.sel.zone-objects"
         },
         {
           "$ref": "#/$defs/A.sel.in-objects"
+        }
+      ]
+    },
+    "A.sel.object-union": {
+      "type": "object",
+      "properties": {
+        "any_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.sel.object-atom"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "any_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.sel.leader-or": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "kind": {
+          "type": "string",
+          "const": "follower"
+        },
+        "leader_or": {
+          "type": "boolean",
+          "const": true
+        },
+        "zone": {
+          "type": "string",
+          "const": "field"
+        }
+      },
+      "required": [
+        "who",
+        "kind",
+        "leader_or"
+      ],
+      "additionalProperties": false
+    },
+    "A.sel.recipient-atom": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.sel.object-atom"
+        },
+        {
+          "$ref": "#/$defs/A.leader-recipient"
+        },
+        {
+          "$ref": "#/$defs/A.sel.leader-or"
+        }
+      ]
+    },
+    "A.sel.recipient-union": {
+      "type": "object",
+      "properties": {
+        "any_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.sel.recipient-atom"
+          },
+          "minItems": 1,
+          "contains": {
+            "anyOf": [
+              {
+                "required": [
+                  "leader"
+                ]
+              },
+              {
+                "required": [
+                  "leaders"
+                ]
+              },
+              {
+                "required": [
+                  "leader_of"
+                ]
+              },
+              {
+                "required": [
+                  "leader_or"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "any_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.sel.recipient": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        {
+          "$ref": "#/$defs/A.leader-recipient"
+        },
+        {
+          "$ref": "#/$defs/A.sel.leader-or"
+        },
+        {
+          "$ref": "#/$defs/A.sel.recipient-union"
         }
       ]
     }

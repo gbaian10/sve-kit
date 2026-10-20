@@ -89,8 +89,10 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | 捕捉 | at=live/play/resolution/selection/event | 只在已登錄位置；apply.capture=play 另為集合捕捉 |
 
 物件來源、差集、where／as 與區域計數的已定片段見[物件查詢矩陣](author-object-query-shapes-1.0.md)。
-其中計數 any_of 保留 counted 角色並先去重；它不表示上表的所有 Sel filter、
-領袖／切片來源或選取位置 any_of 都已實作。
+計數 any_of 保留 counted 角色並先去重；選取 any_of 另分純物件 ObjectUnion
+與至少含一個領袖 limb 的 RecipientUnion，見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
+具名 RecipientSel 不擴大物件消費位置；等義拼法不推定相同 body hash。
+這些片段不表示上表全部 Sel filter、切片來源或完整父動作已實作。
 
 ## 動作與內層選項
 

@@ -158,7 +158,10 @@ roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣]
 區域物件、in、except、where／as 與區域計數的已定形片段見
 [物件來源與計數矩陣](author-object-query-shapes-1.0.md)。
 ObjectSel 與 CountObjects 分別保留 source 與 counted 角色；
-計數 any_of 先去重再數張數。這些片段不代表完整 Sel 或領袖接受者組合已完成。
+計數 any_of 先去重再數張數。選取位置的 ObjectUnion 只收物件，
+具名 RecipientSel 另納入領袖與至少含一個領袖 limb 的接受者聯集；
+逐型與選用規則見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
+等義聯集與集合形欄位不推定相同 body hash。這些片段不代表完整 Sel 或父動作已完成。
 
 ## 6. 玩家、引用、結果
 
