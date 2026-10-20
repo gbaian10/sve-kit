@@ -4,7 +4,9 @@
 `astra/1`. Documents use `format: 1, kind: effect_set`; keyword registries
 use `format: 1, kind: keyword_registry`. These envelopes select the existing
 prototype grammar and keep Schema `$id: urn:sve-kit:effects:astra:1`.
-A future DSL 1.0 uses a separate kind or entry, rather than effect_set format 2.
+The [author 1.0 contract](../docs/dsl/author-contract-1.0.md) specifies separate
+`author_effect_set` and `effect_body_shard` entries. Their schemas and loaders
+are not implemented yet; this directory still validates only the prototype.
 Its 73 node variants contain 47 action atoms, 10 combinators,
 14 declarations and two loading/unsupported markers.
 

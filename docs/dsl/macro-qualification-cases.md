@@ -39,7 +39,7 @@ threshold_eligible 恰為 count≥3；qualified 還須同時具備：
 2. 至少兩個不同模型的獨立 ok 審核，模型皆不同於 written_by；每筆都對候選本體版本／適用域有效且 current=true。重複同模型不算第二模型，過期或不適用的審核不能補足數量。
 3. 同本體版本／適用域、current=true 且 result=pass 的邊界測試，涵蓋 zero_cards、no_legal_targets、large_values、timing、information 五項責任。
 
-同版本同範圍的有效審核可在 2→3 張時採計；本體或適用域變動後，舊紀錄保留但不作新資格。current=false 的案例只表達已失效的事實；每個 frame 用途依賴須包含 interface_key，建置重算不符即失效接口連接、用途審查與實跑資格，不重鍵有效來源的翻譯。鍵的存放承載及 stale 比較位置由 #498 後續實作定，本檔不指定欄位或表。
+同版本同範圍的有效審核可在 2→3 張時採計；本體或適用域變動後，舊紀錄保留但不作新資格。current=false 的案例只表達已失效的事實；每個 frame 用途依賴須包含 interface_key，建置重算不符即失效接口連接、用途審查與實跑資格，不重鍵有效來源的翻譯。鍵的存放承載及 stale 比較依[作者承載契約 §4–5](author-contract-1.0.md#4-本體版本與新鮮度)；本檔的 current 仍只是固定測試事實，不是 production 作者欄位。
 
 use_review 的 application 恰為 `{frame_variant_match,in_scope,typed_params_match,source_roles_match,roundtrip_match,roundtrip_from_dsl,unresolved_semantics,engine_run_passed}`，皆為 Bool。三項機械檢查依作者語法 §10.2；roundtrip_from_dsl=false 表示回放儲存的原文，不能算反譯。engine_run_passed 表示當前 exact 版本的有效實跑證據，不是 YAML 作者的宣告。
 

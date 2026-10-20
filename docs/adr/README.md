@@ -30,3 +30,4 @@
 | [ADR-0016](0016-four-layer-translation.md) | 翻譯與 DSL 共用四層來源綁定 |
 | [ADR-0017](0017-trust-image-inventory.md) | 卡圖上傳與快照分開並信任成功清單 |
 | [ADR-0018](0018-review-parsed-card-inputs.md) | 已審查的解析卡片輸入以純文字進版控 |
+| [ADR-0019](0019-publish-typed-ir.md) | 公開程式包承載已展開的有型別 IR |
