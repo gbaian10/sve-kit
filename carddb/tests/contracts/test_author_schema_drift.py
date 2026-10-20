@@ -22,6 +22,7 @@ from .author_receipt_cases import RECEIPT_NAMES, RECEIPTS
 from .author_recipient_cases import RECIPIENT_NAMES, RECIPIENTS
 from .author_selection_cases import SELECTIONS
 from .author_selector_cases import COUNTS, SELECTOR_NAMES, SELECTORS
+from .author_step_types import STEP_NAMES, STEPS
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -182,6 +183,7 @@ def test_every_implemented_definition_has_a_python_type() -> None:
             | HISTORY
             | COSTS
             | EFFECTS
+            | STEPS
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -223,6 +225,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | HISTORY
         | COSTS
         | EFFECTS
+        | STEPS
     )[name].json_schema()
     names = (
         SELECTOR_NAMES
@@ -234,6 +237,7 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         | RECEIPT_NAMES
         | COST_NAMES
         | EFFECT_NAMES
+        | STEP_NAMES
     )
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
@@ -1141,3 +1145,8 @@ def test_inlining_named_union_branch_fails_structural_check(
     variants[1] = deepcopy(definitions[leaf])
     with pytest.raises(AssertionError):
         _assert_shared_definitions_are_referenced(changed)
+
+
+@pytest.mark.parametrize("name", STEPS)
+def test_step_type_drift(name: str) -> None:
+    assert_selector_definition(NODES, name)

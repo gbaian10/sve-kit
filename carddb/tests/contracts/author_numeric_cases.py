@@ -40,6 +40,7 @@ NUMERIC: dict[str, TypeAdapter[object]] = {
     "A.cond.any": TypeAdapter(author.CondAny),
     "A.cond.not": TypeAdapter(author.CondNot),
     "A.cond.did": TypeAdapter(author.CondDid),
+    "A.cond.payment-decided": TypeAdapter(author.CondPaymentDecided),
     "A.cond": TypeAdapter(author.Condition, config=CONFIG),
 }
 NUMERIC_NAMES = {
@@ -71,6 +72,7 @@ NUMERIC_NAMES = {
     "A.cond.any": "CondAny",
     "A.cond.not": "CondNot",
     "A.cond.did": "CondDid",
+    "A.cond.payment-decided": "CondPaymentDecided",
     "A.cond": "Condition",
 }
 NUMERIC_DEPENDENCIES = {
@@ -109,6 +111,7 @@ EXPRESSIONS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.expr.count-of", {"count_of": "returned"}),
 ]
 CONDITIONS: list[tuple[str, dict[str, JsonValue]]] = [
+    ("A.cond.payment-decided", {"payment_decided": "optional"}),
     ("A.cond.cmp", CMP),
     ("A.cond.all", {"all": [CMP]}),
     ("A.cond.all", {"all": [CMP, {"not": CMP}]}),
