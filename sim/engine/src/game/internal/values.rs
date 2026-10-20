@@ -9,6 +9,10 @@ use super::{
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Value evaluation and ordering share the same execution slots."
+)]
 impl Execution {
     pub(super) fn player(&self, game: &Game, player: &PlayerRef) -> Result<PlayerId> {
         match player {
@@ -30,7 +34,7 @@ impl Execution {
         }
     }
 
-    fn players(&self, game: &Game, players: &PlayerSet) -> Result<Vec<PlayerId>> {
+    pub(super) fn players(&self, game: &Game, players: &PlayerSet) -> Result<Vec<PlayerId>> {
         let relative = self.player(game, &players.relative_to)?;
         let values = match players.relation {
             PlayerRelation::SelfPlayer => vec![relative],

@@ -21,15 +21,16 @@ pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<
     if !missing.is_empty() {
         return Err(unsupported(&format!("requirements {missing:?}")));
     }
-    check_program(program.program())
+    check_program(program.program(), source)
 }
 
-fn check_program(program: &Program) -> Result<()> {
+fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
     for step in &program.steps {
+        super::ordering::check_node(&step.node, source)?;
         match &step.node {
             Node::Control {
                 control: Control::Sequence { body },
-            } => check_program(body)?,
+            } => check_program(body, source)?,
             Node::Control {
                 control:
                     Control::If {
@@ -38,9 +39,9 @@ fn check_program(program: &Program) -> Result<()> {
                         ..
                     },
             } => {
-                check_program(then_body)?;
+                check_program(then_body, source)?;
                 if let Some(body) = else_body {
-                    check_program(body)?;
+                    check_program(body, source)?;
                 }
             }
             Node::Instruction { instruction } => {
@@ -108,6 +109,21 @@ fn supported(code: &str) -> bool {
             | "player.require-one"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
+            | "shape.Action.Look"
+            | "action.look"
+            | "shape.Action.Order"
+            | "action.order"
+            | "shape.Position.Top"
+            | "shape.Position.Bottom"
+            | "shape.Selector.ReceiptMembers"
+            | "read.receipt.members"
+            | "shape.ObjectReceipt.Look"
+            | "internal.MemberProjection.Before"
+            | "internal.MemberProjection.After"
+            | "shape.Selector.Difference"
+            | "selector.difference"
+            | "internal.OwnerZone.Deck"
+            | "internal.ZoneKind.Deck"
             | "action.draw"
             | "internal.StepwiseMode.Exact"
             | "internal.StepwiseMode.UpToStepwise"

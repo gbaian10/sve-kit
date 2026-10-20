@@ -11,12 +11,13 @@ use crate::ir::{
     ChoiceDomain, Comparison, Control, DamageAmount, DamageEvent, DamageFlags,
     DamageQuantityOutcome, DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome,
     DrawEvent, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
-    InstructionContext, Int, IntFrozen, IntOperation, IntRead, Located, MeasuredReceipt,
-    MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
-    ObjectOperand, ObjectRef, ObjectView, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
-    PlayerSet, PositiveInt, Predicate, Program, ReceiptId, ReceiptLocation, RecipientSet,
-    Requirements, ResolvedRecipients, RuntimeDamageRecipient, RuntimeObjectView, ScopeId, Selector,
-    SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
+    InstructionContext, Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome,
+    MeasuredReceipt, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen,
+    ObjectId, ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PlayerId, PlayerRef,
+    PlayerRelation, PlayerResource, PlayerSet, PositiveInt, Predicate, Program, ReceiptId,
+    ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients, RuntimeDamageRecipient,
+    RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode,
+    Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -27,9 +28,11 @@ use serde_json::{Value, json};
 
 mod admission;
 mod movement;
+mod ordering;
 mod values;
 
 pub use movement::MovementFact;
+pub use ordering::OrderCard;
 
 /// Internal context pinned to the game's immutable catalogue and one source generation.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -54,7 +57,7 @@ pub struct DecisionToken {
 }
 
 /// Authorized input without receipts, bindings or the pending program.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DecisionView {
     /// Required response coordinate.
     pub token: DecisionToken,
@@ -65,25 +68,25 @@ pub struct DecisionView {
 }
 
 /// First-slice input shapes.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InputDomain {
     /// Continue or stop before exactly one draw attempt.
     BeforeDraw,
     /// One natural number in the checked inclusive range.
     Integer(Cardinality),
+    /// Token-scoped handles and printed information, visible only to the chooser.
+    Order(Vec<OrderCard>),
 }
 
 /// Internal answer, checked against actor and the entire decision token.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-#[expect(
-    variant_size_differences,
-    reason = "Inline answer payloads avoid allocating one integer."
-)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Answer {
     /// Answer the current before-draw occurrence.
     Stepwise(StepwiseAnswer),
     /// Answer a bounded integer decision.
     Integer(Nat),
+    /// Complete permutation of this question's handles, in top-to-bottom order.
+    Order(Vec<u64>),
 }
 
 /// Typed instruction outcomes retained only by the authority.
@@ -99,6 +102,10 @@ pub enum InstructionOutcome {
     Destroy(DestroyOutcome),
     /// Fixed generations protected until this resolution ends.
     Installed(Vec<ObjectRef>),
+    /// Objects observed without movement or a generation change.
+    Look(LookOutcome),
+    /// Successful same-deck ordering; never a cross-zone movement.
+    Order(OrderOutcome),
 }
 
 /// Authority result. This type intentionally has no player/wire serialization.
@@ -133,6 +140,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    Order(ordering::OrderWait),
     Integer {
         binding: Binding<Nat>,
         bounds: Cardinality,
@@ -157,6 +165,7 @@ pub(super) struct Execution {
     facts: Vec<Fact>,
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
+    look_viewers: BTreeMap<ReceiptId, PlayerId>,
 }
 
 #[expect(
@@ -217,6 +226,7 @@ impl Game {
                 facts: Vec::new(),
                 waiting: None,
                 destroy_guards: Vec::new(),
+                look_viewers: BTreeMap::new(),
             };
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
@@ -255,6 +265,9 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::Order(wait), Answer::Order(handles)) => {
+                    self.internal_order_answer(&mut execution, &wait, &handles)?;
+                }
                 (Wait::Integer { binding, bounds }, Answer::Integer(number))
                     if contains(bounds, number) =>
                 {
@@ -326,7 +339,7 @@ impl Game {
         let (question, _) = self.typed.as_ref()?.waiting.as_ref()?;
         view.player()
             .is_none_or(|seat| seat == seat_name(question.actor).unwrap_or_default())
-            .then_some(*question)
+            .then(|| question.clone())
     }
 
     pub(super) fn internal_decision_packet(&self, view: View) -> Value {
@@ -334,6 +347,7 @@ impl Game {
             let domain = match question.domain {
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
+                InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
             };
             json!({"by":seat_name(question.actor).unwrap_or_default(),"execution":question.token.execution.0,"decision":question.token.decision.0,"epoch":question.token.epoch,"domain":domain})
         })
@@ -529,6 +543,8 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::Look { .. } => self.internal_look(execution, &instruction)?,
+            Action::Order { .. } => self.internal_order(execution, instruction)?,
             Action::Draw {
                 player,
                 count,
