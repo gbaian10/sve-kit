@@ -5,7 +5,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import ValidationError
 
+from sve_carddb.contracts.author_leaves import EffectsIndex
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
@@ -231,6 +233,7 @@ def test_index_paths_are_relative_without_normalizing(
         _index(_record(card_id="c:" + "A" * 32)),
         _index(_record(record_key="")),
         _index(_record(), format=True),
+        _index(_record(), format=1.0),
         _index(_record(), format="1"),
         _index(_record(), format=2),
         _index(_record(), kind="author_effect_set"),
@@ -242,6 +245,16 @@ def test_index_paths_are_relative_without_normalizing(
 def test_index_rejects_wrong_envelopes(schemas: AuthorSchemas, raw: bytes) -> None:
     with pytest.raises(AuthorInputError):
         schemas.effects_index(raw)
+
+
+@pytest.mark.parametrize("version", [True, 1.0, "1"])
+def test_index_python_literal_does_not_coerce_format(version: object) -> None:
+    with pytest.raises(ValidationError):
+        EffectsIndex.model_validate_json(_index(format=version), strict=True)
+
+
+def test_index_python_literal_accepts_integer_format() -> None:
+    assert EffectsIndex.model_validate_json(_index(), strict=True).format == 1
 
 
 def test_index_duplicate_diagnostic(schemas: AuthorSchemas) -> None:

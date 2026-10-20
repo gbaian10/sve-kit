@@ -14,6 +14,7 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
+from .author_receipt_cases import RECEIPTS
 from .author_selection_cases import SELECTIONS
 
 if TYPE_CHECKING:
@@ -104,6 +105,15 @@ def _shape(
         return node
     reference = node.get("$ref")
     if isinstance(reference, str):
+        # Never silently discard constraints attached beside a reference.
+        assert node.keys() <= {
+            "$ref",
+            "$defs",
+            "$schema",
+            "$id",
+            "title",
+            "description",
+        }
         resource, name = reference.split("#/$defs/")
         source = NODES if resource == "urn:sve-kit:author-nodes:1.0" else root
         definition = object_value(source["$defs"])[name]
@@ -144,7 +154,7 @@ def _assert_definition(
 def test_every_implemented_definition_has_a_python_type() -> None:
     assert (
         object_value(NODES["$defs"]).keys()
-        == (LEAVES | REFERENCES | NUMERIC | SELECTIONS).keys()
+        == (LEAVES | REFERENCES | NUMERIC | SELECTIONS | RECEIPTS).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
 
@@ -162,6 +172,70 @@ def test_reference_type_drift(name: str) -> None:
 @pytest.mark.parametrize("name", SELECTIONS)
 def test_selection_type_drift(name: str) -> None:
     _assert_definition(NODES, name, SELECTIONS[name])
+
+
+@pytest.mark.parametrize("name", RECEIPTS)
+def test_receipt_type_drift(name: str) -> None:
+    _assert_definition(NODES, name, RECEIPTS[name])
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "A.expr.objects-of",
+        "A.same-as",
+        "A.expr.count-of-filtered",
+        "A.cond.did-filtered",
+        "A.expr.count-of",
+        "A.cond.did",
+    ],
+)
+@pytest.mark.parametrize("mutation", ["required", "discriminator", "exclusive"])
+def test_receipt_drift_detects_variant_changes(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definition = object_value(object_value(changed["$defs"])[name])
+    properties = object_value(definition["properties"])
+    if mutation == "required":
+        definition["required"] = []
+    elif mutation == "discriminator":
+        key = next(iter(properties))
+        properties["wrong_key"] = properties.pop(key)
+        required = definition["required"]
+        assert isinstance(required, list)
+        definition["required"] = [
+            "wrong_key" if item == key else item for item in required
+        ]
+    else:
+        properties["follow"] = {"$ref": "#/$defs/A.follow-source"}
+    if name in NUMERIC:
+        with pytest.raises(AssertionError):
+            _assert_numeric_definition(changed, name)
+    else:
+        with pytest.raises(AssertionError):
+            _assert_definition(changed, name, RECEIPTS[name])
+
+
+@pytest.mark.parametrize("mutation", ["nonempty", "nullable", "source_key"])
+def test_material_filter_drift_detects_changes(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definition = object_value(object_value(changed["$defs"])["A.material-filter"])
+    props = object_value(definition["properties"])
+    if mutation == "nonempty":
+        definition.pop("minProperties")
+    elif mutation == "nullable":
+        props["name"] = {"anyOf": [props["name"], {"type": "null"}]}
+    else:
+        props["in"] = {"$ref": "#/$defs/A.ref"}
+    with pytest.raises(AssertionError):
+        _assert_definition(changed, "A.material-filter", RECEIPTS["A.material-filter"])
+
+
+def test_drift_check_does_not_ignore_reference_sibling_constraints() -> None:
+    changed = deepcopy(NODES)
+    definition = object_value(object_value(changed["$defs"])["A.snapshot-read"])
+    definition["minProperties"] = 3
+    with pytest.raises(AssertionError):
+        _assert_definition(changed, "A.snapshot-read", RECEIPTS["A.snapshot-read"])
 
 
 @pytest.mark.parametrize("name", ["A.target.role-one", "A.leader-of"])
