@@ -128,7 +128,7 @@ BP07-SL09、BP06-024 僅驗「看五張、已決定零張入場、餘牌放底�
 
 ## 搜尋本體與單次分組回答
 
-Search 先准入搜尋者自己的 Deck、Single 目的地與同一次回答的 groups。
+Search 准入搜尋者自己的 Deck、Single／Partition 目的地與同一次回答的 groups。
 依[執行語義 §6](runtime-semantics.md#6-search-的輸入點回答與觀察)，開始後固定全域 filter、
 各組交集、世代、有效基數與 snapshot；空牌庫或空候選仍給搜尋者一次問答。
 對手的 awaiting 與物件投影不因候選是否存在而改變。
@@ -151,7 +151,19 @@ found 不變，after／actual_to 為空。手牌新 slot 不提供對手持續�
 輸入，因此可找到的最大張數可能超過正數空位時，在讀取隱藏候選前拒絕情境；零空位
 可記零成功移動。スペル置於場的結果尚未准入：張數限定搜尋進場在開始前整棵拒絕，
 條件搜尋的回答若選到スペル即拒絕並維持待答。position／order、entry_effects、
-Partition、OptionalSelfReplacement、成功投影與減費安裝仍拒絕。完整 CardProgram、lowering 與公開 capability 沒有擴充。
+OptionalSelfReplacement、成功投影與減費安裝仍拒絕。完整 CardProgram、lowering 與公開
+capability 沒有擴充。
+
+Partition 僅准入 Owners(Hand)→Owners(Cemetery) 兩段，且搜尋有明示 maximum，兩段
+minimum 足以涵蓋該上限，以保證所有回答都會分配完 found；可能留下未分配成員的形狀
+仍拒絕，其處理尚未定案。搜尋完成後固定 found 並先公開
+條件證據；依印刷段序從 remaining_found 分配，基數各截限到剩餘張數，不替後段預留。
+非空域即使只有一張或基數為零仍問；空段自動完成。每題有獨立 DecisionId、epoch、
+snapshot 與新 handle，上一題 handle 不可沿用；錯答完整保留當前待答。分配先扣已分配
+成員，再提交當段 movement；各段成功 MoveResult 合併到 SearchOutcome，最後才洗來源
+一次。私有 domain 與 token 僅搜尋者可見，公開證據不給對手手牌固定位置。
+合成測試驗零／一／兩張、兩席、錯答與末段後失敗的可觀察 RNG 回復；CP03-SL07 的
+NameContains 尚未獲 D0 准入，不能將此程序宣稱成整張卡或其完整搜尋片段。
 
 CP04-060 僅驗排除同名的ドラゴンズネスト搜尋、公開、進 EX 與洗牌，未接 UB、進化程序、
 成功 after 減費及其他能力；BP13-035 僅驗已支付追加費用後的三組各一張搜尋、進場與

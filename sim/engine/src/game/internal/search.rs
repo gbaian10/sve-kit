@@ -8,10 +8,10 @@ use crate::ir::{
     Action, Binding, Bool, CardKind, Cardinality, CharacteristicView, Expr, Instruction, KindRead,
     MoveDestination, MoveMethod, MoveResult, NamesRead, Nat, ObjectOperand, ObjectProperty,
     ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Predicate, RuntimeObjectView,
-    RuntimeZoneRef, SearchDestination, SearchOutcome, SearchSelectionAnswer, SelectionView,
-    Selector, SnapshotId, TraitsRead, ZoneKind, ZoneRef,
+    RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
+    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, TraitsRead, ZoneKind, ZoneRef,
 };
-use alloc::collections::BTreeSet;
+use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
 /// Frozen selection constraints visible only to the authenticated searcher.
@@ -41,6 +41,34 @@ pub enum SearchAnswer {
     Ungrouped(Vec<u64>),
     /// Every printed group, including empty entries.
     Grouped(Vec<Vec<u64>>),
+}
+
+/// Frozen remaining found set for one printed destination allocation.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SearchPartitionDomain {
+    /// Fresh handles scoped to this allocation question.
+    pub cards: Vec<OrderCard>,
+    /// Printed bounds truncated to the number of remaining found members.
+    pub cardinality: Cardinality,
+}
+
+#[derive(Clone, Debug)]
+struct PartitionContinuation {
+    instruction: Box<Instruction>,
+    player: PlayerId,
+    outcome: SearchOutcome,
+    remaining: Vec<ObjectRef>,
+    destinations: VecDeque<SearchPartition>,
+    next_handle: u64,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct PartitionWait {
+    continuation: PartitionContinuation,
+    partition: SearchPartition,
+    domain: SearchPartitionDomain,
+    deck: Vec<String>,
+    snapshot: SnapshotId,
 }
 
 #[derive(Clone, Debug)]
@@ -116,6 +144,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         filter,
         groups,
         destination,
+        cardinality,
         ..
     } = action
     else {
@@ -148,8 +177,20 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             }
         }
     }
-    let Some(SearchDestination::Single { movement }) = destination else {
-        return Err(unsupported("search destination other than Single"));
+    let movement = match destination {
+        Some(SearchDestination::Single { movement }) => movement,
+        Some(SearchDestination::Partition { destinations })
+            if matches!(destinations.as_slice(), [hand, cemetery]
+                if hand.zone == (MoveDestination::Owners { zone: OwnerZone::Hand })
+                && cemetery.zone == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
+                && cardinality.maximum.is_some_and(|maximum|
+                    maximum.0.checked_sub(hand.cardinality.minimum.0)
+                        .is_none_or(|needed| cemetery.cardinality.minimum.0 >= needed))) =>
+        {
+            // Unallocated found members have no admitted disposition; prove all choices consume the set.
+            return Ok(());
+        }
+        _ => return Err(unsupported("search destination or incomplete allocation")),
     };
     if movement.position.is_some()
         || movement.order.is_some()
@@ -194,6 +235,7 @@ pub(super) fn private_requirement(code: &str) -> bool {
         "shape.Action.Search"
             | "action.search"
             | "shape.SearchDestination.Single"
+            | "shape.SearchDestination.Partition"
             | "shape.Predicate.NamesIntersect"
             | "predicate.names-intersect"
             | "shape.NamesRead.Names"
@@ -329,12 +371,18 @@ impl Game {
         }
         let seat = seat_name(player)?;
         let deck = self.internal_known_deck(seat)?;
-        let Some(SearchDestination::Single { movement }) = destination else {
-            return Err(unsupported("search destination"));
+        let capacity_zone = match destination {
+            Some(SearchDestination::Single { movement }) => {
+                let zone = self
+                    .internal_search_destination(execution, &movement.to, player)?
+                    .1;
+                matches!(zone, ZoneKind::Ex | ZoneKind::Field).then_some(zone)
+            }
+            Some(SearchDestination::Partition { .. }) => None,
+            _ => return Err(unsupported("search destination")),
         };
-        let (_, zone) = self.internal_search_destination(execution, &movement.to, player)?;
         // A missing capacity protocol must not be replaced by asking the searcher to find fewer cards.
-        if matches!(zone, ZoneKind::Ex | ZoneKind::Field) {
+        if let Some(zone) = capacity_zone {
             let available = 5_i64
                 .saturating_sub(self.zone_count(seat, zone_name(zone)?))
                 .max(0);
@@ -522,28 +570,166 @@ impl Game {
         if wait.conditional {
             self.reveal(&ids, "all", &execution.frame(), false);
         }
-        let Some(SearchDestination::Single { movement }) = (match &wait.instruction.action {
-            Action::Search { destination, .. } => destination.as_ref(),
-            _ => None,
-        }) else {
-            return Err(unsupported("search movement continuation"));
+        let outcome = SearchOutcome {
+            found: views.clone(),
+            revealed: if wait.conditional { views } else { Vec::new() },
+            moved: Vec::new(),
         };
-        let moved = self.internal_search_move(execution, &found, &movement.to, wait.player)?;
+        match &wait.instruction.action {
+            Action::Search {
+                destination: Some(SearchDestination::Single { movement }),
+                ..
+            } => {
+                let moved =
+                    self.internal_search_move(execution, &found, &movement.to, wait.player)?;
+                self.internal_search_finish(
+                    execution,
+                    &wait.instruction,
+                    wait.player,
+                    SearchOutcome { moved, ..outcome },
+                )
+            }
+            Action::Search {
+                destination: Some(SearchDestination::Partition { destinations }),
+                ..
+            } => self.internal_search_partition(
+                execution,
+                PartitionContinuation {
+                    instruction: wait.instruction.clone(),
+                    player: wait.player,
+                    outcome,
+                    remaining: found,
+                    destinations: destinations.clone().into(),
+                    next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
+                },
+            ),
+            _ => Err(unsupported("search movement continuation")),
+        }
+    }
+
+    fn internal_search_finish(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        player: PlayerId,
+        outcome: SearchOutcome,
+    ) -> Result<()> {
+        let seat = seat_name(player)?;
         let remaining = self.internal_known_deck(seat)?;
         self.shuffle(seat, &remaining)?;
         execution.look_viewers.clear();
-        execution.facts.push(Fact::Shuffled {
-            player: wait.player,
-        });
-        execution.receipts.insert(
-            wait.instruction.receipt,
-            InstructionOutcome::Search(SearchOutcome {
-                found: views.clone(),
-                revealed: if wait.conditional { views } else { Vec::new() },
-                moved,
-            }),
-        );
+        execution.facts.push(Fact::Shuffled { player });
+        execution
+            .receipts
+            .insert(instruction.receipt, InstructionOutcome::Search(outcome));
         Ok(())
+    }
+
+    fn internal_search_partition(
+        &mut self,
+        execution: &mut Execution,
+        mut continuation: PartitionContinuation,
+    ) -> Result<()> {
+        while let Some(partition) = continuation.destinations.pop_front() {
+            // Empty segments consume no token, but never skip a nonempty singleton question.
+            if continuation.remaining.is_empty() {
+                continue;
+            }
+            let mut cards = Vec::new();
+            for &object in &continuation.remaining {
+                let id = execution.object_id(object)?;
+                let handle = continuation.next_handle;
+                continuation.next_handle = handle
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("search handle overflow"))?;
+                cards.push(OrderCard {
+                    handle,
+                    card: self.object(id)?.card.clone(),
+                    name: self.card_name(id)?,
+                });
+            }
+            let domain = SearchPartitionDomain {
+                cards,
+                cardinality: bounds(partition.cardinality, continuation.remaining.len(), false)?,
+            };
+            let player = continuation.player;
+            let decision = partition.decision;
+            let wait = PartitionWait {
+                continuation,
+                partition,
+                domain: domain.clone(),
+                deck: self.internal_known_deck(seat_name(player)?)?,
+                snapshot: SnapshotId(self.state.ir_epoch),
+            };
+            return self.internal_wait(
+                execution,
+                decision,
+                player,
+                InputDomain::SearchPartition(domain),
+                Wait::SearchPartition(wait),
+            );
+        }
+        self.internal_search_finish(
+            execution,
+            &continuation.instruction,
+            continuation.player,
+            continuation.outcome,
+        )
+    }
+
+    pub(super) fn internal_search_partition_answer(
+        &mut self,
+        execution: &mut Execution,
+        wait: &PartitionWait,
+        handles: &[u64],
+    ) -> Result<()> {
+        let mut cards = handles
+            .iter()
+            .map(|handle| {
+                let index = wait
+                    .domain
+                    .cards
+                    .iter()
+                    .position(|card| card.handle == *handle)
+                    .ok_or_else(|| invalid("foreign partition handle"))?;
+                Ok(wait.continuation.remaining[index])
+            })
+            .collect::<Result<Vec<_>>>()?;
+        if !(SearchPartitionAnswer {
+            cards: cards.clone(),
+        })
+        .matches_remainder(&wait.continuation.remaining, wait.partition.cardinality)
+        {
+            return Err(invalid("partition answer does not match its remainder"));
+        }
+        if self.internal_known_deck(seat_name(wait.continuation.player)?)? != wait.deck
+            || self.state.ir_epoch
+                != wait
+                    .snapshot
+                    .0
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("partition epoch overflow"))?
+        {
+            return Err(invalid("partition snapshot changed"));
+        }
+        for &object in &wait.continuation.remaining {
+            if self.object(execution.object_id(object)?)?.generation != object.generation.0 {
+                return Err(invalid("stale partition generation"));
+            }
+        }
+        cards.sort_by_key(|object| object.id);
+        let mut continuation = wait.continuation.clone();
+        // Allocation consumes members even if a future admitted movement can fail.
+        continuation
+            .remaining
+            .retain(|object| !cards.contains(object));
+        continuation.outcome.moved.extend(self.internal_search_move(
+            execution,
+            &cards,
+            &wait.partition.zone,
+            continuation.player,
+        )?);
+        self.internal_search_partition(execution, continuation)
     }
 
     fn internal_search_destination(
