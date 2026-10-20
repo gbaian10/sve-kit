@@ -39,7 +39,7 @@ fn modify(
     )
 }
 
-fn buff(id: u64, attack: i64, life: i64) -> Located<Node> {
+pub(super) fn buff(id: u64, attack: i64, life: i64) -> Located<Node> {
     modify(
         id,
         zone(ZoneKind::Field, 100_u64.saturating_add(id)),
@@ -54,7 +54,12 @@ fn changes(progress: &Progress) -> Vec<&StatChangeFact> {
         .iter()
         .filter_map(|fact| match fact {
             Fact::StatChange(fact) => Some(fact),
-            Fact::Draw(_) | Fact::Damage(_) | Fact::Movement(_) | Fact::Shuffled { .. } => None,
+            Fact::Draw(_)
+            | Fact::Damage(_)
+            | Fact::Movement(_)
+            | Fact::Shuffled { .. }
+            | Fact::AbilityPlayed { .. }
+            | Fact::AbilityResolved { .. } => None,
         })
         .collect()
 }

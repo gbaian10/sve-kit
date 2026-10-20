@@ -247,6 +247,13 @@ pub struct Game {
         serialize_with = "internal::serialize_prepared"
     )]
     prepared: BTreeMap<u64, internal::PreparedPlay>,
+    #[serde(
+        default,
+        skip_deserializing,
+        skip_serializing_if = "internal::CardRuntime::is_empty",
+        serialize_with = "internal::serialize_cards"
+    )]
+    card_runtime: internal::CardRuntime,
 }
 
 const ZONES: [&str; 14] = [
@@ -474,6 +481,7 @@ impl Game {
             node: "opening".into(),
             typed: None,
             prepared: BTreeMap::new(),
+            card_runtime: internal::CardRuntime::default(),
         };
         game.initialize_evolved(&position)?;
         game.initialize_history(&position)?;

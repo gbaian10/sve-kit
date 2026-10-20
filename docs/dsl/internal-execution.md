@@ -4,6 +4,35 @@
 它只供合成與卡片段測試使用，不接作者 YAML、不執行整張 `CardProgram`，也不發布公開 capability。
 `Registry::current().supported()` 仍為空；良構通過不能取代本入口的執行准入。
 
+## 整卡起動的內部邊界
+
+`load_internal_card(card_no, WellFormedCardProgram)` 在同一個 Game 載入完整的手寫整卡，
+不接作者 YAML。此入口目前只承載以卡號識別卡片、以十進位 ordinal 識別 face 的內部輸入。
+所有能力都必須是 Field 的 Printed Activated，PlaySpec 的 captures、parameters 與 Ordered
+costs 必須為空；Spell、Triggered、Static、成本替代、模式、其他 play metadata 與介入能力整棵拒絕。
+載入逐能力驗證 card／face／line 座標一致、印刷座標唯一、instruction source 相符，以及完整本文的
+封閉 requirement 集合（含未執行分支）。另以正向集合限定同步 Draw Exact、Look Exact、Uniform Damage、
+已支援的 Modify／InstallEffect、capture、Sequence／If；互動與可能移動來源的 Move／Destroy 亦整棵拒絕，
+未接 LKI 時不以來源離場後取消本文代替規則。
+
+`activate_internal_card(holder, AbilityId, actor)` 只從已載入的 holder 卡片取得定義；呼叫者不提供
+來源、世代、instance 或 execution。所有對局物件的整卡都必須已載入，沒有能力的卡也要明示空整卡；
+原型能力、keyword、continuous、delayed、待機及忙碌 context 維持拒絕。
+動態准入限主動玩家 main 時點、目前場上未失能的從者、當前 face 與 controller。
+同 holder 世代與定義重複起動沿用 AbilityInstanceId；新世代的鍵不同，每次起動另配 ExecutionId。
+
+空成本已完整付款後形成 authority 的 AbilityPlayed fact，接著執行完整本文、EndResolution 收尾，
+最後形成同 producer 的 AbilityResolved fact，回傳完整 receipts 與 facts。
+這些型別沒有 wire 編碼，也不宣稱已接正式事件訂閱者。執行錯誤回復整次起動前的 Game，包含
+instance／execution 配發、RNG、事件、觀察與額度；本子集不會外發可撤銷的待答 token。
+
+回傳明示 `ResumeStage::CheckTiming`，Game 同時保留該階段。在
+`resume_internal_card()` 前，原型 decide／submit、另一個 typed 入口與起動都拒絕。
+checkpoint 期間玩家 projection 的 awaiting 為 null。resume 才交既有規則檢查管線，
+回傳該階段產生的規則事件，不重送本文事件；不自動推到 end／discard，本文中不插入致死或抽空檢查。
+載入整卡的 Game 尚無儲存與 digest 格式，序列化與 digest 都明確失敗，不靜默遺失整卡或 instance。
+本子集尚未承載正式卡片打出、PlayParameter Distribution、目標選取、付款、互動續體或真實卡准入。
+
 ## 准入與原子性
 
 入口以 `Requirements::derive_program` 走訪完整程式體，包含未執行分支；每一個 exact

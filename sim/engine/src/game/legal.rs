@@ -187,7 +187,7 @@ impl Game {
         reason = "The legal decision union enumerates each distinct input kind once."
     )]
     pub fn legal(&self) -> Result<Vec<Value>> {
-        if self.typed.is_some() {
+        if self.typed.is_some() || self.card_runtime.checkpoint.is_some() {
             return Ok(Vec::new());
         }
         if self.state.game["ended"] == true {

@@ -30,7 +30,7 @@ impl Game {
     /// # Errors
     /// Returns unsupported semantics or malformed transport data; legal rejections are outcomes.
     pub fn decide(&mut self, decision: &Value, node: &str) -> Result<Step> {
-        if self.typed.is_some() {
+        if self.typed.is_some() || self.card_runtime.checkpoint.is_some() {
             return Err(invalid("typed execution owns the input point"));
         }
         if self.internal_numeric_active() {

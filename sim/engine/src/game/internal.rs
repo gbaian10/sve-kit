@@ -15,9 +15,9 @@ use crate::ir::{
     NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
     ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet,
     PositiveInt, Predicate, Program, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
-    ResolvedRecipients, RuntimeDamageRecipient, RuntimeObjectView, ScopeId, SearchOutcome,
-    Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram,
-    ZoneKind,
+    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, RuntimeObjectView, ScopeId,
+    SearchOutcome, Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility,
+    WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -29,6 +29,7 @@ use serde_json::{Value, json};
 
 mod admission;
 mod allocation;
+mod card;
 mod movement;
 mod numeric;
 mod ordering;
@@ -36,6 +37,8 @@ mod search;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
+pub use card::{Activation, ResumeStage};
+pub(super) use card::{CardRuntime, serialize_cards};
 pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
@@ -166,6 +169,20 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// A fully paid (empty-cost subset) activation, before its body.
+    AbilityPlayed {
+        /// Authority execution producer.
+        execution: ExecutionId,
+        /// Fixed holder generation, instance and controller.
+        source: RuntimeAbilitySource,
+    },
+    /// Body and end-of-resolution cleanup completed, before check timing.
+    AbilityResolved {
+        /// Authority execution producer.
+        execution: ExecutionId,
+        /// The same producer as the play fact.
+        source: RuntimeAbilitySource,
+    },
     /// A performed full-source shuffle, even when the deck has zero or one member.
     Shuffled {
         /// Owner of the complete source deck.
@@ -227,6 +244,7 @@ pub(super) struct Execution {
     allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
     origin: Option<Box<Game>>,
     distribution_started: bool,
+    ability: Option<RuntimeAbilitySource>,
 }
 
 #[expect(
@@ -339,6 +357,14 @@ impl Game {
     /// # Errors
     /// Rejects missing or consumed play handles and restores all authority on failure.
     pub fn execute_internal_play(&mut self, play: &ProperPlay) -> Result<Progress> {
+        self.resolve_internal_play(play, None)
+    }
+
+    fn resolve_internal_play(
+        &mut self,
+        play: &ProperPlay,
+        ability: Option<RuntimeAbilitySource>,
+    ) -> Result<Progress> {
         let prepared = self
             .prepared
             .get(&play.execution)
@@ -373,7 +399,14 @@ impl Game {
                 allocations: BTreeMap::new(),
                 origin: Some(Box::new(before.clone())),
                 distribution_started: false,
+                ability,
             };
+            if let Some(source) = ability {
+                execution.facts.push(Fact::AbilityPlayed {
+                    execution: execution.id,
+                    source,
+                });
+            }
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
             if !progress.complete {
@@ -560,6 +593,7 @@ impl Game {
             ));
         }
         if self.typed.is_some()
+            || self.card_runtime.checkpoint.is_some()
             || self.state.frame.is_some()
             || self.state.prompt.is_some()
             || !self.state.pending.is_empty()
@@ -586,7 +620,14 @@ impl Game {
             let Some(node) = execution.todo.pop_front() else {
                 self.internal_numeric_cleanup();
                 self.internal_numeric_end_resolution(execution.id)?;
-                self.checks()?;
+                if let Some(source) = execution.ability {
+                    execution.facts.push(Fact::AbilityResolved {
+                        execution: execution.id,
+                        source,
+                    });
+                } else {
+                    self.checks()?;
+                }
                 return Ok(());
             };
             match node {
