@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class Inherited:
     inputs: Inputs
-    records: dict[str, str]
-    frames: dict[str, str]
+    record_origins: dict[str, str]
+    frame_origins: dict[str, str]
 
 
 def _same_revision(
@@ -85,7 +85,9 @@ def _rekey(compiled: CompiledField, owner: FaceRevisionOwner) -> dict[str, Frame
     return frames
 
 
-def _records(inputs: Inputs, frames: Mapping[str, Frame]) -> Inherited:
+def _records(
+    inputs: Inputs, frames: Mapping[str, Frame]
+) -> tuple[list[Record], dict[str, str], dict[str, str]]:
     added: list[Record] = []
     origins = {}
     for record in inputs.records:
@@ -107,8 +109,8 @@ def _records(inputs: Inputs, frames: Mapping[str, Frame]) -> Inherited:
             continue
         origins[updated.record_key] = record.record_key
         added.append(updated)
-    return Inherited(
-        Inputs(inputs.files, (*inputs.records, *added)),
+    return (
+        added,
         origins,
         {frame.id: original for original, frame in frames.items()},
     )
@@ -146,12 +148,12 @@ def inherit(
     sources: Sources,
     batch_id: str,
 ) -> Inherited:
-    """Only an earlier identical revision on this face can donate pending target wording."""
+    """Reuse earlier identical wording; authored frames must be unambiguous before manual narrowing."""
     automatic = Frames(r.data for r in inputs.records if isinstance(r, FrameRecord))
     definitions = {
         r.data.id: r.data for r in inputs.records if isinstance(r, FrameRecord)
     }
-    inherited = Inherited(inputs, {}, {})
+    additions = []
     for row in db.select(
         "face_revision",
         db.columns("face_revision"),
@@ -214,22 +216,16 @@ def inherit(
                     db, sources, source, classifier, candidates
                 ).complete:
                     continue
-                additions = _records(inputs, frames)
-                existing = {r.record_key for r in inherited.inputs.records}
-                inherited = Inherited(
-                    Inputs(
-                        inputs.files,
-                        (
-                            *inherited.inputs.records,
-                            *(
-                                r
-                                for r in additions.inputs.records
-                                if r.record_key not in existing
-                            ),
-                        ),
-                    ),
-                    inherited.records | additions.records,
-                    inherited.frames | additions.frames,
-                )
+                additions.append(_records(inputs, frames))
                 break
-    return inherited
+    return Inherited(
+        Inputs(
+            inputs.files,
+            (
+                *inputs.records,
+                *(record for records, _, _ in additions for record in records),
+            ),
+        ),
+        {key: origin for _, origins, _ in additions for key, origin in origins.items()},
+        {key: origin for _, _, origins in additions for key, origin in origins.items()},
+    )

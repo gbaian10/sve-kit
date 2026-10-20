@@ -338,8 +338,12 @@ def _populate(
             db,
             definition,
             plan.canonical_sources[identifier],
-            audit[inherited.records.get(definition.record_key, definition.record_key)],
-            authored_record_key=inherited.records.get(definition.record_key),
+            audit[
+                inherited.record_origins.get(
+                    definition.record_key, definition.record_key
+                )
+            ],
+            authored_record_key=inherited.record_origins.get(definition.record_key),
         )
     forms: dict[tuple[str, str], Form] = {}
     selected: dict[tuple[str, str], SelectedTarget] = {}
@@ -357,10 +361,12 @@ def _populate(
             write_target(
                 db,
                 record,
-                audit[inherited.records.get(record.record_key, record.record_key)],
+                audit[
+                    inherited.record_origins.get(record.record_key, record.record_key)
+                ],
                 frame=definitions[record.data.template_id].data,
                 forms=form_definitions,
-                authored_record_key=inherited.records.get(record.record_key),
+                authored_record_key=inherited.record_origins.get(record.record_key),
             )
             if isinstance(record, TargetRecord):
                 selected[record.data.template_id, record.data.lang] = SelectedTarget(
@@ -380,13 +386,14 @@ def apply(
         db, snapshot, settings.sources, settings.vocabulary, settings.rules
     )
     inherited = inherit(db, inputs, classifier, settings.sources, settings.batch_id)
-    inputs = inherited.inputs
     controls = Controls(
-        inputs, settings.reference_names, frame_origins=inherited.frames
+        inherited.inputs,
+        settings.reference_names,
+        frame_origins=inherited.frame_origins,
     )
     plan = _compile(
         db,
-        Frames(r.data for r in inputs.records if isinstance(r, FrameRecord)),
+        Frames(r.data for r in inherited.inputs.records if isinstance(r, FrameRecord)),
         classifier,
         settings,
         controls,
@@ -402,13 +409,12 @@ def apply(
     translated = low = 0
     for field in plan.fields:
         chosen = controls.select(field, renderer, selected, settings.lang)
-        detail = plan.details[
-            canonical(
-                field.source.descriptor.model_dump(
-                    mode="json", include={"owner", "field", "ordinal"}
-                )
+        field_key = canonical(
+            field.source.descriptor.model_dump(
+                mode="json", include={"owner", "field", "ordinal"}
             )
-        ]
+        )
+        detail = plan.details[field_key]
         selected_targets = [
             chosen.targets.get((match.frame.id, settings.lang))
             for match in field.matches
@@ -443,11 +449,17 @@ def apply(
         plan.pending,
         tuple(
             sorted(
-                {r.data.id for r in inputs.records if isinstance(r, FrameRecord)}
+                {
+                    r.data.id
+                    for r in inherited.inputs.records
+                    if isinstance(r, FrameRecord)
+                }
                 - plan.canonical_sources.keys()
             )
         ),
         tuple(value for _, value in sorted(plan.details.items())),
-        apply_english(db, inputs, settings.sources, audit, settings.reference_names),
+        apply_english(
+            db, inherited.inputs, settings.sources, audit, settings.reference_names
+        ),
         plan.fields,
     )
