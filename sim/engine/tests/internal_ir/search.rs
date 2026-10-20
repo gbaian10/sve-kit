@@ -1008,3 +1008,6 @@ fn effective_numeric_reads_survive_a_private_search_input_between_additions() {
 
 #[path = "search/partition.rs"]
 mod partition;
+
+#[path = "search/replacement.rs"]
+mod replacement;
