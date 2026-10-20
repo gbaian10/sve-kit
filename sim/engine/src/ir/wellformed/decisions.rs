@@ -1,10 +1,12 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
+use crate::ir::AggregateBound;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
-    InstructionContext, Nat, Node, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot,
-    PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality, RuleProcedure,
-    SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind,
+    InstructionContext, MemberProjection, Nat, Node, PaymentOptionality, PaymentResult,
+    PaymentTime, PlaySlot, PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality,
+    RuleProcedure, SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility,
+    ZoneKind,
 };
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use alloc::collections::BTreeSet;
@@ -119,11 +121,8 @@ impl Checker {
             return self.reject();
         }
         self.env.chooser = Some(decision.actor.clone());
-        self.env.private_choice = matches!(
-            &decision.visibility,
-            Visibility::Only { players } if players.relation == PlayerRelation::SelfPlayer
-                && players.relative_to == decision.actor
-        );
+        self.env.private_choice =
+            super::visibility::private_to(&decision.visibility, &decision.actor);
         let result = self.at("domain", |checker| {
             checker.domain(&decision.domain, cardinality)
         });
@@ -331,7 +330,11 @@ impl Checker {
                 checker.selector(&group.selector)
             })?;
         }
-        for (index, bound) in constraint.aggregate_bounds.iter().enumerate() {
+        self.aggregate_bounds(&constraint.aggregate_bounds)
+    }
+
+    pub(super) fn aggregate_bounds(&mut self, bounds: &[AggregateBound]) -> Checked {
+        for (index, bound) in bounds.iter().enumerate() {
             self.at(&format!("aggregate_bounds/{index}"), |checker| {
                 checker.integer(&bound.value)
             })?;
@@ -387,6 +390,12 @@ impl Checker {
             return Ok(());
         };
         match selector {
+            Selector::SearchFound { found } => {
+                self.visible_object(self.env.access.get(&found.key()))
+            }
+            Selector::SearchRevealed { revealed } => {
+                self.visible_object(self.env.access.get(&revealed.key()))
+            }
             Selector::Zone {
                 players,
                 zone: ZoneKind::Hand,
@@ -418,9 +427,15 @@ impl Checker {
                 self.visible_object(self.env.access.get(&reference.binding.key()))
             }
             Selector::Created { receipt } => self.visible_receipt(receipt),
-            Selector::ReceiptMembers { receipt, .. } => match receipt {
+            Selector::ReceiptMembers {
+                receipt,
+                projection,
+            } => match receipt {
                 ObjectReceipt::Look { receipt } => self.visible_receipt(receipt),
                 ObjectReceipt::Token { receipt } => self.visible_receipt(receipt),
+                ObjectReceipt::Movement { receipt } if *projection == MemberProjection::Before => {
+                    self.movement_before_visible(receipt)
+                }
                 ObjectReceipt::Movement { receipt } => self.movement_visible(receipt),
                 ObjectReceipt::Batch { .. }
                 | ObjectReceipt::TransformBanished { .. }
@@ -487,6 +502,8 @@ impl Checker {
             | Selector::MoveAfter { .. }
             | Selector::Intersection { .. }
             | Selector::Ordered { .. }
+            | Selector::SearchFound { .. }
+            | Selector::SearchRevealed { .. }
             | Selector::Objects { .. }
             | Selector::Captured { .. }
             | Selector::Bound { .. }

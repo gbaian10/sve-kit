@@ -112,10 +112,8 @@ impl Checker {
             Expr::Frozen(read) => match read.as_ref() {
                 NatFrozen::SnapshotCounter { object, .. } => self.projection(object),
                 NatFrozen::ReceiptActual { receipt } => self.measured(receipt),
-                NatFrozen::SearchFoundCount { found } => self.reference(*found, BindingKind::Value),
-                NatFrozen::SearchRevealedCount { revealed } => {
-                    self.reference(*revealed, BindingKind::Value)
-                }
+                NatFrozen::SearchFoundCount { found } => self.scalar(*found),
+                NatFrozen::SearchRevealedCount { revealed } => self.scalar(*revealed),
                 NatFrozen::SpellChain {
                     player,
                     execution,
@@ -286,6 +284,7 @@ impl Checker {
                 predicate,
             } => {
                 self.reference(*found, BindingKind::Value)?;
+                self.visible_object(self.env.access.get(&found.key()))?;
                 self.candidate(*object, predicate)
             }
             Predicate::EventCause { .. }
@@ -443,6 +442,8 @@ impl Checker {
         }
         self.selection_visibility(selector)?;
         match selector {
+            Selector::SearchFound { found } => self.reference(*found, BindingKind::Value),
+            Selector::SearchRevealed { revealed } => self.reference(*revealed, BindingKind::Value),
             Selector::Bound { reference } => self.reference(*reference, BindingKind::Value),
             Selector::Captured { reference } => {
                 self.reference(reference.binding, BindingKind::Capture)
@@ -492,20 +493,7 @@ impl Checker {
             Selector::ReceiptMembers {
                 receipt,
                 projection,
-            } => match receipt {
-                ObjectReceipt::Look { receipt } => self.receipt(receipt),
-                ObjectReceipt::Flip { receipt } => self.receipt(receipt),
-                ObjectReceipt::Token { receipt } => self.receipt(receipt),
-                ObjectReceipt::Batch { receipt } => self.receipt(receipt),
-                ObjectReceipt::Movement { receipt } => {
-                    if *projection != MemberProjection::Before {
-                        return self.reject();
-                    }
-                    self.movement_receipt(receipt)
-                }
-                ObjectReceipt::TransformBanished { .. }
-                | ObjectReceipt::TransformCreated { .. } => self.reject(),
-            },
+            } => self.selector_receipt(receipt, *projection),
             Selector::CollectedMembers { receipts, .. } => match receipts {
                 ObjectReceiptList::Look { receipts } => {
                     self.reference(*receipts, BindingKind::Value)
@@ -536,6 +524,24 @@ impl Checker {
                 self.movement_receipts(*receipts)
             }
             Selector::Zone { .. } | Selector::Relation { .. } => self.reject(),
+        }
+    }
+
+    fn selector_receipt(&self, receipt: &ObjectReceipt, projection: MemberProjection) -> Checked {
+        match receipt {
+            ObjectReceipt::Look { receipt } => self.receipt(receipt),
+            ObjectReceipt::Flip { receipt } => self.receipt(receipt),
+            ObjectReceipt::Token { receipt } => self.receipt(receipt),
+            ObjectReceipt::Batch { receipt } => self.receipt(receipt),
+            ObjectReceipt::Movement { receipt } => {
+                if projection != MemberProjection::Before {
+                    return self.reject();
+                }
+                self.movement_receipt(receipt)
+            }
+            ObjectReceipt::TransformBanished { .. } | ObjectReceipt::TransformCreated { .. } => {
+                self.reject()
+            }
         }
     }
 

@@ -818,7 +818,7 @@ fn search_bindings_and_cardinality_cannot_be_forged() {
 }
 
 #[test]
-fn movement_rejects_unvalidated_entry_effects_and_orders() {
+fn movement_rejects_unvalidated_entry_effects_and_invalid_orders() {
     for ordered in [false, true] {
         let mut step = moving(1, objects(), shared(ZoneKind::Field));
         if let Action::Move { movement, .. } = action(&mut step) {
@@ -835,7 +835,14 @@ fn movement_rejects_unvalidated_entry_effects_and_orders() {
                 }];
             }
         }
-        reject(body(1, vec![step]), WellFormedReason::UnsupportedShape);
+        reject(
+            body(1, vec![step]),
+            if ordered {
+                WellFormedReason::InvalidMovement
+            } else {
+                WellFormedReason::UnsupportedShape
+            },
+        );
     }
     let mut mill = moving(
         1,
@@ -853,3 +860,6 @@ fn movement_rejects_unvalidated_entry_effects_and_orders() {
     }
     reject(body(1, vec![mill]), WellFormedReason::InvalidMovement);
 }
+
+mod ordering;
+mod search_groups;

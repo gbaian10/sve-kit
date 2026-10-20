@@ -48,7 +48,7 @@
 
 接受 sequence、if、simultaneous、直接 body 的 repeat、each-object、each-player
 與下述結算付款、May 和模式；instruction 接受 draw、look、counter、reveal、flip-down、posture、
-初次擲骰、數值 declare、life、resource、transfer，以及下述 discard、damage、token、move、search、destroy、banish、install-effect。UpToStepwise 的決定描述及逐張協定見下節。
+初次擲骰、數值 declare、life、resource、transfer，以及下述 discard、damage、token、move、search、destroy、banish、install-effect、modify、order。UpToStepwise 的決定描述及逐張協定見下節。
 本文的 resource 不接受 Pay；Pay 只屬於 K.pay 的成本步驟。draw、discard 與 search 目前只接受
 actor 就是抽牌者／捨牌者／搜尋者。擲骰者只由 instruction actor 表示，checker 無法對照卡文，
 lowering 必須寫入實際擲骰的玩家。
@@ -171,12 +171,36 @@ Token 檢查所有模板的常值名稱、數量、Field／Ex 單一目的區及
 
 ## 搜尋、移動與減費安裝
 
+`Action::Modify` 獨立接受 Numeric Add／Set、非空且全為 Numeric 的遞迴 Combined，
+或單獨 SetKind。GrantAbility、SuppressAbility、名稱／類型增減及混合層 Combined
+整棵拒絕。subjects、每個數值、source 與 expires 的引用都檢查；數值可以有號，
+不能在 IR 邊界先截為零。CurrentInstallation 表示本指示建立的修正實例，
+Bound source 仍須有支配且型別相符的 EffectId producer（目前沒有此 producer）。
+期限沿用安裝期限檢查，但 usage 一律拒絕，因為尚無數值修正消耗規則。
+Numeric 的 stat_changed 與 InstallEffect Continuous 的差異依 IR GAP-S-008；
+checker 不執行重算或事件。CP02-007、BP16-049、BP05-001 僅為動作片段種子，
+不代表完整成本、能力、lowering 或 executor 已驗收。
+
 MoveSpec 與 search Partition 使用內部 `MoveDestination`：`Owners(Hand / Deck /
 Cemetery / Banish)` 逐物件解析該物件持有者；`Shared(ZoneRef)` 僅接受 Field／Ex。
 混合持有者的集合不能用來源控制者或來源持有者的一個 ZoneRef 替代。Destroy／Banish
 保留專用動作，目的區由各自規則逐物件決定。一般 Move 的 position 只接受 Owners(Deck)，
 initial_posture 只接受 Shared(Field)；Mill 目的地必須為 Owners(Cemetery)。
-entry_effects 與 order 尚未接受，不能把未知欄位忽略後發出憑證。
+Placement.zone 同樣使用 MoveDestination。Order 先接受一個 Placement：cards 與
+Placement.cards 精確相等、Owners(Deck) 及明示 position；在指示開始固定集合，回答必須
+是其完整排列，不重新選子集。MoveSpec.order 只在 Owners(Deck) 且有 position 時接受：
+Required ResolutionChoice、外層 exact 1、無 guard／capture，Order domain 精確等於
+Move.objects，actor 等於該指示 actor；回答僅在該動作內可見。
+Order action 的 chooser 也須等於指示 actor；兩者都檢查決定可見性與物件證據，
+禁止選擇的 batch／stage 仍拒絕。空集合可以承載，實際空排列的省略依規則程序，不能
+用空集合推論牌庫沒有搜尋候選。
+單一排列跨多個持有者時，先保存一次完整回答，再依各持有者保留相對順序放入各自牌庫；
+回答順序以牌庫頂至底方向解讀，Bottom 的第一項在放入區塊最上方。
+同區重排不變世代、不造移區事件；跨區才記 MoveResult 與 after。
+lowering 的正規形以 Action::Order 表示已在目的牌庫內的重排（例如 Look 餘牌），
+跨區則使用 Move＋order；良構檢查不推導物件的執行期所在區域，executor 仍須驗證。
+跨 owner 的單 chooser 排列是內部契約約定，沒有以本片卡例證明其官方適用範圍。
+多 Placement、獨立／compound 的 Order decision 及 Move／Token entry_effects 尚未接受。
 
 Search 的 filter 與替代目的地 predicate 依搜尋者的私有選擇域檢查可見性；
 不能藉可選牌集合或替代選項讀取對手手牌、原始牌庫或他人的私有 Look 結果。
@@ -186,12 +210,22 @@ candidate 只在 filter 可見，continuation 的 found／revealed 在另一個�
 found 成員上逐一綁定局部 object，只供自己的 predicate；空 found 為 false。
 BP03-002 的替代目的地條件可讀這個物件的 cost，不能以 found 計數替代。
 object、found 與 revealed 均不得流出 continuation；found 不能冒充 revealed 或
-successful moved after，也不新增第二次選牌。
+successful moved after，也不新增第二次選牌。SearchFound／SearchRevealed selector 僅在
+continuation 內投影移動前物件；前者為搜尋者私有，後者為公開證明，兩種 binding
+不能互換。計數與 SearchFoundAny 同樣遵守 audience。Search destination 中的
+MoveSpec.order 與 position 尚未接受：末尾洗牌會抵銷同牌庫的放置順序；若要承載
+洗牌後放置，須另定時序與 found 排列域，不能以 revealed 代替實際要搬的 found。
+continuation 仍是 destination 的封閉區段，沒有任意 Program／shuffle callback。
 Single、非空 Partition 與 OptionalSelfReplacement 的每個欄位／分支都檢查；Partition
 保留順序與各段基數，不要求各段 minimum 的總和不超過 found，因為後段可能無牌可做。
 沒有 destination 的形狀尚未定義，回報 UnsupportedShape；全部 partition 有限時，
 其 maximum 總和須覆蓋搜尋 maximum，無上限搜尋也不能配全有限 partition。
-groups、禁止決定的區段內 search 仍拒絕。HasTrait 與 NamesIntersect 的 Current 物件
+groups 接受一個 SelectionConstraint，總基數須等於 Search.cardinality、群組非空且
+Disjoint；各群組是指定 deck 的 Current Zone selector，predicate、基數與 aggregate bounds
+逐欄驗證，保留 distinct_by。群組域與全域 filter 取交集，所有群組共用同一次搜尋回答，
+不讓每組重新搜尋；重疊候選由回答分組且同物件最多一次。群組根節點的 Deck 只授權
+該組候選，巢狀 predicate 或 aggregate 不得讀整個牌庫／對手手牌。其他群組 selector
+暫不接受。禁止決定的區段內 search 仍拒絕。HasTrait 與 NamesIntersect 的 Current 物件
 讀值支援 CP04-060 的 filter；未驗快照形狀仍拒絕。
 
 Move／Search／Destroy／Banish 各自產生對應 outcome，不能互換 receipt 型別。
@@ -201,7 +235,12 @@ ObjectReceipt::Movement 僅接受 Before 成功成員投影，供原集合扣除
 After 必須用 MoveAfter，不能省略跨世代引用權限。BP18-059 的 remainder 是觀察集合
 減去成功移動的 before 成員；不能減去所有 chosen，否則 EX 滿而未移動的牌會遺失。
 Move 與 Token 可共用 SharedCapacityAtomic 批次，成員間仍不能讀 sibling 結果。
-這些結果不自動成為 Public 選擇證據：取代可能把牌移到非公開區域。
+Move／Destroy／Banish 的成功 Before 成員可保留原輸入已知的 audience，供 remainder
+選擇使用；audience 必須在首次檢查 selector、宣告 candidate 之前推導，
+成功完成指示後才發布，batch 在所有成員完成後合併，sibling 仍不可讀。
+目前僅本地 receipt，不擴及 repeat iteration。這只證明哪些已知舊世代成員
+成功移動，不授權其目的地、新世代或隱藏身分。MoveAfter／MoveAfterAll 不自動成為
+Public 選擇證據：取代可能把牌移到非公開區域。FlipDown 仍單調撤銷物件證據。
 
 InstallEffect 接受 InstructionStart、Objects 的獨立 affected binding，以及：
 
@@ -248,15 +287,16 @@ Players 安裝、AtPlay 安裝、Replacement／RuleModifier／DeckRule 仍拒絕
 指示自我取代仍未承載，不能用靜態改道、Put 或 If 替代。
 
 CP04-060 的動作種子使用 search 的成功 moved after 安裝本回合 delta -2；found／revealed
-不是 selector，SearchFoundAny 也不授予移動後引用；不能假冒 moved。checker 不由卡號反推卡文：合法的 Set 或另一個已定義
+只在 continuation 投影移動前物件，SearchFoundAny 也不授予移動後引用；不能假冒 moved。checker 不由卡號反推卡文：合法的 Set 或另一個已定義
 選擇集合仍可能是別張卡需要的程式，lowering 必須獨立驗證與 CP04-060 原文相符。
 
 本節的 CP04-060、BP18-059、BP13-SL16 是動作片段的結構種子，非完整卡片執行驗收。
 Search 仍須由 executor 證明條件、先找到才問替代目的地、拒絕時回原手牌、末尾只洗一次；
 不得依真實牌庫先告知無候選。EX 滿時保留未移動 remainder、跨 Move／Token 的容量分配
 （Q1776）、after 的新世代與入場事件也須實際局面測試。BP18 種子已含私有的至多一張
-武闘竜人選擇與 −3 減費；任意順序、完整 trigger／UB、
-新世代 entry_effects 尚未由上述片段涵蓋。
+武闘竜人選擇與 −3 減費；完整 trigger／UB、新世代 entry_effects 尚未由上述片段涵蓋。
+任意順序另以 Look→選取→Move→成功 Before remainder→Order／MoveSpec.order 的合成片段
+驗證良構，不把此片段當作整卡或實際排列驗收。
 
 MoveResult 保存 requested_position／actual_position，與 requested_to／actual_to／
 replacements 一起保留提案與結果；checker 沒有建構或驗證執行結果，不把這些欄位當成

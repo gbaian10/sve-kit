@@ -805,17 +805,6 @@ fn deferred_actions_and_granted_sources_stay_rejected() {
         face: FaceId("base".to_owned()),
         ability: AbilityId(1),
     };
-    let modify = Action::Modify {
-        subjects: affected(),
-        patch: CharacteristicPatch::Numeric {
-            stat: Stat::Attack,
-            change: NumericChange::Add {
-                amount: Expr::Literal(Int(1)),
-            },
-        },
-        expires: lasting(),
-        source: EffectReference::CurrentInstallation {},
-    };
     let grant = Action::Grant {
         subjects: affected(),
         abilities: vec![],
@@ -840,7 +829,7 @@ fn deferred_actions_and_granted_sources_stay_rejected() {
         lifetime: DelayedLifetime::Once {},
         source: ability_source(),
     };
-    for action in [modify, grant, delay] {
+    for action in [grant, delay] {
         let error = reject(
             body(1, vec![instruction(action, 1, "synthetic")]),
             WellFormedReason::UnsupportedShape,

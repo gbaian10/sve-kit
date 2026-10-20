@@ -696,7 +696,12 @@ fn movement_collections_keep_discard_destroy_banish_types_and_private_provenance
                 },
             );
             before_choice.visibility = visibility;
-            reject_choice(body(1, vec![producer.clone(), decision(before_choice)]));
+            let program = body(1, vec![producer.clone(), decision(before_choice)]);
+            if matches!(receipt, MovementReceipt::Discard { .. }) {
+                reject_choice(program);
+            } else {
+                accept(program);
+            }
         }
     }
 }

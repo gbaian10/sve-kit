@@ -389,14 +389,20 @@ CharacteristicPatch 初版參數為 `GrantAbility / SuppressAbility / SetKind / 
 
 `I.token` 的 output bind 保存新建立物件（不含未成功建立者），數量選擇為 ResolutionChoice；`TokenAllocation {templates:List<TokenTemplateId>,total,counts:Map<TemplateId,Nat>,constraint:Unrestricted|EachExactlyOnce}` 要求總和相符。目的地 `DestinationAllocation {scope:Batch|PerItem,domain:Set<ZoneRef>}` 在建立前選，容量規則仍可另需合法程序。具名 token 必須能唯一解析同一快照模板，`Binding<CardName>` 不等於任意 V.name 的多名稱集合。
 
-內部 Rust 的 MoveSpec.to、SearchPartition.zone 與 RedirectMove.to 使用
+內部 Rust 的 MoveSpec.to、SearchPartition.zone、Placement.zone 與 RedirectMove.to 使用
 `MoveDestination::Owners(Hand / Deck / Cemetery / Banish) | Shared(ZoneRef)`：前者對每個
 物件解析其持有者，後者在目前良構子集只接受 Field／Ex。不能把混合持有者集合送到來源
 控制者的一個私人區域。MoveResult 保留 requested_position 與 actual_position，並與
 requested_to、actual_to、replacements 一起保存；這是內部承載，非公開 IR schema 或
 executor 驗收。各動作目前接受的良構範圍見 [typed IR 良構邊界](typed-ir-validation.md)。
 
-`I.search.destination = Single(MoveSpec) | Partition(PrintedOrder,List<{zone,cardinality}>) | OptionalSelfReplacement(predicate,MoveSpec)`；先找到與公開證明，再按文字順序分配／替代，末尾只 FullZone shuffle 一次。Partition 各段照印刷指示要求選擇，不擅合併輸入點；CP03-SL07 找到 1 張時先手牌、墓地步驟無牌，不能先分到墓地逃避前句。found 只在此指示的 continuation 可讀。`T.receipt` 保留 found／revealed／moved 三種量，search 成功量不能一律代表入場成功量。
+`I.search.destination = Single(MoveSpec) | Partition(PrintedOrder,List<{zone,cardinality}>) | OptionalSelfReplacement(predicate,MoveSpec)`；先找到與公開證明，再按文字順序分配／替代，末尾只 FullZone shuffle 一次。Partition 各段照印刷指示要求選擇，不擅合併輸入點；CP03-SL07 找到 1 張時先手牌、墓地步驟無牌，不能先分到墓地逃避前句。found／revealed 只在此指示的 destination continuation 可讀；物件投影保持移動前世代，
+found 為搜尋者私有、revealed 為公開條件證明，兩者不能作成功 after。groups 是同一次
+搜尋回答上的限制：全域 filter 與群組域取交集、Disjoint 成員不重複，各組照自己的基數
+及共同 distinct_by／aggregate bounds 驗答案，不能拆成多次搜尋。
+OptionalSelfReplacement 僅在找到並公開後求條件，成立才問一次替代；拒絕走原本
+Owners(Hand)，零張不問替代。Partition 按文字順序消耗剩餘 found。每條分支（含零張、
+拒絕與容量不足）最後只洗被搜尋的整副牌庫一次，不能提前依實際候選數取消搜尋詢問。`T.receipt` 保留 found／revealed／moved 三種量，search 成功量不能一律代表入場成功量。
 
 `TargetRoleSpec {roles:Map<RoleId,Cardinality>}` 與既有選目標一起回答，供 first/rest 不等處理（BP21-PR13）；无序 ObjectSet 不允許任取 first。`TokenAllocation` 見 GAP-S-019，變身在實際消滅後以 ResolutionChoice 決定張數，與打出時的目標角色分開。`K.repeat.receipts` 保存每輪結果，collect 是列表；去重物件需明示，同一張重新入場的新世代不自動合併。
 
@@ -461,6 +467,16 @@ R-0004 revision 2 納入維護者 2026-10-19 對三組舊新版次共用 DSL 的
 - 持續效果條件翻轉、修正期限結束、操縦／箱詰め還原與單純重算不生事件（`strength: inferred`，不能把 Q2758 擴稱這些情況均有直接 Q&A）。
 - 一個數值指示對同一主體只記一個事實，Attack／Life 是 facet；「攻擊力或體力增加」any_of 只匹配一次（`strength: inferred`，Q2075 未直接說次數）。連續兩個指示仍是兩事實，不因同 execution 合併。
 - 領袖傷害／回復／生命費用照實際 delta 記；Q732 含進化時生命成本，Q2282 的三次變動是三事實。E.life-change／E.stat-change 如表示同一提交，共用 OriginFactId，不能數兩遍。
+
+`I.modify` 的 Numeric（含 Combined）就是此處的明示數值指示：執行時捕捉 subjects
+及數值運算元，登記 Numeric 層修正，以該次指示前後的有效特徵求 delta。
+同主體的非零 Attack／Life facet 合為一個事實；無實際差值不造事件。
+SetKind 單獨登記 NonNumeric 層，不產生數值事件，也不隱含失去能力。
+`I.install-effect` 的 Continuous 是登記持續宣告，即使當下有效特徵改變也不是明示
+數值指示，不產生 stat_changed；不能拿它代替 buff／set_stat 的 lowering。
+這個區分沿用上述 `strength: inferred` 的事件來源政策，並非新增官方裁定。
+兩條入口都以適正打出時點排序並固定安裝時對象，不以來源離場自動失效；期限與目標
+世代仍須檢查。Modify 不帶條件重讀數值；卡文明寫動態條件的宣告使用 Continuous。
 
 撰寫 stat_changed 的事件 filter 與 history.where 統一為 ref／stat／direction，降低時分別匹配 subject、StatDelta.property、delta 的正負；這是同一份述詞，不接受另一套撰寫別名。
 
