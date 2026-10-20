@@ -16,6 +16,9 @@ use sve_engine::game::internal::{Answer, Context, Fact, InstructionOutcome, Prog
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
+#[path = "internal_ir/ordering.rs"]
+mod ordering;
+
 fn source(card: &str) -> SourceSpan {
     SourceSpan {
         card_id: card.into(),

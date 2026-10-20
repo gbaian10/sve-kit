@@ -90,3 +90,32 @@ Effect(Any) cause、常值 true condition，以及 Installation anchor 的 EndRe
 BP02-116 的測試只驗一個已給定對象的破壞片段，不包含 Quick、打出目標或後續搜尋。
 BP02-089 只驗能力破壞禁止述詞，測試的 EndResolution 為合成期限；原卡的 static、Aura、
 進化與其他能力沒有遷移。兩者印刷資料均來自公開輸入生成器，片段不算整卡准入。
+
+## 私有看牌與同區排列
+
+Look 先准入 Exact、viewer 自己的 Deck，取頂端至多 count 張；不移區、不換世代。
+LookOutcome 保存觀察的舊世代及 snapshot，並只向 viewer 增加觀察證據。
+其他區域、他人牌庫、匿名 filler 及逐張 Look 仍拒絕。
+
+Order 使用自己的 DecisionId，先固定 cards、chooser、單一 Owners(Deck) Placement
+及完整牌庫 snapshot。可見性只准入以 chooser 為基準的 Only(SelfPlayer)；Public、AuthorityOnly
+及其他 audience 的題目與結果投影尚未定義，包含未執行分支都拒絕。只准入 Top／Bottom、位於 chooser 自己牌庫的目前世代；
+跨 owner、跨區與 Index 拒絕。cards 可由本次執行的私有 Look receipt、Union／Difference 及原有
+公開 selector 求得；Look receipt 必須屬於 chooser，且仍有有效觀察證據。
+這些新增的私有 selector 只在 Order cards 的 Union／Difference 主幹准入，不放寬一般
+If／capture／Move 或主幹下其他 selector（例如 Zone predicate）的讀值範圍；未執行分支同樣檢查。
+
+DecisionView 的 Order domain 只向 chooser／Referee 給出本次 token 範圍內的整數 handle
+及印刷卡號／卡名，沒有物件 ID 或世代。Answer::Order 回答完整 handle 排列，authority
+轉為 OrderAnswer 後驗完整域、重複、世代與 snapshot；錯玩家、錯 payload、過期 token、
+漏牌或外來 handle 完整回復待答狀態。成功提交後同鍵重播明確拒絕，不再重排或耗 RNG。
+空域自動記錄空結果，單張仍必問；待答仍不可存檔或計算 digest。
+
+排列方向為頂至底，Bottom 的第一項位於底部區塊最上方。一次移除域並插入整個區塊，
+保留域外相對順序；OrderOutcome 的 moves 空、成功成員不換世代，沒有移區／入場／離場
+事實。非空重排撤銷該牌庫舊位置證據及先前 Look receipt 的排列授權，即使回答沒有改變
+順序也一樣；需要再次排列時先取得新的 Look 證據。
+
+BP07-SL09、BP06-024 僅驗「看五張、已決定零張入場、餘牌放底」片段；沒有實作中間的
+選牌、總費用、入場、觸發及整卡其他能力。Search、其 groups／目的地程序、成功移動
+remainder、減費安裝與 Token 共享容量仍未准入；不能以此片段宣稱整能力已執行。
