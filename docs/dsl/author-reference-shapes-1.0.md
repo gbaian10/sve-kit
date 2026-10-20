@@ -53,7 +53,8 @@ schema 通過不授予這些語義。
 | A.player-set | PlayerSetName | 無 | 不接 self／opp 或陣列 | 不因引擎目前二席而縮成 PlayerRef |
 | A.single-leader | `{leader: self 或 opp}` | 無 | 不接其他 PlayerRef | §6 明列值域，與葉參數 Player 分開定義 |
 | A.multiple-leaders | `{leaders: opponents 或 all}` | 無 | 不接單席 | GAP-A-020、§6 |
-| A.leader-recipient | A.single-leader 或 A.multiple-leaders | 無 | 兩種單鍵互斥 | 不混進 A.ref |
+| A.leader-of | `{leader_of:A.ref}` | 無 | 不接 PlayerRef、param 或快照表達式 | Live controller 的領袖；離場依法 LKI，不是 owner |
+| A.leader-recipient | A.single-leader、A.multiple-leaders 或 A.leader-of | 無 | 三種單鍵互斥，各納入一次 | 不混進 A.ref；leader_of 的單一物件基數另驗 |
 | A.until／short | turn、next_opp_turn、this_and_next_opp_turn、game | 無 | 四個字串值 | §9；不收無錨點舊別名 |
 | A.phase-edge | `{who: A.player-ref, phase: Phase, edge: Edge}` | 無 | Phase=start/main/end；Edge=begin/end | 安裝時捕捉 who |
 | A.turn-edge | `{who: A.player-ref, edge: Edge}` | 無 | 不收 phase | 指定玩家下回合邊界 |
@@ -72,9 +73,10 @@ amount／value 是表達式讀值，move_receipt 是收據，不得混成物件�
 holder 是否存在於該 on 事件仍須由事件型別推導。
 不能把 IR 任意欄位直接當成作者欄位，也不能輸入自由字串路徑。
 
-本表不定義 `first/second/rest` 的作者編碼或 Sel 的 `leader/leader_of/rest`。
-它們須與 Sel、Target 的順序／角色視圖一併定形，不從 §6 的簡寫推斷出
+本表定義領袖葉形狀，不定義完整 Sel 的 filter 組合或 `rest`。
+`first/second/rest` 的作者編碼須與 Target 的順序／角色視圖一併定形，不從 §6 的簡寫推斷出
 `"first:t"` 或 `{first: t}` 都合法。這不刪除原語義，也不宣稱完整 Ref 語法已交付。
+已定形的 Target roles 與接線責任見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 
 ## 參數與入口邊界
 

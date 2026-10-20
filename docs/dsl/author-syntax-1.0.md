@@ -101,6 +101,9 @@ evolve:
 
 `A.target`：`targets: [{bind, from: Sel, n|upto|any, groups?, cost_sum_le?, distinct_by?, distinct_names?, option?, roles?}]`。選ぶ依語義規則收集為 D.play-param Targets，順序按卡文；本文普通 choose 永遠結算時。公開與否不能獨自決定選擇時點。`option` 僅在被選的チョイス模式有效。**刪除 `targets[].if`**：R-0004 普通條件不阻止選目標，R-0005 未支付土の秘術也不能免除目標要求。必要目標不足不能打出／選該模式；一般條件在本文查，SC／NC 另按捕捉規則。
 
+roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
+數量規則不表示完整 Target／Sel／動作 schema 已實作。
+
 `A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。**標準長形為 `steps: [{<費用鍵>: payload}, …]`**，依文字順序付款；v0 短形鍵順序需由保序解析器保存，重複同鍵用 steps，不能默默覆寫。
 
 選材料格式 `{sel, n|upto|any, groups?, distinct_by?, result?}`，top 切片不額外選身份。材料組 groups 共用 disjoint=true 與整體限制；不是逐組貪婪選。K.pay 全付或全不付；合法零費用、合法取代依 CR 10.6.2.5.2–.3 可算完整付款，但不製造原動作事件。
