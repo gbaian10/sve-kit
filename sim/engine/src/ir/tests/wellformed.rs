@@ -983,12 +983,24 @@ fn look(id: u64, count: Expr<Nat>, mode: StepwiseMode) -> Located<Node> {
         "synthetic",
     )
 }
+fn stepwise(id: u64, timing: StepwiseTiming) -> StepwiseMode {
+    StepwiseMode::UpToStepwise {
+        decision: Box::new(StepwiseDecision {
+            id: DecisionId(id),
+            actor: PlayerRef::Controller {},
+            visibility: Visibility::Only {
+                players: controller_set(),
+            },
+            timing,
+        }),
+    }
+}
 fn up_to_draw(id: u64) -> Located<Node> {
     instruction(
         Action::Draw {
             player: PlayerRef::Controller {},
             count: Expr::Literal(Int(2)),
-            mode: StepwiseMode::UpToStepwise,
+            mode: stepwise(id, StepwiseTiming::BeforeDraw),
         },
         id,
         "synthetic",
@@ -1012,7 +1024,11 @@ fn choice_free_batches_and_stages_cannot_hide_stepwise_decisions() {
     accept(body(
         1,
         vec![each_player(
-            look(1, Expr::Literal(Nat(3)), StepwiseMode::UpToStepwise),
+            look(
+                1,
+                Expr::Literal(Nat(3)),
+                stepwise(9, StepwiseTiming::AfterLook),
+            ),
             StageMode::ChoiceProcedure {},
         )],
     ));
@@ -1030,7 +1046,11 @@ fn choice_free_batches_and_stages_cannot_hide_stepwise_decisions() {
         vec![up_to_draw(1)],
         vec![
             draw(1, Expr::Literal(Int(1))),
-            look(2, Expr::Literal(Nat(1)), StepwiseMode::UpToStepwise),
+            look(
+                2,
+                Expr::Literal(Nat(1)),
+                stepwise(9, StepwiseTiming::AfterLook),
+            ),
         ],
     ] {
         reject(
@@ -1040,7 +1060,11 @@ fn choice_free_batches_and_stages_cannot_hide_stepwise_decisions() {
     }
     for stage in [
         up_to_draw(1),
-        look(1, Expr::Literal(Nat(3)), StepwiseMode::UpToStepwise),
+        look(
+            1,
+            Expr::Literal(Nat(3)),
+            stepwise(9, StepwiseTiming::AfterLook),
+        ),
         control(Control::If {
             condition: Expr::Literal(Bool(true)),
             then_body: body(4, vec![up_to_draw(1)]),

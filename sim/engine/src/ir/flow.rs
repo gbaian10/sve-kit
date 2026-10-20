@@ -80,14 +80,14 @@ record!(AbilityReference {
     instance: AbilityReferenceKind,
     definition: AbilityId
 });
-record!(Ability { id: AbilityId, source: AbilitySource, kind: AbilityKind, qualification: AbilityQualification, active_zones: Vec<ZoneKind>, play: Option<PlaySpec>, trigger: Option<TriggerSpec>, body: Option<Program>, declarations: Vec<Effect> });
+record!(Ability { id: AbilityId, scope: ScopeId, source: AbilitySource, kind: AbilityKind, qualification: AbilityQualification, active_zones: Vec<ZoneKind>, event_captures: Vec<Capture>, play: Option<PlaySpec>, trigger: Option<TriggerSpec>, body: Option<Program>, declarations: Vec<Effect> });
 tags!(AbilityKind {
     Spell,
     Activated,
     Triggered,
     Static
 });
-record!(PlaySpec { parameters: Vec<Decision>, costs: CostSpec });
+record!(PlaySpec { captures: Vec<Capture>, parameters: Vec<Decision>, costs: CostSpec });
 record!(Precondition { kind: PreconditionKind, predicate: Expr<Bool>, protects: InstructionId, reason: PreconditionReason });
 tags!(PreconditionKind {
     CardTextPrerequisite,
@@ -96,10 +96,15 @@ tags!(PreconditionKind {
 variants!(#[derive(Copy)] PreconditionReason { CardText {} => [], Rule { rule: RuleId } => [] });
 record!(Decision {
     id: DecisionId,
+    captures: Vec<Capture>,
     actor: PlayerRef,
     domain: ChoiceDomain,
     kind: DecisionKind,
     visibility: Visibility
+});
+variants!(Procedure {
+    Rule { scope: ScopeId, procedure: RuleProcedure, rule: RuleId, decision: Decision } => [],
+    Quick { window: QuickWindow, decision: Decision } => []
 });
 variants!(DecisionKind {
     PlayParameter { slot: PlaySlot, selection_snapshot: SelectionSnapshot, play_scope: ExecutionRef, input: InputMode } => ["decision.play-parameter"],
@@ -132,6 +137,7 @@ tags!(RuleProcedure {
 });
 tags!(QuickWindow { Attack, EndPhase });
 variants!(ChoiceDomain {
+    EndPhaseGuardAct { binding: Binding<Selector> } => [],
     Objects { constraint: SelectionConstraint, binding: Binding<Selector>, target_roles: Option<TargetRoleSpec> } => [],
     Modes { modes: Vec<ModeId>, cardinality: Cardinality, binding: Binding<Vec<ModeId>>, exclude_used: Option<ModeExclusion> } => [],
     Order { objects: Selector, binding: Binding<Selector> } => [],
@@ -185,6 +191,7 @@ variants!(Control {
 });
 record!(Mode {
     id: ModeId,
+    parameters: Vec<Decision>,
     body: Program
 });
 tags!(ModeChoiceKind {

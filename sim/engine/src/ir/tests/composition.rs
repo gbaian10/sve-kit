@@ -328,7 +328,9 @@ fn dynamic_recipients_work_for_damage_distribution_and_attack_restrictions() {
         rule: RuleId(1),
     });
     ability.play = Some(PlaySpec {
+        captures: vec![],
         parameters: vec![Decision {
+            captures: vec![],
             id: DecisionId(1),
             actor: PlayerRef::Controller {},
             domain: ChoiceDomain::Distribution {
@@ -385,6 +387,7 @@ fn primary_and_remainder_target_roles_feed_distinct_damage_instructions() {
         ],
     };
     let choice = Decision {
+        captures: vec![],
         id: DecisionId(1),
         actor: PlayerRef::Controller {},
         domain: ChoiceDomain::Objects {

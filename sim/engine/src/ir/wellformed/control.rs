@@ -3,10 +3,20 @@ use super::{
     IterationCheck, Program, ReceiptExport, ReceiptList, ReceiptLocation, ReceiptReference,
     RepeatBody, ScopeId, Termination, TypeId, WellFormedReason,
 };
-use crate::ir::{DecisionKind, IterationOrder, StageMode};
+use crate::ir::{Decision, DecisionKind, Declinable, IterationOrder, ReceiptId, StageMode};
 
 impl Checker {
     pub(super) fn control(&mut self, control: &Control) -> Checked {
+        let modes = self.env.play_modes;
+        if !matches!(control, Control::Sequence { .. } | Control::Mode { .. }) {
+            self.env.play_modes = false;
+        }
+        let result = self.control_inner(control);
+        self.env.play_modes = modes;
+        result
+    }
+
+    fn control_inner(&mut self, control: &Control) -> Checked {
         match control {
             Control::Sequence { body } => self.isolated(|checker| checker.program(body)),
             Control::If {
@@ -92,11 +102,40 @@ impl Checker {
                 on_paid,
                 receipt,
             } => self.payment(*at, costs, *optional, on_paid, *receipt),
-            Control::Match { .. }
-            | Control::May { .. }
-            | Control::Mode { .. }
-            | Control::Repeat { .. } => self.reject(),
+            Control::May {
+                body,
+                choice,
+                receipt,
+            } => self.optional(body, choice, *receipt),
+            Control::Mode {
+                modes,
+                count,
+                chosen,
+                choice_kind,
+            } => self.modes(modes, count, chosen, *choice_kind),
+            Control::Match { .. } | Control::Repeat { .. } => self.reject(),
         }
+    }
+
+    fn optional(&mut self, body: &Program, choice: &Decision, receipt: ReceiptId) -> Checked {
+        let DecisionKind::ResolutionChoice {
+            may: Declinable::MayDecline,
+            cardinality,
+            precondition: None,
+        } = choice.kind
+        else {
+            return Err(self.error(WellFormedReason::DecisionTiming));
+        };
+        self.isolated(|checker| {
+            checker.env.scope = body.scope;
+            checker.at("choice", |checker| {
+                checker.decision_header(choice)?;
+                checker.answer(choice, Some(cardinality))
+            })?;
+            checker.env.choices = false;
+            checker.at("body", |checker| checker.program(body))
+        })?;
+        self.produce(receipt, TypeId::of::<super::OpaqueOutcome>())
     }
 
     fn batch(&mut self, batch: &InstructionBatch) -> Checked {

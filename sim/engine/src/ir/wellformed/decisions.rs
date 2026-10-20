@@ -1,10 +1,12 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
 use crate::ir::{
-    Action, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision, DecisionKind,
-    Declinable, DiscardMode, Disjointness, InstructionContext, Node, PaymentOptionality,
-    PaymentResult, PaymentTime, PlayerRef, PlayerRelation, Posture, Program, ReceiptId,
-    SelectionConstraint, SelectionView, Selector, Visibility, ZoneKind,
+    Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
+    DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
+    InstructionContext, Nat, Node, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot,
+    PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality, RuleProcedure,
+    SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind,
 };
+use alloc::collections::BTreeSet;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -64,12 +66,6 @@ impl Checker {
     }
 
     pub(super) fn decision(&mut self, decision: &Decision) -> Checked {
-        if !self.env.choices {
-            return self.reject();
-        }
-        if !self.decisions.insert(decision.id) {
-            return Err(self.error(WellFormedReason::DuplicateDecision));
-        }
         let DecisionKind::ResolutionChoice {
             may,
             cardinality,
@@ -81,11 +77,42 @@ impl Checker {
         if *may != Declinable::Required {
             return self.reject();
         }
-        self.cardinality(*cardinality)?;
-        self.player(&decision.actor)?;
-        self.visibility(&decision.visibility)?;
         if let Some(guard) = precondition {
             self.at("precondition", |checker| checker.boolean(&guard.predicate))?;
+        }
+        self.decision_header(decision)?;
+        self.answer(decision, Some(*cardinality))
+    }
+
+    pub(super) fn decision_header(&mut self, decision: &Decision) -> Checked {
+        if !self.env.choices {
+            return self.reject();
+        }
+        if !self.decisions.insert(decision.id) {
+            return Err(self.error(WellFormedReason::DuplicateDecision));
+        }
+        self.player(&decision.actor)?;
+        self.visibility(&decision.visibility)
+    }
+
+    pub(super) fn answer(
+        &mut self,
+        decision: &Decision,
+        cardinality: Option<Cardinality>,
+    ) -> Checked {
+        if let Some(cardinality) = cardinality {
+            self.cardinality(cardinality)?;
+        }
+        if has_roles(&decision.domain)
+            && !matches!(
+                decision.kind,
+                DecisionKind::PlayParameter {
+                    slot: PlaySlot::Targets,
+                    ..
+                }
+            )
+        {
+            return self.reject();
         }
         self.env.chooser = Some(decision.actor.clone());
         self.env.private_choice = matches!(
@@ -94,57 +121,198 @@ impl Checker {
                 && players.relative_to == decision.actor
         );
         let result = self.at("domain", |checker| {
-            checker.domain(&decision.domain, *cardinality)
+            checker.domain(&decision.domain, cardinality)
         });
         self.env.chooser = None;
         self.env.private_choice = false;
         result?;
-        if decision.visibility == (Visibility::Public {})
-            && let ChoiceDomain::Integer { binding, .. } = &decision.domain
-        {
-            self.env.public_scalars.insert(binding.key());
+        if decision.visibility == (Visibility::Public {}) {
+            self.public_answers(&decision.domain);
         }
-        Ok(())
+        self.at("captures", |checker| {
+            checker.captures(
+                &decision.captures,
+                CaptureTime::AtSelection {
+                    decision: decision.id,
+                },
+            )
+        })
     }
 
-    fn visibility(&mut self, visibility: &Visibility) -> Checked {
+    fn public_answers(&mut self, domain: &ChoiceDomain) {
+        match domain {
+            ChoiceDomain::Integer { binding, .. } => {
+                self.env.public_scalars.insert(binding.key());
+            }
+            ChoiceDomain::Compound { domains } => {
+                for child in domains {
+                    self.public_answers(child);
+                }
+            }
+            ChoiceDomain::Objects { .. }
+            | ChoiceDomain::EndPhaseGuardAct { .. }
+            | ChoiceDomain::Modes { .. }
+            | ChoiceDomain::Order { .. }
+            | ChoiceDomain::Distribution { .. }
+            | ChoiceDomain::Names { .. }
+            | ChoiceDomain::QuickActionOrPass { .. } => {}
+        }
+    }
+
+    pub(super) fn visibility(&mut self, visibility: &Visibility) -> Checked {
         match visibility {
             Visibility::Public {} | Visibility::AuthorityOnly {} => Ok(()),
             Visibility::Only { players } => self.players(players),
         }
     }
 
-    fn domain(&mut self, domain: &ChoiceDomain, cardinality: Cardinality) -> Checked {
+    fn domain(&mut self, domain: &ChoiceDomain, cardinality: Option<Cardinality>) -> Checked {
         match domain {
             ChoiceDomain::Objects {
                 constraint,
                 binding,
-                target_roles: None,
+                target_roles,
             } => {
-                if constraint.cardinality != cardinality {
+                if cardinality.is_some_and(|cardinality| constraint.cardinality != cardinality) {
                     return Err(self.error(WellFormedReason::DecisionCardinality));
                 }
                 self.constraint(constraint)?;
-                self.define(*binding, BindingKind::Value)
+                self.define(*binding, BindingKind::Value)?;
+                if let Some(roles) = target_roles {
+                    self.roles(roles, constraint.cardinality)?;
+                }
+                Ok(())
             }
             ChoiceDomain::Integer {
                 cardinality: bounds,
                 binding,
             } => {
                 self.cardinality(*bounds)?;
-                if *bounds != cardinality {
+                if cardinality.is_some_and(|cardinality| *bounds != cardinality) {
                     return Err(self.error(WellFormedReason::DecisionCardinality));
                 }
                 self.define(*binding, BindingKind::Value)
             }
-            ChoiceDomain::Objects { .. }
+            ChoiceDomain::Compound { domains } => {
+                // The envelope cardinality counts execution, not members of heterogeneous payloads.
+                if cardinality.is_some_and(|value| {
+                    value
+                        != (Cardinality {
+                            minimum: Nat(1),
+                            maximum: Some(Nat(1)),
+                        })
+                }) {
+                    return Err(self.error(WellFormedReason::DecisionCardinality));
+                }
+                let start = self.env.clone();
+                let mut after = start.clone();
+                for (index, child) in domains.iter().enumerate() {
+                    self.env = start.clone();
+                    self.at(&index.to_string(), |checker| checker.domain(child, None))?;
+                    after.bindings.extend(self.env.bindings.clone());
+                }
+                self.env = after;
+                Ok(())
+            }
+            ChoiceDomain::EndPhaseGuardAct { .. }
             | ChoiceDomain::Modes { .. }
             | ChoiceDomain::Order { .. }
             | ChoiceDomain::Distribution { .. }
             | ChoiceDomain::Names { .. }
-            | ChoiceDomain::Compound { .. }
             | ChoiceDomain::QuickActionOrPass { .. } => self.reject(),
         }
+    }
+
+    pub(super) fn play_decision(&mut self, decision: &Decision, controller: &PlayerRef) -> Checked {
+        let DecisionKind::PlayParameter {
+            slot,
+            play_scope,
+            input,
+            ..
+        } = decision.kind
+        else {
+            return Err(self.error(WellFormedReason::DecisionTiming));
+        };
+        self.play_input(play_scope, input, &decision.actor, controller)?;
+        if decision.visibility != (Visibility::Public {}) {
+            return self.reject();
+        }
+        match (slot, &decision.domain) {
+            (PlaySlot::Targets, ChoiceDomain::Objects { .. })
+            | (PlaySlot::X, ChoiceDomain::Integer { .. }) => {}
+            _ => return self.reject(),
+        }
+        self.decision_header(decision)?;
+        self.answer(decision, None)
+    }
+
+    pub(super) fn play_input(
+        &mut self,
+        execution: ExecutionRef,
+        input: InputMode,
+        actor: &PlayerRef,
+        controller: &PlayerRef,
+    ) -> Checked {
+        if execution != (ExecutionRef::Current {}) {
+            return Err(self.error(WellFormedReason::DecisionTiming));
+        }
+        let valid = match input {
+            InputMode::Inline => actor == controller,
+            InputMode::Handoff => matches!(actor, PlayerRef::RequireOne { players }
+                if players.relation == PlayerRelation::Opponents && &players.relative_to == controller
+                    && players.cardinality == (Cardinality { minimum: Nat(1), maximum: Some(Nat(1)) })),
+        };
+        if !valid {
+            return Err(self.error(WellFormedReason::DecisionTiming));
+        }
+        self.player(actor)
+    }
+
+    pub(super) fn rule_decision(
+        &mut self,
+        procedure: RuleProcedure,
+        decision: &Decision,
+    ) -> Checked {
+        let ChoiceDomain::EndPhaseGuardAct { binding } = &decision.domain else {
+            return self.reject();
+        };
+        if procedure != RuleProcedure::GuardAct
+            || decision.visibility != (Visibility::Public {})
+            || decision.actor != (PlayerRef::Active {})
+            || !decision.captures.is_empty()
+        {
+            return self.reject();
+        }
+        self.decision_header(decision)?;
+        self.define(*binding, BindingKind::Value)
+    }
+
+    fn roles(&mut self, spec: &TargetRoleSpec, selected: Cardinality) -> Checked {
+        if spec.roles.is_empty() || spec.roles.len() > 2 {
+            return Err(self.error(WellFormedReason::InvalidRoles));
+        }
+        let mut ids = BTreeSet::new();
+        let mut first = false;
+        let mut remainder = false;
+        for role in &spec.roles {
+            if !ids.insert(role.role.0) {
+                return Err(self.error(WellFormedReason::InvalidRoles));
+            }
+            match role.cardinality {
+                RoleCardinality::IfNonempty { count: Nat(1) } if !first => first = true,
+                RoleCardinality::Remainder {} if !remainder => remainder = true,
+                RoleCardinality::IfNonempty { .. }
+                | RoleCardinality::Remainder {}
+                | RoleCardinality::Fixed { .. } => {
+                    return Err(self.error(WellFormedReason::InvalidRoles));
+                }
+            }
+            self.define(role.binding, BindingKind::Value)?;
+        }
+        if !first || (!remainder && selected.maximum.is_none_or(|maximum| maximum.0 > 1)) {
+            return Err(self.error(WellFormedReason::InvalidRoles));
+        }
+        Ok(())
     }
 
     fn constraint(&mut self, constraint: &SelectionConstraint) -> Checked {
@@ -365,5 +533,19 @@ impl Checker {
             .receipts
             .insert(receipt, TypeId::of::<PaymentResult>());
         Ok(())
+    }
+}
+
+fn has_roles(domain: &ChoiceDomain) -> bool {
+    match domain {
+        ChoiceDomain::Objects { target_roles, .. } => target_roles.is_some(),
+        ChoiceDomain::Compound { domains } => domains.iter().any(has_roles),
+        ChoiceDomain::EndPhaseGuardAct { .. }
+        | ChoiceDomain::Modes { .. }
+        | ChoiceDomain::Order { .. }
+        | ChoiceDomain::Distribution { .. }
+        | ChoiceDomain::Integer { .. }
+        | ChoiceDomain::Names { .. }
+        | ChoiceDomain::QuickActionOrPass { .. } => false,
     }
 }

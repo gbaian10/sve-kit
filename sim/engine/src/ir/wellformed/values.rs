@@ -4,7 +4,9 @@ use super::{
     NatOperation, NatRead, ObjectOperand, ObjectReceipt, ObjectReceiptList, ObjectRef, ObjectView,
     PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView, Selector, WellFormedReason,
 };
-use crate::ir::{BoolFrozen, PaymentReference};
+use crate::ir::{
+    BoolFrozen, CaptureTime, CharacteristicView, ExecutionRef, NumberRead, PaymentReference,
+};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -12,6 +14,9 @@ use crate::ir::{BoolFrozen, PaymentReference};
 )]
 impl Checker {
     pub(super) fn integer(&mut self, expression: &Expr<Int>) -> Checked {
+        if self.event_capture() && matches!(expression, Expr::Live(_)) {
+            return self.reject();
+        }
         if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
             return self.reject();
         }
@@ -76,12 +81,25 @@ impl Checker {
                     self.integer(else_value)
                 }
                 IntOperation::Sum { objects, .. } => self.selector(objects),
-                IntOperation::InformationOrZero { .. } => self.reject(),
+                IntOperation::InformationOrZero { information } => match information {
+                    NumberRead::Cost { object, view } | NumberRead::Stats { object, view, .. } => {
+                        if !matches!(
+                            view,
+                            CharacteristicView::Original | CharacteristicView::Effective
+                        ) {
+                            return self.reject();
+                        }
+                        self.view(object)
+                    }
+                },
             },
         }
     }
 
     pub(super) fn natural(&mut self, expression: &Expr<Nat>) -> Checked {
+        if self.event_capture() && matches!(expression, Expr::Live(_)) {
+            return self.reject();
+        }
         if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
             return self.reject();
         }
@@ -91,6 +109,24 @@ impl Checker {
             Expr::Captured(reference) => self.reference(reference.binding, BindingKind::Capture),
             Expr::Frozen(read) => match read.as_ref() {
                 NatFrozen::ReceiptActual { receipt } => self.measured(receipt),
+                NatFrozen::SpellChain {
+                    player,
+                    execution,
+                    at,
+                }
+                | NatFrozen::NecroCharge {
+                    player,
+                    execution,
+                    at,
+                } => {
+                    if self.play_entry.is_none()
+                        || *execution != (ExecutionRef::Current {})
+                        || self.count_time != Some(*at)
+                    {
+                        return Err(self.error(WellFormedReason::CaptureTiming));
+                    }
+                    self.player(player)
+                }
                 NatFrozen::EarthRiteRemovedStack { .. }
                 | NatFrozen::DiceAcceptedAttempt { .. }
                 | NatFrozen::TargetedTargetSlot { .. }
@@ -99,8 +135,6 @@ impl Checker {
                 | NatFrozen::CounterChangeAfter { .. }
                 | NatFrozen::AttackOrdinal { .. }
                 | NatFrozen::RaceOrdinal { .. }
-                | NatFrozen::SpellChain { .. }
-                | NatFrozen::NecroCharge { .. }
                 | NatFrozen::DiceValue { .. } => self.reject(),
             },
             Expr::Live(read) => match read.as_ref() {
@@ -141,6 +175,9 @@ impl Checker {
     }
 
     pub(super) fn boolean(&mut self, expression: &Expr<Bool>) -> Checked {
+        if self.event_capture() && matches!(expression, Expr::Live(_)) {
+            return self.reject();
+        }
         if self.env.chooser.is_some() && matches!(expression, Expr::Captured(_)) {
             return self.reject();
         }
@@ -307,14 +344,31 @@ impl Checker {
 
     fn view(&self, view: &ObjectView) -> Checked {
         match view {
-            ObjectView::Current { object } => self.object(object),
-            ObjectView::Snapshot { .. }
+            ObjectView::Current { object } if !self.event_capture() => self.object(object),
+            ObjectView::EventSnapshot {
+                object,
+                event,
+                policy,
+            } if self.capture_time
+                == Some(CaptureTime::AtEvent {
+                    event: *event,
+                    policy: *policy,
+                }) =>
+            {
+                self.object(object)
+            }
+            ObjectView::Current { .. }
+            | ObjectView::Snapshot { .. }
             | ObjectView::LastKnown { .. }
             | ObjectView::EventSnapshot { .. } => self.reject(),
         }
     }
 
     pub(super) fn selector(&mut self, selector: &Selector) -> Checked {
+        // This slice has object snapshots, but no event-scoped collection read.
+        if self.event_capture() {
+            return self.reject();
+        }
         self.selection_visibility(selector)?;
         match selector {
             Selector::Bound { reference } => self.reference(*reference, BindingKind::Value),
@@ -391,6 +445,10 @@ impl Checker {
             | Selector::Zone { .. }
             | Selector::Relation { .. } => self.reject(),
         }
+    }
+
+    const fn event_capture(&self) -> bool {
+        matches!(self.capture_time, Some(CaptureTime::AtEvent { .. }))
     }
 
     fn candidate(&mut self, binding: Binding<ObjectRef>, predicate: &Expr<Bool>) -> Checked {
