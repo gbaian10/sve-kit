@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Closed author node fragments for numeric expressions, conditions, object and recipient queries, event/history narrowing, capture, LKI operands and payment/dice reads. These registered variants share one recursive graph; they are not complete author entry, E/C/Sel or execution admission contracts. Scope, units, source authority and capabilities require C1/D0 validation. Includes closed effect installation and cost/target fragments; enclosing ability headers remain outside this subset.",
+  "$comment": "Select a named definition for closed author nodes. Complete authored/expanded file containers and execution admission are outside this schema; the root rejects standalone documents.",
   "not": {},
   "$defs": {
     "Int": {
@@ -669,6 +669,9 @@
         },
         {
           "$ref": "#/$defs/A.until-during-next-phase"
+        },
+        {
+          "$ref": "#/$defs/A.until-during-next-turn"
         }
       ]
     },
@@ -12409,10 +12412,10 @@
       "type": "object",
       "properties": {
         "cost_delta": {
-          "$ref": "#/$defs/A.expr.numeric"
+          "$ref": "#/$defs/A.play.cost-deltas"
         },
         "cost_set": {
-          "$ref": "#/$defs/A.quantity"
+          "$ref": "#/$defs/A.play.cost-sets"
         },
         "additional_cost": {
           "$ref": "#/$defs/A.cost.additional"
@@ -12421,10 +12424,10 @@
           "$ref": "#/$defs/A.cost.optionals"
         },
         "optional_cost_delta": {
-          "$ref": "#/$defs/A.expr.numeric"
+          "$ref": "#/$defs/A.play.cost-deltas"
         },
         "optional_cost_set": {
-          "$ref": "#/$defs/A.quantity"
+          "$ref": "#/$defs/A.play.cost-sets"
         },
         "alt_cost": {
           "$ref": "#/$defs/A.cost.alt"
@@ -13941,6 +13944,9 @@
         },
         "rule_override": {
           "$ref": "#/$defs/A.effect.rule-override"
+        },
+        "grant": {
+          "$ref": "#/$defs/A.effect.grant"
         }
       },
       "type": "object"
@@ -14499,6 +14505,13 @@
         },
         "after": {
           "$ref": "#/$defs/A.steps"
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.granted-ability-head"
+          },
+          "minItems": 1
         }
       },
       "additionalProperties": false,
@@ -14515,6 +14528,11 @@
           "required": [
             "replace_with"
           ]
+        },
+        {
+          "required": [
+            "abilities"
+          ]
         }
       ],
       "not": {
@@ -14523,6 +14541,12 @@
             "required": [
               "replace_with",
               "keywords"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "abilities"
             ]
           }
         ]
@@ -15850,7 +15874,7 @@
       "type": "object",
       "properties": {
         "on": {
-          "$ref": "#/$defs/A.effect-object"
+          "$ref": "#/$defs/A.effect-recipient"
         },
         "keywords": {
           "type": "array",
@@ -15881,12 +15905,30 @@
             "$ref": "#/$defs/A.instead.grant"
           },
           "minItems": 1
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.granted-ability-head"
+          },
+          "minItems": 1
         }
       },
       "additionalProperties": false,
       "required": [
-        "on",
-        "keywords"
+        "on"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "keywords"
+          ]
+        },
+        {
+          "required": [
+            "abilities"
+          ]
+        }
       ]
     },
     "A.act.lose-abilities": {
@@ -16844,21 +16886,7 @@
           "$ref": "#/$defs/A.cond"
         },
         "into": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/CardName"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/CardName"
-              },
-              "minItems": 1
-            },
-            {
-              "$ref": "#/$defs/A.sel.object-core"
-            }
-          ]
+          "$ref": "#/$defs/A.evolution-destination"
         }
       },
       "additionalProperties": false,
@@ -17540,6 +17568,9 @@
         },
         "transform": {
           "$ref": "#/$defs/A.act.transform"
+        },
+        "delayed": {
+          "$ref": "#/$defs/A.act.delayed"
         }
       },
       "additionalProperties": false,
@@ -17725,6 +17756,9 @@
         },
         "by_kind": {
           "$ref": "#/$defs/A.control.by-kind"
+        },
+        "delayed": {
+          "$ref": "#/$defs/A.act.delayed"
         }
       },
       "additionalProperties": false,
@@ -17749,6 +17783,899 @@
         "payment_decided"
       ],
       "additionalProperties": false
+    },
+    "A.play.conditional-delta": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if",
+        "delta"
+      ]
+    },
+    "A.play.conditional-set": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "set": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if",
+        "set"
+      ]
+    },
+    "A.play.cost-delta": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        {
+          "$ref": "#/$defs/A.play.conditional-delta"
+        }
+      ]
+    },
+    "A.play.cost-set": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.quantity"
+        },
+        {
+          "$ref": "#/$defs/A.play.conditional-set"
+        }
+      ]
+    },
+    "A.play.cost-deltas": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.play.cost-delta"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.play.cost-delta"
+          },
+          "minItems": 2
+        }
+      ]
+    },
+    "A.play.cost-sets": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.play.cost-set"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.play.cost-set"
+          },
+          "minItems": 2
+        }
+      ]
+    },
+    "A.ability-zone": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Zone"
+        },
+        {
+          "type": "string",
+          "const": "equipment"
+        }
+      ]
+    },
+    "A.ability-zones": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ability-zone"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.ability-zone"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "A.define": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/BindingName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/A.expr.numeric"
+      },
+      "minProperties": 1
+    },
+    "A.evolution-destination": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CardName"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        {
+          "$ref": "#/$defs/A.sel.object-core"
+        }
+      ]
+    },
+    "A.fusion.exact": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sel",
+        "n"
+      ]
+    },
+    "A.fusion.up-to": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sel",
+        "upto"
+      ]
+    },
+    "A.fusion.any": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sel",
+        "any"
+      ]
+    },
+    "A.fusion": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.fusion.exact"
+        },
+        {
+          "$ref": "#/$defs/A.fusion.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.fusion.any"
+        }
+      ]
+    },
+    "A.head.trigger": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "targets": {
+          "$ref": "#/$defs/A.targets"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "x": {
+          "$ref": "#/$defs/A.x"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        },
+        "per_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "ub": {
+          "type": "boolean",
+          "const": true
+        },
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "do"
+      ]
+    },
+    "A.head.lastword": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "targets": {
+          "$ref": "#/$defs/A.targets"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "x": {
+          "$ref": "#/$defs/A.x"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        },
+        "per_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "ub": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "do"
+      ]
+    },
+    "A.head.auto": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.event"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "targets": {
+          "$ref": "#/$defs/A.targets"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "x": {
+          "$ref": "#/$defs/A.x"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        },
+        "per_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "ub": {
+          "type": "boolean",
+          "const": true
+        },
+        "zone": {
+          "$ref": "#/$defs/A.ability-zones"
+        },
+        "aggregation": {
+          "type": "string",
+          "const": "batch"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on",
+        "do"
+      ]
+    },
+    "A.head.activate.cost": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "targets": {
+          "$ref": "#/$defs/A.targets"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "x": {
+          "$ref": "#/$defs/A.x"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        },
+        "per_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "ub": {
+          "type": "boolean",
+          "const": true
+        },
+        "zone": {
+          "$ref": "#/$defs/A.ability-zones"
+        },
+        "usable_if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "quick": {
+          "type": "boolean",
+          "const": true
+        },
+        "advance": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cost",
+        "do"
+      ]
+    },
+    "A.head.activate.fusion": {
+      "type": "object",
+      "properties": {
+        "fusion": {
+          "$ref": "#/$defs/A.fusion"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "targets": {
+          "$ref": "#/$defs/A.targets"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "x": {
+          "$ref": "#/$defs/A.x"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        },
+        "per_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "ub": {
+          "type": "boolean",
+          "const": true
+        },
+        "zone": {
+          "$ref": "#/$defs/A.ability-zones"
+        },
+        "usable_if": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fusion",
+        "do"
+      ]
+    },
+    "A.head.activate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.head.activate.cost"
+        },
+        {
+          "$ref": "#/$defs/A.head.activate.fusion"
+        }
+      ]
+    },
+    "A.head.evolve": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        },
+        "into": {
+          "$ref": "#/$defs/A.evolution-destination"
+        },
+        "usable_if": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cost"
+      ]
+    },
+    "A.head.ride": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cost"
+      ]
+    },
+    "A.head.feed": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        },
+        "times": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cost"
+      ]
+    },
+    "A.head.spell": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "targets": {
+          "$ref": "#/$defs/A.targets"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "x": {
+          "$ref": "#/$defs/A.x"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "do"
+      ]
+    },
+    "A.head.static": {
+      "type": "object",
+      "properties": {
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
+        },
+        "while": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "zone": {
+          "$ref": "#/$defs/A.ability-zones"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "effects"
+      ]
+    },
+    "A.play.zones": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Zone"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Zone"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "A.play.conditional-zones": {
+      "type": "object",
+      "properties": {
+        "zone": {
+          "$ref": "#/$defs/A.play.zones"
+        },
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "zone",
+        "if"
+      ]
+    },
+    "A.play.playable-from": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.play.zones"
+        },
+        {
+          "$ref": "#/$defs/A.play.conditional-zones"
+        }
+      ]
+    },
+    "A.head.play": {
+      "type": "object",
+      "properties": {
+        "cost_delta": {
+          "$ref": "#/$defs/A.play.cost-deltas"
+        },
+        "cost_set": {
+          "$ref": "#/$defs/A.play.cost-sets"
+        },
+        "additional_cost": {
+          "$ref": "#/$defs/A.cost.additional"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "optional_cost_delta": {
+          "$ref": "#/$defs/A.play.cost-deltas"
+        },
+        "optional_cost_set": {
+          "$ref": "#/$defs/A.play.cost-sets"
+        },
+        "alt_cost": {
+          "$ref": "#/$defs/A.cost.alt"
+        },
+        "cannot_if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "playable_from": {
+          "$ref": "#/$defs/A.play.playable-from"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        }
+      },
+      "additionalProperties": false,
+      "dependentRequired": {
+        "optional_cost_delta": [
+          "optional_cost"
+        ],
+        "optional_cost_set": [
+          "optional_cost"
+        ]
+      },
+      "if": {
+        "anyOf": [
+          {
+            "required": [
+              "optional_cost_delta"
+            ]
+          },
+          {
+            "required": [
+              "optional_cost_set"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "optional_cost": {
+            "type": "object"
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "cost_delta"
+          ]
+        },
+        {
+          "required": [
+            "cost_set"
+          ]
+        },
+        {
+          "required": [
+            "additional_cost"
+          ]
+        },
+        {
+          "required": [
+            "optional_cost"
+          ]
+        },
+        {
+          "required": [
+            "optional_cost_delta"
+          ]
+        },
+        {
+          "required": [
+            "optional_cost_set"
+          ]
+        },
+        {
+          "required": [
+            "alt_cost"
+          ]
+        },
+        {
+          "required": [
+            "cannot_if"
+          ]
+        },
+        {
+          "required": [
+            "playable_from"
+          ]
+        }
+      ]
+    },
+    "A.granted-ability-head": {
+      "type": "object",
+      "properties": {
+        "fanfare": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "lastword": {
+          "$ref": "#/$defs/A.head.lastword"
+        },
+        "evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "super_evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "attack_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "race_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "drive_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "auto": {
+          "$ref": "#/$defs/A.head.auto"
+        },
+        "activate": {
+          "$ref": "#/$defs/A.head.activate"
+        },
+        "static": {
+          "$ref": "#/$defs/A.head.static"
+        },
+        "play": {
+          "$ref": "#/$defs/A.head.play"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1
+    },
+    "A.ability-head": {
+      "type": "object",
+      "properties": {
+        "fanfare": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "lastword": {
+          "$ref": "#/$defs/A.head.lastword"
+        },
+        "evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "super_evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "attack_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "race_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "drive_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        "auto": {
+          "$ref": "#/$defs/A.head.auto"
+        },
+        "activate": {
+          "$ref": "#/$defs/A.head.activate"
+        },
+        "static": {
+          "$ref": "#/$defs/A.head.static"
+        },
+        "play": {
+          "$ref": "#/$defs/A.head.play"
+        },
+        "quick": {
+          "type": "boolean",
+          "const": true
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Concept"
+              },
+              {
+                "$ref": "#/$defs/A.param"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "evolve": {
+          "$ref": "#/$defs/A.head.evolve"
+        },
+        "ride": {
+          "$ref": "#/$defs/A.head.ride"
+        },
+        "feed": {
+          "$ref": "#/$defs/A.head.feed"
+        },
+        "spell": {
+          "$ref": "#/$defs/A.head.spell"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1
+    },
+    "A.effect.grant": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-recipient"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.granted-ability-head"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "keywords"
+          ]
+        },
+        {
+          "required": [
+            "abilities"
+          ]
+        }
+      ]
+    },
+    "A.act.delayed": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.event"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "targets": {
+          "$ref": "#/$defs/A.targets"
+        },
+        "optional_cost": {
+          "$ref": "#/$defs/A.cost.optionals"
+        },
+        "x": {
+          "$ref": "#/$defs/A.x"
+        },
+        "define": {
+          "$ref": "#/$defs/A.define"
+        },
+        "aggregation": {
+          "type": "string",
+          "const": "batch"
+        },
+        "next_only": {
+          "type": "boolean"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on",
+        "do"
+      ],
+      "if": {
+        "properties": {
+          "next_only": {
+            "const": false
+          }
+        },
+        "required": [
+          "next_only"
+        ]
+      },
+      "then": {
+        "required": [
+          "until"
+        ]
+      }
+    },
+    "A.turn-interval": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
+    "A.until-during-next-turn": {
+      "type": "object",
+      "properties": {
+        "during_next_turn": {
+          "$ref": "#/$defs/A.turn-interval"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "during_next_turn"
+      ]
     }
-  }
+  },
+  "description": "Closed author nodes: ability heads, recursive effects/actions/steps, costs and targets. Full file/card containers and execution admission are separate contracts."
 }

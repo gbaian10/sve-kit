@@ -12,6 +12,12 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
 COSTS: dict[str, TypeAdapter[object]] = {
+    "A.play.conditional-delta": TypeAdapter(costs.ConditionalCostDelta, config=CONFIG),
+    "A.play.conditional-set": TypeAdapter(costs.ConditionalCostSet, config=CONFIG),
+    "A.play.cost-delta": TypeAdapter(costs.PlayCostDelta, config=CONFIG),
+    "A.play.cost-set": TypeAdapter(costs.PlayCostSet, config=CONFIG),
+    "A.play.cost-deltas": TypeAdapter(costs.PlayCostDeltas, config=CONFIG),
+    "A.play.cost-sets": TypeAdapter(costs.PlayCostSets, config=CONFIG),
     "A.cost.material-group.exact": TypeAdapter(costs.MaterialGroupExact, config=CONFIG),
     "A.cost.material.exact": TypeAdapter(costs.MaterialExact, config=CONFIG),
     "A.cost.material-group.up-to": TypeAdapter(costs.MaterialGroupUpTo, config=CONFIG),
@@ -50,6 +56,12 @@ COSTS: dict[str, TypeAdapter[object]] = {
     "A.play.costs": TypeAdapter(costs.PlayCosts, config=CONFIG),
 }
 COST_NAMES = {
+    "A.play.conditional-delta": "ConditionalCostDelta",
+    "A.play.conditional-set": "ConditionalCostSet",
+    "A.play.cost-delta": "PlayCostDelta",
+    "A.play.cost-set": "PlayCostSet",
+    "A.play.cost-deltas": "PlayCostDeltas",
+    "A.play.cost-sets": "PlayCostSets",
     "A.cost.material-group.exact": "MaterialGroupExact",
     "A.cost.material.exact": "MaterialExact",
     "A.cost.material-group.up-to": "MaterialGroupUpTo",

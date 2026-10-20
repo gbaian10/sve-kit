@@ -1,6 +1,6 @@
 # 動作與 Steps 形狀矩陣
 
-本文件對應 `author-nodes.schema.json` 的 `A.action`、`A.step`、`A.steps` 與內層定義；Python 對照為 `author_steps`。JSON Schema 是語法權威。這些是封閉片段，沒有完整能力頭、作者入口、展開或執行准入。通過形狀不代表來源、作用域、物件世代或 capability 已驗證。
+本文件對應 `author-nodes.schema.json` 的 `A.action`、`A.step`、`A.steps` 與內層定義；Python 對照為 `author_programs`。JSON Schema 是語法權威。這些是封閉片段，完整能力頭見[能力矩陣](author-ability-shapes-1.0.md)，不含作者入口、展開或執行准入。通過形狀不代表來源、作用域、物件世代或 capability 已驗證。
 
 `A.action` 恰一動作鍵；`A.step` 恰一動作或控制鍵；`A.steps` 是保序列表，保留重複步驟和空列表。所有固定物件拒絕未知鍵，不補預設。`optional.do` 需要最後一個指示的 receipt，`simultaneous.do` 沿 IR 批次契約，這兩處要求非空。其他空 Steps 仍須通過 C1 的來源及終止檢查。
 
@@ -51,7 +51,7 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | set_life | who:P、n:Q | 設定與增減分開 | BP02-075、BP05-092 |
 | buff | on:O、power:N/hp:N 至少一 | until:U、instead | BP01-011；不是 static |
 | set_stat | on:O、power:Q/hp:Q 至少一 | until:U | BP16-049、BP15-001 |
-| grant | on:O、keywords:[Concept或ParamRef] | until:U、instead；abilities 尚不接受 | BP19-056、BP11-P27 |
+| grant | on:R、keywords:[Concept或ParamRef]／abilities:[GrantedAbilityHead] 至少一項，可並用 | until:U、instead | BP19-056、BP11-P27；領袖／混合／裝備見能力矩陣 |
 | lose_abilities | on:O | until:U | BP05-061 |
 | counter | on:O、name:CounterName、delta:N | 與費用 counter 分開 | BP20-030 |
 | move_counters | from:O、to:O、name、all:true | 不接受部分量 | BP01-T10 |
@@ -80,7 +80,7 @@ TriggerKind 的封閉值為 fanfare、lastword、evolve_time、super_evolve_time
 
 create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。
 
-pilot、feed、drive_check、play_card.cost、delayed、grant.abilities 沒有本矩陣的接受形狀。pilot 的舊 `{ref,on}` 無法承載印刷數值與期限，不能拿提醒文冒第二個物件。這個有限 Step union 不宣稱所有登錄構造均可承載。
+delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 只帶 precondition 共通 metadata，不收 result。pilot、feed、drive_check、play_card.cost 沒有本矩陣的接受形狀。pilot 的舊 `{ref,on}` 無法承載印刷數值與期限，不能拿提醒文冒第二個物件。這個有限 Step union 不宣稱所有登錄構造均可承載。
 
 ## 自我取代
 
@@ -92,7 +92,7 @@ pilot、feed、drive_check、play_card.cost、delayed、grant.abilities 沒有�
 | move | ref:O、to:Z或ParamRef、position、order、acted | BP01-008 改 ref；其餘合成 |
 | buff | power:N、hp:N | BP04-082、CP04-P60 |
 | life | delta:RecoveryDelta | 合成 |
-| grant | keywords:[Concept或ParamRef] | 合成 |
+| grant | keywords:[Concept或ParamRef]、abilities:[GrantedAbilityHead] 可並用 | keywords BP15-029 sections/0；abilities 合成 |
 | create | n:CountAmount或upto:Q、to:CreateDestination | ETD01-018、BP07-P20；to 合成 |
 | draw | n:CountAmount | 同型合成；replace_with:search BP07-096 |
 | search | sel:ObjectSel、n或upto:SelectionQuantity、to:SearchDestination或per_group | 同型合成；BP13-035 完整替換群組 |

@@ -130,3 +130,7 @@ def _true(value: object) -> Literal[True]:
 TrueFlag = Annotated[Literal[True], BeforeValidator(_true)]
 type CounterName = Text
 type Title = Text
+
+
+type Concept = Text
+type CardName = Text

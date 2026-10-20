@@ -2,7 +2,7 @@
 
 from pydantic import TypeAdapter
 
-from sve_carddb.contracts import author_steps as steps
+from sve_carddb.contracts import author_programs as steps
 
 from .author_selector_cases import CONFIG
 
@@ -146,8 +146,8 @@ STEPS: dict[str, TypeAdapter[object]] = {
     "A.control.each-player": TypeAdapter(steps.EachPlayerControl, config=CONFIG),
     "A.control.simultaneous": TypeAdapter(steps.SimultaneousControl, config=CONFIG),
     "A.control.by-kind": TypeAdapter(steps.ByKindControl, config=CONFIG),
-    "A.action": TypeAdapter(steps.Action, config=CONFIG),
-    "A.step": TypeAdapter(steps.Step, config=CONFIG),
+    "A.action": TypeAdapter(steps.Action),
+    "A.step": TypeAdapter(steps.Step),
     "A.steps": TypeAdapter(steps.Steps, config=CONFIG),
 }
 

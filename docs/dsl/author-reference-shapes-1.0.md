@@ -55,6 +55,7 @@ schema 通過不授予這些語義。
 | A.multiple-leaders | `{leaders: opponents 或 all}` | 無 | 不接單席 | GAP-A-020、§6 |
 | A.leader-of | `{leader_of:A.ref}` | 無 | 不接 PlayerRef、param 或快照表達式 | Live controller 的領袖；離場依法 LKI，不是 owner |
 | A.leader-recipient | A.single-leader、A.multiple-leaders 或 A.leader-of | 無 | 三種單鍵互斥，各納入一次 | 不混進 A.ref；leader_of 的單一物件基數另驗 |
+| A.until／during_next_turn | during_next_turn:{who:PlayerRef} | 無 | 完整下次回合，不收 phase/edge/param | CP04-012；who 在安裝時捕捉 |
 | A.until／short | turn、next_opp_turn、this_and_next_opp_turn、game | 無 | 四個字串值 | §9；不收無錨點舊別名 |
 | A.phase-edge | `{who: A.player-ref, phase: Phase, edge: Edge}` | 無 | Phase=start/main/end；Edge=begin/end | 安裝時捕捉 who |
 | A.turn-edge | `{who: A.player-ref, edge: Edge}` | 無 | 不收 phase | 指定玩家下回合邊界 |

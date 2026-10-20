@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import TypeAdapter
 
-from sve_carddb.contracts import author_effects as effects
+from sve_carddb.contracts import author_programs as effects
 
 from .author_selector_cases import CONFIG
 
@@ -27,7 +27,9 @@ EFFECTS: dict[str, TypeAdapter[object]] = {
     "A.effect.prevent": TypeAdapter(effects.Prevent, config=CONFIG),
     "A.effect.damage-cap": TypeAdapter(effects.DamageCap, config=CONFIG),
     "A.effect.evolve-cost-mod": TypeAdapter(effects.EvolveCostMod, config=CONFIG),
-    "A.effect.banish-instead": TypeAdapter(effects.BanishInstead, config=CONFIG),
+    "A.effect.banish-instead": TypeAdapter(
+        effects.BanishReplacementEffect, config=CONFIG
+    ),
     "A.effect.object": TypeAdapter(effects.ObjectEffect, config=CONFIG),
     "A.effect.play-permission": TypeAdapter(effects.PlayPermission, config=CONFIG),
     "A.effect.no-trigger": TypeAdapter(effects.NoTrigger, config=CONFIG),
@@ -87,7 +89,7 @@ EFFECT_NAMES = {
     "A.effect.prevent": "Prevent",
     "A.effect.damage-cap": "DamageCap",
     "A.effect.evolve-cost-mod": "EvolveCostMod",
-    "A.effect.banish-instead": "BanishInstead",
+    "A.effect.banish-instead": "BanishReplacementEffect",
     "A.effect.object": "ObjectEffect",
     "A.effect.play-permission": "PlayPermission",
     "A.effect.no-trigger": "NoTrigger",

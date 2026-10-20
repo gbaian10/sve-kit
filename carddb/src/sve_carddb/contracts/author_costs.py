@@ -352,6 +352,44 @@ type PaymentX = PaymentXFields
 type XParameter = FreeX | PaymentX
 
 
+_ConditionalCostDeltaKeys = TypedDict("_ConditionalCostDeltaKeys", {"if": Condition})
+
+
+@with_config(CONFIG)
+class ConditionalCostDeltaFields(_ConditionalCostDeltaKeys):
+    delta: NumericExpr
+
+
+type ConditionalCostDelta = ConditionalCostDeltaFields
+
+
+_ConditionalCostSetKeys = TypedDict("_ConditionalCostSetKeys", {"if": Condition})
+
+
+@with_config(CONFIG)
+class ConditionalCostSetFields(_ConditionalCostSetKeys):
+    set: Quantity
+
+
+type ConditionalCostSet = ConditionalCostSetFields
+
+
+type PlayCostDelta = NumericExpr | ConditionalCostDelta
+
+
+type PlayCostSet = Quantity | ConditionalCostSet
+
+
+type PlayCostDeltas = (
+    PlayCostDelta | Annotated[tuple[PlayCostDelta, ...], Field(min_length=2)]
+)
+
+
+type PlayCostSets = (
+    PlayCostSet | Annotated[tuple[PlayCostSet, ...], Field(min_length=2)]
+)
+
+
 @with_config(
     ConfigDict(
         **CONFIG,
@@ -371,16 +409,17 @@ type XParameter = FreeX | PaymentX
     )
 )
 class PlayCostsFields(TypedDict, total=False):
-    cost_delta: NumericExpr
-    cost_set: Quantity
+    cost_delta: PlayCostDeltas
+    cost_set: PlayCostSets
     additional_cost: AdditionalCost
     optional_cost: OptionalCosts
-    optional_cost_delta: NumericExpr
-    optional_cost_set: Quantity
+    optional_cost_delta: PlayCostDeltas
+    optional_cost_set: PlayCostSets
     alt_cost: AltCost
 
 
-def _validate_play_costs(value: PlayCostsFields) -> PlayCostsFields:
+def validate_play_costs(value: PlayCostsFields) -> PlayCostsFields:
+    """Keep optional modifiers attached to one explicit optional payment."""
     if ("optional_cost_delta" in value or "optional_cost_set" in value) and (
         "optional_cost" not in value or isinstance(value["optional_cost"], tuple)
     ):
@@ -388,4 +427,4 @@ def _validate_play_costs(value: PlayCostsFields) -> PlayCostsFields:
     return value
 
 
-type PlayCosts = Annotated[PlayCostsFields, AfterValidator(_validate_play_costs)]
+type PlayCosts = Annotated[PlayCostsFields, AfterValidator(validate_play_costs)]
