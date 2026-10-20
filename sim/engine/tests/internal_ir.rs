@@ -16,6 +16,8 @@ use sve_engine::game::internal::{Answer, Context, Fact, InstructionOutcome, Prog
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
+#[path = "internal_ir/allocation.rs"]
+mod allocation;
 #[path = "internal_ir/damage.rs"]
 mod damage;
 #[path = "internal_ir/numeric.rs"]
