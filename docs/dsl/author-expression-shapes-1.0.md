@@ -14,7 +14,7 @@
   浮點由嚴格 JSON／YAML 入口拒絕；JSON Schema 的 integer 無法區分 `1` 與 `1.0`。
 - Nat 是安全非負整數。一般 selector 的 `cost_*` 等比較常量與精確數／upto 的數量位置
   不能直接套本核心或全域 `IntOrParam`。`any:true` 是另一個變體，不是數量值。
-- 此核心只在 plus 的一個偏移 operand、minus 的第二個 operand 接受 `{param:ParamName}`。
+- 算術直接 operand 只在 plus 的一個偏移 operand、minus 的第二個 operand 接受 `{param:ParamName}`。
   minus 第一個 operand、times、half_up、per.unit、min/max 的直接元素及比較直接 operand
   都不接受 param；內含 plus/minus 的遞迴節點仍照自己的白名單判斷。
 - plus 的兩個 operand 不得同時是 param；來源的加法偏移角色、minus 的 subtract_offset
@@ -22,8 +22,8 @@
   接線必須用完整 operand 路徑對照來源 canonical 構造，不能只看最近的 plus／minus；
   外層相減或縮放會影響偏移的實際方向與幅度。
 - `count.who/zone` 是 counted_owner/counted_zone；一般 `Sel.who/zone` 是
-  source_owner/source_zone。這些構造不在本核心，必須使用不同位置型別，不能以
-  `count: Sel` 的文法簡寫遺失來源角色。
+  source_owner/source_zone。它們使用[不同位置型別](author-object-query-shapes-1.0.md)，
+  不能以 `count: Sel` 的文法簡寫遺失來源角色；count 的葉參數另依承載白名單核對。
 
 ## 逐 variant 矩陣
 
@@ -56,6 +56,7 @@ define 因而有兩種已記載的拼法重疊，本表不選標準形，也不�
 | A.expr.turn-number | `{turn_number:A.expr.turn-number-payload}` | 無 | 單鍵 | 實際開始的玩家回合序數 |
 | A.expr.zone-free-payload | `{who:A.player-ref,zone:field或ex}` | 無 | 不接受 param／zone 集合 | §14 欄位正規化，回 Nat |
 | A.expr.zone-free | `{zone_free:A.expr.zone-free-payload}` | 無 | 不接受 Cond 的 ge／eq | §14 |
+| A.expr.count | `{count:A.expr.count-source}` | 無 | 區域計數或計數聯集；不是任意 ObjectSel | [來源矩陣](author-object-query-shapes-1.0.md) |
 | A.cond.cmp-payload | `{left:E,op:eq或ne或lt或le或gt或ge,right:E}` | 無 | 不接受裸 param／物件集合 | §5；本片只有數值比較，同型值仍另驗 |
 | A.cond.cmp | `{cmp:A.cond.cmp-payload}` | 無 | 單鍵 | GAP-A-005／028／055／056 |
 | A.cond.all | `{all:[C,…]}` | 無 | 非空列表 | §5 組合條件 |
@@ -121,15 +122,15 @@ CP03-SL16（GAP-A-054）、BP07-SL20 母なる君（GAP-A-060）支持。
 
 ## 片段邊界
 
-本表不定義依賴 Sel 或事件的 count、distinct_names、distinct_orig_costs、
-history_count、history_sum、lki_of、agg、event。
+count 只含[來源矩陣](author-object-query-shapes-1.0.md)的區域與聯集片段，不代表完整 Sel 計數。
+distinct_names、distinct_orig_costs、history_count、history_sum、lki_of、agg、event 不在本表。
 objects_of 是快照集合，不可作數值 operand；event 的數值欄位須按事件窄化，
 不得設任意 payload 字串路徑。history.where 不可把所有事件欄位合成一個任意選用池。
 hand、leader_life、counter、dice、paid、x_paid 的精確形狀亦不在本表；
 其中 hand、leader_life 不依賴 Sel，但必須分清同名 Expr 與 Cond 的 payload。
 本表不定義 `at` 捕捉的附掛位置；片段的封閉 mapping 不表示完整讀值語法禁止捕捉。
 
-完整 Cond 的資源門檻、物件／規則狀態與歷史謂詞尚不在本核心。本表不定義 Sel 的 filter、
+完整 Cond 的資源門檻、物件／規則狀態與歷史謂詞尚不在本核心。本表不定義完整 Sel 的 filter、
 精確數／upto／any 或 first／second／rest 的編碼，也不提供有序／角色視圖的接線驗證。
 完整 Sel 與動作位置的重疊仍須逐位置檢查；已定形的領袖葉分支與數量位置規則見
 [角色與選取位置矩陣](author-selection-shapes-1.0.md)。

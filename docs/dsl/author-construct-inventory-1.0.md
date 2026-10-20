@@ -88,6 +88,10 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | did 長形 | result、where | 兩鍵必填；預設成功判準且存在匹配的成功材料；已登錄 before 視角限付款／捨牌，型別另驗 |
 | 捕捉 | at=live/play/resolution/selection/event | 只在已登錄位置；apply.capture=play 另為集合捕捉 |
 
+物件來源、差集、where／as 與區域計數的已定片段見[物件查詢矩陣](author-object-query-shapes-1.0.md)。
+其中計數 any_of 保留 counted 角色並先去重；它不表示上表的所有 Sel filter、
+領袖／切片來源或選取位置 any_of 都已實作。
+
 ## 動作與內層選項
 
 動作共通 `result? / precondition?` 不表示每個短形都可附物件欄位；短形須轉成該動作已登錄的長形。by 是執行者，who 是資源接受者，目的區持有者另判。

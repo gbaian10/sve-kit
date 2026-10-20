@@ -155,6 +155,11 @@ roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣]
 
 `Sel` 欄位沿用 `who`、`zone`、`kind`、`class/not_class`、`trait/traits_any/not_trait`、`name/names/name_contains/not_same_name_as_this`、`other`、`cost_*/orig_cost_*`、`hp_le`、`power_max`、`acted`、`evolved`、`keyword`、`has_trigger/has_evolve`、`not_token`、`face_up`、`leader/leader_or/leader_of`、`in/rest`、`entered_this_turn`、`any_of`、`except`、`where`；增加 as（局部元素別名）、advance_follower、boxed、racing、同型／同名引用與頂底切片。`in` 僅接物件 binding，receipt 必須先用 objects_of（或 count_of.where 在材料快照篩選）。未知 filter 不當 no-op。
 
+區域物件、in、except、where／as 與區域計數的已定形片段見
+[物件來源與計數矩陣](author-object-query-shapes-1.0.md)。
+ObjectSel 與 CountObjects 分別保留 source 與 counted 角色；
+計數 any_of 先去重再數張數。這些片段不代表完整 Sel 或領袖接受者組合已完成。
+
 ## 6. 玩家、引用、結果
 
 已定形的引用／玩家／期限原子之必填、互斥與名稱字元域見[引用形狀矩陣](author-reference-shapes-1.0.md)。矩陣區分引用原子與含 Sel 的動作位置型別，不以片段 schema 宣稱完整語法已交付。
