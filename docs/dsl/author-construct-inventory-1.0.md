@@ -55,12 +55,12 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | A.optional／A.pay | who?、do、then?、result?；pay 另 cost | then 仍受拒絕／付款責任保護 |
 | A.choice | n\|upto、options、instead?、who?、exclude_chosen? | 打出參數；upto 是 1..N |
 | A.either | who?、options、bind? | 結算時恰選一項；不接受 choice 的數量欄 |
-| A.declare | bind、kind=number/name、min?、max?、who? | §4 未逐 kind 明定 min/max 組合，不能據此新增拒絕規則 |
+| A.declare | bind、kind=number/name、min?、max?、who? | number 可收 min/max，name 拒絕；上下界關係由 C1 驗 |
 | A.if | cond、then、else? | 不讀事件前置 when |
 | A.comb.repeat | n\|until\|while、check?、do、collect? | collect={receipts:name}；check=before/after |
 | repeat_ability | {while} | 本文重複，非 play_ability |
 | A.comb.foreach | in、as、do | 明示逐物件；不把全體改逐一 |
-| A.comb.each_player | who?=each、stages | stage 為 Steps 或 {do,mode,evidence?}；mode=choice/nonchoice/explicit |
+| A.comb.each_player | who?=each、as?、stages | stage 為 Steps 或 {do,mode,evidence?}；mode=choice/nonchoice/explicit |
 | A.comb.simultaneous | do、result? | 尚未完成的 receipt 不可互讀 |
 | A.by-kind | ref、as?、leader、follower | leader 分支為 PlayerRef、follower 為 ObjectRef |
 | roles／role | Map<RoleName,{if_nonempty:1}\|remaining>／{of,name} | first/rest 角色非無序集合的任取順序；形狀與數量位置見[選取矩陣](author-selection-shapes-1.0.md) |
@@ -76,14 +76,14 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | A.expr 程序／歷史 | dice、x_paid、history_count、history_sum、resource、agg、event、turn_number | resource={who,kind}；agg={of,attr,fn}；history_sum 先窄化欄位 |
 | A.expr.zone_free | {who,zone} | 回 Nat；初版容量讀值為 field/ex |
 | A.cond 組合 | cmp:{left,op,right}、all、any、not | 數值 cmp.op=eq/ne/lt/le/gt/ge；PlayerExpr 只 eq/ne，左右同型 |
-| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
+| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、payment_decided、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
 | Sel 玩家／區域／種類 | who、zone、kind、class、not_class、trait、traits_any、traits_all、not_trait | zone 單值或集合；traits_all 與 traits_any 不合併；kind 可 same_as（§13 GAP-A-057） |
 | Sel 名稱 | name、names、name_contains、not_same_name_as_this | name 可 {same_as:{objects_of,view}}，不是任意字串替換 |
 | Sel 數值 | cost_*、orig_cost_*、hp_le、power_max | 比較 suffix 與數量 Expr 分開 |
 | Sel 狀態 | other、acted、evolved、keyword、has_trigger、has_evolve、not_token、token、face_up、advance_follower、boxed、racing、entered_this_turn | token:true 是 TokenStatus 別名；advance_follower 在 §5 列為欄位、§13 GAP-A-036 列為 kind 值，本表保留差異 |
-| Sel 組合／視圖 | leader、leader_or、leader_of、in、rest、any_of、except、where、as；同型／同名引用、頂底切片 | in 接 ObjectRef／物件 binding，receipt 須先 objects_of；where 的 item 局部 |
+| Sel 組合／視圖 | leader、leader_or、leader_of、in、any_of、except、where、as；同型／同名引用 | in 接 ObjectRef／物件 binding，receipt 須先 objects_of；where 的 item 局部 |
 | PlayerRef／PlayerSet | self、turn、non_turn、current、owner_of、master_of、opp／opponents、each、other_players | owner 與 controller 不互換；集合不因二席而降單人 |
-| Ref／Recipient | this、it、binding、first:binding、second:binding、rest:binding、attack_target、host、cost1；leader、leaders、role、follow、event | first/second 須有順序；by_kind 的 item 按分支窄化 |
+| Ref／Recipient | this、it、binding、attack_target、host、cost1；leader、leaders、role、follow、event | 前後者用 Target binding／roles／search.per_group；by_kind 的 item 按分支窄化 |
 | ReceiptRef | binding；{event:move_receipt}；{entry_payment:additional} | 只有有移動授權的 receipt 可 follow；不存在的合法 entry_payment 不等於拼錯引用 |
 | count_of 長形 | receipt、where、view=before/after | 三鍵必填；成功材料快照篩選，不查現在卡片；receipt 材料型別另驗 |
 | did 長形 | result、where；view?=before/after | 前兩鍵必填；預設成功判準且存在匹配的成功材料；付款／捨牌省略為 before，其他材料須明示 view，型別另驗 |
@@ -99,47 +99,47 @@ agg／distinct／count.except 的來源不繼承 counted 參數權限。選取 a
 見[要求量矩陣](author-quantity-shapes-1.0.md)的逐 variant 與延後欄位清單。
 Cost 各操作、wrapper、X、PlayCosts 片段及 Target.groups 見[費用與目標矩陣](author-cost-target-shapes-1.0.md)。
 這些片段不表示上表全部 Sel filter 或完整父動作已實作；
-Sel.top／bottom 的登錄保留，尚不加入 ObjectSel。
+Sel.top／bottom 不接受；同層動作 top 與目的地 position 見[動作矩陣](author-step-shapes-1.0.md)。
 
 ## 動作與內層選項
 
 動作共通 `result? / precondition?` 不表示每個短形都可附物件欄位；短形須轉成該動作已登錄的長形。by 是執行者，who 是資源接受者，目的區持有者另判。
 
 move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{top:…} 別名；
-四個完整父動作尚未實作。費用 banish.top 已接入相同 payload，見費用與目標矩陣。
+四個父動作與遞迴 Steps 已有封閉片段，完整能力入口另驗。費用 banish.top 已接入相同 payload，見費用與目標矩陣。
 
 | 動作 | payload／額外鍵 | 互斥與上下文 |
 | --- | --- | --- |
-| draw／discard | who?、n；discard 另 all/down_to/any/sel/ref/include_self/random | 數量變體不混填；draw 不是一次批次 move |
+| draw／discard | who?、n；discard 另 all/down_to/any/sel/ref/random；include_self 不接受 | 數量變體不混填；draw 不是一次批次 move |
 | damage | to、n、distribute?、distribute_at?、instead? | distribute 時點獨立 |
 | destroy／banish | Ref 或 {ref}；banish 另 top | top 與 ref 互斥 |
-| move | ref\|top、to、position?、order?、reveal?、by?、acted?、entry_effects?、bind?、result? | to 可區域或目的地選項 |
+| move | ref\|top、to、position?、order?、reveal?、by?、acted?、entry_effects?、result? | to 為區域或直接 param；位置選項在 position |
 | create | token、n?\|upto\|any、to、counters?、by?、acted?、entry_effects?、bind?、result? | 可 declare→bound 指定量（§13 GAP-A-039）；token 列表每名各 n；allocate 另有總量 |
 | act／stand／flip_down／flip_up | Ref 或 {ref} | flip 與 EP 分開 |
 | evolve／transform | ref、into?、result?；transform 另 entry_effects? | evolve 能力頭另型別；transform.into 支援 allocate |
 | life／set_life | who、delta／n | delta 與 n 不互換 |
 | buff／set_stat | on、power?、hp?、until?、instead? | effect.stat/set_stat 是持續效果，另型別 |
-| grant／lose_abilities | on、keywords?、abilities?、until? | 不接受舊 grant.effects |
-| counter／move_counters | {on,name,delta}／{from,to,name,all?} | cost.counter 使用材料數量，非 delta |
+| grant／lose_abilities | grant:{on,keywords,until?,instead?}；lose_abilities:{on,until?} | abilities 尚不接受；不接受舊 grant.effects |
+| counter／move_counters | {on,name,delta}／{from,to,name,all:true} | cost.counter 使用材料數量，非 delta |
 | pp／pp_max／ep／sep | {who,delta}；pp 另 {who,to_max:true} | delta 與 to_max 互斥 |
 | reveal／look | ref\|top、bind、result?、by?、random? | random={n}，與 cost.discard.random=true 不同 |
 | reveal_until | sel、n、bind、matched | 結果區分公開與匹配 |
-| search | sel＋n\|upto 或 groups、to、bind?、cost_sum_le?、distinct_by?、entry_effects?、result? | search 特例與普通 choose 分開；不多次洗牌 |
-| shuffle／order | {who}／{ref,to,by?} | A.order 為 canonical ID |
+| search | sel＋n\|upto 或 groups、to、cost_sum_le?、distinct_by?、entry_effects?、instead?、result? | search 特例與普通 choose 分開；不多次洗牌 |
+| shuffle／order | shuffle:{who}；order 由 choose.order／move.order 承載 | A.order 分類 ID 保留，獨立 order 作者鍵不接受 |
 | dice／declare | {bind,who?}／控制流程表 | 骰子與宣告分開 |
 | equip | on、token | 裝備不占普通場格 |
 | steal／give | ref、to?、precondition? | 同世代控制轉移 |
 | stack_plus | Expr | 規則選擇與建立 counter 語義 |
-| box／pilot | {ref}／{ref,on} | 不以 boxed effect 代替 box |
-| race／feed／gain_drive／drive_check | ref?、n?、who? | 按各規則程序，不是任意動作組合 |
-| play_card／play_ability | {ref,cost?}／{of,trigger?,ability?,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
+| box／pilot | box:{ref,until}；pilot 尚不接受 | box 期限必填，pilot 數值／期限未定 |
+| race／feed／gain_drive／drive_check | race:{ref,n?}、gain_drive:{ref}；feed/drive_check 尚不接受 | 按各規則程序，不是任意動作組合 |
+| play_card／play_ability | {ref}（cost 尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
 | delayed | on、do、next_only?、until?、line | on 是事件；預設一次誘發 |
 | player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開；apply.capture=play |
 | win／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
 | make_type | on、type、until? | 不隱式失去能力 |
 | to.one_of | one_of、by、scope | create 的 scope=each/batch（§13 GAP-A-017） |
 | to.partition | order=printed、partition:[{zone,n}…] | 順序與份額保留 |
-| position | top/bottom 或 {nth} 或 {one_of,by} | nth 為 1 起算 |
+| position | top/bottom 或 {nth} 或 {one_of,by} 或 {chosen:BindingName} | nth 為 1 起算；chosen 消費 choose 的 compound 位置回答 |
 | token.allocate | among、total、by? | among 為名稱列表；total 為總量 |
 | into.allocate | among、each_exactly_once:true | 與 token 的總量分配不同 |
 
@@ -301,7 +301,7 @@ instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/dest
 | GAP-A-052 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `moved`；`auto.on.moved` → `during, from, to`；`auto.on.moved.from` → `who, zone`；`auto.on.moved.during` → `turn`；`auto.do[]` → `buff`；`auto.do[].buff` → `on, power` |
 | GAP-A-053 | `$` → `activate`；`activate` → `cost, do`；`activate.cost` → `steps`；`activate.cost.steps[]` → `act_self, banish`；`activate.cost.steps[].banish` → `distinct_by, n, sel`；`activate.cost.steps[].banish.sel` → `who, zone`；`activate.do[]` → `choose, move`；`activate.do[].choose` → `bind, from, may, n`；`activate.do[].choose.from` → `name, who, zone`；`activate.do[].move` → `ref, to` |
 | GAP-A-054 | `$` → `fanfare`；`fanfare` → `do`；`fanfare.do[]` → `if`；`fanfare.do[].if` → `cond, then`；`fanfare.do[].if.cond` → `did`；`fanfare.do[].if.cond.did` → `result, where`；`fanfare.do[].if.cond.did.result` → `entry_payment`；`fanfare.do[].if.cond.did.where` → `name, zone`；`fanfare.do[].if.then[]` → `evolve`；`fanfare.do[].if.then[].evolve` → `ref` |
-| GAP-A-055 | `$` → `fanfare`；`fanfare` → `do`；`fanfare.do[]` → `search`；`fanfare.do[].search` → `instead, n, sel, to`；`fanfare.do[].search.sel` → `kind, trait, who, zone`；`fanfare.do[].search.instead[]` → `if, may, to`；`fanfare.do[].search.instead[].if` → `cmp`；`fanfare.do[].search.instead[].if.cmp` → `left, op, right`；`fanfare.do[].search.instead[].if.cmp.left` → `cost_of` |
+| GAP-A-055 | `$` → `fanfare`；`fanfare` → `do`；`fanfare.do[]` → `search`；`fanfare.do[].search` → `n, sel, to`；`fanfare.do[].search.sel` → `kind, trait, who, zone`；`fanfare.do[].search.to` → `zone, instead`；`fanfare.do[].search.to.instead` → `if, may, zone`；`fanfare.do[].search.to.instead.if` → `cmp`；`fanfare.do[].search.to.instead.if.cmp` → `left, op, right`；`fanfare.do[].search.to.instead.if.cmp.left` → `cost_of` |
 | GAP-A-056 | `$` → `play`；`play` → `cannot_if`；`play.cannot_if` → `cmp`；`play.cannot_if.cmp` → `left, op, right`；`play.cannot_if.cmp.left` → `turn_number`；`play.cannot_if.cmp.left.turn_number` → `who` |
 | GAP-A-057 | `$` → `evolve_time`；`evolve_time` → `cost, do`；`evolve_time.cost` → `banish`；`evolve_time.cost.banish` → `n, result, sel`；`evolve_time.cost.banish.sel` → `kind, who, zone`；`evolve_time.do[]` → `search`；`evolve_time.do[].search` → `sel, to, upto`；`evolve_time.do[].search.sel` → `kind, name, who, zone`；`evolve_time.do[].search.sel.name` → `same_as`；`evolve_time.do[].search.sel.name.same_as` → `objects_of, view` |
 | GAP-A-058 | `$` → `auto`；`auto` → `do, on, targets`；`auto.on` → `equipped`；`auto.on.equipped` → `equipment`；`auto.targets[]` → `bind, from, n`；`auto.targets[].from` → `kind, who, zone`；`auto.do[]` → `act, buff`；`auto.do[].buff` → `hp, on, power`；`auto.do[].buff.on` → `event` |

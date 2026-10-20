@@ -106,7 +106,7 @@ evolve:
 roles 的逐 variant 形狀與數量位置分型見[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 單組 Target／choose／search 與 counter 的數量父變體見[要求量矩陣](author-quantity-shapes-1.0.md)；
 Cost、wrapper 與 Target.groups 已定形，見[費用與目標矩陣](author-cost-target-shapes-1.0.md)；
-choose／search groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實作。
+choose／search groups 與已定動作欄位見[動作矩陣](author-step-shapes-1.0.md)，不表示完整作者樹已實作。
 
 `A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。其中 stack_counter_from 只保留舊名稱登錄、沒有接受形狀，不是獨立付款操作。外層有兩種互斥形狀：
 
@@ -168,7 +168,7 @@ to_deck 的材料 payload 必填 shuffle:true。discard 的 random 只接受 `{s
 
 `item` 是保留的局部名稱：`Sel.where` 求值時綁定目前候選元素，型別為該 Sel 的元素型別，只在該 predicate 有效；`by_kind` 分支則綁定窄化後的接受者。禁止巢狀 where／by_kind 隱式遮蔽 item；需要巢狀時以 `Sel.as: name` 或 `by_kind.as: name` 明確命名，該層不再引入 item。別名與一般 bind 同樣不得重名，離開 predicate／分支即失效，外層 item 仍可明確讀取。
 
-`Sel` 欄位沿用 `who`、`zone`、`kind`、`class/not_class`、`trait/traits_any/not_trait`、`name/names/name_contains/not_same_name_as_this`、`other`、`cost_*/orig_cost_*`、`hp_le`、`power_max`、`acted`、`evolved`、`keyword`、`has_trigger/has_evolve`、`not_token`、`face_up`、`leader/leader_or/leader_of`、`in/rest`、`entered_this_turn`、`any_of`、`except`、`where`；增加 as（局部元素別名）、advance_follower、boxed、racing、同型／同名引用與頂底切片。`in` 僅接物件 binding，receipt 必須先用 objects_of（或 count_of.where 在材料快照篩選）。未知 filter 不當 no-op。
+`Sel` 欄位沿用 `who`、`zone`、`kind`、`class/not_class`、`trait/traits_any/not_trait`、`name/names/name_contains/not_same_name_as_this`、`other`、`cost_*/orig_cost_*`、`hp_le`、`power_max`、`acted`、`evolved`、`keyword`、`has_trigger/has_evolve`、`not_token`、`face_up`、`leader/leader_or/leader_of`、`in`、`entered_this_turn`、`any_of`、`except`、`where`；增加 as（局部元素別名）、advance_follower、boxed、racing、同型／同名引用；頂部來源只用動作 top:DeckSlice。`in` 僅接物件 binding，receipt 必須先用 objects_of（或 count_of.where 在材料快照篩選）。未知 filter 不當 no-op。
 
 區域物件、in、except、where／as 與計數集合的已定形片段見
 [物件來源與計數矩陣](author-object-query-shapes-1.0.md)。
@@ -178,7 +178,7 @@ agg／distinct／count.except 的 CollectionSource 不繼承 counted 參數權�
 具名 RecipientSel 另納入領袖與至少含一個領袖 limb 的接受者聯集；
 逐型與選用規則見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
 等義聯集與集合形欄位不推定相同 body hash。這些片段不代表完整 Sel 或父動作已完成。
-頂底切片的 Sel 登錄保留，但目前沒有獨立消費位置與卡例，尚不加入 ObjectSel；
+Sel.top/bottom 不接受，頂部來源使用動作同層 top:DeckSlice；
 「看過的牌之中」使用 in:looked，不重新查詢牌庫頂。動作同層 top 另共用 DeckSlice。
 
 ## 6. 玩家、引用、結果
@@ -187,7 +187,7 @@ agg／distinct／count.except 的 CollectionSource 不繼承 counted 參數權�
 
 `self / turn / non_turn / current / owner_of / master_of` 為 PlayerRef；`opp` 在單人位置以 RequireOne(Opponents) 取得唯一席位；`opponents / each / other_players` 保留 PlayerSet 與原文基數。執行目前僅二席；「相手すべて」不因此抹去集合。`leader: self|opp`、`leaders: opponents|all` 是領袖 recipient；集合動作保留批次。
 
-`this / it / bind / first:bind / second:bind / rest:bind / attack_target / host / cost1` 保留 R.object 世代或事件快照。first/second 必須來自有角色或明示順序的 binding，無序集合不可任取第一張。目標引用 R.target 在結算驗合法；LKI 可讀不代表能對離場物件執行。`follow: receipt` 只接具合法移動授權的實際 after refs（R.follow-move），失敗或消去成員不回傳可操作物件。合法 follow 若沒有成功成員，後續對該集合的動作依 CR 1.3.2 不做，不是載入錯誤；未綁定或無授權的 follow 仍應拒絕。
+`this / it / bind / attack_target / host / cost1` 保留 R.object 世代或事件快照。不接受 first/second/rest 引用別名：前者／後者使用 Target binding 或 roles，搜尋用 per_group；剩餘集合扣除成功搬移的 before，見[動作矩陣](author-step-shapes-1.0.md)。目標引用 R.target 在結算驗合法；LKI 可讀不代表能對離場物件執行。`follow: receipt` 只接具合法移動授權的實際 after refs（R.follow-move），失敗或消去成員不回傳可操作物件。合法 follow 若沒有成功成員，後續對該集合的動作依 CR 1.3.2 不做，不是載入錯誤；未綁定或無授權的 follow 仍應拒絕。
 
 `result` 可掛所有動作、費用、simultaneous。`count_of` 是指定單位 actual；`objects_of` 預設成功成員的快照，`follow` 才取得可執行的新區引用。`count_of: {receipt, where, view: before|after}` 用有型別材料快照，無資訊按 CR 1.3.6。`did`：卡片移動／建立／公開／抽／找須至少一個實際成功成員；傷害須實際正量；姿態／翻面／counter 需所要求全數實變；pay 是 PaymentComplete；evolve 是 receipt.evolved=true。非預設語意必須使用明示 predicate 並附依據，不通用地用 actual>0。
 
@@ -202,37 +202,37 @@ agg／distinct／count.except 的 CollectionSource 不繼承 counted 參數權�
 
 move／banish／look／reveal 的 top 一律在動作同層使用
 [DeckSlice](author-quantity-shapes-1.0.md#牌庫切片的消費位置)，不另收 ref:{top:…} 別名。
-DeckSlice 的型別已定，四個完整父動作仍待接入；費用 banish.top 同樣共用它，待完整 Cost。
+四個父動作、choose/search 群組、遞迴 Steps 的接受形狀及限制見[動作矩陣](author-step-shapes-1.0.md)；費用 banish.top 也共用 DeckSlice。下表未接入的規則程序不代表可接受任意欄位。
 
-| 鍵                                     | payload                                                                              | 降低成                                                                               |
+| 鍵 | payload | 降低成 |
 | -------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| draw / discard                         | `{who?, n}`；discard 另有 all/down_to/any/sel/random                                 | I.draw / I.discard；逐張抽不是批次搬牌                                               |
-| damage / destroy / banish              | `{to,n,distribute?,distribute_at?,instead?}`；後兩者 Ref 或 `{ref}`，banish 另接 top | I.damage / I.destroy / I.banish；distribute 預設打出時                               |
-| move                                   | `{ref或top,to,position?,order?,reveal?,by?,acted?,entry_effects?,bind?,result?}`     | I.move；位置決定與順序 I.order，洗指定集 I.shuffle                                   |
-| create                                 | `{token,n,to,counters?,by?,acted?,entry_effects?,bind?,result?}`                     | I.token；token 列表為每名各 n，不是擇一；不寫 n 時每名 1                             |
-| act / stand                            | Ref 或 `{ref}`                                                                       | I.posture；已在該姿態不產生變化                                                      |
-| evolve / transform                     | `{ref,into?,result?}`；transform 另接 `entry_effects?`                               | I.evolve Effect / I.transform；變身不是改卡名，into 分配見 §14 A-016j                |
-| life / set_life                        | `{who,delta或n}`                                                                     | I.life Add / Set；生命改變不等於傷害                                                 |
-| buff / set_stat                        | `{on,power?,hp?,until?,instead?}`                                                    | I.modify＋L.continuous Numeric                                                       |
-| grant / lose_abilities                 | `{on,keywords?,abilities?,until?}`                                                   | I.grant / I.remove-ability；刪除舊 grant.effects，以 apply 安裝效果                  |
-| counter / move_counters                | `{on,name,delta}` / `{from,to,name,all?}`                                            | I.counter Add/Remove/Move                                                            |
-| pp / pp_max / ep / sep                 | `{who,delta}`；pp 另有 `{who,to_max:true}`                                           | I.resource；不更改印刷費用                                                           |
-| reveal / look                          | `{ref或top,bind,result?,by?,random?}`                                                | I.reveal / I.look；random 先以 I.random 抽樣，不讓玩家挑                             |
-| reveal_until                           | `{sel,n,bind,matched}`                                                               | I.reveal-until；頂端逐張、達標或耗盡停止                                             |
-| search                                 | `{sel,n或upto,to,bind?,groups?,cost_sum_le?,distinct_by?,entry_effects?,result?}`    | I.search；找牌／證明條件／搬牌／洗牌，分量結果保存                                   |
-| shuffle / order                        | `{who}` / `{ref,to,by?}`                                                             | I.shuffle FullZone / I.order                                                         |
-| dice / declare                         | `{bind,who?}` / §4                                                                   | I.dice / I.declare；骰值非玩家宣告                                                   |
-| flip_down / flip_up                    | Ref 或 `{ref}`                                                                       | I.flip-down / I.flip-up；進化牌庫表裏，不是 EP 資源                                  |
-| equip                                  | `{on,token}`                                                                         | I.equip；裝備物不占普通場格                                                          |
-| steal / give                           | `{ref,to?,precondition?}`                                                            | I.transfer；場間轉移同世代、不生入場事件                                             |
-| stack_plus                             | Expr                                                                                 | K.if＋D.rule-choice StackRecipient＋I.counter 或 I.token 初始 N 個 counter（非 N+1） |
-| box / pilot                            | `{ref}` / `{ref,on}`                                                                 | I.box-pilot；依 CR 5.31/5.32 的能力及關聯展開                                        |
-| race / feed / gain_drive / drive_check | `{ref?,n?,who?}`                                                                     | I.meal-race / I.ride-drive / I.drive-check 的對應規則程序                            |
-| play_card / play_ability               | `{ref,cost?}` / `{of,trigger?,ability?,cost_policy?}`                                | I.play-card / I.play-ability；內層獨立 execution                                     |
-| delayed                                | `{on,do,next_only?,until?,line}`                                                     | I.delay；無期限預設只誘發一次                                                        |
-| player_effect / apply                  | `{who,effect,until?}` / `{on,effect,until?}`                                         | I.install-effect，分玩家與物件範圍；不是 I.grant                                     |
-| win / skip_turn / extra_turn           | `{who}`                                                                              | I.game-result / I.schedule-turn                                                      |
-| make_type                              | `{on,type,until?}`                                                                   | I.modify SetKind；不隱式失去能力                                                     |
+| draw / discard | `{who?, n}`；discard 另有 all/down_to/any/sel/random | I.draw / I.discard；逐張抽不是批次搬牌 |
+| damage / destroy / banish | `{to,n,distribute?,distribute_at?,instead?}`；後兩者 Ref 或 `{ref}`，banish 另接 top | I.damage / I.destroy / I.banish；distribute 預設打出時 |
+| move | `{ref或top,to,position?,order?,reveal?,by?,acted?,entry_effects?,result?}` | I.move；位置決定與順序 I.order，洗指定集 I.shuffle |
+| create | `{token,n?,to,counters?,by?,acted?,entry_effects?,bind?,result?}` | I.token；token 列表為每名各 n，不是擇一；不寫 n 時每名 1 |
+| act / stand | Ref 或 `{ref}` | I.posture；已在該姿態不產生變化 |
+| evolve / transform | `{ref,into?,result?}`；transform 另接 `entry_effects?` | I.evolve Effect / I.transform；變身不是改卡名，into 分配見 §14 A-016j |
+| life / set_life | `{who,delta或n}` | I.life Add / Set；生命改變不等於傷害 |
+| buff / set_stat | `{on,power?,hp?,until?,instead?}` | I.modify＋L.continuous Numeric |
+| grant / lose_abilities | grant:`{on,keywords,until?,instead?}`；lose_abilities:`{on,until?}`；abilities 尚不接受 | I.grant / I.remove-ability；刪除舊 grant.effects，以 apply 安裝效果 |
+| counter / move_counters | `{on,name,delta}` / `{from,to,name,all:true}` | I.counter Add/Remove/Move |
+| pp / pp_max / ep / sep | `{who,delta}`；pp 另有 `{who,to_max:true}` | I.resource；不更改印刷費用 |
+| reveal / look | `{ref或top,bind,result?,by?,random?}` | I.reveal / I.look；random 先以 I.random 抽樣，不讓玩家挑 |
+| reveal_until | `{sel,n,bind,matched}` | I.reveal-until；頂端逐張、達標或耗盡停止 |
+| search | `{sel＋n或upto 或 groups,to,cost_sum_le?,distinct_by?,entry_effects?,instead?,result?}` | I.search；找牌／證明條件／搬牌／洗牌，分量結果保存 |
+| shuffle | `{who}`；order 由 choose.order／move.order 承載 | I.shuffle FullZone / I.order |
+| dice / declare | `{bind,who?}` / §4 | I.dice / I.declare；骰值非玩家宣告 |
+| flip_down / flip_up | Ref 或 `{ref}` | I.flip-down / I.flip-up；進化牌庫表裏，不是 EP 資源 |
+| equip | `{on,token}` | I.equip；裝備物不占普通場格 |
+| steal / give | `{ref,to?,precondition?}` | I.transfer；場間轉移同世代、不生入場事件 |
+| stack_plus | Expr | K.if＋D.rule-choice StackRecipient＋I.counter 或 I.token 初始 N 個 counter（非 N+1） |
+| box / pilot | box:`{ref,until}`；pilot 尚無接受形狀 | I.box-pilot；依 CR 5.31/5.32 的能力及關聯展開 |
+| race / feed / gain_drive / drive_check | race:`{ref,n?}`、gain_drive:`{ref}`；feed/drive_check 尚無接受形狀 | I.meal-race / I.ride-drive / I.drive-check 的對應規則程序 |
+| play_card / play_ability | `{ref}`（cost 尚不接受） / `{of,trigger或ability,cost_policy?}` | I.play-card / I.play-ability；內層獨立 execution |
+| delayed | `{on,do,next_only?,until?,line}` | I.delay；無期限預設只誘發一次 |
+| player_effect / apply | `{who,effect,until?}` / `{on,effect,until?}` | I.install-effect，分玩家與物件範圍；不是 I.grant |
+| win / skip_turn / extra_turn | `{who}` | I.game-result / I.schedule-turn |
+| make_type | `{on,type,until?}` | I.modify SetKind；不隱式失去能力 |
 
 ## 8. 事件與歷史
 
@@ -246,7 +246,7 @@ DeckSlice 的型別已定，四個完整父動作仍待接入；費用 banish.to
 
 ## 9. 效果、取代與期限
 
-各鍵必填／選填、cannot 變體及安裝上下文見[效果形狀](author-effect-shapes-1.0.md)。C0 目前接受 26 鍵片段；grant 尚待完整能力頭與 Steps，仍拒絕，不以空 payload 占位。
+各鍵必填／選填、cannot 變體及安裝上下文見[效果形狀](author-effect-shapes-1.0.md)。C0 目前接受 26 鍵片段；EffectSpec.grant 尚待完整能力頭，仍拒絕（動作 grant.keywords 已由動作矩陣承載），不以空 payload 占位。
 
 `A.effect` 可用於 static.effects、player_effect.effect、apply.effect；apply.on 預設在指示開始捕捉集合，可依明確證據用 capture:play，static selector 隨狀態求值。保留 stat/set_stat、keywords/grant/lose_abilities、also_named/add_trait/remove_trait/make_type、cost_mod、damage_mod、banish_instead、cannot、must_attack、play_permission、no_trigger、unlimited_evolve、rule_override；補 prevent、damage_cap、evolve_cost_mod、enters_acted、reroll、ignore_ward、choice_any、extra_trigger、must_target。各鍵只接受配對 IR 封閉變體；無語義的 boxed 宣告改本文 box。
 
@@ -258,7 +258,7 @@ DeckSlice 的型別已定，四個完整父動作仍待接入；費用 banish.to
 
 `enters_acted:{on}` 是入場姿態取代。自身 static 在 ProspectiveEntry 以目的區資訊求值（CR 10.9.3），因此預設 active_zones=field 仍能在入場當下生效，毋須擴成手牌／墓地皆有效；不產生額外 act 事件。
 
-`instead: [{if, <動作 payload 差異>, after?: Steps}]` 可掛 damage/move/buff/life/grant/choice/create/draw/search/banish/destroy。同種差異保留未改欄位，異種用 `replace_with: {<另一動作>: payload}`。降低為一次自我取代，不是先做原動作；after 是取代成功適用後同條件段落的後續句，R-0007 不允許把它放成無條件下一步。choice 只改模式數的形式在打出時計算，不裝全域攔截器。
+`instead: [{if, <動作 payload 差異>, after?: Steps}]` 可掛 damage/move/buff/life/grant/create/draw/search/banish/destroy。同型差異保留未改欄位，數量鍵取代整個數量 variant；完整替換用 `replace_with: {<動作>: payload}`，可同種但不可放控制流程。降低為一次自我取代，不是先做原動作；after 是取代成功適用後同條件段落的後續句，R-0007 不允許把它放成無條件下一步。choice.instead 獨立為 `{if,n}` 或 `{if,upto}`，不接受 after/replace_with；只在打出時計算模式數，不裝全域攔截器。search.to.instead 是找到後的目的地取代，與指示開始的 search.instead 分開，詳動作矩陣。
 
 Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形 `{next_phase: {who,phase:start|main|end,edge:begin|end}}`、`{next_turn: {who,edge:begin|end}}`；`{during_next_phase:{who,phase}}` 表示完整下次階段區間（BP05-006），不是到開始即到期。who 在安裝時捕捉（master_of 與 owner_of 不可混淆）。舊無參數 next_start_phase / next_main_phase / next_owner_turn_end 遷移時要求補錨點，不猜。
 
@@ -1485,10 +1485,11 @@ fanfare:
     - search:
         sel: { who: self, zone: deck, kind: follower, trait: 獣 }
         n: 1
-        to: hand
-        instead:
-          - if: { cmp: { left: { cost_of: found }, op: le, right: 2 } }
-            to: field
+        to:
+          zone: hand
+          instead:
+            if: { cmp: { left: { cost_of: found }, op: le, right: 2 } }
+            zone: field
             may: true
 ```
 
@@ -2218,7 +2219,7 @@ auto:
 
 此能力掛在 grant.abilities 的接受者（裝備者），不是闇斧ナハトファング或裝備提供者自身。`no_trigger` 的 on:Ref/Binding 與 who:PlayerRef/PlayerSet 恰一，who 指能力控制者；`search.entry_effects` 與 move 相同，在入場掃描前作用。`extra_trigger:{phase,who,n}` 降 TriggerMultiplicity，N 是附加次數。`ignore_ward` 只略過守護目標限制。`choice_any` 是 ChooseMode 的數量自我取代：原本至少一個才適用；BP20-P65 替代後「好きな数」可為 0（依 CR 1.3.5／5.18.2.2 推論，無此卡直接 Q&A；`strength: inferred`），不套「Nつまで」的 1 下限。
 
-`A.by-kind` 為 by_kind 的 canonical ID；`A.define`、`A.either` 是新增組合／宣告 ID，其他新原子（apply、sep）依 A.act.<鍵>。v0 的 A.declare、A.order、A.distribute、A.place-acted 分類 ID 保留；動作表的 order 使用 A.order，不另建立第二個 canonical A.act.order。
+`A.by-kind` 為 by_kind 的 canonical ID；`A.define`、`A.either` 是新增組合／宣告 ID，其他新原子（apply、sep）依 A.act.<鍵>。v0 的 A.declare、A.order、A.distribute、A.place-acted 分類 ID 保留；A.order 分類 ID 對應 choose.order／move.order，不提供獨立 order 作者鍵，不另建立第二個 canonical A.act.order。
 
 `event.move_receipt` 是離場／移動事件的 header.receipt 型別化投影。lastword 本文依卡文明示引用離場的「これ」時，以 `follow:{event:move_receipt}` 找到該次實際移動 after；這是 R.follow-move 的 TriggerExplicitReference 授權，並非 LKI 可執行。若該世代又移動，follow 失效，不搜尋同卡號。`this` 作能力 source 仍指原持有者，不因效果召回而偷偷改變傷害來源。
 

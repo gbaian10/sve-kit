@@ -258,7 +258,7 @@ def test_bind_is_a_declaration_name(name: str, bind: JsonValue) -> None:
                 "distinct_by": "orig_cost",
             },
         ),
-        ("A.act.search", {"bind": "found_cards", "result": "searched"}),
+        ("A.act.search", {"result": "searched"}),
         ("A.cost.counter.selected", {"result": "paid_counter"}),
     ],
 )

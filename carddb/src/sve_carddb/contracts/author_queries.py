@@ -210,6 +210,7 @@ type Condition = (
     | CondZoneFree
     | CondHistory
     | CondPaid
+    | CondPaymentDecided
     | CondChosen
 )
 
@@ -704,6 +705,10 @@ class ExprXPaid(RecordData):
 
 class PaidReceipt(RecordData):
     receipt: BindingName | EntryPaymentRef
+
+
+class CondPaymentDecided(RecordData):
+    payment_decided: Literal["optional"]
 
 
 class CondPaid(RecordData):

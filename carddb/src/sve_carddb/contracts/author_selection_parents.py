@@ -5,7 +5,7 @@ from typing import Annotated, Literal, TypedDict
 
 from pydantic import AfterValidator, ConfigDict, Field, with_config
 
-from sve_carddb.contracts.author_leaves import ParamRef, TrueFlag, Zone  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_leaves import TrueFlag  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
 from sve_carddb.contracts.author_quantities import SelectionQuantity  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
 from sve_carddb.contracts.author_queries import (
     FILTER_CONSTRAINTS,
@@ -15,7 +15,7 @@ from sve_carddb.contracts.author_queries import (
     RecipientSel,
     validate_object_filters,
 )
-from sve_carddb.contracts.author_references import BindingName, PlayerRef
+from sve_carddb.contracts.author_references import BindingName
 from sve_carddb.contracts.author_selections import TargetRoles  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
 
 CONFIG = ConfigDict(extra="forbid", strict=True, regex_engine="python-re")
@@ -126,64 +126,3 @@ type Target = (
     | TargetGroupedAny
 )
 type Targets = Annotated[tuple[Target, ...], Field(min_length=1)]
-
-
-@with_config(CONFIG)
-class ChooseFields(_ChooseSource, total=False):
-    by: PlayerRef
-    may: bool
-    reveal: bool
-    order: bool
-    cost_sum_le: Quantity
-    distinct_by: DistinctBy
-
-
-@with_config(CONFIG)
-class ChooseExactFields(ChooseFields):
-    n: SelectionQuantity
-
-
-@with_config(CONFIG)
-class ChooseUpToFields(ChooseFields):
-    upto: SelectionQuantity
-
-
-@with_config(CONFIG)
-class ChooseAnyFields(ChooseFields):
-    any: TrueFlag
-
-
-type Choose = ChooseExact | ChooseUpTo | ChooseAny
-
-
-class _SearchSource(TypedDict):
-    sel: ObjectSel
-    to: Zone | ParamRef
-
-
-@with_config(CONFIG)
-class SearchFields(_SearchSource, total=False):
-    bind: BindingName
-    result: BindingName
-    cost_sum_le: Quantity
-    distinct_by: DistinctBy
-
-
-@with_config(CONFIG)
-class SearchExactFields(SearchFields):
-    n: SelectionQuantity
-
-
-@with_config(CONFIG)
-class SearchUpToFields(SearchFields):
-    upto: SelectionQuantity
-
-
-type Search = SearchExact | SearchUpTo
-
-# Named adapters carry regex configuration across recursive quantity definitions.
-type ChooseExact = ChooseExactFields
-type ChooseUpTo = ChooseUpToFields
-type ChooseAny = ChooseAnyFields
-type SearchExact = SearchExactFields
-type SearchUpTo = SearchUpToFields

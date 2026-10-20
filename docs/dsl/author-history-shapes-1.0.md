@@ -159,7 +159,7 @@ any_of 只能讀所有可能事件共有的同型欄位。片段驗證不驗 enc
 
 | 定義 | 必填形狀 | 值域與接線責任 | 卡例 |
 | --- | --- | --- | --- |
-| A.cond.paid | `{paid:additional或optional或{receipt:BindingName或EntryPaymentRef}}` | Bool；關鍵字須唯一定位本能力 wrapper；具名 receipt 用 mapping，避免同名關鍵字歧義 | optional：BP11-068、BP20-P12；receipt：BP13-098；additional：合成 |
+| A.cond.paid | `{paid:additional或optional或{receipt:BindingName或EntryPaymentRef}}` | Bool；關鍵字須唯一定位同卡、同次 play 的費用 wrapper（可由 play 頭宣告、spell 本文讀取）；具名 receipt 用 mapping，避免同名關鍵字歧義 | optional：BP11-068、BP20-P12；receipt：BP13-098；additional：合成 |
 | A.expr.x-paid | `{x_paid:BindingName}` | 已完成、單一有確定單位的材料／counter 費用步驟 actual；不收一般動作、複合 PaymentComplete 或自由宣告 X | BP03-001，為 x.from_payment 的明示等義拼法 |
 | A.expr.dice | `{dice:BindingName}` | 最終接受骰值，不是宣告數；binding 來源必驗 | BP06-111、BP12-113、BP10-020 |
 | A.cond.chosen | `{chosen:{ref:BindingName,where?:EventSubjectFilter}}` | 單一具名 Target 的選定快照，至少一符合者；省略 where 表非空；不收 at | BP17-030、BP20-073 |

@@ -8,7 +8,7 @@ Python 對應型別在 `contracts/author_effects.py`，與 selector／數值共�
 ## 1. 共通邊界
 
 EffectSpec 是恰含一個效果鍵的物件；下面接受 26 鍵。§9 登錄的第 27 鍵
-`grant` 尚未接入完整能力頭與 Steps，C0 目前拒絕它，包括 `{grant:{}}`
+EffectSpec 的 `grant` 尚未接入完整能力頭，C0 在 EffectSpec 拒絕它，包括 `{grant:{}}`
 與 `{grant:{keywords:[storm]}}`；不以任意 JSON 代替授予能力。
 所有 payload 封閉，未列欄位、null 與錯型別拒絕，不補預設欄位。
 
@@ -179,3 +179,5 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 
 直接事件與 history.where 的逐欄矩陣另見[事件矩陣](author-event-matrix-1.0.md)。
 事件角色與本文件的安裝角色不可互借；兩者的正反例都不取代全卡與執行驗收。
+
+動作 grant.keywords 與 EffectSpec 不同，已接受的動作及 Steps 見[動作矩陣](author-step-shapes-1.0.md)；grant.abilities 仍不接受。

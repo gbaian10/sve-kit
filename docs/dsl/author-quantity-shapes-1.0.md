@@ -47,8 +47,8 @@ Q 表 Quantity，T 表 SelectionQuantity；各 exact／up-to／any 是獨立分�
 | A.act.choose.exact | bind、from:ObjectSel、n:T | choose 欄 |
 | A.act.choose.up-to | bind、from:ObjectSel、upto:T | choose 欄 |
 | A.act.choose.any | bind、from:ObjectSel、any:嚴格 true | choose 欄 |
-| A.act.search.exact | sel:ObjectSel、to:Zone或ParamRef、n:T | search 欄 |
-| A.act.search.up-to | sel:ObjectSel、to:Zone或ParamRef、upto:T | search 欄 |
+| A.act.search.exact | sel:ObjectSel、to:SearchDestination、n:T | search 欄 |
+| A.act.search.up-to | sel:ObjectSel、to:SearchDestination、upto:T | search 欄 |
 | A.cost.counter.self.exact | on:this、name:CounterName、n:Q | result |
 | A.cost.counter.self.up-to | on:this、name:CounterName、upto:Q | result |
 | A.cost.counter.self.any | on:this、name:CounterName、any:嚴格 true | result |
@@ -66,8 +66,8 @@ holder 個數與每個 holder 的 counter 要求量是不同位置，兩者都�
 | 共用選填欄 | 型別與局部限制 |
 | --- | --- |
 | Target | roles:TargetRoles、option:正安全整數、cost_sum_le:Q、distinct_by:DistinctBy、distinct_names:嚴格 true |
-| choose | by:PlayerRef、may:bool、reveal:bool、order:bool、cost_sum_le:Q、distinct_by:DistinctBy |
-| search | bind、result、cost_sum_le:Q、distinct_by:DistinctBy |
+| choose | by:PlayerRef、may:bool、reveal:bool、order:bool、position:top_or_bottom、groups、cost_sum_le:Q、distinct_by:DistinctBy |
+| search | result、precondition、cost_sum_le:Q、distinct_by:DistinctBy、entry_effects、instead；不收 bind |
 
 Target 的 distinct_by 與 distinct_names 互斥。名稱互異的作者標準形為 distinct_by:name；
 既有 distinct_names:true 保留，但兩者不推定相同 body hash。
@@ -118,10 +118,10 @@ who 為 PlayerSet 時，n 表每位玩家各 n 張；不從玩家列舉建立跨
 | reveal.top | 同上；CP03-105 |
 | cost.banish.top | 同上；GAP-A-010，已接入 Cost 的 BanishTop |
 
-DeckSlice 已接入 cost.banish；**四個完整動作父節點尚未實作**。
+DeckSlice 已接入 cost.banish 及 move/banish/look/reveal 父動作。
 後續父節點不可默收 `ref:{top:…}` 或 `ref:{bottom:…}` 別名。
 ObjectSel、RecipientSel、Ref 目前都拒絕 top／bottom；不新增一套排除切片的 selector。
-語法 §5 的頂底切片登錄仍保留；獨立 Sel 消費位置未有卡例前，不加入 ObjectAtom。
+不接受獨立 Sel.top/bottom 或動作 bottom 來源。
 BP06-108 的「その中から」應讀 `in:looked`，不能重新查當下牌庫頂端。
 bottom 來源沒有凍結卡例；`position:bottom` 是目的地，不能冒充其證據。
 
@@ -152,14 +152,5 @@ ECP01-038 的 DeckSlice 為 `{who:opponents,n:20}`；
 - 參數來源 role、component、mode 與完整算式 operand 路徑仍須核對；
   shape 合法不表示來源、資訊可見性或操作能力已准入。
 
-尚未接入的欄位逐父列如下；目前節點 schema 會拒絕它們，**不是從作者語法刪除**：
-
-| 父節點 | 尚未接入 |
-| --- | --- |
-| choose | groups、position |
-| search | groups 變體、entry_effects、instead、to.partition、precondition |
-| move／banish／look／reveal | 整個父動作及其附加欄位；本片只定 top 的 DeckSlice |
-
-例如 CP03-SL07 的 to.partition、CP04-P68 的分組與 entry_effects 仍是已定語法，
-本片單組 search 尚不能接受；不以任意 JSON 子樹補洞。
-完整 E/C、其餘 filter、來源／型別／scope／ports／receipt/capability 檢查仍另行實作。
+完整 choose/search 群組、位置、search.to.partition、entry_effects、instead、precondition 及 move/banish/look/reveal 已由[動作矩陣](author-step-shapes-1.0.md)承載。
+本表保留數量角色邊界；完整能力入口、來源／型別／scope／ports／receipt/capability 檢查仍另行實作。

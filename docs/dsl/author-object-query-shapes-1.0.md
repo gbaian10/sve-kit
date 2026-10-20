@@ -6,7 +6,7 @@
 它不接受領袖 recipient，未涵蓋完整 Sel，也不提供完整作者 reader 或執行准入。
 已定形的單組選取父節點與要求量見[數量矩陣](author-quantity-shapes-1.0.md)。
 DeckSlice 只定動作同層 top 的共用 payload；ObjectSel 不因而接受 top／bottom。
-語法 §5 的頂底切片登錄保留，獨立 Sel 消費位置仍待證，不以目的地 position:bottom 作來源例。
+不接受 Sel.top/bottom；頂部來源使用動作同層 top:DeckSlice，底部只有目的地 position:bottom。
 
 ## 逐 variant 矩陣
 
@@ -37,10 +37,10 @@ count.who 的雙方範圍有 CP01-004；PlayerSet 保留集合基數，不因引
 Sel.zone 可省略（GAP-A-048 BP20-030），不在形狀層補 field；
 count.zone 必填（GAP-A-001／025／040）。區域列表不接受元素 param。
 
-ObjectSel 的 `except` 是單一 ObjectSel，排除 binding 寫 `{in:looked,except:{in:chosen}}`。
+ObjectSel 的 `except` 是單一 ObjectSel。一般扣除已選集合可寫 `{in:looked,except:{in:chosen}}`；移動後「残り」須扣除成功 before：`{in:looked,except:{in:{objects_of:moved,view:before}}}`，不能扣除容量不足而未移動的 chosen。
 差集保留左側已有順序，按相同物件身分比較；世代及快照視角須相容，
 不能將不相容的 Live／快照物件自行配對。
-BP07-SL09、BP14-023 的剩餘材料由這個差集表達，之後的「好きな順」仍須獨立 order；
+BP07-SL09、BP14-023 的剩餘材料用成功 before 差集，之後的「好きな順」使用 move.order:chooser；
 差集本身不讓玩家選擇排列。這不新增 Sel.rest 或 first/second/rest 引用編碼，
 也不把 Target.roles.remaining 當成差集別名。
 
@@ -76,7 +76,7 @@ any_of:
 ```
 
 以上卡例取自 `card-data/jp/` 遞迴各子目錄的凍結卡文 text／sections，不以 Q&A 作卡例；
-只驗來源片段可表達，沒有宣稱完整父動作已實作；單組 choose 的數量變體另見數量矩陣。
+來源片段與單組數量另見數量矩陣；父動作及遞迴 Steps 見[動作矩陣](author-step-shapes-1.0.md)。
 BP07-050 的 t 須有合法前序目標宣告，其 controller 捕捉／離場 LKI 沿既有規則另驗。
 CountSource 保持獨立位置型別，新增的 in／except／where／as 依本表明確定形；
 這四個計數欄位目前沒有直接卡例，只有契約與合成測試，不冒稱 corpus 已覆蓋。

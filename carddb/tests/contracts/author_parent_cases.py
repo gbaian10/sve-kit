@@ -9,6 +9,7 @@ from sve_carddb.contracts import author_leaves as leaves
 from sve_carddb.contracts import author_quantities as quantities
 from sve_carddb.contracts import author_queries as queries
 from sve_carddb.contracts import author_selection_parents as parents
+from sve_carddb.contracts import author_steps as steps
 
 from .author_selector_cases import CONFIG
 
@@ -30,13 +31,13 @@ PARENTS: dict[str, TypeAdapter[object]] = {
     "A.target.up-to": TypeAdapter(parents.TargetUpTo, config=CONFIG),
     "A.target.any": TypeAdapter(parents.TargetAny, config=CONFIG),
     "A.target": TypeAdapter(parents.Target, config=CONFIG),
-    "A.act.choose.exact": TypeAdapter(parents.ChooseExact, config=CONFIG),
-    "A.act.choose.up-to": TypeAdapter(parents.ChooseUpTo, config=CONFIG),
-    "A.act.choose.any": TypeAdapter(parents.ChooseAny, config=CONFIG),
-    "A.act.choose": TypeAdapter(parents.Choose, config=CONFIG),
-    "A.act.search.exact": TypeAdapter(parents.SearchExact, config=CONFIG),
-    "A.act.search.up-to": TypeAdapter(parents.SearchUpTo, config=CONFIG),
-    "A.act.search": TypeAdapter(parents.Search, config=CONFIG),
+    "A.act.choose.exact": TypeAdapter(steps.ChooseExact, config=CONFIG),
+    "A.act.choose.up-to": TypeAdapter(steps.ChooseUpTo, config=CONFIG),
+    "A.act.choose.any": TypeAdapter(steps.ChooseAny, config=CONFIG),
+    "A.act.choose": TypeAdapter(steps.Choose, config=CONFIG),
+    "A.act.search.exact": TypeAdapter(steps.SearchExact, config=CONFIG),
+    "A.act.search.up-to": TypeAdapter(steps.SearchUpTo, config=CONFIG),
+    "A.act.search": TypeAdapter(steps.Search, config=CONFIG),
     "A.cost.counter.self.exact": TypeAdapter(costs.CounterCostSelfExact, config=CONFIG),
     "A.cost.counter.self.up-to": TypeAdapter(costs.CounterCostSelfUpTo, config=CONFIG),
     "A.cost.counter.self.any": TypeAdapter(costs.CounterCostSelfAny, config=CONFIG),
