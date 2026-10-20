@@ -14,6 +14,7 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
+from .author_selection_cases import SELECTIONS
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -70,6 +71,7 @@ REFERENCES: dict[str, TypeAdapter[object]] = {
     "A.player-set": TypeAdapter(references.PlayerSet, config=CONFIG),
     "A.single-leader": TypeAdapter(references.SingleLeader),
     "A.multiple-leaders": TypeAdapter(references.MultipleLeaders),
+    "A.leader-of": TypeAdapter(references.LeaderOf),
     "A.leader-recipient": TypeAdapter(references.LeaderRecipient, config=CONFIG),
     "A.phase-edge": TypeAdapter(references.PhaseEdge),
     "A.turn-edge": TypeAdapter(references.TurnEdge),
@@ -140,7 +142,10 @@ def _assert_definition(
 
 
 def test_every_implemented_definition_has_a_python_type() -> None:
-    assert object_value(NODES["$defs"]).keys() == (LEAVES | REFERENCES | NUMERIC).keys()
+    assert (
+        object_value(NODES["$defs"]).keys()
+        == (LEAVES | REFERENCES | NUMERIC | SELECTIONS).keys()
+    )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
 
 
@@ -152,6 +157,45 @@ def test_leaf_type_drift(name: str) -> None:
 @pytest.mark.parametrize("name", REFERENCES)
 def test_reference_type_drift(name: str) -> None:
     _assert_definition(NODES, name, REFERENCES[name])
+
+
+@pytest.mark.parametrize("name", SELECTIONS)
+def test_selection_type_drift(name: str) -> None:
+    _assert_definition(NODES, name, SELECTIONS[name])
+
+
+@pytest.mark.parametrize("name", ["A.target.role-one", "A.leader-of"])
+@pytest.mark.parametrize("mutation", ["required", "discriminator", "exclusive"])
+def test_selection_mapping_drift_detects_variant_changes(
+    name: str, mutation: str
+) -> None:
+    changed = deepcopy(NODES)
+    definition = object_value(object_value(changed["$defs"])[name])
+    properties = object_value(definition["properties"])
+    if mutation == "required":
+        definition["required"] = []
+    elif mutation == "discriminator":
+        value = properties.pop(next(iter(properties)))
+        properties["wrong_key"] = value
+        definition["required"] = ["wrong_key"]
+    else:
+        properties["other_variant"] = {"type": "boolean"}
+    with pytest.raises(AssertionError):
+        _assert_definition(changed, name, (REFERENCES | SELECTIONS)[name])
+
+
+@pytest.mark.parametrize("mutation", ["empty", "key_domain", "value_type"])
+def test_role_map_drift_detects_declaration_changes(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definition = object_value(object_value(changed["$defs"])["A.target.roles"])
+    if mutation == "empty":
+        definition["minProperties"] = 0
+    elif mutation == "key_domain":
+        definition["propertyNames"] = {"type": "string"}
+    else:
+        definition["additionalProperties"] = {"type": "integer"}
+    with pytest.raises(AssertionError):
+        _assert_definition(changed, "A.target.roles", SELECTIONS["A.target.roles"])
 
 
 @pytest.mark.parametrize("name", INDEX)
