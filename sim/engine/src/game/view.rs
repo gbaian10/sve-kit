@@ -101,10 +101,13 @@ impl Game {
                     .collect::<Vec<_>>()
             )
         });
-        packet["awaiting"] = self.awaited(view)?;
-        if self.typed.is_some() {
-            packet["awaiting"] = self.internal_decision_packet(view);
-        }
+        packet["awaiting"] = if self.typed.is_some() {
+            self.internal_decision_packet(view)
+        } else if self.card_runtime.checkpoint.is_some() {
+            Value::Null
+        } else {
+            self.awaited(view)?
+        };
         if seat.is_none_or(|seat| self.input_point()["by"] == seat) {
             packet["legal"] = json!(self.legal()?);
         }
@@ -263,9 +266,9 @@ impl Game {
     /// # Errors
     /// When serialization fails.
     pub fn digest(&self) -> Result<String> {
-        if self.typed.is_some() {
+        if self.typed.is_some() || !self.card_runtime.is_empty() {
             return Err(invalid(
-                "active internal IR executions have no digest format",
+                "internal IR executions and loaded cards have no digest format",
             ));
         }
         let mut value = serde_json::to_value(&self.state).map_err(invalid)?;
