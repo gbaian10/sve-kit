@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
 
-from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.compression import verify_brotli
 from sve_carddb.core.json import (
@@ -282,15 +282,33 @@ def read_index(raw: bytes) -> dict[str, JsonValue]:
 
 
 def retained_manifest(raw: bytes, entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
-    """Verify a retained manifest against its version index identity."""
+    """Verify retained publication metadata without revalidating card data fields."""
+    validate("IndexEntry", entry)
     if digest(raw) != entry["manifest_sha256"]:
         raise ExportError("Retained manifests must be intact")
     manifest = object_value(parse(raw))
-    validate("Manifest", manifest, string(manifest["format_version"]))
-    if raw != canonical(manifest) or any(
-        manifest[k] != entry[k] for k in ("data_version", "published_at")
+    try:
+        profile(string(manifest["format_version"]))
+    except ValueError:
+        raise ExportError("Unsupported retained snapshot format") from None
+    path = string(entry["manifest_path"])
+    if (
+        raw != canonical(manifest)
+        or path
+        != "snapshots/manifests/" + string(entry["manifest_sha256"])[7:] + ".json"
+        or any(manifest[k] != entry[k] for k in _ENTRY)
     ):
         raise ExportError("Manifest differs from its index entry")
+    closure(path, manifest)
+    # Retained data was validated at publication; only its transport envelope is stable.
+    for row in _descriptions(manifest):
+        length = object_value(row["compressed_bytes"])["br"]
+        if (
+            re.fullmatch(r"sha256:[0-9a-f]{64}", string(row["sha256"])) is None
+            or integer(row["bytes"]) <= 0
+            or (length is not None and integer(length) <= 0)
+        ):
+            raise ExportError("Invalid retained manifest file description")
     return manifest
 
 

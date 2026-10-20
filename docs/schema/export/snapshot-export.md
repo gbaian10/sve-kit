@@ -127,8 +127,9 @@ JP 量測不足以凍結正式配置；正式前還須量 EN、雙區與完整�
 兩者都不開圖檔。傳輸 header 由發布端決定。
 
 `read_index(raw)` 驗證 canonical 版本索引；`validate_index(value)` 驗證索引形狀。
-GC 使用 `retained_manifest(raw, entry)` 核對保留的 manifest、`closure(path, manifest)`
-取得 JSON 引用閉包，及 `current_image_keys(manifest, payloads)` 取得 current 圖片 keys。
+上傳增量比對與 GC 使用 `retained_manifest(raw, entry)` 核對保留 manifest 的已知格式與發布外殼
+（身分、hash、canonical、檔案描述與閉包），不以目前的資料 schema 重驗；`closure(path, manifest)`
+取得 JSON 引用閉包，卡圖 GC 的 `current_image_keys(manifest, payloads)` 仍須以完整 reader 驗證 current 才取得圖片 keys。
 `directory(root)` 與 `read_member(root, key)` 保留非 symlink 的本機讀取限制。
 這個入口不載入 DB、建置流程、preview writer 或 R2 傳輸，也不在 import 時執行 I/O。
 
