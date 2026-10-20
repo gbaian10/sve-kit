@@ -28,6 +28,7 @@ export interface Face {
   readonly illustrator?: string
   /** An older wording that the current revision replaced (errata); JP only. */
   readonly previousEffectJa?: string
+  readonly previousEffectZh?: string
 }
 
 export interface Printing {
@@ -471,6 +472,7 @@ export const CARDS: readonly Card[] = [
           zhHant: "對對手 1 張從者造成 3 點傷害。",
           en: "Deal 3 damage to an enemy follower.",
         },
+        previousEffectZh: "對對手 1 張從者造成 2 點傷害。",
         previousEffectJa: "相手のフォロワー1体に2ダメージ。",
       },
     ],

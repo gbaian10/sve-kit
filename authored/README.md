@@ -12,6 +12,7 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `rules/rulings/` — evidence-backed interpretations; see `../docs/adr/0009-rulings-evidence.md`
 - `translations/glossary/<filing_key>/*.yaml` — current glossary concepts and editable current translations
 - `translations/flavor/<hash digit>.yaml` — whole-paragraph flavor translations keyed by the source text's SHA-256; see [flavor translation](../docs/schema/domains/flavor-translation.md)
+- `translations/errata/<filing_key>.yaml` — Japanese errata before/after translations paired by source URL, date and wording hash; see [errata translations](../docs/schema/domains/errata-translations.md)
 
 Every YAML document explicitly declares integer `format` and enumerated `kind`.
 Templates use `translations/templates/{definitions,values,candidates}/`; products

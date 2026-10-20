@@ -70,6 +70,7 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 | `errata`                       | T1   |
 | `errata_version`               | T1   |
 | `errata_change`                | T1   |
+| `errata_change_translation`    | T1   |
 | `errata_printing`              | T1   |
 | `card_related`                 | T1   |
 | `region_divergence`            | T1   |

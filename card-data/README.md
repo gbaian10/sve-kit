@@ -9,6 +9,11 @@ Batch source selections live separately under `batches/`, in fixed groups of
 when no source observation changes. Offline builds read these admitted inputs
 directly; players and the simulator continue to consume versioned carddb snapshots.
 
+`errata/` is an independent, hash-pinned supplement containing reviewed Japanese
+and English announcement fragments and portable evidence. `parsed-cards validate`
+checks both trees and their retained history; offline builds read both without HTML.
+See the [errata input contract](../docs/schema/ingest/parsed-errata.md).
+
 The initial observations come from official Japanese and English SVE card pages.
 Each records its exact source URL, raw SHA-256, observation time, parser recipe
 and declared producer commit. Raw archives and backups remain separately preserved.

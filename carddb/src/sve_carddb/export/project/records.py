@@ -257,10 +257,24 @@ def ancillary_records(source: Source, view: dict[str, list[Record]]) -> None:
                     "field": row["field"],
                     "before": row["before_value"],
                     "after": row["after_value"],
+                    "wording_translations": [
+                        {
+                            "lang": translated["lang"],
+                            "before": translated["before_text"],
+                            "after": translated["after_text"],
+                            "origin": translated["origin"],
+                            "low_confidence": translated["low_confidence"],
+                        }
+                        for translated in source.matching(
+                            "errata_change_translation",
+                            "change_id,lang,before_text,after_text,origin,low_confidence",
+                            change_id=row["id"],
+                        )
+                    ],
                 }
                 for row in source.matching(
                     "errata_change",
-                    "errata_version_id,face_id,field,before_value,after_value",
+                    "id,errata_version_id,face_id,field,before_value,after_value",
                     errata_version_id=version["id"],
                 )
             ]

@@ -61,7 +61,7 @@ describe("printed-text availability", () => {
   it("keeps the switch hidden after verifying a printing has no printed text", async () => {
     const props = await originWithPrintedText(false)
     await renderInRouter(
-      <CardTextPanel {...props} edition="jp">
+      <CardTextPanel cardId="card" {...props} edition="jp">
         <p>Synthetic current wording</p>
       </CardTextPanel>,
     )
@@ -85,7 +85,7 @@ describe("printed-text availability", () => {
   it("shows a printing's flavor beside the current wording without the switch", async () => {
     const props = await originWithPrintedText(false, true)
     await renderInRouter(
-      <CardTextPanel {...props} edition="jp">
+      <CardTextPanel cardId="card" {...props} edition="jp">
         <p>Synthetic current wording</p>
       </CardTextPanel>,
     )
@@ -117,7 +117,7 @@ describe("printed-text availability", () => {
   it("offers a working switch when a verified printing actually has effect text", async () => {
     const props = await originWithPrintedText(true)
     await renderInRouter(
-      <CardTextPanel {...props} edition="jp">
+      <CardTextPanel cardId="card" {...props} edition="jp">
         <p>Synthetic current wording</p>
       </CardTextPanel>,
     )

@@ -42,6 +42,7 @@ export interface QueryState {
   readonly sets: readonly string[]
   readonly rarities: readonly string[]
   readonly altArtOnly: boolean
+  readonly errataOnly: boolean
   readonly unit: QueryUnit
   /** Which printing a merged cell shows (#781); ignored while the unit is `printing`. */
   readonly representative: RepresentativeRarity
@@ -65,6 +66,7 @@ export const DEFAULT_QUERY: QueryState = {
   sets: [],
   rarities: [],
   altArtOnly: false,
+  errataOnly: false,
   unit: "printing",
   representative: "low",
   prFirst: false,
@@ -85,6 +87,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.sets.length > 0 ? 1 : 0) +
     (state.rarities.length > 0 ? 1 : 0) +
     (state.altArtOnly ? 1 : 0) +
+    (state.errataOnly ? 1 : 0) +
     (state.unit !== DEFAULT_QUERY.unit ? 1 : 0)
   )
 }

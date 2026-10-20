@@ -59,6 +59,7 @@
     "PrintingStamp",
     "PrintingFace",
     "ArtArtist",
+    "ErrataTranslation",
     "ErrataChange",
     "ErrataPrinting",
     "ErrataVersion",
@@ -1919,9 +1920,18 @@
           }
         },
         "errata_card_ids": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/ID"
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "jp",
+              "en"
+            ]
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ID"
+            }
           }
         },
         "changes_ref": {
@@ -3882,6 +3892,19 @@
           },
           "descriptor": {
             "json": "CorrectionValue"
+          }
+        },
+        "wording_translations": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ErrataTranslation"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "ref": "ErrataTranslation"
+            }
           }
         }
       },
@@ -12326,6 +12349,57 @@
         }
       },
       "constraints": {}
+    },
+    "ErrataTranslation": {
+      "fields": {
+        "lang": {
+          "schema": {
+            "$ref": "#/$defs/Lang"
+          },
+          "descriptor": {
+            "scalar": "Lang"
+          }
+        },
+        "before": {
+          "schema": {
+            "$ref": "#/$defs/Text"
+          },
+          "descriptor": {
+            "scalar": "Text"
+          }
+        },
+        "after": {
+          "schema": {
+            "$ref": "#/$defs/Text"
+          },
+          "descriptor": {
+            "scalar": "Text"
+          }
+        },
+        "origin": {
+          "schema": {
+            "enum": [
+              "project",
+              "machine"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "project",
+              "machine"
+            ]
+          }
+        },
+        "low_confidence": {
+          "schema": {
+            "$ref": "#/$defs/Bool"
+          },
+          "descriptor": {
+            "scalar": "Bool"
+          }
+        }
+      },
+      "constraints": {}
     }
   },
   "nested": [
@@ -12337,6 +12411,7 @@
     "PrintingStamp",
     "PrintingFace",
     "ArtArtist",
+    "ErrataTranslation",
     "ErrataChange",
     "ErrataPrinting",
     "ErrataVersion",

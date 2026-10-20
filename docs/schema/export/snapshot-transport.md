@@ -52,7 +52,8 @@ manifest 是一般 JSON object，不使用 tuple。完整欄位如下；引用�
 | mechanic_universe_id | Hash；取 keyword 的 id/kind/definition_unit_id/actions，按 id 排序後的 canonical 陣列 |
 | restriction_coverage | `[RestrictionCoverage]`，按 profile_id/from_date 排序 |
 | source_windows | `[SourceWindow]`，按 kind/region/scope_key/from_date/as_of 排序 |
-| qa_card_ids, errata_card_ids | `[ID]`，本次公開 card ID 的排序唯一集合，見 §6 |
+| qa_card_ids | `[ID]`，本次公開 QA card ID 的排序唯一集合，見 §6 |
+| errata_card_ids | `{ region: [ID] }`，每個出貨地區的公告 card ID 排序唯一集合，keys 恰為 `regions`，見 §6 |
 | changes_ref | `Blob?`，首版或預覽可 null；正式續版必填且指向 §7 的變動摘要 |
 
 `FileRef = {key:Text,sha256:Hash}`；必須同時吻合 files 中該 key 的 hash。`Blob = {path:Path,sha256:Hash,bytes:UInt,compressed_bytes:{br:UInt?}}`，bytes > 0；壓縮值非 null 時亦 > 0。
@@ -122,7 +123,8 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | PrintingFace.observations | ObservedText | revision_id, state, source_url |
 | art.artists | ArtArtist | artist_id, role |
 | PrintingFace.stamps | PrintingStamp | stamp_id, position, color |
-| ErrataVersion.changes | ErrataChange | face_id, field, before, after |
+| ErrataVersion.changes | ErrataChange | face_id, field, before, after, wording_translations |
+| ErrataChange.wording_translations | ErrataTranslation | lang, before, after, origin, low_confidence |
 | ErrataVersion.printings | ErrataPrinting | printing_id, scope |
 | ruling_revision.replaced_scopes | ReplacedScope | scope_unit_id, replacement_revision_id |
 | ruling_revision.hints | RulingHint | lang, text_unit_id, parameter_schema |
@@ -183,6 +185,10 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 `{}`、省略 uint／variables、兩值域皆停用或 bounds 超出上述範圍也拒絕；無參數只能使用表列的空 parameters 表示。新增參數種類或變數值須依 §1.1 升版，不能靠更換 data_version 放寬。
 
 ### 3.3 公開更正值
+
+`ErrataChange.wording_translations` 為 `[{lang,before,after,origin,low_confidence}]`。
+每筆翻譯對應同一變更的前後公告片段；`origin` 限 machine／project，不授予官方身分。
+缺譯時為空陣列，仍顯示原文；不把譯文寫回 `before`／`after`，也不推定完整印刷卡文。
 
 `Correction.corrected_from` 與 `ErrataChange.before/after` 共用下表的 field 白名單與 `CorrectionValue` 型別對照；before、after 各自按同一 field 驗證。這些值是玩家可讀的來源原值／改值，不是 text_unit ID；field 也不是可任意存取公開欄位的路徑。
 
@@ -415,7 +421,7 @@ version 為 1..2^53−1 或 null，狀態／空陣列約束依 snapshot-format �
 
 窗口是 `[from_date,until_date)`；until=null 只表示未另記有限終點，不保證未來來源完整。SourceWindow 查詢還須 date≤as_of；RestrictionCoverage 無獨立 as_of 時最多證明到 manifest.data_as_of。重疊窗口有 partial／矛盾時不得挑 complete 宣稱完整；producer 應合併無矛盾窗口或隔離衝突。缺窗口、日期／region／scope 不涵蓋皆 unknown。
 
-`qa_card_ids` 從本次出貨的 qa.current_version_id 對應 qa_version.cards 聯集推導；歷史版本的已移除關聯不算現行 QA。`errata_card_ids` 從本次 errata.versions.changes.face_id 及 printings.printing_id 對應的 card 聯集推導；包含已公布但未生效的公告，UI 另讀日期。兩者先驗引用閉包、再排序去重；有 ID 表示 present。沒 ID 只有在相應 kind／region／收錄 scope 的完整來源窗口涵蓋查詢日期時才為 absent，其餘 unknown。摘要不表示裁定適用已人工確認，也不能由一區的 absent 推另一區。
+`qa_card_ids` 從本次出貨的 qa.current_version_id 對應 qa_version.cards 聯集推導；歷史版本的已移除關聯不算現行 QA。`errata_card_ids` 按公告的 `region` 分區，從本次 errata.versions.changes.face_id 及 printings.printing_id 對應的 card 聯集推導；日版只看 `jp`、英版只看 `en`，不混用兩區聯集；包含已公布但未生效的公告，UI 另讀日期。兩者先驗引用閉包、再排序去重；有 ID 表示 present。沒 ID 只有在相應 kind／region／收錄 scope 的完整來源窗口涵蓋查詢日期時才為 absent，其餘 unknown。摘要不表示裁定適用已人工確認，也不能由一區的 absent 推另一區。
 
 ## 7. changes 元素
 

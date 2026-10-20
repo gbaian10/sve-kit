@@ -1,0 +1,46 @@
+import { screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { useState } from "react"
+import { expect, it } from "vitest"
+
+import { formatQuery, parseQuery } from "../../domain/query/codec"
+import { DEFAULT_QUERY } from "../../domain/query/model"
+import { renderInRouter } from "../../test-utils"
+import { FilterPanel } from "./FilterPanel"
+
+function Harness() {
+  const [query, setQuery] = useState(DEFAULT_QUERY)
+  return (
+    <>
+      <FilterPanel
+        id="test-filters"
+        open
+        query={query}
+        onChange={setQuery}
+        edition="jp"
+        onEditionChange={() => undefined}
+        facets={null}
+      />
+      <output aria-label="URL">{formatQuery(query).toString()}</output>
+    </>
+  )
+}
+
+it("toggles errata independently before the display controls and round trips through the URL", async () => {
+  await renderInRouter(<Harness />)
+  const user = userEvent.setup()
+  const errata = screen.getByRole("switch", { name: "只顯示勘誤卡" })
+  const grouping = screen.getByRole("combobox", { name: "顯示方式" })
+  expect(screen.getAllByRole("switch")).toHaveLength(1)
+  expect(errata).toHaveAccessibleDescription("官方發過勘誤公告的卡")
+  expect(errata.compareDocumentPosition(grouping) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  await user.click(errata)
+  expect(errata).toBeChecked()
+  expect(grouping).toHaveValue("printing")
+  const state = parseQuery(new URLSearchParams(screen.getByLabelText("URL").textContent))
+  expect(state.errataOnly).toBe(true)
+  await user.selectOptions(grouping, "card")
+  expect(errata).toBeChecked()
+  await user.click(errata)
+  expect(screen.getByLabelText("URL")).not.toHaveTextContent("errata")
+})

@@ -1131,6 +1131,18 @@ async function addCard(ctx: CardContext): Promise<void> {
               {
                 face_id: face.id,
                 field: "effect",
+                wording_translations:
+                  face.previousEffectZh && face.effect.zhHant
+                    ? [
+                        {
+                          lang: "zh-Hant",
+                          before: face.previousEffectZh,
+                          after: face.effect.zhHant,
+                          origin: "machine",
+                          low_confidence: false,
+                        },
+                      ]
+                    : [],
                 before: face.previousEffectJa,
                 after: face.effect.ja,
               },
@@ -2033,11 +2045,15 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   const faceCards = new Map(
     view("face").map((row) => [stringValue(row["id"]), stringValue(row["card_id"])]),
   )
-  const errataCards = new Set<string>()
-  for (const row of view("errata"))
+  const errataCards = new Map<string, Set<string>>()
+  for (const row of view("errata")) {
+    const region = stringValue(row["region"])
+    const ids = errataCards.get(region) ?? new Set<string>()
+    errataCards.set(region, ids)
     for (const version of row["versions"] as JsonObject[])
       for (const change of version["changes"] as JsonObject[])
-        errataCards.add(faceCards.get(stringValue(change["face_id"])) ?? "")
+        ids.add(faceCards.get(stringValue(change["face_id"])) ?? "")
+  }
 
   const regions = [
     ...new Set(cards.flatMap((card) => card.printings.map((printing) => printing.region))),
@@ -2105,7 +2121,12 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       },
     ],
     qa_card_ids: [...qaCards].sort(compareCodePoints),
-    errata_card_ids: [...errataCards].sort(compareCodePoints),
+    errata_card_ids: Object.fromEntries(
+      regions.map((region) => [
+        region,
+        [...(errataCards.get(region) ?? [])].sort(compareCodePoints),
+      ]),
+    ),
     changes_ref: null,
   }
   const manifestBytes = canonical(manifest)

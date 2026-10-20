@@ -89,6 +89,24 @@ TABLES = (
         ),
     ),
     Table(
+        "errata_change_translation",
+        (
+            Column("change_id", Kind.ID),
+            Column("lang", Kind.ID),
+            Column("before_text", Kind.TEXT),
+            Column("after_text", Kind.TEXT),
+            Column("origin", Kind.TEXT, choices=("project", "machine")),
+            Column("low_confidence", Kind.BOOL),
+            Column("source_id", Kind.ID),
+        ),
+        ("change_id", "lang"),
+        foreign_keys=(
+            ForeignKey(("change_id",), "errata_change", ("id",)),
+            ForeignKey(("lang",), "language", ("code",)),
+            ForeignKey(("source_id",), "source_record", ("id",)),
+        ),
+    ),
+    Table(
         "errata_printing",
         (
             Column("errata_version_id", Kind.ID),

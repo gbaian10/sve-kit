@@ -24,13 +24,32 @@ export function SymbolIcon({ piece }: { readonly piece: SymbolPiece }) {
 }
 
 /** Card text without annotations, with its official inline icons; everything stays inline. */
-export function InlineText({ text }: { readonly text: string }) {
+export function InlineText({
+  text,
+  emphasis = false,
+}: {
+  readonly text: string
+  readonly emphasis?: boolean
+}) {
+  const { termEmphasis } = usePrefs()
   const pieces = useMemo(() => inlinePieces(text), [text])
   return (
     <>
       {pieces.map((piece, index) =>
         piece.kind === "text" ? (
-          <Fragment key={index}>{piece.text}</Fragment>
+          <Fragment key={index}>
+            {emphasis && termEmphasis
+              ? piece.text
+                  .split(/(【[^】]+】)/u)
+                  .map((part, position) =>
+                    part.startsWith("【") && part.endsWith("】") ? (
+                      <strong key={position}>{part}</strong>
+                    ) : (
+                      part
+                    ),
+                  )
+              : piece.text}
+          </Fragment>
         ) : (
           <SymbolIcon key={index} piece={piece} />
         ),

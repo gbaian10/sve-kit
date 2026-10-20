@@ -1245,6 +1245,7 @@ it("a stored index image answers every query like the index it was encoded from"
   const catalog = createCatalog(snapshot)
   const states = [
     CARD_QUERY,
+    { ...CARD_QUERY, errataOnly: true },
     ...["bp", "bp01-001", "51", "試作", "does not exist"].map((text) => ({
       ...CARD_QUERY,
       text,
@@ -1261,7 +1262,15 @@ it("a stored index image answers every query like the index it was encoded from"
     const columns = new BootstrapColumns()
     columns.ingest(snapshot.bootstrap)
     columns.seal()
-    const built = new SearchIndex(columns, edition)
+    const built = new SearchIndex(
+      columns,
+      edition,
+      new Set(
+        arrayValue(objectValue(snapshot.manifest["errata_card_ids"])[edition]).map((id) =>
+          stringValue(id),
+        ),
+      ),
+    )
     const encoded = built.encode()
     const restored = new SearchIndex(encoded, edition)
     expect(restored.allocation()).toEqual(built.allocation())
@@ -1273,6 +1282,8 @@ it("a stored index image answers every query like the index it was encoded from"
       for (const page of [{}, { offset: 1, limit: 2 }]) {
         const request = { ...query, ...page, edition, state }
         expect(restored.search(request)).toEqual(built.search(request))
+        if (state.errataOnly)
+          expect(built.search(request).total).toBe(catalog.results(state, edition).length)
         expect(unaligned.search(request)).toEqual(built.search(request))
       }
     expect(() => new SearchIndex(encoded, edition === "jp" ? "en" : "jp")).toThrow("edition")
@@ -3102,3 +3113,24 @@ it("waits for printing dates before returning a release-date-sorted printing que
     h.session.dispose()
   }
 })
+
+it.each(["jp", "en"] as const)(
+  "filters only %s announcements before grouping and keeps them in a restored index",
+  async (edition) => {
+    const cache = memoryCache()
+    for (let pass = 0; pass < 2; pass++) {
+      const h = harness(origin(), cache)
+      h.session.load(base, edition, "preview")
+      await h.settled()
+      h.channel.search({ ...query, edition, state: { ...CARD_QUERY, errataOnly: true } })
+      await h.settled()
+      const result = h.status().result
+      expect(result.phase).toBe("complete")
+      if (result.phase !== "complete") throw new Error("missing result")
+      expect(result.page.items.map((item) => item.key).sort()).toEqual(
+        edition === "jp" ? ["c:bp01-020", "c:bp01-021"] : [],
+      )
+      h.session.dispose()
+    }
+  },
+)

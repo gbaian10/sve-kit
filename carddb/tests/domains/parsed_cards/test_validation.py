@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from sve_carddb.core.json import digest
+from sve_carddb.domains.card_extras.reviewed_errata import Notices
 from sve_carddb.domains.parsed_cards import batches
 from sve_carddb.domains.parsed_cards.codec import encode, schema
 from sve_carddb.domains.parsed_cards.generate import assemble, generate
@@ -371,14 +372,18 @@ def test_oversized_card_file_requires_contract_review(tmp_path: Path) -> None:
         ("cards", CardFile),
         ("evidence", EvidenceFile),
         ("batch", BatchFile),
+        ("errata", Notices),
     ],
 )
 def test_committed_schema_has_no_drift(name: str, model: type) -> None:
     root = Path(__file__).parents[4]
     expected = (json.dumps(schema(model), ensure_ascii=False, indent=2) + "\n").encode()
-    assert (
-        root / "docs/schema/ingest/parsed-cards" / f"{name}.schema.json"
-    ).read_bytes() == expected
+    path = (
+        (root / "docs/schema/ingest/parsed-errata.schema.json")
+        if name == "errata"
+        else (root / "docs/schema/ingest/parsed-cards" / f"{name}.schema.json")
+    )
+    assert path.read_bytes() == expected
 
 
 def test_non_sve_source_is_rejected(tmp_path: Path) -> None:

@@ -133,26 +133,24 @@ Reskin regions are recomputed after the source and current graph exists, using
 relation, without inheriting DSL or deck identity. Missing related targets and
 same-card references remain in staging and their source uses are retained.
 
-## Later errata input
+## Reviewed errata input
 
-The Python composition API accepts parsed `ErrataPage` inputs; the CLI does not
-pretend that sealed announcement bodies have already been parsed. PR C supplies
-that parser and its source adapter separately. `errata.official_url` is the exact
-announcement URL; each version keeps `announced_on` nullable and each change keeps
-`face_id`, `field`, `before` and `after`. Treat these as change fragments, retaining
-all announcements. Date absence does not authorize substitution by fetch time,
-effective date or an inferred year. No original printing text is reconstructed.
+Offline builds read admitted `card-data/errata/jp.json` and `en.json` through
+`reviewed_errata.read`, without HTML or repeat hash/schema/history validation.
+Run `parsed-cards validate` after editing that data. The Python composition API
+also accepts explicit `ErrataPage` inputs; passing `errata=()` selects an empty
+supplement for synthetic builds. See the [input contract](../../../../docs/schema/ingest/parsed-errata.md).
 
-This recipe only reports pending errata restrictions; it has no confirmation input
-or mechanism to clear them. PR C must first define the confirmation contract,
-authorized maintainer, decision category/policy, complete correction scope and
-freshness, together with its producer and consumer. Importing an announcement
-alone does not approve current wording or clear any restriction.
+Announcement dates and effective dates remain separate; all supplied before/after
+values are announcement passages. Listed printings stay `listed`, not confirmed
+applicability, and no original printed wording is reconstructed. Illustration-only
+notices retain their listing without inventing text changes. Japanese passages
+receive source-paired Traditional Chinese translations from the current authored
+shards; English passages are never used as their source.
 
-The report uses counts and identifiers rather than official text. Unknown
-coverage and pending checks are not a claim that there is no erratum. Real
-publication requires complete adopted raw-field vocabulary, C's per-card corrected-text checks,
-formal release gates and the separate Web consumer acceptance.
+Importing announcements alone does not approve corrected current wording, clear
+pending engine restrictions, establish complete coverage or grant formal release
+readiness. The report retains these limitations and counts without card wording.
 
 ## Validation boundary
 

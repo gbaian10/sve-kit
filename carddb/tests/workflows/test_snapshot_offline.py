@@ -271,7 +271,7 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
     assert (tmp_path / "bundle/inputs.json").read_bytes() == built.input_content
     assert "Synthetic answer." not in canonical(built.report).decode()
     assert tables["errata"] == []
-    assert built.projection.metadata["errata_card_ids"] == []
+    assert built.projection.metadata["errata_card_ids"] == {"en": [], "jp": []}
     assert built.projection.metadata["source_windows"] == []
     assert built.projection.metadata["restriction_coverage"] == []
     snapshot = export_snapshot(
@@ -415,7 +415,10 @@ def test_errata_fragments_dates_and_multiple_notices_remain_independent(
         == "Synthetic corrected fragment"
         for version in versions
     )
-    assert len(array(built.projection.metadata["errata_card_ids"])) == 1
+    assert (
+        len(array(object_value(built.projection.metadata["errata_card_ids"])["en"]))
+        == 1
+    )
     assert built.report["supplemental_restrictions"]
     export_snapshot(
         prepare_media(built.projection, None, revision=1).projection,

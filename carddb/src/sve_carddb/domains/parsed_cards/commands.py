@@ -11,6 +11,10 @@ from sve_carddb.core.json import parse
 from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.core.provenance import Revision
 from sve_carddb.core.regions import Region
+from sve_carddb.domains.card_extras.reviewed_errata import validate as validate_errata
+from sve_carddb.domains.card_extras.reviewed_errata_verify import (
+    verify as verify_errata,
+)
 from sve_carddb.domains.parsed_cards import codec
 from sve_carddb.domains.parsed_cards.engine_fixture import project as engine_fixture
 from sve_carddb.domains.parsed_cards.generate import generate
@@ -19,6 +23,7 @@ from sve_carddb.domains.parsed_cards.reader import read
 from sve_carddb.domains.parsed_cards.storage import load, write
 from sve_carddb.domains.parsed_cards.wire import CardFile, EvidenceFile
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.source_archive import ArchiveError
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -118,6 +123,7 @@ def validate_command(
         catalog = load(_absolute(root))
         if previous:
             catalog.validate_update(load(_absolute(previous)))
+        validate_errata(root, previous=previous)
     except OSError, ValueError:
         typer.echo("Parsed input validation failed.", err=True)
         raise typer.Exit(1) from None
@@ -138,3 +144,16 @@ def schema_command(output: Path) -> None:
             json.dumps(codec.schema(model), ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
+
+
+@app.command("verify-errata")
+def verify_errata_command(root: Path, archive: Path, store_id: str) -> None:
+    """Verify announcement byte ranges using an explicitly selected frozen archive."""
+    try:
+        result = verify_errata(_absolute(root), _absolute(archive), store_id)
+    except OSError, ValueError, ArchiveError:
+        typer.echo("Frozen errata evidence verification failed.", err=True)
+        raise typer.Exit(1) from None
+    typer.echo(
+        f"Verified {result['notices']} notices and {result['ranges']} byte ranges."
+    )

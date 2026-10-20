@@ -6,6 +6,16 @@ const kinds = (text: string) =>
   inlinePieces(text).map((piece) => (piece.kind === "text" ? piece.text : `<${piece.alt}>`))
 
 describe("official text symbols", () => {
+  it("renders announcement icon spellings while retaining their original span and alt", () => {
+    for (const text of ["《ファンファーレ》", "{《ファンファーレ》}"]) {
+      const piece = inlinePieces(text)[0]
+      expect(piece?.kind).toBe("symbol")
+      expect(piece?.start).toBe(0)
+      expect(piece?.end).toBe(text.length)
+      expect(piece?.kind === "symbol" && piece.alt).toBe("《ファンファーレ》")
+    }
+    expect(kinds("《正義》・名前")).toEqual(["《正義》・名前"])
+  })
   it("maps the Traditional Chinese Quick spelling to the Quick icon", () => {
     const quick = inlinePieces("{Quick}")[0]
     const japanese = inlinePieces("{クイック}")[0]

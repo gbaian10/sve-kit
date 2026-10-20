@@ -23,6 +23,7 @@ describe("query codec", () => {
       sets: ["set:bp01"],
       rarities: ["gold"],
       altArtOnly: true,
+      errataOnly: false,
       unit: "art",
       representative: "high",
       prFirst: true,
