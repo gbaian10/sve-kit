@@ -56,7 +56,7 @@ Pydantic 的 `Literal[1]` 即使 strict 也可能接受 bool 或浮點；Python 
 cost.counter 的 counter 個數與 holder 個數是兩個不同位置。
 
 一般 n／upto 與 selector 比較位置保留正文支持的 X、bound 及算式，不能只以 Nat 常量
-或含 param 的常量子集代表完整值域。數值核心的有號 Int 也不是所有位置的通用型別：
+或含 param 的常量子集代表完整值域。數值表達式的有號 Int 也不是所有位置的通用型別：
 inline 常量的域、負要求量的規則處理，以及比較與選取量的不同責任，要由各位置分別驗證。
 形狀驗證不把有號算式先截為零。
 `count.who/zone` 的來源角色是 counted_owner/counted_zone；

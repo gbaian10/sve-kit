@@ -10,14 +10,15 @@ Target、choose、search 的**單組數量父變體**包含來源與必要的 bi
 | 定義／Python | 值域 | 限制 |
 | --- | --- | --- |
 | A.expr.numeric-operation／NumericOperation | [NumericExpr](author-expression-shapes-1.0.md) 除 Int 的全部分支，含 BindingName | 算術、別名與讀值只列一次；不代表僅有算術 |
-| A.expr.numeric-core／NumericExpr | Int 或 NumericOperation | 保留有號常量與原有遞迴 operand |
+| A.expr.numeric／NumericExpr | Int 或 NumericOperation | 保留有號常量與原有遞迴 operand |
 | A.quantity／Quantity | Nat 或 NumericOperation | inline 常量非負；不是 Nat 或 Int 的重疊聯集 |
 | A.selection-quantity／SelectionQuantity | Quantity 或 ParamRef | 直接 param 只供 Target／choose／search 的 n、upto |
 | A.deck-slice／DeckSlice | `{who:PlayerRef或PlayerSet,n:Quantity}` | 兩鍵必填、封閉；who 與 n 均拒絕直接 param |
 | CounterName | 非空文字 | counter 種類的名稱；登錄存在性另驗，不借 Concept 參數權限 |
 | DistinctBy | orig_cost、class、name | 封閉屬性列舉，不接受 param |
 
-Quantity 共用於 DeckSlice.n、counter 的 n／upto／holders 與 cost_sum_le。
+Quantity 共用於 DeckSlice.n、counter 的 n／upto／holders、cost_sum_le、
+已登錄的物件比較 filter 與 hand／leader_life／zone_free 條件門檻。
 它限制的是**直接字面量**，不將算式結果截零。負算式與來源不足的規則處理不由 shape 決定。
 bool、數字字串與超過安全整數界的常量拒絕；float 由嚴格入口及 Python 解碼拒絕。
 

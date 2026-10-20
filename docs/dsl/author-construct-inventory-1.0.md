@@ -88,8 +88,10 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | did 長形 | result、where | 兩鍵必填；預設成功判準且存在匹配的成功材料；已登錄 before 視角限付款／捨牌，型別另驗 |
 | 捕捉 | at=live/play/resolution/selection/event | 只在已登錄位置；apply.capture=play 另為集合捕捉 |
 
-物件來源、差集、where／as 與區域計數的已定片段見[物件查詢矩陣](author-object-query-shapes-1.0.md)。
-計數 any_of 保留 counted 角色並先去重；選取 any_of 另分純物件 ObjectUnion
+物件來源、差集、where／as 與計數集合的已定片段見[物件查詢矩陣](author-object-query-shapes-1.0.md)。
+計數 any_of 的區域 limb 保留 counted 角色並先去重；
+集合讀值與非歷史條件的封閉 payload 見[讀值形狀矩陣](author-expression-shapes-1.0.md)，
+agg／distinct／count.except 的來源不繼承 counted 參數權限。選取 any_of 另分純物件 ObjectUnion
 與至少含一個領袖 limb 的 RecipientUnion，見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
 具名 RecipientSel 不擴大物件消費位置；等義拼法不推定相同 body hash。
 單組 Target／choose／search 的數量父變體、counter 與 DeckSlice 已定形，

@@ -134,7 +134,7 @@ groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實�
 
 ## 5. 表達式、捕捉與選擇器
 
-已定形的數值與收據片段見[讀值形狀矩陣](author-expression-shapes-1.0.md)。
+已定形的數值、非歷史條件與收據片段見[讀值形狀矩陣](author-expression-shapes-1.0.md)。
 它逐 variant 區分必填、互斥與葉參數位置；每個 variant 的 operand 也仍是片段值域，
 不能當作本節完整 Expr／Cond／Sel 或 expanded profile。
 
@@ -156,9 +156,10 @@ groups 與完整動作欄位仍未全部接入，不表示完整作者樹已實�
 
 `Sel` 欄位沿用 `who`、`zone`、`kind`、`class/not_class`、`trait/traits_any/not_trait`、`name/names/name_contains/not_same_name_as_this`、`other`、`cost_*/orig_cost_*`、`hp_le`、`power_max`、`acted`、`evolved`、`keyword`、`has_trigger/has_evolve`、`not_token`、`face_up`、`leader/leader_or/leader_of`、`in/rest`、`entered_this_turn`、`any_of`、`except`、`where`；增加 as（局部元素別名）、advance_follower、boxed、racing、同型／同名引用與頂底切片。`in` 僅接物件 binding，receipt 必須先用 objects_of（或 count_of.where 在材料快照篩選）。未知 filter 不當 no-op。
 
-區域物件、in、except、where／as 與區域計數的已定形片段見
+區域物件、in、except、where／as 與計數集合的已定形片段見
 [物件來源與計數矩陣](author-object-query-shapes-1.0.md)。
 ObjectSel 與 CountObjects 分別保留 source 與 counted 角色；
+agg／distinct／count.except 的 CollectionSource 不繼承 counted 參數權限；
 計數 any_of 先去重再數張數。選取位置的 ObjectUnion 只收物件，
 具名 RecipientSel 另納入領袖與至少含一個領袖 limb 的接受者聯集；
 逐型與選用規則見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
