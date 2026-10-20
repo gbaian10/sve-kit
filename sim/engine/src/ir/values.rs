@@ -428,6 +428,7 @@ variants!(NatOperation {
     DistinctCount { objects: Selector, property: ObjectProperty } => ["value.aggregate.distinct-count"]
 });
 variants!(Predicate {
+    SearchFoundAny { found: Binding<super::SearchFound>, object: Binding<ObjectRef>, predicate: Expr<Bool> } => [],
     EventCause { event: EventContext, pattern: CausePattern } => ["predicate.event-cause"],
     Equal { operands: Box<ValueEquality> } => ["predicate.equal"],
     PlayerEquals { left: Expr<PlayerRef>, right: Expr<PlayerRef> } => ["predicate.player-equals"],
@@ -581,6 +582,7 @@ variants!(IntFrozen {
     StatDelta { event: Binding<StatDelta> } => ["read.event-field"]
 });
 variants!(NatFrozen {
+    SnapshotCounter { object: Expr<RuntimeObjectView>, kind: CounterKind } => ["read.snapshot-counter"],
     SearchFoundCount { found: Binding<super::SearchFound> } => [],
     SearchRevealedCount { revealed: Binding<super::SearchRevealed> } => [],
     ReceiptActual { receipt: MeasuredReceipt } => ["read.receipt.actual"],

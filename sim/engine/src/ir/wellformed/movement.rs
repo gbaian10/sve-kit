@@ -2,9 +2,26 @@ use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::{
     Binding, Bool, Cardinality, CostChange, Duration, DurationEnd, Effect, Expr, FollowPermission,
     InstallationSubjects, InstallationTime, MoveDestination, MoveReason, MoveSpec, MovementReceipt,
-    MovementReceiptList, ObjectRef, OwnerZone, PlayerRef, SearchContinuation, SearchDestination,
-    SelectionConstraint, Selector, TimeAnchor, ZoneKind,
+    MovementReceiptList, ObjectRef, OwnerZone, PlayerRef, Position, SearchContinuation,
+    SearchDestination, SelectionConstraint, Selector, TimeAnchor, ZoneKind,
 };
+
+// Keep receipt outcome types intact while sharing the exhaustive movement family.
+macro_rules! movement_dispatch {
+    ($value:expr, $family:ident, $member:ident => $check:expr $(; trigger => $trigger:expr)?) => {
+        match $value {
+            $family::Move { $member } => $check,
+            $family::Search { $member } => $check,
+            $family::Discard { $member } => $check,
+            $family::Destroy { $member } => $check,
+            $family::Banish { $member } => $check,
+            $family::Order { $member } => $check,
+            $family::Transform { $member } => $check,
+            $family::Fusion { $member } => $check,
+            $($family::TriggerEvent { .. } => $trigger,)?
+        }
+    };
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -23,17 +40,29 @@ impl Checker {
         }
     }
 
+    pub(super) fn positioned_destination(
+        &mut self,
+        to: &MoveDestination,
+        position: Option<Position>,
+    ) -> Checked {
+        self.destination(to)?;
+        if position.is_some()
+            && *to
+                != (MoveDestination::Owners {
+                    zone: OwnerZone::Deck,
+                })
+        {
+            return Err(self.error(WellFormedReason::InvalidMovement));
+        }
+        Ok(())
+    }
+
     pub(super) fn movement(&mut self, movement: &MoveSpec, reason: Option<MoveReason>) -> Checked {
-        self.at("to", |checker| checker.destination(&movement.to))?;
-        if movement.position.is_some()
-            && !matches!(
-                movement.to,
-                MoveDestination::Owners {
-                    zone: OwnerZone::Deck
-                }
-            )
-            || movement.initial_posture.is_some()
-                && !matches!(&movement.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field)
+        self.at("to", |checker| {
+            checker.positioned_destination(&movement.to, movement.position)
+        })?;
+        if movement.initial_posture.is_some()
+            && !matches!(&movement.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field)
             || reason == Some(MoveReason::Mill)
                 && movement.to
                     != (MoveDestination::Owners {
@@ -133,85 +162,19 @@ impl Checker {
     }
 
     pub(super) fn movement_receipt(&self, receipt: &MovementReceipt) -> Checked {
-        match receipt {
-            MovementReceipt::Move { receipt } => self.receipt(receipt),
-            MovementReceipt::Search { receipt } => self.receipt(receipt),
-            MovementReceipt::Discard { receipt } => self.receipt(receipt),
-            MovementReceipt::Destroy { receipt } => self.receipt(receipt),
-            MovementReceipt::Banish { receipt } => self.receipt(receipt),
-            MovementReceipt::Order { receipt } => self.receipt(receipt),
-            MovementReceipt::Transform { receipt } => self.receipt(receipt),
-            MovementReceipt::Fusion { receipt } => self.receipt(receipt),
-            MovementReceipt::TriggerEvent { .. } => self.reject(),
-        }
+        movement_dispatch!(receipt, MovementReceipt, receipt => self.receipt(receipt); trigger => self.reject())
     }
 
     pub(super) fn movement_receipts(&self, receipts: MovementReceiptList) -> Checked {
-        match receipts {
-            MovementReceiptList::Move { receipts } => self.reference(receipts, BindingKind::Value),
-            MovementReceiptList::Search { receipts } => {
-                self.reference(receipts, BindingKind::Value)
-            }
-            MovementReceiptList::Discard { receipts } => {
-                self.reference(receipts, BindingKind::Value)
-            }
-            MovementReceiptList::Destroy { receipts } => {
-                self.reference(receipts, BindingKind::Value)
-            }
-            MovementReceiptList::Banish { receipts } => {
-                self.reference(receipts, BindingKind::Value)
-            }
-            MovementReceiptList::Order { receipts } => self.reference(receipts, BindingKind::Value),
-            MovementReceiptList::Transform { receipts } => {
-                self.reference(receipts, BindingKind::Value)
-            }
-            MovementReceiptList::Fusion { receipts } => {
-                self.reference(receipts, BindingKind::Value)
-            }
-        }
+        movement_dispatch!(receipts, MovementReceiptList, receipts => self.reference(receipts, BindingKind::Value))
     }
 
     pub(super) fn movement_visible(&self, receipt: &MovementReceipt) -> Checked {
-        match receipt {
-            MovementReceipt::Move { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::Search { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::Discard { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::Destroy { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::Banish { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::Order { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::Transform { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::Fusion { receipt } => self.visible_receipt(receipt),
-            MovementReceipt::TriggerEvent { .. } => self.reject(),
-        }
+        movement_dispatch!(receipt, MovementReceipt, receipt => self.visible_receipt(receipt); trigger => self.reject())
     }
 
     pub(super) fn movements_visible(&self, receipts: MovementReceiptList) -> Checked {
-        match receipts {
-            MovementReceiptList::Move { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-            MovementReceiptList::Search { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-            MovementReceiptList::Discard { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-            MovementReceiptList::Destroy { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-            MovementReceiptList::Banish { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-            MovementReceiptList::Order { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-            MovementReceiptList::Transform { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-            MovementReceiptList::Fusion { receipts } => {
-                self.visible_object(self.env.access.get(&receipts.key()))
-            }
-        }
+        movement_dispatch!(receipts, MovementReceiptList, receipts => self.visible_object(self.env.access.get(&receipts.key())))
     }
 
     pub(super) fn install(

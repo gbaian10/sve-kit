@@ -345,7 +345,7 @@ fn evolution_costs_reveal_the_selected_card_then_pay_printed_pp() {
 }
 
 #[test]
-fn self_entry_comparison_is_read_only_by_the_trigger_pattern() {
+fn self_entry_comparison_retains_its_bound_event_in_body_and_capture() {
     let event = Binding::new(90, ScopeId(1));
     let self_entry = Expr::Compute(Box::new(Predicate::ObjectEquals {
         left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
@@ -371,7 +371,7 @@ fn self_entry_comparison_is_read_only_by_the_trigger_pattern() {
             else_body: None,
         })],
     ));
-    assert_eq!(reason(in_body), Err(WellFormedReason::UnsupportedShape));
+    assert_eq!(reason(in_body), Ok(()));
     let mut at_event = printed;
     at_event.node.event_captures.push(Capture::Boolean {
         at: CaptureTime::AtEvent {
@@ -383,7 +383,7 @@ fn self_entry_comparison_is_read_only_by_the_trigger_pattern() {
             binding: Binding::new(91, ScopeId(1)),
         },
     });
-    assert_eq!(reason(at_event), Err(WellFormedReason::UnsupportedShape));
+    assert_eq!(reason(at_event), Ok(()));
 }
 
 #[test]

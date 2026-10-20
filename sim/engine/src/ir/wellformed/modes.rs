@@ -186,7 +186,8 @@ impl Checker {
                     Ok(())
                 }
                 Predicate::Not { predicate } => self.mode_condition(predicate),
-                Predicate::EventCause { .. }
+                Predicate::SearchFoundAny { .. }
+                | Predicate::EventCause { .. }
                 | Predicate::Equal { .. }
                 | Predicate::PlayerEquals { .. }
                 | Predicate::PlayerIn { .. }

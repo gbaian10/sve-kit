@@ -69,7 +69,7 @@ FloorDivide 只接受可靜態確認的正整數常值除數，其他動態除�
 InformationOrZero 接受 Cost／Stats 的 Original／Effective 特徵讀值；LastKnown 與
 ProspectiveEntry 尚未接受，不能用一般讀值替代 LKI 或入場取代情境。
 
-其餘形狀一律拒絕，包含 replacement、
+其餘形狀一律拒絕，包含下述來源持有者靜態離區改道以外的 replacement、
 未驗的事件投影、下述範圍以外的 effect 安裝及能力宣告。未承載的 decision／付款時點回報 `DecisionTiming`，
 其餘未驗形狀回報 `UnsupportedShape`。
 拒絕形狀的程式不會得到已驗包裝。這個拒絕不是「語法無效」或「引擎已實作」的宣稱。
@@ -182,7 +182,11 @@ Search 的 filter 與替代目的地 predicate 依搜尋者的私有選擇域檢
 不能藉可選牌集合或替代選項讀取對手手牌、原始牌庫或他人的私有 Look 結果。
 candidate 只在 filter 可見，continuation 的 found／revealed 在另一個獨立 scope
 定義，只供 destination 使用；candidate、兩個 continuation binding 均不流到後續本文。
-內部 SearchFoundCount／SearchRevealedCount 只提供這段的計數，不產生物件引用。
+內部 SearchFoundCount／SearchRevealedCount 提供這段的計數。SearchFoundAny 在
+found 成員上逐一綁定局部 object，只供自己的 predicate；空 found 為 false。
+BP03-002 的替代目的地條件可讀這個物件的 cost，不能以 found 計數替代。
+object、found 與 revealed 均不得流出 continuation；found 不能冒充 revealed 或
+successful moved after，也不新增第二次選牌。
 Single、非空 Partition 與 OptionalSelfReplacement 的每個欄位／分支都檢查；Partition
 保留順序與各段基數，不要求各段 minimum 的總和不超過 found，因為後段可能無牌可做。
 沒有 destination 的形狀尚未定義，回報 UnsupportedShape；全部 partition 有限時，
@@ -206,7 +210,7 @@ CostModifier 對同一 binding 的 Delta／Set；負常值 Set 尚未接受，�
 安裝內可見，不能在另一個指示沿用。Duration 接受 Installation anchor、無 usage／intervals，
 各種 end 的 player／predicate／source 都驗證；未來引用與未執行分支同樣拒絕。
 CP04-060 的動作種子使用 search 的成功 moved after 安裝本回合 delta -2；found／revealed
-不是 selector，不能假冒 moved。checker 不由卡號反推卡文：合法的 Set 或另一個已定義
+不是 selector，SearchFoundAny 也不授予移動後引用；不能假冒 moved。checker 不由卡號反推卡文：合法的 Set 或另一個已定義
 選擇集合仍可能是別張卡需要的程式，lowering 必須獨立驗證與 CP04-060 原文相符。
 
 本節的 CP04-060、BP18-059、BP13-SL16 是動作片段的結構種子，非完整卡片執行驗收。
@@ -216,9 +220,66 @@ Search 仍須由 executor 證明條件、先找到才問替代目的地、拒絕
 武闘竜人選擇與 −3 減費；任意順序、完整 trigger／UB、
 新世代 entry_effects 尚未由上述片段涵蓋。
 
-MoveResult 額外保存 requested_position／actual_position，與 requested_to／actual_to／
+MoveResult 保存 requested_position／actual_position，與 requested_to／actual_to／
 replacements 一起保留提案與結果；checker 沒有建構或驗證執行結果，不把這些欄位當成
 LeavesZone／RedirectMove 或每事件一次取代已實作的證據。
+
+## 事件投影、歷史與取代
+
+typed payload binding 表示原事件的 payload 與 envelope，header projection 必須明示
+EventContext。Trigger 僅在真正的 trigger 入口可用；封閉 Program 不得憑空使用。
+typed EventContext 依原 binding 的 scope 與型別檢查，不能把 LeaveField slot 轉成
+Damage，或讀其他能力、未來節點的事件。header／payload 的相等比較保留原輸入，
+checker 不重建或猜測「最近一個事件」。
+
+AnyOf 每個分支只在自己的 predicate 內窄化，所有分支皆驗證，不因常值條件略過。
+分支 payload 不隱含 join 到其他分支或本文；本文仍可讀 Trigger envelope。
+AnyMove、AnySnapshot、AnyStatFacet 的元素與 EarthRitePayment component 只供各自
+predicate，不能在其後讀取；binding slot 仍全樹唯一。事件欄位、快照及歷史讀值
+目前不授予選擇域可見性，須待 runtime observation 證據，不以公開事件名稱推定全部
+payload 公開。
+
+PlayerRef::FromExpression 只接受常值、既有 binding 與凍結事件欄位；Live 角色讀值
+（例如來源目前的控制者）會在同一次結算中隨控制權移轉改變，不能當 actor、viewer
+或可見性對象，否則 Look 的私有結果可經同一運算式轉給新控制者。PlayerEquals／
+PlayerIn 的比較運算元仍可讀 Live。ObjectEquals 的 Bound 物件與 ObjectOperand::Bound
+同規則：選擇域內只有本域候選豁免，其餘須有物件可見性，翻面撤銷後不再可比較。
+
+FollowEventMove 僅接受當前 trigger 明示綁定的 Move／LeaveField，型別表達的是沿
+header receipt 查找 triggering subject 的 before 成員，取得該單一成員成功移動後
+的引用。其他 binding、歷史事件與 union 外的分支 payload 均不授權。整個
+TriggerEvent receipt、MoveAfter 的 TriggerExplicitReference 與 RuleCarry 仍拒絕；
+不能用整份 receipt 的所有 moved 成員冒充觸發主體。本文的 FromExpression 物件動作
+仍拒絕，Frozen MoveAfter 欄位只可作事件資訊比較，不能繞過 follow 權限執行動作。
+實際配對 before／after、失敗或無 member 的結果及卡文明示引用，仍由 executor／lowering 驗收。
+
+SnapshotCounter 只讀 RuntimeObjectView 指定的快照與 counter kind，沒有「找不到就
+改讀 Current」的退回。BP07-088 種子在 AtEvent 捕捉 LeaveFieldLki 的祈禱 counter；
+一般 Live Counter 在該捕捉時點仍拒絕。凍結的 Names／Kind／Traits 可讀快照或事件
+characteristics；不把離場後同 ID 的新世代當作材料。
+
+HistoryExists、HistoryCount 與 HistorySum 檢查 window、cutoff、include_execution
+及局部事件 predicate；查詢不把自己的事件 binding 匯出，也不授予 trigger follow。
+Since 與 Capture cutoff 必須有正確型別及 capture 類別的既有 binding。
+Facts／Subjects、數值加總與 OriginFactId 去重的實際結果仍由歷史執行器驗證。
+
+CausePattern::Effect 與 AnyRule 是不同變體；EffectSource::Matching 的 binding 只在
+該 Effect cause 的 source predicate 可見，其他 cause 沒有 source candidate。
+Permission declaration 接受 Destroy／Banish 的對象、cause 與 condition 遞迴檢查，
+保留 polarity、rule 與 duration。BP02-089 的禁止保留 Effect cause，不泛化成所有
+規則破壞。checker 不依卡號檢查卡文等價性；AnyRule 是其他規則可能需要的合法輸入，
+lowering 必須另外驗證 BP02-089 使用 Effect。
+
+Replacement declaration 的子集是 General、LeavesZone 的 SourceHolder，離開區須
+在來源能力有效區內，rewrite 為 RedirectMove。目的地共用 MoveDestination 檢查，
+position 僅適用 Owners(Deck)；合成種子保留 Top。condition 與 affected_player
+逐欄檢查；OncePerEvent 僅能構造 Enforced。SelfOnly 表示效果對自身指示的自我取代，
+不等於「對象是 SourceHolder」，靜態宣告的 SelfOnly 一律拒絕。BP02-041 是スペル
+自身返回手牌指示在條件成立時改置牌庫頂的自我取代，尚未承載；不得降為靜態離區
+改道、一般 Put 或先執行再補的 If。usage、prospective_chars、其他 pattern 及
+其他 rewrite 尚未接受。原提案不可覆寫，實際目的地／位置與 replacements 必須並存；
+多個取代的順序、每事件每個取代至多一次，以及被取代原事件不得偽造，仍須 executor
+局面測試，不能把本節的結構通過當作取代已執行。
 
 ## 診斷
 
@@ -255,8 +316,8 @@ AtPlay、AtSelection、AtEvent 只能出現在上述明確欄位，不能以普�
 時點。capture 目前仍限 Int／Nat／Bool／Selector；其他型別明確拒絕。
 AtEvent 採較窄範圍：拒絕 Live、Current 物件讀值及全部集合讀值，只接受常值、
 已可見值與明確匹配 event／policy 的 ObjectView::EventSnapshot（及其純運算）。
-不把一般 State 讀值隱含改解釋為事件快照。Holder 尚無 snapshot counter 讀法，
-因此 BP07-088 的離場前祈禱 counter 仍拒絕，等待 LKI／事件欄位讀值。
+不把一般 State 讀值隱含改解釋為事件快照；BP07-088 改用上節的 Frozen SnapshotCounter，
+不透過普通 Holder Counter 讀目前狀態。
 
 PlayParameter 目前接受 Public 的 Targets→Objects、X→Integer。Targets 排除非公開領域
 （CR10.6.2.3）；Public 是本片的保守承載限制。ExecutionRef 僅 Current，
@@ -271,9 +332,9 @@ OptionalCost 仍未接受；Face 僅接受下述限定進化入口，不能據�
 BP06-110 的整卡種子包含兩個能力。Fanfare keyword 入口限自身 EnterField、
 AfterEntry、active_zones=[Field]；述詞固定為
 `ObjectEquals(Frozen EnterFieldObject(event), Frozen SourceHolder)`，event 必須是該 pattern
-自己的事件 binding。這個比較只在 EnterField trigger 的 pattern 述詞中以完整形狀辨識，
-非 keyword 的 EnterField trigger 也可使用；AtEvent capture、本文條件與其他 ObjectEquals
-一律拒絕，不放行其他未驗事件投影。
+自己的事件 binding。非 keyword 的 EnterField trigger 也可使用；一般 ObjectEquals
+遞迴檢查 typed Frozen／Bound 投影，事件 binding 支配的 AtEvent capture 與本文條件
+也可比較，不以特例跳過欄位檢查。Fanfare 入口仍要求上述精確自身入場形狀。
 
 進化入口只接受 Printed 的 Evolution keyword、Activated、SourceHolder、
 Controller 與 active_zones=[Field]，採下列封閉形狀：
@@ -302,11 +363,14 @@ Normal 在此入口表示印刷進化的基底程序，不是「永遠禁止超�
 
 ### 其他入口
 
-Trigger 暫接受 PerFact、無 limit，並限定 EnterField／EnterEx 的 AfterEntry，及
-LeaveField／Discard／Destroy 的 BeforeExit；各 pattern 述詞遞迴檢查。
-State、AnyOf、Banish（可能裏向）、其他事件形狀、不同快照 policy 尚未接受。Continuous declaration 接受
+Trigger 暫接受 PerFact、無 limit。EnterField／EnterEx、Damage／StatChange／LifeChange／
+CounterChange 使用 AfterEntry；LeaveField／Discard／Destroy／Move／Payment／
+EarthRitePayment／Fused 使用 BeforeExit。這是本 checker 的快照 policy 子集，
+不是宣稱每種事件都由移動或入場產生。AnyOf 每支須與同一 trigger.view 相容，
+各 pattern 述詞遞迴檢查。State、Banish（可能裏向）、其他事件形狀及其他 policy
+尚未接受。Continuous declaration 接受
 Numeric 與 Combined patch，以及遞迴檢查的 GrantAbility Definition；Keyword grant、
-其他 effect、layer 不一致、未驗 duration／usage／timestamp 一律拒絕。
+上節以外的 effect、layer 不一致、未驗 duration／usage／timestamp 一律拒絕。
 Static declaration 的 active_zones 必須與能力完全相同，duration 僅 NoTemporalExpiry，
 anchor 為 Installation、無 usage／intervals；條件走 condition，時間性期限留給 effect 安裝。
 GrantAbility Definition 在這裡只驗來源仍為 Printed／Keyword 的定義模板；
