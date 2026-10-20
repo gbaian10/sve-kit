@@ -55,10 +55,15 @@ snapshots require an explicit `before`/`after` view; `same_as` reads those snaps
 Material predicates admit a nonempty combination of `name`, `zone` and
 `orig_cost_eq` constants, without selector parameter permissions. Receipt types,
 units, available material projections and typed success predicates require lowering.
-Only the registered plus/minus offset positions accept parameters. Nested
+Only the registered plus/minus arithmetic operand positions accept parameters. Nested
 arithmetic must still be checked against the full source operand path.
-Selector/count roles, event/history narrowing and capture placement are outside
-this fragment. Neither numeric union is an expanded profile.
+The [object query matrix](../docs/dsl/author-object-query-shapes-1.0.md) defines
+zone and binding/snapshot object sources, `except`, `where`/`as`, and a closed
+attribute subset. `count` uses separate counted-owner/zone queries and a deduplicated
+count union. These queries have their own leaf parameter positions; role checks,
+scope, identity and operation authority still require lowering. Object selections
+exclude leader recipients. Full Sel, event/history narrowing and capture placement
+remain outside this fragment. Neither numeric union is an expanded profile.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
 `format: 1, kind: effects_index` envelope and record syntax. Both use JSON Schema
 2020-12. The `AuthorSchemas` reader in

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Leaf, reference-atom, target-role, numeric and receipt fragment library. Numeric/condition operands and material predicates have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
+  "$comment": "Leaf, reference-atom, target-role, numeric, receipt and object-query fragment library. Object selectors exclude leader recipients; count queries retain distinct counted roles. Operands and filters have partial domains, not full Expr/Cond/Sel. Snapshot reads grant no operation authority. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
   "not": {},
   "$defs": {
     "Int": {
@@ -1039,6 +1039,9 @@
         },
         {
           "$ref": "#/$defs/A.expr.count-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.count"
         }
       ]
     },
@@ -1319,6 +1322,537 @@
         "did"
       ],
       "additionalProperties": false
+    },
+    "A.expr.count-objects": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardKind"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "class": {
+          "$ref": "#/$defs/Concept"
+        },
+        "trait": {
+          "$ref": "#/$defs/Concept"
+        },
+        "traits_all": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Concept"
+          },
+          "minItems": 1
+        },
+        "name": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        "name_contains": {
+          "$ref": "#/$defs/CardName"
+        },
+        "other": {
+          "type": "boolean",
+          "const": true
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/Nat"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "boolean",
+          "const": true
+        },
+        "not_token": {
+          "type": "boolean",
+          "const": true
+        },
+        "who": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.player-ref"
+            },
+            {
+              "$ref": "#/$defs/A.player-set"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Zone"
+              },
+              "minItems": 1
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        }
+      },
+      "required": [
+        "who",
+        "zone"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      }
+    },
+    "A.expr.count-union": {
+      "type": "object",
+      "properties": {
+        "any_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.expr.count-objects"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "any_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.count-source": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.expr.count-objects"
+        },
+        {
+          "$ref": "#/$defs/A.expr.count-union"
+        }
+      ]
+    },
+    "A.expr.count": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "$ref": "#/$defs/A.expr.count-source"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "A.sel.zone-objects": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardKind"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "class": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Concept"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "trait": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Concept"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "traits_all": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Concept"
+              },
+              {
+                "$ref": "#/$defs/A.param"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "name": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        "name_contains": {
+          "$ref": "#/$defs/CardName"
+        },
+        "other": {
+          "type": "boolean",
+          "const": true
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/Nat"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "boolean",
+          "const": true
+        },
+        "not_token": {
+          "type": "boolean",
+          "const": true
+        },
+        "except": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "where": {
+          "$ref": "#/$defs/A.cond.numeric-core"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "who": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.player-ref"
+            },
+            {
+              "$ref": "#/$defs/A.player-set"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Zone"
+              },
+              "minItems": 1
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        }
+      },
+      "required": [
+        "who"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "dependentRequired": {
+        "as": [
+          "where"
+        ]
+      }
+    },
+    "A.sel.in-objects": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardKind"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "class": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Concept"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "trait": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Concept"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "traits_all": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Concept"
+              },
+              {
+                "$ref": "#/$defs/A.param"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "name": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            },
+            {
+              "$ref": "#/$defs/A.same-as"
+            }
+          ]
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        "name_contains": {
+          "$ref": "#/$defs/CardName"
+        },
+        "other": {
+          "type": "boolean",
+          "const": true
+        },
+        "orig_cost_eq": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "orig_cost_ge": {
+          "$ref": "#/$defs/Nat"
+        },
+        "hp_le": {
+          "$ref": "#/$defs/Nat"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "racing": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "boolean",
+          "const": true
+        },
+        "not_token": {
+          "type": "boolean",
+          "const": true
+        },
+        "except": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "where": {
+          "$ref": "#/$defs/A.cond.numeric-core"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "in": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.ref"
+            },
+            {
+              "$ref": "#/$defs/A.snapshot-read"
+            }
+          ]
+        }
+      },
+      "required": [
+        "in"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "token",
+              "not_token"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "names"
+            ]
+          },
+          {
+            "required": [
+              "name",
+              "name_contains"
+            ]
+          },
+          {
+            "required": [
+              "names",
+              "name_contains"
+            ]
+          }
+        ]
+      },
+      "dependentRequired": {
+        "as": [
+          "where"
+        ]
+      }
+    },
+    "A.sel.object-core": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.sel.zone-objects"
+        },
+        {
+          "$ref": "#/$defs/A.sel.in-objects"
+        }
+      ]
     }
   }
 }
