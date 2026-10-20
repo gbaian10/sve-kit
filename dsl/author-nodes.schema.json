@@ -118,13 +118,15 @@
       "type": "object",
       "properties": {
         "param": {
-          "$ref": "#/$defs/ParamName"
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamName"
         }
       },
       "required": [
         "param"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "$id": "urn:sve-kit:author-nodes:1.0:authorParam",
+      "$dynamicAnchor": "authorParam"
     },
     "IntParamValue": {
       "type": "object",
@@ -697,7 +699,7 @@
               "type": "array",
               "prefixItems": [
                 {
-                  "$ref": "#/$defs/A.param"
+                  "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
                 },
                 {
                   "$ref": "#/$defs/A.expr.numeric"
@@ -713,7 +715,7 @@
                   "$ref": "#/$defs/A.expr.numeric"
                 },
                 {
-                  "$ref": "#/$defs/A.param"
+                  "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
                 }
               ],
               "minItems": 2,
@@ -742,7 +744,7 @@
                   "$ref": "#/$defs/A.expr.numeric"
                 },
                 {
-                  "$ref": "#/$defs/A.param"
+                  "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
                 }
               ]
             }
@@ -1486,7 +1488,7 @@
               "$ref": "#/$defs/A.player-set"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1503,7 +1505,7 @@
               "minItems": 1
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1657,7 +1659,7 @@
               "$ref": "#/$defs/CardKind"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -1670,7 +1672,7 @@
               "$ref": "#/$defs/Concept"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1680,7 +1682,7 @@
               "$ref": "#/$defs/Concept"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1692,7 +1694,7 @@
                 "$ref": "#/$defs/Concept"
               },
               {
-                "$ref": "#/$defs/A.param"
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
               }
             ]
           },
@@ -1704,7 +1706,7 @@
               "$ref": "#/$defs/CardName"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -1770,7 +1772,7 @@
               "$ref": "#/$defs/A.player-set"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1787,7 +1789,7 @@
               "minItems": 1
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1897,7 +1899,7 @@
               "$ref": "#/$defs/CardKind"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -1910,7 +1912,7 @@
               "$ref": "#/$defs/Concept"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1920,7 +1922,7 @@
               "$ref": "#/$defs/Concept"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -1932,7 +1934,7 @@
                 "$ref": "#/$defs/Concept"
               },
               {
-                "$ref": "#/$defs/A.param"
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
               }
             ]
           },
@@ -1944,7 +1946,7 @@
               "$ref": "#/$defs/CardName"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -2349,7 +2351,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         {
-          "$ref": "#/$defs/A.param"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
         }
       ]
     },
@@ -6867,7 +6869,7 @@
               "$ref": "#/$defs/Phase"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -12972,7 +12974,7 @@
               "$ref": "#/$defs/A.expr.numeric"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -12982,7 +12984,7 @@
               "$ref": "#/$defs/A.quantity"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -13957,7 +13959,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         {
-          "$ref": "#/$defs/A.param"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
         }
       ]
     },
@@ -13967,7 +13969,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         {
-          "$ref": "#/$defs/A.param"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
         }
       ]
     },
@@ -13977,7 +13979,7 @@
           "$ref": "#/$defs/A.expr.numeric"
         },
         {
-          "$ref": "#/$defs/A.param"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
         }
       ]
     },
@@ -14139,7 +14141,7 @@
           "$ref": "#/$defs/Zone"
         },
         {
-          "$ref": "#/$defs/A.param"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
         },
         {
           "$ref": "#/$defs/A.search.partition"
@@ -14289,7 +14291,7 @@
               "$ref": "#/$defs/Zone"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -14494,7 +14496,7 @@
                 "$ref": "#/$defs/Concept"
               },
               {
-                "$ref": "#/$defs/A.param"
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
               }
             ]
           },
@@ -14913,7 +14915,7 @@
               "$ref": "#/$defs/A.effect-players"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -15332,7 +15334,7 @@
               "$ref": "#/$defs/Zone"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -15450,7 +15452,7 @@
               "$ref": "#/$defs/Zone"
             },
             {
-              "$ref": "#/$defs/A.param"
+              "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
             }
           ]
         },
@@ -15884,7 +15886,7 @@
                 "$ref": "#/$defs/Concept"
               },
               {
-                "$ref": "#/$defs/A.param"
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
               }
             ]
           },
@@ -16666,7 +16668,7 @@
           "$ref": "#/$defs/CardName"
         },
         {
-          "$ref": "#/$defs/A.param"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
         },
         {
           "type": "array",
@@ -16676,7 +16678,7 @@
                 "$ref": "#/$defs/CardName"
               },
               {
-                "$ref": "#/$defs/A.param"
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
               }
             ]
           },
@@ -16721,7 +16723,7 @@
           "$ref": "#/$defs/Zone"
         },
         {
-          "$ref": "#/$defs/A.param"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
         },
         {
           "$ref": "#/$defs/A.create.destination-choice"
@@ -18538,7 +18540,7 @@
                 "$ref": "#/$defs/Concept"
               },
               {
-                "$ref": "#/$defs/A.param"
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
               }
             ]
           },
@@ -18682,7 +18684,7 @@
           "$ref": "#/$defs/A.inline-ability"
         },
         {
-          "$ref": "#/$defs/A.ability.generated"
+          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorGenerated#authorGenerated"
         }
       ]
     },
@@ -19222,11 +19224,11 @@
           "type": "integer"
         },
         "section": {
-          "$ref": "#/$defs/Nat"
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
         },
         "sources": {
           "items": {
-            "$ref": "#/$defs/SourceUse"
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/SourceUse"
           },
           "maxItems": 1,
           "minItems": 1,
@@ -19236,14 +19238,14 @@
           "minProperties": 1,
           "type": "object",
           "propertyNames": {
-            "$ref": "#/$defs/Code"
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
           },
           "additionalProperties": {
-            "$ref": "#/$defs/ImportUse"
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
           }
         },
         "generated_by": {
-          "$ref": "#/$defs/A.generated-by"
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.generated-by"
         }
       },
       "required": [
@@ -19251,7 +19253,9 @@
         "sources",
         "generated_by"
       ],
-      "type": "object"
+      "type": "object",
+      "$id": "urn:sve-kit:author-nodes:1.0:authorGenerated",
+      "$dynamicAnchor": "authorGenerated"
     },
     "A.generated-by": {
       "additionalProperties": false,
@@ -19562,7 +19566,7 @@
                 "$ref": "#/$defs/Concept"
               },
               {
-                "$ref": "#/$defs/A.param"
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
               }
             ]
           },
@@ -20894,6 +20898,20 @@
     },
     "authored": {
       "$ref": "#/$defs/A.file"
+    },
+    "expanded": {
+      "$id": "urn:sve-kit:author-nodes:1.0:expanded",
+      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.file",
+      "$defs": {
+        "authorParam": {
+          "$dynamicAnchor": "authorParam",
+          "not": {}
+        },
+        "authorGenerated": {
+          "$dynamicAnchor": "authorGenerated",
+          "not": {}
+        }
+      }
     }
   },
   "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."

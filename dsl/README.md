@@ -6,7 +6,7 @@ use `format: 1, kind: keyword_registry`. These envelopes select the existing
 prototype grammar and keep Schema `$id: urn:sve-kit:effects:astra:1`.
 The [author 1.0 contract](../docs/dsl/author-contract-1.0.md) specifies separate
 `author_effect_set` and `effect_body_shard` entries. Their closed schemas and
-Python structural readers are available; source admission and expansion remain separate. The prototype's 73 node variants contain 47 action atoms, 10 combinators,
+Python structural readers and explicit expansion APIs are available; source admission remains separate. The prototype's 73 node variants contain 47 action atoms, 10 combinators,
 14 declarations and two loading/unsupported markers.
 
 The Rust prototype validates `authored/rules/keywords.yaml` and every pack file, expands
@@ -95,9 +95,9 @@ ability/effect/step graph. Grant payloads can combine keywords and abilities and
 accept leader recipients; equipment and nested static grants use the same graph.
 Effect parent defaults, source scopes and execution capabilities require C1/D0;
 fragment acceptance is not enclosing-context validation. Full authored file/card
-containers use the structural reader described below; expansion remains separate.
-Snapshot count/exists do not establish hash equivalence with count_of/did. This recursive graph is not an expanded profile;
-Rust decoding and execution have not been validated by this fragment.
+containers use the structural reader described below; explicit expansion validates
+the same graph through `$defs/expanded`. Snapshot count/exists do not establish hash
+equivalence with count_of/did. Rust decoding and execution remain separate.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
 `format: 1, kind: effects_index` envelope and record syntax. Both use JSON Schema
 2020-12. The `AuthorSchemas` reader in
@@ -138,8 +138,8 @@ the containing mapping; ordinary property paths locate their value node.
 Reference syntax does not validate binding scope, event-field availability,
 singleton cardinality or permission to follow a movement receipt.
 The complete-container APIs below add `author_effect_set`, `effect_body_shard` and
-the recursive `authored` profile. Parameter expansion and the `expanded` profile
-remain unavailable; structural acceptance is not runtime support.
+the recursive `authored` profile. Explicit expansion also uses the `expanded`
+profile; structural acceptance is not runtime support.
 
 ## Complete author containers
 
@@ -153,7 +153,45 @@ The [entry shape matrix](../docs/dsl/author-entry-shapes-1.0.md) describes all f
 The reader checks strict YAML/JSON, local duplicate and evidence invariants, and
 rejects typed `ParamRef` leaves anywhere in inline abilities. The shared schema
 and decoder graph alone still accept these leaves; companion bodies need them.
-This is structural validation: source registries, index/file closure, source and
-body hashes, generated body expansion, qualification and executable support are
-not established. Nonempty `verified_by_exam` is explicitly unsupported. There is
-no `expanded` profile or Rust consumer contract yet. No prototype data is migrated.
+`author_tree` and `body_tree` apply the same checks and return the original strict-loader
+JSON tree, preserving optional fields instead of reconstructing hash payloads from
+models. `document` reuses its parsed document when dispatching. Mechanical review
+body references must match their use dependencies in frame, ability scope, body
+version and applicability scope. Nonempty `verified_by_exam` remains unsupported.
+These readers do not establish source admission, qualification or executable support.
+No prototype data is migrated.
+
+## Expansion candidates
+
+`AuthorExpander` in `carddb/src/sve_carddb/domains/effects/author_expansion.py`
+selects exact body versions and registrations, verifies `effect-body-v1` against
+original JSON payloads, and compares full canonical payloads even when hashes match.
+It replaces only typed parameter leaves and preserves array order, bindings and
+arithmetic. Canonical ability comparison removes only top-level use locations
+(`line`, `section`, `sources`); ports and imports remain significant.
+
+| API | Result and evidence boundary |
+| --- | --- |
+| `AuthorExpander.expand` | `ExpansionCandidate.tree` plus a separate `sidecar`; each ability has `source_proof=none` |
+| `AuthorExpander.expand_sources` | Reconstructs supplied source candidates and validates supported role/operand mappings; successful evidence has `source_proof=derived_self_consistent` |
+| `AuthorSchemas.expanded` | Validates the complete tree against `$defs/expanded` and independently rejects decoded `ParamRef` and `GeneratedBy` nodes |
+
+Neither evidence state means admitted or executable. Current source registries,
+index/file closure, historical qualification and engine exams remain separate.
+Source adapters accept only supported named constructs: offsets use registered
+expression operands, never numeric or textual guesswork. Nonempty source or author
+ports/imports are rejected by the source route until source-role/scope mappings are
+specified. Concept, CardKind, Phase and negated-magnitude source conversions remain
+unsupported; ambiguous direct `instead`, grouped Target quantity and grouped search
+destination parameter sites fail closed. Pure local binding and import-graph checks do not establish those
+source mappings.
+
+The expanded profile shares the author graph through dynamic anchors and excludes
+parameter and generated branches recursively. D0 consumes the expanded JSON tree;
+the C0 sidecar is separate and is not a new public wire format. Candidate goldens
+can exercise lowering, but production admission still requires the remaining source
+and qualification checks. Rust must verify the same profile's dynamic-scope positive
+and negative cases with locked `jsonschema` 0.58.1; that Rust check is not yet complete.
+BP08-038 and CP04-060 are pure expansion/canonical goldens only. Their existing
+source fixtures remain negative cases (pending semantics and signed-number review,
+respectively), not successful source admission.

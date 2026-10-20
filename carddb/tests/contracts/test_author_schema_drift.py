@@ -115,19 +115,32 @@ def _shape(
         return [_shape(child, root, names) for child in node]
     if not isinstance(node, dict):
         return node
-    reference = node.get("$ref")
+    reference = node.get("$ref", node.get("$dynamicRef"))
     if isinstance(reference, str):
         # Never silently discard constraints attached beside a reference.
         assert node.keys() <= {
             "$ref",
+            "$dynamicRef",
+            "$dynamicAnchor",
             "$defs",
             "$schema",
             "$id",
             "title",
             "description",
         }
-        resource, name = reference.split("#/$defs/")
-        source = NODES if resource == "urn:sve-kit:author-nodes:1.0" else root
+        anchors = {
+            "urn:sve-kit:author-nodes:1.0:authorParam#authorParam": "A.param",
+            "urn:sve-kit:author-nodes:1.0:authorGenerated#authorGenerated": "A.ability.generated",
+        }
+        if reference in anchors:
+            resource, name = "urn:sve-kit:author-nodes:1.0", anchors[reference]
+        else:
+            resource, name = reference.split("#/$defs/")
+        source = (
+            (root if root.get("$id") == resource else NODES)
+            if resource == "urn:sve-kit:author-nodes:1.0"
+            else root
+        )
         definition = object_value(source["$defs"])[name]
         if names is not None and name in names:
             return {"$ref": names[name]}
@@ -135,7 +148,8 @@ def _shape(
     shaped = {
         key: _shape(value, root, names)
         for key, value in node.items()
-        if key not in {"$schema", "$id", "$defs", "title", "description"}
+        if key
+        not in {"$schema", "$id", "$dynamicAnchor", "$defs", "title", "description"}
     }
     for key in ("required", "enum"):
         value = shaped.get(key)
@@ -173,7 +187,7 @@ def _assert_definition(
 
 def test_every_implemented_definition_has_a_python_type() -> None:
     assert (
-        object_value(NODES["$defs"]).keys()
+        object_value(NODES["$defs"]).keys() - {"expanded"}
         == (
             LEAVES
             | REFERENCES

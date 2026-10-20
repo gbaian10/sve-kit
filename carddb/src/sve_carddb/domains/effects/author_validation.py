@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, RootModel
 
+from sve_carddb.contracts.author_entries import GeneratedBy
 from sve_carddb.contracts.author_evidence import (
     Actor,
     BodyDependencies,
@@ -61,6 +62,15 @@ def inline_parameters(value: object, path: PathParts) -> Iterator[Violation]:
     for location, node in typed_nodes(value, path):
         if isinstance(node, ParamRef):
             yield Violation("inline_param_reference", location)
+
+
+def expanded_residuals(value: object) -> Iterator[Violation]:
+    """Independently reject typed syntax that expansion must have eliminated."""
+    for path, node in typed_nodes(value):
+        if isinstance(node, ParamRef):
+            yield Violation("expanded_param_reference", path)
+        elif isinstance(node, GeneratedBy):
+            yield Violation("expanded_generated_by", path)
 
 
 def _ordered(values: tuple[BaseModel, ...]) -> bool:
@@ -148,3 +158,15 @@ def evidence_violations(value: object) -> Iterator[Violation]:
             yield from _dependency_order(node, path)
         elif isinstance(node, Meta | Registration):
             yield from _reviews(node, path)
+        elif isinstance(node, MacroMechanical):
+            for field in (
+                "frame_id",
+                "ability_scope",
+                "body_version",
+                "applicability_scope",
+            ):
+                if getattr(node.body, field) != getattr(node.use_dependencies, field):
+                    yield Violation(
+                        "macro_body_dependency_mismatch",
+                        (*path, "use_dependencies", field),
+                    )
