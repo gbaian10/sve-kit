@@ -109,7 +109,7 @@ impl Game {
         self.apply_damage(&actual, frame)
     }
 
-    fn apply_damage(&mut self, actual: &[Value], frame: &Frame) -> Result<()> {
+    pub(super) fn apply_damage(&mut self, actual: &[Value], frame: &Frame) -> Result<()> {
         let mut pending = self.drain_triggers(actual, &frame.cause)?;
         let group = self.group();
         let mut damaged = Vec::new();

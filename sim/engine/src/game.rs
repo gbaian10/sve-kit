@@ -14,6 +14,7 @@ mod expr;
 mod extensions;
 mod grants;
 mod history;
+pub mod internal;
 mod keywords;
 mod legal;
 mod movement;
@@ -208,6 +209,13 @@ struct State {
     next_group: u64,
     next_decision: u64,
     draws_failed: BTreeSet<String>,
+    #[serde(default)]
+    ir_epoch: u64,
+    /// Typed physical identities; numbers are never reassigned within one game.
+    #[serde(default)]
+    ir_objects: BTreeMap<String, u64>,
+    #[serde(default)]
+    next_ir_object: u64,
 }
 
 /// A cloneable game. Only this type resolves effects, creates prompts and hides private state.
@@ -219,6 +227,13 @@ pub struct Game {
     emitted: Vec<Value>,
     #[serde(skip)]
     node: String,
+    #[serde(
+        default,
+        skip_deserializing,
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "internal::serialize_idle"
+    )]
+    typed: Option<internal::Execution>,
 }
 
 const ZONES: [&str; 14] = [
@@ -401,6 +416,9 @@ impl Game {
             next_group: 1,
             next_decision: 1,
             draws_failed: BTreeSet::new(),
+            ir_epoch: 0,
+            ir_objects: BTreeMap::new(),
+            next_ir_object: 0,
         };
         for seat in ["P1", "P2"] {
             state.knowledge.insert(seat.into(), Knowledge::default());
@@ -438,6 +456,7 @@ impl Game {
             state,
             emitted: Vec::new(),
             node: "opening".into(),
+            typed: None,
         };
         game.initialize_evolved(&position)?;
         game.initialize_history(&position)?;
