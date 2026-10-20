@@ -16,8 +16,8 @@ use crate::ir::{
     ObjectId, ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PlayerId, PlayerRef,
     PlayerRelation, PlayerResource, PlayerSet, PositiveInt, Predicate, Program, ReceiptId,
     ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients, RuntimeDamageRecipient,
-    RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode,
-    Visibility, WellFormedProgram, ZoneKind,
+    RuntimeObjectView, ScopeId, SearchOutcome, Selector, SnapshotId, SourceSpan, StepwiseAnswer,
+    StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -30,12 +30,14 @@ mod admission;
 mod movement;
 mod numeric;
 mod ordering;
+mod search;
 mod values;
 
 pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
 pub use ordering::OrderCard;
+pub use search::{SearchAnswer, SearchDomain, SearchGroup};
 
 /// Internal context pinned to the game's immutable catalogue and one source generation.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -79,6 +81,8 @@ pub enum InputDomain {
     Integer(Cardinality),
     /// Token-scoped handles and printed information, visible only to the chooser.
     Order(Vec<OrderCard>),
+    /// One complete search selection, including all printed groups.
+    Search(SearchDomain),
 }
 
 /// Internal answer, checked against actor and the entire decision token.
@@ -90,6 +94,8 @@ pub enum Answer {
     Integer(Nat),
     /// Complete permutation of this question's handles, in top-to-bottom order.
     Order(Vec<u64>),
+    /// Token-scoped handles; never physical object references.
+    Search(SearchAnswer),
 }
 
 /// Typed instruction outcomes retained only by the authority.
@@ -116,6 +122,8 @@ pub enum InstructionOutcome {
         /// Successful subjects, deduplicated at instruction start.
         subjects: Vec<ObjectRef>,
     },
+    /// Found and proved old generations, distinct from successful movement.
+    Search(SearchOutcome),
 }
 
 /// Authority result. This type intentionally has no player/wire serialization.
@@ -132,6 +140,11 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// A performed full-source shuffle, even when the deck has zero or one member.
+    Shuffled {
+        /// Owner of the complete source deck.
+        player: PlayerId,
+    },
     /// A successful individual draw.
     Draw(DrawEvent),
     /// A positive damage application.
@@ -153,6 +166,7 @@ enum Slot {
 #[derive(Clone, Debug)]
 enum Wait {
     Order(ordering::OrderWait),
+    Search(search::SearchWait),
     Integer {
         binding: Binding<Nat>,
         bounds: Cardinality,
@@ -280,6 +294,9 @@ impl Game {
                 (Wait::Order(wait), Answer::Order(handles)) => {
                     self.internal_order_answer(&mut execution, &wait, &handles)?;
                 }
+                (Wait::Search(wait), Answer::Search(answer)) => {
+                    self.internal_search_answer(&mut execution, &wait, answer)?;
+                }
                 (Wait::Integer { binding, bounds }, Answer::Integer(number))
                     if contains(bounds, number) =>
                 {
@@ -360,6 +377,7 @@ impl Game {
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
+                InputDomain::Search(domain) => search::packet(&domain),
             };
             json!({"by":seat_name(question.actor).unwrap_or_default(),"execution":question.token.execution.0,"decision":question.token.decision.0,"epoch":question.token.epoch,"domain":domain})
         })
@@ -675,6 +693,7 @@ impl Game {
             } => {
                 self.internal_move(execution, &instruction, objects, Some((movement, *reason)))?;
             }
+            Action::Search { .. } => return self.internal_search(execution, instruction),
             Action::Destroy { objects } => {
                 self.internal_move(execution, &instruction, objects, None)?;
             }

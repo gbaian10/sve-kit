@@ -4,8 +4,8 @@ use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, player_i
 use crate::ir::{
     Action, ActionPattern, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd, Effect,
     EffectSource, Expr, Generation, Instruction, MoveDestination, MoveMethod, MoveOutcome,
-    MoveReason, MoveResult, MoveSpec, OwnerZone, PlayerId, Polarity, ResultMember, ResultMemberId,
-    RuntimeObjectView, RuntimeZoneRef, Selector, SnapshotId, TimeAnchor, ZoneKind,
+    MoveReason, MoveResult, MoveSpec, ObjectRef, OwnerZone, PlayerId, Polarity, ResultMember,
+    ResultMemberId, RuntimeObjectView, RuntimeZoneRef, Selector, SnapshotId, TimeAnchor, ZoneKind,
 };
 use serde_json::json;
 
@@ -76,10 +76,6 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     reason = "Movement shares the authoritative Game and its mutation primitive."
 )]
 impl Game {
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Planning, commit and receipt construction form one atomic movement instruction."
-    )]
     pub(super) fn internal_move(
         &mut self,
         execution: &mut Execution,
@@ -104,11 +100,41 @@ impl Game {
                 (zone, kind, MoveMethod::Put)
             }
         };
+        let members = execution.objects(self, objects)?;
+        for &member in &members {
+            let object = self.object(execution.object_id(member)?)?;
+            if object.generation == member.generation.0 {
+                public_zone(&object.zone)?;
+            }
+        }
+        let (moves, successful) =
+            self.internal_move_members(execution, &members, zone, kind, method)?;
+        let outcome = if method == MoveMethod::Destroy {
+            InstructionOutcome::Destroy(DestroyOutcome { successful, moves })
+        } else {
+            InstructionOutcome::Move(MoveOutcome { moved: moves })
+        };
+        execution.receipts.insert(instruction.receipt, outcome);
+        Ok(())
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Planning and receipt construction share the atomic movement boundary."
+    )]
+    pub(super) fn internal_move_members(
+        &mut self,
+        execution: &mut Execution,
+        members: &[ObjectRef],
+        zone: &str,
+        kind: ZoneKind,
+        method: MoveMethod,
+    ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
         let snapshot = SnapshotId(self.state.ir_epoch);
         let mut moves = Vec::new();
         let mut successful = Vec::new();
         let mut plans = Vec::new();
-        for before in execution.objects(self, objects)? {
+        for &before in members {
             let id = execution.object_id(before)?.to_owned();
             let previous = self.object(&id)?.clone();
             let requested_to = RuntimeZoneRef {
@@ -131,7 +157,11 @@ impl Game {
             if method == MoveMethod::Destroy && previous.zone != "field" {
                 return Err(unsupported("off-field destruction"));
             }
-            let from_kind = public_zone(&previous.zone)?;
+            let from_kind = if previous.zone == "deck" && method == MoveMethod::Put {
+                ZoneKind::Deck
+            } else {
+                public_zone(&previous.zone)?
+            };
             if previous.zone == zone
                 || (method == MoveMethod::Destroy && execution.destroy_guards.contains(&before))
             {
@@ -225,13 +255,7 @@ impl Game {
                 );
             }
         }
-        let outcome = if method == MoveMethod::Destroy {
-            InstructionOutcome::Destroy(DestroyOutcome { successful, moves })
-        } else {
-            InstructionOutcome::Move(MoveOutcome { moved: moves })
-        };
-        execution.receipts.insert(instruction.receipt, outcome);
-        Ok(())
+        Ok((moves, successful))
     }
 }
 
