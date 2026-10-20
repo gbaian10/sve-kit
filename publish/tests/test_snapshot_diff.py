@@ -107,7 +107,7 @@ def test_old_manifest_shape_supports_incremental_upload_and_gc(
     assert all(method == "GET" for method, _key in fake.requests)
 
 
-def test_new_export_still_requires_the_full_manifest_schema(
+def test_new_export_rejects_the_old_errata_shape(
     images: PublicImages, roots: Roots
 ) -> None:
     export(images, roots, step=0)
@@ -124,7 +124,9 @@ def test_new_export_still_requires_the_full_manifest_schema(
         load_export(roots.preview)
 
 
-@pytest.mark.parametrize("damage", ["hash", "canonical", "files", "changes_ref"])
+@pytest.mark.parametrize(
+    "damage", ["hash", "canonical", "files", "changes_ref", "format"]
+)
 def test_damaged_retained_envelopes_stop_gc_before_deletion(
     images: PublicImages, roots: Roots, damage: str
 ) -> None:
@@ -134,8 +136,13 @@ def test_damaged_retained_envelopes_stop_gc_before_deletion(
     value["errata_card_ids"] = []
     if damage in {"files", "changes_ref"}:
         value[damage] = "invalid"
+    elif damage == "format":
+        value["format_version"] = "5.0.0"
     fake = DelayedS3(delay=0)
-    entry = retained_entry(fake, loaded.entry, value)
+    identity = loaded.entry | (
+        {"format_version": "5.0.0"} if damage == "format" else {}
+    )
+    entry = retained_entry(fake, identity, value)
     path = string(entry["manifest_path"])
     if damage in {"hash", "canonical"}:
         raw = fake.objects[path].raw + b"\n"
@@ -325,6 +332,7 @@ def test_optional_manifest_brotli_is_not_inferred_from_its_raw_manifest(
         "missing",
         "hash",
         "canonical",
+        "format",
         "schema",
         "identity",
         "manifest-path",
@@ -346,6 +354,8 @@ def test_bad_retained_manifests_stop_before_any_put(
         raw = manifest(first)
         if damage == "schema":
             raw["files"] = "invalid"
+        elif damage == "format":
+            raw["format_version"] = entry["format_version"] = "5.0.0"
         elif damage == "identity":
             entry["required_capabilities"] = ["synthetic-capability"]
         elif damage in {"path", "raw-length", "br-length"}:
@@ -381,7 +391,7 @@ def test_bad_retained_manifests_stop_before_any_put(
         export(images, roots, step=1, brotli=python_brotli())
         fake.requests.clear()
         with pytest.raises(
-            ExportError, match=r"manifest|Manifest|length conflicts|payload path"
+            ExportError, match=r"manifest|Manifest|length conflicts|payload path|format"
         ):
             upload(store, load_export(roots.preview))
     assert not any(method == "PUT" for method, _ in fake.requests)

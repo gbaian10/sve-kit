@@ -6,7 +6,6 @@ from jsonschema import ValidationError as SchemaError
 from sve_carddb.export.read_api import (
     ExportError,
     array,
-    closure,
     integer,
     object_value,
     retained_manifest,
@@ -48,13 +47,6 @@ def _retain(store: R2Store, entry: dict[str, JsonValue], known: dict[str, int]) 
     if remote is None:
         raise ExportError("Snapshot upload requires intact retained manifests")
     manifest = retained_manifest(remote.raw, entry)
-    if any(
-        value != manifest[key]
-        for key, value in entry.items()
-        if key not in {"manifest_path", "manifest_sha256"}
-    ):
-        raise ExportError("Manifest differs from its index entry")
-    closure(path, manifest)
     # Manifest .br has no descriptor, so only its raw representation is known.
     _remember(known, path, len(remote.raw))
     rows = [object_value(row) for row in array(manifest["files"])]
