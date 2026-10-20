@@ -15,6 +15,7 @@ from sve_carddb.core.models import Text, UInt
 
 from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
 from .author_receipt_cases import RECEIPTS
+from .author_recipient_cases import RECIPIENT_NAMES, RECIPIENTS
 from .author_selection_cases import SELECTIONS
 from .author_selector_cases import COUNTS, SELECTOR_NAMES, SELECTORS
 
@@ -156,7 +157,14 @@ def test_every_implemented_definition_has_a_python_type() -> None:
     assert (
         object_value(NODES["$defs"]).keys()
         == (
-            LEAVES | REFERENCES | NUMERIC | SELECTIONS | RECEIPTS | COUNTS | SELECTORS
+            LEAVES
+            | REFERENCES
+            | NUMERIC
+            | SELECTIONS
+            | RECEIPTS
+            | COUNTS
+            | SELECTORS
+            | RECIPIENTS
         ).keys()
     )
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
@@ -188,19 +196,97 @@ def test_count_query_type_drift(name: str) -> None:
 
 
 def _assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
-    python = SELECTORS[name].json_schema()
-    names = SELECTOR_NAMES | NUMERIC_NAMES | NUMERIC_DEPENDENCIES
+    python = (SELECTORS | RECIPIENTS)[name].json_schema()
+    names = SELECTOR_NAMES | RECIPIENT_NAMES | NUMERIC_NAMES | NUMERIC_DEPENDENCIES
     python_names = {value: key for key, value in names.items()}
     # Expand the root once; only internal recursive references preserve names.
-    body = object_value(python["$defs"])[SELECTOR_NAMES[name]]
+    reference = python.get("$ref")
+    body = (
+        object_value(python["$defs"])[reference.removeprefix("#/$defs/")]
+        if isinstance(reference, str)
+        else python
+    )
     assert _shape(
         object_value(schema["$defs"])[name], schema, {key: key for key in names}
     ) == _shape(body, python, python_names)
 
 
-@pytest.mark.parametrize("name", SELECTORS)
+@pytest.mark.parametrize("name", SELECTORS | RECIPIENTS)
 def test_selector_type_drift(name: str) -> None:
     _assert_selector_definition(NODES, name)
+
+
+@pytest.mark.parametrize(
+    "name", ["A.sel.leader-or", "A.sel.object-union", "A.sel.recipient-union"]
+)
+@pytest.mark.parametrize("mutation", ["required", "tag", "extra"])
+def test_recipient_drift_detects_variant_changes(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    node = object_value(object_value(changed["$defs"])[name])
+    props = object_value(node["properties"])
+    if mutation == "required":
+        node["required"] = []
+    elif mutation == "tag":
+        key = "leader_or" if name == "A.sel.leader-or" else "any_of"
+        props["wrong_key"] = props.pop(key)
+    else:
+        node["additionalProperties"] = True
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["contains", "contains_location", "minItems", "items", "true", "zone", "except"],
+)
+def test_recipient_drift_detects_domain_changes(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    name = "A.sel.recipient-union"
+    node = object_value(definitions[name])
+    array = object_value(object_value(node["properties"])["any_of"])
+    if mutation in {"contains", "contains_location"}:
+        condition = array.pop("contains")
+        if mutation == "contains_location":
+            node["contains"] = condition
+    elif mutation == "minItems":
+        array["minItems"] = 0
+    elif mutation == "items":
+        array["items"] = {"$ref": "#/$defs/A.sel.recipient"}
+    elif mutation == "except":
+        name = "A.sel.zone-objects"
+        props = object_value(object_value(definitions[name])["properties"])
+        props["except"] = {"$ref": "#/$defs/A.sel.recipient"}
+    else:
+        name = "A.sel.leader-or"
+        props = object_value(object_value(definitions[name])["properties"])
+        props["leader_or" if mutation == "true" else "zone"] = (
+            {"type": "boolean"} if mutation == "true" else {"$ref": "#/$defs/Zone"}
+        )
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "A.sel.object-atom",
+        "A.sel.object-core",
+        "A.sel.recipient-atom",
+        "A.sel.recipient",
+    ],
+)
+@pytest.mark.parametrize("mutation", ["duplicate", "missing"])
+def test_recipient_drift_detects_sum_branch_changes(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    branches = object_value(object_value(changed["$defs"])[name])["anyOf"]
+    assert isinstance(branches, list)
+    if mutation == "duplicate":
+        branches.append(deepcopy(branches[0]))
+    else:
+        branches.pop()
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
 
 
 @pytest.mark.parametrize(

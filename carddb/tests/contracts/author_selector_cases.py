@@ -19,11 +19,15 @@ COUNTS: dict[str, TypeAdapter[object]] = {
 SELECTORS: dict[str, TypeAdapter[object]] = {
     "A.sel.zone-objects": TypeAdapter(author.ZoneObjects, config=CONFIG),
     "A.sel.in-objects": TypeAdapter(author.InObjects, config=CONFIG),
+    "A.sel.object-atom": TypeAdapter(author.ObjectAtom, config=CONFIG),
+    "A.sel.object-union": TypeAdapter(author.ObjectUnion, config=CONFIG),
     "A.sel.object-core": TypeAdapter(author.ObjectSel, config=CONFIG),
 }
 SELECTOR_NAMES = {
     "A.sel.zone-objects": "ZoneObjects",
     "A.sel.in-objects": "InObjects",
+    "A.sel.object-atom": "ObjectAtom",
+    "A.sel.object-union": "ObjectUnion",
     "A.sel.object-core": "ObjectSel",
 }
 OBJECTS = "A.sel.object-core"
@@ -41,6 +45,21 @@ QUERY_CASES: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.sel.in-objects", {"in": "shown", "kind": "follower"}),
     ("A.sel.in-objects", {"in": "looked", "except": {"in": "chosen"}}),
     ("A.sel.object-core", {"in": {"objects_of": "moved", "view": "before"}}),
+    ("A.sel.object-atom", {"in": "shown", "kind": "follower"}),
+    (
+        "A.sel.object-union",
+        {
+            "any_of": [
+                {
+                    "in": "looked",
+                    "kind": "follower",
+                    "trait": "童話",
+                    "orig_cost_le": 5,
+                },
+                {"in": "looked", "kind": "amulet", "trait": "童話", "orig_cost_le": 5},
+            ]
+        },
+    ),
     ("A.expr.count-objects", {"who": "each", "zone": "field"}),
     ("A.expr.count-union", COUNT_UNION),
     ("A.expr.count-source", {"who": "self", "zone": "cemetery", "other": True}),

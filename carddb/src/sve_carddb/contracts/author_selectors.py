@@ -66,4 +66,13 @@ def _validate_selection[T: ObjectSelectionFields](value: T) -> T:
 
 type ZoneObjects = Annotated[ZoneObjectsFields, AfterValidator(_validate_selection)]
 type InObjects = Annotated[InObjectsFields, AfterValidator(_validate_selection)]
-type ObjectSel = ZoneObjects | InObjects
+type ObjectAtom = ZoneObjects | InObjects
+
+
+@with_config(ConfigDict(extra="forbid", strict=True, regex_engine="python-re"))
+class ObjectUnionFields(TypedDict):
+    any_of: Annotated[tuple[ObjectAtom, ...], Field(min_length=1)]
+
+
+type ObjectUnion = ObjectUnionFields
+type ObjectSel = ObjectAtom | ObjectUnion
