@@ -676,6 +676,7 @@ impl Checker {
                 self.movement(movement, Some(*reason), objects, instruction_actor)
             }
             Action::Search {
+                decision,
                 player,
                 deck,
                 candidate,
@@ -684,16 +685,21 @@ impl Checker {
                 groups,
                 destination,
                 continuation,
-            } => self.search(
-                player,
-                deck,
-                *candidate,
-                filter,
-                *cardinality,
-                groups.as_ref(),
-                destination.as_ref(),
-                *continuation,
-            ),
+            } => {
+                if !self.decisions.insert(*decision) {
+                    return Err(self.error(WellFormedReason::DuplicateDecision));
+                }
+                self.search(
+                    player,
+                    deck,
+                    *candidate,
+                    filter,
+                    *cardinality,
+                    groups.as_ref(),
+                    destination.as_ref(),
+                    *continuation,
+                )
+            }
             Action::InstallEffect {
                 subjects,
                 capture,

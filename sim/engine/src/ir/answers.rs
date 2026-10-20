@@ -103,6 +103,96 @@ impl OrderAnswer {
     }
 }
 
+/// One search selection; group positions match the checked constraint's printed order.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum SearchSelectionAnswer {
+    /// No grouping constraint; order does not prescribe destination placement.
+    Ungrouped {
+        /// Found members before movement; duplicates are invalid.
+        cards: Vec<ObjectRef>,
+    },
+    /// Every group is present, including groups with an empty selection.
+    Grouped {
+        /// One entry per constraint group, including empty entries.
+        groups: Vec<Vec<ObjectRef>>,
+    },
+}
+impl SearchSelectionAnswer {
+    /// Check shape and disjoint membership in frozen, filtered domains.
+    /// Cardinalities, distinct properties, aggregate bounds and authority are checked separately.
+    #[must_use]
+    pub fn matches_domain(
+        &self,
+        members: &[ObjectRef],
+        group_members: Option<&[Vec<ObjectRef>]>,
+    ) -> bool {
+        let mut seen = BTreeSet::new();
+        match (self, group_members) {
+            (Self::Ungrouped { cards }, None) => subset(cards, members, &mut seen),
+            (Self::Grouped { groups }, Some(domains)) => {
+                !domains.is_empty()
+                    && groups.len() == domains.len()
+                    && groups.iter().zip(domains).all(|(cards, domain)| {
+                        subset(domain, members, &mut BTreeSet::new())
+                            && subset(cards, domain, &mut seen)
+                    })
+            }
+            (Self::Ungrouped { .. }, Some(_)) | (Self::Grouped { .. }, None) => false,
+        }
+    }
+}
+
+/// One printed destination step selects from the still-unassigned found set.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SearchPartitionAnswer {
+    /// Selected old generations, without any destination ordering meaning.
+    pub cards: Vec<ObjectRef>,
+}
+impl SearchPartitionAnswer {
+    /// Clamp this step's required count to the remaining found set (CR 1.3.2).
+    /// Movement success and destination capacity do not change the assigned set.
+    #[must_use]
+    pub fn matches_remainder(&self, remaining: &[ObjectRef], cardinality: Cardinality) -> bool {
+        let Ok(available) = u64::try_from(remaining.len()) else {
+            return false;
+        };
+        let Ok(count) = u64::try_from(self.cards.len()) else {
+            return false;
+        };
+        if cardinality
+            .maximum
+            .is_some_and(|maximum| maximum.0 < cardinality.minimum.0)
+        {
+            return false;
+        }
+        let effective = Cardinality {
+            minimum: Nat(cardinality.minimum.0.min(available)),
+            maximum: Some(Nat(cardinality
+                .maximum
+                .map_or(available, |max| max.0.min(available)))),
+        };
+        contains(effective, count) && subset(&self.cards, remaining, &mut BTreeSet::new())
+    }
+}
+
+/// A destination choice after finding, proving and testing the replacement condition.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SearchReplacementAnswer {
+    /// Keep the original instruction to put found cards in their owners' hands.
+    Original,
+    /// Apply the checked replacement movement; this is not a second card selection.
+    Replacement,
+}
+
+fn subset(cards: &[ObjectRef], members: &[ObjectRef], seen: &mut BTreeSet<(u64, u64)>) -> bool {
+    let domain: BTreeSet<_> = members.iter().map(object_key).collect();
+    domain.len() == members.len()
+        && cards.iter().all(|card| {
+            let key = object_key(card);
+            domain.contains(&key) && seen.insert(key)
+        })
+}
+
 /// One role assignment in the same answer as the selected target set.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TargetRoleAnswer {

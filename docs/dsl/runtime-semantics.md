@@ -1,4 +1,4 @@
-# 內部執行的分配、移動與排列契約
+# 內部執行的分配、移動、搜尋與排列契約
 
 本文件規定 typed IR 交給引擎時的語義；它不表示 executor 已支援全部形狀。
 [良構檢查](typed-ir-validation.md)只證明結構、型別及作用域；runtime 必須再驗整張卡與
@@ -365,3 +365,198 @@ BP16-049 把已受傷目標 Set 1／1 後讀有效值，重算不另發 stat_cha
 Attack／Life 修改只形成一個多 facet 事實。反例須含負 Set 拒絕、usage Modify 拒絕、
 成本失敗額度不減、兩個不同 play 反序安裝仍依 ProperPlay 排序，以及 snapshot 重算
 不推進 timestamp。這些是 executor 待實現的測試，非本次 Rust 良構測試的保證。
+
+## 6. Search 的輸入點、回答與觀察
+
+### 6.1 靜態身分與同次回答
+
+`Action::Search.decision: DecisionId` 識別一次搜尋選牌；每個
+`SearchPartition.decision` 識別該印刷段的分配；
+`OptionalSelfReplacement.decision` 識別找到後的可選目的地。三者與一般 Decision、
+Order、Stepwise 共用整棵 Program／CardProgram 的唯一性集合，包含死分支、空域及
+條件為假的替代。不能借 InstructionId、以執行順序臨時編號或在不同能力重用 ID。
+Single 沒有額外選牌點；groups 沒有各自的 DecisionId。
+
+這些 ID 與下列型別是內部協定，不是 CR 規定的資料格式，也不發布 wire capability。
+來源座標仍由包含它的 Located instruction 提供，診斷能定位 destination 的段索引。
+actor 是 Search.player；良構已要求它等於 instruction.actor，不一致即拒絕。良構不要求
+deck 等於 player：首批 runtime 只准入搜尋者自己的牌庫，deck≠player 時整次拒絕。
+每次提交仍須由 authority 認證送答者就是此 actor，並與該題 token 對應；靜態 actor
+相符不代表任何連線都能作答。
+
+| 輸入點 | authority 回答型別 | 完整性與拒絕條件 |
+| --- | --- | --- |
+| Search，groups=None | `SearchSelectionAnswer::Ungrouped {cards}` | cards 是找到的舊世代集合；重複、外來物件／世代、錯變體拒絕 |
+| Search，groups=Some | `SearchSelectionAnswer::Grouped {groups}` | 外層 Vec 與 SelectionConstraint.groups 按印刷順序逐項對應，空組也必須保留；缺／多組、跨組重複拒絕 |
+| Partition 的第 i 段 | `SearchPartitionAnswer {cards}` | 從當段尚未分配的 found 選取；不能帶其他段的回答、重新搜尋或重用前段成員 |
+| OptionalSelfReplacement | `SearchReplacementAnswer::Original / Replacement` | 不再帶 cards；對整個已找到集合決定原手牌或替代 movement，不能夾帶第二次選牌 |
+
+選牌 Vec 的順序只供傳輸，**沒有目的地排序語義**；同一組內的排列不影響選牌結果。
+group 的位置具有分組意義，不是物件的排序。found 是所有組的無重複聯集，不因組號
+取得放置順序或 after 權限。`SearchSelectionAnswer::matches_domain` 僅驗完整分組、
+全域／各組固定域 membership 與世代／互斥；不驗基數、屬性、actor 或 token。
+`SearchPartitionAnswer::matches_remainder` 另驗當段基數，依剩餘張數截限 minimum／maximum。
+executor 必須完成以下語義檢查後才能提交；local helper 通過不是可信回答的證明。
+
+### 6.2 搜尋 snapshot 與找到的基數
+
+CR 5.8.1 只授權搜尋者確認該副牌庫；CR 4.1.2.2、5.8.1.1–.2 區分只有張數和有其他
+條件的搜尋。真實例 [BP01-035 メイドリーダー](https://shadowverse-evolve.com/cardlist/?cardno=BP01-035)
+Q173 允許沒有候選仍開始搜尋，Q174 要求找到後、加手前公開證明。
+
+開始時先進入搜尋程序，再固定 source deck 的物件世代、全域 filter、各組候選交集、
+已准入述詞所讀的特徵及 snapshot。只向搜尋者授權該次私有觀察；不能
+在開始前向任何人用「沒有候選」取消或隱藏程序，也不能把錯誤訊息當存在性 oracle。
+首批一律保留一次搜尋回答，即使牌庫空或候選空；空答案完成程序後仍按 §4.2 洗牌。
+這是保守的 UI／重播約定；不宣稱 CR 要求空牌庫也顯示視窗。
+
+- 只有張數條件：執行期基數為原 minimum／maximum 各截限到牌庫張數；Exact N 必須
+  找足 min(N,牌庫張數)，UpTo 仍可選零（CR 1.3.2、1.3.5.1、5.8.1.1）。
+- 通常非公開牌庫、有張數以外的條件：可不找到；有效 minimum 為零，maximum 保留。
+  已選成員仍須滿足全域 filter、各組 predicate、各組及總上限與 distinct_by；
+  aggregate bounds 依下一項首批不准入。不能把「可找不到」當成可選不符合條件的卡。
+- 有效 minimum 為零必須與 aggregate bounds 相容，且 aggregate 必須讀對特徵版本。
+  `AggregateBound` 目前只有 `NumericProperty`（Cost／Attack／Life），沒有
+  CharacteristicView；BP20-030 讀「元のコスト」，executor 不能依卡號特判原值，
+  也不能假設原值等於有效值。非負與空答可行性也不能在搜尋開始後掃描隱藏候選，
+  再以 Unsupported 拒絕：拒絕與否本身會洩漏牌庫內容。因此首批 runtime 只要
+  groups 帶非空 aggregate_bounds，就在准入時只依 IR 形狀整次拒絕。這只擋該形狀；
+  aggregate_bounds 為空的 groups（如下述 BP13-035）仍依本節准入。
+- 解除前須另定欄位契約：AggregateBound 明示原值／有效值，並能在准入時靜態證明
+  空答可行（例如原值上界）。BP20-030「元のコストの合計が8以下」與 Q2645「1枚も
+  見つけない」只支持這類上界；正下限、Equal／NotEqual、負數值與可不找到如何並存
+  沒有已審依據，不自創下限、不改成「盡量接近」。
+- IR cardinality 保存原文要求，不由 checker 因 filter 改寫；上述搜尋特例在 runtime
+  的當次選牌驗證套用。Partition 已是確定 found 的分配，不能沿用「可找不到」把必選
+  一張改成零張。所有數值／計數操作 checked，溢位拒絕並回復 execution。
+- 不能從候選是否為空或本次特徵碰巧全符合來判定「只有張數」。首批 runtime 只有
+  無 groups 且 filter 為常值 true 的已審降低形狀可當張數限定；其他形狀須能從
+  卡文及已支援的述詞結構確認。無法分類、混合張數限定組與條件組、整副牌庫正因
+  效果公開而可能不適用 CR 4.1.2.2 的情境，先整次拒絕，不猜測有效 minimum。
+
+[BP13-035 レヴィオンシスターズ登場！](https://shadowverse-evolve.com/cardlist/?cardno=BP13-035)
+的追加費用已支付片段是三組各一張搜尋，Q1743（2024-12-13）允許任一指定名稱不找到。
+三組合併成一次回答，不能逐組詢問或讓後組讀前組的新狀態。重疊候選必須由回答分組，
+同物件只能分到一組；重疊是合成邊界，不宣稱這三個相異名稱原本會重疊。
+[BP20-030 簒奪のアジト](https://shadowverse-evolve.com/cardlist/?cardno=BP20-030)
+提供名稱相異、原費用總和上限與至多三張的搜尋種子；Q2645（2026-05-18）明定先找到，
+再依場容量從 found 選能進場者，未進場者留牌庫後洗。不能在 found 階段先截到場容量。
+因 aggregate 尚缺原值欄位，此卡的搜尋首批整次拒絕；上列程序是解除後的驗收要求。
+這些只定搜尋片段，不表示 Fusion、追加付款或整卡已准入。
+
+### 6.3 destination 的先後與獨立域
+
+搜尋答案驗證成功後才固定 found／revealed；有其他條件時出示已找到成員的條件證據，
+只有張數時不自動公開牌面（CR 5.8.1.2）。後續題目只可用此 continuation 的 found，
+不能重算整個牌庫或取得另一個搜尋的結果。found、revealed、成功 before、成功 after
+仍是四種不同的用途；本片不擴充可見性證明或跨區追蹤。
+
+Single 直接提出該 found 的 movement，必要容量程序依自己的規則處理；此 Search
+選牌 ID 不兼作 Capacity 的 ID。D1 若尚無受驗的容量輸入點，須限制可執行情境或拒絕，
+不能讓玩家以縮小搜尋答案代替容量選擇。CP04-060 進 EX 滿而零成功仍保留 found、無
+成功 after，最後洗牌；沒有 capacity 複選輸入的情境可先實作。
+
+Partition 依 destinations 的印刷順序執行，當段輸入是 `remaining_found`。當段基數
+各截限到 remaining 張數，不因後段 minimum 而預留卡。非空域即使只能選唯一成員仍問；
+空域自動記空段而不建立玩家 token（沿用 §4.1 的保守輸入省略約定）。提交當段答案後，
+先從 remaining 扣掉**已分配**成員，再執行當段 movement，然後才進入下一段。即使
+一般化的移動失敗，也不能把已分配成員重送另一段；實際成功 before 另由 receipt 保存。
+首批 runtime 僅准入 CP03-SL07 的 Hand→Cemetery 兩段，其他目的區、取代或禁止介入
+分段時維持拒絕，不能靠這個資料結構推定所有容量／失敗裁定。
+
+[CP03-SL07 スターコール・トランペッター](https://shadowverse-evolve.com/cardlist/?cardno=CP03-SL07)
+Q1402（2024-06-24）直接支持：只找到一張時必須先公開並加手，不能選墓地。
+找到兩張時先問哪張加手，該段完成後再以另一 DecisionId 問剩餘一張入墓；找到零張
+兩段都自動空結果。沒有任意 continuation Program，也沒有第二次搜尋。
+
+OptionalSelfReplacement 先找到並按規則公開，再求 predicate；found 空或 predicate=false
+不發該題，非空且為 true 才發獨立 token。[BP03-002 コスモスファング](https://shadowverse-evolve.com/cardlist/?cardno=BP03-002)
+Q445（2022-12-09）支持低費獣可選場或手牌；不能在搜尋前先問目的地或用隱藏候選
+判斷是否提供選項。Original 回 Owners(Hand)；Replacement 採 movement，不能在移動
+失敗後自動改回手牌。首批 runtime 僅准入此卡至多一張、兩種目的地均可實行的片段；
+場滿或禁止入場時是否仍可選替代，Q445 未直接裁定，維持情境拒絕並另求規則依據。
+零張／條件不成立直接走既定收尾，不受上述需要實際選擇的限制。
+
+所有 destination 完成後才洗來源一次；Single 零成功、Partition 空段、選 Original、
+零 found 都不新增／取消洗牌（CR 5.8.2、5.9.1.1）。輸出 SearchOutcome 的 found 與
+revealed 保存原世代快照、moved 保存各段真實 MoveResult；只有成功 after 能接減費。
+Search destination.order／position 仍依 §4.2 拒絕，不能用選牌 Vec 的次序繞過。
+
+### 6.4 token、重播與觀察隔離
+
+所有搜尋及後續輸入沿用 §4.1 的 token、認證 actor、消耗與重播鍵。pending 除了
+`(ExecutionId, DecisionId, epoch)` 還保存輸入種類、該段 snapshot、固定域、已驗約束、
+actor 及 continuation；不能只靠 DecisionId 接答案。Partition 下一段與替代題各取得
+自己的 snapshot／新 token，保留原 found 身分；不把最初選牌 snapshot 當成移動後狀態。
+
+玩家傳回的 cards 都是**本 token 範圍**內的 handle，由 authority 轉成上述 ObjectRef。
+每個後續題換發 handle，不以群組序號、物件 ID、牌庫索引或上一題 handle 當永久座標。
+對手在 found 證據出示前只能得到搜尋已開始等公開程序資訊，不能看到候選數、分組
+候選、空候選原因或完整 deck 順序。證據出示後可看到被證明的卡面及依法公開的移動，
+不因此取得自己的回答 token、私有 domain、continuation 或手牌固定 ID。
+
+公開證據不等於持續公開追蹤；CR 5.21.1.1 的公開終止及 §3.4 的觀察 epoch 同樣適用。
+洗牌撤銷舊位置／搜尋觀察證據，保留已發生的公開歷史，不提供目前隱藏 slot 連結。
+錯 actor、錯回答變體、舊 token、錯 snapshot／世代、缺組或違反約束，完整保持目前
+待答狀態，不搬牌、不洗牌、不耗 RNG；已消耗鍵重播不再執行。若執行錯誤須回復整次
+execution，已消耗或撤銷 token 不得復活，恢復待答須配新 epoch。
+
+### 6.5 可重現局面
+
+以下是 Sol 的局面驗收要求；本片 Rust 僅保證型別、local answer invariants 與良構。
+
+| ID | 正例／輸出 | 反例／拒絕 |
+| --- | --- | --- |
+| S-A | BP01-035：有／無合格卡都進搜尋；可答空，最後洗一次 | 開始前向對手洩漏候選是否存在；空答不洗 |
+| S-B | CP04-060：找到 A、出示、入 EX、有新 after；滿 EX 零成功仍洗 | 把 found 當 after 減費；以 EX 容量先縮 found |
+| S-C | BP13-035 追加費用片段：三組 `[A],[],[C]` 同次完整回答 | 缺空組、額外組、A 同時放兩組、錯群組／全域 filter、錯世代 |
+| S-D | BP20-030 首批：帶 aggregate_bounds 的整次搜尋在准入時拒絕，判斷只看 IR 形狀；解除後同名限制與原費用總和 8 在同 snapshot 驗，場只餘一格仍可 found 多張，空答可行 | 依卡號特判原值；搜尋開始後掃隱藏候選才以 Unsupported 拒絕；解除後總費用 9、同名兩副本、違反全域條件、無容量輸入協定仍准入多張入場 |
+| S-E | CP03-SL07：found A/B，先手 A、再墓 B；found A 只能先手，第二段空 | 先墓 A、第一段答空、第二段重用 A、以選牌 Vec 次序代答兩段 |
+| S-F | BP03-002：找到 cost≤2，獨立問 Original／Replacement；cost>2 或空不問 | 搜尋前問替代；替代答案帶 cards；場滿未定情境擅自入場或回手 |
+| S-G | 各點獨立 ID、共享 namespace，條件為 false 的替代仍保留 ID | Search／Partition／替代互撞，或與一般 Decision／Order／Stepwise／另一能力撞 ID；死分支亦拒絕 |
+| S-H | 搜尋者各題用新 handle；對手只見已公開證據及移動；同鍵重播拒絕 | 跨題 token、錯 actor／snapshot、手牌固定 ID、洗後追蹤 found |
+| S-I | 合成張數限定 exact 2、牌庫 1：必找 1；條件搜尋允許空 | 張數限定仍有牌卻答空；把條件全部剛好符合當成張數限定 |
+
+以上交換兩席；除最終區域與張數，須驗詢問順序、receipt、世代、公開歷史、兩個隱藏
+配置的對手投影、RNG／pending／epoch 的拒絕前後等價。groups 重疊、張數限定與
+錯誤傳輸均為合成邊界，不以不存在的原卡卡文包裝。
+
+## 7. Public Order 的准入邊界
+
+`visibility=Public` 的候選可見性與**排列結果**是否公開是兩個問題，不能只因來源集合
+曾 Reveal 就把完整答案送給對手。CR 4.1.5.1 明確限制公開區往非公開區、由該卡 master
+定序時其他玩家可知的順序；CR 5.21.1.1 又規定在同一非公開區移至另一位置時公開終止。
+前者不是任意同區 Order 的直接裁定，後者也沒有授權公開新順序。
+
+BP07-SL09／BP06-024 的餘牌原本只是私有 Look，不能作 Public Order 種子。一般
+「公開候選後同區放底」只有公開舊身分的證據，沒有本文件採納的官方 Q&A／實卡可
+證明非 chooser 能取得新排列。因此 Public Order 繼續在 runtime 整棵拒絕，包括死分支；
+checker 可接受具有公開來源證據的形狀，不代表可執行，也不能將 Public 靜默改成 Only。
+
+目前支援的 Only(chooser) 題目與結果投影依 §4.1、§3.4：非 chooser 不收到可操作
+DecisionView、token、域 handle 或排列；只保留本來合法的公開歷史及程序完成資訊。
+即使曾看見 A/B，兩種私有排列 A/B 與 B/A 對手的結果投影必須相同，不能提供新的
+位置證據。若將來取得明示公開排序的實卡，需另定題目、結果、公開終止時點與反例
+才解除拒絕，不從 IR 的 Public enum 推導規則。
+
+## 8. 重複到達同一輸入點
+
+Repeat 的 body 是同一棵靜態樹，不在每輪複製或重編 DecisionId。將來准入 Repeat 時，
+每次到達 Search、Partition、OptionalSelfReplacement、Order 或逐張點都產生新的
+occurrence；若需玩家輸入，配發單調、不重用的 epoch。即使相鄰兩輪的域、牌序與
+actor 完全相同，也不是同一次詢問。無玩家輸入的空段記 authority occurrence，不
+偽造玩家答案；下一個真正的題仍用未使用過的 epoch。禁止溢位回繞。
+
+本規定是 §4.1 重播協定的延伸，不新增遊戲重複效果。真實重複背景
+[BP05-054 魔導電磁サイ](https://shadowverse-evolve.com/cardlist/?cardno=BP05-054)
+Q708／Q710／Q712 只支持其加攻與 Mill 的本文逐輪程序，**沒有證明該卡具有 Search／
+Order 或重選 play 目標**；Search／Order 的 Repeat 用合成局面驗證。每輪重新依其指示
+時點凍結域；receipt／binding／continuation 以 execution＋occurrence 分開，不能只用
+靜態 ID 或 slot 覆蓋前輪。上輪已撤銷的 Look／Search 證據不能因下一輪重用 ID 復活。
+
+驗收 R-A：合成兩輪同一 Order／Search ID，第二輪新 token，舊答案與同鍵重播拒絕；
+新答案只影響第二輪。R-B：第一輪空段、第二輪非空，第二輪仍須新詢問，不重用空結果。
+R-C：回復或存檔恢復不能重用已消耗 epoch；無完整 pending／序列保存時繼續禁止待答
+存檔。錯誤回答保持該輪待答；不能一併回滾前一輪已完成的回答，除非整次 execution
+因錯誤撤銷，此時所有外發 token 仍失效。這些是 Repeat executor 的驗收要求；目前
+內部入口仍拒絕 Repeat，本文件不宣稱已完成 R-A～C 的局面測試。

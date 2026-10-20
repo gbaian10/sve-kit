@@ -23,6 +23,7 @@ fn bp03_002_search_found_cost_is_local_to_the_destination_question() {
     let mut node = search();
     if let Action::Search { destination, .. } = action(&mut node) {
         *destination = Some(SearchDestination::OptionalSelfReplacement {
+            decision: DecisionId(9002),
             predicate: condition.clone(),
             movement: movement(shared(ZoneKind::Field)),
         });
@@ -325,6 +326,7 @@ fn search_condition(predicate: Expr<Bool>, destination_condition: bool) -> Locat
     {
         if destination_condition {
             *destination = Some(SearchDestination::OptionalSelfReplacement {
+                decision: DecisionId(9002),
                 predicate,
                 movement: movement(shared(ZoneKind::Ex)),
             });
@@ -450,7 +452,11 @@ fn search_requires_a_destination_with_enough_partition_capacity() {
             *destination = Some(SearchDestination::Partition {
                 destinations: parts
                     .into_iter()
-                    .map(|limit| SearchPartition {
+                    .enumerate()
+                    .map(|(index, limit)| SearchPartition {
+                        decision: DecisionId(
+                            u64::try_from(index).unwrap().checked_add(9010).unwrap(),
+                        ),
                         zone: MoveDestination::Owners {
                             zone: OwnerZone::Hand,
                         },

@@ -175,6 +175,7 @@ fn cp04(follow_moved: bool, set: bool) -> Located<CardProgram> {
     let filter = cp04_filter(candidate);
     let search = instruction(
         Action::Search {
+            decision: DecisionId(9001),
             player: PlayerRef::Controller {},
             deck: PlayerRef::Controller {},
             candidate,

@@ -119,3 +119,7 @@ DecisionView 的 Order domain 只向 chooser／Referee 給出本次 token 範圍
 BP07-SL09、BP06-024 僅驗「看五張、已決定零張入場、餘牌放底」片段；沒有實作中間的
 選牌、總費用、入場、觸發及整卡其他能力。Search、其 groups／目的地程序、成功移動
 remainder、減費安裝與 Token 共享容量仍未准入；不能以此片段宣稱整能力已執行。
+
+Search 的靜態輸入點與三種回答型別已在 IR 定義，契約依
+[執行語義 §6](runtime-semantics.md#6-search-的輸入點回答與觀察)；本入口仍未執行它們。
+Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等待執行驗收。

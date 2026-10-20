@@ -210,6 +210,18 @@ runtime 依 CR 4.1.5 預設由目的區所屬玩家定序；缺卡文明示單 c
 跨 owner 排列。Shared(Field／Ex) 的逐物件規則解析與成功 Before 定義依執行語義 §3。
 多 Placement、獨立／compound 的 Order decision 及 Move／Token entry_effects 尚未接受。
 
+Search 的選牌點明示 `decision: DecisionId`；每個 SearchPartition 及
+OptionalSelfReplacement 也各有必填 decision，與一般 Decision、Order、Stepwise 共用
+全樹唯一性檢查，包含未執行分支。Single 不新增第二次選牌，groups 仍是同一次回答；
+候選／continuation 的型別與 scope 隔離不因新增 ID 改變。
+`SearchSelectionAnswer` 以 Ungrouped／Grouped 區分回答，後者的 Vec 按 groups 印刷順序
+完整保留空組；`matches_domain` 只檢查形狀、成員世代與互斥，不驗基數或 authority。
+`SearchPartitionAnswer::matches_remainder` 檢查剩餘 found 子集與截限後的當段基數；
+`SearchReplacementAnswer` 僅 Original／Replacement，不帶第二次 cards。
+基數的搜尋特例、各題時點、token／epoch／snapshot、公開證據與拒絕條件依
+[執行語義 §6](runtime-semantics.md#6-search-的輸入點回答與觀察)。
+Public Order 及 Repeat 的 executor 准入仍分別依該文件 §7、§8，不能由良構推定支援。
+
 Search 的 filter 與替代目的地 predicate 依搜尋者的私有選擇域檢查可見性；
 不能藉可選牌集合或替代選項讀取對手手牌、原始牌庫或他人的私有 Look 結果。
 candidate 只在 filter 可見，continuation 的 found／revealed 在另一個獨立 scope

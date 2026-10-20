@@ -57,6 +57,7 @@ fn action(node: &mut Located<Node>) -> &mut Action {
 fn search() -> Located<Node> {
     instruction(
         Action::Search {
+            decision: DecisionId(9001),
             player: PlayerRef::Controller {},
             deck: PlayerRef::Controller {},
             candidate: Binding::new(1, ScopeId(2)),
@@ -157,6 +158,7 @@ fn search_filter_and_continuation_are_disjoint_even_for_unexecuted_branches() {
     let mut step = search();
     if let Action::Search { destination, .. } = action(&mut step) {
         *destination = Some(SearchDestination::OptionalSelfReplacement {
+            decision: DecisionId(9002),
             predicate: positive(Expr::Frozen(Box::new(NatFrozen::SearchFoundCount {
                 found: Binding::new(2, ScopeId(3)),
             }))),
@@ -225,12 +227,14 @@ fn search_validates_every_destination_and_rejects_unsupported_choice_regions() {
     let valid_destination = Some(SearchDestination::Partition {
         destinations: vec![
             SearchPartition {
+                decision: DecisionId(9010),
                 zone: MoveDestination::Owners {
                     zone: OwnerZone::Hand,
                 },
                 cardinality: bounds(1, Some(1)),
             },
             SearchPartition {
+                decision: DecisionId(9011),
                 zone: MoveDestination::Owners {
                     zone: OwnerZone::Cemetery,
                 },
@@ -251,12 +255,14 @@ fn search_validates_every_destination_and_rejects_unsupported_choice_regions() {
         *destination = Some(SearchDestination::Partition {
             destinations: vec![
                 SearchPartition {
+                    decision: DecisionId(9012),
                     zone: MoveDestination::Owners {
                         zone: OwnerZone::Hand,
                     },
                     cardinality: bounds(1, Some(1)),
                 },
                 SearchPartition {
+                    decision: DecisionId(9013),
                     zone: shared(ZoneKind::Cemetery),
                     cardinality: bounds(1, Some(1)),
                 },
@@ -808,6 +814,7 @@ fn search_bindings_and_cardinality_cannot_be_forged() {
     let mut wrong_type = search();
     if let Action::Search { destination, .. } = action(&mut wrong_type) {
         *destination = Some(SearchDestination::OptionalSelfReplacement {
+            decision: DecisionId(9002),
             predicate: positive(Expr::Frozen(Box::new(NatFrozen::SearchFoundCount {
                 found: Binding::new(3, ScopeId(3)),
             }))),
@@ -863,3 +870,4 @@ fn movement_rejects_unvalidated_entry_effects_and_invalid_orders() {
 
 mod ordering;
 mod search_groups;
+mod search_inputs;
