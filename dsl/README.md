@@ -39,7 +39,7 @@ exclusive variants and roles are listed in the
 Its root rejects standalone documents; select a named `$defs` entry.
 A reference atom is not a complete action-position type: positions such as
 `move.ref` also accept selectors; complete action-position schemas are not implemented here.
-`first`/`second`/`rest` views still need their joint selector/target definitions.
+Independent `first`/`second`/`rest` views are rejected. Use target roles or bindings, grouped search destinations, and successful-before set differences.
 The leader union shares `A.single-leader`, `A.multiple-leaders` and `A.leader-of`
 without duplicate branches. The [selection shape matrix](../docs/dsl/author-selection-shapes-1.0.md)
 defines Target role declarations and the named `RecipientSel` sum, and distinguishes quantity
@@ -48,7 +48,7 @@ defines closed single-group Target/choose/search quantity variants and counter c
 Their source and binding/destination fields are present. The
 [cost and target matrix](../docs/dsl/author-cost-target-shapes-1.0.md) adds ordered Cost
 steps, payment wrappers, material variants, X declarations and grouped Targets.
-Choose/search groups and other action extensions remain outside these fragments. Counter holder quantities are separate
+The [action and step matrix](../docs/dsl/author-step-shapes-1.0.md) adds choose/search groups, destinations, actions, and recursive Steps. It keeps pre-payment decisions separate from payment receipts. Counter holder quantities are separate
 from counter amounts, and only selection n/upto accept direct selection parameters.
 DeckSlice accepts a player or player set and shares the same nonnegative-literal
 Quantity as cost bounds and counter quantities. NumericExpr and Quantity reference
@@ -90,7 +90,7 @@ event keys, plus the counter_reached macro. The
 [effect matrix](../docs/dsl/author-effect-shapes-1.0.md) adds 26 closed EffectSpec keys,
 cannot variants and rule overrides. `contracts/author_effects.py` shares the same
 selector and numeric graph; grant remains rejected until complete recursive ability
-headers and Steps exist. Effect parent defaults and source scope require C1/D0;
+ability headers exist; recursive Steps and keyword-grant actions are separate accepted fragments. Effect parent defaults and source scope require C1/D0;
 fragment acceptance is not enclosing-context validation. Cost/Target nodes do not constitute complete
 ability headers or author entry contracts; full Sel and enclosing-context and
 capability checks still require further contracts and C1/D0.

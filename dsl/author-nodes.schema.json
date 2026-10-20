@@ -1197,6 +1197,9 @@
         },
         {
           "$ref": "#/$defs/A.cond.chosen"
+        },
+        {
+          "$ref": "#/$defs/A.cond.payment-decided"
         }
       ]
     },
@@ -2546,11 +2549,8 @@
         "from": {
           "$ref": "#/$defs/A.sel.object-core"
         },
-        "cost_sum_le": {
-          "$ref": "#/$defs/A.quantity"
-        },
-        "distinct_by": {
-          "$ref": "#/$defs/DistinctBy"
+        "n": {
+          "$ref": "#/$defs/A.selection-quantity"
         },
         "by": {
           "$ref": "#/$defs/A.player-ref"
@@ -2564,16 +2564,30 @@
         "order": {
           "type": "boolean"
         },
-        "n": {
-          "$ref": "#/$defs/A.selection-quantity"
+        "position": {
+          "type": "string",
+          "const": "top_or_bottom"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.target.group-filter"
+          },
+          "minItems": 2
         }
       },
+      "additionalProperties": false,
       "required": [
         "bind",
         "from",
         "n"
-      ],
-      "additionalProperties": false
+      ]
     },
     "A.act.choose.up-to": {
       "type": "object",
@@ -2584,11 +2598,8 @@
         "from": {
           "$ref": "#/$defs/A.sel.object-core"
         },
-        "cost_sum_le": {
-          "$ref": "#/$defs/A.quantity"
-        },
-        "distinct_by": {
-          "$ref": "#/$defs/DistinctBy"
+        "upto": {
+          "$ref": "#/$defs/A.selection-quantity"
         },
         "by": {
           "$ref": "#/$defs/A.player-ref"
@@ -2602,16 +2613,30 @@
         "order": {
           "type": "boolean"
         },
-        "upto": {
-          "$ref": "#/$defs/A.selection-quantity"
+        "position": {
+          "type": "string",
+          "const": "top_or_bottom"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.target.group-filter"
+          },
+          "minItems": 2
         }
       },
+      "additionalProperties": false,
       "required": [
         "bind",
         "from",
         "upto"
-      ],
-      "additionalProperties": false
+      ]
     },
     "A.act.choose.any": {
       "type": "object",
@@ -2622,11 +2647,9 @@
         "from": {
           "$ref": "#/$defs/A.sel.object-core"
         },
-        "cost_sum_le": {
-          "$ref": "#/$defs/A.quantity"
-        },
-        "distinct_by": {
-          "$ref": "#/$defs/DistinctBy"
+        "any": {
+          "type": "boolean",
+          "const": true
         },
         "by": {
           "$ref": "#/$defs/A.player-ref"
@@ -2640,17 +2663,30 @@
         "order": {
           "type": "boolean"
         },
-        "any": {
-          "type": "boolean",
-          "const": true
+        "position": {
+          "type": "string",
+          "const": "top_or_bottom"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.target.group-filter"
+          },
+          "minItems": 2
         }
       },
+      "additionalProperties": false,
       "required": [
         "bind",
         "from",
         "any"
-      ],
-      "additionalProperties": false
+      ]
     },
     "A.act.choose": {
       "anyOf": [
@@ -2671,15 +2707,17 @@
         "sel": {
           "$ref": "#/$defs/A.sel.object-core"
         },
+        "n": {
+          "$ref": "#/$defs/A.selection-quantity"
+        },
         "to": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Zone"
-            },
-            {
-              "$ref": "#/$defs/A.param"
-            }
-          ]
+          "$ref": "#/$defs/A.search.destination"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
         },
         "cost_sum_le": {
           "$ref": "#/$defs/A.quantity"
@@ -2687,22 +2725,27 @@
         "distinct_by": {
           "$ref": "#/$defs/DistinctBy"
         },
-        "bind": {
-          "$ref": "#/$defs/BindingName"
+        "entry_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
         },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "n": {
-          "$ref": "#/$defs/A.selection-quantity"
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.search"
+          },
+          "minItems": 1
         }
       },
+      "additionalProperties": false,
       "required": [
         "sel",
-        "to",
-        "n"
-      ],
-      "additionalProperties": false
+        "n",
+        "to"
+      ]
     },
     "A.act.search.up-to": {
       "type": "object",
@@ -2710,15 +2753,17 @@
         "sel": {
           "$ref": "#/$defs/A.sel.object-core"
         },
+        "upto": {
+          "$ref": "#/$defs/A.selection-quantity"
+        },
         "to": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Zone"
-            },
-            {
-              "$ref": "#/$defs/A.param"
-            }
-          ]
+          "$ref": "#/$defs/A.search.destination"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
         },
         "cost_sum_le": {
           "$ref": "#/$defs/A.quantity"
@@ -2726,22 +2771,27 @@
         "distinct_by": {
           "$ref": "#/$defs/DistinctBy"
         },
-        "bind": {
-          "$ref": "#/$defs/BindingName"
+        "entry_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
         },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "upto": {
-          "$ref": "#/$defs/A.selection-quantity"
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.search"
+          },
+          "minItems": 1
         }
       },
+      "additionalProperties": false,
       "required": [
         "sel",
-        "to",
-        "upto"
-      ],
-      "additionalProperties": false
+        "upto",
+        "to"
+      ]
     },
     "A.act.search": {
       "anyOf": [
@@ -2750,6 +2800,9 @@
         },
         {
           "$ref": "#/$defs/A.act.search.up-to"
+        },
+        {
+          "$ref": "#/$defs/A.act.search.grouped"
         }
       ]
     },
@@ -13891,6 +13944,3811 @@
         }
       },
       "type": "object"
+    },
+    "A.count-amount": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.quantity"
+        },
+        {
+          "$ref": "#/$defs/A.param"
+        }
+      ]
+    },
+    "A.damage-amount": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.quantity"
+        },
+        {
+          "$ref": "#/$defs/A.param"
+        }
+      ]
+    },
+    "A.recovery-delta": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        {
+          "$ref": "#/$defs/A.param"
+        }
+      ]
+    },
+    "A.position.nth": {
+      "type": "object",
+      "properties": {
+        "nth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "nth"
+      ]
+    },
+    "A.placement": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "top",
+            "bottom"
+          ]
+        },
+        {
+          "$ref": "#/$defs/A.position.nth"
+        }
+      ]
+    },
+    "A.position.choice": {
+      "type": "object",
+      "properties": {
+        "one_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.placement"
+          },
+          "minItems": 2
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "one_of",
+        "by"
+      ]
+    },
+    "A.position.chosen": {
+      "type": "object",
+      "properties": {
+        "chosen": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chosen"
+      ]
+    },
+    "A.position": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.placement"
+        },
+        {
+          "$ref": "#/$defs/A.position.choice"
+        },
+        {
+          "$ref": "#/$defs/A.position.chosen"
+        }
+      ]
+    },
+    "A.move-order": {
+      "type": "string",
+      "enum": [
+        "chooser",
+        "shuffle"
+      ]
+    },
+    "A.search.partition-part": {
+      "type": "object",
+      "properties": {
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "zone",
+        "n"
+      ]
+    },
+    "A.search.partition": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "type": "string",
+          "const": "printed"
+        },
+        "partition": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.search.partition-part"
+          },
+          "minItems": 2
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "partition"
+      ]
+    },
+    "A.search.destination-replacement": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "may": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if",
+        "zone"
+      ]
+    },
+    "A.search.conditional-destination": {
+      "type": "object",
+      "properties": {
+        "zone": {
+          "$ref": "#/$defs/Zone"
+        },
+        "instead": {
+          "$ref": "#/$defs/A.search.destination-replacement"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "zone",
+        "instead"
+      ]
+    },
+    "A.search.destination": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Zone"
+        },
+        {
+          "$ref": "#/$defs/A.param"
+        },
+        {
+          "$ref": "#/$defs/A.search.partition"
+        },
+        {
+          "$ref": "#/$defs/A.search.conditional-destination"
+        }
+      ]
+    },
+    "A.search.per-group": {
+      "type": "object",
+      "properties": {
+        "per_group": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Zone"
+          },
+          "minItems": 2
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "per_group"
+      ]
+    },
+    "A.search.grouped-destination": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.search.destination"
+        },
+        {
+          "$ref": "#/$defs/A.search.per-group"
+        }
+      ]
+    },
+    "A.search.group.exact": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sel",
+        "n"
+      ]
+    },
+    "A.search.group.up-to": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sel",
+        "upto"
+      ]
+    },
+    "A.search.group": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.search.group.exact"
+        },
+        {
+          "$ref": "#/$defs/A.search.group.up-to"
+        }
+      ]
+    },
+    "A.instead.damage": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "to": {
+          "$ref": "#/$defs/A.effect-recipient"
+        },
+        "n": {
+          "$ref": "#/$defs/A.damage-amount"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "to"
+          ]
+        },
+        {
+          "required": [
+            "n"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "to"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "n"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.move": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "position": {
+          "$ref": "#/$defs/A.position"
+        },
+        "order": {
+          "$ref": "#/$defs/A.move-order"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "ref"
+          ]
+        },
+        {
+          "required": [
+            "to"
+          ]
+        },
+        {
+          "required": [
+            "position"
+          ]
+        },
+        {
+          "required": [
+            "order"
+          ]
+        },
+        {
+          "required": [
+            "acted"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "ref"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "to"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "position"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "order"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "acted"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.buff": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "power": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "hp": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "power"
+          ]
+        },
+        {
+          "required": [
+            "hp"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "power"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "hp"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.life": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.recovery-delta"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "delta"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "delta"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.grant": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Concept"
+              },
+              {
+                "$ref": "#/$defs/A.param"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "keywords"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "keywords"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.create": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "n": {
+          "$ref": "#/$defs/A.count-amount"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "to": {
+          "$ref": "#/$defs/A.create.destination"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "n"
+          ]
+        },
+        {
+          "required": [
+            "upto"
+          ]
+        },
+        {
+          "required": [
+            "to"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "n"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "upto"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "to"
+            ]
+          },
+          {
+            "required": [
+              "n",
+              "upto"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.draw": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "n": {
+          "$ref": "#/$defs/A.count-amount"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "n"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "n"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.search": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.selection-quantity"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.selection-quantity"
+        },
+        "to": {
+          "$ref": "#/$defs/A.search.grouped-destination"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "sel"
+          ]
+        },
+        {
+          "required": [
+            "n"
+          ]
+        },
+        {
+          "required": [
+            "upto"
+          ]
+        },
+        {
+          "required": [
+            "to"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "sel"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "n"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "upto"
+            ]
+          },
+          {
+            "required": [
+              "replace_with",
+              "to"
+            ]
+          },
+          {
+            "required": [
+              "n",
+              "upto"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.banish": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "ref"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "ref"
+            ]
+          }
+        ]
+      }
+    },
+    "A.instead.destroy": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "replace_with": {
+          "$ref": "#/$defs/A.action"
+        },
+        "after": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "ref"
+          ]
+        },
+        {
+          "required": [
+            "replace_with"
+          ]
+        }
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "replace_with",
+              "ref"
+            ]
+          }
+        ]
+      }
+    },
+    "A.act.search.grouped": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.search.group"
+          },
+          "minItems": 2
+        },
+        "to": {
+          "$ref": "#/$defs/A.search.grouped-destination"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "cost_sum_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "distinct_by": {
+          "$ref": "#/$defs/DistinctBy"
+        },
+        "entry_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.search"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "groups",
+        "to"
+      ]
+    },
+    "A.act.draw": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "$ref": "#/$defs/A.count-amount"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.effect-players"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.draw"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "n"
+      ]
+    },
+    "A.act.discard.exact": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "$ref": "#/$defs/A.count-amount"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "random": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "n"
+      ]
+    },
+    "A.act.discard.all": {
+      "type": "object",
+      "properties": {
+        "all": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "all"
+      ]
+    },
+    "A.act.discard.down-to": {
+      "type": "object",
+      "properties": {
+        "down_to": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "down_to"
+      ]
+    },
+    "A.act.discard.any": {
+      "type": "object",
+      "properties": {
+        "any": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "any"
+      ]
+    },
+    "A.act.discard.ref": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.discard": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.discard.exact"
+        },
+        {
+          "$ref": "#/$defs/A.act.discard.all"
+        },
+        {
+          "$ref": "#/$defs/A.act.discard.down-to"
+        },
+        {
+          "$ref": "#/$defs/A.act.discard.any"
+        },
+        {
+          "$ref": "#/$defs/A.act.discard.ref"
+        }
+      ]
+    },
+    "A.act.damage": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "$ref": "#/$defs/A.effect-recipient"
+        },
+        "n": {
+          "$ref": "#/$defs/A.damage-amount"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "distribute": {
+          "type": "boolean",
+          "const": true
+        },
+        "distribute_at": {
+          "type": "string",
+          "enum": [
+            "play",
+            "resolution"
+          ]
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.damage"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "to",
+        "n"
+      ],
+      "dependentRequired": {
+        "distribute_at": [
+          "distribute"
+        ]
+      }
+    },
+    "A.act.destroy.long": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.destroy"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.destroy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.destroy.long"
+        }
+      ]
+    },
+    "A.act.banish.long": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.banish"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.banish.top": {
+      "type": "object",
+      "properties": {
+        "top": {
+          "$ref": "#/$defs/A.deck-slice"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.banish"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "top"
+      ]
+    },
+    "A.act.banish": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.banish.long"
+        },
+        {
+          "$ref": "#/$defs/A.act.banish.top"
+        }
+      ]
+    },
+    "A.act.act.long": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.act": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.act.long"
+        }
+      ]
+    },
+    "A.act.stand.long": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.stand": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.stand.long"
+        }
+      ]
+    },
+    "A.act.flip-down.long": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.flip-down": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.flip-down.long"
+        }
+      ]
+    },
+    "A.act.flip-up.long": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.flip-up": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.flip-up.long"
+        }
+      ]
+    },
+    "A.act.move.ref": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "position": {
+          "$ref": "#/$defs/A.position"
+        },
+        "order": {
+          "$ref": "#/$defs/A.move-order"
+        },
+        "reveal": {
+          "type": "boolean"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "entry_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.move"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "to"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "to": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "to"
+            ]
+          },
+          "then": {
+            "allOf": [
+              {
+                "if": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "position"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "order"
+                      ]
+                    }
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "to": {
+                      "const": "deck"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "acted"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "to": {
+                      "const": "field"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "dependentRequired": {
+        "order": [
+          "position"
+        ]
+      }
+    },
+    "A.act.move.top": {
+      "type": "object",
+      "properties": {
+        "top": {
+          "$ref": "#/$defs/A.deck-slice"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Zone"
+            },
+            {
+              "$ref": "#/$defs/A.param"
+            }
+          ]
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "position": {
+          "$ref": "#/$defs/A.position"
+        },
+        "order": {
+          "$ref": "#/$defs/A.move-order"
+        },
+        "reveal": {
+          "type": "boolean"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "entry_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.move"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "to"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "to": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "to"
+            ]
+          },
+          "then": {
+            "allOf": [
+              {
+                "if": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "position"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "order"
+                      ]
+                    }
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "to": {
+                      "const": "deck"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "acted"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "to": {
+                      "const": "field"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "dependentRequired": {
+        "order": [
+          "position"
+        ]
+      }
+    },
+    "A.act.move": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.move.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.move.top"
+        }
+      ]
+    },
+    "A.random-sample": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "n"
+      ]
+    },
+    "A.act.look.ref": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "random": {
+          "$ref": "#/$defs/A.random-sample"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "bind"
+      ]
+    },
+    "A.act.look.top": {
+      "type": "object",
+      "properties": {
+        "top": {
+          "$ref": "#/$defs/A.deck-slice"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "bind"
+      ]
+    },
+    "A.act.look": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.look.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.look.top"
+        }
+      ]
+    },
+    "A.act.reveal.ref": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "random": {
+          "$ref": "#/$defs/A.random-sample"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "bind"
+      ]
+    },
+    "A.act.reveal.top": {
+      "type": "object",
+      "properties": {
+        "top": {
+          "$ref": "#/$defs/A.deck-slice"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "bind"
+      ]
+    },
+    "A.act.reveal": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.reveal.ref"
+        },
+        {
+          "$ref": "#/$defs/A.act.reveal.top"
+        }
+      ]
+    },
+    "A.act.reveal-until": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "$ref": "#/$defs/A.sel.object-core"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "matched": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sel",
+        "n",
+        "bind",
+        "matched"
+      ]
+    },
+    "A.act.life": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.recovery-delta"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.life"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "delta"
+      ]
+    },
+    "A.act.set-life": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "n"
+      ]
+    },
+    "A.act.buff": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "power": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "hp": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.buff"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "power"
+          ]
+        },
+        {
+          "required": [
+            "hp"
+          ]
+        }
+      ]
+    },
+    "A.act.set-stat": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "power": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "hp": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "power"
+          ]
+        },
+        {
+          "required": [
+            "hp"
+          ]
+        }
+      ]
+    },
+    "A.act.grant": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Concept"
+              },
+              {
+                "$ref": "#/$defs/A.param"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.grant"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on",
+        "keywords"
+      ]
+    },
+    "A.act.lose-abilities": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on"
+      ]
+    },
+    "A.act.counter": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on",
+        "name",
+        "delta"
+      ]
+    },
+    "A.act.move-counters": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "to": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "name": {
+          "$ref": "#/$defs/CounterName"
+        },
+        "all": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "name",
+        "all"
+      ]
+    },
+    "A.act.pp-max": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "delta"
+      ]
+    },
+    "A.act.ep": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "delta"
+      ]
+    },
+    "A.act.sep": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "delta"
+      ]
+    },
+    "A.act.pp.delta": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "delta": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "delta"
+      ]
+    },
+    "A.act.pp.to-max": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "to_max": {
+          "type": "boolean",
+          "const": true
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "to_max"
+      ]
+    },
+    "A.act.pp": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.pp.delta"
+        },
+        {
+          "$ref": "#/$defs/A.act.pp.to-max"
+        }
+      ]
+    },
+    "A.act.shuffle": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
+    "A.act.dice": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "bind"
+      ]
+    },
+    "A.act.declare.number": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "kind": {
+          "type": "string",
+          "const": "number"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "min": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "max": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "bind",
+        "kind"
+      ]
+    },
+    "A.act.declare.name": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "kind": {
+          "type": "string",
+          "const": "name"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "bind",
+        "kind"
+      ]
+    },
+    "A.act.declare": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.declare.number"
+        },
+        {
+          "$ref": "#/$defs/A.act.declare.name"
+        }
+      ]
+    },
+    "A.act.equip": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "token": {
+          "$ref": "#/$defs/CardName"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on",
+        "token"
+      ]
+    },
+    "A.act.steal": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.player-ref"
+            },
+            {
+              "type": "string",
+              "const": "other_players"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.give": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.player-ref"
+            },
+            {
+              "type": "string",
+              "const": "other_players"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.box": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "until"
+      ]
+    },
+    "A.act.race": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.gain-drive": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.act.play-card": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.play-ability.ub": {
+      "type": "object",
+      "properties": {
+        "ub": {
+          "type": "boolean",
+          "const": true
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ub",
+        "n"
+      ]
+    },
+    "A.act.play-ability.trigger": {
+      "type": "object",
+      "properties": {
+        "of": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "fanfare",
+            "lastword",
+            "evolve_time",
+            "super_evolve_time",
+            "attack_time",
+            "race_time",
+            "drive_time"
+          ]
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "cost_policy": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "waive_original"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "of",
+        "trigger"
+      ]
+    },
+    "A.act.play-ability.ability": {
+      "type": "object",
+      "properties": {
+        "of": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "ability": {
+          "$ref": "#/$defs/A.play-ability.ub"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "cost_policy": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "waive_original"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "of",
+        "ability"
+      ]
+    },
+    "A.act.play-ability": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.act.play-ability.trigger"
+        },
+        {
+          "$ref": "#/$defs/A.act.play-ability.ability"
+        }
+      ]
+    },
+    "A.act.apply": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "effect": {
+          "$ref": "#/$defs/A.effect"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        },
+        "capture": {
+          "type": "string",
+          "const": "play"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on",
+        "effect"
+      ]
+    },
+    "A.act.player-effect": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "effect": {
+          "$ref": "#/$defs/A.effect"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect"
+      ]
+    },
+    "A.act.win": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
+    "A.act.skip-turn": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
+    "A.act.extra-turn": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.effect-players"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
+    "A.act.make-type": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "type": {
+          "$ref": "#/$defs/CardKind"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "until": {
+          "$ref": "#/$defs/A.until"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "on",
+        "type"
+      ]
+    },
+    "A.create.allocation": {
+      "type": "object",
+      "properties": {
+        "among": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        "total": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "among",
+        "total"
+      ]
+    },
+    "A.create.allocated": {
+      "type": "object",
+      "properties": {
+        "allocate": {
+          "$ref": "#/$defs/A.create.allocation"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "allocate"
+      ]
+    },
+    "A.create.token": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CardName"
+        },
+        {
+          "$ref": "#/$defs/A.param"
+        },
+        {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/CardName"
+              },
+              {
+                "$ref": "#/$defs/A.param"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        {
+          "$ref": "#/$defs/A.create.allocated"
+        }
+      ]
+    },
+    "A.create.destination-choice": {
+      "type": "object",
+      "properties": {
+        "one_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Zone"
+          },
+          "minItems": 2
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "each",
+            "batch"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "one_of",
+        "by",
+        "scope"
+      ]
+    },
+    "A.create.destination": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Zone"
+        },
+        {
+          "$ref": "#/$defs/A.param"
+        },
+        {
+          "$ref": "#/$defs/A.create.destination-choice"
+        }
+      ]
+    },
+    "A.act.create": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "$ref": "#/$defs/A.create.token"
+        },
+        "to": {
+          "$ref": "#/$defs/A.create.destination"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "n": {
+          "$ref": "#/$defs/A.count-amount"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "any": {
+          "type": "boolean",
+          "const": true
+        },
+        "counters": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/CounterName"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/A.quantity"
+          },
+          "minProperties": 1
+        },
+        "by": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "acted": {
+          "type": "boolean"
+        },
+        "entry_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.create"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "token",
+        "to"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "n",
+              "upto"
+            ]
+          },
+          {
+            "required": [
+              "n",
+              "any"
+            ]
+          },
+          {
+            "required": [
+              "upto",
+              "any"
+            ]
+          }
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "token": {
+                "type": "object",
+                "required": [
+                  "allocate"
+                ]
+              }
+            },
+            "required": [
+              "token"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "n"
+                  ]
+                },
+                {
+                  "required": [
+                    "upto"
+                  ]
+                },
+                {
+                  "required": [
+                    "any"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "to": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "to",
+              "acted"
+            ]
+          },
+          "then": {
+            "properties": {
+              "to": {
+                "const": "field"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "A.act.evolve": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "into": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/CardName"
+              },
+              "minItems": 1
+            },
+            {
+              "$ref": "#/$defs/A.sel.object-core"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "A.transform.allocation": {
+      "type": "object",
+      "properties": {
+        "among": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CardName"
+          },
+          "minItems": 1
+        },
+        "each_exactly_once": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "among",
+        "each_exactly_once"
+      ]
+    },
+    "A.transform.allocated": {
+      "type": "object",
+      "properties": {
+        "allocate": {
+          "$ref": "#/$defs/A.transform.allocation"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "allocate"
+      ]
+    },
+    "A.act.transform": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "into": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardName"
+            },
+            {
+              "$ref": "#/$defs/A.transform.allocated"
+            }
+          ]
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "precondition": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "entry_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.effect"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "into"
+      ]
+    },
+    "A.control.optional": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.step"
+          },
+          "minItems": 1
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "then": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "do"
+      ]
+    },
+    "A.control.pay": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/A.cost"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "then": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cost",
+        "do"
+      ]
+    },
+    "A.instead.choice.exact": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if",
+        "n"
+      ]
+    },
+    "A.instead.choice.up-to": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if",
+        "upto"
+      ]
+    },
+    "A.instead.choice": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.instead.choice.exact"
+        },
+        {
+          "$ref": "#/$defs/A.instead.choice.up-to"
+        }
+      ]
+    },
+    "A.control.choice.exact": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.steps"
+          },
+          "minItems": 1
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "exclude_chosen": {
+          "type": "string",
+          "const": "this_turn"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.choice"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "n",
+        "options"
+      ]
+    },
+    "A.control.choice.up-to": {
+      "type": "object",
+      "properties": {
+        "upto": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.steps"
+          },
+          "minItems": 1
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "exclude_chosen": {
+          "type": "string",
+          "const": "this_turn"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.instead.choice"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "upto",
+        "options"
+      ]
+    },
+    "A.control.choice": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.control.choice.exact"
+        },
+        {
+          "$ref": "#/$defs/A.control.choice.up-to"
+        }
+      ]
+    },
+    "A.control.either": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.steps"
+          },
+          "minItems": 2
+        },
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "options"
+      ]
+    },
+    "A.control.if": {
+      "type": "object",
+      "properties": {
+        "cond": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "then": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "else": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cond",
+        "then"
+      ]
+    },
+    "A.repeat.collection": {
+      "type": "object",
+      "properties": {
+        "receipts": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "receipts"
+      ]
+    },
+    "A.control.repeat.count": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "collect": {
+          "$ref": "#/$defs/A.repeat.collection"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "n",
+        "do"
+      ]
+    },
+    "A.control.repeat.until": {
+      "type": "object",
+      "properties": {
+        "until": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "collect": {
+          "$ref": "#/$defs/A.repeat.collection"
+        },
+        "check": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "until",
+        "do"
+      ]
+    },
+    "A.control.repeat.while": {
+      "type": "object",
+      "properties": {
+        "while": {
+          "$ref": "#/$defs/A.cond"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "collect": {
+          "$ref": "#/$defs/A.repeat.collection"
+        },
+        "check": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "while",
+        "do"
+      ]
+    },
+    "A.control.repeat": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.control.repeat.count"
+        },
+        {
+          "$ref": "#/$defs/A.control.repeat.until"
+        },
+        {
+          "$ref": "#/$defs/A.control.repeat.while"
+        }
+      ]
+    },
+    "A.control.repeat-ability": {
+      "type": "object",
+      "properties": {
+        "while": {
+          "$ref": "#/$defs/A.cond"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "while"
+      ]
+    },
+    "A.control.foreach": {
+      "type": "object",
+      "properties": {
+        "in": {
+          "$ref": "#/$defs/A.effect-object"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        },
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "in",
+        "as",
+        "do"
+      ]
+    },
+    "A.stage.mode": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "choice",
+            "nonchoice"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "do",
+        "mode"
+      ]
+    },
+    "A.stage.explicit": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "mode": {
+          "type": "string",
+          "const": "explicit"
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "do",
+        "mode",
+        "evidence"
+      ]
+    },
+    "A.stage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.steps"
+        },
+        {
+          "$ref": "#/$defs/A.stage.mode"
+        },
+        {
+          "$ref": "#/$defs/A.stage.explicit"
+        }
+      ]
+    },
+    "A.control.each-player": {
+      "type": "object",
+      "properties": {
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.stage"
+          },
+          "minItems": 1
+        },
+        "who": {
+          "type": "string",
+          "const": "each"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "stages"
+      ]
+    },
+    "A.control.simultaneous": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.step"
+          },
+          "minItems": 1
+        },
+        "result": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "do"
+      ]
+    },
+    "A.control.by-kind": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.effect-recipient"
+        },
+        "leader": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "follower": {
+          "$ref": "#/$defs/A.steps"
+        },
+        "as": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "leader",
+        "follower"
+      ]
+    },
+    "A.action": {
+      "type": "object",
+      "properties": {
+        "choose": {
+          "$ref": "#/$defs/A.act.choose"
+        },
+        "search": {
+          "$ref": "#/$defs/A.act.search"
+        },
+        "draw": {
+          "$ref": "#/$defs/A.act.draw"
+        },
+        "discard": {
+          "$ref": "#/$defs/A.act.discard"
+        },
+        "damage": {
+          "$ref": "#/$defs/A.act.damage"
+        },
+        "destroy": {
+          "$ref": "#/$defs/A.act.destroy"
+        },
+        "banish": {
+          "$ref": "#/$defs/A.act.banish"
+        },
+        "act": {
+          "$ref": "#/$defs/A.act.act"
+        },
+        "stand": {
+          "$ref": "#/$defs/A.act.stand"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.act.flip-down"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.act.flip-up"
+        },
+        "move": {
+          "$ref": "#/$defs/A.act.move"
+        },
+        "look": {
+          "$ref": "#/$defs/A.act.look"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.act.reveal"
+        },
+        "reveal_until": {
+          "$ref": "#/$defs/A.act.reveal-until"
+        },
+        "life": {
+          "$ref": "#/$defs/A.act.life"
+        },
+        "set_life": {
+          "$ref": "#/$defs/A.act.set-life"
+        },
+        "buff": {
+          "$ref": "#/$defs/A.act.buff"
+        },
+        "set_stat": {
+          "$ref": "#/$defs/A.act.set-stat"
+        },
+        "grant": {
+          "$ref": "#/$defs/A.act.grant"
+        },
+        "lose_abilities": {
+          "$ref": "#/$defs/A.act.lose-abilities"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.act.counter"
+        },
+        "move_counters": {
+          "$ref": "#/$defs/A.act.move-counters"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.act.pp-max"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.act.ep"
+        },
+        "sep": {
+          "$ref": "#/$defs/A.act.sep"
+        },
+        "pp": {
+          "$ref": "#/$defs/A.act.pp"
+        },
+        "shuffle": {
+          "$ref": "#/$defs/A.act.shuffle"
+        },
+        "dice": {
+          "$ref": "#/$defs/A.act.dice"
+        },
+        "declare": {
+          "$ref": "#/$defs/A.act.declare"
+        },
+        "equip": {
+          "$ref": "#/$defs/A.act.equip"
+        },
+        "steal": {
+          "$ref": "#/$defs/A.act.steal"
+        },
+        "give": {
+          "$ref": "#/$defs/A.act.give"
+        },
+        "stack_plus": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "box": {
+          "$ref": "#/$defs/A.act.box"
+        },
+        "race": {
+          "$ref": "#/$defs/A.act.race"
+        },
+        "gain_drive": {
+          "$ref": "#/$defs/A.act.gain-drive"
+        },
+        "play_card": {
+          "$ref": "#/$defs/A.act.play-card"
+        },
+        "play_ability": {
+          "$ref": "#/$defs/A.act.play-ability"
+        },
+        "apply": {
+          "$ref": "#/$defs/A.act.apply"
+        },
+        "player_effect": {
+          "$ref": "#/$defs/A.act.player-effect"
+        },
+        "win": {
+          "$ref": "#/$defs/A.act.win"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.act.skip-turn"
+        },
+        "extra_turn": {
+          "$ref": "#/$defs/A.act.extra-turn"
+        },
+        "make_type": {
+          "$ref": "#/$defs/A.act.make-type"
+        },
+        "create": {
+          "$ref": "#/$defs/A.act.create"
+        },
+        "evolve": {
+          "$ref": "#/$defs/A.act.evolve"
+        },
+        "transform": {
+          "$ref": "#/$defs/A.act.transform"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1
+    },
+    "A.step": {
+      "type": "object",
+      "properties": {
+        "choose": {
+          "$ref": "#/$defs/A.act.choose"
+        },
+        "search": {
+          "$ref": "#/$defs/A.act.search"
+        },
+        "draw": {
+          "$ref": "#/$defs/A.act.draw"
+        },
+        "discard": {
+          "$ref": "#/$defs/A.act.discard"
+        },
+        "damage": {
+          "$ref": "#/$defs/A.act.damage"
+        },
+        "destroy": {
+          "$ref": "#/$defs/A.act.destroy"
+        },
+        "banish": {
+          "$ref": "#/$defs/A.act.banish"
+        },
+        "act": {
+          "$ref": "#/$defs/A.act.act"
+        },
+        "stand": {
+          "$ref": "#/$defs/A.act.stand"
+        },
+        "flip_down": {
+          "$ref": "#/$defs/A.act.flip-down"
+        },
+        "flip_up": {
+          "$ref": "#/$defs/A.act.flip-up"
+        },
+        "move": {
+          "$ref": "#/$defs/A.act.move"
+        },
+        "look": {
+          "$ref": "#/$defs/A.act.look"
+        },
+        "reveal": {
+          "$ref": "#/$defs/A.act.reveal"
+        },
+        "reveal_until": {
+          "$ref": "#/$defs/A.act.reveal-until"
+        },
+        "life": {
+          "$ref": "#/$defs/A.act.life"
+        },
+        "set_life": {
+          "$ref": "#/$defs/A.act.set-life"
+        },
+        "buff": {
+          "$ref": "#/$defs/A.act.buff"
+        },
+        "set_stat": {
+          "$ref": "#/$defs/A.act.set-stat"
+        },
+        "grant": {
+          "$ref": "#/$defs/A.act.grant"
+        },
+        "lose_abilities": {
+          "$ref": "#/$defs/A.act.lose-abilities"
+        },
+        "counter": {
+          "$ref": "#/$defs/A.act.counter"
+        },
+        "move_counters": {
+          "$ref": "#/$defs/A.act.move-counters"
+        },
+        "pp_max": {
+          "$ref": "#/$defs/A.act.pp-max"
+        },
+        "ep": {
+          "$ref": "#/$defs/A.act.ep"
+        },
+        "sep": {
+          "$ref": "#/$defs/A.act.sep"
+        },
+        "pp": {
+          "$ref": "#/$defs/A.act.pp"
+        },
+        "shuffle": {
+          "$ref": "#/$defs/A.act.shuffle"
+        },
+        "dice": {
+          "$ref": "#/$defs/A.act.dice"
+        },
+        "declare": {
+          "$ref": "#/$defs/A.act.declare"
+        },
+        "equip": {
+          "$ref": "#/$defs/A.act.equip"
+        },
+        "steal": {
+          "$ref": "#/$defs/A.act.steal"
+        },
+        "give": {
+          "$ref": "#/$defs/A.act.give"
+        },
+        "stack_plus": {
+          "$ref": "#/$defs/A.expr.numeric"
+        },
+        "box": {
+          "$ref": "#/$defs/A.act.box"
+        },
+        "race": {
+          "$ref": "#/$defs/A.act.race"
+        },
+        "gain_drive": {
+          "$ref": "#/$defs/A.act.gain-drive"
+        },
+        "play_card": {
+          "$ref": "#/$defs/A.act.play-card"
+        },
+        "play_ability": {
+          "$ref": "#/$defs/A.act.play-ability"
+        },
+        "apply": {
+          "$ref": "#/$defs/A.act.apply"
+        },
+        "player_effect": {
+          "$ref": "#/$defs/A.act.player-effect"
+        },
+        "win": {
+          "$ref": "#/$defs/A.act.win"
+        },
+        "skip_turn": {
+          "$ref": "#/$defs/A.act.skip-turn"
+        },
+        "extra_turn": {
+          "$ref": "#/$defs/A.act.extra-turn"
+        },
+        "make_type": {
+          "$ref": "#/$defs/A.act.make-type"
+        },
+        "create": {
+          "$ref": "#/$defs/A.act.create"
+        },
+        "evolve": {
+          "$ref": "#/$defs/A.act.evolve"
+        },
+        "transform": {
+          "$ref": "#/$defs/A.act.transform"
+        },
+        "optional": {
+          "$ref": "#/$defs/A.control.optional"
+        },
+        "pay": {
+          "$ref": "#/$defs/A.control.pay"
+        },
+        "choice": {
+          "$ref": "#/$defs/A.control.choice"
+        },
+        "either": {
+          "$ref": "#/$defs/A.control.either"
+        },
+        "if": {
+          "$ref": "#/$defs/A.control.if"
+        },
+        "repeat": {
+          "$ref": "#/$defs/A.control.repeat"
+        },
+        "repeat_ability": {
+          "$ref": "#/$defs/A.control.repeat-ability"
+        },
+        "foreach": {
+          "$ref": "#/$defs/A.control.foreach"
+        },
+        "each_player": {
+          "$ref": "#/$defs/A.control.each-player"
+        },
+        "simultaneous": {
+          "$ref": "#/$defs/A.control.simultaneous"
+        },
+        "by_kind": {
+          "$ref": "#/$defs/A.control.by-kind"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1
+    },
+    "A.steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/A.step"
+      }
+    },
+    "A.cond.payment-decided": {
+      "type": "object",
+      "properties": {
+        "payment_decided": {
+          "type": "string",
+          "const": "optional"
+        }
+      },
+      "required": [
+        "payment_decided"
+      ],
+      "additionalProperties": false
     }
   }
 }
