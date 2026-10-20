@@ -151,13 +151,19 @@ fn every_installed_duration_checks_its_references_before_minting_a_certificate()
             WellFormedReason::UnavailableBinding,
         );
     }
+    reject_action(
+        body(
+            1,
+            vec![installed_for(Duration {
+                anchor: TimeAnchor::Bound {
+                    binding: Binding::new(99, ScopeId(1)),
+                },
+                ..turn()
+            })],
+        ),
+        WellFormedReason::UnavailableBinding,
+    );
     for duration in [
-        Duration {
-            anchor: TimeAnchor::Bound {
-                binding: Binding::new(99, ScopeId(1)),
-            },
-            ..turn()
-        },
         Duration {
             usage: Some(UseLimit {
                 count: Nat(1),
@@ -174,10 +180,7 @@ fn every_installed_duration_checks_its_references_before_minting_a_certificate()
             ..turn()
         },
     ] {
-        reject_action(
-            body(1, vec![installed_for(duration)]),
-            WellFormedReason::UnsupportedShape,
-        );
+        accept(body(1, vec![installed_for(duration)]));
     }
 }
 

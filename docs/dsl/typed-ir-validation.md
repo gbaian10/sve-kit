@@ -203,12 +203,50 @@ After 必須用 MoveAfter，不能省略跨世代引用權限。BP18-059 的 rem
 Move 與 Token 可共用 SharedCapacityAtomic 批次，成員間仍不能讀 sibling 結果。
 這些結果不自動成為 Public 選擇證據：取代可能把牌移到非公開區域。
 
-InstallEffect 目前僅接受 InstructionStart、Objects 的獨立 affected binding，與
-CostModifier 對同一 binding 的 Delta／Set；負常值 Set 尚未接受，動態數值的合法範圍
-仍由 executor 檢查。Live 數值在求值時讀取，卡文要求鎖定時 lowering 必須使用 capture。
-內外 Duration 必須一致。affected 只在此
-安裝內可見，不能在另一個指示沿用。Duration 接受 Installation anchor、無 usage／intervals，
-各種 end 的 player／predicate／source 都驗證；未來引用與未執行分支同樣拒絕。
+InstallEffect 接受 InstructionStart、Objects 的獨立 affected binding，以及：
+
+- CostModifier 對同一 binding 的 Delta／Set；負常值 Set 尚未接受，動態數值的合法範圍
+  仍由 executor 檢查。獨立的 CostModifier.usage 仍拒絕，使用額度放在 Duration.usage。
+- Continuous 的 Numeric 層與 Numeric／非空 Combined patch。target 必須是精確引用
+  affected 的 Dynamic selector；executor 必須在安裝時固定對象，不得重新掃描區域。
+  每個 patch、condition 都檢查，即使 condition 為 false。EffectDefinitionId 全樹唯一。
+  source 必須與安裝指示相同，封閉 Program 也檢查這個等同性。
+- Permission 的 Objects subject 與 Destroy／Banish action 都精確引用 affected，
+  polarity 必須是 Forbid；cause 與 condition 遞迴檢查。這是既有保護述詞的安裝形狀，
+  不將其他 ActionPattern 或 Allow／Require 一併放行；InstallEffect 不發布可見性證明，
+  executor 也不得從 Banish 推定物件公開。
+
+內外 Duration 必須一致，affected 只在此安裝內可見，不能在另一個指示沿用。
+Live 數值在求值時讀取，卡文要求鎖定時 lowering 必須使用 capture。
+本文 Continuous 的 active_zones 必須為空，表達不隨來源能力失效而移除的設計要求；
+靜態 Continuous 仍要求 active_zones 等於能力有效區，兩者不可互換。
+本文的 timestamp 必須為 ProperPlay，不能使用 ZoneEntry；靜態宣告仍使用 ZoneEntry。
+ProperPlay(Current) 指向本次解算的適正打出事實；Bound execution 只做下文的引用檢查。
+期限明寫 SourceZoneExit 時，才額外錨定來源物件與區域；NoTemporalExpiry 不會取消
+目標世代的失效規則。
+
+安裝期限檢查所有 end 的 player／predicate／source，以及每個
+DuringNextPhase／DuringNextTurn interval。anchor 為 Installation 或下文的 Bound。
+Duration.usage 只在 CostModifier 安裝接受 PerObject 或
+SharedPlayer(player, CurrentInstallation)：IR §14 只定義 cost_mod.next_only 的消耗，
+Continuous／Permission 帶 usage 一律拒絕，不替數值修正或保護效果訂消耗時點。
+checker 原樣保留 UseLimit 的 Nat(0)；executor 必須將它視為已耗盡的額度，
+不能視為無限制；無限制須使用 None。
+TimeAnchor、ProperPlay execution、SharedPlayer effect 的 Bound 形狀均檢查
+binding 的支配、scope 與型別；目前沒有產生 AnchorId／ExecutionId／EffectId
+binding 的已驗入口，不能憑空構造有效的外部實例引用。
+期限在安裝輸入環境檢查，不能讀稍後建立的 affected binding；condition 則可以讀。
+安裝時玩家捕捉、嚴格晚於錨點的 occurrence、複合區間求值、適正 play 消耗／rollback、
+來源與目標的獨立生命週期仍待 executor 驗收，這裡只驗結構。
+
+CP02-007 的本文 buff 依撰寫語法降為 I.modify＋L.continuous，Action::Modify 目前仍拒絕。
+本片只借它的 Numeric patch、NoTemporalExpiry 與單一目標形狀作合成安裝例，不是該卡的
+lowering，也未包含完整成本、另一能力及實際執行。BP02-089 只提供 Destroy 保護述詞
+（能力造成的破壞），該卡仍可被消滅；Banish 是同形的合成例。兩者都不宣稱該卡本身會
+執行 InstallEffect。Grant／Delay、Granted 來源實例、Ability／NonNumeric 安裝、
+Players 安裝、AtPlay 安裝、Replacement／RuleModifier／DeckRule 仍拒絕。BP02-041 的
+指示自我取代仍未承載，不能用靜態改道、Put 或 If 替代。
+
 CP04-060 的動作種子使用 search 的成功 moved after 安裝本回合 delta -2；found／revealed
 不是 selector，SearchFoundAny 也不授予移動後引用；不能假冒 moved。checker 不由卡號反推卡文：合法的 Set 或另一個已定義
 選擇集合仍可能是別張卡需要的程式，lowering 必須獨立驗證與 CP04-060 原文相符。
