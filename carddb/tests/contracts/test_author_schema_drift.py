@@ -13,6 +13,8 @@ from sve_carddb.contracts.four_layer import Code
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
 
+from .author_numeric_cases import NUMERIC, NUMERIC_DEPENDENCIES, NUMERIC_NAMES
+
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
@@ -89,18 +91,25 @@ NODES = object_value(parse((SCHEMAS / "author-nodes.schema.json").read_bytes()))
 INDEX_SCHEMA = object_value(parse((SCHEMAS / "effects-index.schema.json").read_bytes()))
 
 
-def _shape(node: JsonValue, root: dict[str, JsonValue]) -> JsonValue:
+def _shape(
+    node: JsonValue,
+    root: dict[str, JsonValue],
+    names: dict[str, str] | None = None,
+) -> JsonValue:
     if isinstance(node, list):
-        return [_shape(child, root) for child in node]
+        return [_shape(child, root, names) for child in node]
     if not isinstance(node, dict):
         return node
     reference = node.get("$ref")
     if isinstance(reference, str):
         resource, name = reference.split("#/$defs/")
         source = NODES if resource == "urn:sve-kit:author-nodes:1.0" else root
-        return _shape(object_value(source["$defs"])[name], source)
+        definition = object_value(source["$defs"])[name]
+        if names is not None and name in names:
+            return {"$ref": names[name]}
+        return _shape(definition, source, names)
     shaped = {
-        key: _shape(value, root)
+        key: _shape(value, root, names)
         for key, value in node.items()
         if key not in {"$schema", "$id", "$defs", "title", "description"}
     }
@@ -131,7 +140,7 @@ def _assert_definition(
 
 
 def test_every_implemented_definition_has_a_python_type() -> None:
-    assert object_value(NODES["$defs"]).keys() == (LEAVES | REFERENCES).keys()
+    assert object_value(NODES["$defs"]).keys() == (LEAVES | REFERENCES | NUMERIC).keys()
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
 
 
@@ -208,3 +217,127 @@ def test_reference_drift_detects_variant_changes(mutation: str) -> None:
         object_value(definitions[name])["pattern"] = pattern.replace("|opponents", "")
     with pytest.raises(AssertionError):
         _assert_definition(changed, name, REFERENCES[name])
+
+
+def _assert_numeric_names(schema: dict[str, JsonValue], names: dict[str, str]) -> None:
+    assert names.keys() == NUMERIC.keys()
+    combined = names | NUMERIC_DEPENDENCIES
+    assert len(set(combined.values())) == len(combined)
+    assert combined.keys() <= object_value(schema["$defs"]).keys()
+    for name, adapter in NUMERIC.items():
+        python = adapter.json_schema()
+        reference = python.get("$ref")
+        actual = (
+            reference.removeprefix("#/$defs/")
+            if isinstance(reference, str)
+            else python["title"]
+        )
+        assert actual == names[name]
+
+
+def _assert_numeric_definition(schema: dict[str, JsonValue], name: str) -> None:
+    python = NUMERIC[name].json_schema()
+    reference = python.get("$ref")
+    body = (
+        object_value(python["$defs"])[reference.removeprefix("#/$defs/")]
+        if isinstance(reference, str)
+        else python
+    )
+    names = NUMERIC_NAMES | NUMERIC_DEPENDENCIES
+    schema_names = {key: key for key in names}
+    python_names = {value: key for key, value in names.items()}
+    # Every named node is compared separately, so cycles preserve target identity.
+    assert _shape(object_value(schema["$defs"])[name], schema, schema_names) == _shape(
+        body, python, python_names
+    )
+
+
+def test_numeric_name_correspondence_is_bijective() -> None:
+    _assert_numeric_names(NODES, NUMERIC_NAMES)
+
+
+@pytest.mark.parametrize("mutation", ["missing_definition", "duplicate_name"])
+def test_numeric_name_check_detects_incomplete_correspondence(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    names = NUMERIC_NAMES.copy()
+    if mutation == "missing_definition":
+        object_value(changed["$defs"]).pop("A.expr.plus")
+    else:
+        names["A.expr.plus"] = names["A.expr.minus"]
+    with pytest.raises(AssertionError):
+        _assert_numeric_names(changed, names)
+
+
+@pytest.mark.parametrize("name", NUMERIC)
+def test_numeric_type_drift(name: str) -> None:
+    _assert_numeric_definition(NODES, name)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "required",
+        "discriminator",
+        "plus_two_params",
+        "minus_first_param",
+        "times_param",
+        "enum",
+        "unit_domain",
+        "recursive_target",
+    ],
+)
+def test_numeric_drift_detects_variant_changes(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    param: JsonValue = {"$ref": "#/$defs/A.param"}
+    if mutation == "required":
+        name = "A.expr.resource-payload"
+        object_value(definitions[name])["required"] = ["who"]
+    elif mutation == "discriminator":
+        name = "A.expr.plus"
+        definition = object_value(definitions[name])
+        props = object_value(definition["properties"])
+        props["add"] = props.pop("plus")
+        definition["required"] = ["add"]
+    elif mutation in {"plus_two_params", "recursive_target"}:
+        name = "A.expr.plus"
+        props = object_value(object_value(definitions[name])["properties"])
+        variants = object_value(props["plus"])["anyOf"]
+        assert isinstance(variants, list)
+        first = object_value(variants[0])
+        if mutation == "plus_two_params":
+            additional = deepcopy(first)
+            additional["prefixItems"] = [param, param]
+            variants.append(additional)
+        else:
+            operands = first["prefixItems"]
+            assert isinstance(operands, list)
+            operands[0] = {"$ref": "#/$defs/A.cond.numeric-core"}
+    elif mutation in {"minus_first_param", "times_param"}:
+        key = "minus" if mutation == "minus_first_param" else "times"
+        name = "A.expr." + key
+        props = object_value(object_value(definitions[name])["properties"])
+        operands = object_value(props[key])["prefixItems"]
+        assert isinstance(operands, list)
+        operands[0] = {"anyOf": [operands[0], param]}
+    elif mutation == "enum":
+        name = "A.cond.cmp-payload"
+        props = object_value(object_value(definitions[name])["properties"])
+        values = object_value(props["op"])["enum"]
+        assert isinstance(values, list)
+        values.append("contains")
+    else:
+        name = "A.expr.per-payload"
+        props = object_value(object_value(definitions[name])["properties"])
+        object_value(props["unit"])["minimum"] = 0
+    with pytest.raises(AssertionError):
+        _assert_numeric_definition(changed, name)
+
+
+def test_numeric_drift_rejects_dangling_references() -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    props = object_value(object_value(definitions["A.expr.half-up"])["properties"])
+    props["half_up"] = {"$ref": "#/$defs/A.expr.missing"}
+    with pytest.raises(KeyError):
+        _assert_numeric_definition(changed, "A.expr.half-up")
