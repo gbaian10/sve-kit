@@ -38,7 +38,7 @@ exclusive variants and roles are listed in the
 [reference shape matrix](../docs/dsl/author-reference-shapes-1.0.md).
 Its root rejects standalone documents; select a named `$defs` entry.
 A reference atom is not a complete action-position type: positions such as
-`move.ref` also accept selectors; complete action-position schemas are not implemented here.
+`move.ref` also accept selectors; the closed action-position types are documented in the action and step matrix.
 Independent `first`/`second`/`rest` views are rejected. Use target roles or bindings, grouped search destinations, and successful-before set differences.
 The leader union shares `A.single-leader`, `A.multiple-leaders` and `A.leader-of`
 without duplicate branches. The [selection shape matrix](../docs/dsl/author-selection-shapes-1.0.md)
@@ -54,7 +54,7 @@ DeckSlice accepts a player or player set and shares the same nonnegative-literal
 Quantity as cost bounds and counter quantities. NumericExpr and Quantity reference
 one shared NumericOperation union. CounterName has no parameter permission.
 DeckSlice consumers are documented at action-level top; the complete move/banish/look/reveal
-parents are not implemented; cost.banish.top uses DeckSlice. ObjectSel and Ref reject top/bottom aliases.
+parents share the registered DeckSlice type; cost.banish.top uses it too. ObjectSel and Ref reject top/bottom aliases.
 Selector-level slices remain registered in prose pending independent consumer evidence.
 Event object references currently admit
 only `holder`; other typed event projections are outside this subset.
@@ -87,13 +87,15 @@ LKI operands, capture wrappers, chosen, paid, x_paid, dice, PlayerExpr equality,
 material filter extensions and agg.hp. The [per-event matrix](../docs/dsl/author-event-matrix-1.0.md)
 separates required and optional payload fields from history.where for all 33 base
 event keys, plus the counter_reached macro. The
-[effect matrix](../docs/dsl/author-effect-shapes-1.0.md) adds 26 closed EffectSpec keys,
-cannot variants and rule overrides. `contracts/author_effects.py` shares the same
-selector and numeric graph; grant remains rejected until complete recursive ability
-ability headers exist; recursive Steps and keyword-grant actions are separate accepted fragments. Effect parent defaults and source scope require C1/D0;
-fragment acceptance is not enclosing-context validation. Cost/Target nodes do not constitute complete
-ability headers or author entry contracts; full Sel and enclosing-context and
-capability checks still require further contracts and C1/D0.
+[effect matrix](../docs/dsl/author-effect-shapes-1.0.md) adds 27 closed EffectSpec keys,
+cannot variants and rule overrides. The [ability matrix](../docs/dsl/author-ability-shapes-1.0.md)
+defines complete ability heads, the granted-head subset, conditional play modifiers,
+and delayed triggers. `contracts/author_programs.py` owns their shared recursive
+ability/effect/step graph. Grant payloads can combine keywords and abilities and
+accept leader recipients; equipment and nested static grants use the same graph.
+Effect parent defaults, source scopes and execution capabilities require C1/D0;
+fragment acceptance is not enclosing-context validation. Full authored file/card
+containers, expansion and the complete reader remain separate contracts.
 Snapshot count/exists do not establish hash equivalence with count_of/did. This recursive graph is not an expanded profile;
 Rust decoding and execution have not been validated by this fragment.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
