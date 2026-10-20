@@ -200,6 +200,7 @@ impl Checker {
                 recipients,
                 total,
                 binding,
+                ..
             } => {
                 if cardinality.is_some_and(|value| {
                     value

@@ -5,9 +5,63 @@ fn private() -> Visibility {
         players: controller_set(),
     }
 }
+
+#[test]
+fn order_reserves_a_decision_identity_in_the_shared_namespace() {
+    let choice = decision(chosen_objects(30, 1, objects()));
+    let ordering = order(objects(), Visibility::Public {});
+    for steps in [
+        vec![choice.clone(), ordering.clone()],
+        vec![ordering.clone(), choice],
+    ] {
+        reject(body(1, steps), WellFormedReason::DuplicateDecision);
+    }
+    let mut second = ordering.clone();
+    if let Node::Instruction { instruction } = &mut second.node {
+        instruction.id = InstructionId(4);
+        instruction.receipt = ReceiptId(4);
+    }
+    reject(
+        body(1, vec![ordering, second]),
+        WellFormedReason::DuplicateDecision,
+    );
+    accept(body(
+        1,
+        vec![
+            decision(chosen_objects(20, 1, objects())),
+            order(objects(), Visibility::Public {}),
+        ],
+    ));
+}
+
+#[test]
+fn order_answers_are_complete_generation_sensitive_permutations() {
+    let first = ObjectRef {
+        id: ObjectId(1),
+        generation: Generation(1),
+    };
+    let second = ObjectRef {
+        id: ObjectId(2),
+        generation: Generation(1),
+    };
+    let next = ObjectRef {
+        generation: Generation(2),
+        ..first
+    };
+    assert!(OrderAnswer { cards: vec![] }.matches_domain(&[]));
+    for cards in [vec![first, second], vec![second, first]] {
+        assert!(OrderAnswer { cards }.matches_domain(&[first, second]));
+    }
+    for cards in [vec![], vec![first], vec![first, first], vec![next, second]] {
+        assert!(!OrderAnswer { cards }.matches_domain(&[first, second]));
+    }
+    assert!(!OrderAnswer { cards: vec![first] }.matches_domain(&[first, first]));
+    assert!(!OrderAnswer { cards: vec![first] }.matches_domain(&[]));
+}
 fn order(cards: Selector, visibility: Visibility) -> Located<Node> {
     instruction(
         Action::Order {
+            decision: DecisionId(30),
             cards: cards.clone(),
             destinations: vec![Placement {
                 cards,

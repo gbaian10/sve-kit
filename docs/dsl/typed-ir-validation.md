@@ -151,7 +151,9 @@ PlayParameter Distribution 也可承載。Damage Allocation 只能讀支配它�
 且 recipients 必須與該分配域精確相等，不能改成其他集合或同 slot 不同型別。
 目前不驗分配 binding 的消耗者數量；沒有消耗者或多次引用也不在此層拒絕。
 lowering 必須依卡文產生正確數量的傷害指示，不能將本檢查當成一次消耗的證明。
-結算時 Distribution 的實際卡例與最低量仍須在 lowering 驗收，不外推打出目標的最低量規則。
+Distribution 明示 `minimum: Nat`，沒有預設；結算時的實際卡例與最低量須在 lowering
+驗收，不外推打出目標的最低量規則。checker 只驗型別，不從數字推論卡文或最低量來源；
+打出 snapshot、trusted producer、runtime 准入及正反例依[執行語義 §1](runtime-semantics.md#1-分配最低量與打出-snapshot)。
 
 `ResolvedRecipients` 只正規化已求值的成員，依物件 ID＋世代／玩家去重，保留空集合。
 `accepts_answer(total, minimum, answer)` 檢查每個成員恰出現一次、沒有外來世代、每項
@@ -163,6 +165,8 @@ lowering 必須依卡文產生正確數量的傷害指示，不能將本檢查�
 Damage 目前接受 Ability flags、Instruction batch、Current source，uniform signed
 amount 或 Allocation；不接受攻擊／交戰來源或 LKI。結果為 DamageQuantityOutcome，
 可讀 quantity、repeat export／collect，不能冒充 Cards receipt。
+Damage requested／actual 的整指示合計依執行語義 §1.3；目前 executor 尚須完成該契約
+才能解除投影拒絕，不能把舊 authority 保存的 Uniform 單項 amount 當成聚合 requested。
 Token 檢查所有模板的常值名稱、數量、Field／Ex 單一目的區及可選 StackCounters；
 空模板串列、未驗 entry_effects、allocated destination 與動態名稱拒絕。output 在輸入
 檢查後才定義，receipt 為 TokenOutcome；同 batch 的 sibling 看不到它，批次結束才公開。
@@ -194,12 +198,16 @@ Move.objects，actor 等於該指示 actor；回答僅在該動作內可見。
 Order action 的 chooser 也須等於指示 actor；兩者都檢查決定可見性與物件證據，
 禁止選擇的 batch／stage 仍拒絕。空集合可以承載，實際空排列的省略依規則程序，不能
 用空集合推論牌庫沒有搜尋候選。
+Order 明示 `decision: DecisionId` 並共用唯一性檢查；`OrderAnswer::matches_domain`
+只驗完整排列與世代，不授權 actor／epoch。協定與 runtime 准入依執行語義 §4。
 單一排列跨多個持有者時，先保存一次完整回答，再依各持有者保留相對順序放入各自牌庫；
 回答順序以牌庫頂至底方向解讀，Bottom 的第一項在放入區塊最上方。
 同區重排不變世代、不造移區事件；跨區才記 MoveResult 與 after。
 lowering 的正規形以 Action::Order 表示已在目的牌庫內的重排（例如 Look 餘牌），
 跨區則使用 Move＋order；良構檢查不推導物件的執行期所在區域，executor 仍須驗證。
 跨 owner 的單 chooser 排列是內部契約約定，沒有以本片卡例證明其官方適用範圍。
+runtime 依 CR 4.1.5 預設由目的區所屬玩家定序；缺卡文明示單 chooser 權限時拒絕
+跨 owner 排列。Shared(Field／Ex) 的逐物件規則解析與成功 Before 定義依執行語義 §3。
 多 Placement、獨立／compound 的 Order decision 及 Move／Token entry_effects 尚未接受。
 
 Search 的 filter 與替代目的地 predicate 依搜尋者的私有選擇域檢查可見性；
