@@ -284,6 +284,11 @@ impl Game {
             .and_then(|play| self.execute_internal_play(&play));
         if result.is_err() {
             *self = before;
+            return result;
+        }
+        if let Some(execution) = self.typed.as_mut() {
+            // This entry owns preparation too, so deferred failures must undo both phases.
+            execution.origin = Some(Box::new(before));
         }
         result
     }
@@ -471,12 +476,11 @@ impl Game {
                 }
                 _ => return Err(invalid("answer is outside the internal domain")),
             }
-            if let Err(error) = self.internal_run(&mut execution) {
+            self.internal_run(&mut execution).inspect_err(|_| {
                 if execution.distribution_started {
                     rollback = execution.origin.take();
                 }
-                return Err(error);
-            }
+            })?;
             let progress = execution.progress();
             if !progress.complete {
                 self.typed = Some(execution);

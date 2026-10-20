@@ -25,6 +25,7 @@ typed ObjectId 由 State 內的持久映射配發給原型物件 ID，同一局�
 尚未開始分配的 execution 在有效回答後執行失敗，同樣還原到回答前並保留原詢問。
 已開始分配的 execution 若在有效回答後執行失敗，回復 execution 前的 Game 並取消續體；
 僅保留已外發 epoch 的高水位，避免舊 token 因回復而復活。
+便利入口回復到準備前；明示預備入口保留已提交的 play 與時間，可用同一 handle 重試，但舊答案 token 仍失效。
 執行入口不允許原型 decide／submit 插入待答中的 typed 解算。尚無 typed save 格式；
 序列化或計算 digest 待答 Game 會明確失敗，不能靜默遺失續體。
 

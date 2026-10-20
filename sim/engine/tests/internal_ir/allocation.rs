@@ -428,11 +428,38 @@ fn infeasible_or_overflowing_distribution_restores_prior_draws_and_observations(
 
 #[test]
 fn a_later_infeasible_domain_rolls_back_entire_execution_and_revokes_observed_tokens() {
-    for seat in [1, 2] {
+    for (seat, prior_set) in [(1, false), (2, false), (1, true), (2, true)] {
         let mut game = game(seat, 2);
+        if prior_set {
+            game.execute_internal(
+                &checked(vec![instruction(
+                    90,
+                    Action::Modify {
+                        subjects: zone(ZoneKind::Field, 90),
+                        patch: CharacteristicPatch::Numeric {
+                            stat: Stat::Attack,
+                            change: NumericChange::Set {
+                                amount: Expr::Literal(Int(1)),
+                            },
+                        },
+                        expires: Duration {
+                            end: DurationEnd::NoTemporalExpiry {},
+                            anchor: TimeAnchor::Installation {},
+                            usage: None,
+                            intervals: vec![],
+                        },
+                        source: EffectReference::CurrentInstallation {},
+                    },
+                )]),
+                &source("synthetic"),
+                context(seat),
+            )
+            .unwrap();
+        }
         let views = [View::P1, View::P2, View::Referee];
         let observations = views.map(|view| game.projection(view).unwrap());
         let saved_before = serde_json::to_value(&game).unwrap();
+        let authority_before = exact_authority(&game);
         let program = checked(vec![
             draw(1, 1),
             distribution(2, leaders(), Expr::Literal(Nat(4)), 1),
@@ -456,6 +483,14 @@ fn a_later_infeasible_domain_rolls_back_entire_execution_and_revokes_observed_to
             saved_after["state"]["ir_epoch"].as_u64().unwrap()
                 > saved_before["state"]["ir_epoch"].as_u64().unwrap()
         );
+        assert_eq!(
+            exact_authority(&game),
+            authority_before.replacen(
+                &format!("ir_epoch: {},", saved_before["state"]["ir_epoch"]),
+                &format!("ir_epoch: {},", saved_after["state"]["ir_epoch"]),
+                1,
+            )
+        );
         saved_after["state"]["ir_epoch"] = saved_before["state"]["ir_epoch"].clone();
         assert_eq!(saved_after, saved_before);
         game.execute_internal(&program, &source("synthetic"), context(seat))
@@ -470,6 +505,72 @@ fn a_later_infeasible_domain_rolls_back_entire_execution_and_revokes_observed_to
             answer(&[(0, 3), (1, 1)]),
             "stale internal answer",
         );
+    }
+}
+
+#[test]
+fn distribution_rollback_preserves_preexisting_proper_play_associations() {
+    for seat in [1, 2] {
+        for explicit_play in [false, true] {
+            let mut game = game(seat, 2);
+            let unrelated = game
+                .prepare_internal_play(
+                    &checked(vec![draw(90, 1)]),
+                    &source("synthetic"),
+                    context(seat),
+                )
+                .unwrap();
+            let program = checked(vec![
+                draw(1, 1),
+                distribution(2, leaders(), Expr::Literal(Nat(4)), 1),
+                allocated(3, 2, leaders()),
+                distribution(4, leaders(), Expr::Literal(Nat(3)), 2),
+            ]);
+            let play = explicit_play.then(|| {
+                game.prepare_internal_play(&program, &source("synthetic"), context(seat))
+                    .unwrap()
+            });
+            let views = [View::P1, View::P2, View::Referee];
+            let observations = views.map(|view| game.projection(view).unwrap());
+            if let Some(play) = &play {
+                game.execute_internal_play(play).unwrap();
+            } else {
+                game.execute_internal(&program, &source("synthetic"), context(seat))
+                    .unwrap();
+            }
+            let old = game.internal_decision(View::Referee).unwrap();
+            let error = game
+                .answer_internal(old.actor, old.token, answer(&[(0, 3), (1, 1)]))
+                .unwrap_err();
+            assert!(error.to_string().contains("infeasible distribution"));
+            assert!(game.internal_decision(View::Referee).is_none());
+            assert_eq!(
+                views.map(|view| game.projection(view).unwrap()),
+                observations
+            );
+            if let Some(play) = &play {
+                game.execute_internal_play(play).unwrap();
+                let fresh = game.internal_decision(View::Referee).unwrap();
+                assert_eq!(fresh.token.execution, old.token.execution);
+                assert!(fresh.token.epoch > old.token.epoch);
+                reject(
+                    &mut game,
+                    fresh.actor,
+                    old.token,
+                    answer(&[(0, 3), (1, 1)]),
+                    "stale internal answer",
+                );
+                game.answer_internal(fresh.actor, fresh.token, answer(&[(0, 3), (1, 1)]))
+                    .unwrap_err();
+            }
+            let progress = game.execute_internal_play(&unrelated).unwrap();
+            cards(&progress, 90, 1, 1);
+            assert!(progress.complete);
+            game.execute_internal_play(&unrelated).unwrap_err();
+            if !explicit_play {
+                serde_json::to_value(&game).unwrap();
+            }
+        }
     }
 }
 
