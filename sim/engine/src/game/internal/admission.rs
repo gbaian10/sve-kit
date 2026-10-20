@@ -268,6 +268,7 @@ fn supported(code: &str) -> bool {
             | "shape.NatFrozen.ReceiptActual"
             | "read.receipt.actual"
             | "shape.MeasuredReceipt.Cards"
+            | "shape.MeasuredReceipt.Damage"
             | "receipt.local"
             | "decision.input"
             | "shape.ChoiceDomain.Integer"

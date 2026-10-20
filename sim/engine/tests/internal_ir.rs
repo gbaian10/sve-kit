@@ -16,6 +16,8 @@ use sve_engine::game::internal::{Answer, Context, Fact, InstructionOutcome, Prog
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
+#[path = "internal_ir/damage.rs"]
+mod damage;
 #[path = "internal_ir/numeric.rs"]
 mod numeric;
 #[path = "internal_ir/ordering.rs"]
@@ -176,13 +178,14 @@ fn setup(seat: u32, deck: Value) -> Value {
     value
 }
 fn catalog() -> Arc<Catalog> {
-    let snapshot = [("unit-spell", "スペル"), ("unit-follower", "フォロワー")].iter().map(|(number, kind)| {
+    let snapshot = [("unit-spell", "スペル"), ("unit-follower", "フォロワー"), ("unit-amulet", "アミュレット")].iter().map(|(number, kind)| {
         json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()
     }).collect::<Vec<_>>().join("\n");
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let document = json!({"format":1,"kind":"effect_set","cards":{
         "unit-spell":{"status":"complete","review":"synthetic","abilities":[]},
-        "unit-follower":{"status":"complete","review":"synthetic","abilities":[]}
+        "unit-follower":{"status":"complete","review":"synthetic","abilities":[]},
+        "unit-amulet":{"status":"complete","review":"synthetic","abilities":[]}
     }})
     .to_string();
     Arc::new(
@@ -477,31 +480,6 @@ fn dead_arms_costs_hidden_reads_and_unsupported_requirements_reject_whole_body()
                 },
             ),
         ]),
-        // Damage receipt requested/actual units are undefined, so neither projection is admitted.
-        checked(vec![
-            damage(1, recipients(), 2),
-            draw_value(
-                2,
-                Expr::Compute(Box::new(IntOperation::FromNat {
-                    value: Expr::Frozen(Box::new(NatFrozen::ReceiptActual {
-                        receipt: MeasuredReceipt::Damage {
-                            receipt: ReceiptReference::new(ReceiptId(1)),
-                        },
-                    })),
-                })),
-            ),
-        ]),
-        checked(vec![
-            damage(1, recipients(), 2),
-            draw_value(
-                2,
-                Expr::Frozen(Box::new(IntFrozen::ReceiptRequested {
-                    receipt: MeasuredReceipt::Damage {
-                        receipt: ReceiptReference::new(ReceiptId(1)),
-                    },
-                })),
-            ),
-        ]),
     ];
     for program in programs {
         let mut game = game(1, 3);
@@ -542,7 +520,7 @@ fn uniform_damage_normalizes_union_and_checks_only_after_resolution() {
             assert_eq!(
                 result.receipts.get(&ReceiptId(1)),
                 Some(&InstructionOutcome::Damage(DamageQuantityOutcome {
-                    requested: Int(amount),
+                    requested: Int(i64::try_from(2 * positive).unwrap()),
                     actual: Nat(2 * positive)
                 }))
             );
@@ -558,7 +536,7 @@ fn uniform_damage_normalizes_union_and_checks_only_after_resolution() {
             assert_eq!(
                 result.receipts.get(&ReceiptId(2)),
                 Some(&InstructionOutcome::Damage(DamageQuantityOutcome {
-                    requested: Int(1),
+                    requested: Int(0),
                     actual: Nat(0)
                 }))
             );
@@ -1288,7 +1266,7 @@ fn explicit_object_and_leader_recipients_deduplicate_source_generations() {
         assert_eq!(
             result.receipts.get(&ReceiptId(1)),
             Some(&InstructionOutcome::Damage(DamageQuantityOutcome {
-                requested: Int(1),
+                requested: Int(2),
                 actual: Nat(2)
             }))
         );

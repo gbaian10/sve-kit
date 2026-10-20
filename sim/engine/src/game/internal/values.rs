@@ -6,7 +6,7 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
-use crate::ir::{CharacteristicView, NumberRead, ObjectView};
+use crate::ir::{CharacteristicView, NumberRead, ObjectView, ReceiptId};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -114,8 +114,8 @@ impl Execution {
     }
 
     fn object_slot(&self, binding: Binding<Selector>) -> Result<Vec<ObjectRef>> {
-        if let Some(Slot::Objects(objects)) = self.slots.get(&binding.key()) {
-            Ok(objects.clone())
+        if let Some(Slot::Objects { members, .. }) = self.slots.get(&binding.key()) {
+            Ok(members.clone())
         } else {
             Err(invalid("missing typed object binding"))
         }
@@ -127,11 +127,13 @@ impl Execution {
         recipients: &RecipientSet,
     ) -> Result<ResolvedRecipients> {
         let values = match recipients {
-            RecipientSet::Objects { objects } => self
-                .objects(game, objects)?
-                .into_iter()
-                .map(|object| RuntimeDamageRecipient::Object { object })
-                .collect(),
+            RecipientSet::Objects { objects } => {
+                self.check_damage_capture(objects)?;
+                self.objects(game, objects)?
+                    .into_iter()
+                    .map(|object| RuntimeDamageRecipient::Object { object })
+                    .collect()
+            }
             RecipientSet::Leaders { players } => self
                 .players(game, players)?
                 .into_iter()
@@ -161,6 +163,27 @@ impl Execution {
         Ok(ResolvedRecipients::new(values))
     }
 
+    fn check_damage_capture(&self, selector: &Selector) -> Result<()> {
+        match selector {
+            Selector::Captured { reference } => {
+                if let Some(Slot::Objects {
+                    on_field_at_capture: false,
+                    ..
+                }) = self.slots.get(&reference.binding.key())
+                {
+                    return Err(unsupported("non-field damage capture"));
+                }
+            }
+            Selector::Union { sets } => {
+                for set in sets {
+                    self.check_damage_capture(set)?;
+                }
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+
     pub(super) fn capture(&mut self, game: &Game, capture: &Capture) -> Result<()> {
         let (key, value) = match capture {
             Capture::Integer { value, into, .. } => (
@@ -175,10 +198,25 @@ impl Execution {
                 into.binding.key(),
                 Slot::Boolean(self.boolean(game, value)?),
             ),
-            Capture::Objects { value, into, .. } => (
-                into.binding.key(),
-                Slot::Objects(self.objects(game, value)?),
-            ),
+            Capture::Objects { value, into, .. } => {
+                let members = self.objects(game, value)?;
+                let on_field_at_capture =
+                    members
+                        .iter()
+                        .try_fold(true, |on_field, &object| -> Result<bool> {
+                            let current = game.object(self.object_id(object)?)?;
+                            Ok(on_field
+                                && current.zone == "field"
+                                && current.generation == object.generation.0)
+                        })?;
+                (
+                    into.binding.key(),
+                    Slot::Objects {
+                        members,
+                        on_field_at_capture,
+                    },
+                )
+            }
             _ => return Err(unsupported("capture domain")),
         };
         self.slots.insert(key, value);
@@ -360,18 +398,28 @@ impl Execution {
     }
 
     fn quantity(&self, receipt: &MeasuredReceipt) -> Result<(Int, Nat)> {
-        // Damage requested/actual aggregation awaits Astra; programs may not branch on it yet.
-        let MeasuredReceipt::Cards { receipt } = receipt else {
-            return Err(unsupported("non-card quantity receipt"));
+        let (id, damage) = match receipt {
+            MeasuredReceipt::Cards { receipt } => (local_receipt(receipt.location())?, false),
+            MeasuredReceipt::Damage { receipt } => (local_receipt(receipt.location())?, true),
+            MeasuredReceipt::Counters { .. } => return Err(unsupported("quantity receipt")),
         };
-        let ReceiptLocation::Local { id } = receipt.location() else {
-            return Err(unsupported("iteration receipt"));
-        };
-        match self.receipts.get(id) {
-            Some(InstructionOutcome::Cards(outcome)) => Ok((outcome.requested, outcome.actual)),
-            _ => Err(invalid("missing typed card receipt")),
+        match (self.receipts.get(id), damage) {
+            (Some(InstructionOutcome::Cards(outcome)), false) => {
+                Ok((outcome.requested, outcome.actual))
+            }
+            (Some(InstructionOutcome::Damage(outcome)), true) => {
+                Ok((outcome.requested, outcome.actual))
+            }
+            _ => Err(invalid("missing or mismatched typed quantity receipt")),
         }
     }
+}
+
+fn local_receipt<T>(location: &ReceiptLocation<T>) -> Result<&ReceiptId> {
+    let ReceiptLocation::Local { id } = location else {
+        return Err(unsupported("iteration receipt"));
+    };
+    Ok(id)
 }
 
 fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
