@@ -1,15 +1,20 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
+use crate::ir::OncePerEvent;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
     CharacteristicPatch, ChoiceDomain, ContinuousLayer, DecisionKind, Duration, DurationEnd,
-    Effect, EffectTarget, EventContext, EventPattern, EventSnapshotPolicy, ExecutionRef,
-    GrantedAbility, Nat, NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId,
-    TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec,
-    Visibility, ZoneKind,
+    Effect, EffectTarget, EventContext, EventPattern, ExecutionRef, GrantedAbility, Nat,
+    NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId, TextQuantifier,
+    TimeAnchor, TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec, Visibility,
+    ZoneKind,
 };
 use crate::ir::{
     AbilityOrigin, Binding, Bool, EnterFieldEvent, Expr, KeywordId, ObjectFrozen, ObjectOperand,
     Predicate,
+};
+use crate::ir::{
+    ActionPattern, EventRewrite, PermissionSubject, ProposedEventPattern, ReplacementScope,
+    Selector,
 };
 use alloc::collections::BTreeSet;
 
@@ -320,71 +325,11 @@ impl Checker {
             return self.reject();
         }
         match &trigger.on {
-            TriggerCondition::Event { pattern } => self.event_pattern(pattern, trigger.view),
+            TriggerCondition::Event { pattern } => {
+                self.env.trigger = Some(trigger.view);
+                self.event_pattern(pattern, Some(trigger.view), true)
+            }
             TriggerCondition::State { .. } => self.reject(),
-        }
-    }
-
-    fn event_pattern(&mut self, pattern: &EventPattern, view: EventSnapshotPolicy) -> Checked {
-        macro_rules! event {
-            ($binding:expr, $predicate:expr, $policy:expr) => {{
-                if view != $policy {
-                    return Err(self.error(WellFormedReason::InvalidEntry));
-                }
-                self.define(*$binding, BindingKind::Value)?;
-                self.boolean($predicate)
-            }};
-        }
-        match pattern {
-            // The self-entry comparison is the only event-field read; ObjectEquals stays closed.
-            EventPattern::EnterField { binding, predicate }
-                if *predicate == self_entry(*binding) =>
-            {
-                if view != EventSnapshotPolicy::AfterEntry {
-                    return Err(self.error(WellFormedReason::InvalidEntry));
-                }
-                self.define(*binding, BindingKind::Value)
-            }
-            EventPattern::EnterField { binding, predicate } => {
-                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
-            }
-            EventPattern::EnterEx { binding, predicate } => {
-                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
-            }
-            EventPattern::LeaveField { binding, predicate } => {
-                event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
-            }
-            EventPattern::Discard { binding, predicate } => {
-                event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
-            }
-            EventPattern::Destroy { binding, predicate } => {
-                event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
-            }
-            EventPattern::Banish { .. }
-            | EventPattern::EarthRitePayment { .. }
-            | EventPattern::Play { .. }
-            | EventPattern::Targeted { .. }
-            | EventPattern::Resolve { .. }
-            | EventPattern::Payment { .. }
-            | EventPattern::Move { .. }
-            | EventPattern::Draw { .. }
-            | EventPattern::Damage { .. }
-            | EventPattern::StatChange { .. }
-            | EventPattern::LifeChange { .. }
-            | EventPattern::CounterChange { .. }
-            | EventPattern::Posture { .. }
-            | EventPattern::Evolve { .. }
-            | EventPattern::Attack { .. }
-            | EventPattern::Phase { .. }
-            | EventPattern::Race { .. }
-            | EventPattern::DriveGained { .. }
-            | EventPattern::DriveTrigger { .. }
-            | EventPattern::UbActivated { .. }
-            | EventPattern::Fused { .. }
-            | EventPattern::Equip { .. }
-            | EventPattern::Dice { .. }
-            | EventPattern::DriveChecked { .. }
-            | EventPattern::AnyOf { .. } => self.reject(),
         }
     }
 
@@ -424,11 +369,97 @@ impl Checker {
                 }
                 self.duration(duration)
             }
-            Effect::Replacement { .. }
-            | Effect::Permission { .. }
-            | Effect::RuleModifier { .. }
-            | Effect::DeckRule { .. }
-            | Effect::CostModifier { .. } => self.reject(),
+            Effect::Replacement {
+                id,
+                source,
+                pattern,
+                condition,
+                rewrite,
+                scope,
+                affected_player,
+                once_per_event: OncePerEvent::Enforced,
+                usage,
+                prospective_chars,
+                duration,
+            } => {
+                if !self.effect_ids.insert(*id) {
+                    return Err(self.error(WellFormedReason::InvalidEntry));
+                }
+                self.ability_source(source)?;
+                if usage.is_some() || prospective_chars.is_some() {
+                    return self.reject();
+                }
+                let ProposedEventPattern::LeavesZone { objects, from } = pattern else {
+                    return self.reject();
+                };
+                // SelfOnly is a self-replacement inside its own effect, not a holder's static rule.
+                if !ability_zones.contains(from)
+                    || *scope != ReplacementScope::General
+                    || *objects
+                        != (Selector::Objects {
+                            objects: vec![ObjectOperand::SourceHolder {}],
+                        })
+                {
+                    return self.reject();
+                }
+                self.at("pattern/objects", |checker| checker.selector(objects))?;
+                self.at("condition", |checker| checker.boolean(condition))?;
+                self.at("affected_player", |checker| checker.player(affected_player))?;
+                let EventRewrite::RedirectMove { to, position } = rewrite else {
+                    return self.reject();
+                };
+                self.at("rewrite/to", |checker| {
+                    checker.positioned_destination(to, *position)
+                })?;
+                self.duration(duration)
+            }
+            Effect::Permission {
+                subject,
+                action,
+                condition,
+                duration,
+                ..
+            } => {
+                self.at("action", |checker| {
+                    checker.permission_action(subject, action)
+                })?;
+                self.at("condition", |checker| checker.boolean(condition))?;
+                self.duration(duration)
+            }
+            Effect::RuleModifier { .. } | Effect::DeckRule { .. } | Effect::CostModifier { .. } => {
+                self.reject()
+            }
+        }
+    }
+
+    fn permission_action(
+        &mut self,
+        subject: &PermissionSubject,
+        action: &ActionPattern,
+    ) -> Checked {
+        match subject {
+            PermissionSubject::Objects { objects } => self.selector(objects)?,
+            PermissionSubject::Players { players } => self.players(players)?,
+        }
+        match action {
+            ActionPattern::Destroy { objects, cause }
+            | ActionPattern::Banish { objects, cause } => {
+                self.selector(objects)?;
+                self.cause_pattern(cause)
+            }
+            ActionPattern::PlayCard { .. }
+            | ActionPattern::PlayAbility { .. }
+            | ActionPattern::Attack { .. }
+            | ActionPattern::ChooseTarget { .. }
+            | ActionPattern::Draw { .. }
+            | ActionPattern::Stand { .. }
+            | ActionPattern::IncreasePpMaximum { .. }
+            | ActionPattern::IgnoreWard { .. }
+            | ActionPattern::Reroll { .. }
+            | ActionPattern::ChooseMode { .. }
+            | ActionPattern::Win { .. }
+            | ActionPattern::Lose { .. }
+            | ActionPattern::TriggerAdmission { .. } => self.reject(),
         }
     }
 

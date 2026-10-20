@@ -1,5 +1,61 @@
 use super::*;
 
+#[test]
+fn bp03_002_search_found_cost_is_local_to_the_destination_question() {
+    let found = Binding::new(2, ScopeId(3));
+    let object = Binding::new(1, ScopeId(4));
+    let condition = Expr::Compute(Box::new(Predicate::SearchFoundAny {
+        found,
+        object,
+        predicate: Expr::Compute(Box::new(Predicate::CompareInt {
+            left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+                information: NumberRead::Cost {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::Bound { binding: object }),
+                    },
+                    view: CharacteristicView::Effective,
+                },
+            })),
+            comparison: Comparison::LessEqual,
+            right: Expr::Literal(Int(2)),
+        })),
+    }));
+    let mut node = search();
+    if let Action::Search { destination, .. } = action(&mut node) {
+        *destination = Some(SearchDestination::OptionalSelfReplacement {
+            predicate: condition.clone(),
+            movement: movement(shared(ZoneKind::Field)),
+        });
+    }
+    accept(body(1, vec![node.clone()]));
+    reject(
+        body(
+            1,
+            vec![
+                node.clone(),
+                control(Control::If {
+                    condition,
+                    then_body: body(5, vec![]),
+                    else_body: None,
+                }),
+            ],
+        ),
+        WellFormedReason::UnavailableBinding,
+    );
+    if let Action::Search {
+        destination: Some(SearchDestination::OptionalSelfReplacement { predicate, .. }),
+        ..
+    } = action(&mut node)
+    {
+        *predicate = Expr::Compute(Box::new(Predicate::SearchFoundAny {
+            found: Binding::new(3, ScopeId(3)),
+            object,
+            predicate: Expr::Literal(Bool(true)),
+        }));
+    }
+    reject(body(1, vec![node]), WellFormedReason::BindingType);
+}
+
 fn reject_action(program: Program, reason: WellFormedReason) {
     let error = reject(program, reason);
     assert!(

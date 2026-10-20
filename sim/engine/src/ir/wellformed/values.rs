@@ -27,18 +27,19 @@ impl Checker {
             }
             Expr::Live(read) => match read.as_ref() {
                 IntRead::PlayerResource { player, .. } => self.player(player),
-                IntRead::HistorySum { .. } => self.reject(),
+                IntRead::HistorySum { query } => self.numeric_history(query),
             },
             Expr::Frozen(read) => match read.as_ref() {
                 IntFrozen::ReceiptRequested { receipt } => self.measured(receipt),
-                IntFrozen::StatBefore { .. }
-                | IntFrozen::StatAfter { .. }
-                | IntFrozen::LifeChangeBefore { .. }
-                | IntFrozen::LifeChangeAfter { .. }
-                | IntFrozen::LifeChangeDelta { .. }
-                | IntFrozen::CounterChangeDelta { .. }
-                | IntFrozen::DamageAmount { .. }
-                | IntFrozen::StatDelta { .. } => self.reject(),
+                IntFrozen::StatBefore { facet } | IntFrozen::StatAfter { facet } => {
+                    self.event_field(*facet)
+                }
+                IntFrozen::LifeChangeBefore { event }
+                | IntFrozen::LifeChangeAfter { event }
+                | IntFrozen::LifeChangeDelta { event } => self.event_field(*event),
+                IntFrozen::CounterChangeDelta { event } => self.event_field(*event),
+                IntFrozen::DamageAmount { event } => self.event_field(*event),
+                IntFrozen::StatDelta { event } => self.event_field(*event),
             },
             Expr::Compute(operation) => match operation.as_ref() {
                 IntOperation::Arithmetic {
@@ -109,6 +110,7 @@ impl Checker {
                 self.visible(self.env.access.get(&reference.binding.key()))
             }
             Expr::Frozen(read) => match read.as_ref() {
+                NatFrozen::SnapshotCounter { object, .. } => self.projection(object),
                 NatFrozen::ReceiptActual { receipt } => self.measured(receipt),
                 NatFrozen::SearchFoundCount { found } => self.reference(*found, BindingKind::Value),
                 NatFrozen::SearchRevealedCount { revealed } => {
@@ -132,15 +134,16 @@ impl Checker {
                     }
                     self.player(player)
                 }
-                NatFrozen::EarthRiteRemovedStack { .. }
-                | NatFrozen::DiceAcceptedAttempt { .. }
-                | NatFrozen::TargetedTargetSlot { .. }
-                | NatFrozen::DrawOrdinal { .. }
-                | NatFrozen::CounterChangeBefore { .. }
-                | NatFrozen::CounterChangeAfter { .. }
-                | NatFrozen::AttackOrdinal { .. }
-                | NatFrozen::RaceOrdinal { .. }
-                | NatFrozen::DiceValue { .. } => self.reject(),
+                NatFrozen::EarthRiteRemovedStack { component } => self.event_field(*component),
+                NatFrozen::DiceAcceptedAttempt { event } | NatFrozen::DiceValue { event } => {
+                    self.event_field(*event)
+                }
+                NatFrozen::TargetedTargetSlot { event } => self.event_field(*event),
+                NatFrozen::DrawOrdinal { event } => self.event_field(*event),
+                NatFrozen::CounterChangeBefore { event }
+                | NatFrozen::CounterChangeAfter { event } => self.event_field(*event),
+                NatFrozen::AttackOrdinal { event } => self.event_field(*event),
+                NatFrozen::RaceOrdinal { event } => self.event_field(*event),
             },
             Expr::Live(read) => match read.as_ref() {
                 NatRead::ZoneCount { selector } => self.selector(selector),
@@ -148,7 +151,8 @@ impl Checker {
                 NatRead::ZoneCapacity { player, .. } | NatRead::TurnOrdinal { player } => {
                     self.player(player)
                 }
-                NatRead::Combo { .. } | NatRead::HistoryCount { .. } => self.reject(),
+                NatRead::HistoryCount { query, .. } => self.history(query),
+                NatRead::Combo { .. } => self.reject(),
             },
             Expr::Compute(operation) => match operation.as_ref() {
                 NatOperation::ReceiptActualSum { receipts } => match receipts {
@@ -195,7 +199,8 @@ impl Checker {
                     self.player(player)
                 }
                 BoolRead::State { object, .. } => self.view(object),
-                BoolRead::HistoryExists { .. } | BoolRead::LegalAttack { .. } => self.reject(),
+                BoolRead::HistoryExists { query } => self.history(query),
+                BoolRead::LegalAttack { .. } => self.reject(),
             },
             Expr::Frozen(read) => match read.as_ref() {
                 BoolFrozen::PaymentComplete {
@@ -204,11 +209,12 @@ impl Checker {
                 BoolFrozen::PaymentsComplete { receipts, .. } => {
                     self.reference(*receipts, BindingKind::Value)
                 }
-                BoolFrozen::PaymentZero { .. }
-                | BoolFrozen::PaymentReplaced { .. }
-                | BoolFrozen::DriveGainedFirstGain { .. }
-                | BoolFrozen::DriveCheckedTriggerAccepted { .. }
-                | BoolFrozen::PaymentComplete { .. } => self.reject(),
+                BoolFrozen::PaymentZero { event } | BoolFrozen::PaymentReplaced { event } => {
+                    self.event_field(*event)
+                }
+                BoolFrozen::DriveGainedFirstGain { event } => self.event_field(*event),
+                BoolFrozen::DriveCheckedTriggerAccepted { event } => self.event_field(*event),
+                BoolFrozen::PaymentComplete { .. } => self.reject(),
             },
             Expr::Compute(predicate) => self.predicate(predicate),
         }
@@ -265,31 +271,38 @@ impl Checker {
                     }
                     self.view(object)
                 }
-                Expr::Frozen(_)
-                | Expr::Live(_)
-                | Expr::Captured(_)
-                | Expr::Bound(_)
-                | Expr::Compute(_) => self.reject(),
+                Expr::Frozen(_) => self.projection(traits),
+                Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => {
+                    self.reject()
+                }
             },
             Predicate::NamesIntersect { left, right } => {
                 self.names(left)?;
                 self.names(right)
             }
+            Predicate::SearchFoundAny {
+                found,
+                object,
+                predicate,
+            } => {
+                self.reference(*found, BindingKind::Value)?;
+                self.candidate(*object, predicate)
+            }
             Predicate::EventCause { .. }
             | Predicate::Equal { .. }
             | Predicate::PlayerEquals { .. }
             | Predicate::PlayerIn { .. }
-            | Predicate::ReceiptStatusEquals { .. }
-            | Predicate::PlayedCard { .. }
-            | Predicate::PlayedAbility { .. }
-            | Predicate::HolderIsPlayer { .. }
-            | Predicate::HolderIsObject { .. }
             | Predicate::AnyStatFacet { .. }
             | Predicate::AnySnapshot { .. }
             | Predicate::AnyMove { .. }
             | Predicate::MoveSucceeded { .. }
+            | Predicate::ObjectEquals { .. } => self.event_predicate(expression),
+            Predicate::ReceiptStatusEquals { .. }
+            | Predicate::PlayedCard { .. }
+            | Predicate::PlayedAbility { .. }
+            | Predicate::HolderIsPlayer { .. }
+            | Predicate::HolderIsObject { .. }
             | Predicate::ReceiptAny { .. }
-            | Predicate::ObjectEquals { .. }
             | Predicate::RecipientIsLeader { .. }
             | Predicate::RecipientIsFollower { .. }
             | Predicate::ZoneEquals { .. }
@@ -312,11 +325,8 @@ impl Checker {
                 let NamesRead::Names { object } = read.as_ref();
                 self.view(object)
             }
-            Expr::Frozen(_)
-            | Expr::Live(_)
-            | Expr::Captured(_)
-            | Expr::Bound(_)
-            | Expr::Compute(_) => self.reject(),
+            Expr::Frozen(_) => self.projection(expression),
+            Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => self.reject(),
         }
     }
 
@@ -333,11 +343,8 @@ impl Checker {
                 }
                 self.view(object)
             }
-            Expr::Live(_)
-            | Expr::Frozen(_)
-            | Expr::Captured(_)
-            | Expr::Bound(_)
-            | Expr::Compute(_) => self.reject(),
+            Expr::Frozen(_) => self.projection(value),
+            Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => self.reject(),
         }
     }
 
@@ -354,7 +361,11 @@ impl Checker {
             PlayerRef::Controller {} | PlayerRef::Owner {} | PlayerRef::Active {} => Ok(()),
             PlayerRef::Bound { binding } => self.reference(*binding, BindingKind::Value),
             PlayerRef::RequireOne { players } => self.players(players),
-            PlayerRef::FromExpression { .. } => self.reject(),
+            // A Live role can change mid-resolution, so it cannot name a stable audience or actor.
+            PlayerRef::FromExpression { value } if matches!(**value, Expr::Live(_)) => {
+                self.reject()
+            }
+            PlayerRef::FromExpression { value } => self.player_value(value),
         }
     }
 
@@ -396,8 +407,8 @@ impl Checker {
                 }
                 Ok(())
             }
-            ObjectOperand::FollowEventMove { .. }
-            | ObjectOperand::FromExpression { .. }
+            ObjectOperand::FollowEventMove { event } => self.follow_event(*event),
+            ObjectOperand::FromExpression { .. }
             | ObjectOperand::Target { .. }
             | ObjectOperand::Moved { .. } => self.reject(),
         }
@@ -405,6 +416,7 @@ impl Checker {
 
     pub(super) fn view(&self, view: &ObjectView) -> Checked {
         match view {
+            ObjectView::Snapshot { value } => self.projection(value),
             ObjectView::Current { object } if !self.event_capture() => self.object(object),
             ObjectView::EventSnapshot {
                 object,
@@ -419,7 +431,6 @@ impl Checker {
                 self.object(object)
             }
             ObjectView::Current { .. }
-            | ObjectView::Snapshot { .. }
             | ObjectView::LastKnown { .. }
             | ObjectView::EventSnapshot { .. } => self.reject(),
         }
@@ -528,7 +539,7 @@ impl Checker {
         }
     }
 
-    const fn event_capture(&self) -> bool {
+    pub(super) const fn event_capture(&self) -> bool {
         matches!(self.capture_time, Some(CaptureTime::AtEvent { .. }))
     }
 

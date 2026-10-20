@@ -19,6 +19,7 @@ use core::fmt;
 mod control;
 mod decisions;
 mod entries;
+mod events;
 mod evolution;
 mod modes;
 mod movement;
@@ -200,6 +201,8 @@ struct Slot {
 struct Environment {
     scope: ScopeId,
     choices: bool,
+    trigger: Option<super::EventSnapshotPolicy>,
+    trigger_events: BTreeSet<Key>,
     play_modes: bool,
     play_payments: Option<ScopeId>,
     evolution_form: Option<Binding<ObjectRef>>,
@@ -253,6 +256,8 @@ impl Checker {
         let env = Environment {
             scope,
             choices: true,
+            trigger: None,
+            trigger_events: BTreeSet::new(),
             play_modes: false,
             play_payments: None,
             evolution_form: None,
