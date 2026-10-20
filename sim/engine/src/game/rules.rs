@@ -33,15 +33,16 @@ impl Game {
         if self.typed.is_some() {
             return Err(invalid("typed execution owns the input point"));
         }
-        if self.internal_numeric_active() {
+        if !self.prepared.is_empty() {
             return Err(EngineFailure::Unsupported(
-                "prototype decisions cannot mix with typed numeric layers".into(),
+                "prototype decisions cannot mix with prepared typed plays".into(),
             ));
         }
         if !decision.is_object() {
             return Err(invalid("decision must be an object"));
         }
         let before = self.clone();
+        let layered = self.internal_numeric_active();
         self.node = node.into();
         self.emitted.clear();
         let point = self.input_point();
@@ -54,6 +55,11 @@ impl Game {
         self.normalize_replacement_order(&mut request);
         match self.decide_inner(&request).and_then(|outcome| {
             self.validate_trigger_choices()?;
+            // Grants or new objects could add triggers whose waits typed layers cannot order yet;
+            // the last layer may expire within this input after such a wait already happened.
+            if layered || self.internal_numeric_active() {
+                self.internal_prototype_abilities()?;
+            }
             Ok(outcome)
         }) {
             Ok(outcome) => Ok(Step {
@@ -764,9 +770,13 @@ impl Game {
         Ok(true)
     }
     fn next_turn(&mut self) -> Result<()> {
+        let turn = self.state.schedule.close()?;
+        self.internal_numeric_end_turn(turn)?;
         self.expire_effects()?;
         let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);
+        self.state.schedule.begin()?;
+        self.internal_numeric_begin_turn()?;
         self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});
         self.state.turn["elapsed_turns"][&seat] =
@@ -810,6 +820,11 @@ impl Game {
                 && entry["window_player"] == seat
                 && int(&entry["window_turn"]) <= elapsed)
         });
+        // Expiry at 7.4.8 cannot destroy a follower before the next start procedures.
+        self.checks()?;
+        if self.state.game["ended"] == true {
+            return Ok(());
+        }
         self.state.turn["phase"] = json!("main");
         let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
         self.enqueue(pending);

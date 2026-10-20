@@ -564,11 +564,6 @@ fn identical_attack_sets_have_no_delta_and_repeated_life_sets_stay_rejected() {
             seat,
         );
         run(&mut board, vec![fixed(set_patch(Stat::Attack, 0))], seat);
-        let before = exact_authority(&board);
-        board
-            .decide(&json!({"do":"evolve","card":"f"}), "set-evolve")
-            .unwrap_err();
-        assert_eq!(exact_authority(&board), before);
         assert_eq!(
             board.projection(View::Referee).unwrap()["objects"]["f"]["power"],
             0

@@ -274,7 +274,11 @@ impl Game {
             "damage" => {
                 let amount = self.number(&node["amount"], frame)?;
                 let split = node["split"].as_str();
-                let hits=self.select(&node["subjects"],frame)?.iter().map(|id|json!({"source":frame.source,"target":id,"amount":split.map_or(amount,|key|int(&frame.decision["distribute"][key][id])),"battle":false})).collect::<Vec<_>>();
+                let targets = self.select(&node["subjects"], frame)?;
+                for id in &targets {
+                    self.numeric_prototype_operand(id, node["amount"].is_i64())?;
+                }
+                let hits=targets.iter().map(|id|json!({"source":frame.source,"target":id,"amount":split.map_or(amount,|key|int(&frame.decision["distribute"][key][id])),"battle":false})).collect::<Vec<_>>();
                 Self::prepend(
                     frame,
                     vec![json!({"op":"_damage","hits":hits,"orders":{},"bind":node["bind"]})],
@@ -688,6 +692,7 @@ impl Game {
                 advances.push(id.clone());
             }
         }
+        self.internal_numeric_cleanup();
         self.conceal_placement_order(&plans, frame);
         let erase_group = self.group();
         for id in erased {
@@ -747,6 +752,7 @@ impl Game {
         for field in ["power", "hp"] {
             let set_key = format!("set_{field}");
             if let Some(expr) = node.get(&set_key) {
+                self.numeric_base_replace_allowed(id)?;
                 let amount = self.number(expr, frame)?;
                 self.object_mut(id)?.state[field] = json!(amount);
                 if field == "hp" {
@@ -754,13 +760,13 @@ impl Game {
                 }
             }
             if let Some(expr) = node.get(field) {
+                self.numeric_prototype_operand(id, expr.is_i64())?;
                 let amount = self.number(expr, frame)?;
-                let object = self.object_mut(id)?;
-                object.state[field] = json!(int(&object.state[field]).saturating_add(amount));
-                if field == "hp" {
-                    object.state["max_hp"] =
-                        json!(int(&object.state["max_hp"]).saturating_add(amount));
-                }
+                self.numeric_add_base(
+                    id,
+                    if field == "power" { amount } else { 0 },
+                    if field == "hp" { amount } else { 0 },
+                )?;
             }
         }
         Ok(())

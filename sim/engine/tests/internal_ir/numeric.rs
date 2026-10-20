@@ -1,6 +1,9 @@
 use super::*;
 use sve_engine::game::internal::StatChangeFact;
 
+#[path = "numeric_turn.rs"]
+mod turn;
+
 const fn patch(stat: Stat, amount: Expr<Int>) -> CharacteristicPatch {
     CharacteristicPatch::Numeric {
         stat,
@@ -352,7 +355,10 @@ fn unsupported_numeric_shapes_are_rejected_in_dead_branches_before_draw() {
                 2,
                 zone(ZoneKind::Field, 130),
                 pair(1, 1),
-                DurationEnd::CurrentTurnEnd {},
+                DurationEnd::NextTurnEdge {
+                    player: PlayerRef::Controller {},
+                    edge: Edge::End,
+                },
             ),
         ] {
             let program = checked(vec![
@@ -371,7 +377,7 @@ fn unsupported_numeric_shapes_are_rejected_in_dead_branches_before_draw() {
 }
 
 #[test]
-fn prototype_decisions_cannot_mutate_a_game_with_typed_numeric_layers() {
+fn prototype_decisions_preserve_numeric_layers_and_reject_invalid_transport() {
     let mut game = game(1, 1);
     game.execute_internal(
         &checked(vec![buff(1, 1, 1)]),
@@ -380,8 +386,14 @@ fn prototype_decisions_cannot_mutate_a_game_with_typed_numeric_layers() {
     )
     .unwrap();
     let before = format!("{game:?}");
-    game.decide(&json!({"do":"end"}), "blocked").unwrap_err();
+    game.decide(&Value::Null, "blocked").unwrap_err();
     assert_eq!(before, format!("{game:?}"));
+    game.decide(&json!({"do":"end-phase"}), "allowed-with-layers")
+        .unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["f"]["power"],
+        3
+    );
     // The layer leaves with its generation, so no live layer remains.
     let mut moved = super::game(1, 1);
     moved
@@ -769,7 +781,7 @@ fn effective_source_reads_follow_earlier_instructions_and_reject_stale_or_other_
 }
 
 #[test]
-fn set_kind_turn_lifetimes_and_continuous_installs_stay_rejected_beside_an_add_control() {
+fn set_kind_turn_edges_and_continuous_installs_stay_rejected_beside_an_add_control() {
     let affected = Binding::new(1, ScopeId(191));
     let lifetime = Duration {
         end: DurationEnd::NoTemporalExpiry {},
@@ -825,8 +837,9 @@ fn set_kind_turn_lifetimes_and_continuous_installs_stay_rejected_beside_an_add_c
             2,
             zone(ZoneKind::Field, 193),
             pair(1, 1),
-            DurationEnd::NextTurnEnd {
+            DurationEnd::NextTurnEdge {
                 player: PlayerRef::Controller {},
+                edge: Edge::End,
             },
         ),
         continuous,

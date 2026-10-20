@@ -227,6 +227,7 @@ impl Game {
                     continue;
                 }
                 if entry["effect"]["op"] == "pilot" {
+                    self.numeric_base_replace_allowed(id)?;
                     for field in ["card_type", "power", "hp", "max_hp"] {
                         if let Some(prior) = entry["prior"].get(field) {
                             self.object_mut(id)?.state[field] = prior.clone();

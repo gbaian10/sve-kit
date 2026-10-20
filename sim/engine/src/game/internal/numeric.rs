@@ -70,6 +70,8 @@ struct Modifier {
 enum NumericEnd {
     NoTemporalExpiry,
     EndResolution,
+    Turn(u64),
+    NextTurn { player: u32, after: u64 },
 }
 
 impl NumericState {
@@ -205,7 +207,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     {
         if !matches!(
             expires.end,
-            DurationEnd::NoTemporalExpiry {} | DurationEnd::EndResolution {}
+            DurationEnd::NoTemporalExpiry {}
+                | DurationEnd::EndResolution {}
+                | DurationEnd::CurrentTurnEnd {}
+                | DurationEnd::NextTurnEnd { .. }
         ) || !matches!(expires.anchor, TimeAnchor::Installation {})
             || expires.usage.is_some()
             || !expires.intervals.is_empty()
@@ -227,6 +232,104 @@ fn check_patch(patch: &CharacteristicPatch) -> Result<()> {
     reason = "Numeric layers share the authoritative objects and instruction transaction."
 )]
 impl Game {
+    fn numeric_state(&self, id: &str) -> Option<&NumericState> {
+        self.state.ir_numeric.get(id).filter(|state| {
+            self.state
+                .objects
+                .get(id)
+                .is_some_and(|object| object.generation == state.generation)
+        })
+    }
+
+    pub(in crate::game) fn numeric_base_replace_allowed(&self, id: &str) -> Result<()> {
+        if self.numeric_state(id).is_some() {
+            return Err(unsupported(
+                "prototype kind or base replacement with numeric layers",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Legacy prototype arithmetic saturates, so only checked-safe operands may meet checked layers.
+    pub(in crate::game) fn numeric_prototype_operand(&self, id: &str, safe: bool) -> Result<()> {
+        if !safe && self.numeric_state(id).is_some() {
+            return Err(unsupported(
+                "saturating prototype arithmetic with numeric layers",
+            ));
+        }
+        Ok(())
+    }
+
+    /// numeric-timing §1.1 leaves how a timed or Set layer behaves after evolution undecided.
+    pub(in crate::game) fn numeric_evolution_allowed(&self, id: &str) -> Result<()> {
+        if self.numeric_state(id).is_some_and(|state| {
+            state.effects.iter().any(|effect| {
+                effect.end != NumericEnd::NoTemporalExpiry
+                    || matches!(effect.attack, Some(Change::Set(_)))
+                    || matches!(effect.life, Some(Change::Set(_)))
+            })
+        }) {
+            return Err(unsupported("evolution with timed or Set numeric layers"));
+        }
+        Ok(())
+    }
+
+    /// Add-only layers commute with a base delta; Set evolution still needs a rule decision.
+    pub(in crate::game) fn numeric_add_base(
+        &mut self,
+        id: &str,
+        attack: i64,
+        life: i64,
+    ) -> Result<()> {
+        let object = self.object(id)?;
+        let damage = number(&object.state, "max_hp")?
+            .checked_sub(number(&object.state, "hp")?)
+            .ok_or_else(|| invalid("numeric damage overflow"))?;
+        let mut state = self
+            .numeric_state(id)
+            .cloned()
+            .unwrap_or_else(|| NumericState {
+                generation: object.generation,
+                attack: super::super::int(&object.state["power"]),
+                life: super::super::int(&object.state["max_hp"]),
+                effects: Vec::new(),
+            });
+        if state.effects.iter().any(|effect| {
+            matches!(effect.attack, Some(Change::Set(_)))
+                || matches!(effect.life, Some(Change::Set(_)))
+        }) {
+            return Err(unsupported("base delta while Set is active"));
+        }
+        state.attack = add(state.attack, attack)?;
+        state.life = add(state.life, life)?;
+        let after = state.effective(damage)?;
+        if !state.effects.is_empty() {
+            self.state.ir_numeric.insert(id.into(), state);
+        }
+        self.internal_numeric_cache(id, after)
+    }
+
+    pub(in crate::game) fn numeric_damage(&mut self, id: &str, amount: i64) -> Result<()> {
+        let object = self.object(id)?;
+        let maximum = number(&object.state, "max_hp")?;
+        let damage = maximum
+            .checked_sub(number(&object.state, "hp")?)
+            .and_then(|damage| damage.checked_add(amount))
+            .ok_or_else(|| invalid("numeric damage overflow"))?;
+        let after = if let Some(state) = self.numeric_state(id) {
+            state.effective(damage)?
+        } else {
+            (
+                number(&object.state, "power")?,
+                maximum
+                    .checked_sub(damage)
+                    .ok_or_else(|| invalid("numeric life overflow"))?,
+                maximum,
+            )
+        };
+        self.internal_numeric_cache(id, after)
+    }
+
     pub(in crate::game) fn internal_numeric_active(&self) -> bool {
         !self.prepared.is_empty()
             || self.state.ir_numeric.iter().any(|(id, state)| {
@@ -284,9 +387,21 @@ impl Game {
         };
         let subjects = execution.objects(self, subjects)?;
         let (attack, life) = changes(execution, self, patch)?;
-        let end = match expires.end {
+        if matches!(
+            expires.end,
+            DurationEnd::CurrentTurnEnd {} | DurationEnd::NextTurnEnd { .. }
+        ) && (self.state.flow["kind"] == "pregame" || self.state.game["ended"] == true)
+        {
+            return Err(unsupported("turn duration requires an actual running turn"));
+        }
+        let end = match &expires.end {
             DurationEnd::NoTemporalExpiry {} => NumericEnd::NoTemporalExpiry,
             DurationEnd::EndResolution {} => NumericEnd::EndResolution,
+            DurationEnd::CurrentTurnEnd {} => NumericEnd::Turn(self.state.schedule.current()?),
+            DurationEnd::NextTurnEnd { player } => NumericEnd::NextTurn {
+                player: execution.player(self, player)?.seat,
+                after: self.state.schedule.current()?,
+            },
             _ => return Err(unsupported("numeric duration")),
         };
         let effect = EffectId(self.state.next_ir_effect);
@@ -299,6 +414,13 @@ impl Game {
             }
             if object.zone != "field" || !self.object_type(id)?.contains("フォロワー") {
                 return Err(unsupported("numeric subjects must be field followers"));
+            }
+            if self.state.continuous.iter().any(|entry| {
+                entry["effect"]["op"] == "pilot"
+                    && entry["generation"].as_u64() == Some(object.generation)
+                    && super::super::list(&entry["applies_to"]).contains(&json!(id))
+            }) {
+                return Err(unsupported("numeric installation during prototype pilot"));
             }
             let before_attack = number(&object.state, "power")?;
             let before_life = number(&object.state, "hp")?;
@@ -406,7 +528,7 @@ impl Game {
     }
 
     /// Layers belong to one generation; a moved target never carries them into a new one.
-    pub(super) fn internal_numeric_cleanup(&mut self) {
+    pub(in crate::game) fn internal_numeric_cleanup(&mut self) {
         let objects = &self.state.objects;
         self.state.ir_numeric.retain(|id, state| {
             objects
@@ -416,12 +538,35 @@ impl Game {
     }
 
     pub(super) fn internal_numeric_end_resolution(&mut self, execution: ExecutionId) -> Result<()> {
+        self.internal_numeric_expire(|effect| {
+            effect.end == NumericEnd::EndResolution && effect.execution == execution.0
+        })
+    }
+
+    pub(in crate::game) fn internal_numeric_end_turn(&mut self, turn: u64) -> Result<()> {
+        self.internal_numeric_cleanup();
+        self.internal_numeric_expire(|effect| effect.end == NumericEnd::Turn(turn))
+    }
+
+    pub(in crate::game) fn internal_numeric_begin_turn(&mut self) -> Result<()> {
+        let turn = self.state.schedule.current()?;
+        let player = super::player_id(self.active())?.seat;
+        for state in self.state.ir_numeric.values_mut() {
+            for effect in &mut state.effects {
+                if matches!(effect.end, NumericEnd::NextTurn { player: waiting, after } if waiting == player && turn > after)
+                {
+                    effect.end = NumericEnd::Turn(turn);
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn internal_numeric_expire(&mut self, expired: impl Fn(&Modifier) -> bool) -> Result<()> {
         let mut plans = Vec::new();
         for (id, state) in &self.state.ir_numeric {
             let mut remaining = state.clone();
-            remaining.effects.retain(|effect| {
-                effect.end != NumericEnd::EndResolution || effect.execution != execution.0
-            });
+            remaining.effects.retain(|effect| !expired(effect));
             if remaining.effects.len() == state.effects.len() {
                 continue;
             }

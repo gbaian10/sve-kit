@@ -189,11 +189,10 @@ fn expiring_earlier_add_recomputes_remaining_set_by_proper_play() {
             serde_json::from_value(serde_json::to_value(&board).unwrap()).unwrap();
         run(&mut restored, vec![], seat);
         stats(&restored, 1, 1, 1, 0);
-        let before = exact_authority(&restored);
         restored
             .decide(&json!({"do":"end-phase"}), "still-layered")
-            .unwrap_err();
-        assert_eq!(exact_authority(&restored), before);
+            .unwrap();
+        stats(&restored, 1, 1, 1, 0);
     }
 }
 
