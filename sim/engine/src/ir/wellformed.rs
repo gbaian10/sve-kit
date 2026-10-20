@@ -21,6 +21,7 @@ mod decisions;
 mod entries;
 mod events;
 mod evolution;
+mod installation;
 mod modes;
 mod movement;
 mod producers;
@@ -502,7 +503,10 @@ impl Checker {
             .as_ref()
             .map(|_| (self.env.bindings.clone(), self.env.access.clone()));
         // The action publishes its output only after all of its inputs were checked.
-        self.at("action", |checker| checker.action(&instruction.action))?;
+        let previous_source = self.ability_source.replace(instruction.source.clone());
+        let result = self.at("action", |checker| checker.action(&instruction.action));
+        self.ability_source = previous_source;
+        result?;
         if let Action::Discard { player, .. }
         | Action::Draw { player, .. }
         | Action::Search { player, .. } = &instruction.action

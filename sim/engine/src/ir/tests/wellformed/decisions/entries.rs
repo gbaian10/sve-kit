@@ -1,5 +1,6 @@
 use super::*;
 mod events;
+mod installation;
 mod review;
 
 fn playable(steps: Vec<Located<Node>>) -> CardProgram {

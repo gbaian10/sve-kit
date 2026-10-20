@@ -1,9 +1,8 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::{
-    Binding, Bool, Cardinality, CostChange, Duration, DurationEnd, Effect, Expr, FollowPermission,
-    InstallationSubjects, InstallationTime, MoveDestination, MoveReason, MoveSpec, MovementReceipt,
-    MovementReceiptList, ObjectRef, OwnerZone, PlayerRef, Position, SearchContinuation,
-    SearchDestination, SelectionConstraint, Selector, TimeAnchor, ZoneKind,
+    Binding, Bool, Cardinality, Expr, FollowPermission, MoveDestination, MoveReason, MoveSpec,
+    MovementReceipt, MovementReceiptList, ObjectRef, OwnerZone, PlayerRef, Position,
+    SearchContinuation, SearchDestination, SelectionConstraint, ZoneKind,
 };
 
 // Keep receipt outcome types intact while sharing the exhaustive movement family.
@@ -175,78 +174,5 @@ impl Checker {
 
     pub(super) fn movements_visible(&self, receipts: MovementReceiptList) -> Checked {
         movement_dispatch!(receipts, MovementReceiptList, receipts => self.visible_object(self.env.access.get(&receipts.key())))
-    }
-
-    pub(super) fn install(
-        &mut self,
-        subjects: &InstallationSubjects,
-        capture: InstallationTime,
-        effect: &Effect,
-        duration: &Duration,
-    ) -> Checked {
-        if capture != InstallationTime::InstructionStart {
-            return self.reject();
-        }
-        let InstallationSubjects::Objects { objects, affected } = subjects else {
-            return self.reject();
-        };
-        self.selector(objects)?;
-        self.installed_duration(duration)?;
-        self.isolated(|checker| {
-            let scope = affected.key().0;
-            if scope == checker.env.scope || !checker.scopes.insert(scope) {
-                return Err(checker.error(WellFormedReason::DuplicateScope));
-            }
-            checker.env.scope = scope;
-            checker.define(*affected, BindingKind::Value)?;
-            checker.at("effect", |checker| match effect {
-                Effect::CostModifier {
-                    subjects: targets,
-                    change,
-                    duration: effect_duration,
-                    usage: None,
-                } if *targets
-                    == (Selector::Bound {
-                        reference: *affected,
-                    })
-                    && effect_duration == duration =>
-                {
-                    checker.selector(targets)?;
-                    match change {
-                        CostChange::Set {
-                            amount: Expr::Literal(amount),
-                        } if amount.0 < 0 => checker.reject(),
-                        CostChange::Delta { amount } | CostChange::Set { amount } => {
-                            checker.integer(amount)
-                        }
-                    }
-                }
-                Effect::Continuous { .. }
-                | Effect::Replacement { .. }
-                | Effect::Permission { .. }
-                | Effect::RuleModifier { .. }
-                | Effect::DeckRule { .. }
-                | Effect::CostModifier { .. } => checker.reject(),
-            })
-        })
-    }
-
-    fn installed_duration(&mut self, duration: &Duration) -> Checked {
-        if duration.anchor != (TimeAnchor::Installation {})
-            || duration.usage.is_some()
-            || !duration.intervals.is_empty()
-        {
-            return self.reject();
-        }
-        match &duration.end {
-            DurationEnd::CurrentTurnEnd {}
-            | DurationEnd::EndResolution {}
-            | DurationEnd::NoTemporalExpiry {} => Ok(()),
-            DurationEnd::NextTurnEnd { player }
-            | DurationEnd::NextPhaseEdge { player, .. }
-            | DurationEnd::NextTurnEdge { player, .. } => self.player(player),
-            DurationEnd::While { predicate } => self.boolean(predicate),
-            DurationEnd::SourceZoneExit { source, .. } => self.object(source),
-        }
     }
 }

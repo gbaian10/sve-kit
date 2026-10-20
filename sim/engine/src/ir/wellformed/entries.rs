@@ -432,7 +432,7 @@ impl Checker {
         }
     }
 
-    fn permission_action(
+    pub(super) fn permission_action(
         &mut self,
         subject: &PermissionSubject,
         action: &ActionPattern,
@@ -463,7 +463,7 @@ impl Checker {
         }
     }
 
-    fn patch(&mut self, patch: &CharacteristicPatch, layer: ContinuousLayer) -> Checked {
+    pub(super) fn patch(&mut self, patch: &CharacteristicPatch, layer: ContinuousLayer) -> Checked {
         match patch {
             CharacteristicPatch::Combined { patches } if !patches.is_empty() => {
                 for (index, child) in patches.iter().enumerate() {
