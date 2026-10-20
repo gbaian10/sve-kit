@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, override
 import pytest
 from sve_carddb.export.read_api import (
     INDEX,
+    POINTER,
     ExportError,
     array,
     canonical,
@@ -21,10 +22,12 @@ from sve_carddb.export.read_api import (
 )
 from sve_carddb.export.transport.compression import python_brotli
 
-from sve_publish.adapter import Stored
+from sve_publish.adapter import SNAPSHOT_PREFIXES, Stored
+from sve_publish.gc import collect, retained
 from sve_publish.headers import INDEX_HEADERS, JSON_HEADERS, member_headers
 from sve_publish.inventory import INVENTORY
 from sve_publish.publish import upload
+from sve_publish.snapshot_diff import missing_members
 
 from .r2_export_fixtures import export
 from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- synthetic corpus
@@ -68,6 +71,88 @@ def retained_entry(
         raw, '"retained"', JSON_HEADERS
     )
     return result
+
+
+@pytest.mark.parametrize("slot", ["current", "previous"])
+def test_old_manifest_shape_supports_incremental_upload_and_gc(
+    images: PublicImages, roots: Roots, slot: str
+) -> None:
+    export(images, roots, step=0, brotli=python_brotli())
+    first = load_export(roots.preview)
+    fake = DelayedS3(delay=0)
+    old = manifest(first)
+    old["errata_card_ids"] = []
+    old["min_reader_version"] = "4.0.0"
+    old_entry = retained_entry(fake, first.entry | {"min_reader_version": "4.0.0"}, old)
+    export(images, roots, step=1, brotli=python_brotli())
+    second = load_export(roots.preview)
+    current_entry = retained_entry(fake, second.entry, manifest(second))
+    index: dict[str, JsonValue] = {
+        "index_format": 2,
+        "revision": 2,
+        "current": old_entry if slot == "current" else current_entry,
+        "previous": old_entry if slot == "previous" else None,
+    }
+    fake.objects[INDEX] = Stored(canonical(index), '"index"', INDEX_HEADERS)
+    old_keys = closure(string(old_entry["manifest_path"]), old)
+    known = old_keys | (declared(second) if slot == "previous" else set())
+    with memory_store(fake) as store:
+        missing = missing_members(store, index, second.members)
+        assert {member.key for member in missing} == {
+            member.key for member in second.members
+        } - known
+        _remote, required, optional = retained(store)
+    assert required == known
+    assert string(old_entry["manifest_path"]) + ".br" in optional
+    assert all(method == "GET" for method, _key in fake.requests)
+
+
+def test_new_export_still_requires_the_full_manifest_schema(
+    images: PublicImages, roots: Roots
+) -> None:
+    export(images, roots, step=0)
+    loaded = load_export(roots.preview)
+    value = manifest(loaded)
+    value["errata_card_ids"] = []
+    raw = canonical(value)
+    path = "snapshots/manifests/" + digest(raw)[7:] + ".json"
+    (roots.preview / path).write_bytes(raw)
+    (roots.preview / POINTER).write_bytes(
+        canonical({"manifest_path": path, "manifest_sha256": digest(raw)})
+    )
+    with pytest.raises(ExportError, match="Export validation failed"):
+        load_export(roots.preview)
+
+
+@pytest.mark.parametrize("damage", ["hash", "canonical", "files", "changes_ref"])
+def test_damaged_retained_envelopes_stop_gc_before_deletion(
+    images: PublicImages, roots: Roots, damage: str
+) -> None:
+    export(images, roots, step=0)
+    loaded = load_export(roots.preview)
+    value = manifest(loaded)
+    value["errata_card_ids"] = []
+    if damage in {"files", "changes_ref"}:
+        value[damage] = "invalid"
+    fake = DelayedS3(delay=0)
+    entry = retained_entry(fake, loaded.entry, value)
+    path = string(entry["manifest_path"])
+    if damage in {"hash", "canonical"}:
+        raw = fake.objects[path].raw + b"\n"
+        if damage == "canonical":
+            path = "snapshots/manifests/" + digest(raw)[7:] + ".json"
+            entry |= {"manifest_path": path, "manifest_sha256": digest(raw)}
+        fake.objects[path] = Stored(raw, '"damaged"', JSON_HEADERS)
+    fake.objects[INDEX] = Stored(
+        canonical(
+            {"index_format": 2, "revision": 1, "current": entry, "previous": None}
+        ),
+        '"index"',
+        INDEX_HEADERS,
+    )
+    with memory_store(fake) as store, pytest.raises(ExportError):
+        collect(store, SNAPSHOT_PREFIXES, execute=True)
+    assert all(method == "GET" for method, _key in fake.requests)
 
 
 def test_first_publish_and_current_rerun_trust_the_committed_index(
@@ -239,6 +324,7 @@ def test_optional_manifest_brotli_is_not_inferred_from_its_raw_manifest(
     [
         "missing",
         "hash",
+        "canonical",
         "schema",
         "identity",
         "manifest-path",
@@ -272,6 +358,8 @@ def test_bad_retained_manifests_stop_before_any_put(
                 lengths = object_value(row["compressed_bytes"])
                 lengths["br"] = integer(lengths["br"]) + 1
         content = canonical(raw)
+        if damage == "canonical":
+            content += b"\n"
         entry["manifest_sha256"] = digest(content)
         entry["manifest_path"] = "snapshots/manifests/" + digest(content)[7:] + ".json"
         if damage == "manifest-path":
