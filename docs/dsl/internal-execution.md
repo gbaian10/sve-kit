@@ -21,7 +21,10 @@ integer ResolutionChoice。數值支援常值、已驗 binding／capture、公�
 Game／State、區域順序、RNG、Knowledge、事件與待機仍使用原有權威狀態。
 typed ObjectId 由 State 內的持久映射配發給原型物件 ID，同一局內不重新編號、不重用，存檔後沿用。
 內部續體只存 typed node、帶 ScopeId 的 slot、typed quantity receipt 及 input occurrence。
-失敗時還原整份 Game，包含私有續體、事件 buffer、RNG、使用紀錄與輸入 epoch。
+入口失敗與錯誤回答還原整份 Game，包含私有續體、事件 buffer、RNG、使用紀錄與輸入 epoch；
+尚未開始分配的 execution 在有效回答後執行失敗，同樣還原到回答前並保留原詢問。
+已開始分配的 execution 若在有效回答後執行失敗，回復 execution 前的 Game 並取消續體；
+僅保留已外發 epoch 的高水位，避免舊 token 因回復而復活。
 執行入口不允許原型 decide／submit 插入待答中的 typed 解算。尚無 typed save 格式；
 序列化或計算 digest 待答 Game 會明確失敗，不能靜默遺失續體。
 
@@ -62,6 +65,31 @@ BP01-006 四點傷害與 BP02-052 固定手札數為 3 的 Uniform 傷害片段�
 不承載混合護符的篩選、動態手札計數、進化、棄牌或打出程序。這些測試不包含 BP01-065 的
 SpellChain／PP 回復，也不包含 BP01-006 的打出時目標選取與整卡准入；不宣稱整卡已遷移完成。
 BP06-110 未准入。
+
+## 合成結算分配
+
+Distribution 僅准入必選、Public 的合成 ResolutionChoice；來源座標的 card_no 必須是
+`synthetic`，不將此入口視為已審真實卡文證據。PlayParameter、付款、AtSelection、
+模式及整張 CardProgram 仍整棵拒絕。真實結算卡沒有時點與 minimum 來源也拒絕。
+分配與 Search／Order／UpToStepwise 混用時也在完整 requirement 預檢拒絕（含死分支）；
+這些 answer handler 尚未區分錯誤回答與驗答成功後的提交失敗，不能承諾分配的整次回復。
+
+每題求出並去重 ResolvedRecipients，凍結 total、IR minimum、snapshot 與
+`(ExecutionId, ScopeId, DecisionId, binding slot)` producer。只接受目前場上從者與主戰者，
+場外捕捉證據、非從者、過期域都拒絕。非空域 minimum×人數超過 total、溢位或 total
+超出 Damage receipt 的有號範圍時，完整回復 execution，不發無解題目；不縮小域。
+空域自動保存空分配，Allocation requested／actual 為零，後句仍執行。
+
+題目只給 actor／Referee token 範圍的 handle 與公開印刷資訊；答案不能注入物件 ID／世代。
+驗證完整 actor／token／epoch、恰好一項對應每個原成員、minimum、checked 精確總和。
+漏項、重複、外來 handle、錯總量或錯回答變體保持同一待答狀態；已消耗 token 拒絕重播。
+其他玩家不取得可操作題目。
+
+Allocation Damage 只讀同 execution 的完整 producer，不重算 selector／total；requested
+是答案和，actual 僅含仍合法原世代的正量。換區成員失效，不改選新世代、不把量補給
+其他成員、不以剩餘生命封頂；零量不發傷害事實。同型 Damage receipt 可接既有投影。
+合成測試對應分配契約的空域、最低量、凍結總量及失效成員要求，不宣稱 BP08-028、
+BP16-077 的正式打出流程或整卡可執行。每項不同下限與 LKI 仍拒絕。
 
 ## 公開區域移動與破壞
 

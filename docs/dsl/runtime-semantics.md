@@ -87,7 +87,8 @@
 每目標事實保持每項正量；receipt 合計不另生一個總量傷害事件。只在整個指示完成後
 發布，simultaneous sibling 不可提前讀。求和、Int／Nat 轉型與乘法皆 checked；超出
 內部可表示範圍回傳 Unsupported／執行錯誤並回復提交，不飽和也不當作遊戲規則。
-內部 executor 的 Uniform 子集依此契約開放同型 Damage 投影；Allocation 仍須另行完成執行與驗收。
+內部 executor 的 Uniform 與合成 ResolutionChoice Allocation 子集依此契約開放同型 Damage 投影；
+正式 play 分配與真實結算卡的來源證據准入仍未開放。
 該內部子集只接納從者物件成員；含不能確認為從者的物件集合整次拒絕，不在此定義其 requested。
 目前世代的非場上物件、或捕捉時不全在場上的集合也拒絕；從場上捕捉後失效的從者不受此限制。
 

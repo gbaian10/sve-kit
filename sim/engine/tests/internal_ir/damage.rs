@@ -570,3 +570,58 @@ fn printed_bp02_052_uniform_fragment_aggregates_three_frozen_hand_cards() {
         assert_eq!(projection[actor]["hand_count"], 3);
     }
 }
+
+#[test]
+fn union_cannot_hide_an_off_field_capture_and_rolls_back_every_prior_effect() {
+    for seat in [1, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        let mut position = setup(seat, json!([{ "id":"d","card":"unit-follower" }]));
+        position["players"][actor]["zones"]["cemetery"] =
+            json!([{ "id":"a","card":"unit-follower" }]);
+        let mut game = Game::new(
+            catalog(),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "union-capture",
+        )
+        .unwrap();
+        let before = exact_authority(&game);
+        let views = [View::P1, View::P2, View::Referee];
+        let observations = views.map(|view| game.projection(view).unwrap());
+        let binding = Binding::new(1, ScopeId(1));
+        let captured = Selector::Captured {
+            reference: CaptureRef { binding },
+        };
+        let program = checked(vec![
+            node(Node::Capture {
+                capture: Capture::Objects {
+                    at: CaptureTime::AtResolution { scope: ScopeId(1) },
+                    value: zone(ZoneKind::Cemetery, 90),
+                    into: CaptureRef { binding },
+                },
+            }),
+            draw(1, 1),
+            movement::put(2, captured.clone(), OwnerZone::Banish),
+            damage(
+                3,
+                RecipientSet::Objects {
+                    objects: Selector::Union {
+                        sets: vec![captured, zone(ZoneKind::Field, 91)],
+                    },
+                },
+                2,
+            ),
+        ]);
+        let error = game
+            .execute_internal(&program, &source("synthetic"), context(seat))
+            .unwrap_err();
+        assert!(matches!(&error, sve_engine::EngineFailure::Unsupported(_)));
+        assert!(error.to_string().contains("non-field damage capture"));
+        assert_eq!(exact_authority(&game), before);
+        assert_eq!(
+            views.map(|view| game.projection(view).unwrap()),
+            observations
+        );
+    }
+}

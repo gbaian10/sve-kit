@@ -10,6 +10,22 @@ pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<
         source: source.clone(),
     };
     let requirements = Requirements::derive_program(&located);
+    let has = |code| {
+        requirements
+            .required
+            .iter()
+            .any(|requirement| requirement.capability.code == code)
+    };
+    // These answer handlers do not yet distinguish invalid input from a failed commit.
+    if has("shape.ChoiceDomain.Distribution")
+        && (has("action.search")
+            || has("action.order")
+            || has("internal.StepwiseMode.UpToStepwise"))
+    {
+        return Err(unsupported(
+            "distribution mixed with another interactive continuation",
+        ));
+    }
     let missing = requirements
         .required
         .iter()
@@ -57,6 +73,13 @@ fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
                 }
             }
             Node::Decision { decision } => {
+                if matches!(decision.domain, ChoiceDomain::Distribution { .. })
+                    && source.card_no != "synthetic"
+                {
+                    return Err(unsupported(
+                        "resolution distribution without reviewed timing/minimum evidence",
+                    ));
+                }
                 if !matches!(
                     decision.domain,
                     ChoiceDomain::Integer {
@@ -65,7 +88,7 @@ fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
                             ..
                         },
                         ..
-                    }
+                    } | ChoiceDomain::Distribution { .. }
                 ) || !decision.captures.is_empty()
                     || !matches!(decision.visibility, Visibility::Public {})
                     || !matches!(
@@ -176,6 +199,8 @@ fn supported(code: &str) -> bool {
             | "shape.ObjectView.Current"
             | "shape.BatchPolicy.Instruction"
             | "shape.DamageAmount.Uniform"
+            | "shape.DamageAmount.Allocation"
+            | "damage.allocation"
             | "shape.RecipientSet.Objects"
             | "recipient.objects"
             | "shape.RecipientSet.Leaders"
@@ -277,6 +302,7 @@ fn supported(code: &str) -> bool {
             | "receipt.local"
             | "decision.input"
             | "shape.ChoiceDomain.Integer"
+            | "shape.ChoiceDomain.Distribution"
             | "shape.DecisionKind.ResolutionChoice"
             | "decision.resolution-choice"
             | "internal.Declinable.Required"

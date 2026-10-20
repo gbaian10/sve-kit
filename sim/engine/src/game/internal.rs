@@ -8,16 +8,16 @@
 use super::{Frame, Game, View, int};
 use crate::ir::{
     Action, Arithmetic, Binding, Bool, Capture, CaptureRef, CardQuantityOutcome, Cardinality,
-    ChoiceDomain, Comparison, Control, DamageAmount, DamageEvent, DamageFlags,
-    DamageQuantityOutcome, DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome,
-    DrawEvent, EffectId, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
-    InstructionContext, Int, IntFrozen, IntOperation, IntRead, Located, LookOutcome,
-    MeasuredReceipt, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen,
-    ObjectId, ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PlayerId, PlayerRef,
-    PlayerRelation, PlayerResource, PlayerSet, PositiveInt, Predicate, Program, ReceiptId,
-    ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients, RuntimeDamageRecipient,
-    RuntimeObjectView, ScopeId, SearchOutcome, Selector, SnapshotId, SourceSpan, StepwiseAnswer,
-    StepwiseMode, Visibility, WellFormedProgram, ZoneKind,
+    ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags, DamageQuantityOutcome,
+    DamageRecipient, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, EffectId,
+    ExecutionId, Expr, Generation, InstallationSubjects, Instruction, InstructionContext, Int,
+    IntFrozen, IntOperation, IntRead, Located, LookOutcome, MeasuredReceipt, MoveOutcome, Nat,
+    NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
+    ObjectView, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet,
+    PositiveInt, Predicate, Program, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
+    ResolvedRecipients, RuntimeDamageRecipient, RuntimeObjectView, ScopeId, SearchOutcome,
+    Selector, SnapshotId, SourceSpan, StepwiseAnswer, StepwiseMode, Visibility, WellFormedProgram,
+    ZoneKind,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -28,12 +28,14 @@ use serde::{Serialize as _, Serializer};
 use serde_json::{Value, json};
 
 mod admission;
+mod allocation;
 mod movement;
 mod numeric;
 mod ordering;
 mod search;
 mod values;
 
+pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
 pub use movement::MovementFact;
 pub(super) use numeric::NumericState;
 pub use numeric::StatChangeFact;
@@ -101,6 +103,8 @@ pub enum InputDomain {
     Search(SearchDomain),
     /// One printed destination allocation from the frozen remaining found set.
     SearchPartition(SearchPartitionDomain),
+    /// Frozen recipients addressed only by this question's handles.
+    Distribution(DistributionDomain),
 }
 
 /// Internal answer, checked against actor and the entire decision token.
@@ -116,6 +120,8 @@ pub enum Answer {
     Search(SearchAnswer),
     /// Fresh handles for the current destination allocation only.
     SearchPartition(Vec<u64>),
+    /// Exactly one nonnegative share per frozen recipient.
+    Distribution(Vec<DamageShare>),
 }
 
 /// Typed instruction outcomes retained only by the authority.
@@ -188,6 +194,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
     Search(search::SearchWait),
     SearchPartition(search::PartitionWait),
@@ -217,6 +224,9 @@ pub(super) struct Execution {
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
+    allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
+    origin: Option<Box<Game>>,
+    distribution_started: bool,
 }
 
 #[expect(
@@ -355,6 +365,9 @@ impl Game {
                 waiting: None,
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
+                allocations: BTreeMap::new(),
+                origin: Some(Box::new(before.clone())),
+                distribution_started: false,
             };
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
@@ -380,6 +393,7 @@ impl Game {
         answer: Answer,
     ) -> Result<Progress> {
         let before = self.clone();
+        let mut rollback = None;
         let result = (|| {
             let mut execution = self
                 .typed
@@ -393,6 +407,9 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::Distribution(wait), Answer::Distribution(shares)) => {
+                    execution.distribution_answer(&wait, &shares)?;
+                }
                 (Wait::Order(wait), Answer::Order(handles)) => {
                     self.internal_order_answer(&mut execution, &wait, &handles)?;
                 }
@@ -454,7 +471,12 @@ impl Game {
                 }
                 _ => return Err(invalid("answer is outside the internal domain")),
             }
-            self.internal_run(&mut execution)?;
+            if let Err(error) = self.internal_run(&mut execution) {
+                if execution.distribution_started {
+                    rollback = execution.origin.take();
+                }
+                return Err(error);
+            }
             let progress = execution.progress();
             if !progress.complete {
                 self.typed = Some(execution);
@@ -462,7 +484,14 @@ impl Game {
             Ok(progress)
         })();
         if result.is_err() {
-            *self = before;
+            if let Some(origin) = rollback {
+                let epoch = self.state.ir_epoch.max(before.state.ir_epoch);
+                *self = *origin;
+                // An externally observed token must never become live again after rollback.
+                self.state.ir_epoch = epoch;
+            } else {
+                *self = before;
+            }
         }
         result
     }
@@ -484,6 +513,7 @@ impl Game {
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
                 InputDomain::Search(domain) => search::packet(&domain),
                 InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
+                InputDomain::Distribution(domain) => allocation::packet(&domain),
             };
             json!({"by":seat_name(question.actor).unwrap_or_default(),"execution":question.token.execution.0,"decision":question.token.decision.0,"epoch":question.token.epoch,"domain":domain})
         })
@@ -578,6 +608,10 @@ impl Game {
                 }
                 Node::Capture { capture } => execution.capture(self, &capture)?,
                 Node::Decision { decision } => {
+                    if matches!(decision.domain, ChoiceDomain::Distribution { .. }) {
+                        self.internal_distribution(execution, &decision)?;
+                        continue;
+                    }
                     let ChoiceDomain::Integer {
                         cardinality,
                         binding,
@@ -726,20 +760,15 @@ impl Game {
             }
             Action::Damage {
                 recipients,
-                amount: DamageAmount::Uniform { amount },
+                amount: damage_amount,
                 source:
                     ObjectView::Current {
                         object: source_object,
                     },
                 ..
             } => {
-                let recipients = execution.recipients(self, recipients)?;
-                let amount = execution.integer(self, amount)?;
-                let requested = amount
-                    .0
-                    .max(0)
-                    .checked_mul(i64::try_from(recipients.members().len()).map_err(invalid)?)
-                    .ok_or_else(|| invalid("damage requested overflow"))?;
+                let (shares, requested) =
+                    execution.damage_shares(self, recipients, damage_amount)?;
                 let source = execution.object(self, source_object)?;
                 let source_id = execution.object_id(source)?.to_owned();
                 if self.object(&source_id)?.generation != source.generation.0 {
@@ -750,8 +779,10 @@ impl Game {
                 let mut hits = Vec::new();
                 let mut facts = Vec::new();
                 let mut actual = 0_u64;
-                for recipient in recipients.members() {
-                    let target = match *recipient {
+                for share in shares {
+                    let recipient = share.recipient;
+                    let amount = i64::try_from(share.amount.0).map_err(invalid)?;
+                    let target = match recipient {
                         RuntimeDamageRecipient::Leader { player } => {
                             format!("{}.leader", seat_name(player)?)
                         }
@@ -771,20 +802,18 @@ impl Game {
                             id.to_owned()
                         }
                     };
-                    if let Ok(positive) =
-                        NonZeroU64::try_from(u64::try_from(amount.0).unwrap_or_default())
-                    {
-                        self.internal_damage_arithmetic(&target, amount.0)?;
+                    if let Ok(positive) = NonZeroU64::try_from(share.amount.0) {
+                        self.internal_damage_arithmetic(&target, amount)?;
                         actual = actual
                             .checked_add(positive.get())
                             .ok_or_else(|| invalid("damage outcome overflow"))?;
-                        hits.push(json!({"source":source_id,"target":target,"amount":amount.0,"battle":false,"attack":false}));
+                        hits.push(json!({"source":source_id,"target":target,"amount":amount,"battle":false,"attack":false}));
                         facts.push(Fact::Damage(DamageEvent {
                             source: RuntimeObjectView {
                                 object: source,
                                 snapshot,
                             },
-                            recipient: *recipient,
+                            recipient,
                             amount: PositiveInt(positive),
                             flags: DamageFlags::Ability,
                             controller: actor,
