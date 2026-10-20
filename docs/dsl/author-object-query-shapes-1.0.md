@@ -4,6 +4,9 @@
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 `ObjectSel` 表 A.sel.object-core，含區域物件、binding／快照物件與這些來源的物件聯集；
 它不接受領袖 recipient，未涵蓋完整 Sel，也不提供完整作者 reader 或執行准入。
+已定形的單組選取父節點與要求量見[數量矩陣](author-quantity-shapes-1.0.md)。
+DeckSlice 只定動作同層 top 的共用 payload；ObjectSel 不因而接受 top／bottom。
+語法 §5 的頂底切片登錄保留，獨立 Sel 消費位置仍待證，不以目的地 position:bottom 作來源例。
 
 ## 逐 variant 矩陣
 
@@ -67,7 +70,7 @@ any_of:
 ```
 
 以上卡例取自 `card-data/jp/` 遞迴各子目錄的凍結卡文 text／sections，不以 Q&A 作卡例；
-只驗來源片段可表達，沒有宣稱完整父動作已實作。
+只驗來源片段可表達，沒有宣稱完整父動作已實作；單組 choose 的數量變體另見數量矩陣。
 BP07-050 的 t 須有合法前序目標宣告，其 controller 捕捉／離場 LKI 沿既有規則另驗。
 CountSource 仍是獨立的區域計數與計數聯集；不因 ObjectUnion 接受 in、except、where
 就擴大 count 的 payload 或葉參數權限。相同 wire 可以在兩個位置各自合法，角色仍不同。

@@ -7,6 +7,9 @@
 表中**每個 variant 定義也只在片段層封閉**；它們的 E、C、A.ref operand 目前不是完整值域。
 完整型別可相容擴展這些 operand 參照，不縮減現在合法的輸入。
 `cmp` 目前只定數值比較，其他同型值的比較形狀不在本表。
+非 Int 的全部分支抽為同一 A.expr.numeric-operation／NumericOperation，
+NumericExpr 為 Int 或 NumericOperation；[要求量矩陣](author-quantity-shapes-1.0.md)
+以 Nat 配同一 operation 建立 Quantity，沒有另複製一份算式清單。
 
 ## 數值與葉參數的位置
 
@@ -130,8 +133,9 @@ hand、leader_life、counter、dice、paid、x_paid 的精確形狀亦不在本�
 其中 hand、leader_life 不依賴 Sel，但必須分清同名 Expr 與 Cond 的 payload。
 本表不定義 `at` 捕捉的附掛位置；片段的封閉 mapping 不表示完整讀值語法禁止捕捉。
 
-完整 Cond 的資源門檻、物件／規則狀態與歷史謂詞尚不在本核心。本表不定義完整 Sel 的 filter、
-精確數／upto／any 或 first／second／rest 的編碼，也不提供有序／角色視圖的接線驗證。
+完整 Cond 的資源門檻、物件／規則狀態與歷史謂詞尚不在本核心。本表不定義完整 Sel 的 filter
+或 first／second／rest 的編碼，也不提供有序／角色視圖的接線驗證。
+單組父節點的精確數／upto／any 另由要求量矩陣定形，不代表完整動作欄位均已接入。
 完整 Sel 與動作位置的重疊仍須逐位置檢查；已定形的領袖葉分支與數量位置規則見
 [角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 裸 BindingName 與未來可能使用的字串關鍵字須保持不相交，不能讓同一字串同時是

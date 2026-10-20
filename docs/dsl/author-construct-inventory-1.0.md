@@ -92,11 +92,17 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 計數 any_of 保留 counted 角色並先去重；選取 any_of 另分純物件 ObjectUnion
 與至少含一個領袖 limb 的 RecipientUnion，見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
 具名 RecipientSel 不擴大物件消費位置；等義拼法不推定相同 body hash。
-這些片段不表示上表全部 Sel filter、切片來源或完整父動作已實作。
+單組 Target／choose／search 的數量父變體、counter 與 DeckSlice 已定形，
+見[要求量矩陣](author-quantity-shapes-1.0.md)的逐 variant 與延後欄位清單。
+這些片段不表示上表全部 Sel filter 或完整父動作已實作；
+Sel.top／bottom 的登錄保留，尚不加入 ObjectSel。
 
 ## 動作與內層選項
 
 動作共通 `result? / precondition?` 不表示每個短形都可附物件欄位；短形須轉成該動作已登錄的長形。by 是執行者，who 是資源接受者，目的區持有者另判。
+
+move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{top:…} 別名；
+四個完整父動作尚未實作。費用 banish.top 是相同 payload 的第五個位置，待完整 Cost。
 
 | 動作 | payload／額外鍵 | 互斥與上下文 |
 | --- | --- | --- |

@@ -4,7 +4,8 @@
 機器語法以 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 為準。
 節點定義包含下列角色宣告、[領袖引用](author-reference-shapes-1.0.md#變體矩陣)
 及獨立的[物件來源／計數片段](author-object-query-shapes-1.0.md)；
-本表另定義具名 `RecipientSel`；數量位置規則尚未由完整 Target／Sel／動作 schema 強制。
+本表另定義具名 `RecipientSel`；單組 Target／choose／search 與 counter 的數量父變體
+見[要求量與切片矩陣](author-quantity-shapes-1.0.md)，其餘父動作仍未完成。
 這些片段不提供作者文件入口、作用域驗證或執行准入。
 
 ## 角色宣告矩陣
@@ -24,7 +25,7 @@ RoleName 與 BindingName 是不同命名空間；roles map 的鍵序沒有語義
 
 Schema 只檢查這些形狀；接線還須確認 `role.of` 指向宣告角色的 Target binding，
 `role.name` 確實存在，且使用位置接受該角色的單一物件或集合基數。
-多個 `remaining` 能否共存及其扣除語義不由本片段授權，也不因形狀驗證通過而自動成立。
+多個 `remaining` 的扣除語義定案前，接線須拒絕；形狀驗證通過不授予這項語義。
 `first/second/rest` 的順序引用尚未定編碼；A.ref 仍不接受 `{first:t}` 或 `"first:t"` 等候選拼法。
 有角色的集合不等於有順序，無序集合不能任取第一項。
 
@@ -45,7 +46,7 @@ Pydantic 的 `Literal[1]` 即使 strict 也可能接受 bool 或浮點；Python 
 | A.act.choose | n／upto／any:true | 必填一種 | 同上 |
 | A.act.search 單組 | n／upto | 必填一種；groups 是另一形狀 | 同上；不接受 any |
 | 費用材料 | n／upto／any:true | 由各成本變體定義，不從共用鍵推導 | 無 |
-| cost.counter 的 counter 數 | n／upto／any:true | 由 Cost 變體定義 | 無 |
+| cost.counter 的 counter 數 | n／upto／any:true | 必填一種，見要求量矩陣 | 無 |
 | cost.counter.holders | holder 數量 | on 為 Sel 時須明示；on:this 唯一，不另問 holder | 無 |
 | A.act.create | n／upto／any:true | 可省略；預設每名 1 | 只有 n：Nat/count/value，不是 selection_count |
 | A.choice | n／upto | 必填一種；upto 的實際選擇 1..N | 無 |
@@ -126,6 +127,7 @@ canonical JSON 不重寫上述結構；執行成員去重不表示作者 bytes �
 物件來源位置只能使用 ObjectSel，例如 move／search／choose 的物件來源與費用材料；
 count 使用獨立 CountSource，in 使用 Ref／SnapshotRead。
 接受領袖的 Target、damage.to、cannot.attack.target 等位置的選擇器分支才使用 RecipientSel，
-不得再另加同形領袖支線。這是父節點後續實作的義務，本片未新增完整父動作 Schema。
+不得再另加同形領袖支線。單組 Target.from 已使用 RecipientSel，
+choose.from／search.sel 只使用 ObjectSel；其他父動作的接入仍是後續實作義務。
 來源角色、binding 基數、Live／快照可用性、世代、去重與批次仍由接線與 lowering 驗證；
 形狀驗證不授予操作能力，也不等於完整 Sel 或執行准入。
