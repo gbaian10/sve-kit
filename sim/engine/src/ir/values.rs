@@ -581,6 +581,8 @@ variants!(IntFrozen {
     StatDelta { event: Binding<StatDelta> } => ["read.event-field"]
 });
 variants!(NatFrozen {
+    SearchFoundCount { found: Binding<super::SearchFound> } => [],
+    SearchRevealedCount { revealed: Binding<super::SearchRevealed> } => [],
     ReceiptActual { receipt: MeasuredReceipt } => ["read.receipt.actual"],
     EarthRiteRemovedStack { component: Binding<EarthRitePaidComponent> } => ["read.payment.earth-rite-stack"],
     DiceAcceptedAttempt { event: Binding<DiceEvent> } => ["read.event-field"],

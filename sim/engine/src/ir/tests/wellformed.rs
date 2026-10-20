@@ -710,12 +710,9 @@ fn each_player_carries_same_player_outputs_across_stages() {
 #[test]
 fn unchecked_connections_fail_closed_instead_of_minting_a_certificate() {
     for seed in [cp04(true, false), cp04(false, false)] {
-        for ability in seed.node.abilities {
-            reject(
-                ability.node.body.expect("seed body"),
-                WellFormedReason::UnsupportedShape,
-            );
-        }
+        let error = WellFormedCardProgram::check(seed.node).unwrap_err();
+        assert_eq!(error.reason, WellFormedReason::UnsupportedShape);
+        assert!(error.ir_path.ends_with("/abilities/0"), "{}", error.ir_path);
     }
     reject(
         body(

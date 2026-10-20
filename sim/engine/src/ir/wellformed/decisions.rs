@@ -421,15 +421,15 @@ impl Checker {
             Selector::ReceiptMembers { receipt, .. } => match receipt {
                 ObjectReceipt::Look { receipt } => self.visible_receipt(receipt),
                 ObjectReceipt::Token { receipt } => self.visible_receipt(receipt),
+                ObjectReceipt::Movement { receipt } => self.movement_visible(receipt),
                 ObjectReceipt::Batch { .. }
                 | ObjectReceipt::TransformBanished { .. }
                 | ObjectReceipt::TransformCreated { .. }
-                | ObjectReceipt::Movement { .. }
                 | ObjectReceipt::Flip { .. } => self.reject(),
             },
-            Selector::MoveAfterAll { .. }
-            | Selector::MoveAfter { .. }
-            | Selector::Zone {
+            Selector::MoveAfterAll { receipts, .. } => self.movements_visible(*receipts),
+            Selector::MoveAfter { receipt, .. } => self.movement_visible(receipt),
+            Selector::Zone {
                 zone:
                     ZoneKind::Hand
                     | ZoneKind::Field

@@ -389,6 +389,13 @@ CharacteristicPatch 初版參數為 `GrantAbility / SuppressAbility / SetKind / 
 
 `I.token` 的 output bind 保存新建立物件（不含未成功建立者），數量選擇為 ResolutionChoice；`TokenAllocation {templates:List<TokenTemplateId>,total,counts:Map<TemplateId,Nat>,constraint:Unrestricted|EachExactlyOnce}` 要求總和相符。目的地 `DestinationAllocation {scope:Batch|PerItem,domain:Set<ZoneRef>}` 在建立前選，容量規則仍可另需合法程序。具名 token 必須能唯一解析同一快照模板，`Binding<CardName>` 不等於任意 V.name 的多名稱集合。
 
+內部 Rust 的 MoveSpec.to、SearchPartition.zone 與 RedirectMove.to 使用
+`MoveDestination::Owners(Hand / Deck / Cemetery / Banish) | Shared(ZoneRef)`：前者對每個
+物件解析其持有者，後者在目前良構子集只接受 Field／Ex。不能把混合持有者集合送到來源
+控制者的一個私人區域。MoveResult 保留 requested_position 與 actual_position，並與
+requested_to、actual_to、replacements 一起保存；這是內部承載，非公開 IR schema 或
+executor 驗收。各動作目前接受的良構範圍見 [typed IR 良構邊界](typed-ir-validation.md)。
+
 `I.search.destination = Single(MoveSpec) | Partition(PrintedOrder,List<{zone,cardinality}>) | OptionalSelfReplacement(predicate,MoveSpec)`；先找到與公開證明，再按文字順序分配／替代，末尾只 FullZone shuffle 一次。Partition 各段照印刷指示要求選擇，不擅合併輸入點；CP03-SL07 找到 1 張時先手牌、墓地步驟無牌，不能先分到墓地逃避前句。found 只在此指示的 continuation 可讀。`T.receipt` 保留 found／revealed／moved 三種量，search 成功量不能一律代表入場成功量。
 
 `TargetRoleSpec {roles:Map<RoleId,Cardinality>}` 與既有選目標一起回答，供 first/rest 不等處理（BP21-PR13）；无序 ObjectSet 不允許任取 first。`TokenAllocation` 見 GAP-S-019，變身在實際消滅後以 ResolutionChoice 決定張數，與打出時的目標角色分開。`K.repeat.receipts` 保存每輪結果，collect 是列表；去重物件需明示，同一張重新入場的新世代不自動合併。
