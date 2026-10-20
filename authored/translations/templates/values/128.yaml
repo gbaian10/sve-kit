@@ -479,33 +479,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:3d38b56b74e41c8ca6d6a6134e6746be22841db935ebc1c3a2bab13a3749f60d
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 使用這張卡片時，將戰場上的
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 個『
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 』{
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: '}：消費-'
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:8c3180210bdcd187ab30bd75151edd894be89d7b86cc20f5df23e27c7b5e106b
       lang: zh-Hant
       target:
@@ -823,35 +796,6 @@ records:
             text: 點傷害。給予其主戰者
           - kind: LeafRef
             slot: leaf_6
-          - kind: Literal
-            text: 點傷害。
-      expression_targets: {}
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:329671b7b82b6e62fb79e7237c7e9ad6ba359441c3c8b07e131ad31742b45b5a
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 選擇
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 。給予其
-          - kind: LeafRef
-            slot: leaf_4
           - kind: Literal
             text: 點傷害。
       expression_targets: {}
