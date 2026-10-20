@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from sve_carddb.contracts import author_counter_costs as costs
+from sve_carddb.contracts import author_leaves as leaves
 from sve_carddb.contracts import author_quantities as quantities
+from sve_carddb.contracts import author_queries as queries
 from sve_carddb.contracts import author_selection_parents as parents
 
 from .author_selector_cases import CONFIG
@@ -14,10 +16,10 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
 PARENTS: dict[str, TypeAdapter[object]] = {
-    "A.quantity": TypeAdapter(quantities.Quantity, config=CONFIG),
+    "A.quantity": TypeAdapter(queries.Quantity, config=CONFIG),
     "A.selection-quantity": TypeAdapter(quantities.SelectionQuantity, config=CONFIG),
     "A.deck-slice": TypeAdapter(quantities.DeckSlice),
-    "CounterName": TypeAdapter(costs.CounterName, config=CONFIG),
+    "CounterName": TypeAdapter(leaves.CounterName, config=CONFIG),
     "DistinctBy": TypeAdapter(parents.DistinctBy, config=CONFIG),
     "A.target.exact": TypeAdapter(parents.TargetExact, config=CONFIG),
     "A.target.up-to": TypeAdapter(parents.TargetUpTo, config=CONFIG),

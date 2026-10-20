@@ -33,6 +33,7 @@ LEAVES: dict[str, TypeAdapter[object]] = {
     "CardNumber": TypeAdapter(Text),
     "CardName": TypeAdapter(Text),
     "Concept": TypeAdapter(Text),
+    "Title": TypeAdapter(author.Title, config=CONFIG),
     "CardKind": TypeAdapter(Code, config=CONFIG),
     "Player": TypeAdapter(author.Player),
     "Zone": TypeAdapter(author.Zone),
@@ -150,6 +151,9 @@ def _shape(
 def _assert_definition(
     schema: dict[str, JsonValue], name: str, adapter: TypeAdapter[object]
 ) -> None:
+    if name in COUNTS:
+        _assert_selector_definition(schema, name)
+        return
     python = adapter.json_schema()
     assert _shape(object_value(schema["$defs"])[name], schema) == _shape(python, python)
 
@@ -198,7 +202,7 @@ def test_count_query_type_drift(name: str) -> None:
 
 
 def _assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
-    python = (SELECTORS | RECIPIENTS | PARENTS)[name].json_schema()
+    python = (SELECTORS | RECIPIENTS | PARENTS | COUNTS | NUMERIC)[name].json_schema()
     names = (
         SELECTOR_NAMES
         | RECIPIENT_NAMES
@@ -652,20 +656,7 @@ def _assert_numeric_names(schema: dict[str, JsonValue], names: dict[str, str]) -
 
 
 def _assert_numeric_definition(schema: dict[str, JsonValue], name: str) -> None:
-    python = NUMERIC[name].json_schema()
-    reference = python.get("$ref")
-    body = (
-        object_value(python["$defs"])[reference.removeprefix("#/$defs/")]
-        if isinstance(reference, str)
-        else python
-    )
-    names = NUMERIC_NAMES | NUMERIC_DEPENDENCIES
-    schema_names = {key: key for key in names}
-    python_names = {value: key for key, value in names.items()}
-    # Every named node is compared separately, so cycles preserve target identity.
-    assert _shape(object_value(schema["$defs"])[name], schema, schema_names) == _shape(
-        body, python, python_names
-    )
+    _assert_selector_definition(schema, name)
 
 
 def test_numeric_name_correspondence_is_bijective() -> None:
@@ -747,7 +738,7 @@ def test_numeric_drift_detects_variant_changes(mutation: str) -> None:
         else:
             operands = first["prefixItems"]
             assert isinstance(operands, list)
-            operands[0] = {"$ref": "#/$defs/A.cond.numeric-core"}
+            operands[0] = {"$ref": "#/$defs/A.cond"}
     elif mutation in {"minus_first_param", "times_param"}:
         key = "minus" if mutation == "minus_first_param" else "times"
         name = "A.expr." + key
@@ -776,3 +767,216 @@ def test_numeric_drift_rejects_dangling_references() -> None:
     props["half_up"] = {"$ref": "#/$defs/A.expr.missing"}
     with pytest.raises(KeyError):
         _assert_numeric_definition(changed, "A.expr.half-up")
+
+
+@pytest.mark.parametrize(
+    "name", ["A.collection.in", "A.collection.objects", "A.expr.count-objects"]
+)
+def test_drift_catches_counted_rights_in_except(name: str) -> None:
+    changed = deepcopy(NODES)
+    props = object_value(
+        object_value(object_value(changed["$defs"])[name])["properties"]
+    )
+    props["except"] = {"$ref": "#/$defs/A.expr.count-source"}
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize("field", ["who", "zone"])
+def test_drift_catches_collection_parameter_rights(field: str) -> None:
+    changed = deepcopy(NODES)
+    name = "A.collection.objects"
+    props = object_value(
+        object_value(object_value(changed["$defs"])[name])["properties"]
+    )
+    props[field] = {"anyOf": [props[field], {"$ref": "#/$defs/A.param"}]}
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "A.expr.hand",
+        "A.expr.leader-life",
+        "A.expr.counter",
+        "A.expr.counter-payload",
+        "A.expr.agg",
+        "A.expr.agg-payload",
+        "A.expr.distinct-names",
+        "A.expr.distinct-orig-costs",
+        "A.cond.exists",
+        "A.cond.in-zone",
+        "A.cond.in-zone-payload",
+        "A.cond.entered-from",
+        "A.cond.played-from",
+        "A.cond.from-payload",
+        "A.cond.entered-by",
+        "A.cond.entered-by-payload",
+        "A.cond.is",
+        "A.cond.is-payload",
+        "A.cond.on-field",
+        "A.cond.standing",
+        "A.cond.acted",
+        "A.cond.evolved",
+        "A.cond.my-turn",
+        "A.cond.opp-turn",
+        "A.cond.construction",
+        "A.cond.combo",
+        "A.cond.spellchain",
+        "A.cond.necro",
+        "A.cond.awakened",
+        "A.cond.crimson",
+        "A.cond.hand",
+        "A.cond.leader-life",
+        "A.cond.zone-free",
+        "A.cond.player-eq-threshold",
+        "A.cond.player-le-threshold",
+        "A.cond.player-ge-threshold",
+        "A.cond.zone-free-eq-threshold",
+        "A.cond.zone-free-ge-threshold",
+        "A.collection.in",
+        "A.collection.objects",
+        "A.collection.union",
+    ],
+)
+@pytest.mark.parametrize("mutation", ["required", "extra", "tag"])
+def test_new_variant_drift_mutations(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    node = object_value(object_value(changed["$defs"])[name])
+    if mutation == "required":
+        node["required"] = []
+    elif mutation == "extra":
+        node["additionalProperties"] = True
+    else:
+        props = object_value(node["properties"])
+        props["wrong_key"] = props.pop(next(iter(props)))
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "A.expr.count-atom",
+        "A.expr.count-source",
+        "A.collection.atom",
+        "A.collection",
+        "A.cond.player-threshold",
+        "A.cond.zone-free-threshold",
+        "A.cond",
+    ],
+)
+@pytest.mark.parametrize("mutation", ["missing", "duplicate", "domain"])
+def test_query_union_drift_detects_changes(name: str, mutation: str) -> None:
+    changed = deepcopy(NODES)
+    branches = object_value(object_value(changed["$defs"])[name])["anyOf"]
+    assert isinstance(branches, list)
+    if mutation == "missing":
+        branches.pop()
+    elif mutation == "duplicate":
+        branches.append(deepcopy(branches[0]))
+    else:
+        branches[0] = {"$ref": "#/$defs/A.ref"}
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "signed_filter",
+        "count_power_max",
+        "condition_false",
+        "combo_zero",
+        "agg_hp",
+        "threshold_param",
+    ],
+)
+def test_query_drift_detects_value_domain_changes(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    changes: dict[str, tuple[str, str, JsonValue]] = {
+        "signed_filter": (
+            "A.sel.in-objects",
+            "cost_le",
+            {"$ref": "#/$defs/A.expr.numeric"},
+        ),
+        "count_power_max": (
+            "A.expr.count-objects",
+            "power_max",
+            {"const": True, "type": "boolean"},
+        ),
+        "condition_false": ("A.cond.awakened", "awakened", {"type": "boolean"}),
+        "combo_zero": ("A.cond.combo", "combo", {"$ref": "#/$defs/Nat"}),
+        "agg_hp": (
+            "A.expr.agg-payload",
+            "attr",
+            {"enum": ["cost", "orig_cost", "power", "hp"], "type": "string"},
+        ),
+        "threshold_param": (
+            "A.cond.player-eq-threshold",
+            "eq",
+            {"$ref": "#/$defs/A.selection-quantity"},
+        ),
+    }
+    name, field, value = changes[mutation]
+    object_value(object_value(definitions[name])["properties"])[field] = value
+    with pytest.raises(AssertionError):
+        _assert_selector_definition(changed, name)
+
+
+def _assert_shared_definitions_are_referenced(schema: dict[str, JsonValue]) -> None:
+    definitions = object_value(schema["$defs"])
+    protected = (
+        "Zone",
+        "Code",
+        "BindingName",
+        "PlayerSetName",
+        "A.same-as",
+        "A.expr.objects-of",
+    )
+
+    def visit(node: JsonValue, owner: str) -> None:
+        if isinstance(node, dict):
+            for name in protected:
+                assert node != definitions[name] or owner == name
+            for child in node.values():
+                visit(child, owner)
+        elif isinstance(node, list):
+            for child in node:
+                visit(child, owner)
+
+    for owner, node in definitions.items():
+        visit(node, owner)
+    construction = object_value(definitions["A.cond.construction"])
+    assert object_value(construction["properties"])["construction"] == {
+        "$ref": "#/$defs/Title"
+    }
+
+
+def test_shared_author_atoms_have_one_definition() -> None:
+    _assert_shared_definitions_are_referenced(NODES)
+
+
+@pytest.mark.parametrize(
+    ("leaf", "name", "field"),
+    [
+        ("Zone", "A.cond.in-zone-payload", "zone"),
+        ("Code", "A.cond.is-payload", "kind"),
+        ("BindingName", "A.collection.in", "as"),
+        ("PlayerSetName", "A.collection.objects", "who"),
+        ("A.same-as", "A.sel.in-objects", "name"),
+        ("A.expr.objects-of", "A.collection.in", "in"),
+        ("Title", "A.cond.construction", "construction"),
+    ],
+)
+def test_inlining_named_atoms_fails_structural_check(
+    leaf: str, name: str, field: str
+) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    properties = object_value(object_value(definitions[name])["properties"])
+    properties[field] = deepcopy(definitions[leaf])
+    with pytest.raises(AssertionError):
+        _assert_shared_definitions_are_referenced(changed)

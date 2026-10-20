@@ -4,13 +4,12 @@ from typing import Annotated, Literal, TypedDict
 
 from pydantic import AfterValidator, ConfigDict, Field, with_config
 
-from sve_carddb.contracts.author_leaves import ParamRef, Zone  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
-from sve_carddb.contracts.author_object_filters import TrueFlag  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
-from sve_carddb.contracts.author_quantities import Quantity, SelectionQuantity  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_leaves import ParamRef, TrueFlag, Zone  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_quantities import SelectionQuantity  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_queries import ObjectSel, Quantity
 from sve_carddb.contracts.author_recipients import RecipientSel
 from sve_carddb.contracts.author_references import BindingName, PlayerRef
 from sve_carddb.contracts.author_selections import TargetRoles  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
-from sve_carddb.contracts.author_selectors import ObjectSel
 
 CONFIG = ConfigDict(extra="forbid", strict=True, regex_engine="python-re")
 TARGET_CONFIG = ConfigDict(

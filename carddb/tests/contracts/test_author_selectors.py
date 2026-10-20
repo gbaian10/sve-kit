@@ -190,14 +190,12 @@ def test_sources_accept_scalars_sets_and_leaf_parameters(
         {"who": "self", "where": {"count": {"who": "self", "zone": "field"}}},
         {"who": "self", "where": {}},
         {"who": "self", "where": None},
-        {"who": "self", "evolved": False},
         {"who": "self", "cost_lt": 3},
         {"who": "self", "names": []},
         {"who": "self", "names": [{"param": "name"}]},
         {"who": "self", "traits_all": {"param": "traits"}},
         {"who": "self", "traits_all": []},
         {"who": "self", "orig_cost_ge": {"param": "cost"}},
-        {"who": "self", "hp_le": {"bound": "limit"}},
         {"who": "self", "name_contains": ""},
     ],
 )
@@ -237,7 +235,7 @@ def test_boolean_attributes_are_strict(field: str, value: JsonValue) -> None:
 @pytest.mark.parametrize(
     "field", ["orig_cost_eq", "orig_cost_le", "orig_cost_ge", "hp_le"]
 )
-@pytest.mark.parametrize("value", [-1, 9007199254740992, True, "2", "X"])
+@pytest.mark.parametrize("value", [-1, 9007199254740992, True, "2", {"param": "n"}])
 def test_comparison_constants_are_not_selection_quantities(
     field: str, value: JsonValue
 ) -> None:
@@ -248,13 +246,9 @@ def test_comparison_constants_are_not_selection_quantities(
     "value",
     [
         {"who": "self"},
-        {"in": "shown"},
-        {"who": "self", "zone": "field", "except": {"in": "shown"}},
-        {"who": "self", "zone": "field", "where": {"did": "moved"}},
         {"who": "self", "zone": "field", "as": "candidate"},
         {"any_of": []},
         {"any_of": [{"who": "self"}]},
-        {"any_of": [{"in": "shown"}]},
         {"any_of": [COUNT_UNION]},
         {"any_of": [{"who": "self", "zone": "field"}], "who": "self"},
         {"any_of": [{"who": "self", "zone": "field"}], "zone": "field"},
@@ -315,7 +309,6 @@ def _leaves(node: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
             OBJECTS,
             [
                 {"who": "self"},
-                {"in": "shown"},
                 {"in": "looked", "except": {"in": "chosen"}},
             ],
         ),

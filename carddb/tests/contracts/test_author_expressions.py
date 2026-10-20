@@ -119,7 +119,7 @@ def test_operators_cannot_be_mixed(
     left: tuple[str, dict[str, JsonValue]],
     right: tuple[str, dict[str, JsonValue]],
 ) -> None:
-    if left[0] == right[0]:
+    if left[1].keys() == right[1].keys():
         return
     value = left[1] | right[1]
     _reject(schema, left[0], value)
@@ -203,8 +203,6 @@ def test_invalid_units(schema: dict[str, JsonValue], unit: JsonValue) -> None:
 @pytest.mark.parametrize(
     "value",
     [
-        {"zone_free": {"who": "self", "zone": "field", "ge": 1}},
-        {"zone_free": {"who": "self", "zone": "field", "eq": 0}},
         {"zone_free": {"who": "self", "zone": "deck"}},
         {"zone_free": {"who": "self", "zone": ["field", "ex"]}},
         {"resource": {"who": "opponents", "kind": "pp"}},

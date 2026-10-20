@@ -4,17 +4,16 @@ from typing import TYPE_CHECKING
 
 from pydantic import ConfigDict, TypeAdapter
 
-from sve_carddb.contracts import author_counts as counts
-from sve_carddb.contracts import author_selectors as author
+from sve_carddb.contracts import author_queries as author
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
 CONFIG = ConfigDict(regex_engine="python-re")
 COUNTS: dict[str, TypeAdapter[object]] = {
-    "A.expr.count-objects": TypeAdapter(counts.CountObjects, config=CONFIG),
-    "A.expr.count-union": TypeAdapter(counts.CountUnion),
-    "A.expr.count-source": TypeAdapter(counts.CountSource, config=CONFIG),
+    "A.expr.count-objects": TypeAdapter(author.CountObjects, config=CONFIG),
+    "A.expr.count-union": TypeAdapter(author.CountUnion),
+    "A.expr.count-source": TypeAdapter(author.CountSource, config=CONFIG),
 }
 SELECTORS: dict[str, TypeAdapter[object]] = {
     "A.sel.zone-objects": TypeAdapter(author.ZoneObjects, config=CONFIG),
@@ -64,3 +63,43 @@ QUERY_CASES: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.expr.count-union", COUNT_UNION),
     ("A.expr.count-source", {"who": "self", "zone": "cemetery", "other": True}),
 ]
+
+COUNTS.update(
+    {
+        "A.expr.count-atom": TypeAdapter(author.CountAtom, config=CONFIG),
+        "A.collection.in": TypeAdapter(author.CollectionIn, config=CONFIG),
+        "A.collection.objects": TypeAdapter(author.CollectionObjects, config=CONFIG),
+        "A.collection.atom": TypeAdapter(author.CollectionAtom, config=CONFIG),
+        "A.collection.union": TypeAdapter(author.CollectionUnion),
+        "A.collection": TypeAdapter(author.CollectionSource, config=CONFIG),
+    }
+)
+SELECTOR_NAMES.update(
+    {
+        "A.expr.count-objects": "CountObjects",
+        "A.expr.count-union": "CountUnion",
+        "A.expr.count-source": "CountSource",
+        "A.expr.count-atom": "CountAtom",
+        "A.collection.in": "CollectionIn",
+        "A.collection.objects": "CollectionObjects",
+        "A.collection.atom": "CollectionAtom",
+        "A.collection.union": "CollectionUnion",
+        "A.collection": "CollectionSource",
+    }
+)
+QUERY_CASES.extend(
+    [
+        ("A.expr.count-atom", {"in": "shown"}),
+        ("A.collection.in", {"in": {"objects_of": "moved", "view": "after"}}),
+        ("A.collection.objects", {"who": "self", "zone": "field"}),
+        ("A.collection.atom", {"in": "shown"}),
+        (
+            "A.collection.union",
+            {"any_of": [{"in": "shown"}, {"who": "self", "zone": "field"}]},
+        ),
+        (
+            "A.collection",
+            {"in": "shown", "except": {"in": "chosen"}, "where": {"standing": "item"}},
+        ),
+    ]
+)

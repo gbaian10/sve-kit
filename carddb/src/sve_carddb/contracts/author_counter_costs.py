@@ -4,13 +4,13 @@ from typing import Literal, NotRequired, TypedDict
 
 from pydantic import ConfigDict, with_config
 
-from sve_carddb.contracts.author_object_filters import TrueFlag  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
-from sve_carddb.contracts.author_quantities import Quantity  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_leaves import CounterName, TrueFlag  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.contracts.author_queries import (
+    ObjectSel,  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+    Quantity,  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+)
 from sve_carddb.contracts.author_references import BindingName  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
-from sve_carddb.contracts.author_selectors import ObjectSel  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
-from sve_carddb.core.models import Text
 
-type CounterName = Text
 CONFIG = ConfigDict(extra="forbid", strict=True, regex_engine="python-re")
 
 
