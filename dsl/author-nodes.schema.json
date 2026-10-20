@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
-  "title": "SVE author 1.0 shared leaf and reference definitions",
+  "title": "Shared author 1.0 containers and ability graph",
   "$comment": "Select a named definition for closed author nodes. Complete authored/expanded file containers and execution admission are outside this schema; the root rejects standalone documents.",
   "not": {},
   "$defs": {
@@ -18675,7 +18675,2226 @@
       "required": [
         "during_next_turn"
       ]
+    },
+    "A.ability": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.inline-ability"
+        },
+        {
+          "$ref": "#/$defs/A.ability.generated"
+        }
+      ]
+    },
+    "A.ability.activate": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "activate": {
+          "$ref": "#/$defs/A.head.activate"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "activate"
+      ],
+      "type": "object"
+    },
+    "Actor": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "who",
+        "model"
+      ],
+      "type": "object"
+    },
+    "A.ability.attack-time": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "attack_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "attack_time"
+      ],
+      "type": "object"
+    },
+    "A.card": {
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "note": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "abilities": {
+          "items": {
+            "$ref": "#/$defs/A.ability"
+          },
+          "type": "array"
+        },
+        "faces": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^f:[0-9a-f]{32}$(?![\\s\\S])"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/A.face"
+          }
+        },
+        "deck_rule": {
+          "$ref": "#/$defs/DeckRule"
+        }
+      },
+      "required": [
+        "meta"
+      ],
+      "type": "object"
+    },
+    "A.face": {
+      "additionalProperties": false,
+      "properties": {
+        "abilities": {
+          "items": {
+            "$ref": "#/$defs/A.ability"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "abilities"
+      ],
+      "type": "object"
+    },
+    "A.ability.auto": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "auto": {
+          "$ref": "#/$defs/A.head.auto"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "auto"
+      ],
+      "type": "object"
+    },
+    "BodyReference": {
+      "additionalProperties": false,
+      "properties": {
+        "frame_id": {
+          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "body_version": {
+          "pattern": "^effect-body-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "applicability_scope": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "frame_id",
+        "ability_scope",
+        "body_version",
+        "applicability_scope"
+      ],
+      "type": "object"
+    },
+    "CrOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "cr_clause",
+          "type": "string"
+        },
+        "cr_clause_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "cr_clause_id"
+      ],
+      "type": "object"
+    },
+    "DeckRule": {
+      "additionalProperties": false,
+      "properties": {
+        "deck": {
+          "enum": [
+            "main",
+            "evolve"
+          ],
+          "type": "string"
+        },
+        "same_name_max": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "deck",
+        "same_name_max"
+      ],
+      "type": "object"
+    },
+    "A.ability.drive-time": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "drive_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "drive_time"
+      ],
+      "type": "object"
+    },
+    "A.ability.evolve": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "evolve": {
+          "$ref": "#/$defs/A.head.evolve"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "evolve"
+      ],
+      "type": "object"
+    },
+    "A.ability.evolve-time": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "evolve_time"
+      ],
+      "type": "object"
+    },
+    "FaceRevisionOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "face_revision",
+          "type": "string"
+        },
+        "revision_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "revision_id"
+      ],
+      "type": "object"
+    },
+    "FamilyOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "product_family",
+          "type": "string"
+        },
+        "product_family_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "product_family_id"
+      ],
+      "type": "object"
+    },
+    "A.ability.fanfare": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "fanfare": {
+          "$ref": "#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "fanfare"
+      ],
+      "type": "object"
+    },
+    "A.ability.feed": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "feed": {
+          "$ref": "#/$defs/A.head.feed"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "feed"
+      ],
+      "type": "object"
+    },
+    "A.ability.generated": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "generated_by": {
+          "$ref": "#/$defs/A.generated-by"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "generated_by"
+      ],
+      "type": "object"
+    },
+    "A.generated-by": {
+      "additionalProperties": false,
+      "properties": {
+        "macro": {
+          "$ref": "#/$defs/MacroReference"
+        },
+        "version": {
+          "pattern": "^effect-body-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/ParamValues"
+        }
+      },
+      "required": [
+        "macro",
+        "version",
+        "params"
+      ],
+      "type": "object"
+    },
+    "ImportBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxItems": 0,
+          "minItems": 0,
+          "type": "array"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "path",
+        "bind"
+      ],
+      "type": "object"
+    },
+    "ImportUse": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "port": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "binding_id",
+        "ability_scope",
+        "port"
+      ],
+      "type": "object"
+    },
+    "ImportedDependency": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "port": {
+          "$ref": "#/$defs/Code"
+        },
+        "dependency_key": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        }
+      },
+      "required": [
+        "binding_id",
+        "ability_scope",
+        "port",
+        "dependency_key"
+      ],
+      "type": "object"
+    },
+    "A.inline-ability": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.ability.fanfare"
+        },
+        {
+          "$ref": "#/$defs/A.ability.lastword"
+        },
+        {
+          "$ref": "#/$defs/A.ability.evolve-time"
+        },
+        {
+          "$ref": "#/$defs/A.ability.super-evolve-time"
+        },
+        {
+          "$ref": "#/$defs/A.ability.attack-time"
+        },
+        {
+          "$ref": "#/$defs/A.ability.race-time"
+        },
+        {
+          "$ref": "#/$defs/A.ability.drive-time"
+        },
+        {
+          "$ref": "#/$defs/A.ability.auto"
+        },
+        {
+          "$ref": "#/$defs/A.ability.activate"
+        },
+        {
+          "$ref": "#/$defs/A.ability.static"
+        },
+        {
+          "$ref": "#/$defs/A.ability.play"
+        },
+        {
+          "$ref": "#/$defs/A.ability.quick"
+        },
+        {
+          "$ref": "#/$defs/A.ability.keywords"
+        },
+        {
+          "$ref": "#/$defs/A.ability.evolve"
+        },
+        {
+          "$ref": "#/$defs/A.ability.ride"
+        },
+        {
+          "$ref": "#/$defs/A.ability.feed"
+        },
+        {
+          "$ref": "#/$defs/A.ability.spell"
+        }
+      ]
+    },
+    "InlineDependencies": {
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "frame_id": {
+          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "semantic_variant": {
+          "$ref": "#/$defs/ResolvedVariant"
+        },
+        "body_version": {
+          "pattern": "^effect-body-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "interfaces": {
+          "items": {
+            "$ref": "#/$defs/InterfaceDependency"
+          },
+          "type": "array"
+        },
+        "source": {
+          "pattern": "^effect-source-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "rulings": {
+          "items": {
+            "$ref": "#/$defs/RulingDependency"
+          },
+          "type": "array"
+        },
+        "expansion_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        },
+        "adapter_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        },
+        "imports": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportedDependency"
+          }
+        },
+        "applicability_scope": {
+          "type": "null"
+        },
+        "domain_hash": {
+          "type": "null"
+        },
+        "params": {
+          "maxProperties": 0,
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ParamValue"
+          }
+        }
+      },
+      "required": [
+        "sources",
+        "frame_id",
+        "ability_scope",
+        "semantic_variant",
+        "body_version",
+        "interfaces",
+        "source",
+        "rulings",
+        "expansion_recipe",
+        "adapter_recipe",
+        "imports",
+        "applicability_scope",
+        "domain_hash",
+        "params"
+      ],
+      "type": "object"
+    },
+    "InterfaceDependency": {
+      "additionalProperties": false,
+      "properties": {
+        "frame_id": {
+          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "interface_key": {
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame_id",
+        "interface_key"
+      ],
+      "type": "object"
+    },
+    "KeywordOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "keyword",
+          "type": "string"
+        },
+        "keyword_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "keyword_id"
+      ],
+      "type": "object"
+    },
+    "A.ability.keywords": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Concept"
+              },
+              {
+                "$ref": "#/$defs/A.param"
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "keywords"
+      ],
+      "type": "object"
+    },
+    "A.ability.lastword": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "lastword": {
+          "$ref": "#/$defs/A.head.lastword"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "lastword"
+      ],
+      "type": "object"
+    },
+    "LocalBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/StructuralPath"
+        },
+        "bind": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "path",
+        "bind"
+      ],
+      "type": "object"
+    },
+    "MacroDependencies": {
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "frame_id": {
+          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "semantic_variant": {
+          "$ref": "#/$defs/ResolvedVariant"
+        },
+        "body_version": {
+          "pattern": "^effect-body-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "interfaces": {
+          "items": {
+            "$ref": "#/$defs/InterfaceDependency"
+          },
+          "type": "array"
+        },
+        "source": {
+          "pattern": "^effect-source-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "rulings": {
+          "items": {
+            "$ref": "#/$defs/RulingDependency"
+          },
+          "type": "array"
+        },
+        "expansion_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        },
+        "adapter_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        },
+        "imports": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportedDependency"
+          }
+        },
+        "applicability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "domain_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/ParamValues"
+        }
+      },
+      "required": [
+        "sources",
+        "frame_id",
+        "ability_scope",
+        "semantic_variant",
+        "body_version",
+        "interfaces",
+        "source",
+        "rulings",
+        "expansion_recipe",
+        "adapter_recipe",
+        "imports",
+        "applicability_scope",
+        "domain_hash",
+        "params"
+      ],
+      "type": "object"
+    },
+    "MacroMechanical": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "macro_mechanical",
+          "type": "string"
+        },
+        "body": {
+          "$ref": "#/$defs/BodyReference"
+        },
+        "use_dependencies": {
+          "$ref": "#/$defs/MacroDependencies"
+        }
+      },
+      "required": [
+        "kind",
+        "body",
+        "use_dependencies"
+      ],
+      "type": "object"
+    },
+    "MacroReference": {
+      "additionalProperties": false,
+      "properties": {
+        "frame_id": {
+          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "applicability_scope": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "frame_id",
+        "ability_scope",
+        "applicability_scope"
+      ],
+      "type": "object"
+    },
+    "Meta": {
+      "additionalProperties": false,
+      "properties": {
+        "dsl": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "source": {
+          "pattern": "^effect-source-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "written_by": {
+          "items": {
+            "$ref": "#/$defs/WrittenBy"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "reviewed_by": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/UseReview"
+              },
+              {
+                "$ref": "#/$defs/MacroMechanical"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "reviewed",
+            "verified",
+            "disputed"
+          ],
+          "type": "string"
+        },
+        "verified_by_exam": {
+          "maxItems": 0,
+          "minItems": 0,
+          "type": "array"
+        },
+        "rulings": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dsl",
+        "source",
+        "written_by",
+        "reviewed_by",
+        "status",
+        "verified_by_exam",
+        "rulings"
+      ],
+      "type": "object"
+    },
+    "OccurrenceKey": {
+      "additionalProperties": false,
+      "properties": {
+        "owner": {
+          "discriminator": {
+            "mapping": {
+              "cr_clause": "#/$defs/CrOwner",
+              "face_revision": "#/$defs/FaceRevisionOwner",
+              "keyword": "#/$defs/KeywordOwner",
+              "printing_face": "#/$defs/PrintingFaceOwner",
+              "product": "#/$defs/ProductOwner",
+              "product_family": "#/$defs/FamilyOwner",
+              "qa_version": "#/$defs/QaOwner",
+              "vocabulary": "#/$defs/VocabularyOwner"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/FaceRevisionOwner"
+            },
+            {
+              "$ref": "#/$defs/PrintingFaceOwner"
+            },
+            {
+              "$ref": "#/$defs/QaOwner"
+            },
+            {
+              "$ref": "#/$defs/CrOwner"
+            },
+            {
+              "$ref": "#/$defs/VocabularyOwner"
+            },
+            {
+              "$ref": "#/$defs/ProductOwner"
+            },
+            {
+              "$ref": "#/$defs/FamilyOwner"
+            },
+            {
+              "$ref": "#/$defs/KeywordOwner"
+            }
+          ]
+        },
+        "field": {
+          "$ref": "#/$defs/Code"
+        },
+        "ordinal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Nat"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_hash": {
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "line_ordinal": {
+          "$ref": "#/$defs/Nat"
+        },
+        "role": {
+          "enum": [
+            "body",
+            "reminder",
+            "token_header",
+            "layout",
+            "name",
+            "label"
+          ],
+          "type": "string"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/Span"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "owner",
+        "field",
+        "ordinal",
+        "source_hash",
+        "line_ordinal",
+        "role",
+        "segments"
+      ],
+      "type": "object"
+    },
+    "OriginalEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "record_key": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_hash",
+        "record_key"
+      ],
+      "type": "object"
+    },
+    "A.ability.play": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "play": {
+          "$ref": "#/$defs/A.head.play"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "play"
+      ],
+      "type": "object"
+    },
+    "Ports": {
+      "additionalProperties": false,
+      "properties": {
+        "imports": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportBinding"
+          }
+        },
+        "exports": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/LocalBinding"
+          }
+        }
+      },
+      "required": [
+        "imports",
+        "exports"
+      ],
+      "type": "object"
+    },
+    "PrintingFaceOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "printing_face",
+          "type": "string"
+        },
+        "printing_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "face_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "printing_id",
+        "face_id"
+      ],
+      "type": "object"
+    },
+    "ProductOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "product",
+          "type": "string"
+        },
+        "product_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "product_id"
+      ],
+      "type": "object"
+    },
+    "QaOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "qa_version",
+          "type": "string"
+        },
+        "qa_version_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "qa_version_id"
+      ],
+      "type": "object"
+    },
+    "A.ability.quick": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "quick": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "quick"
+      ],
+      "type": "object"
+    },
+    "A.ability.race-time": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "race_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "race_time"
+      ],
+      "type": "object"
+    },
+    "RecipePin": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Code"
+        },
+        "hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "hash"
+      ],
+      "type": "object"
+    },
+    "ResolvedVariant": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "resolved",
+          "type": "string"
+        },
+        "key": {
+          "$ref": "#/$defs/Code"
+        },
+        "scope": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "state",
+        "key",
+        "scope"
+      ],
+      "type": "object"
+    },
+    "A.ability.ride": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "ride": {
+          "$ref": "#/$defs/A.head.ride"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "ride"
+      ],
+      "type": "object"
+    },
+    "RulingDependency": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "SourceUse": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "occurrence": {
+          "$ref": "#/$defs/OccurrenceKey"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "binding_id",
+        "occurrence",
+        "ability_scope"
+      ],
+      "type": "object"
+    },
+    "Span": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/Nat"
+        },
+        "end": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "type": "object"
+    },
+    "A.ability.spell": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "spell": {
+          "$ref": "#/$defs/A.head.spell"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "spell"
+      ],
+      "type": "object"
+    },
+    "A.ability.static": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "static": {
+          "$ref": "#/$defs/A.head.static"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "static"
+      ],
+      "type": "object"
+    },
+    "StructuralPath": {
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/Nat"
+          }
+        ]
+      },
+      "type": "array"
+    },
+    "A.ability.super-evolve-time": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/Nat"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceUse"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "super_evolve_time": {
+          "$ref": "#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "sources",
+        "ports",
+        "super_evolve_time"
+      ],
+      "type": "object"
+    },
+    "UseDependencies": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InlineDependencies"
+        },
+        {
+          "$ref": "#/$defs/MacroDependencies"
+        }
+      ]
+    },
+    "UseRekey": {
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "$ref": "#/$defs/OriginalEvidence"
+        },
+        "before": {
+          "$ref": "#/$defs/UseDependencies"
+        },
+        "after": {
+          "$ref": "#/$defs/UseDependencies"
+        },
+        "mapping_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        }
+      },
+      "required": [
+        "original",
+        "before",
+        "after",
+        "mapping_recipe"
+      ],
+      "type": "object"
+    },
+    "UseReview": {
+      "additionalProperties": false,
+      "properties": {
+        "reviewer": {
+          "$ref": "#/$defs/Actor"
+        },
+        "date": {
+          "pattern": "^^(?:(?!0000)[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$(?![\\s\\S])$",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "ok",
+            "revise",
+            "disputed"
+          ],
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "const": "use",
+          "type": "string"
+        },
+        "dependencies": {
+          "$ref": "#/$defs/UseDependencies"
+        },
+        "rekey": {
+          "$ref": "#/$defs/UseRekey"
+        }
+      },
+      "required": [
+        "reviewer",
+        "date",
+        "verdict",
+        "reason",
+        "kind",
+        "dependencies"
+      ],
+      "type": "object"
+    },
+    "VocabularyOwner": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "vocabulary",
+          "type": "string"
+        },
+        "vocabulary_kind": {
+          "$ref": "#/$defs/Code"
+        },
+        "vocabulary_code": {
+          "$ref": "#/$defs/Code"
+        }
+      },
+      "required": [
+        "kind",
+        "vocabulary_kind",
+        "vocabulary_code"
+      ],
+      "type": "object"
+    },
+    "WrittenBy": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/Actor"
+        },
+        "date": {
+          "pattern": "^^(?:(?!0000)[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$(?![\\s\\S])$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "actor",
+        "date"
+      ],
+      "type": "object"
+    },
+    "BodyDependencies": {
+      "additionalProperties": false,
+      "properties": {
+        "frame_id": {
+          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "body_version": {
+          "pattern": "^effect-body-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "applicability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "domain_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "interfaces": {
+          "items": {
+            "$ref": "#/$defs/InterfaceDependency"
+          },
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/ReviewedSource"
+          },
+          "type": "array"
+        },
+        "rulings": {
+          "items": {
+            "$ref": "#/$defs/RulingDependency"
+          },
+          "type": "array"
+        },
+        "expansion_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        },
+        "adapter_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        }
+      },
+      "required": [
+        "frame_id",
+        "ability_scope",
+        "body_version",
+        "applicability_scope",
+        "domain_hash",
+        "interfaces",
+        "sources",
+        "rulings",
+        "expansion_recipe",
+        "adapter_recipe"
+      ],
+      "type": "object"
+    },
+    "BodyRekey": {
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "$ref": "#/$defs/OriginalEvidence"
+        },
+        "before": {
+          "$ref": "#/$defs/BodyDependencies"
+        },
+        "after": {
+          "$ref": "#/$defs/BodyDependencies"
+        },
+        "mapping_recipe": {
+          "$ref": "#/$defs/RecipePin"
+        }
+      },
+      "required": [
+        "original",
+        "before",
+        "after",
+        "mapping_recipe"
+      ],
+      "type": "object"
+    },
+    "BodyReview": {
+      "additionalProperties": false,
+      "properties": {
+        "reviewer": {
+          "$ref": "#/$defs/Actor"
+        },
+        "date": {
+          "pattern": "^^(?:(?!0000)[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$(?![\\s\\S])$",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "ok",
+            "revise",
+            "disputed"
+          ],
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "const": "body",
+          "type": "string"
+        },
+        "dependencies": {
+          "$ref": "#/$defs/BodyDependencies"
+        },
+        "rekey": {
+          "$ref": "#/$defs/BodyRekey"
+        }
+      },
+      "required": [
+        "reviewer",
+        "date",
+        "verdict",
+        "reason",
+        "kind",
+        "dependencies"
+      ],
+      "type": "object"
+    },
+    "Companion": {
+      "additionalProperties": false,
+      "properties": {
+        "frame_id": {
+          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "body_version": {
+          "pattern": "^effect-body-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        },
+        "dsl": {
+          "const": "1.0",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/ParamDeclarations"
+        },
+        "body": {
+          "$ref": "#/$defs/A.ability-head"
+        },
+        "ports": {
+          "$ref": "#/$defs/Ports"
+        },
+        "written_by": {
+          "items": {
+            "$ref": "#/$defs/WrittenBy"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "registrations": {
+          "items": {
+            "$ref": "#/$defs/Registration"
+          },
+          "type": "array"
+        },
+        "note": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame_id",
+        "ability_scope",
+        "body_version",
+        "dsl",
+        "params",
+        "body",
+        "ports",
+        "written_by",
+        "registrations"
+      ],
+      "type": "object"
+    },
+    "Domain": {
+      "additionalProperties": false,
+      "properties": {
+        "regions": {
+          "items": {
+            "enum": [
+              "jp",
+              "en"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "regions"
+      ],
+      "type": "object"
+    },
+    "Registration": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Code"
+        },
+        "domain": {
+          "$ref": "#/$defs/Domain"
+        },
+        "reviews": {
+          "items": {
+            "$ref": "#/$defs/BodyReview"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "domain",
+        "reviews"
+      ],
+      "type": "object"
+    },
+    "ReviewedSource": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "occurrence": {
+          "$ref": "#/$defs/OccurrenceKey"
+        },
+        "ability_scope": {
+          "$ref": "#/$defs/Code"
+        },
+        "source": {
+          "pattern": "^effect-source-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
+          "type": "string"
+        }
+      },
+      "required": [
+        "binding_id",
+        "occurrence",
+        "ability_scope",
+        "source"
+      ],
+      "type": "object"
+    },
+    "A.file": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": 1,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "author_effect_set",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "shared",
+            "en_override"
+          ],
+          "type": "string"
+        },
+        "cards": {
+          "additionalProperties": {
+            "$ref": "#/$defs/A.card"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "format",
+        "kind",
+        "scope",
+        "cards"
+      ],
+      "type": "object"
+    },
+    "A.body-shard": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": 1,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "effect_body_shard",
+          "type": "string"
+        },
+        "scope": {
+          "const": "shared",
+          "type": "string"
+        },
+        "records": {
+          "items": {
+            "$ref": "#/$defs/Companion"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "kind",
+        "scope",
+        "records"
+      ],
+      "type": "object"
+    },
+    "authored": {
+      "$ref": "#/$defs/A.file"
     }
   },
-  "description": "Closed author nodes: ability heads, recursive effects/actions/steps, costs and targets. Full file/card containers and execution admission are separate contracts."
+  "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."
 }
