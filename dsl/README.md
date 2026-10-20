@@ -31,15 +31,27 @@ The [construct inventory](../docs/dsl/author-construct-inventory-1.0.md) maps
 author syntax §§2–9, all 63 GAP-A families and the 22 supplementary sections.
 It includes prose-only shapes and canonical IDs; it is not an executable grammar.
 
-[author-nodes.schema.json](author-nodes.schema.json) currently defines only the
-closed author leaf parameters (`A.param`, declarations and eight typed value
-variants). Its root rejects standalone documents; select a named `$defs` entry.
+[author-nodes.schema.json](author-nodes.schema.json) defines the closed author
+leaf parameters (`A.param`, declarations and eight typed value variants) and
+reference, player, leader-recipient and duration atoms. Their required fields,
+exclusive variants and roles are listed in the
+[reference shape matrix](../docs/dsl/author-reference-shapes-1.0.md).
+Its root rejects standalone documents; select a named `$defs` entry.
+A reference atom is not a complete action-position type: positions such as
+`move.ref` also accept selectors, whose schema is not implemented here.
+`first`/`second`/`rest` views and selector `leader`/`leader_of` shapes still need
+their joint selector/target definitions. Event object references currently admit
+only `holder`; other typed event projections are outside this subset.
 [effects-index.schema.json](effects-index.schema.json) defines the complete
 `format: 1, kind: effects_index` envelope and record syntax. Both use JSON Schema
 2020-12. The `AuthorSchemas` reader in
 `carddb/src/sve_carddb/domains/effects/author_inputs.py` takes the explicit schema
-directory and validates these inputs with local resources only. Python leaf
-types are checked against every implemented definition by structural drift tests.
+directory and validates leaf and index inputs with local resources only.
+It does not expose a new reader for the reference atoms. Python types in
+`contracts/author_leaves.py` and `contracts/author_references.py` are checked
+against every implemented definition by structural drift tests. Reference
+acceptance tests also check reserved-name separation, required fields, exclusive
+variants and nested rejection of parameter nodes.
 
 The reader rejects non-JSON YAML values, unsafe numbers, duplicate/non-string
 keys, unknown fields, wrong envelope versions and duplicate index card/scope
@@ -51,6 +63,8 @@ Concept values are nonempty author strings, including Japanese trait/class names
 they are not restricted to the ASCII `Code` syntax used for source-slot names.
 For non-string keys and merged keys without direct cursors, coordinates identify
 the containing mapping; ordinary property paths locate their value node.
-It does not admit `author_effect_set` or `effect_body_shard`, expand parameters,
+Reference syntax does not validate binding scope, event-field availability,
+singleton cardinality or permission to follow a movement receipt.
+The reader does not admit `author_effect_set` or `effect_body_shard`, expand parameters,
 or provide the recursive `authored`/`expanded` profiles. This library is not
 evidence of full author-language or runtime support.

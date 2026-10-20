@@ -150,6 +150,8 @@ evolve:
 
 ## 6. 玩家、引用、結果
 
+已定形的引用／玩家／期限原子之必填、互斥與名稱字元域見[引用形狀矩陣](author-reference-shapes-1.0.md)。矩陣區分引用原子與含 Sel 的動作位置型別，不以片段 schema 宣稱完整語法已交付。
+
 `self / turn / non_turn / current / owner_of / master_of` 為 PlayerRef；`opp` 在單人位置以 RequireOne(Opponents) 取得唯一席位；`opponents / each / other_players` 保留 PlayerSet 與原文基數。執行目前僅二席；「相手すべて」不因此抹去集合。`leader: self|opp`、`leaders: opponents|all` 是領袖 recipient；集合動作保留批次。
 
 `this / it / bind / first:bind / second:bind / rest:bind / attack_target / host / cost1` 保留 R.object 世代或事件快照。first/second 必須來自有角色或明示順序的 binding，無序集合不可任取第一張。目標引用 R.target 在結算驗合法；LKI 可讀不代表能對離場物件執行。`follow: receipt` 只接具合法移動授權的實際 after refs（R.follow-move），失敗或消去成員不回傳可操作物件。合法 follow 若沒有成功成員，後續對該集合的動作依 CR 1.3.2 不做，不是載入錯誤；未綁定或無授權的 follow 仍應拒絕。

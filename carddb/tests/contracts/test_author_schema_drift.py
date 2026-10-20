@@ -8,6 +8,7 @@ import pytest
 from pydantic import ConfigDict, TypeAdapter
 
 from sve_carddb.contracts import author_leaves as author
+from sve_carddb.contracts import author_references as references
 from sve_carddb.contracts.four_layer import Code
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.core.models import Text, UInt
@@ -45,6 +46,37 @@ LEAVES: dict[str, TypeAdapter[object]] = {
     "ParamDeclarations": TypeAdapter(author.ParamDeclarations, config=CONFIG),
     "ParamValues": TypeAdapter(author.ParamValues, config=CONFIG),
 }
+REFERENCES: dict[str, TypeAdapter[object]] = {
+    "BindingName": TypeAdapter(references.BindingName, config=CONFIG),
+    "RoleName": TypeAdapter(references.RoleName, config=CONFIG),
+    "ReservedRefName": TypeAdapter(references.ReservedRefName),
+    "ReservedPlayerName": TypeAdapter(references.ReservedPlayerName),
+    "PlayerSetName": TypeAdapter(references.PlayerSetName),
+    "Edge": TypeAdapter(references.Edge),
+    "A.event-move-receipt": TypeAdapter(references.EventMoveReceipt),
+    "A.entry-payment-ref": TypeAdapter(references.EntryPaymentRef),
+    "A.follow-source": TypeAdapter(references.FollowSource, config=CONFIG),
+    "A.receipt-ref": TypeAdapter(references.ReceiptRef, config=CONFIG),
+    "A.follow-ref": TypeAdapter(references.FollowRef),
+    "A.role-selection": TypeAdapter(references.RoleSelection),
+    "A.role-ref": TypeAdapter(references.RoleRef),
+    "A.event-object-ref": TypeAdapter(references.EventObjectRef),
+    "A.ref": TypeAdapter(references.Ref, config=CONFIG),
+    "A.owner-ref": TypeAdapter(references.OwnerRef),
+    "A.master-ref": TypeAdapter(references.MasterRef),
+    "A.player-ref": TypeAdapter(references.PlayerRef, config=CONFIG),
+    "A.player-set": TypeAdapter(references.PlayerSet, config=CONFIG),
+    "A.single-leader": TypeAdapter(references.SingleLeader),
+    "A.multiple-leaders": TypeAdapter(references.MultipleLeaders),
+    "A.leader-recipient": TypeAdapter(references.LeaderRecipient, config=CONFIG),
+    "A.phase-edge": TypeAdapter(references.PhaseEdge),
+    "A.turn-edge": TypeAdapter(references.TurnEdge),
+    "A.phase-interval": TypeAdapter(references.PhaseInterval),
+    "A.until-next-phase": TypeAdapter(references.UntilNextPhase),
+    "A.until-next-turn": TypeAdapter(references.UntilNextTurn),
+    "A.until-during-next-phase": TypeAdapter(references.UntilDuringNextPhase),
+    "A.until": TypeAdapter(references.Until, config=CONFIG),
+}
 INDEX: dict[str, TypeAdapter[object]] = {
     "CardId": TypeAdapter(author.CardId, config=CONFIG),
     "RelativeFile": TypeAdapter(author.RelativeFile, config=CONFIG),
@@ -76,7 +108,7 @@ def _shape(node: JsonValue, root: dict[str, JsonValue]) -> JsonValue:
         value = shaped.get(key)
         if isinstance(value, list):
             shaped[key] = sorted(value, key=canonical)
-    # These unions have distinct literal discriminants; annotation order is irrelevant.
+    # Acceptance tests separately check the disjoint literal and name-pattern domains.
     union = shaped.pop("anyOf", shaped.pop("oneOf", None))
     if isinstance(union, list):
         shaped["union"] = sorted(union, key=canonical)
@@ -99,13 +131,18 @@ def _assert_definition(
 
 
 def test_every_implemented_definition_has_a_python_type() -> None:
-    assert object_value(NODES["$defs"]).keys() == LEAVES.keys()
+    assert object_value(NODES["$defs"]).keys() == (LEAVES | REFERENCES).keys()
     assert object_value(INDEX_SCHEMA["$defs"]).keys() == INDEX.keys()
 
 
 @pytest.mark.parametrize("name", LEAVES)
 def test_leaf_type_drift(name: str) -> None:
     _assert_definition(NODES, name, LEAVES[name])
+
+
+@pytest.mark.parametrize("name", REFERENCES)
+def test_reference_type_drift(name: str) -> None:
+    _assert_definition(NODES, name, REFERENCES[name])
 
 
 @pytest.mark.parametrize("name", INDEX)
@@ -138,3 +175,36 @@ def test_drift_check_detects_incompatible_contract_changes(mutation: str) -> Non
         definition["additionalProperties"] = True
     with pytest.raises(AssertionError):
         _assert_definition(changed, "IntParamValue", LEAVES["IntParamValue"])
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["required", "discriminant", "exclusive", "open_object", "enum", "reserved_name"],
+)
+def test_reference_drift_detects_variant_changes(mutation: str) -> None:
+    changed = deepcopy(NODES)
+    definitions = object_value(changed["$defs"])
+    if mutation == "required":
+        name = "A.phase-edge"
+        object_value(definitions[name])["required"] = ["who", "phase"]
+    elif mutation == "discriminant":
+        name = "A.event-object-ref"
+        props = object_value(object_value(definitions[name])["properties"])
+        props["event"] = {"type": "string", "const": "move_receipt"}
+    elif mutation == "exclusive":
+        name = "A.owner-ref"
+        props = object_value(object_value(definitions[name])["properties"])
+        props["master_of"] = {"$ref": "#/$defs/A.ref"}
+    elif mutation == "open_object":
+        name = "A.role-ref"
+        object_value(definitions[name])["additionalProperties"] = True
+    elif mutation == "enum":
+        name = "ReservedPlayerName"
+        object_value(definitions[name])["enum"] = ["self", "opp", "opponents"]
+    else:
+        name = "BindingName"
+        pattern = object_value(definitions[name])["pattern"]
+        assert isinstance(pattern, str)
+        object_value(definitions[name])["pattern"] = pattern.replace("|opponents", "")
+    with pytest.raises(AssertionError):
+        _assert_definition(changed, name, REFERENCES[name])
