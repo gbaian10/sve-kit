@@ -297,8 +297,12 @@ binding 的已驗入口，不能憑空構造有效的外部實例引用。
 期限在安裝輸入環境檢查，不能讀稍後建立的 affected binding；condition 則可以讀。
 安裝時玩家捕捉、嚴格晚於錨點的 occurrence、複合區間求值、適正 play 消耗／rollback、
 來源與目標的獨立生命週期仍待 executor 驗收，這裡只驗結構。
+NextTurnEnd 以「下一回合的開始」找 occurrence，NextTurnEdge 以指定 edge 找 occurrence；
+兩者在指定玩家的目前回合可能不同。數值 Set、Combined 的 runtime 限制及具體期限
+依[數值修正、排序與期限](numeric-timing.md)，不由本 checker 推定。
 
-CP02-007 的本文 buff 依撰寫語法降為 I.modify＋L.continuous，Action::Modify 目前仍拒絕。
+CP02-007 的本文 buff 依撰寫語法降為 I.modify＋L.continuous；Action::Modify 的結構
+已由本文件前節接受，runtime 的固定 Add 子集見[內部執行](internal-execution.md)。
 本片只借它的 Numeric patch、NoTemporalExpiry 與單一目標形狀作合成安裝例，不是該卡的
 lowering，也未包含完整成本、另一能力及實際執行。BP02-089 只提供 Destroy 保護述詞
 （能力造成的破壞），該卡仍可被消滅；Banish 是同形的合成例。兩者都不宣稱該卡本身會

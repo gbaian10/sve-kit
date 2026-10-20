@@ -146,7 +146,8 @@ instruction、execution、effect 與 commit 身分。兩個指示保持兩個事
 NoTemporalExpiry 沒有額外時間截止。解算完成時只清除目標已換世代的數值層，再執行
 既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
 閒置 Game 的基礎與加數可存檔；待答仍不可存檔。
-數值修正的 EndResolution 到期與規則檢查先後尚無正式契約，Modify 帶此期限時整棵拒絕，
+數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
+executor 尚未接入；Modify 帶此期限時仍整棵拒絕，
 包括未執行分支；InstallEffect 的 Permission EndResolution 不受影響。
 持久數值層有效期間拒絕原型 decide，避免未遷移的 set／進化等寫入繞過求值器。
 同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`

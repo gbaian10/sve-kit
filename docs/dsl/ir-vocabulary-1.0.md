@@ -563,6 +563,11 @@ SetKind 單獨登記 NonNumeric 層，不產生數值事件，也不隱含失去
 
 ## 14. 持續效果與使用額度補充
 
+受傷 Set、Set 主體進化的差額（CR 5.16.2.1）、ProperPlay 的 authority 來源、
+Combined 的准入限制與實際期限 occurrence
+依[數值修正、排序與期限](numeric-timing.md)。NextTurnEnd 取下一個實際回合的結束，
+不等於 GAP-S-006 的下一個結束 edge；Installation 期限錨也不等於排序 timestamp。
+
 CR 10.9.1.1–.4：基礎資訊→能力有效性→非數值→數值；Add／Set 同層。依 10.9.1.5 動態比較適用對象／操作以建立依存；不是 read/write 交集就算依存。無法決定先後的循環，依 10.9.1.6 時間序各套一次後重算剩餘依存（generalized），不尋找數值固定點。static 的 timestamp 為進入目前區域時點，其餘為適正 play 時點（.6.1–.6.2）。
 
 相同 timestamp 的方案為 `D.rule-choice ContinuousTieOrder {group,controller,ordered_effects}`：回合玩家所控制效果先，同一玩家選排列並保存，重算沿用，不每次讀值重新詢問；有效效果集合變更只針對尚未定序部分續補並保留舊相對序。此為已採用的專案解讀，標 `strength: inferred`，CR 1.3.4.1 僅作類推依據，不能宣稱官方已有同 timestamp 裁定。同 key 不可交換 rule modifier 無證據時載入／對局預檢拒絕。
