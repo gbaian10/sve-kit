@@ -162,7 +162,7 @@ Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等�
 ## 固定數值修正
 
 Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combined；期限只接受 Installation anchor
-的 NoTemporalExpiry，沒有 usage 或 interval。對象限目前場上從者，
+的 NoTemporalExpiry 或 EndResolution，沒有 usage 或 interval。對象限目前場上從者，
 已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
 同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
@@ -180,12 +180,14 @@ instruction、execution、effect 與 commit 身分。兩個指示保持兩個事
 此為 authority 結果，尚未接完整 EventHeader、觸發及歷史查詢管線，不能當玩家 wire payload。
 
 來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
-NoTemporalExpiry 沒有額外時間截止。解算完成時只清除目標已換世代的數值層，再執行
-既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
+NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本文完成後，先清除目標已換世代的數值層，
+再移除綁定此次 execution 的整批 EndResolution 修正，從原始基礎與其餘 Add／Set 完整重算、保留目前受傷量 D，
+最後執行既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
+到期不增加 stat_changed；最後一層消失後不保留過期基礎供後續重用。
 閒置 Game 的基礎、固定操作與 ProperPlay 時間可存檔；待答與尚未解算的預備 play 不可存檔。
 數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
-executor 尚未接入；Modify 帶此期限時仍整棵拒絕，
-包括未執行分支；InstallEffect 的 Permission EndResolution 不受影響。
+目前只驗合成 closed Program 的生命週期；沒有真實 Numeric EndResolution 卡例，不由 lowering 自動補入期限。
+待答不是解算完成，resume 失敗連同到期清理一起回復；真實卡的解決區清理、nested play 與完整 CardProgram 仍未接入。
 持久數值層有效期間拒絕原型 decide，避免未遷移的 set／進化等寫入繞過求值器。
 尚有預備 play 時也拒絕原型 decide；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
 布林摘要，不含 effect、execution 或加數明細；belief 入口見到它即拒絕，
@@ -202,9 +204,9 @@ EffectId 仍在成功安裝才分配；反序安裝、唯讀查詢及存檔恢�
 不同 stat、純 Add 與相同 Attack Set 可交換。多次 Life Set 可能捕捉不同 D_set，亦整棵拒絕。
 沒有以安裝次序、EffectId 或陣列次序補出非交換 tie；ContinuousTieOrder 的規則輸入仍待後片。
 
-Continuous 安裝及其動態依存、EndResolution／CurrentTurnEnd／NextTurnEnd、interval、SetKind、
+Continuous 安裝及其動態依存、CurrentTurnEnd／NextTurnEnd、interval、SetKind、
 Grant／RemoveAbility、Modify usage、負 Set 與非常值 Set，包括未執行分支，仍整棵拒絕。
 Set 層有效時的進化／基礎替換由既有原型 decide guard 保持拒絕，未宣稱差額換算完成。
 CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
 觸發或整卡准入。BP16-049 只驗受傷對象的 Set 1／1，未承載 SpellChain capture、
-RemoveAbility 或整能力；期限與 Set 到期還原的局面仍待後片驗收。
+RemoveAbility 或整能力；實際回合期限與非連續區間仍待後片驗收。

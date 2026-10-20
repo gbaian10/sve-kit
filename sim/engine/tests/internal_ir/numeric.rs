@@ -855,7 +855,7 @@ fn set_kind_turn_lifetimes_and_continuous_installs_stay_rejected_beside_an_add_c
 }
 
 #[test]
-fn numeric_end_resolution_is_rejected_whole_tree_while_permission_end_resolution_runs() {
+fn numeric_and_permission_end_resolution_share_the_closed_body_boundary() {
     for seat in [1, 2] {
         let program = |end: DurationEnd, dead: bool| {
             let numeric = modify(2, zone(ZoneKind::Field, 201), pair(1, 1), end);
@@ -876,10 +876,19 @@ fn numeric_end_resolution_is_rejected_whole_tree_while_permission_end_resolution
             ])
         };
         for dead in [false, true] {
-            unchanged(
-                &mut game(seat, 0),
-                &program(DurationEnd::EndResolution {}, dead),
-                seat,
+            let mut transient = game(seat, 0);
+            let progress = transient
+                .execute_internal(
+                    &program(DurationEnd::EndResolution {}, dead),
+                    &source("synthetic"),
+                    context(seat),
+                )
+                .unwrap();
+            assert!(progress.complete);
+            assert_eq!(changes(&progress).len(), usize::from(!dead));
+            assert_eq!(
+                transient.projection(View::Referee).unwrap()["objects"]["f"]["power"],
+                2
             );
             let mut control = game(seat, 0);
             control
@@ -899,3 +908,6 @@ fn numeric_end_resolution_is_rejected_whole_tree_while_permission_end_resolution
 
 #[path = "numeric_set.rs"]
 mod set;
+
+#[path = "numeric_resolution.rs"]
+mod resolution;
