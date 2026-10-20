@@ -271,7 +271,7 @@ fn strength(catalog: &Catalog, object: &Value, profile: &Profile, printed: bool)
     } else {
         int(&object["hp"])
     };
-    let mut value = number(power) + number(hp.max(0)) * 0.5_f64;
+    let mut value = number(hp.max(0)).mul_add(0.5_f64, number(power));
     let program = catalog.program(card)?;
     for ability in list(&program["abilities"]) {
         if ability["body"]["op"] == "keyword"

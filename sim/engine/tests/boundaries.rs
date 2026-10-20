@@ -1398,7 +1398,7 @@ fn effect_victory_stops_resolution_before_rule_defeat_unless_prohibited() {
             step.events.iter().any(|event| event["kind"] == "解決"),
             prohibited
         );
-        assert!(engine.legal().unwrap().is_empty());
+        assert_eq!(engine.legal().unwrap(), Vec::<Value>::new());
     }
 }
 
@@ -3293,7 +3293,7 @@ fn invalid_pending_targets_and_distributions_preserve_the_trigger_for_retry() {
         ] {
             let step = instance.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}},"targets":{"1":targets},"distribute":{"1":amounts}}), "invalid").unwrap();
             assert_eq!(step.outcome, "cannot-play");
-            assert!(step.events.is_empty());
+            assert_eq!(step.events, Vec::<Value>::new());
             assert_eq!(instance.digest().unwrap(), before);
         }
         let choice = instance
@@ -4369,7 +4369,7 @@ fn transformation_banishes_and_erases_before_creating_a_fresh_batch() {
         Some(json!("other-token"))
     );
     assert_eq!(created[0]["source"], "s");
-    assert!(phase("場に出す").is_empty());
+    assert_eq!(phase("場に出す"), Vec::<&Value>::new());
     assert_eq!(
         engine.query(View::P1, "P1.banish").unwrap(),
         Some(json!([]))
@@ -5231,11 +5231,11 @@ fn evolution_discounts_only_consume_the_matching_paid_ability() {
         engine.query(View::P1, "P1.pp.current").unwrap(),
         Some(json!(2_i64))
     );
-    assert!(
+    assert_eq!(
         engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"]
             .as_array()
-            .unwrap()
-            .is_empty()
+            .unwrap(),
+        &Vec::<Value>::new()
     );
 }
 
@@ -7286,7 +7286,7 @@ fn suppression_precedes_trigger_limits_and_preserves_unrelated_entry_triggers() 
                 assert_eq!(pending.len(), 1);
                 assert_eq!(packet["semantic_state"]["used_this_turn"], json!([]));
             } else {
-                assert!(suppressed.is_empty());
+                assert_eq!(suppressed, Vec::<&Value>::new());
                 assert_eq!(pending.len(), 2);
                 assert_eq!(
                     packet["semantic_state"]["used_this_turn"][0]["count"],
@@ -7499,7 +7499,7 @@ fn advances_return_face_up_to_the_owner_before_the_effect_continues() {
                 Some(json!(true))
             );
         } else {
-            assert!(returns.is_empty());
+            assert_eq!(returns, Vec::<&Value>::new());
             assert_eq!(packet["P2"][destination], json!(["b"]));
             assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
         }
@@ -8399,7 +8399,7 @@ fn counter_costs_reserve_the_aggregate_and_reject_partial_payment_without_any_ev
         let result = engine.decide(&action, "activate").unwrap();
         if counters == 3 {
             assert_eq!(result.outcome, "cannot-activate");
-            assert!(result.events.is_empty());
+            assert_eq!(result.events, Vec::<Value>::new());
             assert_eq!(engine.digest().unwrap(), before);
         } else {
             assert_eq!(result.outcome, "resolved");
@@ -8547,7 +8547,7 @@ fn movement_costs_consider_prior_departures_and_never_expose_partial_payment() {
             );
         } else {
             assert_eq!(result.outcome, "cannot-activate");
-            assert!(result.events.is_empty());
+            assert_eq!(result.events, Vec::<Value>::new());
             assert_eq!(engine.digest().unwrap(), before);
         }
     }
@@ -8584,7 +8584,7 @@ fn fixed_cardinality_costs_recheck_each_step_after_earlier_cards_have_left() {
             .unwrap();
         if count == 3 {
             assert_eq!(result.outcome, "cannot-activate");
-            assert!(result.events.is_empty());
+            assert_eq!(result.events, Vec::<Value>::new());
             assert_eq!(engine.digest().unwrap(), before);
         } else {
             assert_eq!(result.outcome, "resolved");
@@ -8621,7 +8621,7 @@ fn movement_payment_preview_revalidates_counters_after_a_change_of_identity() {
         )
         .unwrap();
     assert_eq!(result.outcome, "cannot-activate");
-    assert!(result.events.is_empty());
+    assert_eq!(result.events, Vec::<Value>::new());
     assert_eq!(engine.digest().unwrap(), before);
 }
 

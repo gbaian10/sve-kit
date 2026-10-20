@@ -10,6 +10,7 @@
     reason = "test code: fixtures are literal JSON and a panic is a test failure"
 )]
 
+#[path = "support/engines.rs"]
 mod support;
 
 use std::path::PathBuf;

@@ -16,8 +16,8 @@ fn help_and_version_succeed_without_input_files() {
     for flag in ["--help", "-h", "--version", "-V"] {
         let output = command().arg(flag).output().unwrap();
         assert!(output.status.success());
-        assert!(!output.stdout.is_empty());
-        assert!(output.stderr.is_empty());
+        assert_ne!(output.stdout, Vec::<u8>::new());
+        assert_eq!(output.stderr, Vec::<u8>::new());
     }
 }
 
@@ -25,8 +25,8 @@ fn help_and_version_succeed_without_input_files() {
 fn missing_snapshot_is_a_usage_error() {
     let output = command().output().unwrap();
     assert_eq!(output.status.code(), Some(2_i32));
-    assert!(output.stdout.is_empty());
-    assert!(!output.stderr.is_empty());
+    assert_eq!(output.stdout, Vec::<u8>::new());
+    assert_ne!(output.stderr, Vec::<u8>::new());
 }
 
 #[test]
@@ -49,8 +49,8 @@ fn invalid_arguments_are_rejected_before_creating_output_or_loading_snapshot() {
             .output()
             .unwrap();
         assert_eq!(output.status.code(), Some(2_i32));
-        assert!(output.stdout.is_empty());
-        assert!(!output.stderr.is_empty());
+        assert_eq!(output.stdout, Vec::<u8>::new());
+        assert_ne!(output.stderr, Vec::<u8>::new());
         assert!(!root.exists());
     }
 }

@@ -247,11 +247,11 @@ fn schema_valid_but_unknown_names_are_rejected_with_card_and_line() {
     assert!(rejections(trigger)[0].contains("trigger event `enterd`"));
     let wrong_field = "      - line: 1\n        kind: trigger\n        event: enter\n        subject: self\n        body:\n          op: damage\n          subjects: opponent.leader\n          amount:\n            read: event.after_life\n";
     assert!(rejections(wrong_field)[0].contains("event `enter` has no field `after_life`"));
-    assert!(
+    assert_eq!(
         rejections(&spell(
             "          op: damage\n          subjects: opponent.leader\n          amount: 1\n"
-        ))
-        .is_empty()
+        )),
+        Vec::<String>::new()
     );
 }
 
@@ -878,7 +878,7 @@ fn scope_and_ruling_violations_are_rejected_at_load() {
     let long_form = "          fn: ge\n          args:\n            - read: self.turn.leader_hp_decreased\n            - 4\n";
     assert!(rejections(&trigger(long_form))[0].contains("R-0009"));
     let event_limit = "          fn: lt\n          args:\n            - read: event.after_life\n            - read: event.before_life\n";
-    assert!(rejections(&trigger(event_limit)).is_empty());
+    assert_eq!(rejections(&trigger(event_limit)), Vec::<String>::new());
     // CR 10.3.5, Q424: a follower's alias is field-only; `any` is rejected.
     let alias = |zone: &str| {
         format!(
@@ -886,7 +886,7 @@ fn scope_and_ruling_violations_are_rejected_at_load() {
         )
     };
     assert!(rejections_for("f-a", &alias("any"))[0].contains("Q424"));
-    assert!(rejections_for("f-a", &alias("field")).is_empty());
+    assert_eq!(rejections_for("f-a", &alias("field")), Vec::<String>::new());
 }
 
 /// M-008: `replace_choice` also widens a choice made while resolving, and never the
@@ -1052,7 +1052,7 @@ fn choice_costs_are_combined_before_play_and_effects_follow_printed_order() {
         );
         if pp == 2 {
             assert_eq!(step.outcome, "cannot-play");
-            assert!(step.events.is_empty());
+            assert_eq!(step.events, Vec::<Value>::new());
             assert_eq!(
                 game.query(View::Referee, "P1.hand").unwrap().unwrap(),
                 json!(["s", "m"])
