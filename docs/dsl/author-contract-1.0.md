@@ -12,7 +12,7 @@
 | `1 / effect_body_shard` | `1.0` | `urn:sve-kit:effect-bodies:1.0` | `dsl/effect-bodies.schema.json` |
 | `1 / effects_index` | 定位資訊，不選語義 | `urn:sve-kit:effects-index:1` | `dsl/effects-index.schema.json` |
 
-目前 `effects-index.schema.json` 已提供索引語法；`author-nodes.schema.json` 提供葉參數及[引用／玩家／期限原子](author-reference-shapes-1.0.md)。引用原子不是包含 Sel 的完整動作位置型別；逐卡／companion 入口及遞迴 authored／expanded profile 尚未實作，不能以片段驗證通過當成完整作者輸入通過。確切可用入口見 [dsl/README](../../dsl/README.md)。
+目前 `effects-index.schema.json` 已提供索引語法；`author-nodes.schema.json` 提供葉參數、[引用／玩家／期限原子](author-reference-shapes-1.0.md)及[數值表達式核心片段](author-expression-shapes-1.0.md)。引用原子不是包含 Sel 的完整動作位置型別；數值核心各 variant 的 operand 也不是完整 Expr／Cond。逐卡／companion 入口及遞迴 authored／expanded profile 尚未實作，不能以片段驗證通過當成完整作者輸入通過。確切可用入口見 [dsl/README](../../dsl/README.md)。
 
 兩個作者資源共用 `urn:sve-kit:author-nodes:1.0`（`dsl/author-nodes.schema.json`）的 A.* 定義。Schema 採 JSON Schema 2020-12。所有固定物件封閉；動態 map 只接受各自卡號／識別字規則，不以任意額外欄位吸收未知構造。Python 型別與 `$defs` 必須逐一對應並驗漂移；Rust 依同一資源的展開 profile 解碼並做漂移測試，不能另立語法。
 
