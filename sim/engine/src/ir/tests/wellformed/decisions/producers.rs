@@ -23,6 +23,7 @@ fn damage(id: u64, recipients: RecipientSet, amount: DamageAmount) -> Located<No
 fn distribution(id: u64, recipients: RecipientSet) -> Decision {
     Decision {
         domain: ChoiceDomain::Distribution {
+            minimum: Nat(0),
             recipients,
             total: Expr::Literal(Nat(3)),
             binding: Binding::new(id, ScopeId(1)),
@@ -298,6 +299,8 @@ fn evaluated_distribution_deduplicates_union_and_preserves_generations() {
     assert!(!set.accepts_answer(Nat(0), Nat(0), &[answer(a, u64::MAX), answer(b, 1)]));
     assert!(!set.accepts_answer(Nat(3), Nat(1), &[answer(a, 3), answer(b, 0)]));
     assert!(set.accepts_answer(Nat(3), Nat(1), &[answer(a, 2), answer(b, 1)]));
+    assert!(set.accepts_answer(Nat(4), Nat(2), &[answer(a, 2), answer(b, 2)]));
+    assert!(!set.accepts_answer(Nat(4), Nat(2), &[answer(a, 3), answer(b, 1)]));
     let empty = ResolvedRecipients::new([]);
     assert!(empty.accepts_answer(Nat(0), Nat(1), &[]));
     assert!(empty.accepts_answer(Nat(1), Nat(1), &[]));

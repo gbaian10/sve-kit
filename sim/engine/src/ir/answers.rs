@@ -44,7 +44,7 @@ impl ResolvedRecipients {
     }
 
     /// Require exactly one entry per member and the exact total without overflow.
-    /// The executor supplies the rule minimum (one for selected play targets).
+    /// The caller passes the decision's frozen minimum; selected play targets require one.
     /// Empty membership skips distribution regardless of total (CR 10.6.2.4.1).
     /// The same membership must be used by the corresponding damage producer.
     #[must_use]
@@ -84,6 +84,22 @@ fn recipient_key(recipient: super::RuntimeDamageRecipient) -> (bool, u64, u64) {
             (false, object.id.0, object.generation.0)
         }
         super::RuntimeDamageRecipient::Leader { player } => (true, u64::from(player.seat), 0),
+    }
+}
+
+/// A complete permutation of a frozen order domain, including object generations.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OrderAnswer {
+    /// The first member is nearest the top of the placed block, even at deck bottom.
+    pub cards: Vec<ObjectRef>,
+}
+impl OrderAnswer {
+    /// Check membership only; the executor still checks actor, epoch and observations.
+    #[must_use]
+    pub fn matches_domain(&self, members: &[ObjectRef]) -> bool {
+        let domain: BTreeSet<_> = members.iter().map(object_key).collect();
+        let answer: BTreeSet<_> = self.cards.iter().map(object_key).collect();
+        domain.len() == members.len() && answer.len() == self.cards.len() && answer == domain
     }
 }
 

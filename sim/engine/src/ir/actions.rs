@@ -24,7 +24,7 @@ variants!(Action {
     Reveal { objects: Selector } => ["action.reveal"],
     RevealUntil { deck: PlayerRef, candidate: Binding<ObjectRef>, predicate: Expr<Bool>, required: Expr<Nat> } => ["action.reveal-until"],
     Shuffle { deck: PlayerRef, scope: ShuffleScope, randomness: RandomnessPolicy } => ["action.shuffle"],
-    Order { cards: Selector, destinations: Vec<Placement>, chooser: PlayerRef, visibility: Visibility } => ["action.order", "receipt.move-after"],
+    Order { decision: DecisionId, cards: Selector, destinations: Vec<Placement>, chooser: PlayerRef, visibility: Visibility } => ["action.order", "receipt.move-after"],
     Evolve { subject: ObjectOperand, form: EvolutionCardRef, mode: EvolutionMode, link: Binding<AssociationId> } => ["action.evolve"],
     Token { tokens: Vec<TokenSpec>, destination: TokenDestination, output: Binding<Selector>, initial_state: Option<TokenInitialState>, initial_posture: Posture, entry_effects: Vec<Effect> } => ["action.token"],
     Transform { objects: Selector, into: TokenAllocation, entry_effects: Vec<Effect> } => ["action.transform", "action.banish", "action.token", "receipt.move-after"],

@@ -707,6 +707,7 @@ impl Checker {
                 source,
             } => self.modify(subjects, patch, expires, *source),
             Action::Order {
+                decision,
                 cards,
                 destinations,
                 chooser,
@@ -714,6 +715,9 @@ impl Checker {
             } => {
                 if chooser != instruction_actor {
                     return self.reject();
+                }
+                if !self.decisions.insert(*decision) {
+                    return Err(self.error(WellFormedReason::DuplicateDecision));
                 }
                 self.order(cards, destinations, chooser, visibility)
             }

@@ -141,7 +141,7 @@ variants!(ChoiceDomain {
     Objects { constraint: SelectionConstraint, binding: Binding<Selector>, target_roles: Option<TargetRoleSpec> } => [],
     Modes { modes: Vec<ModeId>, cardinality: Cardinality, binding: Binding<Vec<ModeId>>, exclude_used: Option<ModeExclusion> } => [],
     Order { objects: Selector, binding: Binding<Selector> } => [],
-    Distribution { recipients: RecipientSet, total: Expr<Nat>, binding: Binding<Vec<DamageAllocation>> } => [],
+    Distribution { recipients: RecipientSet, total: Expr<Nat>, minimum: Nat, binding: Binding<Vec<DamageAllocation>> } => [],
     Integer { cardinality: Cardinality, binding: Binding<Nat> } => [],
     Names { snapshot: CardSnapshot, binding: Binding<CardName> } => [],
     Compound { domains: Vec<ChoiceDomain> } => [],

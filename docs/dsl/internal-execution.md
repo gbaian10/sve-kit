@@ -38,11 +38,13 @@ Damage 只接受 Ability flags、Instruction batch、Current source 及 Uniform 
 所有正量 hit 共用原型的 `apply_damage` 提交原語；typed DamageEvent 保留來源 snapshot、接受者、
 量及控制者。致死與抽空的規則檢查在整段解算完成後執行，指示間不自行插入清場時點。
 authority 的 `DamageQuantityOutcome` 記錄 Uniform 的原始有號 amount（requested）與實際正量合計
-（actual），只作執行紀錄，不是聚合語義的核可。多接受者時 requested 與 actual 的單位尚未定義，
-因此任何讀 Damage receipt 的投影（requested 或 actual）都在入口整棵拒絕，待 Astra 定義後再分別准入。
+（actual），只作執行紀錄，尚不符合[執行語義 §1.3](runtime-semantics.md#13-damage-requestedactual-投影)
+的整指示聚合契約。任何讀 Damage receipt 的投影（requested 或 actual）仍在入口整棵拒絕，
+須完成聚合實作與局面驗收後才可解除。
 
-Allocation／Distribution 在入口拒絕。結算分配的每項最低量尚無本片的執行承載，不將
-selected play targets 的最低 1 點規則外推為所有結算分配的預設。
+Allocation／Distribution 仍在入口拒絕。IR 已以 `Distribution.minimum: Nat` 承載明示最低量；
+本入口尚未執行它。來源、凍結、無解拒絕及 selected play targets 的最低 1 點限制依
+[執行語義 §1](runtime-semantics.md#1-分配最低量與打出-snapshot)，不能外推為所有結算分配的預設。
 
 ## 觀察與測試種子
 

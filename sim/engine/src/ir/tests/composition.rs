@@ -335,6 +335,7 @@ fn dynamic_recipients_work_for_damage_distribution_and_attack_restrictions() {
             id: DecisionId(1),
             actor: PlayerRef::Controller {},
             domain: ChoiceDomain::Distribution {
+                minimum: Nat(1),
                 recipients: all_recipients(),
                 total: Expr::Literal(Nat(5)),
                 binding: Binding::new(2, ScopeId(1)),
