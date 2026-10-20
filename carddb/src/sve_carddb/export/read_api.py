@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
 
-from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.compression import verify_brotli
 from sve_carddb.core.json import (
@@ -287,6 +287,10 @@ def retained_manifest(raw: bytes, entry: dict[str, JsonValue]) -> dict[str, Json
     if digest(raw) != entry["manifest_sha256"]:
         raise ExportError("Retained manifests must be intact")
     manifest = object_value(parse(raw))
+    try:
+        profile(string(manifest["format_version"]))
+    except ValueError:
+        raise ExportError("Unsupported retained snapshot format") from None
     path = string(entry["manifest_path"])
     if (
         raw != canonical(manifest)

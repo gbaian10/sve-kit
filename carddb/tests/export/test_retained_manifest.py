@@ -3,7 +3,6 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from jsonschema import ValidationError
 
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.export.read_api import (
@@ -77,53 +76,104 @@ def test_retained_manifest_uses_only_the_publication_envelope() -> None:
     }
 
 
-@pytest.mark.parametrize("description", ["files", "changes_ref"])
-@pytest.mark.parametrize("damage", ["invalid", [None], {}])
+@pytest.mark.parametrize(
+    ("description", "damage", "error", "message"),
+    [
+        ("files", "invalid", TypeError, "Expected array"),
+        ("files", [None], TypeError, "Expected object"),
+        ("files", {}, TypeError, "Expected array"),
+        ("changes_ref", "invalid", TypeError, "Expected object"),
+        ("changes_ref", [None], TypeError, "Expected object"),
+        ("changes_ref", {}, KeyError, "path"),
+    ],
+)
 def test_retained_manifest_rejects_invalid_file_lists(
-    description: str, damage: JsonValue
+    description: str, damage: JsonValue, error: type[Exception], message: str
 ) -> None:
     value = envelope()
     value[description] = damage
     raw = canonical(value)
-    with pytest.raises((ExportError, ValueError, TypeError, KeyError)):
+    with pytest.raises(error, match=message):
         retained_manifest(raw, entry(value, raw))
 
 
 @pytest.mark.parametrize(
-    ("field", "damage"),
+    ("field", "damage", "error", "message"),
     [
-        ("path", "../private.json"),
-        ("path", "snapshots/blobs/" + "b" * 64 + ".json"),
-        ("sha256", "wrong:" + "a" * 64),
-        ("bytes", 0),
-        ("bytes", -1),
-        ("bytes", True),
-        ("bytes", "12"),
-        ("compressed_bytes", {}),
-        ("compressed_bytes", {"br": 0}),
-        ("compressed_bytes", {"br": -1}),
-        ("compressed_bytes", {"br": True}),
-        ("compressed_bytes", {"br": "8"}),
+        ("path", "../private.json", ExportError, "Invalid immutable payload path"),
+        (
+            "path",
+            "snapshots/blobs/" + "b" * 64 + ".json",
+            ExportError,
+            "Invalid immutable payload path",
+        ),
+        ("bytes", 0, ExportError, "Invalid retained manifest file description"),
+        ("bytes", -1, ExportError, "Invalid retained manifest file description"),
+        ("bytes", True, ValueError, "Expected safe integer"),
+        ("bytes", "12", ValueError, "Expected safe integer"),
+        ("compressed_bytes", {}, KeyError, "br"),
+        (
+            "compressed_bytes",
+            {"br": 0},
+            ExportError,
+            "Invalid retained manifest file description",
+        ),
+        (
+            "compressed_bytes",
+            {"br": -1},
+            ExportError,
+            "Invalid retained manifest file description",
+        ),
+        ("compressed_bytes", {"br": True}, ValueError, "Expected safe integer"),
+        ("compressed_bytes", {"br": "8"}, ValueError, "Expected safe integer"),
     ],
 )
 @pytest.mark.parametrize("description", ["files", "changes_ref"])
 def test_retained_manifest_rejects_bad_file_descriptions(
-    field: str, damage: JsonValue, description: str
+    field: str,
+    damage: JsonValue,
+    error: type[Exception],
+    message: str,
+    description: str,
 ) -> None:
     value = envelope()
     row = dict(object_value(array(value["files"])[0]))
     row[field] = damage
     value[description] = [row] if description == "files" else row
     raw = canonical(value)
-    with pytest.raises((ExportError, ValueError, TypeError, KeyError, ValidationError)):
+    with pytest.raises(error, match=message):
+        retained_manifest(raw, entry(value, raw))
+
+
+@pytest.mark.parametrize("description", ["files", "changes_ref"])
+def test_retained_manifest_rejects_invalid_hash_with_matching_path(
+    description: str,
+) -> None:
+    value = envelope()
+    row = dict(object_value(array(value["files"])[0]))
+    row["sha256"] = "sha256:" + "A" * 64
+    row["path"] = "snapshots/blobs/" + "A" * 64 + ".json"
+    value[description] = [row] if description == "files" else row
+    raw = canonical(value)
+    with pytest.raises(ExportError, match="Invalid retained manifest file description"):
         retained_manifest(raw, entry(value, raw))
 
 
 @pytest.mark.parametrize(
-    "damage", ["hash", "canonical", "version", "published", "path"]
+    ("damage", "message"),
+    [
+        ("hash", "Retained manifests must be intact"),
+        ("canonical", "Manifest differs from its index entry"),
+        ("version", "Manifest differs from its index entry"),
+        ("published", "Manifest differs from its index entry"),
+        ("path", "Manifest differs from its index entry"),
+        ("format", "Unsupported retained snapshot format"),
+    ],
 )
-def test_retained_manifest_rejects_damaged_identity(damage: str) -> None:
+def test_retained_manifest_rejects_damaged_identity(damage: str, message: str) -> None:
     value = envelope()
+    if damage == "format":
+        value["format_version"] = "5.0.0"
     raw = canonical(value)
     if damage == "canonical":
         raw += b"\n"
@@ -136,5 +186,5 @@ def test_retained_manifest_rejects_damaged_identity(damage: str) -> None:
         identity["published_at"] = "2026-10-18T01:02:03Z"
     elif damage == "path":
         identity["manifest_path"] = "snapshots/manifests/" + "b" * 64 + ".json"
-    with pytest.raises(ExportError):
+    with pytest.raises(ExportError, match=message):
         retained_manifest(raw, identity)
