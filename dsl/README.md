@@ -6,8 +6,7 @@ use `format: 1, kind: keyword_registry`. These envelopes select the existing
 prototype grammar and keep Schema `$id: urn:sve-kit:effects:astra:1`.
 The [author 1.0 contract](../docs/dsl/author-contract-1.0.md) specifies separate
 `author_effect_set` and `effect_body_shard` entries. Their schemas and loaders
-are not implemented yet; this directory still validates only the prototype.
-Its 73 node variants contain 47 action atoms, 10 combinators,
+are not implemented yet. The prototype's 73 node variants contain 47 action atoms, 10 combinators,
 14 declarations and two loading/unsupported markers.
 
 The Rust prototype validates `authored/rules/keywords.yaml` and every pack file, expands
@@ -27,3 +26,31 @@ explicit zero-card execution is a distinct option when `min` permits it.
 
 Prototype effect `review` notes are optional and do not authorize execution or
 represent an acceptance state. Keep specific explanations; omit boilerplate.
+
+The [construct inventory](../docs/dsl/author-construct-inventory-1.0.md) maps
+author syntax §§2–9, all 63 GAP-A families and the 22 supplementary sections.
+It includes prose-only shapes and canonical IDs; it is not an executable grammar.
+
+[author-nodes.schema.json](author-nodes.schema.json) currently defines only the
+closed author leaf parameters (`A.param`, declarations and eight typed value
+variants). Its root rejects standalone documents; select a named `$defs` entry.
+[effects-index.schema.json](effects-index.schema.json) defines the complete
+`format: 1, kind: effects_index` envelope and record syntax. Both use JSON Schema
+2020-12. The `AuthorSchemas` reader in
+`carddb/src/sve_carddb/domains/effects/author_inputs.py` takes the explicit schema
+directory and validates these inputs with local resources only. Python leaf
+types are checked against every implemented definition by structural drift tests.
+
+The reader rejects non-JSON YAML values, unsafe numbers, duplicate/non-string
+keys, unknown fields, wrong envelope versions and duplicate index card/scope
+pairs. Diagnostics expose structural paths and available YAML coordinates without
+source excerpts. Parameter placement, source-role compatibility, candidate-file
+closure and registry membership are separate checks, not implemented by this reader.
+Source-role checks include the allowed type/component combinations in contract §3.
+Concept values are nonempty author strings, including Japanese trait/class names;
+they are not restricted to the ASCII `Code` syntax used for source-slot names.
+For non-string keys and merged keys without direct cursors, coordinates identify
+the containing mapping; ordinary property paths locate their value node.
+It does not admit `author_effect_set` or `effect_body_shard`, expand parameters,
+or provide the recursive `authored`/`expanded` profiles. This library is not
+evidence of full author-language or runtime support.
