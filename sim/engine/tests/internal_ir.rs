@@ -1289,3 +1289,6 @@ fn explicit_object_and_leader_recipients_deduplicate_source_generations() {
         );
     }
 }
+
+#[path = "internal_ir/movement.rs"]
+mod movement;

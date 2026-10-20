@@ -44,6 +44,7 @@ fn check_program(program: &Program) -> Result<()> {
                 }
             }
             Node::Instruction { instruction } => {
+                super::movement::check_action(&instruction.action)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
                 {
@@ -111,6 +112,30 @@ fn supported(code: &str) -> bool {
             | "internal.StepwiseMode.Exact"
             | "internal.StepwiseMode.UpToStepwise"
             | "internal.StepwiseTiming.BeforeDraw"
+            | "shape.Action.Move"
+            | "action.move"
+            | "shape.Action.Destroy"
+            | "action.destroy"
+            | "receipt.move-after"
+            | "shape.MoveDestination.Owners"
+            | "internal.OwnerZone.Cemetery"
+            | "internal.OwnerZone.Banish"
+            | "internal.MoveReason.Put"
+            | "shape.Action.InstallEffect"
+            | "action.install-effect"
+            | "shape.InstallationSubjects.Objects"
+            | "internal.InstallationTime.InstructionStart"
+            | "shape.Effect.Permission"
+            | "effect.permission"
+            | "shape.PermissionSubject.Objects"
+            | "shape.ActionPattern.Destroy"
+            | "shape.CausePattern.Effect"
+            | "shape.EffectSource.Any"
+            | "internal.Polarity.Forbid"
+            | "shape.DurationEnd.EndResolution"
+            | "duration.resolution"
+            | "shape.TimeAnchor.Installation"
+            | "shape.Selector.Bound"
             | "shape.Action.Damage"
             | "action.damage"
             | "internal.DamageFlags.Ability"

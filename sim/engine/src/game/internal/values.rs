@@ -68,7 +68,7 @@ impl Execution {
         }
     }
 
-    fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
+    pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
         let objects = match selector {
             Selector::Objects { objects } => objects
                 .iter()
