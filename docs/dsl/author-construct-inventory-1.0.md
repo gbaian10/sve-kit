@@ -44,11 +44,11 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | spell | targets?、optional_cost?、x?、define?、do | 空 do 合法；仍須打出程序 |
 | static | while?、zone?、effects | 動態 selector、來源有效區；需範圍的 on 不省略 |
 | play | cost_delta?、cost_set?、additional_cost?、optional_cost?、optional_cost_delta?、optional_cost_set?、alt_cost?、cannot_if?、playable_from?、define? | set／delta／替代費用不等價；alt_cost={if,may?,cost} |
-| A.cost 短形 | pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from、act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of 中恰一個操作鍵 | 拒絕多操作鍵；所在 wrapper 已登錄的 result 不算操作鍵，不授予其他位置 metadata；to_deck 可含 shuffle:true（§13 GAP-A-012） |
+| A.cost 短形 | pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from、act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of 中恰一個操作鍵 | 拒絕多操作鍵；所在 wrapper 已登錄的 result 不算操作鍵，不授予其他位置 metadata；stack_counter_from 無接受形狀；to_deck 必填 shuffle:true（§13 GAP-A-012） |
 | A.cost 長形 | steps:[{單一費用鍵:payload}…]，至少兩項 | 按卡文陣列順序付款，保留重複步驟；拒絕 steps 混操作鍵、多鍵 step、step 層級 metadata；payload 已登錄 result 不受影響；短／長形互斥，詳 §3 |
-| 費用材料 | sel、n\|upto\|any、groups?、distinct_by?、result?；banish 另 top:{who,n}（§13 GAP-A-010） | groups 共用 disjoint／整體限制；discard 的 ref/include_self/random 見 §7、§13 GAP-A-042 |
+| 費用材料 | sel＋n\|upto\|any 或 groups（至少兩組）；distinct_by?、cost_sum_ge?、result?；banish 另 top:{who,n}（§13 GAP-A-010） | groups 共用 disjoint／整體限制；discard 的 ref/random 見費用矩陣；include_self 無接受形狀 |
 | 費用 counter | on、name、n\|upto\|any、holders?、result? | on:this 固定唯一 holder；selector 須明示 holders |
-| optional_cost／additional_cost | 費用＋result? | result 是付款 receipt；付款前不可讀 paid |
+| optional_cost／additional_cost | 費用＋result?；optional_cost 另 option?，多組用至少兩項且每項必填 option 的陣列 | result 是付款 receipt；付款前不可讀 paid，多組禁裸 paid:optional |
 | x | {min?,max?} 或 {from_payment} | 自由宣告與付款量別名互斥 |
 | A.target | bind、from、n\|upto\|any、groups?、cost_sum_le?、distinct_by?、distinct_names?、option?、roles? | 打出時選；沒有 targets[].if |
 | A.act.choose | bind、from、n\|upto\|any、by?、groups?、cost_sum_le?、distinct_by?、reveal?、order?、position?、may? | 結算時選；may 與選零個分開 |
@@ -97,6 +97,7 @@ agg／distinct／count.except 的來源不繼承 counted 參數權限。選取 a
 具名 RecipientSel 不擴大物件消費位置；等義拼法不推定相同 body hash。
 單組 Target／choose／search 的數量父變體、counter 與 DeckSlice 已定形，
 見[要求量矩陣](author-quantity-shapes-1.0.md)的逐 variant 與延後欄位清單。
+Cost 各操作、wrapper、X、PlayCosts 片段及 Target.groups 見[費用與目標矩陣](author-cost-target-shapes-1.0.md)。
 這些片段不表示上表全部 Sel filter 或完整父動作已實作；
 Sel.top／bottom 的登錄保留，尚不加入 ObjectSel。
 
@@ -105,7 +106,7 @@ Sel.top／bottom 的登錄保留，尚不加入 ObjectSel。
 動作共通 `result? / precondition?` 不表示每個短形都可附物件欄位；短形須轉成該動作已登錄的長形。by 是執行者，who 是資源接受者，目的區持有者另判。
 
 move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{top:…} 別名；
-四個完整父動作尚未實作。費用 banish.top 是相同 payload 的第五個位置，待完整 Cost。
+四個完整父動作尚未實作。費用 banish.top 已接入相同 payload，見費用與目標矩陣。
 
 | 動作 | payload／額外鍵 | 互斥與上下文 |
 | --- | --- | --- |
