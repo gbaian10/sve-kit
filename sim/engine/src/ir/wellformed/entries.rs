@@ -1,11 +1,15 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
-    CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind, Duration,
-    DurationEnd, Effect, EffectTarget, EventContext, EventPattern, EventSnapshotPolicy,
-    ExecutionRef, GrantedAbility, Nat, NumericChange, PlayerRef, PlayerRelation, PlayerSet,
-    Procedure, ScopeId, TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation,
-    TriggerCondition, TriggerSpec, Visibility, ZoneKind,
+    CharacteristicPatch, ChoiceDomain, ContinuousLayer, DecisionKind, Duration, DurationEnd,
+    Effect, EffectTarget, EventContext, EventPattern, EventSnapshotPolicy, ExecutionRef,
+    GrantedAbility, Nat, NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId,
+    TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec,
+    Visibility, ZoneKind,
+};
+use crate::ir::{
+    AbilityOrigin, Binding, Bool, EnterFieldEvent, Expr, KeywordId, ObjectFrozen, ObjectOperand,
+    Predicate,
 };
 use alloc::collections::BTreeSet;
 
@@ -122,6 +126,13 @@ impl WellFormedProcedure {
     }
 }
 
+fn self_entry(event: Binding<EnterFieldEvent>) -> Expr<Bool> {
+    Expr::Compute(Box::new(Predicate::ObjectEquals {
+        left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
+        right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+    }))
+}
+
 const fn self_player(player: PlayerRef) -> PlayerSet {
     PlayerSet {
         relation: PlayerRelation::SelfPlayer,
@@ -147,9 +158,11 @@ impl Checker {
         let previous_play = self.play_entry.clone();
         let previous_controller = self.play_controller.clone();
         let previous_source = self.ability_source.replace(ability.source.clone());
+        let previous_revoked = self.revoked;
         self.env = Self::new(ability.scope).env;
         self.root = ability.scope;
         self.entry = true;
+        self.revoked = false;
         self.env.play_modes = ability.play.is_some();
         self.play_entry = None;
         self.play_controller = ability
@@ -164,6 +177,7 @@ impl Checker {
         self.play_entry = previous_play;
         self.play_controller = previous_controller;
         self.ability_source = previous_source;
+        self.revoked = previous_revoked;
         result
     }
 
@@ -196,6 +210,24 @@ impl Checker {
             return self.reject();
         }
         self.at("source", |checker| checker.ability_source(&ability.source))?;
+        if matches!(
+            ability.source.origin,
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::Evolution,
+                ..
+            }
+        ) {
+            return self.evolution_entry(ability);
+        }
+        if matches!(
+            ability.source.origin,
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::Fanfare,
+                ..
+            }
+        ) {
+            self.fanfare_header(ability)?;
+        }
         if let Some(trigger) = &ability.trigger {
             self.at("trigger", |checker| checker.trigger(trigger))?;
             self.at("event_captures", |checker| {
@@ -223,13 +255,11 @@ impl Checker {
                         checker.play_decision(decision, &ability.source.controller)
                     })?;
                 }
-                // Full play-time payment remains outside this structural slice.
-                if !matches!(&play.costs, CostSpec::Ordered { steps } if steps.is_empty()) {
-                    return checker.reject();
-                }
+                checker.at("costs", |checker| checker.costs(&play.costs))?;
                 Ok(())
             })?;
         }
+        self.env.play_payments = ability.play.as_ref().map(|_| ability.scope);
         self.resolution_entry = self.env.clone();
         if let Some(body) = &ability.body {
             self.at("body/steps", |checker| checker.program_steps(body))?;
@@ -242,6 +272,30 @@ impl Checker {
         Ok(())
     }
 
+    fn fanfare_header(&self, ability: &Ability) -> Checked {
+        let Some(TriggerSpec {
+            on:
+                TriggerCondition::Event {
+                    pattern: EventPattern::EnterField { binding, predicate },
+                },
+            active_zones,
+            ..
+        }) = &ability.trigger
+        else {
+            return self.reject();
+        };
+        if ability.kind != AbilityKind::Triggered
+            || ability.play.is_some()
+            || ability.source.holder != (ObjectOperand::SourceHolder {})
+            || ability.active_zones != [ZoneKind::Field]
+            || *active_zones != [ZoneKind::Field]
+            || *predicate != self_entry(*binding)
+        {
+            return self.reject();
+        }
+        Ok(())
+    }
+
     pub(super) fn captures(&mut self, captures: &[Capture], at: CaptureTime) -> Checked {
         let entry = self.env.clone();
         let mut after = entry.clone();
@@ -250,6 +304,7 @@ impl Checker {
             self.env = entry.clone();
             self.at(&index.to_string(), |checker| checker.capture(capture))?;
             after.bindings.extend(self.env.bindings.clone());
+            after.access.extend(self.env.access.clone());
         }
         self.capture_time = previous;
         self.env = after;
@@ -281,6 +336,15 @@ impl Checker {
             }};
         }
         match pattern {
+            // The self-entry comparison is the only event-field read; ObjectEquals stays closed.
+            EventPattern::EnterField { binding, predicate }
+                if *predicate == self_entry(*binding) =>
+            {
+                if view != EventSnapshotPolicy::AfterEntry {
+                    return Err(self.error(WellFormedReason::InvalidEntry));
+                }
+                self.define(*binding, BindingKind::Value)
+            }
             EventPattern::EnterField { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }

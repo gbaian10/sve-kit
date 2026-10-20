@@ -1,4 +1,6 @@
 use super::*;
+mod action_boundaries;
+mod evolution;
 
 fn bounds(minimum: u64, maximum: Option<u64>) -> Cardinality {
     Cardinality {
@@ -418,7 +420,7 @@ fn payments_publish_complete_after_costs_and_keep_locals_inside_on_paid() {
     });
     reject(
         body(1, vec![pay(vec![early], body(2, vec![]))]),
-        WellFormedReason::UnavailableReceipt,
+        WellFormedReason::PreconditionTiming,
     );
     let mut invalid_3 = cost(DiscardMode::DownTo { count: Nat(2) }, None);
     invalid_3.instruction.context = InstructionContext::Effect;
@@ -692,7 +694,7 @@ fn batch_selections_are_local_but_member_receipts_are_committed() {
             reason: PreconditionReason::CardText {},
         });
     }
-    reject(body(1, vec![batch]), WellFormedReason::UnsupportedShape);
+    reject(body(1, vec![batch]), WellFormedReason::PreconditionTiming);
 }
 
 #[test]
@@ -811,7 +813,12 @@ fn a_capture_cannot_launder_unverified_private_information_into_a_domain() {
         body(
             1,
             vec![
-                capture(captured, Expr::Literal(Int(1))),
+                capture(
+                    captured,
+                    signed(Expr::Compute(Box::new(NatOperation::Count {
+                        objects: zone(PlayerRef::Owner {}, ZoneKind::Hand, 77),
+                    }))),
+                ),
                 discard(DiscardMode::Chosen {
                     constraint: selection,
                 }),
@@ -824,3 +831,11 @@ fn a_capture_cannot_launder_unverified_private_information_into_a_domain() {
 mod review_regressions;
 
 mod entries;
+
+mod producers;
+
+mod observations;
+
+mod payments;
+
+mod player_cards;

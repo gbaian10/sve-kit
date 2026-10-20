@@ -6,6 +6,87 @@ use super::{
 };
 use alloc::collections::BTreeSet;
 
+/// A concrete allocation after the executor has resolved symbolic recipients.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ResolvedDamageAllocation {
+    /// Object generations are part of membership.
+    pub recipient: super::RuntimeDamageRecipient,
+    /// Nonnegative damage assigned to this member, subject to the decision's minimum.
+    pub amount: Nat,
+}
+
+/// Deduplicated membership evaluated once at the distribution decision's snapshot.
+/// This local value does not evaluate selectors or authorize observations.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ResolvedRecipients {
+    members: Vec<super::RuntimeDamageRecipient>,
+}
+impl ResolvedRecipients {
+    /// Normalize an evaluated domain, including unions and the empty set.
+    #[must_use]
+    pub fn new<T>(members: T) -> Self
+    where
+        T: IntoIterator<Item = super::RuntimeDamageRecipient>,
+    {
+        let mut unique = BTreeSet::new();
+        Self {
+            members: members
+                .into_iter()
+                .filter(|member| unique.insert(recipient_key(*member)))
+                .collect(),
+        }
+    }
+
+    /// Inspect the frozen, unique members.
+    #[must_use]
+    pub fn members(&self) -> &[super::RuntimeDamageRecipient] {
+        &self.members
+    }
+
+    /// Require exactly one entry per member and the exact total without overflow.
+    /// The executor supplies the rule minimum (one for selected play targets).
+    /// Empty membership skips distribution regardless of total (CR 10.6.2.4.1).
+    /// The same membership must be used by the corresponding damage producer.
+    #[must_use]
+    pub fn accepts_answer(
+        &self,
+        total: Nat,
+        minimum: Nat,
+        answer: &[ResolvedDamageAllocation],
+    ) -> bool {
+        if self.members.is_empty() {
+            return answer.is_empty();
+        }
+        if answer.len() != self.members.len() {
+            return false;
+        }
+        let mut seen = BTreeSet::new();
+        let mut sum = 0_u64;
+        for allocation in answer {
+            if allocation.amount.0 < minimum.0
+                || !self.members.contains(&allocation.recipient)
+                || !seen.insert(recipient_key(allocation.recipient))
+            {
+                return false;
+            }
+            let Some(next) = sum.checked_add(allocation.amount.0) else {
+                return false;
+            };
+            sum = next;
+        }
+        sum == total.0
+    }
+}
+
+fn recipient_key(recipient: super::RuntimeDamageRecipient) -> (bool, u64, u64) {
+    match recipient {
+        super::RuntimeDamageRecipient::Object { object } => {
+            (false, object.id.0, object.generation.0)
+        }
+        super::RuntimeDamageRecipient::Leader { player } => (true, u64::from(player.seat), 0),
+    }
+}
+
 /// One role assignment in the same answer as the selected target set.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TargetRoleAnswer {

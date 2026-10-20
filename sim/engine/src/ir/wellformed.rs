@@ -8,8 +8,8 @@ use super::{
     IterationCheck, Located, LookOutcome, MeasuredReceipt, MeasuredReceiptList, Nat, NatFrozen,
     NatOperation, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectReceiptList, ObjectRef,
     ObjectView, PlayerRef, PlayerRelation, PlayerSet, Predicate, Program, ReceiptExport, ReceiptId,
-    ReceiptList, ReceiptLocation, ReceiptReference, RepeatBody, ScopeId, SelectionView, Selector,
-    SourceSpan, StepwiseMode, Termination,
+    ReceiptList, ReceiptLocation, ReceiptReference, RepeatBody, ResourceOperation, ScopeId,
+    SelectionView, Selector, SourceSpan, StepwiseMode, Termination,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::any::TypeId;
@@ -19,8 +19,11 @@ use core::fmt;
 mod control;
 mod decisions;
 mod entries;
+mod evolution;
 mod modes;
+mod producers;
 mod values;
+mod visibility;
 pub use entries::{WellFormedCardProgram, WellFormedProcedure};
 
 /// An owned program body whose supported shapes passed structural validation.
@@ -112,6 +115,8 @@ pub enum WellFormedReason {
     InvalidRoles,
     /// A mode decision does not describe its printed modes and count.
     InvalidModes,
+    /// An allocation does not belong to the damage instruction's recipient domain.
+    DistributionRecipients,
 }
 
 impl WellFormedReason {
@@ -143,6 +148,7 @@ impl WellFormedReason {
             Self::CaptureTiming => "CaptureTiming",
             Self::InvalidRoles => "InvalidRoles",
             Self::InvalidModes => "InvalidModes",
+            Self::DistributionRecipients => "DistributionRecipients",
         }
     }
 }
@@ -191,13 +197,27 @@ struct Environment {
     scope: ScopeId,
     choices: bool,
     play_modes: bool,
+    play_payments: Option<ScopeId>,
+    evolution_form: Option<Binding<ObjectRef>>,
     chooser: Option<PlayerRef>,
     private_choice: bool,
     choice_candidates: BTreeSet<Key>,
-    public_scalars: BTreeSet<Key>,
+    distributions: BTreeMap<Key, super::RecipientSet>,
+    access: BTreeMap<Key, super::Visibility>,
+    receipt_access: BTreeMap<ReceiptId, super::Visibility>,
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
 }
+impl Environment {
+    fn inherit_values(&mut self, other: &Self) {
+        self.bindings.extend(other.bindings.clone());
+        self.receipts.extend(other.receipts.clone());
+        self.access.extend(other.access.clone());
+        self.receipt_access.extend(other.receipt_access.clone());
+        self.distributions.extend(other.distributions.clone());
+    }
+}
+#[derive(Clone)]
 struct Checker {
     env: Environment,
     root: ScopeId,
@@ -207,6 +227,8 @@ struct Checker {
     play_controller: Option<PlayerRef>,
     capture_time: Option<CaptureTime>,
     count_time: Option<super::SpellCountTime>,
+    // Lives outside `Environment`, so no scope join can restore evidence a flip may have revoked.
+    revoked: bool,
     scopes: BTreeSet<ScopeId>,
     ability_ids: BTreeSet<super::AbilityId>,
     effect_ids: BTreeSet<super::EffectDefinitionId>,
@@ -228,10 +250,14 @@ impl Checker {
             scope,
             choices: true,
             play_modes: false,
+            play_payments: None,
+            evolution_form: None,
             chooser: None,
             private_choice: false,
             choice_candidates: BTreeSet::new(),
-            public_scalars: BTreeSet::new(),
+            distributions: BTreeMap::new(),
+            access: BTreeMap::new(),
+            receipt_access: BTreeMap::new(),
             bindings: BTreeMap::new(),
             receipts: BTreeMap::new(),
         };
@@ -244,6 +270,7 @@ impl Checker {
             play_controller: None,
             capture_time: None,
             count_time: None,
+            revoked: false,
             scopes: BTreeSet::new(),
             ability_ids: BTreeSet::new(),
             effect_ids: BTreeSet::new(),
@@ -270,7 +297,11 @@ impl Checker {
         Err(self.error(WellFormedReason::UnsupportedShape))
     }
 
-    fn at(&mut self, field: &str, check: impl FnOnce(&mut Self) -> Checked) -> Checked {
+    fn at<T>(
+        &mut self,
+        field: &str,
+        check: impl FnOnce(&mut Self) -> Result<T, WellFormedError>,
+    ) -> Result<T, WellFormedError> {
         let length = self.path.len();
         self.path.push('/');
         self.path.push_str(field);
@@ -372,10 +403,23 @@ impl Checker {
     }
 
     fn node(&mut self, node: &Node) -> Checked {
-        if !matches!(node, Node::Capture { .. }) {
+        let play_payment = matches!(
+            node,
+            Node::Control {
+                control: Control::Pay {
+                    at: super::PaymentTime::PlayParameter,
+                    ..
+                }
+            }
+        );
+        if !play_payment {
+            self.env.play_payments = None;
+        }
+        // Play-time payment finishes before resolution starts, so leading captures may follow it.
+        if !play_payment && !matches!(node, Node::Capture { .. }) {
             self.entry = false;
         }
-        match node {
+        let result = match node {
             Node::Instruction { instruction } => {
                 self.at("instruction", |checker| checker.instruction(instruction))
             }
@@ -384,17 +428,27 @@ impl Checker {
             Node::Decision { decision } => {
                 self.at("decision", |checker| checker.decision(decision))
             }
+        };
+        if play_payment {
+            self.resolution_entry = self.env.clone();
         }
+        result
     }
 
     fn instruction(&mut self, instruction: &Instruction) -> Checked {
-        self.instruction_in(instruction, InstructionContext::Effect)
+        self.instruction_in(instruction, InstructionContext::Effect, false)
+    }
+
+    /// Check an instruction whose start guard, if any, its decision or batch already evaluated.
+    fn guarded_instruction(&mut self, instruction: &Instruction) -> Checked {
+        self.instruction_in(instruction, InstructionContext::Effect, true)
     }
 
     fn instruction_in(
         &mut self,
         instruction: &Instruction,
         context: InstructionContext,
+        guard_checked: bool,
     ) -> Checked {
         if !self.instructions.insert(instruction.id) {
             return Err(self.error(WellFormedReason::DuplicateInstruction));
@@ -415,17 +469,44 @@ impl Checker {
                 if precondition.protects != instruction.id {
                     return Err(checker.error(WellFormedReason::PreconditionTiming));
                 }
+                // Rechecking would also redefine the predicate's candidate bindings.
+                if guard_checked {
+                    return Ok(());
+                }
                 checker.boolean(&precondition.predicate)
             })?;
         }
-        if let Action::Discard { player, .. } = &instruction.action
+        // Payment belongs to a K.pay transaction; an effect has no all-or-nothing rule for it.
+        if context == InstructionContext::Effect
+            && matches!(
+                instruction.action,
+                Action::Resource {
+                    operation: ResourceOperation::Pay,
+                    ..
+                }
+            )
+        {
+            return self.reject();
+        }
+        let guarded_inputs = instruction
+            .precondition
+            .as_ref()
+            .map(|_| (self.env.bindings.clone(), self.env.access.clone()));
+        // The action publishes its output only after all of its inputs were checked.
+        self.at("action", |checker| checker.action(&instruction.action))?;
+        if let Action::Discard { player, .. } | Action::Draw { player, .. } = &instruction.action
             && instruction.actor != *player
         {
             return self.reject();
         }
-        // The action publishes its output only after all of its inputs were checked.
-        self.at("action", |checker| checker.action(&instruction.action))?;
-        self.produce(instruction.receipt, outcome(&instruction.action))
+        self.produce(instruction.receipt, outcome(&instruction.action))?;
+        self.observation(instruction);
+        if let Some((bindings, access)) = guarded_inputs {
+            // A skipped instruction has a receipt, but its output values were never produced.
+            self.env.bindings = bindings;
+            self.env.access = access;
+        }
+        Ok(())
     }
 
     fn ability_source(&mut self, source: &AbilitySource) -> Checked {
@@ -449,6 +530,10 @@ impl Checker {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Exhaustive action dispatch keeps unvalidated variants explicitly rejected."
+    )]
     fn action(&mut self, action: &Action) -> Checked {
         match action {
             Action::Draw {
@@ -495,40 +580,73 @@ impl Checker {
                     return self.reject();
                 }
                 self.player(actor)?;
-                match declaration {
-                    Declaration::NonnegativeInteger { binding } => {
-                        self.define(*binding, BindingKind::Value)
-                    }
-                    Declaration::BoundedInteger {
-                        minimum,
-                        maximum,
-                        binding,
-                    } => {
-                        if minimum.0 > maximum.0 {
-                            return Err(self.error(WellFormedReason::InvalidCardinality));
-                        }
-                        self.define(*binding, BindingKind::Value)
-                    }
-                    Declaration::CardNames { .. } => self.reject(),
-                }
+                self.declaration(declaration)
             }
             Action::Discard { player, mode } => self.discard(player, mode),
+            Action::Damage {
+                recipients,
+                amount,
+                flags,
+                source,
+                batch,
+            } => self.damage(recipients, amount, *flags, source, *batch),
+            Action::Token {
+                tokens,
+                destination,
+                output,
+                initial_state,
+                entry_effects,
+                ..
+            } => {
+                if !entry_effects.is_empty() {
+                    return self.reject();
+                }
+                self.tokens(tokens, destination, initial_state.as_ref())?;
+                self.define(*output, BindingKind::Value)
+            }
+            Action::Transfer {
+                objects,
+                destination_controller,
+            } => {
+                self.selector(objects)?;
+                self.player(destination_controller)
+            }
+            Action::Life { player, change } => {
+                self.player(player)?;
+                match change {
+                    super::NumericChange::Add { amount } | super::NumericChange::Set { amount } => {
+                        self.integer(amount)
+                    }
+                }
+            }
+            Action::Resource { player, amount, .. } => {
+                self.player(player)?;
+                self.integer(amount)
+            }
+            Action::Evolve {
+                subject,
+                form,
+                mode,
+                link,
+            } if *subject == (ObjectOperand::SourceHolder {})
+                && *mode == super::EvolutionMode::Normal
+                && matches!(&form.object, ObjectOperand::Bound { binding }
+                        if self.env.evolution_form == Some(*binding)) =>
+            {
+                self.object(&form.object)?;
+                self.define(*link, BindingKind::Value)
+            }
             Action::InstallEffect { .. }
             | Action::Move { .. }
             | Action::Destroy { .. }
             | Action::Banish { .. }
-            | Action::Transfer { .. }
-            | Action::Damage { .. }
-            | Action::Life { .. }
             | Action::Search { .. }
             | Action::RevealUntil { .. }
             | Action::Shuffle { .. }
             | Action::Order { .. }
             | Action::Evolve { .. }
-            | Action::Token { .. }
             | Action::Transform { .. }
             | Action::FlipUp { .. }
-            | Action::Resource { .. }
             | Action::Modify { .. }
             | Action::Grant { .. }
             | Action::RemoveAbility { .. }
@@ -545,6 +663,25 @@ impl Checker {
             | Action::ScheduleTurn { .. }
             | Action::GameResult { .. }
             | Action::BoxPilot { .. } => self.reject(),
+        }
+    }
+
+    fn declaration(&mut self, declaration: &Declaration) -> Checked {
+        match declaration {
+            Declaration::NonnegativeInteger { binding } => {
+                self.define(*binding, BindingKind::Value)
+            }
+            Declaration::BoundedInteger {
+                minimum,
+                maximum,
+                binding,
+            } => {
+                if minimum.0 > maximum.0 {
+                    return Err(self.error(WellFormedReason::InvalidCardinality));
+                }
+                self.define(*binding, BindingKind::Value)
+            }
+            Declaration::CardNames { .. } => self.reject(),
         }
     }
 
@@ -578,20 +715,32 @@ impl Checker {
     fn capture(&mut self, capture: &Capture) -> Checked {
         match capture {
             Capture::Integer { at, value, into } => {
+                let access = self.capture_access(*at, |checker| checker.integer(value));
                 self.frozen(*at, |checker| checker.integer(value))?;
-                self.define(into.binding, BindingKind::Capture)
+                self.define(into.binding, BindingKind::Capture)?;
+                self.save_access(into.binding.key(), access);
+                Ok(())
             }
             Capture::Natural { at, value, into } => {
+                let access = self.capture_access(*at, |checker| checker.natural(value));
                 self.frozen(*at, |checker| checker.natural(value))?;
-                self.define(into.binding, BindingKind::Capture)
+                self.define(into.binding, BindingKind::Capture)?;
+                self.save_access(into.binding.key(), access);
+                Ok(())
             }
             Capture::Boolean { at, value, into } => {
+                let access = self.capture_access(*at, |checker| checker.boolean(value));
                 self.frozen(*at, |checker| checker.boolean(value))?;
-                self.define(into.binding, BindingKind::Capture)
+                self.define(into.binding, BindingKind::Capture)?;
+                self.save_access(into.binding.key(), access);
+                Ok(())
             }
             Capture::Objects { at, value, into } => {
+                let access = self.capture_access(*at, |checker| checker.selector(value));
                 self.frozen(*at, |checker| checker.selector(value))?;
-                self.define(into.binding, BindingKind::Capture)
+                self.define(into.binding, BindingKind::Capture)?;
+                self.save_access(into.binding.key(), access);
+                Ok(())
             }
             Capture::Names { .. }
             | Capture::Kind { .. }
@@ -652,12 +801,13 @@ const fn outcome(action: &Action) -> TypeId {
         Action::Look { .. } => TypeId::of::<LookOutcome>(),
         Action::Counter { .. } => TypeId::of::<CounterQuantityOutcome>(),
         Action::FlipDown { .. } => TypeId::of::<FlipOutcome>(),
+        Action::Damage { .. } => TypeId::of::<super::DamageQuantityOutcome>(),
+        Action::Token { .. } => TypeId::of::<super::TokenOutcome>(),
         Action::InstallEffect { .. }
         | Action::Move { .. }
         | Action::Destroy { .. }
         | Action::Banish { .. }
         | Action::Transfer { .. }
-        | Action::Damage { .. }
         | Action::Life { .. }
         | Action::Search { .. }
         | Action::Reveal { .. }
@@ -665,7 +815,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::Shuffle { .. }
         | Action::Order { .. }
         | Action::Evolve { .. }
-        | Action::Token { .. }
         | Action::Transform { .. }
         | Action::FlipUp { .. }
         | Action::Posture { .. }
