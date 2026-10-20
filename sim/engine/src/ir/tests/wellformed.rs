@@ -651,7 +651,7 @@ fn candidates_and_each_object_bindings_do_not_escape_their_body() {
 }
 
 #[test]
-fn each_player_exposes_only_the_player_across_stages() {
+fn each_player_carries_same_player_outputs_across_stages() {
     let player = Binding::new(1, ScopeId(2));
     let declaration = Binding::new(2, ScopeId(2));
     let each = |count| {
@@ -683,10 +683,7 @@ fn each_player_exposes_only_the_player_across_stages() {
         })
     };
     accept(body(1, vec![each(Expr::Literal(Int(1)))]));
-    reject(
-        body(1, vec![each(Expr::Bound(declaration))]),
-        WellFormedReason::UnavailableBinding,
-    );
+    accept(body(1, vec![each(Expr::Bound(declaration))]));
     reject(
         body(
             1,
@@ -1674,3 +1671,5 @@ fn defined_operands_pass_through_accepted_value_positions() {
 fn missing_receipt<T>() -> ReceiptReference<T> {
     ReceiptReference::new(ReceiptId(9))
 }
+
+mod decisions;
