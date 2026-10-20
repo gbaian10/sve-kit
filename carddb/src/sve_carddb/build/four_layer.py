@@ -3,6 +3,7 @@
 from typing import Annotated
 
 from pydantic import ConfigDict, Field, JsonValue, TypeAdapter
+from typing_extensions import TypeForm
 
 from sve_carddb.build.model import Column, ForeignKey, Kind, QueryCheck, Table, Unique
 from sve_carddb.build.scalars import LANG
@@ -250,7 +251,7 @@ TABLES = (*FRAME_TABLES, *ANNOTATION_TABLES)
 def schemas() -> dict[str, JsonValue]:
     """JSON declarations share the closed models used on typed reads."""
     declarations: dict[str, JsonValue] = {}
-    models = (
+    models: tuple[tuple[str, TypeForm[object]], ...] = (
         ("FrameSource", four_layer.Source),
         ("FrameSemanticVariant", SemanticVariant),
         ("FrameLeafSchema", LeafSchema),

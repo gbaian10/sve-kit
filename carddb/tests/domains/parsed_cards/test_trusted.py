@@ -7,6 +7,7 @@ from typing import cast
 
 import pytest
 from pydantic import BaseModel, create_model
+from typing_extensions import TypeForm
 
 from sve_carddb.domains.parsed_cards.trusted import construct
 
@@ -29,7 +30,7 @@ class FutureEnum(Enum):
     ],
 )
 def test_unknown_annotations_fail_even_without_values(
-    annotation: object, value: object
+    annotation: TypeForm[object], value: object
 ) -> None:
     model = create_model("FutureInput", value=(annotation, ...))
     with pytest.raises(TypeError, match="Unsupported trusted input annotation"):

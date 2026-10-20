@@ -258,6 +258,7 @@
       "type": "object"
     },
     "ProductHint": {
+      "additionalProperties": false,
       "description": "Product evidence printed below the card, before product identity is resolved.",
       "properties": {
         "name": {
@@ -289,10 +290,10 @@
         "links"
       ],
       "title": "ProductHint",
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "RelatedHint": {
+      "additionalProperties": false,
       "description": "An official link, without inferring the relationship or card identity.",
       "properties": {
         "label": {
@@ -309,8 +310,7 @@
         "href"
       ],
       "title": "RelatedHint",
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "SourceRef": {
       "additionalProperties": false,
@@ -340,6 +340,7 @@
       "type": "object"
     },
     "sve_carddb__parse__pages__extract_en__Face": {
+      "additionalProperties": false,
       "properties": {
         "name": {
           "title": "Name",
@@ -440,10 +441,10 @@
         "traits"
       ],
       "title": "Face",
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "sve_carddb__parse__pages__extract_en__QA": {
+      "additionalProperties": false,
       "properties": {
         "title": {
           "title": "Title",
@@ -464,10 +465,10 @@
         "answer"
       ],
       "title": "QA",
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "sve_carddb__parse__pages__extract_jp__Face": {
+      "additionalProperties": false,
       "description": "One side of a card; double-faced cards have two.",
       "properties": {
         "name": {
@@ -595,10 +596,10 @@
         "trait_raw"
       ],
       "title": "Face",
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "sve_carddb__parse__pages__extract_jp__QA": {
+      "additionalProperties": false,
       "description": "A ruling printed on the card page.",
       "properties": {
         "id": {
@@ -625,8 +626,7 @@
         "answer"
       ],
       "title": "QA",
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     }
   },
   "additionalProperties": false,
