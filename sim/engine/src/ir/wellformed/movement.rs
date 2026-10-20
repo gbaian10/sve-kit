@@ -223,9 +223,13 @@ impl Checker {
                     checker.search_movement(movement, &objects, player)
                 }
                 Some(SearchDestination::OptionalSelfReplacement {
+                    decision,
                     predicate,
                     movement,
                 }) => {
+                    if !checker.decisions.insert(*decision) {
+                        return Err(checker.error(WellFormedReason::DuplicateDecision));
+                    }
                     checker.boolean(predicate)?;
                     checker.search_movement(movement, &objects, player)
                 }
@@ -235,6 +239,9 @@ impl Checker {
                     }
                     for (index, partition) in destinations.iter().enumerate() {
                         checker.at(&index.to_string(), |checker| {
+                            if !checker.decisions.insert(partition.decision) {
+                                return Err(checker.error(WellFormedReason::DuplicateDecision));
+                            }
                             checker.cardinality(partition.cardinality)?;
                             checker.destination(&partition.zone)
                         })?;

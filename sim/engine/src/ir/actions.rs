@@ -20,7 +20,7 @@ variants!(Action {
     Life { player: PlayerRef, change: NumericChange } => ["action.life"],
     Draw { player: PlayerRef, count: Expr<Int>, mode: StepwiseMode } => ["action.draw"],
     Look { viewer: PlayerRef, zone: ZoneRef, count: Expr<Nat>, mode: StepwiseMode } => ["action.look"],
-    Search { player: PlayerRef, deck: PlayerRef, candidate: Binding<ObjectRef>, filter: Expr<Bool>, cardinality: Cardinality, groups: Option<SelectionConstraint>, destination: Option<SearchDestination>, continuation: SearchContinuation } => ["action.search", "receipt.move-after"],
+    Search { decision: DecisionId, player: PlayerRef, deck: PlayerRef, candidate: Binding<ObjectRef>, filter: Expr<Bool>, cardinality: Cardinality, groups: Option<SelectionConstraint>, destination: Option<SearchDestination>, continuation: SearchContinuation } => ["action.search", "receipt.move-after"],
     Reveal { objects: Selector } => ["action.reveal"],
     RevealUntil { deck: PlayerRef, candidate: Binding<ObjectRef>, predicate: Expr<Bool>, required: Expr<Nat> } => ["action.reveal-until"],
     Shuffle { deck: PlayerRef, scope: ShuffleScope, randomness: RandomnessPolicy } => ["action.shuffle"],
@@ -191,9 +191,10 @@ tags!(InstallationTime {
 variants!(SearchDestination {
     Single { movement: MoveSpec } => [],
     Partition { destinations: Vec<SearchPartition> } => [],
-    OptionalSelfReplacement { predicate: Expr<Bool>, movement: MoveSpec } => []
+    OptionalSelfReplacement { decision: DecisionId, predicate: Expr<Bool>, movement: MoveSpec } => []
 });
 record!(SearchPartition {
+    decision: DecisionId,
     zone: MoveDestination,
     cardinality: Cardinality
 });

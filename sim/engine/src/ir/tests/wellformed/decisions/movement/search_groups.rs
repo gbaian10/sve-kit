@@ -40,6 +40,7 @@ fn continued(revealed: bool) -> Located<Node> {
             }
         };
         *destination = Some(SearchDestination::OptionalSelfReplacement {
+            decision: DecisionId(9002),
             predicate: Expr::Compute(Box::new(Predicate::Exists { objects })),
             movement: movement(shared(ZoneKind::Field)),
         });
@@ -164,6 +165,7 @@ fn search_rejects_destination_order_and_position_until_shuffle_sequencing_is_def
             if let Action::Search { destination, .. } = action(&mut step) {
                 *destination = Some(if replacement {
                     SearchDestination::OptionalSelfReplacement {
+                        decision: DecisionId(9002),
                         predicate: Expr::Literal(Bool(true)),
                         movement,
                     }
