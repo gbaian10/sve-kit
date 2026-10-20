@@ -46,6 +46,7 @@ fn check_program(program: &Program, source: &SourceSpan) -> Result<()> {
             }
             Node::Instruction { instruction } => {
                 super::movement::check_action(&instruction.action)?;
+                super::numeric::check_action(&instruction.action)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
                 {
@@ -132,6 +133,18 @@ fn supported(code: &str) -> bool {
             | "action.move"
             | "shape.Action.Destroy"
             | "action.destroy"
+            | "shape.Action.Modify"
+            | "action.modify"
+            | "effect.continuous"
+            | "shape.CharacteristicPatch.Numeric"
+            | "shape.CharacteristicPatch.Combined"
+            | "shape.NumericChange.Add"
+            | "numeric.add"
+            | "internal.Stat.Attack"
+            | "internal.Stat.Life"
+            | "shape.DurationEnd.NoTemporalExpiry"
+            | "duration.no-expiry"
+            | "shape.EffectReference.CurrentInstallation"
             | "receipt.move-after"
             | "shape.MoveDestination.Owners"
             | "internal.OwnerZone.Cemetery"
@@ -210,6 +223,11 @@ fn supported(code: &str) -> bool {
             | "internal.PlayerResource.Ep"
             | "internal.PlayerResource.Sep"
             | "shape.IntOperation.FromNat"
+            | "shape.IntOperation.InformationOrZero"
+            | "value.absent-number-zero"
+            | "shape.NumberRead.Stats"
+            | "read.stats"
+            | "internal.CharacteristicView.Effective"
             | "value.nat-to-int"
             | "shape.IntOperation.Conditional"
             | "value.conditional"

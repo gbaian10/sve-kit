@@ -24,6 +24,12 @@ impl Game {
         seat: &str,
         seed: &str,
     ) -> Result<Self> {
+        // Effective numbers would become prototype base values that decide could then rewrite.
+        if packet["semantic_state"]["typed_numeric_layers"] == true {
+            return Err(EngineFailure::Unsupported(
+                "observations with typed numeric layers have no belief model".into(),
+            ));
+        }
         let mut random = Random::new(seed);
         let mut setup = json!({"turn":packet["turn"],"room":packet["room"],"semantic_state":packet["semantic_state"],"players":{}});
         setup["semantic_state"]["delayed_triggers"] = json!([]);

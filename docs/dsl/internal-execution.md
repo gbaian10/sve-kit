@@ -123,3 +123,38 @@ remainder、減費安裝與 Token 共享容量仍未准入；不能以此片段�
 Search 的靜態輸入點與三種回答型別已在 IR 定義，契約依
 [執行語義 §6](runtime-semantics.md#6-search-的輸入點回答與觀察)；本入口仍未執行它們。
 Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等待執行驗收。
+
+## 加法數值修正
+
+Modify 准入 Numeric Add 與非空、遞迴純 Add Combined；期限只接受 Installation anchor
+的 NoTemporalExpiry，沒有 usage 或 interval。對象限目前場上從者，
+已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
+同指示先固定去重對象，求完所有有號操作數，再規劃與提交。重複同 stat 的 Add 合計，
+不先截零；整數溢位拒絕並回復整份 Game。
+
+型別化數值層與基礎值保存在 State；純求值器從基礎及固定加數計算有效攻體，傷害另行扣除。
+提交時物化到原有物件的有效狀態，因此合法性、事件主體、view 與後續傷害共讀同一有效值；
+Catalog 印刷值不變。Effective Current 的 Stats read 經同一求值器，限仍有效的 SourceHolder
+場上從者。唯讀投影與讀值不分配效果 ID，也不發事件。
+
+成功登記時 authority 分配 EffectId；沒有有效主體就不分配。同主體同指示只有一個
+`Fact::StatChange`，內含非零 Attack／Life facets、實際 before／after／delta、Add 操作、
+instruction、execution、effect 與 commit 身分。兩個指示保持兩個事實；零差值不造 facet。
+此為 authority 結果，尚未接完整 EventHeader、觸發及歷史查詢管線，不能當玩家 wire payload。
+
+來源離場不移除非 static 加數；目標換區後原世代加數失效，不追蹤新世代。
+NoTemporalExpiry 沒有額外時間截止。解算完成時只清除目標已換世代的數值層，再執行
+既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
+閒置 Game 的基礎與加數可存檔；待答仍不可存檔。
+數值修正的 EndResolution 到期與規則檢查先後尚無正式契約，Modify 帶此期限時整棵拒絕，
+包括未執行分支；InstallEffect 的 Permission EndResolution 不受影響。
+持久數值層有效期間拒絕原型 decide，避免未遷移的 set／進化等寫入繞過求值器。
+同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
+布林摘要，不含 effect、execution 或加數明細；belief 入口見到它即拒絕，
+不把有效值當成原型基礎值重建另一份可 decide 的局面。
+
+此子集只有可交換的固定 Add，不宣稱 ProperPlay timestamp／依存排序已接。
+Set、Continuous 安裝、EndResolution／CurrentTurnEnd／NextTurnEnd、interval、SetKind、Grant／RemoveAbility
+及其他未准入形狀，包括未執行分支，仍整棵拒絕。
+CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
+觸發或整卡准入。BP16-049 的 Set 1/1 尚未執行。

@@ -6,6 +6,7 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
+use crate::ir::{CharacteristicView, NumberRead, ObjectView};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -214,6 +215,21 @@ impl Execution {
                 _ => Err(unsupported("signed projection")),
             },
             Expr::Compute(operation) => match operation.as_ref() {
+                IntOperation::InformationOrZero {
+                    information:
+                        NumberRead::Stats {
+                            object: ObjectView::Current { object },
+                            property,
+                            view: CharacteristicView::Effective,
+                        },
+                } => {
+                    let reference = self.object(game, object)?;
+                    let id = self.object_id(reference)?;
+                    if game.object(id)?.generation != reference.generation.0 {
+                        return Err(invalid("stale numeric read"));
+                    }
+                    game.internal_numeric_stat(id, *property).map(Int)
+                }
                 IntOperation::FromNat { value } => Ok(Int(i64::try_from(
                     self.natural(game, value)?.0,
                 )
