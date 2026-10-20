@@ -60,6 +60,7 @@ jobs:
               - '.github/ci/**'
             python:
               - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
+              - 'dsl/**' # schema changes must run the Python type drift checks
               - 'publish/**'
               - 'docs/schema/**'
               - 'tools/schema-er/**'
