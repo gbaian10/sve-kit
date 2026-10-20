@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:author-nodes:1.0",
   "title": "SVE author 1.0 shared leaf and reference definitions",
-  "$comment": "Leaf and reference-atom library only. Reference atoms are not complete action-position types. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
+  "$comment": "Leaf, reference-atom and numeric-core fragment library. All numeric variants have partial operand domains, not full Expr/Cond. The root rejects standalone documents; select a $defs entry. Full authored/expanded profiles are not implemented.",
   "not": {},
   "$defs": {
     "Int": {
@@ -666,6 +666,473 @@
         },
         {
           "$ref": "#/$defs/A.until-during-next-phase"
+        }
+      ]
+    },
+    "A.expr.plus": {
+      "type": "object",
+      "properties": {
+        "plus": {
+          "anyOf": [
+            {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/A.expr.numeric-core"
+                },
+                {
+                  "$ref": "#/$defs/A.expr.numeric-core"
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            },
+            {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/A.param"
+                },
+                {
+                  "$ref": "#/$defs/A.expr.numeric-core"
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            },
+            {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/A.expr.numeric-core"
+                },
+                {
+                  "$ref": "#/$defs/A.param"
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ]
+        }
+      },
+      "required": [
+        "plus"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.minus": {
+      "type": "object",
+      "properties": {
+        "minus": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/A.expr.numeric-core"
+            },
+            {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/A.expr.numeric-core"
+                },
+                {
+                  "$ref": "#/$defs/A.param"
+                }
+              ]
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "minus"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.times": {
+      "type": "object",
+      "properties": {
+        "times": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/A.expr.numeric-core"
+            },
+            {
+              "$ref": "#/$defs/A.expr.numeric-core"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "times"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.half-up": {
+      "type": "object",
+      "properties": {
+        "half_up": {
+          "$ref": "#/$defs/A.expr.numeric-core"
+        }
+      },
+      "required": [
+        "half_up"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.per-payload": {
+      "type": "object",
+      "properties": {
+        "of": {
+          "$ref": "#/$defs/A.expr.numeric-core"
+        },
+        "unit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "of",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.per": {
+      "type": "object",
+      "properties": {
+        "per": {
+          "$ref": "#/$defs/A.expr.per-payload"
+        }
+      },
+      "required": [
+        "per"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.min": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.expr.numeric-core"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "min"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.max": {
+      "type": "object",
+      "properties": {
+        "max": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.expr.numeric-core"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "max"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.bound": {
+      "type": "object",
+      "properties": {
+        "bound": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "bound"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.power-of": {
+      "type": "object",
+      "properties": {
+        "power_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "power_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.hp-of": {
+      "type": "object",
+      "properties": {
+        "hp_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "hp_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.cost-of": {
+      "type": "object",
+      "properties": {
+        "cost_of": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "cost_of"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.resource-payload": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "pp_max",
+            "pp",
+            "ep",
+            "sep"
+          ]
+        }
+      },
+      "required": [
+        "who",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.resource": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "#/$defs/A.expr.resource-payload"
+        }
+      },
+      "required": [
+        "resource"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.turn-number-payload": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        }
+      },
+      "required": [
+        "who"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.turn-number": {
+      "type": "object",
+      "properties": {
+        "turn_number": {
+          "$ref": "#/$defs/A.expr.turn-number-payload"
+        }
+      },
+      "required": [
+        "turn_number"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.zone-free-payload": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/A.player-ref"
+        },
+        "zone": {
+          "type": "string",
+          "enum": [
+            "field",
+            "ex"
+          ]
+        }
+      },
+      "required": [
+        "who",
+        "zone"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.zone-free": {
+      "type": "object",
+      "properties": {
+        "zone_free": {
+          "$ref": "#/$defs/A.expr.zone-free-payload"
+        }
+      },
+      "required": [
+        "zone_free"
+      ],
+      "additionalProperties": false
+    },
+    "A.expr.numeric-core": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Int"
+        },
+        {
+          "$ref": "#/$defs/BindingName"
+        },
+        {
+          "$ref": "#/$defs/A.expr.plus"
+        },
+        {
+          "$ref": "#/$defs/A.expr.minus"
+        },
+        {
+          "$ref": "#/$defs/A.expr.times"
+        },
+        {
+          "$ref": "#/$defs/A.expr.half-up"
+        },
+        {
+          "$ref": "#/$defs/A.expr.per"
+        },
+        {
+          "$ref": "#/$defs/A.expr.min"
+        },
+        {
+          "$ref": "#/$defs/A.expr.max"
+        },
+        {
+          "$ref": "#/$defs/A.expr.bound"
+        },
+        {
+          "$ref": "#/$defs/A.expr.power-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.hp-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.cost-of"
+        },
+        {
+          "$ref": "#/$defs/A.expr.resource"
+        },
+        {
+          "$ref": "#/$defs/A.expr.turn-number"
+        },
+        {
+          "$ref": "#/$defs/A.expr.zone-free"
+        }
+      ]
+    },
+    "A.cond.cmp-payload": {
+      "type": "object",
+      "properties": {
+        "left": {
+          "$ref": "#/$defs/A.expr.numeric-core"
+        },
+        "op": {
+          "type": "string",
+          "enum": [
+            "eq",
+            "ne",
+            "lt",
+            "le",
+            "gt",
+            "ge"
+          ]
+        },
+        "right": {
+          "$ref": "#/$defs/A.expr.numeric-core"
+        }
+      },
+      "required": [
+        "left",
+        "op",
+        "right"
+      ],
+      "additionalProperties": false
+    },
+    "A.cond.cmp": {
+      "type": "object",
+      "properties": {
+        "cmp": {
+          "$ref": "#/$defs/A.cond.cmp-payload"
+        }
+      },
+      "required": [
+        "cmp"
+      ],
+      "additionalProperties": false
+    },
+    "A.cond.all": {
+      "type": "object",
+      "properties": {
+        "all": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cond.numeric-core"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "all"
+      ],
+      "additionalProperties": false
+    },
+    "A.cond.any": {
+      "type": "object",
+      "properties": {
+        "any": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/A.cond.numeric-core"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "any"
+      ],
+      "additionalProperties": false
+    },
+    "A.cond.not": {
+      "type": "object",
+      "properties": {
+        "not": {
+          "$ref": "#/$defs/A.cond.numeric-core"
+        }
+      },
+      "required": [
+        "not"
+      ],
+      "additionalProperties": false
+    },
+    "A.cond.numeric-core": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/A.cond.cmp"
+        },
+        {
+          "$ref": "#/$defs/A.cond.all"
+        },
+        {
+          "$ref": "#/$defs/A.cond.any"
+        },
+        {
+          "$ref": "#/$defs/A.cond.not"
         }
       ]
     }
