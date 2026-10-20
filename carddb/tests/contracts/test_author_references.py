@@ -26,6 +26,7 @@ ADAPTERS: dict[str, TypeAdapter[object]] = {
     "A.player-ref": TypeAdapter(author.PlayerRef, config=CONFIG),
     "A.player-set": TypeAdapter(author.PlayerSet, config=CONFIG),
     "A.leader-recipient": TypeAdapter(author.LeaderRecipient, config=CONFIG),
+    "A.leader-of": TypeAdapter(author.LeaderOf),
     "A.until": TypeAdapter(author.Until, config=CONFIG),
 }
 
@@ -66,6 +67,11 @@ OBJECTS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.leader-recipient", {"leader": "opp"}),
     ("A.leader-recipient", {"leaders": "opponents"}),
     ("A.leader-recipient", {"leaders": "all"}),
+    ("A.leader-of", {"leader_of": "this"}),
+    ("A.leader-of", {"leader_of": {"follow": "moved_group"}}),
+    ("A.leader-of", {"leader_of": {"role": {"of": "t", "name": "primary"}}}),
+    ("A.leader-recipient", {"leader_of": "this"}),
+    ("A.leader-recipient", {"leader_of": {"role": {"of": "t", "name": "primary"}}}),
     ("A.until", {"next_phase": {"who": "self", "phase": "start", "edge": "begin"}}),
     ("A.until", {"next_turn": {"who": "opp", "edge": "end"}}),
     ("A.until", {"during_next_phase": {"who": "opp", "phase": "main"}}),
@@ -292,6 +298,21 @@ def test_identifier_boundaries(
         ("A.ref", {"in": "chosen_group", "kind": "follower"}),
         ("A.ref", "first:chosen_group"),
         ("A.ref", {"first": "chosen_group"}),
+        ("A.ref", {"second": "chosen_group"}),
+        ("A.ref", {"rest": "chosen_group"}),
+        ("A.ref", "second:chosen_group"),
+        ("A.ref", "rest:chosen_group"),
+        ("A.ref", {"leader_of": "this"}),
+        ("A.player-ref", {"leader_of": "this"}),
+        ("A.receipt-ref", {"leader_of": "this"}),
+        ("A.leader-of", {"leader_of": "self"}),
+        ("A.leader-of", {"leader_of": {"owner_of": "t"}}),
+        ("A.leader-of", {"leader_of": {"master_of": "t"}}),
+        ("A.leader-of", {"leader_of": {"objects_of": "moved"}}),
+        ("A.leader-of", {"leader_of": {"lki_of": "t"}}),
+        ("A.leader-of", {"leader_of": {"leader": "self"}}),
+        ("A.leader-recipient", {"leader_of": {"owner_of": "t"}}),
+        ("A.leader-recipient", {"leader": "opp", "leader_of": "this"}),
         ("A.receipt-ref", {"event": "holder"}),
         ("A.receipt-ref", {"entry_payment": "optional"}),
         ("A.receipt-ref", {"follow": "moved_group"}),
@@ -350,3 +371,63 @@ def test_library_root_is_not_a_document_entry(
     schema: dict[str, JsonValue], value: JsonValue
 ) -> None:
     assert not Draft202012Validator(schema).is_valid(value)
+
+
+def _union_leaves(
+    schema: dict[str, JsonValue], node: dict[str, JsonValue]
+) -> list[dict[str, JsonValue]]:
+    reference = node.get("$ref")
+    if isinstance(reference, str):
+        name = reference.removeprefix("#/$defs/")
+        return _union_leaves(schema, object_value(object_value(schema["$defs"])[name]))
+    branches = node.get("anyOf", node.get("oneOf"))
+    if isinstance(branches, list):
+        return [
+            leaf
+            for branch in branches
+            for leaf in _union_leaves(schema, object_value(branch))
+        ]
+    return [node]
+
+
+def _assert_leader_union_disjoint(schema: dict[str, JsonValue]) -> None:
+    leaves = _union_leaves(schema, {"$ref": "#/$defs/A.leader-recipient"})
+    assert len({canonical(leaf) for leaf in leaves}) == len(leaves)
+    samples = [value for name, value in OBJECTS if name == "A.leader-recipient"]
+    for value in samples:
+        assert (
+            sum(
+                Draft202012Validator({"$defs": schema["$defs"], **leaf}).is_valid(value)
+                for leaf in leaves
+            )
+            == 1
+        )
+
+
+def test_leader_union_contains_each_shape_once(schema: dict[str, JsonValue]) -> None:
+    _assert_leader_union_disjoint(schema)
+
+
+@pytest.mark.parametrize("operator", ["anyOf", "oneOf"])
+@pytest.mark.parametrize("mutation", ["nested_duplicate", "overlapping_shape"])
+def test_leader_union_probe_detects_overlap(
+    schema: dict[str, JsonValue], operator: str, mutation: str
+) -> None:
+    changed = deepcopy(schema)
+    definitions = object_value(changed["$defs"])
+    union = object_value(definitions["A.leader-recipient"])
+    branches = union.pop("anyOf")
+    assert isinstance(branches, list)
+    union[operator] = branches
+    if mutation == "nested_duplicate":
+        branches.append({"anyOf": [{"$ref": "#/$defs/A.single-leader"}]})
+    else:
+        narrower = deepcopy(object_value(definitions["A.single-leader"]))
+        object_value(narrower["properties"])["leader"] = {
+            "type": "string",
+            "const": "self",
+        }
+        definitions["A.overlapping-leader"] = narrower
+        branches.append({"$ref": "#/$defs/A.overlapping-leader"})
+    with pytest.raises(AssertionError):
+        _assert_leader_union_disjoint(changed)

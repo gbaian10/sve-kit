@@ -82,7 +82,11 @@ class MultipleLeaders(RecordData):
     leaders: Literal["opponents", "all"]
 
 
-type LeaderRecipient = SingleLeader | MultipleLeaders
+class LeaderOf(RecordData):
+    leader_of: Ref
+
+
+type LeaderRecipient = SingleLeader | MultipleLeaders | LeaderOf
 
 
 class PhaseEdge(RecordData):

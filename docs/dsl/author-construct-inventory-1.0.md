@@ -63,7 +63,7 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | A.comb.each_player | who?=each、stages | stage 為 Steps 或 {do,mode,evidence?}；mode=choice/nonchoice/explicit |
 | A.comb.simultaneous | do、result? | 尚未完成的 receipt 不可互讀 |
 | A.by-kind | ref、as?、leader、follower | leader 分支為 PlayerRef、follower 為 ObjectRef |
-| roles／role | Map<binding,{if_nonempty:1}\|remaining>／{of,name} | first/rest 角色非無序集合的任取順序 |
+| roles／role | Map<RoleName,{if_nonempty:1}\|remaining>／{of,name} | first/rest 角色非無序集合的任取順序；形狀與數量位置見[選取矩陣](author-selection-shapes-1.0.md) |
 
 ## 表達式、條件、集合與引用
 

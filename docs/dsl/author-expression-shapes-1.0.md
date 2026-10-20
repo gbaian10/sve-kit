@@ -79,8 +79,9 @@ hand、leader_life、counter、dice、paid、x_paid 的精確形狀亦不在本�
 本表不定義 `at` 捕捉的附掛位置；片段的封閉 mapping 不表示完整讀值語法禁止捕捉。
 
 完整 Cond 的資源門檻、物件／規則狀態與歷史謂詞尚不在本核心。本表不定義 Sel 的 filter、
-精確數／upto／any、first／second／rest、有序／角色視圖、leader／leader_of 的編碼，
-也不選擇與 A.leader-recipient 的重疊處理。
+精確數／upto／any 或 first／second／rest 的編碼，也不提供有序／角色視圖的接線驗證。
+完整 Sel 與動作位置的重疊仍須逐位置檢查；已定形的領袖葉分支與數量位置規則見
+[角色與選取位置矩陣](author-selection-shapes-1.0.md)。
 裸 BindingName 與未來可能使用的字串關鍵字須保持不相交，不能讓同一字串同時是
 無條件接受的數值別名與不同構造；變更保留字也會影響共用引用原子。
 現有引用矩陣的邊界不變，不宣稱整個 §13／§14 的能力已驗證。
