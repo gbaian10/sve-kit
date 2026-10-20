@@ -125,10 +125,17 @@ def test_new_export_rejects_the_old_errata_shape(
 
 
 @pytest.mark.parametrize(
-    "damage", ["hash", "canonical", "files", "changes_ref", "format"]
+    ("damage", "message"),
+    [
+        ("hash", "GC requires intact retained manifests"),
+        ("canonical", "Manifest differs from its index entry"),
+        ("files", "GC retained snapshot is invalid"),
+        ("changes_ref", "GC retained snapshot is invalid"),
+        ("format", "Unsupported retained snapshot format"),
+    ],
 )
 def test_damaged_retained_envelopes_stop_gc_before_deletion(
-    images: PublicImages, roots: Roots, damage: str
+    images: PublicImages, roots: Roots, damage: str, message: str
 ) -> None:
     export(images, roots, step=0)
     loaded = load_export(roots.preview)
@@ -157,7 +164,7 @@ def test_damaged_retained_envelopes_stop_gc_before_deletion(
         '"index"',
         INDEX_HEADERS,
     )
-    with memory_store(fake) as store, pytest.raises(ExportError):
+    with memory_store(fake) as store, pytest.raises(ExportError, match=message):
         collect(store, SNAPSHOT_PREFIXES, execute=True)
     assert all(method == "GET" for method, _key in fake.requests)
 
