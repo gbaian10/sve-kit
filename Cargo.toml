@@ -4,7 +4,7 @@ members = ["sim/scenario-runner", "sim/engine"]
 
 [workspace.package]
 edition = "2024"
-rust-version = "1.98"
+rust-version = "1.99"
 license = "Apache-2.0"
 publish = false
 
@@ -48,6 +48,8 @@ separated_literal_suffix = "allow" # write `1_u32`
 semicolon_inside_block = "allow"   # keep `{ f(); }` over `{ f() };`
 big_endian_bytes = "allow"         # `host_endian_bytes` stays on for determinism
 little_endian_bytes = "allow"
+# Contradicts `unneeded_field_pattern`.
+rest_pattern_accessible_field = "allow"
 # Conflicts with rustc's `unreachable_pub`, which we keep.
 redundant_pub_crate = "allow"
 field_scoped_visibility_modifiers = "allow"
