@@ -18,7 +18,10 @@ use core::fmt;
 
 mod control;
 mod decisions;
+mod entries;
+mod modes;
 mod values;
+pub use entries::{WellFormedCardProgram, WellFormedProcedure};
 
 /// An owned program body whose supported shapes passed structural validation.
 ///
@@ -101,6 +104,14 @@ pub enum WellFormedReason {
     InvalidDivisor,
     /// A batch must contain at least one member.
     EmptyBatch,
+    /// An ability or procedure has inconsistent entry metadata.
+    InvalidEntry,
+    /// A capture is not owned by the named entry or decision.
+    CaptureTiming,
+    /// Target roles cannot partition the selected set.
+    InvalidRoles,
+    /// A mode decision does not describe its printed modes and count.
+    InvalidModes,
 }
 
 impl WellFormedReason {
@@ -128,6 +139,10 @@ impl WellFormedReason {
             Self::ArithmeticArity => "ArithmeticArity",
             Self::InvalidDivisor => "InvalidDivisor",
             Self::EmptyBatch => "EmptyBatch",
+            Self::InvalidEntry => "InvalidEntry",
+            Self::CaptureTiming => "CaptureTiming",
+            Self::InvalidRoles => "InvalidRoles",
+            Self::InvalidModes => "InvalidModes",
         }
     }
 }
@@ -175,6 +190,7 @@ struct Slot {
 struct Environment {
     scope: ScopeId,
     choices: bool,
+    play_modes: bool,
     chooser: Option<PlayerRef>,
     private_choice: bool,
     choice_candidates: BTreeSet<Key>,
@@ -186,12 +202,20 @@ struct Checker {
     env: Environment,
     root: ScopeId,
     entry: bool,
+    resolution_entry: Environment,
+    play_entry: Option<Environment>,
+    play_controller: Option<PlayerRef>,
+    capture_time: Option<CaptureTime>,
+    count_time: Option<super::SpellCountTime>,
     scopes: BTreeSet<ScopeId>,
+    ability_ids: BTreeSet<super::AbilityId>,
+    effect_ids: BTreeSet<super::EffectDefinitionId>,
     bindings: BTreeSet<Key>,
     instructions: BTreeSet<InstructionId>,
     decisions: BTreeSet<super::DecisionId>,
     receipts: BTreeSet<ReceiptId>,
     source: Option<Box<SourceSpan>>,
+    ability_source: Option<AbilitySource>,
     path: String,
 }
 #[expect(
@@ -199,26 +223,36 @@ struct Checker {
     reason = "Control and value rules share one checker state but live in separate modules."
 )]
 impl Checker {
-    const fn new(scope: ScopeId) -> Self {
+    fn new(scope: ScopeId) -> Self {
+        let env = Environment {
+            scope,
+            choices: true,
+            play_modes: false,
+            chooser: None,
+            private_choice: false,
+            choice_candidates: BTreeSet::new(),
+            public_scalars: BTreeSet::new(),
+            bindings: BTreeMap::new(),
+            receipts: BTreeMap::new(),
+        };
         Self {
-            env: Environment {
-                scope,
-                choices: true,
-                chooser: None,
-                private_choice: false,
-                choice_candidates: BTreeSet::new(),
-                public_scalars: BTreeSet::new(),
-                bindings: BTreeMap::new(),
-                receipts: BTreeMap::new(),
-            },
+            resolution_entry: env.clone(),
+            env,
             root: scope,
             entry: true,
+            play_entry: None,
+            play_controller: None,
+            capture_time: None,
+            count_time: None,
             scopes: BTreeSet::new(),
+            ability_ids: BTreeSet::new(),
+            effect_ids: BTreeSet::new(),
             bindings: BTreeSet::new(),
             instructions: BTreeSet::new(),
             decisions: BTreeSet::new(),
             receipts: BTreeSet::new(),
             source: None,
+            ability_source: None,
             path: String::new(),
         }
     }
@@ -395,6 +429,13 @@ impl Checker {
     }
 
     fn ability_source(&mut self, source: &AbilitySource) -> Checked {
+        if self
+            .ability_source
+            .as_ref()
+            .is_some_and(|owner| owner != source)
+        {
+            return Err(self.error(WellFormedReason::InvalidEntry));
+        }
         self.at("holder", |checker| checker.object(&source.holder))?;
         self.at("controller", |checker| checker.player(&source.controller))?;
         self.at("origin", |checker| checker.origin(&source.origin))
@@ -415,7 +456,7 @@ impl Checker {
                 count,
                 mode,
             } => {
-                self.stepwise(*mode)?;
+                self.stepwise(mode, player, super::StepwiseTiming::BeforeDraw)?;
                 self.player(player)?;
                 self.integer(count)
             }
@@ -425,7 +466,7 @@ impl Checker {
                 count,
                 mode,
             } => {
-                self.stepwise(*mode)?;
+                self.stepwise(mode, viewer, super::StepwiseTiming::AfterLook)?;
                 self.player(viewer)?;
                 self.player(&zone.player)?;
                 self.natural(count)
@@ -507,12 +548,31 @@ impl Checker {
         }
     }
 
-    fn stepwise(&self, mode: StepwiseMode) -> Checked {
-        // Up-to draws and looks make per-card decisions, which a choice-free context cannot host.
-        if mode == StepwiseMode::UpToStepwise && !self.env.choices {
+    fn stepwise(
+        &mut self,
+        mode: &StepwiseMode,
+        actor: &PlayerRef,
+        timing: super::StepwiseTiming,
+    ) -> Checked {
+        let StepwiseMode::UpToStepwise { decision } = mode else {
+            return Ok(());
+        };
+        if !self.env.choices {
             return self.reject();
         }
-        Ok(())
+        if !self.decisions.insert(decision.id) {
+            return Err(self.error(WellFormedReason::DuplicateDecision));
+        }
+        if decision.actor != *actor || decision.timing != timing {
+            return Err(self.error(WellFormedReason::DecisionTiming));
+        }
+        if !matches!(&decision.visibility, super::Visibility::Only { players }
+            if players.relative_to == *actor && players.relation == PlayerRelation::SelfPlayer
+                && players.cardinality.minimum == Nat(1) && players.cardinality.maximum == Some(Nat(1)))
+        {
+            return self.reject();
+        }
+        self.player(&decision.actor)
     }
 
     fn capture(&mut self, capture: &Capture) -> Checked {
@@ -555,6 +615,12 @@ impl Checker {
     }
 
     fn frozen(&mut self, at: CaptureTime, check: impl FnOnce(&mut Self) -> Checked) -> Checked {
+        if let Some(expected) = self.capture_time {
+            if at != expected {
+                return Err(self.error(WellFormedReason::CaptureTiming));
+            }
+            return check(self);
+        }
         match at {
             CaptureTime::AtResolution { scope } if scope != self.root => {
                 Err(self.error(WellFormedReason::WrongScope))
@@ -565,16 +631,14 @@ impl Checker {
             // Leading captures freeze together, so none may depend on another.
             CaptureTime::AtResolution { .. } => {
                 let current = self.env.clone();
-                self.env.scope = self.root;
-                self.env.bindings.clear();
-                self.env.receipts.clear();
+                self.env = self.resolution_entry.clone();
                 let result = check(self);
                 self.env = current;
                 result
             }
             CaptureTime::AtPlay { .. }
             | CaptureTime::AtSelection { .. }
-            | CaptureTime::AtEvent { .. } => self.reject(),
+            | CaptureTime::AtEvent { .. } => Err(self.error(WellFormedReason::CaptureTiming)),
         }
     }
 }

@@ -5,7 +5,7 @@ use super::{
     Int, KeywordId, MovedRef, Nat, ObjectOperand, ObjectRef, ObjectView, PlaySpec, PlayerRef,
     PlayerSet, Position, Posture, Program, RandomnessPolicy, ReceiptId, RollId, RuleId,
     ScheduleAnchor, ScheduleToken, SelectionConstraint, Selector, TextProvider, TimestampBasis,
-    TokenTemplateId, TriggerSpec, UsageReference, Visibility, ZoneRef,
+    TokenTemplateId, TriggerSpec, UsageReference, Visibility, Visitor, Walk, ZoneRef,
 };
 
 // I.swap remains rule-only; there is deliberately no constructible variant.
@@ -53,9 +53,37 @@ variants!(Action {
 });
 record!(MoveSpec { to: ZoneRef, initial_posture: Option<Posture>, entry_effects: Vec<Effect>, position: Option<Position>, order: Option<Decision> });
 tags!(MoveReason { Put, Return, Mill });
-tags!(StepwiseMode {
+/// Exact quantity or an explicit per-card continue/stop decision.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum StepwiseMode {
+    /// No optional stop decision.
     Exact,
-    UpToStepwise
+    /// Repeated answers belong to this one instruction-local decision point.
+    UpToStepwise {
+        /// The instruction-local continue/stop decision.
+        decision: Box<StepwiseDecision>,
+    },
+}
+impl Walk for StepwiseMode {
+    fn walk(&self, visitor: &mut Visitor, path: &str) {
+        match self {
+            Self::Exact => visitor.require("internal.StepwiseMode.Exact", path),
+            Self::UpToStepwise { decision } => {
+                visitor.require("internal.StepwiseMode.UpToStepwise", path);
+                decision.walk(visitor, path);
+            }
+        }
+    }
+}
+record!(StepwiseDecision {
+    id: DecisionId,
+    actor: PlayerRef,
+    visibility: Visibility,
+    timing: StepwiseTiming
+});
+tags!(StepwiseTiming {
+    BeforeDraw,
+    AfterLook
 });
 variants!(DiscardMode {
     Chosen { constraint: SelectionConstraint } => ["discard.chosen"],

@@ -53,6 +53,8 @@ fn card(body: Program, number: &str) -> Located<CardProgram> {
             abilities: vec![Located {
                 source: source(number),
                 node: Ability {
+                    scope: body.scope,
+                    event_captures: vec![],
                     id: AbilityId(1),
                     source: ability_source(),
                     kind: AbilityKind::Spell,
@@ -461,6 +463,7 @@ fn static_declarations_and_play_costs_are_not_omitted() {
             usage: None,
         });
         ability.node.play = Some(PlaySpec {
+            captures: vec![],
             parameters: vec![],
             costs: CostSpec::Ordered {
                 steps: vec![CostStep {

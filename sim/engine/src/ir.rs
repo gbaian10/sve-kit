@@ -118,6 +118,7 @@ macro_rules! runtime_variants {
 }
 
 mod actions;
+mod answers;
 mod capabilities;
 mod effects;
 mod events;
@@ -128,6 +129,7 @@ mod values;
 mod wellformed;
 
 pub use actions::*;
+pub use answers::*;
 pub use capabilities::{
     AdmissionError, Capability, DependencyMismatch, Identity, Location, Registry, Requirement,
     Requirements,
@@ -138,7 +140,10 @@ pub use flow::*;
 pub use projections::*;
 pub use runtime::*;
 pub use values::*;
-pub use wellformed::{WellFormedError, WellFormedProgram, WellFormedReason};
+pub use wellformed::{
+    WellFormedCardProgram, WellFormedError, WellFormedProcedure, WellFormedProgram,
+    WellFormedReason,
+};
 
 use capabilities::Visitor;
 

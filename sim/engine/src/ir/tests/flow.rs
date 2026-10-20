@@ -232,6 +232,7 @@ fn target_roles_unbounded_choices_and_declining_need_distinct_support() {
                 source: source("synthetic"),
                 node: Node::Decision {
                     decision: Decision {
+                        captures: vec![],
                         id: DecisionId(1),
                         actor: PlayerRef::Controller {},
                         domain: ChoiceDomain::Objects {

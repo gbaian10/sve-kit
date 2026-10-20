@@ -32,6 +32,7 @@ fn constraint(selector: Selector) -> SelectionConstraint {
 }
 fn choose(id: u64, scope: u64) -> Decision {
     Decision {
+        captures: vec![],
         id: DecisionId(id),
         actor: PlayerRef::Controller {},
         domain: ChoiceDomain::Integer {
@@ -821,3 +822,5 @@ fn a_capture_cannot_launder_unverified_private_information_into_a_domain() {
 }
 
 mod review_regressions;
+
+mod entries;
