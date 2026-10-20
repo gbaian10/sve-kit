@@ -252,7 +252,7 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 每個鍵必須在**目前構造上下文**的登錄表：例如 cannot 沒有 n，buff 有 on；不能以另一構造曾使用 n 就放行。cards、define、roles 的動態名稱須符合其專屬卡號／識別字規則，不是任意額外欄位。未知鍵附卡號、行與完整路徑報錯。event 與 history.where 共用該事件的欄位表。
 
-`carddb` 的 authored 讀取採 `yamlrocks==0.6.1`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。正式 1.0 由 Python C0 嚴格讀 YAML 並交付已驗且完全展開的作者 JSON 樹，Rust D0 只接該樹降低 IR；不要求第二套 Rust 作者 YAML parser。既有 astra/1 Rust 入口不在此變更。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
+`carddb` 的 authored 讀取採 `yamlrocks==0.7.0`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。正式 1.0 由 Python C0 嚴格讀 YAML 並交付已驗且完全展開的作者 JSON 樹，Rust D0 只接該樹降低 IR；不要求第二套 Rust 作者 YAML parser。既有 astra/1 Rust 入口不在此變更。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
 
 Python YAML 載入器必過金絲雀：含 on、n、yes／no 值的最小卡片保留字串與數字；true 值仍為布林；布林鍵、字串 true 鍵、重複 on、未知鍵、cannot.draw.n、stat_changed 歷史中的 subject／property 舊別名均拒絕。Rust D0 接入時另驗 JSON 型別化解碼、未知節點／錯型別／scope／版本與能力拒絕，並比較同一份 canonical 展開樹；不以 Python 結果宣稱 Rust 已驗收。
 
