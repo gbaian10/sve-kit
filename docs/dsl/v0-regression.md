@@ -11,6 +11,9 @@
   沿用[分類來源契約](../schema/domains/effect-classifications.md)的逐文字版本與分類識別碼。
 - 手寫效果基底為 commit `70050d752657b7de5ae98c3b2de3e2fd90b866d7` 的
   `authored/rules/effects/`；422 卡、802 個 abilities、780 個不同位置。
+  BP07-P06 後續依來源更正 [#824](https://github.com/gbaian10/sve-kit/pull/824)
+  （`77340d8e33c0134f3292b6f2c9bcf8cc61614034`）移動能力 2 的錨點；
+  只更新該卡 AST 與位置，保留原 body、目標選取及 additional_costs。
 - 位置對照使用 `four-layer-jp-v6` 的凍結卡表建置（as-of 2026-10-06，
   data version `preview-20261018T170627Z-0001`），建置 SQLite SHA-256 為
   `1de5adc33023646bbc7ced36bb49bb1850fe54309fed29c246d060a40862bc53`。
@@ -70,23 +73,20 @@ use ID、來源 hash 和 span。`face`、`section`、ability index 是零起算�
 跨行涵蓋另附 `covered_by.ability` 與該 ability 內的 JSON pointer。
 定位覆蓋不證明其 body 全面正確，尤其位置錯標仍需單獨修正。
 
-| 分類 | 凍結數量 | 處理 |
+| 分類 | 數量 | 處理 |
 | --- | --- | --- |
-| token | 30 | 引用 token 的欄位不複製成本卡效果；token 自身仍需獨立覆蓋 |
-| 跨行涵蓋 | 17 | 含 1 筆位置錯標（見下）；其餘指向 costs、additional_costs 或 body，模式本文須組裝 |
+| token | 29 | 引用 token 的欄位不複製成本卡效果；token 自身仍需獨立覆蓋 |
+| 跨行涵蓋 | 16 | 指向 costs、additional_costs 或 body，模式本文須組裝 |
 | 通用規則 | 4 | 食事／EP 等由一般規則處理，不建立虛構能力 |
 | 說明 | 11 | 關鍵字、建構與裝備的說明文字，不重複執行 |
 | 真正缺漏 | 0 | 本次未發現無承接的獨立能力；不代表 422 卡全部正確 |
 
 「通用規則」及「說明」只區分責任，不代表引擎已實作；例如ドライブチェック與タイトル構築開局配置仍須獨立確認支援。
 
-780 個正向位置包含 BP07-P06 這 1 筆已知無效對齊：傷害 body 標成 section 0 line 2，
-實際應在 effect line 3，不新增第二份傷害。來源更正已清空 section，對齊例外待 DSL 移位後移除。
-`positive_alignment_exceptions` 保存 `card_no`、`ability`、`status: known_invalid_alignment`、
-原 `position`、`source_issue: uncorrected_duplicate`、既有 `source_correction` ID 及
-`proposed_position`；兩個位置都含 face／field／section／line。測試驗證原位置在正向基線、
-建議位置在反向基線且 covered_by 指回同一能力。能力移動後原行將成為未分類來源，
-須交由[來源更正流程](../schema/domains/authored-layout.md#34-來源更正)處理重複，不能當作 token 效果。
+BP07-P06 的基線依來源更正 `x:d529a2a90bd757f2be41c721eb0eaf4b` 不含補充段落的位置，
+因此與凍結建置刻意不同：凍結建置仍有 section 0 line 1／2。
+能力 2 對應的 effect line 3 片段取自凍結建置，其本文全文 hash 與現行更正相同；
+測試以更正後全文核對 hash 及第三行範圍。
 
 CSD01-T01 的兩行歸通用規則。其餘 15 個空 abilities 卡的主 effect
 為空；16 個空 abilities 卡都保留在測試基線內，不算作執行成功案例。
@@ -140,7 +140,7 @@ Python 基線測試驗證 AST、位置、分類版本與跨行 pointer；Rust �
   必須從契約記錄的凍結建置取得；若改用新建置，須一併更新 `basis`、來源版本及受影響範圍。
   缺少該輸入時保留失敗並取得凍結來源，不能清空片段或移除反向位置來使測試通過。
 - ability 改位置時，同時檢查原位置與新位置的來源、正向／反向集合及 `covered_by`。
-  BP07-P06 移至 effect line 3 後，原 section 行須先經來源更正處理；在重複句仍存在的建置中，
-  該行應保留為來源異常的反向紀錄，不能默默漏掉。新來源與定位都驗證後，才更新或移除對齊例外。
+  原位置若是錯植或重複內容，先由來源更正流程處理；更正採納前不移動 ability，
+  也不得從基線刪除原位置。更正採納且新位置片段驗證後，才移動 ability 並移除失效的反向位置。
 - BP18-059 修正 body 時保留清楚的行為差異證據，再更新 AST 期望與原 body 情境的預期結果；
   不再把已修正的行為稱為已知缺陷。

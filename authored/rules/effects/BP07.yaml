@@ -149,13 +149,12 @@ cards:
                   zone: field
                   name: 王たる光・ベイリオン
               - 0
-      - line: 2
+      - line: 3
         kind: spell
         body:
           op: damage
           subjects: target.1
           amount: 4
-        section: 0
         targets:
           - key: '1'
             select:
