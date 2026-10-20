@@ -382,6 +382,8 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 
 ## 10. DSL、驗證與未實作卡片頁
 
+下表的 DSL／巨集表為未實作的舊儲存設計。正式作者 1.0 的承載與資格改依[作者承載契約](../../dsl/author-contract-1.0.md)：`dsl_document` 的 meta／來源、`dsl_review` 的證據和型別、`author_macro`／`macro_review`／`dsl_macro_use` 的鍵與依賴均以該契約為準，實作時再同步 DDL，本表不能當成另一套作者入口。body_boundary 當前結果依承載 §5 存於 caller 明示選用位置的當前已驗 DB 並供新建 DB 消費；其原子更新不刪改下表逐用途 dsl_exam 的診斷歷史，舊 pass 也不能推翻新的 fail。DB 內部表如何配置為可調整細節。
+
 | 表                       | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `dsl_document`           | `id:ID PK,card_id→card,scope:shared\|en_override,dsl_version:Text,document_revision:UInt,ast:Json,program_hash:Hash,source_text_hash:Hash,hash_recipe:Text,written_by:Text,written_on:Date,status:draft\|reviewed\|verified\|disputed,validation_state:fresh\|stale,cr_version_id→cr_version?,engine_compatibility:Text?`；A／工具填 meta；`UQ(card_id,scope,document_revision)`，`dsl_version` 主版.次版                                                                                                                                                    |
@@ -403,7 +405,7 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 | `mechanic_projection`    | `card_id→card,keyword_id→keyword,scope:shared\|en_override,relations:Json,actions:Json`；`PK(card_id,keyword_id,scope)`，陣列 ID 逐項驗 FK；只出有新鮮正標籤的 (card,keyword,scope)，relations/actions 不得同時空；不輸出 absent/unknown 列                                                                                                                                                                                                                                                                                                                  |
 | `card_mechanic_coverage` | `card_id→card,scope:shared\|en_override,complete_all:Bool,complete_mode:include\|exclude,complete_keyword_ids:Json,partial_mode:include\|exclude,partial_keyword_ids:Json`；`PK(card_id,scope)`，D 從新鮮建置資料庫的 `mechanic_coverage` 推導；陣列 ID 逐項→keyword(id) 驗引用；解碼後集合唯一/互斥，`complete_all=true` 時兩 mode=include、兩陣列空，涵蓋此快照清單的 keyword universe                                                                                                                                                                     |
 
-建置資料庫的 `card_engine_support` 可逐 card/region 保存推導；卡表快照合併共用狀態，每卡一列＋只對真正區域差異存 overrides，不重複日英文件。shared 文件以 JP 全面卡文為 source；EN 無對照/未完成語義核對/差異尚未解決，不繼承 automatic。EN-only 卡無 JP 時可用 `en_override` 並明示來源，不能編造 JP hash。
+建置資料庫的 `card_engine_support` 可逐 card/region 保存推導；卡表快照合併共用狀態，每卡一列＋只對真正區域差異存 overrides，不重複日英文件。shared 文件以 JP 全面卡文為 source；EN 無對照/未完成語義核對/差異尚未解決，不繼承 automatic。EN-only 卡的目標 scope 為 `en_override`，不能編造 JP hash；正式作者 1.0 在 EN 來源契約未定義前以明確診斷拒絕該入口，見作者承載 §2.1，不把此表的預定 scope 當成已支援。
 
 手寫 reviewed：不同作者語意審核 ok。巨集需兩個模型審核與測試，逐卡三項機械檢查（句型、參數、反譯）全過。驗證政策要求新卡載入＋基本局面以及所有必要題本；每次 run 追加，exact program/source/exam/engine build/policy/測試輸入 manifest 取最新結果，最新 fail 不沿用舊 pass。`policy_id`、`engine_version/build`、source/program/candidate hash 任何變更都重算；測試輸入 manifest 不必等於包含結果的新 manifest，避免自我 hash 循環。
 
@@ -497,9 +499,9 @@ canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮�
 
 `text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。舊 T／C 模板身分只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v1 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，normalizer、角色／域或語義變體變更須重鍵，NP／中文形式不入身分。
 
-`program_hash`＝canonical `{dsl_version,ast}`；macro `body_hash`＝`{dsl_version,body}`。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與類型），只作觀測追溯，不充當 DSL 新鮮度鍵。
+`program_hash`＝canonical `{dsl_version,ast}`；正式作者 1.0 的 body_version 依[承載 §4.1](../../dsl/author-contract-1.0.md#41-body-recipe)的 effect-body-v1 完整 payload（含 params、ability_scope、ports），取代舊 macro `{dsl_version,body}` 配方。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與類型），只作觀測追溯，不充當 DSL 新鮮度鍵。
 
-目前不提供規則等義 bundle 或跨表記重用 DSL 的建置能力；未實作的語義表與 hash recipe 已移除。未來啟用正式 DSL 驗證時，須依實際來源與消費端另定新鮮度契約，不能只改 recipe 名稱沿用舊驗證結果。翻譯仍比自己的 exact source/context。
+目前不提供規則等義 bundle 或跨表記重用 DSL 的建置能力；未實作的語義表與 hash recipe 已移除。正式作者 1.0 的來源新鮮度文稿依[承載 §4.2](../../dsl/author-contract-1.0.md#42-來源與用途依賴)，尚未實作；不能只改 recipe 名稱沿用舊驗證結果。翻譯仍比自己的 exact source/context。
 
 卡表快照不出逐列稽核 hash；`program_ref` 由快照清單的檔案雜湊驗證。發布 metadata 不能改寫歷史審核事實。
 

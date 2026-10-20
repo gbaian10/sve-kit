@@ -73,7 +73,7 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 此決定不涵蓋 SV1、Worlds Beyond 等其他遊戲的原檔。
 官方內容仍排除於專案的 Apache／CC0 授權之外，依 [LICENSING.md](LICENSING.md) 標示。
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
-`authored/` 依卡包切檔（例如 `authored/rules/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
+`authored/` 依卡包切檔（原型如 `authored/rules/effects/BP01.yaml`；正式作者入口依[作者承載契約](docs/dsl/author-contract-1.0.md)分片），單檔不要超過 1 MiB（1024 KiB）。
 
 16 個 SVE 日英官方頁面 fixture 存在 `carddb/tests/fixtures/official_jp/`、`official_en/`，來源說明及原有逐欄 hash 保存在旁邊；公開與 fork 測試都執行。合成案例繼續驗證結構與邊界。
 引擎測試由 carddb 讀取 `card-data/` 及 `tests/engine/card-input.json` 明示的 JP 批次，產生暫存 JSONL；不提交衍生卡表。引擎仍自行載入 authored 效果、規則名稱與 token 選用，不另造一套卡表規則。
