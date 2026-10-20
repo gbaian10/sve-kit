@@ -542,6 +542,7 @@ impl Game {
         while execution.waiting.is_none() {
             let Some(node) = execution.todo.pop_front() else {
                 self.internal_numeric_cleanup();
+                self.internal_numeric_end_resolution(execution.id)?;
                 self.checks()?;
                 return Ok(());
             };

@@ -2,7 +2,7 @@
 
 use super::*;
 
-const fn set_patch(stat: Stat, value: i64) -> CharacteristicPatch {
+pub(super) const fn set_patch(stat: Stat, value: i64) -> CharacteristicPatch {
     CharacteristicPatch::Numeric {
         stat,
         change: NumericChange::Set {
@@ -11,13 +11,13 @@ const fn set_patch(stat: Stat, value: i64) -> CharacteristicPatch {
     }
 }
 
-fn set_pair(value: i64) -> CharacteristicPatch {
+pub(super) fn set_pair(value: i64) -> CharacteristicPatch {
     CharacteristicPatch::Combined {
         patches: vec![set_patch(Stat::Attack, value), set_patch(Stat::Life, value)],
     }
 }
 
-fn fixed(patch: CharacteristicPatch) -> Located<Node> {
+pub(super) fn fixed(patch: CharacteristicPatch) -> Located<Node> {
     modify(
         1,
         zone(ZoneKind::Field, 301),

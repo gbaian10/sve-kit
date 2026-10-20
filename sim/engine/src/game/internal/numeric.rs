@@ -60,8 +60,16 @@ impl Change {
 struct Modifier {
     effect: u64,
     timestamp: u64,
+    execution: u64,
+    end: NumericEnd,
     attack: Option<Change>,
     life: Option<Change>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+enum NumericEnd {
+    NoTemporalExpiry,
+    EndResolution,
 }
 
 impl NumericState {
@@ -195,8 +203,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         ..
     } = action
     {
-        if !matches!(expires.end, DurationEnd::NoTemporalExpiry {})
-            || !matches!(expires.anchor, TimeAnchor::Installation {})
+        if !matches!(
+            expires.end,
+            DurationEnd::NoTemporalExpiry {} | DurationEnd::EndResolution {}
+        ) || !matches!(expires.anchor, TimeAnchor::Installation {})
             || expires.usage.is_some()
             || !expires.intervals.is_empty()
             || !matches!(source, EffectReference::CurrentInstallation {})
@@ -264,13 +274,21 @@ impl Game {
         instruction: &Instruction,
     ) -> Result<()> {
         let Action::Modify {
-            subjects, patch, ..
+            subjects,
+            patch,
+            expires,
+            ..
         } = &instruction.action
         else {
             return Err(unsupported("numeric action"));
         };
         let subjects = execution.objects(self, subjects)?;
         let (attack, life) = changes(execution, self, patch)?;
+        let end = match expires.end {
+            DurationEnd::NoTemporalExpiry {} => NumericEnd::NoTemporalExpiry,
+            DurationEnd::EndResolution {} => NumericEnd::EndResolution,
+            _ => return Err(unsupported("numeric duration")),
+        };
         let effect = EffectId(self.state.next_ir_effect);
         let mut plans = Vec::new();
         for subject in subjects {
@@ -307,6 +325,8 @@ impl Game {
             state.effects.push(Modifier {
                 effect: effect.0,
                 timestamp: execution.timestamp,
+                execution: execution.id.0,
+                end,
                 attack,
                 life: adjusted_life,
             });
@@ -393,6 +413,35 @@ impl Game {
                 .get(id)
                 .is_some_and(|object| object.generation == state.generation)
         });
+    }
+
+    pub(super) fn internal_numeric_end_resolution(&mut self, execution: ExecutionId) -> Result<()> {
+        let mut plans = Vec::new();
+        for (id, state) in &self.state.ir_numeric {
+            let mut remaining = state.clone();
+            remaining.effects.retain(|effect| {
+                effect.end != NumericEnd::EndResolution || effect.execution != execution.0
+            });
+            if remaining.effects.len() == state.effects.len() {
+                continue;
+            }
+            let object = self.object(id)?;
+            // Materialized max/current life carry damage, never the original base characteristics.
+            let damage = number(&object.state, "max_hp")?
+                .checked_sub(number(&object.state, "hp")?)
+                .ok_or_else(|| invalid("numeric damage overflow"))?;
+            let after = remaining.effective(damage)?;
+            plans.push((id.clone(), remaining, after));
+        }
+        for (id, remaining, after) in plans {
+            self.internal_numeric_cache(&id, after)?;
+            if remaining.effects.is_empty() {
+                self.state.ir_numeric.remove(&id);
+            } else {
+                self.state.ir_numeric.insert(id, remaining);
+            }
+        }
+        Ok(())
     }
 
     fn internal_numeric_cache(
